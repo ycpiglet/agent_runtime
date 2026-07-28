@@ -220,6 +220,12 @@ def test_repo_schema_catalogs_new_provenance_closure_and_governance_fields() -> 
         "due_date",
         "blocked_since",
         "xp_value",
+        "measurement_unavailable_reason",
+        "recovered_without_claim",
+        "recovery_reason",
+        "recovered_at",
+        "recovered_by",
+        "recovery_independent_evidence_refs",
     ):
         assert f"\n  {field}:\n" in text, f"catalog missing field: {field}"
     assert "field_promotion_policy:" in text
@@ -237,6 +243,30 @@ def test_gate_blocks_missing_new_catalog_field(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     assert "work-schema:missing-field-catalog:merged_into" in result.stdout
+
+
+def test_gate_blocks_missing_recovery_catalog_field(tmp_path: Path) -> None:
+    text = _schema_path().read_text(encoding="utf-8")
+    broken = text.replace("  recovery_reason:\n", "  renamed_recovery_reason:\n", 1)
+    path = tmp_path / "WORK-SCHEMA.yml"
+    path.write_text(broken, encoding="utf-8")
+
+    result = _run("--path", str(path), "--check")
+
+    assert result.returncode == 1
+    assert "work-schema:missing-field-catalog:recovery_reason" in result.stdout
+
+
+def test_gate_blocks_incomplete_recovered_without_claim_record(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-TEST-001.md",
+        _minimal_task_frontmatter(extra="recovered_without_claim: true"),
+    )
+
+    result = _run("--root", str(tmp_path), "--path", str(_schema_path()), "--items", "--check")
+
+    assert result.returncode == 1
+    assert "work-item:recovery-missing-required:recovery_reason" in result.stdout
 
 
 def test_gate_blocks_missing_promotion_policy(tmp_path: Path) -> None:

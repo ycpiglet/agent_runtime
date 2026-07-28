@@ -1,16 +1,26 @@
-"""Validate active taskset sync across pointer, tasks, board, backlog, and status."""
+"""Reconcile live task lifecycle records across claims and projections.
+
+The gate deliberately uses durable lifecycle metadata, not commit-message
+guessing.  Its enforcement set is small: active worker claims, pointer-active
+work, and verified-but-not-closed work.  Older completed history is therefore
+not forced through a migration merely because it pre-dates the claim protocol.
+"""
 
 from __future__ import annotations
 
 import argparse
+import json
 import re
+import subprocess
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 POINTER = Path("agents/project/NEXT-SESSION-POINTER.yml")
 TASKS_DIR = Path("agents/lead_engineer/tasks")
+CLAIMS_DIR = Path("agents/runtime/task_claims")
 BOARD = Path("BACKLOG-BOARD.md")
 BACKLOG = Path("BACKLOG.md")
 STATUS = Path("STATUS.md")
@@ -19,6 +29,7 @@ try:
 except ImportError:  # imported as scripts.<name> (namespace package)
     from scripts import status_alias
 DONE_STATUSES = status_alias.DONE_STATUSES
+ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 
 
 @dataclass(frozen=True)
@@ -30,11 +41,18 @@ class Finding:
 
 
 @dataclass(frozen=True)
-class Task:
-    task_id: str
+class WorkItem:
+    work_id: str
     path: Path
-    status: str
-    task_set_id: str
+    meta: dict[str, object]
+
+    @property
+    def status(self) -> str:
+        return str(self.meta.get("status") or "unknown").strip().lower()
+
+    @property
+    def task_set_id(self) -> str:
+        return str(self.meta.get("task_set_id") or "").strip()
 
 
 def _read(path: Path) -> str:
@@ -49,37 +67,98 @@ def _scalar(text: str, key: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _frontmatter(text: str) -> dict[str, str]:
+def _frontmatter(text: str) -> dict[str, object]:
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return {}
-    out: dict[str, str] = {}
+    out: dict[str, object] = {}
+    current_key = ""
     for line in lines[1:]:
         if line.strip() == "---":
             break
+        item = re.match(r"^\s*-\s+(.*?)\s*$", line)
+        if item and current_key:
+            current = out.setdefault(current_key, [])
+            if isinstance(current, list):
+                current.append(item.group(1).strip().strip("'\""))
+            continue
         match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*?)\s*$", line)
-        if match:
-            out[match.group(1)] = match.group(2).strip().strip("'\"")
+        if not match:
+            current_key = ""
+            continue
+        key, value = match.groups()
+        if value:
+            out[key] = value.strip().strip("'\"")
+            current_key = ""
+        else:
+            out[key] = []
+            current_key = key
     return out
 
 
-def load_tasks(root: Path) -> list[Task]:
-    tasks: list[Task] = []
+def _values(meta: dict[str, object], key: str) -> list[str]:
+    value = meta.get(key)
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if str(value or "").strip():
+        return [str(value).strip()]
+    return []
+
+
+def load_tasks(root: Path) -> list[WorkItem]:
     task_dir = root / TASKS_DIR
     if not task_dir.is_dir():
-        return tasks
+        return []
+    tasks: list[WorkItem] = []
     for path in sorted(task_dir.glob("TASK-*.md")):
         meta = _frontmatter(_read(path))
-        task_id = meta.get("id") or path.stem
-        tasks.append(
-            Task(
-                task_id=task_id,
-                path=path,
-                status=meta.get("status", "unknown"),
-                task_set_id=meta.get("task_set_id", ""),
-            )
-        )
+        tasks.append(WorkItem(str(meta.get("id") or meta.get("work_id") or path.stem), path, meta))
     return tasks
+
+
+def load_units(root: Path) -> list[WorkItem]:
+    unit_dir = root / TASKS_DIR / "units"
+    if not unit_dir.is_dir():
+        return []
+    units: list[WorkItem] = []
+    for path in sorted(unit_dir.glob("**/UNIT-*.md")):
+        meta = _frontmatter(_read(path))
+        units.append(WorkItem(str(meta.get("unit_id") or meta.get("work_id") or path.stem), path, meta))
+    return units
+
+
+def _pointer_block(text: str, label: str) -> list[str]:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        match = re.match(rf"^(?P<indent>\s*){re.escape(label)}:\s*$", line)
+        if not match:
+            continue
+        indent = len(match.group("indent"))
+        body: list[str] = []
+        for child in lines[index + 1 :]:
+            if child.strip() and len(child) - len(child.lstrip()) <= indent:
+                break
+            body.append(child)
+        return body
+    return []
+
+
+def _pointer_list(text: str, label: str) -> list[str]:
+    return [match.group(1).strip().strip("'\"") for line in _pointer_block(text, label) if (match := re.match(r"^\s*-\s+(.*?)\s*$", line))]
+
+
+def _pointer_agents(text: str) -> list[dict[str, str]]:
+    records: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for line in _pointer_block(text, "current_agents"):
+        item = re.match(r"^\s*-\s*([A-Za-z0-9_-]+):\s*(.*?)\s*$", line)
+        field = re.match(r"^\s+([A-Za-z0-9_-]+):\s*(.*?)\s*$", line)
+        if item:
+            current = {item.group(1): item.group(2).strip().strip("'\"")}
+            records.append(current)
+        elif field and current is not None:
+            current[field.group(1)] = field.group(2).strip().strip("'\"")
+    return records
 
 
 def active_pointer(root: Path) -> tuple[str, str, str]:
@@ -92,79 +171,242 @@ def active_pointer(root: Path) -> tuple[str, str, str]:
 
 
 def _contains(root: Path, path: Path, needle: str) -> bool:
-    if not needle or needle == "none":
-        return True
-    return needle in _read(root / path)
+    return not needle or needle == "none" or needle in _read(root / path)
+
+
+def _is_active(claim: dict[str, object]) -> bool:
+    return str(claim.get("status") or "").strip().lower() in ACTIVE_CLAIM_STATUSES
+
+
+def _is_explicit_overlay(claim: dict[str, object]) -> bool:
+    """Only an affirmative, well-formed overlay marker earns the exemption."""
+    return claim.get("overlay") is True
+
+
+def _claim_records(root: Path) -> tuple[list[tuple[Path, dict[str, object]]], list[Finding]]:
+    records: list[tuple[Path, dict[str, object]]] = []
+    findings: list[Finding] = []
+    for path in sorted((root / CLAIMS_DIR).glob("*.json")) if (root / CLAIMS_DIR).is_dir() else []:
+        try:
+            claim = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            findings.append(Finding("block", f"claim:malformed:{path.name}", _rel(root, path), "claim is not valid JSON"))
+            continue
+        if not isinstance(claim, dict):
+            findings.append(Finding("block", f"claim:malformed:{path.name}", _rel(root, path), "claim must be a JSON object"))
+            continue
+        records.append((path, claim))
+    return records, findings
+
+
+def _rel(root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _worktree(root: Path, value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else root / path
+
+
+def _branch_matches_worktree(worktree: Path, branch: str) -> bool:
+    """Confirm the claimed branch is checked out by its claimed worktree."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(worktree), "branch", "--show-current"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return False
+    return result.returncode == 0 and result.stdout.strip() == branch
+
+
+def _is_main_checkout(worktree: Path) -> bool:
+    """Return true only when Git proves this path is its common-dir parent."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(worktree), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return False
+    if result.returncode != 0 or not result.stdout.strip():
+        return False
+    return worktree.resolve() == Path(result.stdout.strip()).resolve().parent
+
+
+def _recovery_errors(root: Path, item: WorkItem) -> list[str]:
+    required = ("recovery_reason", "recovered_at", "recovered_by")
+    errors = [field for field in required if not str(item.meta.get(field) or "").strip()]
+    refs = _values(item.meta, "recovery_independent_evidence_refs")
+    if not refs:
+        errors.append("recovery_independent_evidence_refs")
+    else:
+        errors.extend(f"recovery_evidence_missing:{ref}" for ref in refs if not (root / ref).is_file())
+    return errors
+
+
+def _has_recovery(item: WorkItem) -> bool:
+    return str(item.meta.get("recovered_without_claim") or "").strip().lower() == "true"
+
+
+def _claim_for_item(records: list[tuple[Path, dict[str, object]]], task_id: str, unit_id: str) -> bool:
+    return any(
+        str(claim.get("task_id") or "") == task_id and str(claim.get("unit_id") or "") == unit_id
+        for _, claim in records
+    )
+
+
+def _validate_active_claim(
+    root: Path,
+    claim_path: Path,
+    claim: dict[str, object],
+    tasks: dict[str, WorkItem],
+    units: dict[str, WorkItem],
+    pointer_taskset: str,
+    pointer_task: str,
+    pointer_claim_refs: list[str],
+    pointer_agents: list[dict[str, str]],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    claim_id = str(claim.get("claim_id") or claim_path.stem)
+    rel_claim_path = _rel(root, claim_path)
+    overlay = _is_explicit_overlay(claim)
+    if overlay:
+        for field in ("claim_id", "task_id", "task_set_id", "agent_role", "agent_instance_id"):
+            if not str(claim.get(field) or "").strip():
+                findings.append(Finding("block", f"claim:missing-overlay-field:{claim_id}:{field}", rel_claim_path, "explicit overlay lacks minimal identity/provenance metadata"))
+        # Overlays intentionally model review/scout traffic that may not map to
+        # worker task, unit, branch, worktree, or pointer projections.
+        return findings
+    required = ("task_id", "task_set_id", "unit_id", "agent_role", "agent_instance_id")
+    required += ("worktree_path", "branch")
+    for field in required:
+        if not str(claim.get(field) or "").strip():
+            findings.append(Finding("block", f"claim:missing-worker-field:{claim_id}:{field}", rel_claim_path, "active worker claim lacks required lifecycle metadata"))
+    task_id, unit_id = str(claim.get("task_id") or ""), str(claim.get("unit_id") or "")
+    task, unit = tasks.get(task_id), units.get(unit_id)
+    if task is None:
+        findings.append(Finding("block", f"claim:task-missing:{claim_id}", rel_claim_path, f"task {task_id or 'missing'} is not canonical"))
+    if unit is None or str(unit.meta.get("task_id") or unit.meta.get("parent_id") or "") != task_id:
+        findings.append(Finding("block", f"claim:unit-mismatch:{claim_id}", rel_claim_path, "claim unit is missing or belongs to another task"))
+    if task and str(claim.get("task_set_id") or "") != task.task_set_id:
+        findings.append(Finding("block", f"claim:taskset-mismatch:{claim_id}", rel_claim_path, "claim and task taskset differ"))
+    for item, label in ((task, "task"), (unit, "unit")):
+        if item and rel_claim_path not in _values(item.meta, "claim_refs"):
+            findings.append(Finding("block", f"claim:missing-{label}-ref:{claim_id}", item.path.as_posix(), "claim path is not projected in claim_refs"))
+    worktree_value = str(claim.get("worktree_path") or "").strip()
+    if worktree_value:
+        worktree = _worktree(root, worktree_value)
+        if _is_main_checkout(worktree):
+            findings.append(Finding("block", f"claim:main-worktree:{claim_id}", rel_claim_path, "worker claim must not use the main checkout"))
+        elif not worktree.is_dir() or not (worktree / ".git").exists():
+            findings.append(Finding("block", f"claim:invalid-worktree:{claim_id}", rel_claim_path, "worker worktree is absent or not a git worktree"))
+        elif not _branch_matches_worktree(worktree, str(claim.get("branch") or "")):
+            findings.append(Finding("block", f"claim:branch-mismatch:{claim_id}", rel_claim_path, "claimed branch is not checked out by claimed worktree"))
+    if rel_claim_path not in pointer_claim_refs:
+        findings.append(Finding("block", f"claim:pointer-missing-active-ref:{claim_id}", POINTER.as_posix(), "claim is absent from pointers.active_claims"))
+    agent = next((entry for entry in pointer_agents if entry.get("claim_id") == claim_id), None)
+    if agent is None:
+        findings.append(Finding("block", f"claim:pointer-missing-agent:{claim_id}", POINTER.as_posix(), "current_agents lacks a full record keyed by claim_id"))
+    else:
+        for field in ("agent_role", "agent_instance_id"):
+            if agent.get(field) != str(claim.get(field) or ""):
+                findings.append(Finding("block", f"claim:pointer-agent-mismatch:{claim_id}:{field}", POINTER.as_posix(), "current_agents identity differs from claim"))
+    return findings
 
 
 def analyze(root: Path) -> list[Finding]:
     root = root.resolve()
-    findings: list[Finding] = []
     pointer_path = root / POINTER
     if not pointer_path.exists():
         return [Finding("block", "pointer:missing", POINTER.as_posix(), "NEXT-SESSION-POINTER.yml is required")]
-
+    findings: list[Finding] = []
+    pointer_text = _read(pointer_path)
     task_set_id, active_task, pointer_status = active_pointer(root)
     tasks = load_tasks(root)
-    by_id = {task.task_id: task for task in tasks}
+    units = load_units(root)
+    by_id = {task.work_id: task for task in tasks}
+    units_by_id = {unit.work_id: unit for unit in units}
     taskset_tasks = [task for task in tasks if task.task_set_id == task_set_id]
 
     if not task_set_id or task_set_id == "none":
         findings.append(Finding("watch", "pointer:no-active-taskset", POINTER.as_posix(), "pointer has no active taskset"))
         return findings
-
     if not taskset_tasks:
         findings.append(Finding("block", f"taskset:missing:{task_set_id}", TASKS_DIR.as_posix(), "active taskset has no canonical task files"))
-
     if active_task and active_task != "none":
         task = by_id.get(active_task)
         if task is None:
             findings.append(Finding("block", f"active-task:missing:{active_task}", POINTER.as_posix(), "active task is not present in task files"))
         elif task.task_set_id != task_set_id:
-            findings.append(
-                Finding(
-                    "block",
-                    f"active-task:taskset-mismatch:{active_task}",
-                    task.path.as_posix(),
-                    f"active task belongs to {task.task_set_id}, pointer says {task_set_id}",
-                )
-            )
-
-    open_tasks = [task for task in taskset_tasks if task.status.lower() not in DONE_STATUSES]
+            findings.append(Finding("block", f"active-task:taskset-mismatch:{active_task}", task.path.as_posix(), f"active task belongs to {task.task_set_id}, pointer says {task_set_id}"))
+    open_tasks = [task for task in taskset_tasks if task.status not in DONE_STATUSES]
     taskset_is_complete = bool(taskset_tasks) and not open_tasks
-    if pointer_status in {"active", "in_progress"} and taskset_tasks:
-        if not open_tasks:
-            findings.append(Finding("block", f"taskset:active-but-complete:{task_set_id}", POINTER.as_posix(), "pointer says active but all taskset tasks are done"))
-
+    if pointer_status in {"active", "in_progress"} and taskset_tasks and not open_tasks:
+        findings.append(Finding("block", f"taskset:active-but-complete:{task_set_id}", POINTER.as_posix(), "pointer says active but all taskset tasks are done"))
     for path in (BOARD, BACKLOG, STATUS):
         if not (root / path).exists():
             findings.append(Finding("block", f"surface:missing:{path.as_posix()}", path.as_posix(), "required state surface is missing"))
-            continue
-        if path == BOARD and taskset_is_complete and pointer_status not in {"active", "in_progress"}:
-            continue
-        if not _contains(root, path, task_set_id):
+        elif not (path == BOARD and taskset_is_complete and pointer_status not in {"active", "in_progress"}) and not _contains(root, path, task_set_id):
             findings.append(Finding("block", f"surface:missing-taskset:{path.as_posix()}", path.as_posix(), f"{path.as_posix()} does not mention active taskset {task_set_id}"))
-
     if active_task and active_task != "none":
         for path in (BOARD, STATUS):
             if (root / path).exists() and not _contains(root, path, active_task):
                 findings.append(Finding("watch", f"surface:missing-active-task:{path.as_posix()}", path.as_posix(), f"{path.as_posix()} does not mention active task {active_task}"))
 
+    records, claim_findings = _claim_records(root)
+    findings.extend(claim_findings)
+    pointer_claim_refs = _pointer_list(pointer_text, "active_claims")
+    pointer_agents = _pointer_agents(pointer_text)
+    for claim_path, claim in records:
+        if _is_active(claim):
+            findings.extend(_validate_active_claim(root, claim_path, claim, by_id, units_by_id, task_set_id, active_task, pointer_claim_refs, pointer_agents))
+    active_workers = [claim for _, claim in records if _is_active(claim) and not _is_explicit_overlay(claim)]
+    if active_task and active_task != "none" and active_workers and not any(
+        str(claim.get("task_id") or "") == active_task and str(claim.get("task_set_id") or "") == task_set_id
+        for claim in active_workers
+    ):
+        findings.append(Finding("block", f"pointer:primary-worker-missing:{active_task}", POINTER.as_posix(), "primary pointer task/taskset does not correspond to any active worker claim"))
+
+    # Verified, still-current units must have a durable claim trace or an explicit
+    # recovery. This catches the TASK-AR-631 shape without migrating closed legacy work.
+    for unit in units:
+        task_id = str(unit.meta.get("task_id") or unit.meta.get("parent_id") or "")
+        task = by_id.get(task_id)
+        if (
+            not task
+            or task.status in DONE_STATUSES
+            or str(task.meta.get("verification_status") or "").strip().lower() != "passed"
+            or str(unit.meta.get("verification_status") or "").strip().lower() != "passed"
+        ):
+            continue
+        if _has_recovery(task) and _has_recovery(unit):
+            errors = _recovery_errors(root, task) + _recovery_errors(root, unit)
+            if errors:
+                findings.append(Finding("block", f"recovery:invalid:{task_id}", task.path.as_posix(), ", ".join(errors)))
+            else:
+                findings.append(Finding("watch", f"recovery:without-claim:{task_id}", task.path.as_posix(), "historical missing claim is explicitly recovered from independent evidence"))
+        elif not _claim_for_item(records, task_id, unit.work_id):
+            findings.append(Finding("block", f"verified-work:missing-lifecycle:{task_id}", unit.path.as_posix(), "verified current work has neither a claim nor explicit recovery"))
     return findings
 
 
 def render(root: Path, findings: list[Finding]) -> str:
     counts = Counter(f.severity for f in findings)
     status = "fail" if counts.get("block", 0) else "pass"
-    lines = [
-        f"state-sync-gate: {status}",
-        f"root={root.resolve()}",
-        f"findings={len(findings)}",
-        f"block={counts.get('block', 0)}",
-        f"watch={counts.get('watch', 0)}",
-    ]
-    for finding in findings:
-        lines.append(f"- {finding.severity} {finding.subject} {finding.path}: {finding.detail}")
+    lines = [f"state-sync-gate: {status}", f"root={root.resolve()}", f"findings={len(findings)}", f"block={counts.get('block', 0)}", f"watch={counts.get('watch', 0)}"]
+    lines.extend(f"- {f.severity} {f.subject} {f.path}: {f.detail}" for f in findings)
     return "\n".join(lines)
 
 
@@ -179,9 +421,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     findings = analyze(args.root)
     print(render(args.root, findings))
-    if args.check and any(finding.severity == "block" for finding in findings):
-        return 1
-    return 0
+    return 1 if args.check and any(f.severity == "block" for f in findings) else 0
 
 
 if __name__ == "__main__":

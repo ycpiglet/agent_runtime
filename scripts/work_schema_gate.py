@@ -127,6 +127,12 @@ REQUIRED_CATALOG_FIELDS = REQUIRED_CORE_FIELDS | {
     "due_date",
     "blocked_since",
     "xp_value",
+    "measurement_unavailable_reason",
+    "recovered_without_claim",
+    "recovery_reason",
+    "recovered_at",
+    "recovered_by",
+    "recovery_independent_evidence_refs",
 }
 REQUIRED_RESOLUTIONS = {"done", "wontfix", "duplicate", "superseded", "moved_to_vault"}
 COMPUTED_ONLY_FIELDS = {"progress_pct", "age", "lead_time", "est_actual_delta", "variance", "rollup_progress_pct"}
@@ -304,6 +310,11 @@ def check_items(root: Path, schema_path: Path) -> tuple[list[str], list[str]]:
                 continue
             if not re.fullmatch(r"\d+", str(value).strip()):
                 findings.append(f"{rel_path}: work-item:invalid-counter:{field}:{value}")
+
+        if str(meta.get("recovered_without_claim") or "").strip().lower() == "true":
+            for field in ("recovery_reason", "recovered_at", "recovered_by", "recovery_independent_evidence_refs"):
+                if _missing(meta.get(field)):
+                    findings.append(f"{rel_path}: work-item:recovery-missing-required:{field}")
 
         for field in sorted(computed_fields):
             if field in meta:
