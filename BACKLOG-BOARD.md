@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-28T21:56:51+09:00
+generated_at: 2026-07-28T23:06:51+09:00
 task_count: 315
 open_count: 25
 completed_count: 290
@@ -80,6 +80,7 @@ completed_task_set_count: 63
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-642` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md | in_progress | Action | P0 | Critical | High | 12h/26000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Update safe runtime files without overwriting host state or allowing one expected sea… |
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md | planned | Action | P0 | Critical | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove lightweight adoption preserves the existing editorial harness while adding task… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | `TASK-AR-643` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Guarantee that every capability advertised to a clean host has all executable depende… |
@@ -88,7 +89,6 @@ completed_task_set_count: 63
 | `TASK-AR-647` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Use current durable, allowlisted Allimbot delivery and add reusable security/external… |
 | `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
-| `TASK-AR-642` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md | planned | Action | P0 | Critical | High | 12h/26000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Update safe runtime files without overwriting host state or allowing one expected sea… |
 | `TASK-AR-645` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md | planned | Action | P0 | Critical | High | 12h/26000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent repeated mistakes and accumulated context without forcing every host into one… |
 
 ## Archived Task Sets

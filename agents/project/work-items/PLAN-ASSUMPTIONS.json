@@ -920,18 +920,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-28-task-ar-641-w0-t3-replan.md",
-          "value": "36a0204bb2c95ef6f73e4b26a3dc123d2d565cbe4eeb06fc96fa05c9171f44f8"
+          "path": "reviews/REVIEW-2026-07-28-task-ar-642-w0-t3-replan.md",
+          "value": "78ce44c24cd2cea17603cb1985c92ab2dee4dab8a0bae8c431953ea102c6de53"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-641.md",
-          "value": "1719a89851d4766cd9f048a1afd3691c34f77f3e3234dbfe1cab51c263f27604"
+          "path": "agents/lead_engineer/tasks/TASK-AR-642.md",
+          "value": "e326a9f5aeb8f0dfeb90627950ab02670c8055d0e36224f1074c43f6b0893ad1"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md",
-          "value": "8ba335e1758724d86fc38b69b8118077f16bc848ec6a7dcdf16f10e7df33ae3f"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md",
+          "value": "9ae26353f6116e4080221f4b2469a1ce8169cbc288b4ec5d738c22dac3e72ef5"
         },
         {
           "kind": "sha256",
@@ -940,38 +940,33 @@
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/inventory.py",
-          "value": "68a0d81eb7a3981decb48e9a2dd2a31acdea631ae7086c51abeb54f880ebad64"
+          "path": "src/agent_runtime/sync.py",
+          "value": "faca0bfbebf01013ce8e31f5eea9c79104f3f809e1717775e346fd7c95bb5c8e"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/doctor.py",
-          "value": "060dd58327ffab1fd7bf1f15f357b4ca4b861039162c3296caa90128964b21af"
+          "path": "src/agent_runtime/lock.py",
+          "value": "4cd8ea1f8bd4b3e3d256139c3a691d609d0e5e1268ed22b684e91f6c69e24c8f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/cli.py",
-          "value": "d393b80a9f79dc5d700b65679370f3eb2b8b9d0b78095f0a2ec98a806d6aca9d"
+          "value": "4a1ce208b951c61b5525167d88dabbb996f3651490395b2b9f7a271f222a4a3b"
         },
         {
-          "kind": "absent",
-          "path": "src/agent_runtime/adoption.py",
-          "value": ""
-        },
-        {
-          "kind": "absent",
-          "path": "tests/test_adoption.py",
-          "value": ""
+          "kind": "sha256",
+          "path": "src/agent_runtime/host_update.py",
+          "value": "82946d2bd8fd6a798f55617659befe77b33c74e30aadf48f5c9a9ec75ff16d38"
         },
         {
           "kind": "sha256",
           "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "71e62d1573ddc030f3628c1e1f3a7144f45ca744aa48f082d72a47e0c0bbb829"
+          "value": "c46fca03f57e2ae90b8cb5023417f88004fd72dce1b8b2ba1262d974aabde5ab"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_doctor.py",
-          "value": "3a523f47baefa5417627f4e0f3499062ac9a7ce275413ea213c582d429c79773"
+          "path": "tests/test_template_smoke.py",
+          "value": "cc9041cfb5a252ca967fc259129b1c5f28edaf85e1bbf1a302101178f712b534"
         },
         {
           "kind": "sha256",
@@ -984,8 +979,8 @@
           "value": "28e326e8350cbf96063cf427efe397932c31d72a8098de26b89b4b42a98fa0bc"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-28-task-ar-641-w0-t3-replan.md",
-      "recorded_at": "2026-07-28T20:53:12+09:00",
+      "design_record": "reviews/REVIEW-2026-07-28-task-ar-642-w0-t3-replan.md",
+      "recorded_at": "2026-07-28T22:13:23+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1201,5 +1196,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-28T20:53:12+09:00"
+  "updated_at": "2026-07-28T22:13:23+09:00"
 }

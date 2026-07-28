@@ -14,8 +14,11 @@ from .config import LEGACY_CONFIG_FILE
 from .config import load_config
 from .publish_check import PublishFinding
 from .sync import _content_digest
+from .sync import _ownership
+from .sync import build_sync_plan
 from .sync import _template_files
 from .sync import default_template_root
+from .sync import template_digest
 
 
 @dataclass(frozen=True)
@@ -33,12 +36,13 @@ LEGACY_LOCK_FILE = "ralph.lock.json"
 
 
 def _template_digest(template_root: Path, unmanaged_paths: tuple[str, ...] = ()) -> tuple[str, int]:
+    # Compatibility wrapper; v2 uses the single sync canonical digest.
+    if not unmanaged_paths:
+        return template_digest(template_root)
     digest = hashlib.sha256()
-    unmanaged = set(unmanaged_paths)
-    files = [path for path in _template_files(template_root) if path.relative_to(template_root).as_posix() not in unmanaged]
+    files = [path for path in _template_files(template_root) if path.relative_to(template_root).as_posix() not in set(unmanaged_paths)]
     for path in files:
-        rel = path.relative_to(template_root).as_posix()
-        digest.update(rel.encode("utf-8"))
+        digest.update(path.relative_to(template_root).as_posix().encode("utf-8"))
         digest.update(b"\0")
         digest.update(_canonical_content(path))
         digest.update(b"\0")
@@ -66,10 +70,16 @@ def _canonical_content(path: Path) -> bytes:
 def build_lock_record(root: Path, template_root: Path | None = None) -> dict[str, Any]:
     config = load_config(root)
     resolved_template_root = template_root or default_template_root()
-    digest, file_count = _template_digest(resolved_template_root, config.unmanaged_paths)
+    plan = build_sync_plan(root, template_root=resolved_template_root)
+    ownership = {path.relative_to(resolved_template_root).as_posix(): _ownership(config, path.relative_to(resolved_template_root).as_posix()) for path in _template_files(resolved_template_root)}
+    managed = {path: digest for path, digest in _managed_files(resolved_template_root).items() if ownership[path] == "managed"}
+    digest, file_count = template_digest(resolved_template_root)
+    seeded = sorted(item.path for item in plan.preserved if item.ownership == "seed_once")
     return {
-        "schema": "agent-runtime-lock/v1",
+        "schema": "agent-runtime-lock/v2",
         "project": config.project,
+        "profiles": list(config.profiles),
+        "capabilities": list(config.capabilities),
         "upstream": {
             "package": config.upstream_package,
             "remote_url": config.upstream_remote_url,
@@ -79,7 +89,9 @@ def build_lock_record(root: Path, template_root: Path | None = None) -> dict[str
             "package_version": __version__,
             "template_digest": digest,
             "template_files": file_count,
-            "managed_files": _managed_files(resolved_template_root, config.unmanaged_paths),
+            "ownership": dict(sorted(ownership.items())),
+            "managed_files": dict(sorted(managed.items())),
+            "seeded": seeded,
         },
     }
 
@@ -167,6 +179,10 @@ def run_lock(root: Path, *, mode: str, template_root: Path | None = None) -> int
     plan = build_lock_plan(root, template_root=template_root)
     if mode == "write":
         blockers = _write_blockers(plan.findings)
+        if build_sync_plan(root, template_root=template_root).conflicts:
+            print(render(plan))
+            print("lock write refused: unresolved sync conflicts")
+            return 1
         if blockers:
             print(render(plan))
             return 1

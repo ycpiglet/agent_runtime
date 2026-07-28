@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T21:56:11+09:00
-updated_by: codex-root-v080-w6
+updated_at: 2026-07-28T23:06:30+09:00
+updated_by: le-20260728-221434-kst-642001
 current_state:
-  summary: "TASK-AR-641 read-only brownfield adoption planning is merged and closed; TASK-AR-642 ownership-aware reconciliation is next."
-  status: planned
+  summary: "UNIT-TASK-AR-642-001 implementation and independent verification are complete; implementation PR integration is pending."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 5
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-641 closed after independent W4b, live read-only pilot probes, PR #360, and Python 3.10-3.12 matrix CI."
+  progress_pct: 95
+  status_text: "W4b approved at 98/100; claims are released and the implementation branch is ready for PR CI and merge."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: TASK-AR-642
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-642 at W0; revalidate ownership-aware reconciliation, v1 unmanaged compatibility, pinned-upstream comparison, and explicit safe-only apply boundaries before W2."
+  branch_policy: "Continue only UNIT-TASK-AR-642-001 in .worktrees/TASK-AR-642; stop before automatic merge, profile file manifests, dependency closure, pilot mutation, lifecycle fixes, or UI work."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -36,7 +36,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-642
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T21:55:47+09:00
-record_count: 945
+generated_at: 2026-07-28T23:04:38+09:00
+record_count: 947
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `945` review and evidence records under `reviews/`.
+- Summary: indexed `947` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `945` files |
+| Reviews covered | pass | `947` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -588,6 +588,7 @@ record_count: 945
 | `reviews/REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan.md` | `REVIEW-2026-07-28-task-ar-639-unit-002-t3-replan` | md | record | pass | TASK-AR-639 UNIT-002 T3 Replan |
 | `reviews/REVIEW-2026-07-28-task-ar-640-w0-t3-replan.md` | `REVIEW-2026-07-28-task-ar-640-w0-t3-replan` | md | record | pass | TASK-AR-640 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-28-task-ar-641-w0-t3-replan.md` | `REVIEW-2026-07-28-task-ar-641-w0-t3-replan` | md | record | pass | TASK-AR-641 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-28-task-ar-642-w0-t3-replan.md` | `REVIEW-2026-07-28-task-ar-642-w0-t3-replan` | md | record | pass | TASK-AR-642 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration.md` | `REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration` | md | record | pass | v0.8 Adoption and Enforcement Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -976,6 +977,7 @@ record_count: 945
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001-approved.md` | `W4B-2026-07-28-unit-task-ar-641-001-approved` | md | approved | pass | TASK-AR-641 UNIT-001 Final Independent W4b Approval |
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001-final.md` | `W4B-2026-07-28-unit-task-ar-641-001-final` | md | changes_required | fail | TASK-AR-641 UNIT-001 Final Independent W4b |
 | `reviews/W4B-2026-07-28-unit-task-ar-641-001.md` | `W4B-2026-07-28-unit-task-ar-641-001` | md | changes_required | fail | TASK-AR-641 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-28-unit-task-ar-642-001-approved.md` | `W4B-2026-07-28-unit-task-ar-642-001-approved` | md | approved | pass | TASK-AR-642 UNIT-001 Independent W4b Approval |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
