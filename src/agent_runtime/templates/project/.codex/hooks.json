@@ -48,11 +48,6 @@
             "type": "command",
             "command": "scripts\\stop_hook_owner_governance.cmd",
             "timeout": 120
-          },
-          {
-            "type": "command",
-            "command": "scripts\\allimbot_stop_hook.cmd",
-            "timeout": 10
           }
         ]
       },

@@ -49,11 +49,11 @@ def _template_digest(template_root: Path, unmanaged_paths: tuple[str, ...] = ())
     return f"sha256:{digest.hexdigest()}", len(files)
 
 
-def _managed_files(template_root: Path, unmanaged_paths: tuple[str, ...] = ()) -> dict[str, str]:
+def _managed_files(template_root: Path, unmanaged_paths: tuple[str, ...] = (), profiles: tuple[str, ...] | None = None) -> dict[str, str]:
     unmanaged = set(unmanaged_paths)
     return {
         path.relative_to(template_root).as_posix(): _content_digest(path)
-        for path in _template_files(template_root)
+        for path in _template_files(template_root, profiles)
         if path.relative_to(template_root).as_posix() not in unmanaged
     }
 
@@ -71,9 +71,10 @@ def build_lock_record(root: Path, template_root: Path | None = None) -> dict[str
     config = load_config(root)
     resolved_template_root = template_root or default_template_root()
     plan = build_sync_plan(root, template_root=resolved_template_root)
-    ownership = {path.relative_to(resolved_template_root).as_posix(): _ownership(config, path.relative_to(resolved_template_root).as_posix()) for path in _template_files(resolved_template_root)}
-    managed = {path: digest for path, digest in _managed_files(resolved_template_root).items() if ownership[path] == "managed"}
-    digest, file_count = template_digest(resolved_template_root)
+    selected = _template_files(resolved_template_root, config.profiles)
+    ownership = {path.relative_to(resolved_template_root).as_posix(): _ownership(config, path.relative_to(resolved_template_root).as_posix()) for path in selected}
+    managed = {path: digest for path, digest in _managed_files(resolved_template_root, profiles=config.profiles).items() if ownership[path] == "managed"}
+    digest, file_count = template_digest(resolved_template_root, config.profiles)
     seeded = sorted(item.path for item in plan.preserved if item.ownership == "seed_once")
     return {
         "schema": "agent-runtime-lock/v2",

@@ -22,6 +22,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRED_FILES = [
     "agent_runtime/templates/project/.gitattributes",
+    "agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
+    "agent_runtime/templates/project/scripts/work.py",
+    "agent_runtime/templates/project/scripts/session_baseline.py",
+    "agent_runtime/templates/project/scripts/dirty_intake.py",
+    "agent_runtime/templates/project/scripts/save_report.py",
+    "agent_runtime/templates/project/scripts/runtime_asset_usage.py",
+    "agent_runtime/templates/project/skills/release-conductor/SKILL.md",
+    "agent_runtime/templates/project/skills/independent-verification/SKILL.md",
+    "agent_runtime/templates/project/skills/work-analytics/SKILL.md",
+    "agent_runtime/templates/project/skills/session-closeout/SKILL.md",
 ]
 REQUIRED_SUBTREES = [
     "agent_runtime/templates/project/.githooks/",

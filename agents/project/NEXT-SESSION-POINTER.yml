@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T23:19:23+09:00
-updated_by: codex-root-v080-w6
+updated_at: 2026-07-29T00:35:55+09:00
+updated_by: le-20260728-234228-kst-643001
 current_state:
-  summary: "TASK-AR-642 ownership-aware sync is merged, independently approved, verified on merged main, and closed; TASK-AR-643 is next."
-  status: planned
+  summary: "UNIT-TASK-AR-643-001 implementation and independent verification are complete; implementation PR integration is pending."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 5
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-642 W4b approved at 98/100; PR #362 passed Python 3.10-3.12 CI, merged at b5643140, and passed post-merge task/unit verification."
+  progress_pct: 95
+  status_text: "W4b approved at 96/100; worker and additive review claims are released, and the implementation branch is ready for PR CI and merge."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: TASK-AR-643
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-643 at W0; revalidate clean-host dependency closure, shipped skill/helper completeness, profile-reduction safety, and executable template smoke before W2."
+  branch_policy: "Continue only UNIT-TASK-AR-643-001 in .worktrees/TASK-AR-643; stop before consumer mutation, TASK-AR-644+, release, tag, publish, or product-specific core assets."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -39,7 +39,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-643
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

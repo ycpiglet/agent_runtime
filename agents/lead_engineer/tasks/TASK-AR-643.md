@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-29T00:34:52+09:00
+started_at: 2026-07-28T23:42:28+09:00
 title: Enforce consumer template and skill dependency closure
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -32,6 +33,13 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-234228-task-ar-643-643001.json
+verification_status: passed
+verified_at: 2026-07-29T00:34:52+09:00
+verified_by: codex-root-v080-integrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-task-ar-643-20260729003452.json
 ---
 
 # TASK-AR-643 - Enforce consumer template and skill dependency closure
@@ -55,3 +63,4 @@ tags:
 
 - `python -m pytest tests/test_template_smoke.py tests/test_runtime_asset_usage.py tests/test_wheel_dotfiles_packaging.py -q`
 - `python scripts/runtime_asset_usage.py --check`
+- `python scripts/verify_wheel_dotfiles.py --check`

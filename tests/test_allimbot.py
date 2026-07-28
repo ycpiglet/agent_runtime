@@ -187,7 +187,9 @@ def test_template_stop_hook_and_blank_configuration_are_shipped() -> None:
         for group in hooks["hooks"]["Stop"]
         for hook in group["hooks"]
     ]
-    assert "scripts\\allimbot_stop_hook.cmd" in stop_commands
+    # allimbot is security-service additive; the core hook projection must not
+    # reference an omitted helper.
+    assert "scripts\\allimbot_stop_hook.cmd" not in stop_commands
     wrapper = (TEMPLATE_ROOT / "scripts" / "allimbot_stop_hook.cmd").read_text(encoding="utf-8")
     assert "allimbot.py" in wrapper
     assert "exit /b 0" in wrapper

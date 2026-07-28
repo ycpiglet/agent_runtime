@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import config as _config
 from .inventory import adoption_scan, generated_path_root, is_generated_path
+from .template_profiles import selected_paths
 
 
 @dataclass(frozen=True)
@@ -47,8 +48,13 @@ def _template_root() -> Path:
     return Path(__file__).resolve().parent / "templates" / "project"
 
 
-def _template_files() -> dict[str, Path]:
+def _template_files(profiles: tuple[str, ...] | None = None) -> dict[str, Path]:
     root = _template_root()
+    manifest = root / "agents/project/RUNTIME-PROFILE-MANIFEST.json"
+    if profiles is not None and not manifest.exists() and root.resolve() == (Path(__file__).resolve().parent / "templates" / "project").resolve():
+        raise ValueError("packaged template profile manifest is missing")
+    if profiles is not None and manifest.exists():
+        return {path.relative_to(root).as_posix(): path for path in selected_paths(root, profiles) if not is_generated_path(path.relative_to(root))}
     files: dict[str, Path] = {}
     for current, directories, names in os.walk(root, followlinks=False):
         current_path = Path(current)
@@ -126,7 +132,7 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
                 target.resolve().relative_to(root)
             except ValueError:
                 findings.append(f"external symlink cannot be adopted: {rel}")
-    for rel, template in _template_files().items():
+    for rel, template in _template_files(tuple(profiles)).items():
         ownership = _ownership(config, rel)
         target = root / rel
         if ownership == "generated":

@@ -39,6 +39,7 @@ from agent_runtime.sync import build_sync_plan
 from agent_runtime.sync import run_sync
 from agent_runtime.sync import reconcile_json
 from agent_runtime.sync import render_reconcile
+from agent_runtime.template_profiles import selected_paths
 
 CURRENT_RELEASE_VERSION = "0.7.0"
 CURRENT_RELEASE_TAG = f"v{CURRENT_RELEASE_VERSION}"
@@ -81,6 +82,21 @@ def test_public_inventory_uses_git_ignore_and_generated_boundary(tmp_path):
     assert "space name.md" in paths
     assert "ignored/private.md" not in paths
     assert ".next/cache/x" not in paths
+
+
+def test_packaged_profile_selection_is_deterministic_across_effective_combinations():
+    from agent_runtime.sync import default_template_root
+    root = default_template_root()
+    core = selected_paths(root, ("core",))
+    web = selected_paths(root, ("core", "web-content"))
+    security = selected_paths(root, ("core", "security-service"))
+    full = selected_paths(root, ("core", "web-content", "security-service"))
+    names = lambda paths: {path.relative_to(root).as_posix() for path in paths}
+    assert names(core) == names(web)
+    assert "scripts/allimbot.py" not in names(core)
+    assert "scripts/allimbot.py" in names(security) <= names(full)
+    assert all(not path.startswith("scripts/test_") for path in names(full))
+    assert all("__pycache__" not in path and not path.endswith((".pyc", ".pyo")) for path in names(full))
 
 
 def test_tracked_generated_boundaries_are_excluded_from_inventory_and_adoption(tmp_path):

@@ -920,53 +920,23 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-28-task-ar-642-w0-t3-replan.md",
-          "value": "78ce44c24cd2cea17603cb1985c92ab2dee4dab8a0bae8c431953ea102c6de53"
+          "path": "reviews/REVIEW-2026-07-28-task-ar-643-w0-t3-replan.md",
+          "value": "08d83c7f1a9c7ce59d0d1fbcb26e50cf343985d85ee3acdfc4003b955efe92c7"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-642.md",
-          "value": "e326a9f5aeb8f0dfeb90627950ab02670c8055d0e36224f1074c43f6b0893ad1"
+          "path": "agents/lead_engineer/tasks/TASK-AR-643.md",
+          "value": "3f366731b8b80fc5ed8bb37ad84c5f3dbb72e86a40e9ade042995bc92bf1db67"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md",
-          "value": "9ae26353f6116e4080221f4b2469a1ce8169cbc288b4ec5d738c22dac3e72ef5"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md",
+          "value": "fcdb489b31f4bedb23bdffdffb2f2d709f3e6df099c3b960bbbacdd755406130"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/config.py",
-          "value": "db396cd3a1b69a7e8add869537613fdd44a917ec046922f20dd8dec4d706f614"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/sync.py",
-          "value": "faca0bfbebf01013ce8e31f5eea9c79104f3f809e1717775e346fd7c95bb5c8e"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/lock.py",
-          "value": "4cd8ea1f8bd4b3e3d256139c3a691d609d0e5e1268ed22b684e91f6c69e24c8f"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/cli.py",
-          "value": "4a1ce208b951c61b5525167d88dabbb996f3651490395b2b9f7a271f222a4a3b"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/host_update.py",
-          "value": "82946d2bd8fd6a798f55617659befe77b33c74e30aadf48f5c9a9ec75ff16d38"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "c46fca03f57e2ae90b8cb5023417f88004fd72dce1b8b2ba1262d974aabde5ab"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_template_smoke.py",
-          "value": "cc9041cfb5a252ca967fc259129b1c5f28edaf85e1bbf1a302101178f712b534"
+          "path": "scripts/work.py",
+          "value": "28e326e8350cbf96063cf427efe397932c31d72a8098de26b89b4b42a98fa0bc"
         },
         {
           "kind": "sha256",
@@ -975,12 +945,122 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/work.py",
-          "value": "28e326e8350cbf96063cf427efe397932c31d72a8098de26b89b4b42a98fa0bc"
+          "path": "scripts/runtime_asset_usage.py",
+          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/verify_wheel_dotfiles.py",
+          "value": "7934ae5f61ccb7a9db198ff1d6cd69d914b3751611a1deb0ae3489c915c498a8"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/template_profiles.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/sync.py",
+          "value": "d5fc33e78ebb6fc230d5eebf1ae63f17ec746a48665ef31bd2f7e98b85f13c56"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/adoption.py",
+          "value": "6cce35744371510d72880ace96519f65ef74eca24d870a58c30205b3ab3d90df"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/lock.py",
+          "value": "9074e9880e90b65b04c558e02f0bf0cae4b4c5674b6d1b0dea4db9c878ea7a0e"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+          "value": "048e4cd44f246ab0e8a1f89747650bb8a1820d00ae51e3cb6508ebe4faf34de6"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/.codex/hooks.json",
+          "value": "947dc7366dbff526e3a13a403989ea2fd75ce6f363a8ca02c92b9b5c36ba6bc8"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/runtime_asset_usage.py",
+          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/scripts/work.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/scripts/session_baseline.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/scripts/dirty_intake.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/scripts/save_report.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/skills/release-conductor/SKILL.md",
+          "value": "85bead6cd21dd5ebd1f104c68e73777e3abeb67a6fb25938b3793d88ba0b3629"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/skills/independent-verification/SKILL.md",
+          "value": "13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/skills/session-closeout/SKILL.md",
+          "value": "547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/skills/work-analytics/SKILL.md",
+          "value": "bd63dbfaa4edba888c0683e41cae5b72fcddc7d3618197c0d23f5e41bb7d156a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_runtime_asset_usage.py",
+          "value": "5f6fdbf8eb0610ba3029f5d244bd0bee8d0efe2e2361b790d8d89f26171a7569"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_template_smoke.py",
+          "value": "cc9041cfb5a252ca967fc259129b1c5f28edaf85e1bbf1a302101178f712b534"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_wheel_dotfiles_packaging.py",
+          "value": "766f893b3510d8b312681c5cafde69b17d32bdfa65838700e00d12e6a551d954"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_adoption.py",
+          "value": "d68147c63bc571e9321a33a49a9174af6d7fd4d50013a5f35ac49f7e21859b65"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_inventory_sync_sanitize.py",
+          "value": "cfdfea0a21fe108c17fdf865a0458fe70f71e835f80702c925f75cd8960d6185"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-28-task-ar-642-w0-t3-replan.md",
-      "recorded_at": "2026-07-28T22:13:23+09:00",
+      "design_record": "reviews/REVIEW-2026-07-28-task-ar-643-w0-t3-replan.md",
+      "recorded_at": "2026-07-28T23:38:15+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1196,5 +1276,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-28T22:13:23+09:00"
+  "updated_at": "2026-07-28T23:38:15+09:00"
 }

@@ -168,6 +168,46 @@ def test_sync_does_not_seed_default_claim_artifacts(tmp_path):
     assert not claim_dir.exists() or not any(p.suffix == ".claim" for p in claim_dir.glob("*.claim"))
 
 
+def test_clean_host_runs_work_session_report_and_dependency_lifecycle(tmp_path):
+    """Exercise generic lifecycle helpers in a synced, clean Git host."""
+    host = _host_from_fixture(tmp_path)
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run([PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"], cwd=REPO_ROOT, env=env)
+    _run(["git", "init", "-q", "-b", "main"], cwd=host); _run(["git", "config", "user.email", "test@example.com"], cwd=host); _run(["git", "config", "user.name", "Test"], cwd=host); _run(["git", "add", "."], cwd=host); _run(["git", "commit", "-qm", "baseline"], cwd=host)
+    probe = host / "scripts/verification_probe.py"; probe.write_text("print('ok')\n", encoding="utf-8")
+    payload = {"schema_version":"agent-runtime-work-registration/v1","project_id":"PROJECT-TEMPLATE-SMOKE","origin_type":"owner_request","origin_ref":"tests","created_by":"test","now":"2026-07-29T00:00:00+09:00","initiative":{"id":"INIT-TEMPLATE-SMOKE","title":"Smoke","summary":"Smoke","owner":"lead_engineer"},"taskset":{"id":"TASKSET-TEMPLATE-SMOKE","display_name":"Smoke","summary":"Smoke","order":990,"plan_slug":"smoke"},"tasks":[{"display_id":"TASK-AR-990","title":"Smoke","goal":"Smoke","acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"units":[{"title":"Unit","context":"Smoke","inputs":["scripts/verification_probe.py"],"target_files":["scripts/verification_probe.py"],"scope":"Smoke","steps":["Run probe"],"acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"handoff":"done","stop_condition":"done"}]}]}
+    registration = host / "registration.json"; registration.write_text(json.dumps(payload), encoding="utf-8")
+    work = host / "scripts/work.py"
+    _run([PYTHON, str(work), "--root", str(host), "new", "--input", str(registration), "--json"], cwd=host)
+    _run([PYTHON, str(work), "--root", str(host), "status", "--json"], cwd=host)
+    _run([PYTHON, str(work), "--root", str(host), "verify", "UNIT-TASK-AR-990-001", "--json"], cwd=host)
+    _run([PYTHON, str(work), "--root", str(host), "close", "UNIT-TASK-AR-990-001", "--actual-hours", "1", "--actual-tokens", "1", "--json"], cwd=host)
+    _run([PYTHON, str(work), "--root", str(host), "verify", "TASK-AR-990", "--json"], cwd=host)
+    _run([PYTHON, str(work), "--root", str(host), "close", "TASK-AR-990", "--actual-hours", "1", "--actual-tokens", "1", "--json"], cwd=host)
+    _run(["git", "add", "."], cwd=host); _run(["git", "commit", "-qm", "lifecycle"], cwd=host)
+    baseline = _run([PYTHON, "scripts/session_baseline.py", "--root", str(host), "--output-dir", str(host / "agents/runtime/session_baselines"), "--json"], cwd=host)
+    baseline_path = Path(json.loads(baseline.stdout)["baseline"])
+    session_cache = f"scripts/__pycache__/session_baseline.{sys.implementation.cache_tag}.pyc"
+    _run([PYTHON, "scripts/dirty_intake.py", "--root", str(host), "--baseline", str(baseline_path), "--declared-path", str(baseline_path.relative_to(host)), "--declared-path", session_cache, "--check", "--json"], cwd=host)
+    body = host / "body.md"; body.write_text("ready", encoding="utf-8")
+    _run([PYTHON, "scripts/save_report.py", "brief", "--title", "Smoke", "--audience", "Owner", "--scale", "mini", "--body-file", str(body), "--now", "2026-07-29T00:00:00+09:00", "--root", str(host)], cwd=host)
+    report = next((host / "agents/lead_engineer/reports").glob("BRIEF-*.md"))
+    assert 'type: "report"' in report.read_text(encoding="utf-8") and 'kind: "BRIEF"' in report.read_text(encoding="utf-8") and "Bottom Line:" in report.read_text(encoding="utf-8")
+    index = (host / "agents/lead_engineer/reports/INDEX.md").read_text(encoding="utf-8")
+    assert "| ID | Kind | Date | Audience | Title |" in index and f"[{report.stem}]({report.name})" in index
+    assert (host / "agents/lead_engineer/reports/VIEW-by-kind.md").exists()
+    docs = _run([PYTHON, "scripts/check_agent_docs.py"], cwd=host, expect_zero=False)
+    # The minimal fixture intentionally lacks several legacy documentation
+    # baseline records, so its whole-project checker is not yet zero-exit.
+    # A saved report must nevertheless add no validator diagnostic on either
+    # stream (the checker has emitted diagnostics on both across versions).
+    docs_output = (docs.stdout or "") + (docs.stderr or "")
+    assert report.name not in docs_output
+    _run([PYTHON, "scripts/generate_report_views.py", "--check"], cwd=host)
+    gate = _run([PYTHON, "scripts/runtime_asset_usage.py", "--root", str(host), "--check"], cwd=host)
+    assert "block=0" in gate.stdout
+
+
 def test_concurrent_workers_on_same_message_generate_single_reply(tmp_path):
     host = _host_from_fixture(tmp_path)
     env = dict(os.environ)
