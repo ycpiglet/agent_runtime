@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-28T22:16:41+09:00",
+  "generated_at": "2026-07-28T23:20:11+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5492,7 +5492,7 @@
       "title": "Update safe runtime files without overwriting host state or allowing one expected sea…",
       "path": "agents/lead_engineer/tasks/TASK-AR-642.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-642-001",
@@ -5503,7 +5503,7 @@
       "title": "UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md",
       "parent_id": "TASK-AR-642",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-643",

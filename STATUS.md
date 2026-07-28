@@ -1,12 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-28 - TASK-AR-641 complete; TASK-AR-642 next
+## 2026-07-28 - TASK-AR-642 complete; TASK-AR-643 next
 
-- Completed: `TASK-AR-641` added deterministic read-only `adopt --plan`, pre-adoption doctor diagnostics, Git-ignore-aware inventory, generated-tree filtering, and explicit ownership/conflict actions without host mutation.
-- Pilot evidence: Bean Wiki planned 282 runtime actions with 361 source-visible files and no conflicts; Allimbot planned the same 282 actions with 275 source-visible files and two host conflicts. Repeated probes preserved both repositories byte-for-byte.
-- Quality: independent W4b approved 97/100; PR #360 passed Python 3.10, 3.11, and 3.12 CI and merged at `1159adaa`.
-- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-642`.
-- Next: begin `TASK-AR-642` at W0 and revalidate ownership-aware reconciliation, v1 unmanaged compatibility, pinned-upstream comparison, and explicit safe-only apply behavior before W2.
+- Completed: `TASK-AR-642` added ownership-aware reconciliation, deterministic `--reconcile` text/JSON, opt-in `--apply-safe`, legacy atomic apply preservation, v1-to-v2 lock migration, and exact-ref host-update routing.
+- Safety: two independent W4b repair rounds closed an apply-time ancestor-symlink escape and missing lock profile/capability metadata; the Autofolio-shaped v1 migration seam remains covered.
+- Quality: independent W4b approved 98/100; implementation PR #362 passed Python 3.10, 3.11, and 3.12 CI and merged at `b5643140`; merged-main verification passed 134 task tests, 125 focused unit tests, and the full suite at 2328 passed with 3 skipped.
+- Consumer boundary: Bean Wiki, Allimbot, Autofolio, and Tag Manual were not mutated.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-643`.
+- Next: begin `TASK-AR-643` at W0 and revalidate clean-host dependency closure, shipped skill/helper completeness, profile-reduction safety, and executable template smoke before W2. Consumer pilot mutation remains deferred to its registered later task.
 
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 
