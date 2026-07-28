@@ -196,7 +196,7 @@
       "scripts/response_contract_gate.py": "sha256:2cdba6444f8797906fa9b0299b2d6e970ebeb8bc4d7a5918103af4cbb0faae0d",
       "scripts/role_mentions.py": "sha256:d5f0488c514f7e6c43c0291f9bb46c4ebf7971b59ec8f01e197ccfda4c81738d",
       "scripts/runtime_asset_usage.py": "sha256:e1d1d9c690943dd1f5c867af66e9547fb20bc2f056b463440a551b26b75d7966",
-      "scripts/save_report.py": "sha256:5ff5df44af5a8845e9cc2031f8018fa641703d833d29ee07ede8c6c354011eaf",
+      "scripts/save_report.py": "sha256:bdb4891c6f105cd27f959cff107f26e2809d3167e057c927c8c58f7226205261",
       "scripts/schedule.py": "sha256:8cb476e4ab4e4b04dd38104f7311e84fbee503e5c12526ca0d604cc26c9ce767",
       "scripts/schedule_task.py": "sha256:900ec8181ecffc388eaea4d5ce5195618f6ea817577344034dd8454eb6aa97cb",
       "scripts/scheduled_dispatch_gate.py": "sha256:c2a41725d81303a58c3cf80c076137d1fca5414019bd45334bf7893eb88b12cf",
@@ -495,7 +495,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:8dca03f95634a6171f29898d25a01b648bd588a199ea061ee1e446440277776e",
+    "template_digest": "sha256:fa46ce5489d81e5fe4e3ccd81917f5d004fb661ceead9569e97d53c74b9ee4b6",
     "template_files": 242
   },
   "profiles": [
