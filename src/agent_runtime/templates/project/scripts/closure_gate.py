@@ -202,16 +202,33 @@ def _active_work_contexts(
             ):
                 claims.append(payload)
 
-    contexts: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for claim in sorted(
+    ordered_claims = sorted(
         claims,
         key=lambda row: (
             str(row.get("updated_at") or row.get("last_heartbeat") or ""),
             str(row.get("claim_id") or ""),
         ),
         reverse=True,
-    ):
+    )
+    matching_claims: list[dict[str, Any]] = []
+    for claim in ordered_claims:
+        worktree = str(claim.get("worktree_path") or "").strip()
+        if not worktree:
+            continue
+        try:
+            if Path(worktree).resolve() == root.resolve():
+                matching_claims.append(claim)
+        except OSError:
+            continue
+    candidates = matching_claims or ordered_claims
+    if len(candidates) > 1:
+        # A global Stop hook cannot safely guess which of several active
+        # claims the caller intends to close. A non-linking sentinel keeps the
+        # gate fail-closed; callers can disambiguate with --work-id.
+        return [{"work_id": "__ambiguous_active_claim__"}]
+
+    contexts: list[dict[str, Any]] = []
+    for claim in candidates:
         path: Path | None = None
         unit_spec = str(claim.get("unit_spec") or "").strip()
         if unit_spec:
@@ -225,9 +242,8 @@ def _active_work_contexts(
             path = _work_item_path(root, claimed_work)
         meta = _read_work(path) if path else None
         resolved = str((meta or {}).get("work_id") or claimed_work).strip()
-        if meta and resolved and resolved not in seen:
+        if meta and resolved:
             contexts.append(meta)
-            seen.add(resolved)
     return contexts
 
 

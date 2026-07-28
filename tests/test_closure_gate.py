@@ -192,6 +192,39 @@ def test_active_work_accepts_explicit_linked_review_and_compound(tmp_path):
     assert rec == {"compound": True, "review": True, "retro": False}
 
 
+def test_multiple_active_claims_fail_closed_without_explicit_work_id(tmp_path):
+    review_ref = f"reviews/REVIEW-{TODAY}-task-ar-645-closeout.md"
+    review = tmp_path / review_ref
+    review.parent.mkdir(parents=True)
+    review.write_text(
+        "---\nwork_id: UNIT-TASK-AR-645-001\n---\n\n# Linked review\n",
+        encoding="utf-8",
+    )
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    claims = tmp_path / "agents" / "runtime" / "task_claims"
+    (claims / "CLAIM-other.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-other",
+                "status": "claimed",
+                "task_id": "TASK-AR-999",
+                "unit_id": "UNIT-TASK-AR-999-001",
+                "updated_at": "2026-06-14T11:30:00+09:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    inferred = closure_gate.has_closure_record(tmp_path, now=NOW)
+    explicit = closure_gate.has_closure_record(
+        tmp_path, now=NOW, work_id="UNIT-TASK-AR-645-001"
+    )
+
+    assert inferred == {"compound": False, "review": False, "retro": False}
+    assert explicit == {"compound": False, "review": True, "retro": False}
+
+
 # --- substantial line counting via git ---
 
 def _git(root, *args):
