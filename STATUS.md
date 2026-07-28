@@ -1,11 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
-## 2026-07-28 - TASK-AR-640 complete; TASK-AR-641 next
+## 2026-07-28 - TASK-AR-641 complete; TASK-AR-642 next
 
-- Completed: `TASK-AR-640` added the backward-compatible config v2 diagnostic contract for profiles, capabilities, ownership modes, host context, and stable doctor JSON without enabling host mutation.
-- Quality: independent W4b approved 97/100; PR #358 passed Python 3.10, 3.11, and 3.12 CI and merged at `2c67d37d`.
-- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` now advances to `TASK-AR-641`, with later tasks covering ownership-aware sync, dependency closure, portable lifecycle hooks, compound/scribe, model economy, Allimbot, pilots, Autofolio migration, and RC.
-- Next: begin `TASK-AR-641` at W0, revalidate read-only brownfield adoption and generated-tree filtering boundaries, then create a clean W2 worker claim.
+- Completed: `TASK-AR-641` added deterministic read-only `adopt --plan`, pre-adoption doctor diagnostics, Git-ignore-aware inventory, generated-tree filtering, and explicit ownership/conflict actions without host mutation.
+- Pilot evidence: Bean Wiki planned 282 runtime actions with 361 source-visible files and no conflicts; Allimbot planned the same 282 actions with 275 source-visible files and two host conflicts. Repeated probes preserved both repositories byte-for-byte.
+- Quality: independent W4b approved 97/100; PR #360 passed Python 3.10, 3.11, and 3.12 CI and merged at `1159adaa`.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-642`.
+- Next: begin `TASK-AR-642` at W0 and revalidate ownership-aware reconciliation, v1 unmanaged compatibility, pinned-upstream comparison, and explicit safe-only apply behavior before W2.
 
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 

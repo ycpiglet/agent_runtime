@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-28T20:55:22+09:00",
+  "generated_at": "2026-07-28T21:55:47+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5470,7 +5470,7 @@
       "title": "Let an existing repository understand exactly what Agent Runtime would add, own, pres…",
       "path": "agents/lead_engineer/tasks/TASK-AR-641.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-641-001",
@@ -5481,7 +5481,7 @@
       "title": "UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md",
       "parent_id": "TASK-AR-641",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-642",
