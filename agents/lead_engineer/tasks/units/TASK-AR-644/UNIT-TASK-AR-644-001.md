@@ -83,6 +83,7 @@ target_files:
   - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+  - reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
@@ -114,6 +115,7 @@ evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
   - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
+  - reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
@@ -187,6 +189,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
 - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
 - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+- reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
