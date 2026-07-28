@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-29T03:29:46+09:00
 title: Make compound and scribe task-linked and host-configurable
 status: planned
 priority: P0
@@ -53,4 +53,8 @@ tags:
 
 ## Verification
 
-- `python -m pytest tests/test_compound_cadence_gate.py tests/test_compound_cadence_obligation.py tests/test_closure_gate.py tests/test_doc_steward_due.py -q`
+- `python -m pytest tests/test_compound_records.py tests/test_task_claim_dispatcher.py tests/test_closure_gate.py tests/test_compound_cadence_gate.py tests/test_compound_cadence_obligation.py tests/test_scribe_due.py tests/test_config_v2.py tests/test_doctor.py tests/test_session_continuity_hooks.py tests/test_inventory_sync_sanitize.py tests/test_adoption.py tests/test_work_schema_gate.py -q`
+- `python scripts/runtime_asset_usage.py --check`
+- `python scripts/verify_wheel_dotfiles.py --check`
+- `python -m agent_runtime.cli sanitize --root . --check`
+- `python -m pytest -q`
