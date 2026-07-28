@@ -39,6 +39,7 @@ import a2a_claim_emitter
 import atomic_io
 import backlog_board
 import claim_guard
+import compound_record
 import model_routing
 import plan_assumption_gate
 import role_routing
@@ -228,10 +229,81 @@ def _unit_spec_target_files(root: Path, unit_spec: str) -> list[str]:
     meta, _ = backlog_board.parse_frontmatter(text)
     value = meta.get("target_files")
     if isinstance(value, list):
+        return _normalize_target_files(value)
+    if isinstance(value, str) and value.strip():
+        return _normalize_target_files([value])
+    return []
+
+
+def _normalize_target_files(values: list[object] | tuple[object, ...]) -> list[str]:
+    """Turn readiness-only ``new:`` markers into real claim footprint paths."""
+
+    normalized: list[str] = []
+    for value in values:
+        text = str(value).strip()
+        if text.startswith("new:"):
+            text = text.removeprefix("new:").strip()
+        if text:
+            normalized.append(text.replace("\\", "/"))
+    return list(dict.fromkeys(normalized))
+
+
+def _frontmatter_list(path: Path, field: str) -> list[str]:
+    if not path.is_file():
+        return []
+    try:
+        meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+    except OSError:
+        return []
+    value = meta.get(field)
+    if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
     if isinstance(value, str) and value.strip():
         return [value.strip()]
     return []
+
+
+def _work_defect_signatures(root: Path, args: argparse.Namespace) -> list[str]:
+    values = [str(value).strip() for value in (args.defect_signature or []) if str(value).strip()]
+    task_path = root / "agents" / "lead_engineer" / "tasks" / f"{args.task_id}.md"
+    values.extend(_frontmatter_list(task_path, "defect_signatures"))
+    unit_spec = Path(str(args.unit_spec or ""))
+    if not unit_spec.is_absolute():
+        unit_spec = root / unit_spec
+    values.extend(_frontmatter_list(unit_spec, "defect_signatures"))
+    return list(dict.fromkeys(values))
+
+
+def _knowledge_lookup(
+    root: Path, args: argparse.Namespace
+) -> tuple[list[str], list[dict[str, Any]]]:
+    raw_signatures = _work_defect_signatures(root, args)
+    signatures = compound_record.normalize_signatures(raw_signatures)
+    work_ids = [value for value in (args.task_id, args.unit_id) if value]
+    rows = compound_record.search_knowledge(
+        root,
+        work_ids=work_ids,
+        defect_signatures=raw_signatures,
+        include_legacy=True,
+        limit=8,
+    )
+    bounded = [
+        {
+            key: row[key]
+            for key in (
+                "id",
+                "path",
+                "title",
+                "score",
+                "legacy",
+                "work_ids",
+                "defect_signatures",
+            )
+            if key in row
+        }
+        for row in rows
+    ]
+    return signatures, bounded
 
 
 def _unit_spec_escalation_triggers(root: Path, unit_spec: str) -> list[str]:
@@ -264,7 +336,7 @@ def _unit_spec_escalation_triggers(root: Path, unit_spec: str) -> list[str]:
 
 
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
-    declared = [str(entry).strip() for entry in (args.target_file or []) if str(entry).strip()]
+    declared = _normalize_target_files(tuple(args.target_file or ()))
     if declared:
         return declared
     return _unit_spec_target_files(root, args.unit_spec)
@@ -364,6 +436,8 @@ def _build_claim(
     *,
     target_files: list[str],
     escalation_triggers: list[str],
+    defect_signatures: list[str],
+    knowledge_matches: list[dict[str, Any]],
 ) -> dict[str, Any]:
     now = _parse_now(args.now)
     expires_at = now + timedelta(minutes=args.lease_minutes)
@@ -428,6 +502,12 @@ def _build_claim(
         "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
         "escalation_triggers": list(escalation_triggers),
+        "defect_signatures": list(defect_signatures),
+        "knowledge_lookup": {
+            "status": "matched" if knowledge_matches else "clear",
+            "match_count": len(knowledge_matches),
+        },
+        "knowledge_matches": knowledge_matches,
         "target_files": list(target_files),
     }
 
@@ -565,11 +645,20 @@ def cmd_create(args: argparse.Namespace) -> int:
     ):
         return 1
 
+    try:
+        defect_signatures, knowledge_matches = _knowledge_lookup(root, args)
+    except compound_record.CompoundRecordError as exc:
+        print("compound knowledge lookup failed before claim persistence:", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
     claim = _build_claim(
         args,
         records,
         target_files=_resolve_target_files(root, args),
         escalation_triggers=_resolve_escalation_triggers(root, args),
+        defect_signatures=defect_signatures,
+        knowledge_matches=knowledge_matches,
     )
     creation_errors = _claim_creation_errors(root, claim, records)
     if creation_errors:
@@ -583,6 +672,15 @@ def cmd_create(args: argparse.Namespace) -> int:
         for error in footprint_errors:
             print(error, file=sys.stderr)
         return 1
+    print(
+        f"compound knowledge lookup: {len(knowledge_matches)} match(es) before claim persistence",
+        file=sys.stderr,
+    )
+    for match in knowledge_matches:
+        print(
+            f"- {match.get('id')} {match.get('path')}: {match.get('title', '')}",
+            file=sys.stderr,
+        )
     claim_dir = _claim_dir(root)
     claim_dir.mkdir(parents=True, exist_ok=True)
     claim_path = claim_dir / f"{claim['claim_id']}.json"
@@ -986,6 +1084,12 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--step-total", type=int, default=6)
     create.add_argument("--status-text", default="Claim created")
     create.add_argument("--tag", action="append", default=[])
+    create.add_argument(
+        "--defect-signature",
+        action="append",
+        default=[],
+        help="Explicit defect signature or raw stable defect phrase (repeatable)",
+    )
     create.add_argument(
         "--escalation-trigger",
         action="append",

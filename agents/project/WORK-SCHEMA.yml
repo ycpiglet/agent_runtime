@@ -612,6 +612,22 @@ fields:
     consumed_by: [review_index, owner_doc_gate]
     query_use: Link planning, review, and closeout records.
     mutable: lifecycle_tools
+  compound_refs:
+    type: list
+    required_for: []
+    populated_by: compound_record_or_work_close
+    source: runtime
+    consumed_by: [compound_index, closeout_gate, work_close]
+    query_use: Link work to validated immutable compound records without mixing them with verification evidence.
+    mutable: lifecycle_tools
+  defect_signatures:
+    type: list
+    required_for: []
+    populated_by: planner_or_compound_record
+    source: human
+    consumed_by: [claim_dispatcher, compound_index, closeout_gate]
+    query_use: Surface known failures before implementation and bind repeat-defect prevention to closeout.
+    mutable: lifecycle_tools
   commit_refs:
     type: list
     required_for: []

@@ -9,11 +9,12 @@ task_id: TASK-AR-645
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T03:29:46+09:00
+updated_at: 2026-07-29T04:34:55+09:00
+started_at: 2026-07-29T03:43:12+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -34,6 +35,10 @@ inputs:
   - scripts/work.py
   - src/agent_runtime/templates/project/scripts/kedb_search.py
 target_files:
+  - BACKLOG-BOARD.md
+  - agents/lead_engineer/tasks/TASK-AR-645.md
+  - agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md
+  - agents/project/NEXT-SESSION-POINTER.yml
   - new:src/agent_runtime/knowledge_records.py
   - new:scripts/compound_record.py
   - new:src/agent_runtime/templates/project/scripts/compound_record.py
@@ -66,6 +71,23 @@ target_files:
   - tests/test_work_schema_gate.py
   - tests/test_template_smoke.py
   - tests/fixtures/host/agent_runtime.lock.json
+  - agents/runtime/a2a/messages.jsonl
+  - agents/runtime/pane_events/pane-events.jsonl
+  - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
+  - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.handoff.md
+  - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.log.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.handoff.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.log.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.handoff.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.log.md
+  - reviews/W4A-2026-07-29-unit-task-ar-645-001.md
+  - reviews/W4B-2026-07-29-unit-task-ar-645-001.md
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json
+  - reviews/INDEX.md
 scope: Add a machine-validated per-record compound store under agents/project/knowledge/compounds/records, a generated index, deterministic defect signatures, claim-time retrieval, and task-linked closeout validation while keeping the legacy monolith as a read-only compatibility source. Do not migrate or rewrite historical host records.
 acceptance:
   - Unrelated same-day records do not satisfy closeout.
@@ -80,6 +102,14 @@ verification:
   - python -m agent_runtime.cli sanitize --root . --check
 handoff: Provide a repeat-defect fixture showing create, indexed retrieval at claim time, unrelated-record rejection, linked work close, legacy read-only fallback, and ownership behavior.
 stop_condition: Stop before bulk-rewriting historical compound logs, changing consumer repositories, or weakening passed-verification JSON requirements.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
+verified_at: 2026-07-29T04:34:55+09:00
+verified_by: codex-root-v080-integrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json
 ---
 
 # UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval
@@ -105,6 +135,10 @@ default. Autofolio demonstrates the cost with a 5,235-line shared log.
 
 ## Target Files
 
+- BACKLOG-BOARD.md
+- agents/lead_engineer/tasks/TASK-AR-645.md
+- agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md
+- agents/project/NEXT-SESSION-POINTER.yml
 - new:src/agent_runtime/knowledge_records.py
 - new:scripts/compound_record.py
 - new:src/agent_runtime/templates/project/scripts/compound_record.py
@@ -137,6 +171,23 @@ default. Autofolio demonstrates the cost with a 5,235-line shared log.
 - tests/test_work_schema_gate.py
 - tests/test_template_smoke.py
 - tests/fixtures/host/agent_runtime.lock.json
+- agents/runtime/a2a/messages.jsonl
+- agents/runtime/pane_events/pane-events.jsonl
+- agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
+- agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.handoff.md
+- agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.log.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.handoff.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.json
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-independent-auditor-closeout.log.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.handoff.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.json
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-645-skeptic-closeout.log.md
+- reviews/W4A-2026-07-29-unit-task-ar-645-001.md
+- reviews/W4B-2026-07-29-unit-task-ar-645-001.md
+- reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json
+- reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json
+- reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json
+- reviews/INDEX.md
 
 ## Scope
 

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-asset-registry/v1",
   "version": 1,
-  "updated_at": "2026-06-13T14:34:57+09:00",
+  "updated_at": "2026-07-29T04:00:00+09:00",
   "status_scale": ["active", "watch", "deprecated", "removed"],
   "lifecycle_decisions": ["keep", "modify", "deprecate", "remove", "observe"],
   "assets": [
@@ -263,6 +263,16 @@
       "paths": ["scripts/work.py"],
       "evidence_paths": ["agents/lead_engineer/tasks/TASK-AR-515.md", "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md"],
       "tokens": ["work.py", "Work Item", "capability.work"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "capability.compound_record",
+      "kind": "script",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/compound_record.py", "src/agent_runtime/knowledge_records.py"],
+      "evidence_paths": ["agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md", "tests/test_compound_records.py"],
+      "tokens": ["compound_record.py", "defect_signatures", "capability.compound_record"],
       "min_recent_uses": 1
     },
     {

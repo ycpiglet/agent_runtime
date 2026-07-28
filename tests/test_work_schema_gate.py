@@ -226,6 +226,8 @@ def test_repo_schema_catalogs_new_provenance_closure_and_governance_fields() -> 
         "recovered_at",
         "recovered_by",
         "recovery_independent_evidence_refs",
+        "compound_refs",
+        "defect_signatures",
     ):
         assert f"\n  {field}:\n" in text, f"catalog missing field: {field}"
     assert "field_promotion_policy:" in text

@@ -8,7 +8,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import AgentRuntimeConfig, load_config
+from .config import AgentRuntimeConfig, default_ownership, load_config
 from .template_profiles import selected_paths
 
 LOCK_FILE = "agent_runtime.lock.json"
@@ -130,9 +130,7 @@ def _ownership(config: AgentRuntimeConfig, path: str) -> str:
     for mode, paths in config.ownership:
         if any(path == candidate or path.startswith(candidate.rstrip("/") + "/") for candidate in paths):
             return mode
-    if path in {"AGENTS.md", "CLAUDE.md", "CURSOR.md", "GEMINI.md", "agents/project/NEXT-SESSION-POINTER.yml"}:
-        return "seed_once"
-    return "managed"
+    return default_ownership(path)
 
 
 def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:

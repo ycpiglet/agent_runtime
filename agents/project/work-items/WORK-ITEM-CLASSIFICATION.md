@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-29T03:14:05+09:00
+generated_at: 2026-07-29T03:45:25+09:00
 record_count: 519
 ---
 
@@ -543,8 +543,8 @@ record_count: 519
 | 41.1.5.1 | Unit 41.1.5.1 | unit | `UNIT-TASK-AR-643-001` | `TASK-AR-643` | completed | `agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md` | UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke |
 | 41.1.6 | Task 41.1.6 | task | `TASK-AR-644` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-644.md` | Make the harness actually enter and re-enter its governance path on supported agent c… |
 | 41.1.6.1 | Unit 41.1.6.1 | unit | `UNIT-TASK-AR-644-001` | `TASK-AR-644` | completed | `agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md` | UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints |
-| 41.1.7 | Task 41.1.7 | task | `TASK-AR-645` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-645.md` | Prevent repeated mistakes and accumulated context without forcing every host into one… |
-| 41.1.7.1 | Unit 41.1.7.1 | unit | `UNIT-TASK-AR-645-001` | `TASK-AR-645` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md` | UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval |
+| 41.1.7 | Task 41.1.7 | task | `TASK-AR-645` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-645.md` | Prevent repeated mistakes and accumulated context without forcing every host into one… |
+| 41.1.7.1 | Unit 41.1.7.1 | unit | `UNIT-TASK-AR-645-001` | `TASK-AR-645` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md` | UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval |
 | 41.1.7.2 | Unit 41.1.7.2 | unit | `UNIT-TASK-AR-645-002` | `TASK-AR-645` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md` | UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections |
 | 41.1.8 | Task 41.1.8 | task | `TASK-AR-646` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-646.md` | Use lower-cost native subagents by default where appropriate and prove when escalatio… |
 | 41.1.8.1 | Unit 41.1.8.1 | unit | `UNIT-TASK-AR-646-001` | `TASK-AR-646` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md` | UNIT-TASK-AR-646-001 - Add effective-tier detection and dispatch cost ledger |

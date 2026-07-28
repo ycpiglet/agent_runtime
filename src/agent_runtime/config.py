@@ -29,6 +29,39 @@ PROFILE_CAPABILITIES = {
 CAPABILITY_ORDER = tuple(capability for profile in PROFILE_ORDER for capability in PROFILE_CAPABILITIES[profile])
 OWNERSHIP_MODES = ("managed", "seed_once", "host_owned", "generated")
 RESERVED_PATHS = {CONFIG_FILE, "agent_runtime.lock.json"}
+DEFAULT_OWNERSHIP = (
+    (
+        "seed_once",
+        (
+            "AGENTS.md",
+            "CLAUDE.md",
+            "CURSOR.md",
+            "GEMINI.md",
+            "agents/project/NEXT-SESSION-POINTER.yml",
+            "agents/lead_engineer/compound_log.md",
+        ),
+    ),
+    (
+        "host_owned",
+        ("agents/project/knowledge/compounds/records",),
+    ),
+    (
+        "generated",
+        ("agents/project/knowledge/compounds/INDEX.json",),
+    ),
+)
+
+
+def default_ownership(path: str) -> str:
+    normalized = str(path).replace("\\", "/").strip().strip("/")
+    for mode, candidates in DEFAULT_OWNERSHIP:
+        if any(
+            normalized == candidate
+            or normalized.startswith(candidate.rstrip("/") + "/")
+            for candidate in candidates
+        ):
+            return mode
+    return "managed"
 
 
 @dataclass(frozen=True)

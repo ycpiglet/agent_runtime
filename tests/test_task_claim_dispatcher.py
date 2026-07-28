@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from agent_runtime import knowledge_records
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
@@ -671,6 +673,114 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
     assert result.returncode == 0, result.stderr or result.stdout
     claim = json.loads(result.stdout)["claim"]
     assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
+
+
+def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    _write_worktree(tmp_path, "TASK-AR-645")
+    task_path = tmp_path / "agents/lead_engineer/tasks/TASK-AR-645.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        "---\nwork_id: TASK-AR-645\ndefect_signatures:\n"
+        "  - claim lookup omitted\n---\n",
+        encoding="utf-8",
+    )
+    unit_rel = (
+        "agents/lead_engineer/tasks/units/TASK-AR-645/"
+        "UNIT-TASK-AR-645-001.md"
+    )
+    unit_path = tmp_path / unit_rel
+    unit_path.parent.mkdir(parents=True, exist_ok=True)
+    unit_path.write_text(
+        "---\nunit_id: UNIT-TASK-AR-645-001\ntask_id: TASK-AR-645\n"
+        "status: worker_ready\ntarget_files:\n"
+        "  - new:src/agent_runtime/knowledge_records.py\n"
+        "  - scripts/task_claim_dispatcher.py\n"
+        "defect_signatures:\n"
+        "  - claim lookup omitted\n---\n",
+        encoding="utf-8",
+    )
+    _path, prior = knowledge_records.create_record(
+        tmp_path,
+        work_ids=["TASK-AR-500"],
+        defect_signatures=["claim lookup omitted"],
+        title="Search before claim",
+        summary="A worker repeated a known error.",
+        cause="The dispatcher did not search.",
+        prevention="Search before persistence.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=["scripts/task_claim_dispatcher.py"],
+        verification_refs=["reviews/verify.json"],
+        created_at="2026-07-28T12:00:00+09:00",
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-645",
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        "UNIT-TASK-AR-645-001",
+        "--unit-spec",
+        unit_rel,
+        "--now",
+        "2026-07-29T04:20:00+09:00",
+        "--suffix",
+        "lookup",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["target_files"] == [
+        "src/agent_runtime/knowledge_records.py",
+        "scripts/task_claim_dispatcher.py",
+    ]
+    assert claim["defect_signatures"] == [
+        knowledge_records.normalize_signature("claim lookup omitted")
+    ]
+    assert claim["knowledge_lookup"] == {"status": "matched", "match_count": 1}
+    assert claim["knowledge_matches"][0]["id"] == prior["id"]
+    assert "before claim persistence" in result.stderr
+
+
+def test_create_claim_refuses_malformed_canonical_compound_before_persistence(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    _write_worktree(tmp_path, "TASK-AR-646")
+    record_dir = knowledge_records.records_dir(tmp_path)
+    record_dir.mkdir(parents=True)
+    (record_dir / "COMPOUND-20260729-000000-bad-000000000000.json").write_text(
+        '{"schema":"wrong"}\n', encoding="utf-8"
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        "TASK-AR-646",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T04:21:00+09:00",
+        "--suffix",
+        "bad-record",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "compound knowledge lookup failed before claim persistence" in result.stderr
+    claims = tmp_path / "agents/runtime/task_claims"
+    assert not claims.exists() or not list(claims.glob("*.json"))
 
 
 def _create_release_candidate(tmp_path: Path, *, task_id: str = "TASK-AR-507", suffix: str = "cv1") -> dict:

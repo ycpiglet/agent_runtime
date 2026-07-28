@@ -137,6 +137,37 @@ ownership:
     assert actions["GEMINI.md"].ownership == "seed_once"
 
 
+def test_existing_legacy_compound_log_is_preserved_by_default(tmp_path):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(
+        root,
+        "agent_runtime.yml",
+        """schema: agent-runtime-config/v2
+project: demo
+sync:
+  mode: check-diff-apply
+  allow_silent_overwrite: false
+""",
+    )
+    _write(
+        root,
+        "agents/lead_engineer/compound_log.md",
+        "# Host history\n\n### COMPOUND-001\n",
+    )
+
+    plan = build_adoption_plan(root)
+    action = next(
+        item
+        for item in plan.actions
+        if item.path == "agents/lead_engineer/compound_log.md"
+    )
+
+    assert action.action == "preserve"
+    assert action.ownership == "seed_once"
+
+
 def test_template_enumeration_prunes_generated_members_and_is_cache_state_invariant(tmp_path, monkeypatch):
     root = tmp_path / "host"
     template = tmp_path / "template"

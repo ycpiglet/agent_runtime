@@ -18,6 +18,7 @@ from agent_runtime.host_update import build_update_plan
 from agent_runtime.host_update import default_install_dir
 from agent_runtime.host_update import run_update
 from agent_runtime.inventory import classify_path
+from agent_runtime.inventory import is_generated_path
 from agent_runtime.lock import build_lock_plan
 from agent_runtime.lock import build_lock_record
 from agent_runtime.lock import run_lock
@@ -273,11 +274,61 @@ def _write_public_source(root: Path):
 
 def test_inventory_keeps_product_and_host_state_out_of_core():
     assert classify_path("scripts/agent_worker.py")[0] == "core"
+    assert classify_path("scripts/compound_record.py")[0] == "core"
     assert classify_path("public/index.html")[0] == "product"
     assert classify_path("supabase/schema.sql")[0] == "product"
     assert classify_path("agents/lead_engineer/tasks/TASK-001-demo.md")[0] == "host-state"
     assert classify_path("agent_runtime.yml")[0] == "host-state"
     assert classify_path("agent_runtime.lock.json")[0] == "host-state"
+    assert (
+        classify_path(
+            "agents/project/knowledge/compounds/records/COMPOUND-one.json"
+        )[0]
+        == "host-state"
+    )
+    assert is_generated_path("agents/project/knowledge/compounds/INDEX.json")
+
+
+def test_compound_store_defaults_preserve_exclude_and_lock_ownership(tmp_path):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    _write_host_config(host)
+    legacy = "agents/lead_engineer/compound_log.md"
+    record = "agents/project/knowledge/compounds/records/COMPOUND-one.json"
+    index = "agents/project/knowledge/compounds/INDEX.json"
+    _write(templates / legacy, "# Packaged legacy seed\n")
+    _write(templates / record, '{"schema":"test"}\n')
+    _write(templates / index, '{"schema":"generated"}\n')
+    _write(host / legacy, "# Host-owned history\n")
+
+    plan = build_sync_plan(host, template_root=templates)
+    by_path = {
+        item.path: item
+        for item in (
+            *plan.updates,
+            *plan.conflicts,
+            *plan.preserved,
+            *plan.excluded,
+        )
+    }
+
+    assert by_path[legacy].action == "preserve"
+    assert by_path[legacy].ownership == "seed_once"
+    assert by_path[record].action == "excluded"
+    assert by_path[record].ownership == "host_owned"
+    assert by_path[index].action == "excluded"
+    assert by_path[index].ownership == "generated"
+    assert apply_safe_updates(plan) == 0
+    assert (host / legacy).read_text(encoding="utf-8") == "# Host-owned history\n"
+    assert not (host / record).exists()
+    assert not (host / index).exists()
+
+    lock = build_lock_record(host, template_root=templates)
+    ownership = lock["installed"]["ownership"]
+    assert ownership[legacy] == "seed_once"
+    assert ownership[record] == "host_owned"
+    assert ownership[index] == "generated"
+    assert not ({legacy, record, index} & set(lock["installed"]["managed_files"]))
 
 
 def test_sync_check_reads_host_config_without_writing(tmp_path, capsys):

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T03:35:50+09:00
-record_count: 968
+generated_at: 2026-07-29T04:35:17+09:00
+record_count: 973
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `968` review and evidence records under `reviews/`.
+- Summary: indexed `973` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `968` files |
+| Reviews covered | pass | `973` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -862,8 +862,12 @@ record_count: 968
 | `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json` | `VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json` | `VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729030636.json` | `VERIFY-2026-07-29-unit-task-ar-644-001-20260729030636` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-644-001-20260729030636 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729041748 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729042042 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455.json` | `VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-001-20260729043455 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
+| `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -999,6 +1003,7 @@ record_count: 968
 | `reviews/W4B-2026-07-29-unit-task-ar-643-001-approved.md` | `W4B-2026-07-29-unit-task-ar-643-001-approved` | md | approved | pass | TASK-AR-643 UNIT-001 Independent W4b Approval |
 | `reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4B-2026-07-29-unit-task-ar-644-001-ci-followup` | md | approved | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-644-001.md` | `W4B-2026-07-29-unit-task-ar-644-001` | md | approved | pass | TASK-AR-644 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-645-001.md` | `W4B-2026-07-29-unit-task-ar-645-001` | md | approved | pass | TASK-AR-645 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

@@ -17,6 +17,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 import compound_cadence_gate as gate  # noqa: E402
+import compound_record  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -123,6 +124,34 @@ def test_equal_counts_no_watch(tmp_path: Path) -> None:
 
     findings = gate.analyze(tmp_path, ratio=20)
     assert not any(f["code"] == "compound-cadence" for f in findings)
+
+
+def test_canonical_per_record_compounds_count_toward_cadence(
+    tmp_path: Path,
+) -> None:
+    reviews_dir = _make_reviews_dir(tmp_path)
+    for i in range(1, 5):
+        _write_review(reviews_dir, i)
+    compound_record.create_record(
+        tmp_path,
+        work_ids=["TASK-AR-645"],
+        defect_signatures=["cadence ignored canonical records"],
+        title="Count canonical compound records",
+        summary="Cadence only counted legacy review-directory files.",
+        cause="The canonical record directory was not part of the count.",
+        prevention="Load and validate canonical records before computing cadence.",
+        source_refs=["reviews/REVIEW-2026-06-01-test.md"],
+        prevention_refs=["scripts/compound_cadence_gate.py"],
+        verification_refs=["tests/test_compound_cadence_gate.py"],
+        created_at="2026-06-14T11:30:00+09:00",
+    )
+
+    report = gate.build_report(tmp_path, gate.analyze(tmp_path, ratio=10), ratio=10)
+
+    assert report["counts"]["compounds"] == 1
+    assert report["counts"]["canonical_compounds"] == 1
+    assert report["counts"]["compound_retro_total"] == 1
+    assert report["status"] == "pass"
 
 
 # ---------------------------------------------------------------------------

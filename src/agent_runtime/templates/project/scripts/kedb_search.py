@@ -2,13 +2,15 @@
 """KEDB(Known Error Database) 검색 — 작업 시작 시 관련 COMPOUND 자동 surface.
 
 TASK-150 (CYCLE-025). §17.1 strict gate 의 자동화 — "LLM 자발 검색에 의존 안 함".
-작업 키워드(도구 / 파일 경로 / 패턴)로 `compound_log.md` 를 검색해, 같은 결함을
-*시작 전에* 알려준다.
+작업 ID, 결함 시그니처, 키워드로 canonical per-record store를 먼저 검색하고,
+과거 `compound_log.md`는 읽기 전용 fallback으로 검색해 같은 결함을 *시작 전에*
+알려준다.
 
 Usage:
   python scripts/kedb_search.py save_report VIEW
   python scripts/kedb_search.py 부산물 commit --critical
   python scripts/kedb_search.py --category process-omission
+  python scripts/kedb_search.py --work-id TASK-AR-645 --signature "same-day closeout"
   python scripts/kedb_search.py VIEW --format json
 """
 from __future__ import annotations
@@ -29,6 +31,11 @@ if sys.platform == "win32":
 ROOT = Path(__file__).resolve().parents[1]
 COMPOUND_LOG = ROOT / "agents" / "lead_engineer" / "compound_log.md"
 CRITICAL_RECURRENCE = 3
+
+try:
+    import compound_record
+except ImportError:  # imported as scripts.<name>
+    from scripts import compound_record
 
 
 def _field(entry: str, name: str) -> str:
@@ -89,6 +96,73 @@ def search(entries: list[dict], keywords: list[str], category: str | None,
     return results
 
 
+def search_knowledge(
+    root: Path,
+    *,
+    keywords: list[str],
+    work_ids: list[str],
+    signatures: list[str],
+    category: str | None,
+    critical_only: bool,
+    limit: int,
+) -> list[dict]:
+    """Search validated canonical records, then the legacy Markdown fallback."""
+    limit = max(1, min(int(limit), compound_record.MAX_SEARCH_RESULTS))
+    canonical = compound_record.search_records(
+        root,
+        work_ids=work_ids,
+        defect_signatures=signatures,
+        keywords=keywords,
+        limit=limit,
+    )
+    rows: list[dict] = []
+    for entry in canonical:
+        recurrence = int(entry["recurrence_count"])
+        if category and category != "canonical":
+            continue
+        if critical_only and recurrence < CRITICAL_RECURRENCE:
+            continue
+        rows.append(
+            {
+                "id": entry["id"],
+                "number": 0,
+                "category": "canonical",
+                "recurrence": recurrence,
+                "status": entry["status"],
+                "pattern": entry["title"],
+                "text": entry["title"],
+                "score": entry["score"],
+                "source": "record",
+                "path": entry["path"],
+                "work_ids": entry["work_ids"],
+                "defect_signatures": entry["defect_signatures"],
+            }
+        )
+    if len(rows) >= limit:
+        return rows[:limit]
+
+    legacy_path = root / "agents" / "lead_engineer" / "compound_log.md"
+    if legacy_path.is_file():
+        legacy_entries = parse_compounds(
+            legacy_path.read_text(encoding="utf-8", errors="replace")
+        )
+        legacy_terms = [*keywords, *work_ids, *signatures]
+        legacy_rows = search(
+            legacy_entries, legacy_terms, category, critical_only
+        )
+        for entry in legacy_rows[: limit - len(rows)]:
+            rows.append(
+                {
+                    **entry,
+                    "source": "legacy",
+                    "path": legacy_path.relative_to(root).as_posix(),
+                    "work_ids": [],
+                    "defect_signatures": [],
+                }
+            )
+    return rows[:limit]
+
+
 def render_table(rows: list[dict], keywords: list[str]) -> str:
     if not rows:
         kw = " ".join(keywords) if keywords else "(filter only)"
@@ -106,23 +180,47 @@ def render_table(rows: list[dict], keywords: list[str]) -> str:
 
 
 def render_json(rows: list[dict]) -> str:
-    payload = [{k: e[k] for k in ("id", "category", "recurrence", "score", "pattern", "status")} for e in rows]
+    fields = (
+        "id",
+        "category",
+        "recurrence",
+        "score",
+        "pattern",
+        "status",
+        "source",
+        "path",
+        "work_ids",
+        "defect_signatures",
+    )
+    payload = [{key: entry.get(key) for key in fields} for entry in rows]
     return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="KEDB(Known Error Database) 검색 — 작업 시작 시 관련 COMPOUND surface")
     parser.add_argument("keywords", nargs="*", help="검색 키워드 (도구/파일/패턴). 본문에 매칭")
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--work-id", action="append", default=[], help="작업 ID 정확 매칭 (반복 가능)")
+    parser.add_argument("--signature", action="append", default=[], help="결함 시그니처/문구 매칭 (반복 가능)")
+    parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--category", help="카테고리 정확 필터 (예: process-omission)")
     parser.add_argument("--critical", action="store_true", help=f"재발>={CRITICAL_RECURRENCE} 만")
     parser.add_argument("--format", choices=["table", "json"], default="table")
     args = parser.parse_args(argv)
 
-    if not COMPOUND_LOG.exists():
-        print("KEDB: compound_log.md not found.", file=sys.stderr)
+    try:
+        rows = search_knowledge(
+            args.root.resolve(),
+            keywords=args.keywords,
+            work_ids=args.work_id,
+            signatures=args.signature,
+            category=args.category,
+            critical_only=args.critical,
+            limit=args.limit,
+        )
+    except (OSError, compound_record.CompoundRecordError) as exc:
+        print(f"KEDB: invalid compound store: {exc}", file=sys.stderr)
         return 1
-    entries = parse_compounds(COMPOUND_LOG.read_text(encoding="utf-8"))
-    rows = search(entries, args.keywords, args.category, args.critical)
     if args.format == "json":
         sys.stdout.write(render_json(rows))
     else:

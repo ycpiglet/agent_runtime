@@ -25,6 +25,7 @@ GENERATED_COMPONENTS = {
     ".wrangler", "__pycache__", "build", "dist", "node_modules", "worktrees",
 }
 GENERATED_FILENAMES = {"next-env.d.ts", "tsconfig.tsbuildinfo"}
+GENERATED_PATHS = {"agents/project/knowledge/compounds/INDEX.json"}
 
 
 @dataclass(frozen=True)
@@ -80,6 +81,7 @@ PRODUCT_SCRIPTS = {
 }
 
 HOST_PREFIXES = (
+    "agents/project/knowledge/compounds/records/",
     "agents/lead_engineer/tasks/",
     "agents/lead_engineer/reports/",
     "agents/lead_engineer/reviews/",
@@ -155,6 +157,7 @@ CORE_SCRIPT_NAMES = {
     "claude_cli_probe.py",
     "codex_subagent_bridge.py",
     "collab_log.py",
+    "compound_record.py",
     "compound_metrics.py",
     "cycle_gate.py",
     "doc_health_report.py",
@@ -286,6 +289,8 @@ def iter_repo_paths(root: Path) -> list[Path]:
 def generated_path_root(path: str | Path) -> str | None:
     """Return the generated boundary responsible for a repo-relative path."""
     normalized = _normalize(path)
+    if normalized in GENERATED_PATHS:
+        return normalized
     parts = PurePosixPath(normalized).parts
     for index, part in enumerate(parts):
         if part in GENERATED_COMPONENTS or part.endswith(".egg-info"):

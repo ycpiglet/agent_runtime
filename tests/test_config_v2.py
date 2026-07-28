@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from agent_runtime import cli
-from agent_runtime.config import CANONICAL_HOST_CONTEXT, _scalar, load_config
+from agent_runtime.config import (
+    CANONICAL_HOST_CONTEXT,
+    _scalar,
+    default_ownership,
+    load_config,
+)
 
 
 def _write(root: Path, text: str) -> None:
@@ -61,6 +66,24 @@ def test_v2_defaults_to_core_and_full_runtime_expands_in_registry_order(tmp_path
     assert load_config(tmp_path).profiles == ("core",)
     _write(tmp_path, _v2("profiles:\n  - full-runtime"))
     assert load_config(tmp_path).profiles == ("core", "web-content", "security-service")
+
+
+def test_compound_store_ownership_defaults_are_safe_without_host_config_entries():
+    assert (
+        default_ownership("agents/lead_engineer/compound_log.md")
+        == "seed_once"
+    )
+    assert (
+        default_ownership(
+            "agents/project/knowledge/compounds/records/COMPOUND-one.json"
+        )
+        == "host_owned"
+    )
+    assert (
+        default_ownership("agents/project/knowledge/compounds/INDEX.json")
+        == "generated"
+    )
+    assert default_ownership("scripts/compound_record.py") == "managed"
 
 
 def test_v2_profiles_and_capabilities_are_registry_ordered(tmp_path):
