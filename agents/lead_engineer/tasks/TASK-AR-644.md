@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-29T01:16:58+09:00
 title: Provide cross-platform start, compact, and resume continuity hooks
 status: planned
 priority: P0
@@ -53,4 +53,7 @@ tags:
 
 ## Verification
 
-- `python -m pytest tests/test_bootstrap_dev_env.py tests/test_session_resume_check.py tests/test_interrupted_run_detector.py tests/test_doctor.py tests/test_template_smoke.py -q`
+- `python -m pytest tests/test_session_continuity_hooks.py tests/test_bootstrap_dev_env.py tests/test_session_resume_check.py tests/test_interrupted_run_detector.py tests/test_doctor.py tests/test_template_smoke.py -q`
+- `python scripts/runtime_asset_usage.py --check`
+- `python scripts/verify_wheel_dotfiles.py --check`
+- `python -m pytest -q`
