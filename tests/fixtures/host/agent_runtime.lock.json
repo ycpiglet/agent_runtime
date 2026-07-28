@@ -11,7 +11,7 @@
   ],
   "installed": {
     "managed_files": {
-      ".codex/hooks.json": "sha256:0ce8889258365b8dc239053c0a02f932369c0a865a02880e8881cee65ce72080",
+      ".codex/hooks.json": "sha256:44d9bee3142a02414449976159ddca8514891e11c74851bdb1a3f91ddc14fbf9",
       ".env.example": "sha256:a91fca7b04c48cbd8a98ee6e33541fbbd6c9baa40aca90e4aa145efa70a873cd",
       ".gitattributes": "sha256:22ec718362af48d401e6717569dfcc89ec3573d553dc3f3530f4db8a1625b79b",
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
@@ -204,6 +204,7 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
+      "scripts/session_compact_hook.py": "sha256:6fd7b702a62c3ef1ab985afae365d0a7369d5a3dcac96677a45fca05ad2573ef",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
@@ -448,6 +449,7 @@
       "scripts/scribe_due.py": "managed",
       "scripts/secretary_digest.py": "managed",
       "scripts/session_baseline.py": "managed",
+      "scripts/session_compact_hook.py": "managed",
       "scripts/session_dashboard.py": "managed",
       "scripts/session_resume_check.py": "managed",
       "scripts/session_start_hook.py": "managed",
@@ -495,8 +497,8 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:fa46ce5489d81e5fe4e3ccd81917f5d004fb661ceead9569e97d53c74b9ee4b6",
-    "template_files": 242
+    "template_digest": "sha256:7686156b8bd1f838d8cf9b96ecec287b79bb457c826c14aaa48bda32a619650e",
+    "template_files": 243
   },
   "profiles": [
     "core",
