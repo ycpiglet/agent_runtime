@@ -319,6 +319,10 @@ def test_work_new_creates_worker_ready_unit_specs_from_task_input(tmp_path: Path
     assert unit_meta["parent_id"] == "TASK-AR-901"
     assert unit_meta["status"] == "worker_ready"
     assert unit_meta["verification_status"] == "pending"
+    assert task_meta["worker_model_tier"] == "worker_low"
+    assert unit_meta["model_tier"] == "worker_low"
+    parsed_unit = org_model_gate.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert parsed_unit["escalation_triggers"] == []
 
     body = unit_path.read_text(encoding="utf-8")
     for heading in (
@@ -358,6 +362,35 @@ def test_work_new_creates_worker_ready_unit_specs_from_task_input(tmp_path: Path
         encoding="utf-8"
     )
     assert "`UNIT-TASK-AR-901-001`" in classification
+
+
+def test_work_new_preserves_only_explicit_escalation_triggers(tmp_path: Path) -> None:
+    payload = _payload(include_units=True)
+    first_task = payload["tasks"][0]
+    first_task["worker_model_tier"] = "worker_low"
+    first_task["units"][0]["escalation_triggers"] = ["data_integrity"]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md"
+    )
+    task_meta = org_model_gate.parse_frontmatter(task_path.read_text(encoding="utf-8"))
+    unit_meta = org_model_gate.parse_frontmatter(unit_path.read_text(encoding="utf-8"))
+    assert task_meta["worker_model_tier"] == "worker_low"
+    assert unit_meta["model_tier"] == "worker_low"
+    assert unit_meta["escalation_triggers"] == ["data_integrity"]
 
     second = _run(tmp_path, input_path)
     assert second.returncode == 0, second.stderr or second.stdout

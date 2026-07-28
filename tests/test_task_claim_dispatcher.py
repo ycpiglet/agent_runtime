@@ -82,6 +82,46 @@ def _write_worktree(root: Path, task_id: str) -> None:
     (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
 
 
+def _write_routing_work(
+    root: Path,
+    task_id: str,
+    *,
+    worker_tier: str = "worker_low",
+    triggers: list[str] | None = None,
+) -> str:
+    task_path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        "\n".join(
+            [
+                "---",
+                f"work_id: {task_id}",
+                f"worker_model_tier: {worker_tier}",
+                "---",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    unit_id = f"UNIT-{task_id}-001"
+    unit_rel = f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    unit_path = root / unit_rel
+    unit_path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        f"unit_id: {unit_id}",
+        f"task_id: {task_id}",
+        f"model_tier: {worker_tier}",
+        "target_files:",
+        "  - scripts/routing_target.py",
+        "escalation_triggers:",
+    ]
+    lines.extend(f"  - {trigger}" for trigger in (triggers or []))
+    lines.extend(["---", ""])
+    unit_path.write_text("\n".join(lines), encoding="utf-8")
+    return unit_rel
+
+
 def test_create_claim_separates_system_identity_from_readable_display_name(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
     _write_worktree(tmp_path, "TASK-AR-246")
@@ -401,6 +441,122 @@ def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
     assert claim["model_tier"] == "worker_standard"
     assert claim["wip_slot"] == 2
     assert claim["stop_condition"] == "stop_after:UNIT-TASK-AR-344-001:no_adjacent_taskset"
+
+
+def test_create_claim_derives_low_requested_and_selected_tier_from_unit(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-646"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:00:00+09:00",
+        "--suffix",
+        "route-low",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["requested_model_tier"] == "worker_low"
+    assert claim["selected_model_tier"] == "worker_low"
+    assert claim["model_tier"] == "worker_low"
+    assert claim["provider_tier"] == "haiku"
+    assert claim["routing_status"] == "selected"
+    assert claim["routing_signals"] == []
+    assert claim["actual_model"] is None
+    assert claim["actual_model_status"] == "unverified"
+
+
+def test_create_claim_visibly_escalates_data_integrity_signal(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-647"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(
+        tmp_path, task_id, triggers=["data_integrity"]
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:01:00+09:00",
+        "--suffix",
+        "route-risk",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["requested_model_tier"] == "worker_low"
+    assert claim["selected_model_tier"] == "planner_high"
+    assert claim["model_tier"] == "planner_high"
+    assert claim["provider_tier"] == "opus"
+    assert claim["routing_status"] == "escalated"
+    assert claim["routing_signals"] == ["data_integrity"]
+    assert claim["routing_unknown_triggers"] == []
+
+
+def test_create_claim_keeps_unknown_routing_signal_visible(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(
+        tmp_path, task_id, triggers=["future_unregistered_risk"]
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:02:00+09:00",
+        "--suffix",
+        "route-unknown",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["routing_status"] == "unverified"
+    assert claim["routing_unknown_triggers"] == ["future_unregistered_risk"]
+    assert claim["actual_model"] is None
 
 
 def test_create_claim_rejects_missing_worktree(tmp_path: Path):

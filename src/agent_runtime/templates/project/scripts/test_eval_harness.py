@@ -3,6 +3,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -17,10 +19,62 @@ def _load():
 eh = _load()
 
 
+def _effective_delta_record(**overrides):
+    rec = {
+        "grade": "Low",
+        "model": "claude-haiku-4-5",
+        "tokens": 100,
+        "baseline_tokens": 400,
+        "actual_tokens_known": True,
+        "observed_model": "claude-haiku-4-5",
+        "baseline_model": "claude-opus-4-8",
+        "model_changed": True,
+        "route_status": "effective",
+        "application_status": "applied",
+        "finish_reason": "stop",
+        "outcome": "ok",
+    }
+    rec.update(overrides)
+    return rec
+
+
+def _golden_records():
+    committed = eh.load_golden()
+    if committed:
+        return committed
+    # The source-template test is also run before a host is initialized, where
+    # the host-local golden.jsonl does not exist yet. Keep that direct test
+    # deterministic without changing the installed-host lookup contract.
+    rows = [
+        ("Low", "stop", "ok", "ok"),
+        ("Low", "length", "ok", "ok"),
+        ("Medium", "stop", "completed", "ok"),
+        ("Medium", "length", "needs-changes", "escalate"),
+        ("High", "error", "ok", "escalate"),
+        ("High", "stop", "rejected", "escalate"),
+        ("High", "stop", "ok", "ok"),
+        ("Critical", "cap", "ok", "escalate"),
+        ("Critical", "stop", "reopen", "escalate"),
+        ("Critical", "stop", "ok", "ok"),
+    ]
+    return [
+        {
+            "task_id": f"G{index}",
+            "grade": grade,
+            "model": "sonnet",
+            "tokens": 1,
+            "finish_reason": finish,
+            "outcome": outcome,
+            "expected": expected,
+        }
+        for index, (grade, finish, outcome, expected) in enumerate(rows, start=1)
+    ]
+
+
 # ---- objective judge: golden set 회귀 가드 ----
 
 def test_judge_matches_golden():
-    golden = eh.load_golden()
+    golden = _golden_records()
     assert len(golden) >= 10
     for rec in golden:
         assert eh.judge_outcome(rec) == rec["expected"], f"{rec['task_id']} mismatch"
@@ -103,7 +157,7 @@ def test_cli_record_writes_routing_metadata(tmp_path, capsys):
 # ---- report (scoreboard) ----
 
 def test_report_aggregates_escalation():
-    recs = eh.load_golden()
+    recs = _golden_records()
     rep = eh.report(recs)
     assert rep["total"] == len(recs)
     # High 등급에 escalate 2건(G5·G6) 존재 → escalation_rate > 0
@@ -117,32 +171,89 @@ def test_report_opus_share():
     assert eh.report(recs)["opus_share"] == 0.5
 
 
-def test_report_includes_cost_delta_when_baseline_tokens_present():
+def test_report_includes_token_delta_only_with_effective_model_evidence():
     recs = [
-        {"grade": "Low", "model": "haiku", "tokens": 100, "baseline_tokens": 400,
-         "finish_reason": "stop", "outcome": "ok"},
-        {"grade": "High", "model": "sonnet", "tokens": 250, "baseline_tokens": 500,
-         "finish_reason": "stop", "outcome": "ok"},
+        _effective_delta_record(),
+        _effective_delta_record(
+            grade="High",
+            model="claude-sonnet-4-6",
+            observed_model="claude-sonnet-4-6",
+            tokens=250,
+            baseline_tokens=500,
+        ),
     ]
-    delta = eh.report(recs)["cost_delta"]
+    report = eh.report(recs)
+    delta = report["token_delta"]
     assert delta["actual_tokens"] == 350
     assert delta["baseline_tokens"] == 900
     assert delta["saved_tokens"] == 550
     assert delta["saved_rate"] == 0.611
+    assert delta["monetary_claim"] is False
+    assert report["cost_delta"]["deprecated_alias"] is True
 
 
-def test_cost_delta_excludes_unknown_zero_actual_tokens():
+def test_token_delta_excludes_unknown_zero_actual_tokens():
     recs = [
-        {"grade": "Low", "model": "haiku", "tokens": 0, "baseline_tokens": 400,
-         "actual_tokens_known": False, "finish_reason": "error", "outcome": "gate-error"},
-        {"grade": "High", "model": "sonnet", "tokens": 250, "baseline_tokens": 500,
-         "finish_reason": "stop", "outcome": "ok"},
+        _effective_delta_record(
+            tokens=0,
+            actual_tokens_known=False,
+            finish_reason="error",
+            outcome="gate-error",
+        ),
+        _effective_delta_record(tokens=250, baseline_tokens=500),
     ]
-    delta = eh.report(recs)["cost_delta"]
+    delta = eh.report(recs)["token_delta"]
     assert delta["actual_tokens"] == 250
     assert delta["baseline_tokens"] == 500
     assert delta["saved_tokens"] == 250
     assert delta["saved_rate"] == 0.5
+    assert delta["exclusion_reasons"]["actual_token_usage_unavailable"] == 1
+
+
+def test_equivalent_route_cannot_contribute_to_token_delta():
+    rec = _effective_delta_record(
+        model="gpt-5.2-codex",
+        observed_model="gpt-5.2-codex",
+        baseline_model="gpt-5.2-codex",
+        model_changed=False,
+        route_status="ineffective_equivalent",
+    )
+    delta = eh.report([rec])["token_delta"]
+    assert delta["eligible_records"] == 0
+    assert delta["saved_tokens"] == 0
+    assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
+
+
+def test_monetary_delta_requires_comparable_same_currency_billed_cost():
+    verified = _effective_delta_record(
+        billed_cost=0.2,
+        currency="USD",
+        baseline_billed_cost=0.5,
+        baseline_currency="usd",
+    )
+    mismatch = _effective_delta_record(
+        billed_cost=0.2,
+        currency="USD",
+        baseline_billed_cost=0.5,
+        baseline_currency="EUR",
+    )
+    delta = eh.report([verified, mismatch])["monetary_delta"]
+    assert delta["verified"] is True
+    assert delta["eligible_records"] == 1
+    assert delta["by_currency"]["USD"]["saved_billed_cost"] == 0.3
+    assert delta["exclusion_reasons"]["currency_mismatch"] == 1
+
+
+def test_record_outcome_rejects_cost_without_currency(tmp_path):
+    with pytest.raises(ValueError, match="currency is required"):
+        eh.record_outcome(
+            "TASK-X",
+            "Low",
+            "claude-haiku-4-5",
+            100,
+            billed_cost=0.2,
+            path=tmp_path / "eval.jsonl",
+        )
 
 
 def test_report_includes_collaboration_verdict_delta():

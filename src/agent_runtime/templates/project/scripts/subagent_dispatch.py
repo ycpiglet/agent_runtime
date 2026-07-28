@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Subagent dispatch helper (TASK-116).
 
-Standardizes Claude Code Agent tool invocation for 5 subagent roles.
+Standardizes session-layer Agent tool invocation for 6 subagent roles.
 TASK-109/113 used ad-hoc subagent calls; this module formalizes the
 pattern: pick a role, render a deterministic prompt, optionally emit a
-`subagent_call` message and an event log line. The actual Agent tool
-invocation stays in the parent Claude conversation — this helper produces
-the standardized prompt + audit trail so different sessions produce the
-same dispatch.
+`subagent_call` message and an event log line. The actual provider/native
+subagent invocation stays in the parent session — this helper produces the
+standardized prompt + audit trail so different execution surfaces produce
+the same observable dispatch contract.
 
-5 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+6 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+  - explorer     — read-only repository inspection and bounded evidence lookup
   - implementer  — write the code/files for the task spec
   - reviewer     — check implementation vs spec, surface issues
   - auditor      — independent audit (AGENTS.md §6.4): pass / 보류 / 재검토 필요
@@ -75,16 +76,53 @@ def resolve_model_decision(
     )
 
 
-def routing_event_fields(decision: dict | None) -> dict:
-    if not decision:
-        return {}
-    return {
-        "routing_grade": decision["grade"],
-        "policy_model": decision["policy_tier"],
-        "selected_model": decision["selected_tier"],
-        "routing_signals": list(decision.get("signals") or []),
-        "routing_reason": decision.get("reason", ""),
+def routing_event_fields(
+    decision: dict | None,
+    *,
+    dispatch_id: str | None = None,
+    provider: str | None = None,
+    route: dict | None = None,
+    preflight: dict | None = None,
+) -> dict:
+    """Return the common observational envelope for a generic dispatch."""
+    route = dict(route or {})
+    preflight = dict(preflight or {})
+    fields = {
+        "dispatch_id": dispatch_id,
+        "provider": route.get("provider") or provider or "unverified",
+        "execution_surface": route.get("execution_surface") or "parent_session_tool",
+        "requested_tier": route.get("requested_tier"),
+        "selected_tier": route.get("selected_tier"),
+        "provider_tier": route.get("provider_tier"),
+        "resolved_model": route.get("resolved_model"),
+        "model_source": route.get("model_source") or "unverified",
+        "reasoning_effort": route.get("reasoning_effort"),
+        "route_status": route.get("route_status") or "unverified",
+        "equivalence_status": route.get("equivalence_status") or "unverified",
+        "application_status": route.get("application_status") or "unverified",
+        "model_observation_status": "unverified",
+        "token_usage_status": "unavailable",
+        "tokens_in": None,
+        "tokens_out": None,
+        "latency_status": "unavailable",
+        "latency_ms": None,
+        "billed_cost_status": "unavailable",
+        "billed_cost": None,
+        "currency": None,
+        "deterministic_preflight": preflight.get("status", "not_recorded"),
+        "deterministic_evidence": list(preflight.get("evidence") or []),
     }
+    if decision:
+        fields.update(
+            {
+                "routing_grade": decision["grade"],
+                "policy_model": decision["policy_tier"],
+                "selected_model": decision["selected_tier"],
+                "routing_signals": list(decision.get("signals") or []),
+                "routing_reason": decision.get("reason", ""),
+            }
+        )
+    return fields
 
 
 # ---------- subagent call cap (TASK-143, RETRO §5 / STAGE-7 §7) ----------
@@ -135,6 +173,21 @@ class SubagentRole:
 
 
 SUBAGENT_ROLES: dict[str, SubagentRole] = {
+    "explorer": SubagentRole(
+        role_id="explorer",
+        description="Read-only repository inspection and bounded evidence lookup.",
+        system_prompt=(
+            "You are the EXPLORER subagent. Inspect the repository read-only. "
+            "Use bounded searches and targeted file reads, cite paths and line "
+            "numbers, and return evidence. Do not edit files, run destructive "
+            "commands, or broaden the requested scope."
+        ),
+        output_contract=(
+            "Produce: concise findings, exact evidence paths/lines, searches "
+            "attempted, and any remaining uncertainty. State explicitly that "
+            "no files were changed."
+        ),
+    ),
     "implementer": SubagentRole(
         role_id="implementer",
         description="Writes the code, tests, or docs that satisfy the task spec.",
@@ -337,15 +390,21 @@ def render_prompt(
     model: str | None = None,
     changed_files: list[str] | None = None,
     diff_lines: int = 0,
+    tier_route: dict | None = None,
+    provider_route: dict | None = None,
 ) -> str:
     """Render the full dispatch prompt the parent invokes Agent tool with."""
     role = get_role(role_id)
-    routing = resolve_model_decision(
-        model,
-        grade=grade,
-        intent=intent,
-        changed_files=changed_files,
-        diff_lines=diff_lines,
+    routing = (
+        None
+        if provider_route
+        else resolve_model_decision(
+            model,
+            grade=grade,
+            intent=intent,
+            changed_files=changed_files,
+            diff_lines=diff_lines,
+        )
     )
     parts: list[str] = [
         f"# Subagent dispatch — role={role.role_id} task={task_id}",
@@ -360,7 +419,37 @@ def render_prompt(
         role.output_contract,
         "",
     ]
-    if routing:
+    if provider_route:
+        tier = dict(tier_route or {})
+        route = dict(provider_route)
+        triggers = ",".join(tier.get("escalation_triggers") or []) or "-"
+        parts.extend([
+            "## Model routing",
+            (
+                f"provider={route.get('provider') or 'unverified'} "
+                f"surface={route.get('execution_surface') or 'unverified'}"
+            ),
+            (
+                f"requested_pm_tier={route.get('requested_tier')} "
+                f"selected_pm_tier={route.get('selected_tier')} "
+                f"provider_tier={route.get('provider_tier')}"
+            ),
+            (
+                f"resolved_request_model={route.get('resolved_model')} "
+                f"reasoning_effort={route.get('reasoning_effort')} "
+                f"route_status={route.get('route_status')}"
+            ),
+            (
+                f"escalation_triggers={triggers} "
+                f"reason={tier.get('reason') or 'provider-aware route'}"
+            ),
+            (
+                "The resolved request model is configuration intent; the "
+                "observed model remains unverified until completion."
+            ),
+            "",
+        ])
+    elif routing:
         signals = ",".join(routing["signals"]) or "-"
         parts.extend([
             "## Model routing",
@@ -411,6 +500,8 @@ def emit_call_message(
     evidence: list[str] | None = None,
     next_items: list[str] | None = None,
     routing: dict | None = None,
+    tier_route: dict | None = None,
+    provider_route: dict | None = None,
     dry_run: bool = False,
 ) -> Path:
     """Write a subagent_call message to agents/messages/inbox/."""
@@ -443,7 +534,30 @@ def emit_call_message(
             front.append(f"  - {item}")
     else:
         front.append("next: []")
-    if routing:
+    if provider_route:
+        route = dict(provider_route)
+        tier = dict(tier_route or {})
+        front.append(f"provider: {route.get('provider') or 'unverified'}")
+        front.append(
+            f"execution_surface: {route.get('execution_surface') or 'unverified'}"
+        )
+        front.append(
+            f"requested_model_tier: {route.get('requested_tier') or 'unverified'}"
+        )
+        front.append(
+            f"selected_model_tier: {route.get('selected_tier') or 'unverified'}"
+        )
+        front.append(
+            f"resolved_model: {route.get('resolved_model') or 'unverified'}"
+        )
+        front.append(
+            f"routing_status: {route.get('route_status') or 'unverified'}"
+        )
+        triggers = ", ".join(
+            str(item) for item in (tier.get("escalation_triggers") or [])
+        )
+        front.append(f"escalation_triggers: [{triggers}]")
+    elif routing:
         front.append(f"routing_grade: {routing['grade']}")
         front.append(f"policy_model: {routing['policy_tier']}")
         front.append(f"selected_model: {routing['selected_tier']}")
@@ -572,6 +686,42 @@ def _cmd_for_worker(args: argparse.Namespace) -> int:
 
 
 def _cmd_dispatch(args: argparse.Namespace) -> int:
+    preflight = model_routing.deterministic_preflight(
+        args.intent,
+        status=args.preflight_status,
+        evidence=args.preflight_evidence,
+    )
+    if args.emit_call and not preflight["allow_dispatch"]:
+        if preflight["status"] == "completed_sufficient":
+            print(
+                "[dispatch] deterministic work completed sufficiently; "
+                "no model call emitted"
+            )
+            return 0
+        print(
+            f"ERROR: model dispatch blocked: {preflight['reason']}",
+            file=sys.stderr,
+        )
+        return 2
+    routing_decision = resolve_model_decision(
+        args.model,
+        grade=args.grade,
+        intent=args.intent,
+        changed_files=args.changed_file,
+        diff_lines=args.diff_lines,
+    )
+    role_route = model_routing.resolve_subagent_tier(
+        args.role,
+        requested_tier=args.pm_tier,
+        escalation_triggers=args.escalation_trigger,
+    )
+    provider_route = None
+    if args.provider:
+        provider_route = model_routing.resolve_provider_route(
+            args.provider,
+            role_route["selected_tier"],
+            requested_tier=role_route["requested_tier"],
+        )
     try:
         prompt = render_prompt(
             role_id=args.role,
@@ -583,6 +733,8 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             model=args.model,
             changed_files=args.changed_file,
             diff_lines=args.diff_lines,
+            tier_route=role_route,
+            provider_route=provider_route,
         )
     except KeyError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
@@ -612,21 +764,10 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             intent=args.intent,
             sender=args.sender,
             evidence=args.evidence or [],
-            routing=resolve_model_decision(
-                args.model,
-                grade=args.grade,
-                intent=args.intent,
-                changed_files=args.changed_file,
-                diff_lines=args.diff_lines,
-            ),
+            routing=routing_decision,
+            tier_route=role_route,
+            provider_route=provider_route,
             dry_run=args.dry_run,
-        )
-        routing_decision = resolve_model_decision(
-            args.model,
-            grade=args.grade,
-            intent=args.intent,
-            changed_files=args.changed_file,
-            diff_lines=args.diff_lines,
         )
         evt_path = emit_event(
             role_id=args.role,
@@ -635,7 +776,13 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             extra={
                 "message_id": msg_path.stem,
                 "intent": args.intent,
-                **routing_event_fields(routing_decision),
+                **routing_event_fields(
+                    routing_decision,
+                    dispatch_id=msg_path.stem,
+                    provider=args.provider,
+                    route=provider_route,
+                    preflight=preflight,
+                ),
             },
             dry_run=args.dry_run,
         )
@@ -653,7 +800,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--role",
         choices=list_roles(),
-        help="Subagent role to dispatch (5 standard roles).",
+        help="Subagent role to dispatch (6 standard roles).",
     )
     p.add_argument("--task-id", help="Related TASK id, e.g. TASK-116.")
     p.add_argument("--intent", help="One-line dispatch intent.")
@@ -665,6 +812,33 @@ def build_parser() -> argparse.ArgumentParser:
         "--model",
         default="auto",
         help="Agent tool model tier: auto, haiku, sonnet, or opus (default: auto).",
+    )
+    p.add_argument(
+        "--provider",
+        default="",
+        help="Execution provider/surface for auditable resolution (for example native-codex)",
+    )
+    p.add_argument(
+        "--pm-tier",
+        choices=sorted(model_routing.ALLOWED_PM_TIERS),
+        help="Requested provider-neutral PM tier; role default when omitted",
+    )
+    p.add_argument(
+        "--escalation-trigger",
+        action="append",
+        default=[],
+        help="Registered task/unit risk signal used for PM-tier escalation",
+    )
+    p.add_argument(
+        "--preflight-status",
+        choices=sorted(model_routing.PREFLIGHT_STATUSES),
+        help="Deterministic-first result for lookup-only dispatch",
+    )
+    p.add_argument(
+        "--preflight-evidence",
+        action="append",
+        default=[],
+        help="Bounded deterministic attempt evidence (repeatable)",
     )
     p.add_argument(
         "--grade",
@@ -705,7 +879,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--list-roles",
         action="store_true",
-        help="List the 5 standard subagent roles.",
+        help="List the 6 standard subagent roles.",
     )
     p.add_argument(
         "--for-worker",

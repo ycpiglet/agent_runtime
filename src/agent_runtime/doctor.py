@@ -33,6 +33,7 @@ class DoctorPlan:
     findings: tuple[DoctorFinding, ...]
     config_loaded: bool = False
     scribe: dict[str, object] | None = None
+    routing: dict[str, object] | None = None
 
     @property
     def blocker_count(self) -> int:
@@ -55,6 +56,7 @@ REQUIRED_TEMPLATE_FILES = (
     "scripts/check_messages.py",
     "scripts/continuity_contract_gate.py",
     "scripts/message_queue.py",
+    "scripts/model_routing.py",
     "scripts/orchestrator_safety_gate.py",
     "scripts/parallel_worktree_gate.py",
     "scripts/pipeline.py",
@@ -645,6 +647,109 @@ def _run_lock_check(root: Path, findings: list[DoctorFinding], cfg_ok: bool) -> 
             )
 
 
+def _routing_matrix_plan(
+    root: Path,
+    findings: list[DoctorFinding],
+) -> dict[str, object]:
+    """Read configured routing matrices without importing a provider or probing it."""
+    relative = "scripts/model_routing.py"
+    path = root / relative
+    report: dict[str, object] = {
+        "status": "unavailable",
+        "source": relative,
+        "live_probe_performed": False,
+        "availability": "configured_unverified",
+        "providers": {},
+    }
+    if not path.is_file():
+        _findings_append(
+            findings,
+            "warning",
+            area="model-routing",
+            path=relative,
+            kind="routing-module-missing",
+            detail="configured routing matrix cannot be inspected",
+        )
+        return report
+    try:
+        spec = importlib.util.spec_from_file_location(
+            f"_agent_runtime_host_model_routing_{abs(hash(path))}",
+            path,
+        )
+        if spec is None or spec.loader is None:
+            raise ImportError("unable to create module spec")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        matrix_fn = getattr(module, "provider_routing_matrix")
+    except Exception as exc:
+        _findings_append(
+            findings,
+            "warning",
+            area="model-routing",
+            path=relative,
+            kind="routing-matrix-load-failed",
+            detail=str(exc),
+        )
+        return report
+
+    providers: dict[str, object] = {}
+    for label, provider_name in (
+        ("claude_agent", "claude-agent"),
+        ("codex_agent", "codex-agent"),
+        ("codex_api", "codex"),
+        ("native_codex", "native-codex"),
+    ):
+        try:
+            matrix = matrix_fn(provider_name)
+        except Exception as exc:
+            matrix = {
+                "provider": provider_name,
+                "status": "unavailable",
+                "rows": [],
+                "equivalence_groups": [],
+                "error": str(exc),
+            }
+        providers[label] = matrix
+        groups = list(matrix.get("equivalence_groups") or [])
+        if groups:
+            for group in groups:
+                tiers = ",".join(str(item) for item in group.get("tiers") or [])
+                _findings_append(
+                    findings,
+                    "warning",
+                    area="model-routing",
+                    path=relative,
+                    kind="tier-mapping-equivalent",
+                    detail=(
+                        f"{provider_name}: tiers={tiers} resolve to the same model; "
+                        "economic delta is ineligible until distinct execution is observed"
+                    ),
+                )
+        elif matrix.get("status") == "configured_unverified":
+            _findings_append(
+                findings,
+                "info",
+                area="model-routing",
+                path=relative,
+                kind="routing-matrix-distinct",
+                detail=(
+                    f"{provider_name}: configured routes are distinct; "
+                    "runtime availability remains unverified"
+                ),
+            )
+        else:
+            _findings_append(
+                findings,
+                "warning",
+                area="model-routing",
+                path=relative,
+                kind="routing-provider-unsupported",
+                detail=f"{provider_name}: routing matrix unavailable",
+            )
+    report.update({"status": "configured_unverified", "providers": providers})
+    return report
+
+
 def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     findings: list[DoctorFinding] = []
     root = root.resolve()
@@ -831,6 +936,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
                 detail=str(exc),
             )
 
+    routing_report = _routing_matrix_plan(root, findings)
     _run_lock_check(root, findings, cfg_ok)
     _run_sync_check(root, findings)
 
@@ -893,6 +999,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         findings=tuple(findings),
         config_loaded=cfg_ok,
         scribe=scribe_report,
+        routing=routing_report,
     ), findings
 
 
@@ -1024,6 +1131,8 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
     }
     if plan.scribe is not None:
         payload["scribe"] = plan.scribe
+    if plan.routing is not None:
+        payload["routing"] = plan.routing
     if actions is not None:
         payload["repair_actions"] = actions
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)

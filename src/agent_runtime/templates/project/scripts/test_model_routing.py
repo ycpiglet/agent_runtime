@@ -72,6 +72,67 @@ def test_critical_raw_provider_model_name_respects_floor():
     assert "critical_floor" in decision["signals"]
 
 
+def test_data_integrity_escalates_worker_pm_tier():
+    decision = mr.resolve_work_item_tier(
+        {"worker_model_tier": "worker_low"},
+        {"model_tier": "worker_low", "escalation_triggers": ["data_integrity"]},
+    )
+    assert decision["selected_tier"] == "planner_high"
+    assert decision["unknown_triggers"] == []
+
+
+def test_explorer_defaults_to_worker_low():
+    decision = mr.resolve_subagent_tier("explorer")
+    assert decision["requested_tier"] == "worker_low"
+    assert decision["selected_tier"] == "worker_low"
+
+
+def test_lookup_preflight_blocks_without_bounded_evidence():
+    blocked = mr.deterministic_preflight("find and list provider files")
+    allowed = mr.deterministic_preflight(
+        "find and list provider files",
+        status="attempted_insufficient",
+        evidence=["rg returned only compatibility aliases"],
+    )
+    complete = mr.deterministic_preflight(
+        "find and list provider files",
+        status="completed_sufficient",
+    )
+    assert blocked["allow_dispatch"] is False
+    assert blocked["status"] == "required_unresolved"
+    assert allowed["allow_dispatch"] is True
+    assert complete["dispatch_required"] is False
+
+
+def test_codex_equivalent_tiers_are_economically_ineligible(monkeypatch):
+    for name in (
+        "CODEX_AGENT_HAIKU_MODEL",
+        "CODEX_AGENT_SONNET_MODEL",
+        "CODEX_AGENT_OPUS_MODEL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    route = mr.resolve_provider_route(
+        "codex-agent",
+        "planner_high",
+        requested_tier="worker_low",
+    )
+    assert route["model_changed"] is False
+    assert route["route_status"] == "ineffective_equivalent"
+    assert route["economic_claim_status"] == "ineligible_equivalent"
+    assert route["observed_model"] is None
+
+
+def test_native_codex_route_carries_exact_model_and_reasoning(monkeypatch):
+    monkeypatch.delenv("CODEX_NATIVE_WORKER_LOW_MODEL", raising=False)
+    monkeypatch.delenv("CODEX_NATIVE_WORKER_LOW_REASONING", raising=False)
+    route = mr.resolve_provider_route("native-codex", "worker_low")
+    assert route["execution_surface"] == "native_subagent_spawn"
+    assert route["resolved_model"] == "gpt-5.6-terra"
+    assert route["reasoning_effort"] == "low"
+    assert route["application_status"] == "configured_unverified"
+    assert route["model_observation_status"] == "unverified"
+
+
 def test_provider_env_resolves_claude_agent_tier(monkeypatch):
     monkeypatch.setenv("CLAUDE_AGENT_SONNET_MODEL", "claude-sonnet-test")
     env = mr.provider_env("claude-agent", "sonnet")

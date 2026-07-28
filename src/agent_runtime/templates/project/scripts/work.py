@@ -609,7 +609,7 @@ def _render_task(
         "created_by": payload["created_by"],
         "summary": task.get("summary", task["goal"]),
         "planner_model_tier": task.get("planner_model_tier", taskset.get("planner_model_tier", "planner_high")),
-        "worker_model_tier": task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_standard")),
+        "worker_model_tier": task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_low")),
         "reviewer_model_tier": task.get("reviewer_model_tier", taskset.get("reviewer_model_tier", "reviewer_standard")),
         "tags": tags,
         "acceptance": acceptance,
@@ -645,7 +645,7 @@ def _render_unit(
     task_id = str(task["display_id"])
     unit_id = str(unit["unit_id"])
     owner = unit.get("owner", task.get("owner", taskset.get("owner", initiative["owner"])))
-    model_tier = unit.get("model_tier", task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_standard")))
+    model_tier = unit.get("model_tier", task.get("worker_model_tier", taskset.get("worker_model_tier", "worker_low")))
     status = unit.get("status", "worker_ready")
     meta = {
         "schema_version": WORK_ITEM_SCHEMA,
@@ -669,7 +669,7 @@ def _render_unit(
         "summary": unit["title"],
         "horizon": unit.get("horizon", "unit"),
         "model_tier": model_tier,
-        "escalation_triggers": _list_value(unit.get("escalation_triggers")) or ["ambiguity", "data_integrity"],
+        "escalation_triggers": _list_value(unit.get("escalation_triggers")),
         "context": unit["context"],
         "inputs": _text_lines(unit.get("inputs")),
         "target_files": _text_lines(unit.get("target_files")),

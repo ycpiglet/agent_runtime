@@ -1,7 +1,7 @@
 """Unit tests for subagent_dispatch (TASK-116).
 
 Covers:
-  - 5 standard roles registered
+  - 6 standard roles registered
   - render_prompt includes role-specific system prompt + output contract
   - emit_call_message produces a frontmatter that passes check_messages.py
   - emit_reply_message links via in_reply_to and uses type=subagent_reply
@@ -23,14 +23,21 @@ import subagent_dispatch as sd  # noqa: E402
 import check_messages as cm  # noqa: E402
 
 
-def test_five_roles_registered():
+def test_six_roles_registered():
     assert set(sd.list_roles()) == {
+        "explorer",
         "implementer",
         "reviewer",
         "auditor",
         "strategist",
         "skeptic",
     }
+
+
+def test_explorer_role_is_read_only():
+    role = sd.get_role("explorer")
+    assert "Read-only" in role.description
+    assert "Do not edit files" in role.system_prompt
 
 
 def test_get_role_unknown_raises():
@@ -74,6 +81,27 @@ def test_render_prompt_defaults_to_auto_model_routing():
     assert "## Model routing" in prompt
     assert "Agent tool model: sonnet" in prompt
     assert "policy_tier=sonnet" in prompt
+
+
+def test_render_prompt_uses_provider_aware_route_without_legacy_tier_conflict():
+    tier = sd.model_routing.resolve_subagent_tier("implementer")
+    route = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    prompt = sd.render_prompt(
+        role_id="implementer",
+        task_id="TASK-646",
+        intent="implement one bounded change",
+        tier_route=tier,
+        provider_route=route,
+    )
+    assert "requested_pm_tier=worker_low" in prompt
+    assert "selected_pm_tier=worker_low" in prompt
+    assert "resolved_request_model=gpt-5.6-terra" in prompt
+    assert "reasoning_effort=low" in prompt
+    assert "Agent tool model: sonnet" not in prompt
 
 
 def test_render_prompt_skeptic_has_severity():
@@ -231,6 +259,80 @@ def test_cli_dispatch_dry_run_accepts_auto_model(capsys, tmp_path, monkeypatch):
     out = capsys.readouterr().out
     assert "Agent tool model: opus" in out
     assert "policy_tier=sonnet" in out
+
+
+def test_cli_blocks_lookup_dispatch_without_deterministic_preflight(
+    capsys, tmp_path, monkeypatch
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    rc = sd.main(
+        [
+            "--role", "explorer",
+            "--task-id", "TASK-646",
+            "--intent", "find and list routing files",
+            "--emit-call",
+        ]
+    )
+    assert rc == 2
+    assert "deterministic preflight" in capsys.readouterr().err
+    assert not (tmp_path / "inbox").exists()
+
+
+def test_cli_emits_lookup_after_insufficient_deterministic_evidence(
+    capsys, tmp_path, monkeypatch
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    rc = sd.main(
+        [
+            "--role", "explorer",
+            "--task-id", "TASK-646",
+            "--intent", "find and list routing files",
+            "--provider", "native-codex",
+            "--preflight-status", "attempted_insufficient",
+            "--preflight-evidence", "rg found only compatibility aliases",
+            "--emit-call",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err
+    output = captured.out
+    assert "selected_pm_tier=worker_low" in output
+    assert "resolved_request_model=gpt-5.6-terra" in output
+    record = json.loads(
+        next((tmp_path / "events").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .strip()
+    )
+    assert record["provider"] == "native-codex"
+    assert record["execution_surface"] == "native_subagent_spawn"
+    assert record["requested_tier"] == "worker_low"
+    assert record["selected_tier"] == "worker_low"
+    assert record["resolved_model"] == "gpt-5.6-terra"
+    assert record["deterministic_preflight"] == "attempted_insufficient"
+    assert record["model_observation_status"] == "unverified"
+    assert record["token_usage_status"] == "unavailable"
+    assert record["billed_cost_status"] == "unavailable"
+
+
+def test_cli_completed_deterministic_lookup_emits_no_call(
+    capsys, tmp_path, monkeypatch
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    rc = sd.main(
+        [
+            "--role", "explorer",
+            "--task-id", "TASK-646",
+            "--intent", "find and list routing files",
+            "--preflight-status", "completed_sufficient",
+            "--emit-call",
+        ]
+    )
+    assert rc == 0
+    assert "no model call emitted" in capsys.readouterr().out
+    assert not (tmp_path / "inbox").exists()
 
 
 def test_emit_event_records_full_routing_metadata(tmp_path, monkeypatch):
