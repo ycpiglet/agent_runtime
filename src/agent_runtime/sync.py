@@ -53,7 +53,10 @@ def _template_files(template_root: Path, profiles: tuple[str, ...] | None = None
         return []
     # Test and explicit override roots remain plain file fixtures; the packaged
     # root is fail-closed because it always carries the manifest.
-    source = selected_paths(template_root, profiles) if profiles is not None and (template_root / "agents/project/RUNTIME-PROFILE-MANIFEST.json").exists() else tuple(template_root.rglob("*"))
+    manifest = template_root / "agents/project/RUNTIME-PROFILE-MANIFEST.json"
+    if profiles is not None and not manifest.exists() and template_root.resolve() == default_template_root().resolve():
+        raise ValueError("packaged template profile manifest is missing")
+    source = selected_paths(template_root, profiles) if profiles is not None and manifest.exists() else tuple(template_root.rglob("*"))
     return sorted(
         (path for path in source if path.is_file() and not _is_runtime_artifact(path)),
         key=lambda path: path.relative_to(template_root).as_posix().lower(),
@@ -212,7 +215,7 @@ def reconcile_json(plan: SyncPlan) -> str:
     payload = {"schema": "agent-runtime-sync-reconcile/v1", "root": str(plan.root), "project": plan.config.project,
         "profiles": list(plan.config.profiles), "capabilities": list(plan.config.capabilities),
         "upstream": {"package": plan.config.upstream_package, "remote_url": plan.config.upstream_remote_url, "ref": plan.config.upstream_ref},
-        "template_root": str(plan.template_root), "template_digest": template_digest(plan.template_root)[0], "lock_schema": plan.lock_schema,
+        "template_root": str(plan.template_root), "template_digest": template_digest(plan.template_root, plan.config.profiles)[0], "lock_schema": plan.lock_schema,
         "lock_migration": {"none": "new", "agent-runtime-lock/v1": "migrate-v1", "agent-runtime-lock/v2": "current"}.get(plan.lock_schema, "unknown"),
         "actions": [{"path": a.path, "ownership": a.ownership, "action": a.action, "reason": a.reason, "safety": a.safety} for a in actions],
         "counts": {"safe_updates": len(plan.updates), "conflicts": len(plan.conflicts), "preserved": len(plan.preserved), "excluded": len(plan.excluded)}}

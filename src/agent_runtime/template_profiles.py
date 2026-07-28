@@ -18,6 +18,13 @@ def load_manifest(template_root: Path) -> dict:
         raise ValueError(f"invalid template profile manifest: {exc}") from exc
     if data.get("schema") != SCHEMA or not isinstance(data.get("profiles"), dict):
         raise ValueError("invalid template profile manifest schema")
+    for name, rules in data["profiles"].items():
+        if not isinstance(name, str) or not isinstance(rules, dict):
+            raise ValueError("invalid template profile rule")
+        for key in ("include", "exclude"):
+            values = rules.get(key)
+            if not isinstance(values, list) or not all(isinstance(value, str) and value for value in values):
+                raise ValueError(f"invalid template profile {key}")
     return data
 
 
@@ -31,6 +38,9 @@ def selected_paths(template_root: Path, profiles: tuple[str, ...]) -> tuple[Path
     selected: set[Path] = set()
     for profile in requested:
         rules = declared[profile]
+        for pattern in [*rules["include"], *rules["exclude"]]:
+            if not any(fnmatch.fnmatch(path.relative_to(template_root).as_posix(), pattern) for path in files):
+                raise ValueError(f"unmatched template profile pattern: {pattern}")
         for path in files:
             rel = path.relative_to(template_root).as_posix()
             if any(fnmatch.fnmatch(rel, pattern) for pattern in rules.get("include", [])):

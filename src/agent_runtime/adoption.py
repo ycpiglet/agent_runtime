@@ -50,7 +50,10 @@ def _template_root() -> Path:
 
 def _template_files(profiles: tuple[str, ...] | None = None) -> dict[str, Path]:
     root = _template_root()
-    if profiles is not None and (root / "agents/project/RUNTIME-PROFILE-MANIFEST.json").exists():
+    manifest = root / "agents/project/RUNTIME-PROFILE-MANIFEST.json"
+    if profiles is not None and not manifest.exists() and root.resolve() == (Path(__file__).resolve().parent / "templates" / "project").resolve():
+        raise ValueError("packaged template profile manifest is missing")
+    if profiles is not None and manifest.exists():
         return {path.relative_to(root).as_posix(): path for path in selected_paths(root, profiles) if not is_generated_path(path.relative_to(root))}
     files: dict[str, Path] = {}
     for current, directories, names in os.walk(root, followlinks=False):
