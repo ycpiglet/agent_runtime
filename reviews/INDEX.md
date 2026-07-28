@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T04:42:09+09:00
-record_count: 973
+generated_at: 2026-07-29T04:53:35+09:00
+record_count: 974
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `973` review and evidence records under `reviews/`.
+- Summary: indexed `974` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `973` files |
+| Reviews covered | pass | `974` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -592,6 +592,7 @@ record_count: 973
 | `reviews/REVIEW-2026-07-28-task-ar-643-w0-t3-replan.md` | `REVIEW-2026-07-28-task-ar-643-w0-t3-replan` | md | record | pass | TASK-AR-643 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration.md` | `REVIEW-2026-07-28-taskset-ar-v080-adoption-enforcement-registration` | md | record | pass | v0.8 Adoption and Enforcement Registration |
 | `reviews/REVIEW-2026-07-29-task-ar-644-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-644-w0-t3-replan` | md | record | pass | TASK-AR-644 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-645-unit-002-t3-replan.md` | `REVIEW-2026-07-29-task-ar-645-unit-002-t3-replan` | md | record | pass | TASK-AR-645 UNIT-002 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-645-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-645-w0-t3-replan` | md | record | pass | TASK-AR-645 W0 T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

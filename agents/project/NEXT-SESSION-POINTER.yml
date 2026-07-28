@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T04:42:09+09:00
-updated_by: le-20260729-0343-kst-645001
+updated_at: 2026-07-29T04:52:04+09:00
+updated_by: codex-root-v080-planner
 current_state:
-  summary: "UNIT-TASK-AR-645-001 is integrated and closed; UNIT-TASK-AR-645-002 must begin from a fresh W0/T2 recheck on main."
+  summary: "UNIT-TASK-AR-645-001 is closed; UNIT-TASK-AR-645-002 has a failure-first T3 replan and refreshed assumptions pending integration."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 6
+  step_index: 0
   step_total: 6
-  progress_pct: 100
-  status_text: "Unit 001 passed W4b and three-version CI, merged as 777d5bb0, completed W5 cleanup, and closed with linked evidence."
+  progress_pct: 0
+  status_text: "T2 drift was attributed entirely to Unit 001; Unit 002's false-zero scribe defect and adapter/projection contract are pinned for a new claim."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: TASK-AR-645
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Run W0 status and a fresh T2/T3 assumption check for UNIT-TASK-AR-645-002 from main 777d5bb0 before creating a new claim/worktree; stop before TASK-AR-646+, consumer mutation, release, tag, publish, bulk historical compound rewrites, or weakening passed verification JSON."
+  branch_policy: "Integrate the Unit 002 T3 review and refreshed assumption snapshot, then create exactly one UNIT-TASK-AR-645-002 claim/worktree; stop before TASK-AR-646+, consumer mutation, release, tag, publish, prompt/transcript persistence, or product-specific parser logic."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

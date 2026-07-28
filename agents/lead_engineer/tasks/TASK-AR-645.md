@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T03:43:12+09:00
+updated_at: 2026-07-29T04:52:04+09:00
 started_at: 2026-07-29T03:43:12+09:00
 title: Make compound and scribe task-linked and host-configurable
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md
 reservation_id: RES-20260728-163601-b8c2a87a-07
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
