@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:52:43+09:00
+updated_at: 2026-07-29T03:13:51+09:00
 started_at: 2026-07-29T01:25:32+09:00
 title: Provide cross-platform start, compact, and resume continuity hooks
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -36,11 +36,16 @@ tags:
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
 verification_status: passed
-verified_at: 2026-07-29T02:52:43+09:00
-verified_by: codex-root-v080-ci-followup
+verified_at: 2026-07-29T03:10:17+09:00
+verified_by: codex-root-v080-w6
 evidence_refs:
   - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
   - reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json
+  - reviews/VERIFY-2026-07-29-task-ar-644-20260729031017.json
+resolution: done
+completed_at: 2026-07-29T03:13:51+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: "\u001eagent-runtime-work-scalar-v1:Task execution included W0 revalidation, cross-platform lifecycle hooks, compact/restart continuity, doctor and packaging enforcement, two independent W4b approvals, sanitizer CI repair, Python 3.10-3.12 CI, claim release, PR #368 integration at b14333ce, and merged-main closeout before reliable task-level time and token metering was available."
 ---
 
 # TASK-AR-644 - Provide cross-platform start, compact, and resume continuity hooks
@@ -67,3 +72,18 @@ evidence_refs:
 - `python scripts/verify_wheel_dotfiles.py --check`
 - `python -m agent_runtime.cli sanitize --root . --check`
 - `python -m pytest -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T03:13:51+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Task execution included W0 revalidation, cross-platform lifecycle hooks, compact/restart continuity, doctor and packaging enforcement, two independent W4b approvals, sanitizer CI repair, Python 3.10-3.12 CI, claim release, PR #368 integration at b14333ce, and merged-main closeout before reliable task-level time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-644-20260729031017.json`
+<!-- work-close:end -->

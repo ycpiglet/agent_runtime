@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-29 - TASK-AR-644 complete; TASK-AR-645 next
+
+- Completed: `TASK-AR-644` added portable Codex lifecycle dispatch, bounded compact checkpoints, restart rebootstrap, explicit owner-run Claude installation, and doctor/packaging enforcement.
+- Safety: checkpoints contain only bounded derived state, never prompt or transcript content; no consumer repository, real per-user setting, version, tag, package, or release was mutated.
+- Quality: CI-follow-up W4b approved 99/100; PR #368 passed Python 3.10, 3.11, and 3.12 and merged at `b14333ce`; merged-main verification passed 66 focused tests, public sanitization with zero findings, and the full suite at 2358 passed with 3 skipped.
+- Consumer boundary: Bean Wiki, Allimbot, Autofolio, and Tag Manual were not mutated.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-645`.
+- Next: begin `TASK-AR-645` at W0 and revalidate per-entry compound records, task/defect-signature linkage, and host-configurable scribe adapters before W2. Consumer pilot mutation and release actions remain deferred.
+
 ## 2026-07-29 - TASK-AR-643 complete; TASK-AR-644 next
 
 - Completed: `TASK-AR-643` added profile-aware dependency closure, generic work/session/report helpers, reduced-profile safety, and clean-host plus built-wheel execution proof.

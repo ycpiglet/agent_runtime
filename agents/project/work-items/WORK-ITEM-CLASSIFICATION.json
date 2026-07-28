@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T01:26:43+09:00",
+  "generated_at": "2026-07-29T03:14:05+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5536,7 +5536,7 @@
       "title": "Make the harness actually enter and re-enter its governance path on supported agent c…",
       "path": "agents/lead_engineer/tasks/TASK-AR-644.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-644-001",
@@ -5547,7 +5547,7 @@
       "title": "UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md",
       "parent_id": "TASK-AR-644",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-645",

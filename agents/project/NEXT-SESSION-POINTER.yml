@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T02:40:52+09:00
-updated_by: le-20260729-0128-kst-644001
+updated_at: 2026-07-29T03:13:59+09:00
+updated_by: codex-root-v080-w6
 current_state:
-  summary: "UNIT-TASK-AR-644-001 implementation and independent verification are complete; implementation PR integration is pending."
-  status: in_progress
+  summary: "TASK-AR-644 is complete on verified main; TASK-AR-645 is the next planned task."
+  status: planned
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 5
+  step_index: 0
   step_total: 6
-  progress_pct: 95
-  status_text: "W4b approved at 97/100; worker and additive review claims are released, and the implementation branch is ready for PR CI and merge."
+  progress_pct: 0
+  status_text: "TASK-AR-644 CI-follow-up W4b approved 99/100; PR #368 passed Python 3.10-3.12, merged at b14333ce, and merged-main verification passed 66 focused plus 2358 full-suite tests."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-644
+  active_task: TASK-AR-645
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Integrate TASK-AR-644 through protected-main PR CI, then perform W6 closeout before entering TASK-AR-645; stop before consumer mutation, release, tag, publish, prompt/transcript persistence, or real per-user setting changes."
+  branch_policy: "Begin TASK-AR-645 at W0, revalidate compound/task linkage and scribe adapter scope, then claim before implementation; stop before TASK-AR-646 or later, consumer mutation, release, tag, publish, bulk historical compound rewrites, or real per-user setting changes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -42,7 +42,10 @@ pointers:
       status: completed
     - task_id: TASK-AR-644
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: in_progress
+      status: completed
+    - task_id: TASK-AR-645
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
