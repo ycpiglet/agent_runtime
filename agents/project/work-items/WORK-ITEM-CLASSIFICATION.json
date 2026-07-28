@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T05:02:40+09:00",
+  "generated_at": "2026-07-29T06:03:29+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5558,7 +5558,7 @@
       "title": "Prevent repeated mistakes and accumulated context without forcing every host into one…",
       "path": "agents/lead_engineer/tasks/TASK-AR-645.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-645-001",
@@ -5580,7 +5580,7 @@
       "title": "UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md",
       "parent_id": "TASK-AR-645",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-646",

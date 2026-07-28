@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T05:46:20+09:00
+updated_at: 2026-07-29T06:03:29+09:00
 started_at: 2026-07-29T03:43:12+09:00
 title: Make compound and scribe task-linked and host-configurable
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 12
@@ -41,6 +41,16 @@ verified_at: 2026-07-29T05:46:20+09:00
 verified_by: codex-root-v080-orchestrator
 evidence_refs:
   - reviews/VERIFY-2026-07-29-task-ar-645-20260729054620.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-645-001.md
+  - reviews/W4B-2026-07-29-unit-task-ar-645-002.md
+  - reviews/RETRO-2026-07-29-task-ar-645-compound-scribe.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c.json
+resolution: done
+completed_at: 2026-07-29T06:03:29+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact per-task hours and tokens were not captured by the current runtime telemetry.
 ---
 
 # TASK-AR-645 - Make compound and scribe task-linked and host-configurable
@@ -67,3 +77,22 @@ evidence_refs:
 - `python scripts/verify_wheel_dotfiles.py --check`
 - `PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check`
 - `python -m pytest -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T06:03:29+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact per-task hours and tokens were not captured by the current runtime telemetry.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-task-ar-645-20260729054620.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-645-001.md`
+  - `reviews/W4B-2026-07-29-unit-task-ar-645-002.md`
+  - `reviews/RETRO-2026-07-29-task-ar-645-compound-scribe.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c.json`
+<!-- work-close:end -->

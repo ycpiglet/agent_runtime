@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T05:48:40+09:00
-record_count: 979
+generated_at: 2026-07-29T06:08:28+09:00
+record_count: 980
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `979` review and evidence records under `reviews/`.
+- Summary: indexed `980` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `979` files |
+| Reviews covered | pass | `980` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -223,6 +223,7 @@ record_count: 979
 | `reviews/RETRO-2026-07-23-taskset-ar-work-cli-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-cli-integrity` | md | complete | n/a | TASKSET-AR-WORK-CLI-INTEGRITY Retrospective |
 | `reviews/RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity.md` | `RETRO-2026-07-23-taskset-ar-work-verify-windows-shell-integrity` | md | complete | n/a | TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY Retrospective |
 | `reviews/RETRO-2026-07-24-work-frontmatter-scalar-integrity.md` | `RETRO-2026-07-24-work-frontmatter-scalar-integrity` | md | completed | pass | Work Frontmatter Scalar Integrity Retrospective |
+| `reviews/RETRO-2026-07-29-task-ar-645-compound-scribe.md` | `RETRO-2026-07-29-task-ar-645-compound-scribe` | md | completed | pass | TASK-AR-645 Compound and Scribe Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |

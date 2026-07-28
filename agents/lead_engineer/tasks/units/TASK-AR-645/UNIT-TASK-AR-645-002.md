@@ -9,11 +9,11 @@ task_id: TASK-AR-645
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T05:45:03+09:00
+updated_at: 2026-07-29T06:01:07+09:00
 started_at: 2026-07-29T04:59:49+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -79,8 +79,15 @@ claim_refs:
 verified_at: 2026-07-29T05:45:03+09:00
 verified_by: codex-root-v080-orchestrator
 evidence_refs:
-  - reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-645-002.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c.json
+resolution: done
+completed_at: 2026-07-29T06:01:07+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact per-unit hours and tokens were not captured by the current runtime telemetry.
 ---
 
 # UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections
@@ -190,3 +197,26 @@ substantial closeout enforcement, and mini-task exemption.
 Stop before changing host status/backlog files, embedding host product
 semantics in core, persisting prompt/transcript content, or mutating consumer
 repositories.
+
+## Superseded verification attempts
+
+- `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json` —
+  the source-layout CLI command omitted `PYTHONPATH=src`; the failed evidence
+  remains preserved and is superseded by the later passing verification.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T06:01:07+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact per-unit hours and tokens were not captured by the current runtime telemetry.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-645-002.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c.json`
+<!-- work-close:end -->
