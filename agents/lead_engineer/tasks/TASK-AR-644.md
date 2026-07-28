@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:35:58+09:00
+updated_at: 2026-07-29T02:52:43+09:00
 started_at: 2026-07-29T01:25:32+09:00
 title: Provide cross-platform start, compact, and resume continuity hooks
 status: in_progress
@@ -36,10 +36,11 @@ tags:
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
 verification_status: passed
-verified_at: 2026-07-29T02:35:58+09:00
-verified_by: codex-root-v080-integrator
+verified_at: 2026-07-29T02:52:43+09:00
+verified_by: codex-root-v080-ci-followup
 evidence_refs:
   - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
+  - reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json
 ---
 
 # TASK-AR-644 - Provide cross-platform start, compact, and resume continuity hooks
@@ -64,4 +65,5 @@ evidence_refs:
 - `python -m pytest tests/test_session_continuity_hooks.py tests/test_bootstrap_dev_env.py tests/test_session_resume_check.py tests/test_interrupted_run_detector.py tests/test_doctor.py tests/test_template_smoke.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/verify_wheel_dotfiles.py --check`
+- `python -m agent_runtime.cli sanitize --root . --check`
 - `python -m pytest -q`

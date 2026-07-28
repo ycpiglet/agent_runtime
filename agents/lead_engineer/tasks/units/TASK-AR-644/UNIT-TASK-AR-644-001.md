@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:33:34+09:00
+updated_at: 2026-07-29T02:50:18+09:00
 started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -81,10 +81,13 @@ target_files:
   - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json
   - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
+  - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
   - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
+  - reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json
   - reviews/INDEX.md
 scope: Use one allowlisted Python dispatcher with POSIX and commandWindows commands, add bounded derived compact checkpoints and SessionStart reinjection, retain explicit owner-run Claude installation, and verify tracked hook health. Do not mutate consumer repositories or real per-user settings, persist prompt/transcript content, redesign compound/scribe, commit checkpoint state, or perform a release.
 acceptance:
@@ -98,16 +101,19 @@ verification:
   - python -m pytest tests/test_session_continuity_hooks.py tests/test_bootstrap_dev_env.py tests/test_session_resume_check.py tests/test_interrupted_run_detector.py tests/test_doctor.py tests/test_template_smoke.py -q
   - python scripts/runtime_asset_usage.py --check
   - python scripts/verify_wheel_dotfiles.py --check
+  - python -m agent_runtime.cli sanitize --root . --check
   - python -m pytest -q
 handoff: Provide the client/OS hook matrix, simulated manual/automatic compact and restart logs, doctor failure fixtures, bounded checkpoint proof, and exact implementation head for independent W4b.
 stop_condition: Stop before editing per-user agent settings without explicit Owner action.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
-verified_at: 2026-07-29T02:33:34+09:00
-verified_by: codex-root-v080-integrator
+verified_at: 2026-07-29T02:50:18+09:00
+verified_by: codex-root-v080-ci-followup
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
+  - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
@@ -179,10 +185,13 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json
 - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md
 - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
+- reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
 - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
 - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
+- reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
 - reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json
+- reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json
 - reviews/INDEX.md
 
 ## Scope
@@ -225,6 +234,7 @@ state, or perform a release.
 - `python -m pytest tests/test_session_continuity_hooks.py tests/test_bootstrap_dev_env.py tests/test_session_resume_check.py tests/test_interrupted_run_detector.py tests/test_doctor.py tests/test_template_smoke.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/verify_wheel_dotfiles.py --check`
+- `python -m agent_runtime.cli sanitize --root . --check`
 - `python -m pytest -q`
 
 ## Handoff

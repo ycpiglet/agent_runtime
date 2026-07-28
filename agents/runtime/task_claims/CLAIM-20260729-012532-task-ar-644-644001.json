@@ -97,10 +97,13 @@
     "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.json",
     "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-644-skeptic-closeout.log.md",
     "reviews/W4A-2026-07-29-unit-task-ar-644-001.md",
+    "reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md",
     "reviews/W4B-2026-07-29-unit-task-ar-644-001.md",
     "reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json",
     "reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json",
+    "reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json",
     "reviews/VERIFY-2026-07-29-task-ar-644-20260729023558.json",
+    "reviews/VERIFY-2026-07-29-task-ar-644-20260729025243.json",
     "reviews/INDEX.md"
   ],
   "released_at": "2026-07-29T02:31:18+09:00",
