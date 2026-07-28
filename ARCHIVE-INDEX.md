@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-28
-archived_count: 286
+archived_count: 288
 ---
 
 # Archived Task Files
 
-- `286` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `288` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -265,6 +265,7 @@ archived_count: 286
 | `TASK-AR-609` | `66ffb2ff-f4c…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-23T07:17:12+09:00 | 2026-07-23T07:50:24+09:00 | 2026-07-23T07:50:24+09:00 | Close GitHub #300 by preventing taskset records from being duplicated into the initia… |
 | `TASK-AR-605` | `010bff90-0ad…` | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | completed | 2026-07-22T17:45:00+09:00 | 2026-07-22T22:17:46+09:00 | 2026-07-22T23:02:22+09:00 | 2026-07-22T23:02:22+09:00 | Close GitHub #294 by making the template W0 dashboard work when repository-only scrip… |
 | `TASK-AR-610` | `956cd4ea-419…` | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | completed | 2026-07-22T18:26:18+09:00 | 2026-07-22T18:27:20+09:00 | 2026-07-22T20:03:03+09:00 | 2026-07-22T20:03:03+09:00 | Make the existing TASK-AR-594 record satisfy the canonical work-item schema while pre… |
+| `TASK-AR-631` | `d66cb389-909…` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | completed | 2026-07-26T20:41:04+09:00 | 2026-07-27T11:12:27+09:00 | 2026-07-28T19:18:05+09:00 | 2026-07-28T19:18:05+09:00 | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
 | `TASK-AR-611` | `7dd220e9-1b3…` | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | completed | 2026-07-22T18:48:38+09:00 | 2026-07-22T18:49:10+09:00 | 2026-07-22T20:03:05+09:00 | 2026-07-22T20:03:05+09:00 | Make the real-backlog classification test recognize every taskset registered by the J… |
 | `TASK-AR-612` | `a6489013-6f3…` | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | completed | 2026-07-22T21:43:00+09:00 | 2026-07-23T08:02:09+09:00 | 2026-07-23T08:28:16+09:00 | 2026-07-23T08:28:16+09:00 | Make closed/released tasks and their registered Korean aliases terminal in taskset se… |
 | `TASK-AR-621` | `fda7eb07-f96…` | `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` | completed | 2026-07-23T14:08:00+09:00 | 2026-07-23T15:39:58+09:00 | 2026-07-23T16:14:17+09:00 | 2026-07-23T16:14:17+09:00 | Prevent shell metacharacters in registered verification commands from being silently… |
@@ -293,6 +294,7 @@ archived_count: 286
 | `TASK-AR-590` | `ac39be71-7ce…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | 2026-06-20T01:04:15+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 | `TASK-AR-591` | `a5da8af2-1b7…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T08:12:15+09:00 | 2026-06-20T08:25:00+09:00 | 2026-06-20T08:25:00+09:00 | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
+| `TASK-AR-639` | `5affd6b2-dab…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T17:55:15+09:00 | 2026-07-28T19:18:44+09:00 | 2026-07-28T19:18:44+09:00 | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | `TASK-AR-613` | `26230ebe-4bf…` | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | completed | 2026-07-23T01:16:34+09:00 | 2026-07-23T01:25:41+09:00 | 2026-07-23T03:13:02+09:00 | 2026-07-23T03:13:02+09:00 | Close GitHub issue 316 by preventing a valid tagged cadence from collapsing into rele… |
 | `TASK-AR-614` | `81421501-db9…` | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | completed | 2026-07-23T02:23:56+09:00 | 2026-07-23T04:27:22+09:00 | 2026-07-23T05:04:00+09:00 | 2026-07-23T05:04:00+09:00 | Close GitHub issue 318 by preventing self-eval from converting exhausted Git queries… |
 | `TASK-AR-615` | `dcbfa286-be0…` | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | completed | 2026-07-23T03:09:36+09:00 | 2026-07-23T03:25:49+09:00 | 2026-07-23T04:15:10+09:00 | 2026-07-23T04:15:10+09:00 | Close GitHub issue 320 by making the release-auto fixture recover from the observed t… |

@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-28T19:18:51+09:00
+generated_at: 2026-07-28T19:50:46+09:00
 task_count: 315
 open_count: 27
 completed_count: 288
@@ -77,12 +77,12 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `1/13` done; `12` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-640` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md | in_progress | Ask | P0 | Critical | High | 10h/22000tok | Medium | 8 | agent-runtime-core | lead-engineer | Owner/agent decision | Represent shared capabilities and host ownership without requiring a project-specific… |
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md | planned | Action | P0 | Critical | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove lightweight adoption preserves the existing editorial harness while adding task… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
-| `TASK-AR-640` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md | planned | Ask | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Represent shared capabilities and host ownership without requiring a project-specific… |
 | `TASK-AR-643` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Guarantee that every capability advertised to a clean host has all executable depende… |
 | `TASK-AR-644` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the harness actually enter and re-enter its governance path on supported agent c… |
 | `TASK-AR-646` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md | planned | Action | P0 | Critical | High | 10h/24000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Use lower-cost native subagents by default where appropriate and prove when escalatio… |

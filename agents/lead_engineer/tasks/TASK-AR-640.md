@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-28T19:48:21+09:00
+started_at: 2026-07-28T19:48:21+09:00
 title: Introduce profile and ownership-aware host configuration
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -23,6 +24,8 @@ project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 unit_spec: agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md
 reservation_id: RES-20260728-163601-b8c2a87a-02
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-194821-task-ar-640-640001.json
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner

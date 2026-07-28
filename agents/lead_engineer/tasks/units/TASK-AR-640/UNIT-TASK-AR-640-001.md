@@ -9,11 +9,12 @@ task_id: TASK-AR-640
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T19:46:04+09:00
+updated_at: 2026-07-28T19:48:21+09:00
+started_at: 2026-07-28T19:48:21+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -49,6 +50,8 @@ verification:
   - python -m pytest tests/test_config_v2.py tests/test_doctor.py tests/test_host_context_read_location.py tests/test_inventory_sync_sanitize.py tests/test_project_context_overlay.py -q
 handoff: Document the v1-to-v2 compatibility table and effective config JSON.
 stop_condition: Stop before mutating a real host or introducing product-specific paths into core defaults.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-194821-task-ar-640-640001.json
 ---
 
 # UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema

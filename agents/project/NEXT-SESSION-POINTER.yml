@@ -1,36 +1,44 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T19:19:17+09:00
-updated_by: le-20260728-170130-kst-codexroot-v080-639-001
+updated_at: 2026-07-28T19:49:54+09:00
+updated_by: le-20260728-194821-kst-640001
 current_state:
-  summary: "TASK-AR-631 recovery and TASK-AR-639 lifecycle truth are closed; TASK-AR-640 W0 revalidation is next."
-  status: planned
+  summary: "UNIT-TASK-AR-640-001 is implementing the bounded config v2 and deterministic doctor projection contract."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 2
   step_total: 6
-  progress_pct: 0
-  status_text: "TASK-AR-639 closed with zero state-sync findings; revalidate TASK-AR-640 before W2."
+  progress_pct: 5
+  status_text: "W0/T3 assumptions are pinned; implementation is isolated in the claimed TASK-AR-640 worktree."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260728-194821-task-ar-640-640001
+      agent_role: lead-engineer
+      agent_instance_id: le-20260728-194821-kst-640001
+      display_name: lead_engineer@unit-640-001-terra
+      callsite_id: codex:subagent:w3-task-ar-640-001
+      pane_id: codex:subagent:w3-task-ar-640-001
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-640
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-640 at W0; revalidate config/profile assumptions before creating a W2 worker claim."
+  branch_policy: "Continue only UNIT-TASK-AR-640-001 in .worktrees/TASK-AR-640; stop before sync/lock behavior, profile manifests, adapter execution, or host mutation."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260728-194821-task-ar-640-640001.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
       status: completed
     - task_id: TASK-AR-640
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
