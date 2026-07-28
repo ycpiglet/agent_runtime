@@ -1,0 +1,8 @@
+{
+  "schema": "agent-runtime-template-profiles/v1",
+  "profiles": {
+    "core": {"include": ["**"], "exclude": ["scripts/test_*.py", "scripts/allimbot.py", "scripts/allimbot_stop_hook.cmd"]},
+    "web-content": {"include": [], "exclude": []},
+    "security-service": {"include": ["scripts/allimbot.py", "scripts/allimbot_stop_hook.cmd"], "exclude": []}
+  }
+}

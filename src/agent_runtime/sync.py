@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .config import AgentRuntimeConfig, load_config
+from .template_profiles import selected_paths
 
 LOCK_FILE = "agent_runtime.lock.json"
 LEGACY_LOCK_FILE = "ralph.lock.json"
@@ -47,11 +48,14 @@ def _is_runtime_artifact(path: Path) -> bool:
     return "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}
 
 
-def _template_files(template_root: Path) -> list[Path]:
+def _template_files(template_root: Path, profiles: tuple[str, ...] | None = None) -> list[Path]:
     if not template_root.exists():
         return []
+    # Test and explicit override roots remain plain file fixtures; the packaged
+    # root is fail-closed because it always carries the manifest.
+    source = selected_paths(template_root, profiles) if profiles is not None and (template_root / "agents/project/RUNTIME-PROFILE-MANIFEST.json").exists() else tuple(template_root.rglob("*"))
     return sorted(
-        (path for path in template_root.rglob("*") if path.is_file() and not _is_runtime_artifact(path)),
+        (path for path in source if path.is_file() and not _is_runtime_artifact(path)),
         key=lambda path: path.relative_to(template_root).as_posix().lower(),
     )
 
@@ -73,10 +77,10 @@ def _content_digest(path: Path) -> str:
     return f"sha256:{hashlib.sha256(_canonical_content(path)).hexdigest()}"
 
 
-def template_digest(template_root: Path) -> tuple[str, int]:
+def template_digest(template_root: Path, profiles: tuple[str, ...] | None = None) -> tuple[str, int]:
     """Canonical packaged-template digest shared with lock serialization."""
     digest = hashlib.sha256()
-    files = _template_files(template_root)
+    files = _template_files(template_root, profiles)
     for path in files:
         digest.update(path.relative_to(template_root).as_posix().encode("utf-8"))
         digest.update(b"\0")
@@ -143,7 +147,7 @@ def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
     conflicts: list[TemplateUpdate] = []
     preserved: list[TemplateUpdate] = []
     excluded: list[TemplateUpdate] = []
-    for source in _template_files(resolved_template_root):
+    for source in _template_files(resolved_template_root, config.profiles):
         rel = source.relative_to(resolved_template_root).as_posix()
         ownership = _ownership(config, rel)
         target = root / rel
