@@ -285,7 +285,9 @@ def _has_recovery(item: WorkItem) -> bool:
 
 def _claim_for_item(records: list[tuple[Path, dict[str, object]]], task_id: str, unit_id: str) -> bool:
     return any(
-        str(claim.get("task_id") or "") == task_id and str(claim.get("unit_id") or "") == unit_id
+        not _is_explicit_overlay(claim)
+        and str(claim.get("task_id") or "") == task_id
+        and str(claim.get("unit_id") or "") == unit_id
         for _, claim in records
     )
 
@@ -325,6 +327,11 @@ def _validate_active_claim(
         findings.append(Finding("block", f"claim:unit-mismatch:{claim_id}", rel_claim_path, "claim unit is missing or belongs to another task"))
     if task and str(claim.get("task_set_id") or "") != task.task_set_id:
         findings.append(Finding("block", f"claim:taskset-mismatch:{claim_id}", rel_claim_path, "claim and task taskset differ"))
+    if unit and (
+        unit.task_set_id != str(claim.get("task_set_id") or "")
+        or (task is not None and unit.task_set_id != task.task_set_id)
+    ):
+        findings.append(Finding("block", f"claim:unit-taskset-mismatch:{claim_id}", unit.path.as_posix(), "unit, task, and claim taskset identifiers must agree"))
     allowed_lifecycle_statuses = {"active", "in_progress", "blocked", "review"}
     for item, label in ((task, "task"), (unit, "unit")):
         if item and item.status not in allowed_lifecycle_statuses:
@@ -384,6 +391,8 @@ def analyze(root: Path) -> list[Finding]:
             findings.append(Finding("block", f"active-task:missing:{active_task}", POINTER.as_posix(), "active task is not present in task files"))
         elif task.task_set_id != task_set_id:
             findings.append(Finding("block", f"active-task:taskset-mismatch:{active_task}", task.path.as_posix(), f"active task belongs to {task.task_set_id}, pointer says {task_set_id}"))
+        elif task.status in status_alias.DONE_CANONICAL:
+            findings.append(Finding("block", f"active-task:done:{active_task}", task.path.as_posix(), "pointer cannot select a completed task as active"))
     open_tasks = [task for task in taskset_tasks if task.status not in DONE_STATUSES]
     taskset_is_complete = bool(taskset_tasks) and not open_tasks
     if task_set_id and task_set_id != "none" and pointer_status in {"active", "in_progress"} and taskset_tasks and not open_tasks:

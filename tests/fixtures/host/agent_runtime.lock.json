@@ -199,7 +199,7 @@
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
       "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
-      "scripts/state_sync_gate.py": "sha256:7c8605a248991965c52a73f91c5ca49a75edfe1404d4f18d893b0d1e3f76ad89",
+      "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
       "scripts/stop_events.py": "sha256:280cd7b51fa565efe99df26d7f9a9477cb0bc2c74a3d0290a1c455c7f6b8435f",
       "scripts/stop_hook_closure_gate.py": "sha256:7b0a40ba37904ca176b603cca6fceacc27c09cdb911a042243c8f54b1626a105",
@@ -285,7 +285,7 @@
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
     "package_version": "0.7.0",
-    "template_digest": "sha256:50f8353b3d17d587a0f34aa24ee681494137c726f956599bf32d263a4a24e9b5",
+    "template_digest": "sha256:1a004b4f35545a9334987285477225207256bb7b701b4b555d0c5343facd6d90",
     "template_files": 282
   },
   "project": "fixture-host",

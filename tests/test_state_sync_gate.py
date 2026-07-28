@@ -256,6 +256,17 @@ def test_active_worker_claim_correlates_task_unit_pointer_and_refs(tmp_path):
     assert not [finding for finding in findings if finding.severity == "block"]
 
 
+def test_active_pointer_blocks_completed_task_even_with_open_taskset_sibling(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="completed")
+    write_task(tmp_path, "TASK-AR-632", "TASKSET-AR-GOVERNANCE-OPS", status="in_progress")
+    write_surfaces(tmp_path, "TASKSET-AR-GOVERNANCE-OPS", "TASK-AR-631")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "active-task:done:TASK-AR-631" for f in findings)
+
+
 def test_active_worker_claim_blocks_completed_task_even_with_open_taskset_sibling(tmp_path):
     gate = load_module()
     write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="completed")
@@ -613,6 +624,44 @@ def test_false_or_string_true_overlay_markers_remain_worker_claims(tmp_path):
         "claim:missing-worker-field:CLAIM-TEST-001:worktree_path",
         "claim:missing-worker-field:CLAIM-TEST-002:worktree_path",
     }
+
+
+def test_matching_explicit_overlay_does_not_satisfy_verified_worker_lifecycle(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS", status="review", verified=True)
+    write_unit(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", verified=True)
+    write_claim(
+        tmp_path,
+        task_id="TASK-AR-631",
+        unit_id="UNIT-TASK-AR-631-001",
+        overlay=True,
+    )
+    write_surfaces(tmp_path, "TASKSET-AR-GOVERNANCE-OPS", "none")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "verified-work:missing-lifecycle:TASK-AR-631" for f in findings)
+
+
+def test_active_worker_claim_blocks_unit_taskset_mismatch(tmp_path):
+    gate = load_module()
+    write_task(tmp_path, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(
+        tmp_path,
+        "TASK-AR-631",
+        "UNIT-TASK-AR-631-001",
+        task_set_id="TASKSET-AR-OTHER",
+    )
+    claim_path = write_claim(tmp_path, task_id="TASK-AR-631", unit_id="UNIT-TASK-AR-631-001")
+    attach_claim_refs(tmp_path, "TASK-AR-631", "UNIT-TASK-AR-631-001", claim_path)
+    write_claim_pointer(tmp_path, "TASK-AR-631", claim_path)
+    write(tmp_path / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(f.subject == "claim:unit-taskset-mismatch:CLAIM-TEST-001" for f in findings)
 
 
 def test_worker_claim_branch_must_match_the_real_worktree_branch(tmp_path):
