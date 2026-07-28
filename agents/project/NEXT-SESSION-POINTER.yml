@@ -1,36 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T18:54:09+09:00
+updated_at: 2026-07-28T18:55:11+09:00
 updated_by: le-20260728-task-ar-639-002-terra
 current_state:
-  summary: "UNIT-TASK-AR-639-002 passed independent W4b; claim release and PR integration are pending."
+  summary: "UNIT-TASK-AR-639-002 passed independent W4b and its claim is released; PR integration is pending."
   status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 5
   step_total: 6
   progress_pct: 95
-  status_text: "Independent W4b approved; release the claim and integrate through PR/CI."
+  status_text: "Claim released after independent W4b approval; integrate through PR/CI."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260728-175515-task-ar-639-639002
-      agent_role: lead-engineer
-      agent_instance_id: le-20260728-task-ar-639-002-terra
-      display_name: lead_engineer@unit-639-002-terra
-      callsite_id: codex:subagent:unit-task-ar-639-002-worker
-  current_teams:
-    - agent-runtime-core
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-639
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Release the independently approved UNIT-TASK-AR-639-002 claim, integrate through PR/CI, then close its W6 lifecycle."
+  branch_policy: "Integrate the independently approved UNIT-TASK-AR-639-002 branch through PR/CI, then close its W6 lifecycle."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260728-175515-task-ar-639-639002.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
