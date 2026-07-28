@@ -9,11 +9,12 @@ task_id: TASK-AR-642
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T22:10:06+09:00
+updated_at: 2026-07-28T22:14:34+09:00
+started_at: 2026-07-28T22:14:34+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -51,6 +52,8 @@ verification:
   - python -m pytest tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q
 handoff: Provide transition-matrix evidence, an Autofolio-shaped v1 migration fixture, deterministic reconcile/lock output, mixed safe/conflict apply evidence, and pinned-source host-update evidence.
 stop_condition: Stop before automatic three-way merges, profile-specific file manifests, dependency closure, pilot mutation, claim-lifecycle fixes, or UI work.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260728-221434-task-ar-642-642001.json
 ---
 
 # UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile
