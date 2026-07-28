@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T18:46:25+09:00
+updated_at: 2026-07-28T18:54:09+09:00
 updated_by: le-20260728-task-ar-639-002-terra
 current_state:
-  summary: "UNIT-TASK-AR-639-002 self-verified the W4b recheck repairs; independent re-review is pending."
+  summary: "UNIT-TASK-AR-639-002 passed independent W4b; claim release and PR integration are pending."
   status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 4
+  step_index: 5
   step_total: 6
-  progress_pct: 90
-  status_text: "Fresh W4a passed after recheck repairs; independent W4b re-review pending."
+  progress_pct: 95
+  status_text: "Independent W4b approved; release the claim and integrate through PR/CI."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260728-175515-task-ar-639-639002
@@ -22,7 +22,7 @@ active_work:
 resume:
   active_task: TASK-AR-639
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Continue only UNIT-TASK-AR-639-002 in its claimed worktree. Apply the verified recovery contract to TASK-AR-631, then stop for independent W4b."
+  branch_policy: "Release the independently approved UNIT-TASK-AR-639-002 claim, integrate through PR/CI, then close its W6 lifecycle."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

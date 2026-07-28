@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T18:46:25+09:00
+updated_at: 2026-07-28T18:54:09+09:00
 started_at: 2026-07-28T17:55:15+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -69,6 +69,7 @@ evidence_refs:
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183121.json
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728183401.json
   - reviews/VERIFY-2026-07-28-unit-task-ar-639-002-20260728184625.json
+  - reviews/W4B-2026-07-28-unit-task-ar-639-002-recheck-2.md
 ---
 
 # UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery
