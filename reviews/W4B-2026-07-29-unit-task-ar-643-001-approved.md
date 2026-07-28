@@ -93,3 +93,39 @@ report itself adds zero diagnostics on either stream, and report schema/index/
 views all pass. Aligning the legacy checker and bootstrap baseline is a
 separate host-documentation compatibility task, not a reason to ship product
 release assets into core.
+
+## CI Follow-up — Python 3.11 Cache Tag
+
+**Approved at follow-up HEAD:** `e2a4b360670ea5718ddbeb3c8ca8e585995167fd`
+(diff audited: `88b102f7..e2a4b360`). GitHub's Python 3.11 clean-host run
+failed because the test declared the literal generated path
+`scripts/__pycache__/session_baseline.cpython-310.pyc`; the running interpreter
+instead created `cpython-311.pyc`, which dirty intake correctly reported as
+undeclared.
+
+The repair replaces only that literal with
+`sys.implementation.cache_tag`, using the same interpreter that ran
+`session_baseline.py`. The resulting supported-CPython paths are:
+
+- Python 3.10: `session_baseline.cpython-310.pyc`
+- Python 3.11: `session_baseline.cpython-311.pyc`
+- Python 3.12: `session_baseline.cpython-312.pyc`
+
+Independent follow-up commands:
+
+```text
+python -m pytest tests/test_template_smoke.py -q
+# 7 passed in 12.90s
+
+python -m pytest tests/test_runtime_asset_usage.py tests/test_wheel_dotfiles_packaging.py -q
+# 8 passed in 0.65s
+
+python -m compileall -q tests/test_template_smoke.py
+git diff --check 88b102f7..e2a4b360
+# pass
+```
+
+The verifier's current CPython 3.10.12 tag was `cpython-310`; source inspection
+and the documented CPython cache-tag convention confirm the corresponding
+3.11 and 3.12 filenames above. No production template, claim lifecycle,
+consumer, release, push, merge, or scope expansion occurred in this follow-up.
