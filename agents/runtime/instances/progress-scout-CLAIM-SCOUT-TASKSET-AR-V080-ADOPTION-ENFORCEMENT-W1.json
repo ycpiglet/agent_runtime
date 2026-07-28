@@ -1,0 +1,33 @@
+{
+  "schema": "agent-runtime-agent-instance/v1",
+  "agent_instance_id": "progress-scout-CLAIM-SCOUT-TASKSET-AR-V080-ADOPTION-ENFORCEMENT-W1",
+  "role": "progress-scout",
+  "team_id": "agent-runtime-core",
+  "callsign": "progress-scout@scout-sweep",
+  "display_name": "progress-scout@scout-sweep",
+  "callsite_id": "codex-subagent:/root/scout_v080_wave1",
+  "pane_id": "codex-subagent:/root/scout_v080_wave1",
+  "spawned_at": "2026-07-28T17:27:43+09:00",
+  "spawned_by": "codex-root-selective-routing",
+  "session_id": "",
+  "workspace": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-639",
+  "worktree_path": ".worktrees/TASK-AR-639",
+  "provider": "openai",
+  "model": "gpt-5.6-terra",
+  "model_tier": "worker_low",
+  "skill_versions": {},
+  "prompt_config_hash": "",
+  "parent_instance_id": "le-20260728-170130-kst-codexroot-v080-639-001",
+  "on_behalf_of": "SCOUT-TASKSET-AR-V080-ADOPTION-ENFORCEMENT-W1",
+  "decision_cycle_id": "",
+  "task_id": "SCOUT-TASKSET-AR-V080-ADOPTION-ENFORCEMENT-W1",
+  "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "",
+  "unit_spec": "",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-SCOUT-TASKSET-AR-V080-ADOPTION-ENFORCEMENT-W1.json"
+  ],
+  "created_at": "2026-07-28T17:27:43+09:00",
+  "updated_at": "2026-07-28T17:29:46+09:00"
+}

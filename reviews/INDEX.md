@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-28T17:19:16+09:00
-record_count: 915
+generated_at: 2026-07-28T17:30:29+09:00
+record_count: 916
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `915` review and evidence records under `reviews/`.
+- Summary: indexed `916` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `915` files |
+| Reviews covered | pass | `916` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -638,6 +638,7 @@ record_count: 915
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC` | md | hold | fail | TASK-AR-622 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md` | `ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B` | md | record | watch | TASK-AR-631 Independent W4b and Lifecycle Recovery Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
+| `reviews/SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1.md` | `SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1` | progress-scout-sweep | record | n/a | v0.8 Adoption and Enforcement — Wave 1 Progress Sweep |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-214-query-contract |
 | `reviews/SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario.md` | `SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario` | md | record | n/a | SEMINAR-2026-06-09-agent-runtime-task-ar-215-overlay-scenario |
