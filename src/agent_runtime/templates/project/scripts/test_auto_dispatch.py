@@ -10,6 +10,7 @@ are dummy or fakes — no live token spend, so this is CI-safe.
 from __future__ import annotations
 
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -21,20 +22,45 @@ from auto_dispatch import SessionBudget, run_bounded_dispatch  # noqa: E402
 
 
 class _FakeResult:
-    def __init__(self, tokens_in=0, tokens_out=0, finish_reason="stop", error=None):
+    def __init__(
+        self,
+        tokens_in=0,
+        tokens_out=0,
+        finish_reason="stop",
+        error=None,
+        *,
+        model=None,
+        billed_cost=None,
+        currency=None,
+    ):
         self.tokens_in = tokens_in
         self.tokens_out = tokens_out
         self.finish_reason = finish_reason
         self.error = error
+        self.model = model
+        self.billed_cost = billed_cost
+        self.currency = currency
 
 
 class _FakeProvider:
     """Records every run() call and returns a fixed per-call token cost."""
 
-    def __init__(self, tokens_per_call=10, raise_on=None, model=None):
+    def __init__(
+        self,
+        tokens_per_call=10,
+        raise_on=None,
+        model=None,
+        *,
+        observed_model=None,
+        billed_cost=None,
+        currency=None,
+    ):
         self.tokens_per_call = tokens_per_call
         self.raise_on = raise_on  # index that should raise
         self.model = model
+        self.observed_model = observed_model
+        self.billed_cost = billed_cost
+        self.currency = currency
         self.calls = []
 
     def run(self, role, instruction, context):
@@ -42,7 +68,13 @@ class _FakeProvider:
         self.calls.append((role, instruction, context))
         if self.raise_on is not None and idx == self.raise_on:
             raise RuntimeError("boom")
-        return _FakeResult(tokens_in=self.tokens_per_call, tokens_out=0)
+        return _FakeResult(
+            tokens_in=self.tokens_per_call,
+            tokens_out=0,
+            model=self.observed_model,
+            billed_cost=self.billed_cost,
+            currency=self.currency,
+        )
 
 
 @pytest.fixture
@@ -55,13 +87,32 @@ def patch_provider(monkeypatch):
     return _install
 
 
+@pytest.fixture(autouse=True)
+def isolate_dispatch_events(monkeypatch, tmp_path_factory):
+    import message_queue
+
+    events_dir = tmp_path_factory.mktemp("auto-dispatch-events")
+    monkeypatch.setattr(
+        auto_dispatch,
+        "EVENTS_DIR",
+        events_dir,
+    )
+    monkeypatch.setattr(
+        message_queue,
+        "CLAIMS_DIR",
+        tmp_path_factory.mktemp("auto-dispatch-claims"),
+    )
+    return events_dir
+
+
 def _items(n):
     return [{"role": "worker", "instruction": f"t{i}"} for i in range(n)]
 
 
 def _run(items, provider, **kw):
     kw.setdefault("out", io.StringIO())
-    return run_bounded_dispatch(items, "fake", **kw)
+    provider_name = kw.pop("provider_name", "fake")
+    return run_bounded_dispatch(items, provider_name, **kw)
 
 
 # ---- SessionBudget ----
@@ -316,7 +367,13 @@ def test_dispatch_records_routing_result(patch_provider):
 
 
 def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, patch_provider):
-    p = patch_provider(_FakeProvider(tokens_per_call=12, model="haiku"))
+    p = patch_provider(
+        _FakeProvider(
+            tokens_per_call=12,
+            model="request-default",
+            observed_model="claude-haiku-4-5",
+        )
+    )
     items = [{
         "role": "qa",
         "instruction": "find and list files",
@@ -324,8 +381,16 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         "routing_model": "auto",
         "routing_grade": "Low",
         "eval_baseline_tokens": 3000,
+        "eval_baseline_model": "claude-opus-4-8",
     }]
-    summary = _run(items, p, session_budget=1000, max_dispatches=10, eval_log_path=tmp_path / "eval.jsonl")
+    summary = _run(
+        items,
+        p,
+        provider_name="claude-agent",
+        session_budget=1000,
+        max_dispatches=10,
+        eval_log_path=tmp_path / "eval.jsonl",
+    )
     assert summary["results"][0]["eval_recorded"] is True
     recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
     assert len(recs) == 1
@@ -336,6 +401,9 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
     assert rec["policy_model"] == "haiku"
     assert rec["selected_model"] == "haiku"
     assert rec["baseline_tokens"] == 3000
+    assert rec["observed_model"] == "claude-haiku-4-5"
+    assert rec["baseline_model"] == "claude-opus-4-8"
+    assert rec["model_changed"] is True
 
 
 def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_path, patch_provider):
@@ -349,16 +417,19 @@ def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_pat
         "eval_baseline_tokens": 3000,
     }]
     summary = _run(items, p, session_budget=1000, max_dispatches=10, eval_log_path=tmp_path / "eval.jsonl")
-    assert summary["results"][0]["eval_recorded"] is True
-    rec = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")[0]
-    assert rec["finish_reason"] == "error"
-    assert rec["outcome"] == "gate-error"
-    assert rec["actual_tokens_known"] is False
-    assert auto_dispatch.eval_harness.judge_outcome(rec) == "escalate"
+    assert summary["results"][0]["eval_recorded"] is False
+    assert summary["results"][0]["eval_skip_reason"] == "model_observation_unavailable"
+    assert not (tmp_path / "eval.jsonl").exists()
 
 
 def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
-    p = patch_provider(_FakeProvider(tokens_per_call=12, model="gpt-5.2-codex"))
+    p = patch_provider(
+        _FakeProvider(
+            tokens_per_call=12,
+            model="gpt-5.2-codex",
+            observed_model="gpt-5.2-codex",
+        )
+    )
     items = [{
         "role": "qa",
         "instruction": "find and list files",
@@ -366,6 +437,7 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
         "routing_model": "auto",
         "routing_grade": "Low",
         "eval_baseline_tokens": 3000,
+        "eval_baseline_model": "gpt-5.2-codex",
     }]
     summary = run_bounded_dispatch(
         items,
@@ -378,8 +450,48 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
     result = summary["results"][0]
     assert result["selected_model"] == "haiku"
     assert result["eval_recorded"] is False
-    assert result["eval_skip_reason"] == "routing_not_applied"
+    assert result["route_status"] == "ineffective_equivalent"
+    assert result["model_changed"] is False
+    assert result["eval_skip_reason"] == "route_not_effective"
     assert not (tmp_path / "eval.jsonl").exists()
+
+
+def test_dispatch_telemetry_does_not_infer_observed_model(
+    patch_provider,
+    isolate_dispatch_events,
+):
+    p = patch_provider(_FakeProvider(tokens_per_call=12, model="request-default"))
+    items = [{
+        "role": "qa",
+        "instruction": "bounded implementation",
+        "routing_model": "haiku",
+        "routing_grade": "Low",
+    }]
+    summary = _run(
+        items,
+        p,
+        provider_name="claude-agent",
+        session_budget=1000,
+        max_dispatches=10,
+    )
+    result = summary["results"][0]
+    assert result["resolved_model"] == "claude-haiku-4-5"
+    assert result["observed_model"] is None
+    assert result["model_observation_status"] == "unverified"
+    assert result["token_usage_status"] == "partial"
+    assert result["tokens_in"] == 12
+    assert result["tokens_out"] is None
+    assert result["latency_status"] == "observed"
+    assert result["billed_cost_status"] == "unavailable"
+    event = json.loads(
+        next(isolate_dispatch_events.glob("*.jsonl")).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert event["dispatch_id"] == result["dispatch_id"]
+    assert event["resolved_model"] == "claude-haiku-4-5"
+    assert event["observed_model"] is None
+    assert event["deterministic_preflight"] == "not_required"
 
 
 # ---- write-back path (TASK-212) ----
@@ -448,14 +560,15 @@ def test_write_back_provider_error_still_answers(tmp_path, patch_provider):
 def test_write_back_reports_reply_even_if_mark_answered_fails(tmp_path, monkeypatch):
     # If the reply is written but the status flip raises (IO error), the reply
     # must still be reported (accounting correct); message stays 'claimed'.
-    import agent_worker
     monkeypatch.delenv("DISPATCH_ENABLE_LIVE", raising=False)
     msg = _write_msg(tmp_path, "MSG-20260603-070000-aaaaaa.md", to="qa", status="open")
     items = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)
 
-    def _boom(_path):
+    def _boom(_path, **_kwargs):
         raise OSError("disk full")
-    monkeypatch.setattr(agent_worker, "mark_answered", _boom)
+    # auto_dispatch intentionally imports the lease primitive directly; patch
+    # the actual call seam rather than agent_worker's unrelated wrapper.
+    monkeypatch.setattr(auto_dispatch, "lease_mark_answered", _boom)
 
     summary = run_bounded_dispatch(items, "dummy", max_dispatches=10,
                                    write_back=True, out=io.StringIO())

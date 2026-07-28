@@ -47,6 +47,109 @@ def test_pm_worker_escalates_to_planner_for_high_risk_trigger():
     assert "security" in decision["escalation_triggers"]
 
 
+def test_data_integrity_is_a_registered_high_risk_trigger():
+    decision = mr.resolve_work_item_tier(
+        {"worker_model_tier": "worker_low"},
+        {"model_tier": "worker_low", "escalation_triggers": ["data_integrity"]},
+    )
+
+    assert decision["requested_tier"] == "worker_low"
+    assert decision["selected_tier"] == "planner_high"
+    assert decision["unknown_triggers"] == []
+
+
+def test_subagent_roles_default_low_for_exploration_and_stronger_for_review():
+    explorer = mr.resolve_subagent_tier("explorer")
+    reviewer = mr.resolve_subagent_tier("reviewer")
+    escalated = mr.resolve_subagent_tier(
+        "reviewer", escalation_triggers=["security"]
+    )
+
+    assert explorer["selected_tier"] == "worker_low"
+    assert reviewer["selected_tier"] == "reviewer_standard"
+    assert escalated["selected_tier"] == "reviewer_high"
+
+
+def test_lookup_only_dispatch_requires_deterministic_preflight_evidence():
+    unresolved = mr.deterministic_preflight("find and list routing files")
+    insufficient = mr.deterministic_preflight(
+        "find and list routing files",
+        status="attempted_insufficient",
+        evidence=["rg found only generated references"],
+    )
+    sufficient = mr.deterministic_preflight(
+        "find and list routing files",
+        status="completed_sufficient",
+        evidence=["rg result recorded"],
+    )
+
+    assert unresolved["status"] == "required_unresolved"
+    assert unresolved["allow_dispatch"] is False
+    assert insufficient["allow_dispatch"] is True
+    assert sufficient["allow_dispatch"] is False
+    assert sufficient["dispatch_required"] is False
+
+
+def test_equivalent_codex_api_tiers_cannot_claim_effective_model_change(monkeypatch):
+    for name in (
+        "CODEX_AGENT_HAIKU_MODEL",
+        "CODEX_AGENT_SONNET_MODEL",
+        "CODEX_AGENT_OPUS_MODEL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    route = mr.resolve_provider_route(
+        "codex-agent",
+        "planner_high",
+        requested_tier="worker_low",
+    )
+
+    assert route["resolved_model"] == "gpt-5.2-codex"
+    assert route["baseline_model"] == "gpt-5.2-codex"
+    assert route["model_changed"] is False
+    assert route["route_status"] == "ineffective_equivalent"
+    assert route["economic_claim_status"] == "ineligible_equivalent"
+    assert route["observed_model"] is None
+    assert route["model_observation_status"] == "unverified"
+
+
+def test_distinct_claude_route_is_effective_but_not_observed(monkeypatch):
+    monkeypatch.delenv("CLAUDE_AGENT_HAIKU_MODEL", raising=False)
+    monkeypatch.delenv("CLAUDE_AGENT_OPUS_MODEL", raising=False)
+
+    route = mr.resolve_provider_route(
+        "claude-agent",
+        "planner_high",
+        requested_tier="worker_low",
+    )
+
+    assert route["baseline_model"] == "claude-haiku-4-5"
+    assert route["resolved_model"] == "claude-opus-4-8"
+    assert route["model_changed"] is True
+    assert route["route_status"] == "effective"
+    assert route["application_status"] == "configured_unverified"
+
+
+def test_native_codex_matrix_is_configured_but_unverified(monkeypatch):
+    for name in (
+        "CODEX_NATIVE_WORKER_LOW_MODEL",
+        "CODEX_NATIVE_WORKER_STANDARD_MODEL",
+        "CODEX_NATIVE_STRONG_MODEL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    matrix = mr.provider_routing_matrix("native-codex")
+    rows = {row["pm_tier"]: row for row in matrix["rows"]}
+
+    assert matrix["status"] == "configured_unverified"
+    assert rows["worker_low"]["resolved_model"] == "gpt-5.6-terra"
+    assert rows["worker_low"]["reasoning_effort"] == "low"
+    assert rows["worker_standard"]["reasoning_effort"] == "medium"
+    assert rows["planner_high"]["resolved_model"] == "gpt-5.6-sol"
+    assert rows["planner_high"]["reasoning_effort"] == "high"
+    assert rows["worker_low"]["equivalence_status"] == "equivalent"
+
+
 def test_provider_env_accepts_pm_tier(monkeypatch):
     monkeypatch.setenv("CLAUDE_AGENT_OPUS_MODEL", "claude-opus-test")
     assert mr.provider_env("claude-agent", "planner_high") == {"CLAUDE_AGENT_MODEL": "claude-opus-test"}

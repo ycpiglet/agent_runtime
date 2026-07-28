@@ -150,6 +150,56 @@ def test_doctor_success_for_synced_host(tmp_path):
     )
 
 
+def test_doctor_reports_provider_routing_equivalence_without_live_probe(
+    tmp_path,
+):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    model_routing_mtime = (root / "scripts" / "model_routing.py").stat().st_mtime_ns
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert plan.routing is not None
+    assert plan.routing["status"] == "configured_unverified"
+    assert plan.routing["live_probe_performed"] is False
+    providers = plan.routing["providers"]
+    assert set(providers) == {
+        "claude_agent",
+        "codex_agent",
+        "codex_api",
+        "native_codex",
+    }
+    codex = providers["codex_api"]
+    assert codex["status"] == "configured_unverified"
+    assert codex["equivalence_groups"]
+    assert any(
+        finding.area == "model-routing"
+        and finding.kind == "tier-mapping-equivalent"
+        and finding.severity == "warning"
+        for finding in plan.findings
+    )
+    assert (root / "scripts" / "model_routing.py").stat().st_mtime_ns == model_routing_mtime
+
+
+def test_doctor_json_routing_section_does_not_expose_provider_secret(
+    monkeypatch,
+    tmp_path,
+):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "must-not-appear")
+
+    payload_text = doctor.render_json(doctor.build_doctor_plan(root)[0])
+    payload = json.loads(payload_text)
+
+    assert "must-not-appear" not in payload_text
+    assert payload["routing"]["live_probe_performed"] is False
+    assert (
+        payload["routing"]["providers"]["native_codex"]["rows"][0][
+            "availability_status"
+        ]
+        == "configured_unverified"
+    )
+
+
 def test_doctor_reports_scribe_missing_overdue_and_fresh_without_writing(tmp_path):
     root = _prepare_host_root(tmp_path)
     (root / "agent_runtime.yml").write_text(

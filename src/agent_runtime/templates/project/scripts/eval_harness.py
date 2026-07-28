@@ -6,9 +6,9 @@ architect subagent(collab-2026-06-05.jsonl): 측정은 peer 아닌 선행 의존
 루프가 merge 시 unfalsifiable(soft 로그 재발).
 
 구성:
-  - record_outcome  : per-task outcome/cost 로그(eval_log.jsonl, gitignore = 런타임 데이터).
+  - record_outcome  : per-task outcome/usage 로그(eval_log.jsonl, gitignore = 런타임 데이터).
   - judge_outcome   : **객관 신호**(finish_reason·outcome)로 분류 — LLM-judge 아님(순환 회피).
-  - report          : grade/model 별 cost·escalation 집계(스코어보드) + all-Opus baseline.
+  - report          : grade/model 별 usage·escalation 집계 + 검증된 token/billed-cost delta.
   - golden set      : 판정 회귀 가드(committed fixture, agents/lead_engineer/eval/golden.jsonl).
 
 "맞는 모델" = escalation 신호 없이 끝낸 가장 싼 tier(별도 judge 모델 불요).
@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -49,7 +50,19 @@ def record_outcome(task_id: str, grade: str, model: str, tokens: int,
                    actual_tokens_known: bool | None = None,
                    baseline_verdict: str | None = None,
                    collab_verdict: str | None = None,
-                   collab_members: list[str] | None = None) -> dict:
+                   collab_members: list[str] | None = None,
+                   provider: str | None = None,
+                   requested_tier: str | None = None,
+                   resolved_model: str | None = None,
+                   observed_model: str | None = None,
+                   model_changed: bool | None = None,
+                   route_status: str | None = None,
+                   application_status: str | None = None,
+                   baseline_model: str | None = None,
+                   billed_cost: float | None = None,
+                   currency: str | None = None,
+                   baseline_billed_cost: float | None = None,
+                   baseline_currency: str | None = None) -> dict:
     rec = {"ts": datetime.now().astimezone().isoformat(timespec="seconds"),  # tz-aware(reviewer #3)
            "task_id": task_id, "grade": grade,
            "model": model, "tokens": int(tokens), "finish_reason": finish_reason,
@@ -70,6 +83,39 @@ def record_outcome(task_id: str, grade: str, model: str, tokens: int,
         rec["collab_verdict"] = collab_verdict
     if collab_members is not None:
         rec["collab_members"] = list(collab_members)
+    optional = {
+        "provider": provider,
+        "requested_tier": requested_tier,
+        "resolved_model": resolved_model,
+        "observed_model": observed_model,
+        "model_changed": model_changed,
+        "route_status": route_status,
+        "application_status": application_status,
+        "baseline_model": baseline_model,
+    }
+    for key, value in optional.items():
+        if value is not None:
+            rec[key] = value
+    actual_currency = str(currency or "").strip().upper() or None
+    baseline_cost_currency = str(baseline_currency or "").strip().upper() or None
+    if billed_cost is not None:
+        if actual_currency is None:
+            raise ValueError("currency is required when billed_cost is supplied")
+        actual_cost = float(billed_cost)
+        if not math.isfinite(actual_cost) or actual_cost < 0:
+            raise ValueError("billed_cost must be non-negative")
+        rec["billed_cost"] = actual_cost
+        rec["currency"] = actual_currency
+    if baseline_billed_cost is not None:
+        if baseline_cost_currency is None:
+            raise ValueError(
+                "baseline_currency is required when baseline_billed_cost is supplied"
+            )
+        baseline_cost = float(baseline_billed_cost)
+        if not math.isfinite(baseline_cost) or baseline_cost < 0:
+            raise ValueError("baseline_billed_cost must be non-negative")
+        rec["baseline_billed_cost"] = baseline_cost
+        rec["baseline_currency"] = baseline_cost_currency
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return rec
@@ -111,6 +157,60 @@ def judge_outcome(rec: dict) -> str:
 
 # ---------- report (scoreboard) ----------
 
+def _routing_evidence_exclusion_reason(rec: dict) -> str | None:
+    if not str(rec.get("observed_model") or "").strip():
+        return "observed_model_unavailable"
+    if not str(rec.get("baseline_model") or "").strip():
+        return "baseline_model_unavailable"
+    if rec.get("application_status") != "applied":
+        return "route_not_applied"
+    if rec.get("model_changed") is not True:
+        if rec.get("route_status") == "ineffective_equivalent":
+            return "route_ineffective_equivalent"
+        return "model_change_unverified"
+    if rec.get("route_status") != "effective":
+        return "route_not_effective"
+    return None
+
+
+def _token_delta_exclusion_reason(rec: dict) -> str | None:
+    routing_reason = _routing_evidence_exclusion_reason(rec)
+    if routing_reason:
+        return routing_reason
+    if rec.get("actual_tokens_known") is not True:
+        return "actual_token_usage_unavailable"
+    if int(rec.get("tokens", 0) or 0) <= 0:
+        return "actual_token_usage_not_positive"
+    if int(rec.get("baseline_tokens", 0) or 0) <= 0:
+        return "baseline_token_usage_unavailable"
+    return None
+
+
+def _monetary_delta_exclusion_reason(rec: dict) -> str | None:
+    routing_reason = _routing_evidence_exclusion_reason(rec)
+    if routing_reason:
+        return routing_reason
+    if rec.get("billed_cost") is None or not str(rec.get("currency") or "").strip():
+        return "actual_billed_cost_unavailable"
+    if (
+        rec.get("baseline_billed_cost") is None
+        or not str(rec.get("baseline_currency") or "").strip()
+    ):
+        return "baseline_billed_cost_unavailable"
+    if str(rec["currency"]).upper() != str(rec["baseline_currency"]).upper():
+        return "currency_mismatch"
+    return None
+
+
+def _exclusion_counts(records: list[dict], reason_fn) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for rec in records:
+        reason = reason_fn(rec)
+        if reason:
+            counts[reason] = counts.get(reason, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def report(records: list[dict] | None = None) -> dict:
     records = read_outcomes() if records is None else records
     by_grade: dict[str, dict] = {}
@@ -138,20 +238,69 @@ def report(records: list[dict] | None = None) -> dict:
         g["opus_share"] = round(g["opus"] / g["total"], 3) if g["total"] else 0.0
     total = len(records)
     opus = sum(1 for r in records if "opus" in str(r.get("model", "")).lower())
-    delta_records = [
-        r for r in records
-        if r.get("baseline_tokens") is not None
-        and r.get("actual_tokens_known") is not False
-        and int(r.get("tokens", 0) or 0) > 0
-    ]
+    delta_records = [r for r in records if _token_delta_exclusion_reason(r) is None]
     actual_tokens = sum(int(r.get("tokens", 0) or 0) for r in delta_records)
     baseline_tokens = sum(int(r.get("baseline_tokens", 0) or 0) for r in delta_records)
     saved_tokens = baseline_tokens - actual_tokens
-    cost_delta = {
+    token_delta = {
+        "evidence_type": "token_usage",
+        "monetary_claim": False,
+        "eligible_records": len(delta_records),
+        "excluded_records": len(records) - len(delta_records),
+        "exclusion_reasons": _exclusion_counts(records, _token_delta_exclusion_reason),
         "actual_tokens": actual_tokens,
         "baseline_tokens": baseline_tokens,
         "saved_tokens": saved_tokens,
         "saved_rate": round(saved_tokens / baseline_tokens, 3) if baseline_tokens else 0.0,
+    }
+    # Compatibility only: callers should migrate to token_delta.  The payload
+    # explicitly says that token evidence is not a monetary cost claim.
+    cost_delta = {
+        **token_delta,
+        "deprecated_alias": True,
+        "label": "token delta (not monetary cost)",
+    }
+    monetary_records = [
+        r for r in records if _monetary_delta_exclusion_reason(r) is None
+    ]
+    monetary_by_currency: dict[str, dict] = {}
+    for rec in monetary_records:
+        currency = str(rec["currency"]).upper()
+        bucket = monetary_by_currency.setdefault(
+            currency,
+            {
+                "records": 0,
+                "actual_billed_cost": 0.0,
+                "baseline_billed_cost": 0.0,
+            },
+        )
+        bucket["records"] += 1
+        bucket["actual_billed_cost"] += float(rec["billed_cost"])
+        bucket["baseline_billed_cost"] += float(rec["baseline_billed_cost"])
+    for bucket in monetary_by_currency.values():
+        bucket["saved_billed_cost"] = round(
+            bucket["baseline_billed_cost"] - bucket["actual_billed_cost"],
+            9,
+        )
+        baseline_cost = bucket["baseline_billed_cost"]
+        bucket["saved_rate"] = (
+            round(bucket["saved_billed_cost"] / baseline_cost, 3)
+            if baseline_cost
+            else 0.0
+        )
+        bucket["actual_billed_cost"] = round(bucket["actual_billed_cost"], 9)
+        bucket["baseline_billed_cost"] = round(
+            bucket["baseline_billed_cost"], 9
+        )
+    monetary_delta = {
+        "evidence_type": "provider_billed_cost",
+        "verified": bool(monetary_records),
+        "eligible_records": len(monetary_records),
+        "excluded_records": len(records) - len(monetary_records),
+        "exclusion_reasons": _exclusion_counts(
+            records, _monetary_delta_exclusion_reason
+        ),
+        "by_currency": dict(sorted(monetary_by_currency.items())),
     }
     collab_records = [
         r for r in records
@@ -179,7 +328,9 @@ def report(records: list[dict] | None = None) -> dict:
     }
     return {"total": total, "opus_share": round(opus / total, 3) if total else 0.0,
             "by_grade": by_grade, "by_model": by_model, "opus_by_grade": opus_by_grade,
-            "cost_delta": cost_delta, "collaboration_delta": collaboration_delta}
+            "token_delta": token_delta, "cost_delta": cost_delta,
+            "monetary_delta": monetary_delta,
+            "collaboration_delta": collaboration_delta}
 
 
 def load_golden(path: Path = GOLDEN) -> list[dict]:
@@ -221,7 +372,19 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--routing-signal", action="append", default=[])
     ap.add_argument("--baseline-tokens", type=int)
     ap.add_argument("--actual-tokens-unknown", action="store_true",
-                    help="mark tokens=0/unknown so cost_delta excludes this record")
+                    help="mark tokens unknown so token_delta excludes this record")
+    ap.add_argument("--provider")
+    ap.add_argument("--requested-tier")
+    ap.add_argument("--resolved-model")
+    ap.add_argument("--observed-model")
+    ap.add_argument("--model-changed", action="store_true")
+    ap.add_argument("--route-status")
+    ap.add_argument("--application-status")
+    ap.add_argument("--baseline-model")
+    ap.add_argument("--billed-cost", type=float)
+    ap.add_argument("--currency")
+    ap.add_argument("--baseline-billed-cost", type=float)
+    ap.add_argument("--baseline-currency")
     ap.add_argument("--baseline-verdict")
     ap.add_argument("--collab-verdict")
     ap.add_argument("--collab-member", action="append", default=[])
@@ -246,6 +409,18 @@ def main(argv: list[str] | None = None) -> int:
             baseline_verdict=args.baseline_verdict,
             collab_verdict=args.collab_verdict,
             collab_members=args.collab_member or None,
+            provider=args.provider,
+            requested_tier=args.requested_tier,
+            resolved_model=args.resolved_model,
+            observed_model=args.observed_model,
+            model_changed=True if args.model_changed else None,
+            route_status=args.route_status,
+            application_status=args.application_status,
+            baseline_model=args.baseline_model,
+            billed_cost=args.billed_cost,
+            currency=args.currency,
+            baseline_billed_cost=args.baseline_billed_cost,
+            baseline_currency=args.baseline_currency,
         )
         print(json.dumps(rec, ensure_ascii=False, indent=2) if args.json else
               f"[eval] recorded {rec['task_id']} {rec['grade']} {rec['model']} {rec['tokens']} tokens")

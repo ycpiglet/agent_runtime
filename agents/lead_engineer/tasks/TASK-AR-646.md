@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T06:29:18+09:00
+updated_at: 2026-07-29T07:35:20+09:00
+started_at: 2026-07-29T06:42:09+09:00
 title: Make model routing economically effective and auditable
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -32,6 +33,14 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-064209-task-ar-646-0823.json
+verification_status: passed
+verified_at: 2026-07-29T07:35:20+09:00
+verified_by: le-20260729-kst-646001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-task-ar-646-20260729073326.json
+  - reviews/VERIFY-2026-07-29-task-ar-646-20260729073520.json
 ---
 
 # TASK-AR-646 - Make model routing economically effective and auditable
@@ -56,6 +65,6 @@ tags:
 ## Verification
 
 - `python -m pytest tests/test_model_routing.py tests/test_work_registration.py tests/test_task_claim_dispatcher.py tests/test_doctor.py tests/test_role_routing.py tests/test_role_routing_wiring.py tests/test_provider_import_contract.py tests/test_template_smoke.py -q`
-- Template routing, native bridge, provider-worker, auto-dispatch, and eval-harness tests.
+- `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python -m pytest -q`

@@ -13,6 +13,21 @@ Owner: Lead Engineer
 
 본 카탈로그는 절대값이 아닌 **추정 ±50%**. 정확한 값은 사용자의 LLM provider UI에서 직접 확인.
 
+> **증거 구분 (필수)**
+> 아래 표의 수치는 과거 세션과 산식으로 만든 **수동 계획 추정치**다. 이는
+> `agents/runtime/events/*.jsonl`에 실행 표면이 남긴 실제 provider/native
+> 관측값과 다르며, `0`이나 요청 모델명으로 관측값을 대신할 수 없다.
+>
+> - `estimate`: 본 문서의 계획용 범위. 실제 사용량·청구액 주장에 사용 금지.
+> - `token_delta`: 실행에서 양의 token 사용량, 실제 관측 모델, 비교 가능한
+>   baseline 모델/토큰, 유효한 모델 변경이 모두 확인된 경우의 토큰 증거.
+>   금액 절감이 아니다.
+> - `monetary_delta`: 실제/기준 billed cost와 동일 통화가 provider 증거로
+>   모두 제공된 경우에만 검증된 금액 차이. 가격표나 토큰 수로 합성 금지.
+>
+> 동일 모델로 resolve되는 tier, 실행 모델 미관측, route 미적용,
+> baseline 부재는 절감 집계에서 제외하고 `unverified`/`unavailable`로 남긴다.
+
 ---
 
 ## 측정 방법
@@ -190,3 +205,4 @@ caller-side accounting (MCP 외부 usage 메타 부재) — parent Claude 가 �
 - 2026-05-23 — CYCLE-NNN 재교정 (COMPOUND-005 trigger). TASK-NNN/095/096/097/098/099 실측 6건 추가. "비용을 줄이는 패턴" 평균이 -65% → -77% 로 강화. 보정값을 단일 "30-40%" 에서 **작업 종류별 5단계** (hotfix 10-15% / 데모 차용 10-20% / 운영 메타 재사용 25-40% / 신규 영역 50-70% / 대형 신규 60-80%) 로 세분화. 다음 추정부터 분류 → 보정 비율 적용 의무. AUDIT-YYYY-MM-DD-NNN.
 - 2026-05-28 — TASK-NNN (CYCLE-NNN Wave 1) — 라이브 subagent / council 비용 분류 신설 (COMPOUND-013 적용 완료). reviewer T0 ~30-50K, T1+ ~60-90K, council 3-agent ~150-200K, Q&A ~5-10K, seminar ~80-120K. 추정 시 시간(구현)·토큰(라이브 호출) 분리 산정 의무. §16 등급별 권장 호출 횟수 표 추가. AUDIT-YYYY-MM-DD-NNN.
 - 2026-05-28 — TASK-NNN (CYCLE-NNN) — MCP 직접 호출 비용 분류 신설 (CYCLE-NNN ENTRY-005 데이터). Playwright MCP ~15-25K / 기타 MCP ~5-30K. 세 dimension (self/subagent/MCP) 가설 명문화. COMPOUND-013 외부 검증 5번째 데이터 포인트. AUDIT-YYYY-MM-DD-NNN.
+- 2026-07-29 — TASK-AR-646 — 수동 계획 추정, 실제 token delta, 동일 통화 billed-cost monetary delta의 증거 계약을 분리. 동일 모델 tier와 미관측 route의 절감 주장 금지.

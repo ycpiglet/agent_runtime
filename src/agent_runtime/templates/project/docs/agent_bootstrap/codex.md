@@ -25,16 +25,28 @@ Build a private Context Snapshot with:
 - verification method
 
 Codex-specific subagent boundary:
-- If the current Codex environment exposes `multi_agent_v1` tools and the user
-  explicitly asks for subagents, delegation, or parallel agent work, you may
-  call Codex subagents directly from the parent Codex session.
+- If the current Codex environment exposes a native subagent-spawn capability
+  (current tool hint: `collaboration.spawn_agent`) and repository/user policy
+  authorizes delegation, call it only from the parent Codex session.
 - Treat Codex subagents as session-layer tools, not repository runtime workers.
   They are not `scripts/providers/codex.py` and not
   `agent_worker --provider codex`.
 - Prefer `python scripts/codex_subagent_bridge.py dispatch --emit-call` before
-  session-layer Codex delegation when the result should be auditable. Use the
-  rendered packet prompt with `multi_agent_v1.spawn_agent`, then close the loop
-  with `record-reply` or `council-record`.
+  session-layer Codex delegation when the result should be auditable. Execute
+  the exact `packet.execution.spawn_args` through the available native spawn
+  tool; do not infer a model from the role or parent session. Then close the
+  loop with `record-reply` or `council-record`.
+- Read-only `explorer` and precise `implementer` work default to the lower-cost
+  native route. Ambiguity, data integrity, security, cross-cutting effects, or
+  repeated failure must remain visible and escalate through the packet policy.
+- For lookup-only work, record a bounded deterministic attempt first. Use
+  `attempted_insufficient` plus evidence only when tools could not finish the
+  lookup; `completed_sufficient` emits no model call.
+- Completion fields are observational: pass provider/model/reasoning, positive
+  token counts, measured latency, and billed cost/currency only when the
+  execution surface actually reports them. Missing values remain
+  `unverified`/`unavailable`; never copy request configuration into observed
+  fields.
 - Repository runtime Codex workers are separate: `agent_worker --provider codex`
   is a single-shot OpenAI Responses API provider, and `--provider codex-agent`
   is a guarded ToolRunner provider for repo-local read/edit/test work. Both

@@ -38,7 +38,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
+import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -61,9 +64,16 @@ from message_queue import (  # noqa: E402
     _has_reply,
     parse_frontmatter,
 )
-from agent_worker import write_reply  # noqa: E402
+from agent_worker import (  # noqa: E402
+    append_event,
+    write_reply,
+    _completion_observation,
+    _provider_routing_event_fields,
+    _route_with_observation,
+)
 
 RUNTIME_DIR = REPO_ROOT / "agents" / "runtime"
+EVENTS_DIR = RUNTIME_DIR / "events"
 STOP_LOOP_FILE = RUNTIME_DIR / "STOP_LOOP"
 ORCHESTRATOR_STOP_FILE = REPO_ROOT / ".orchestrator-stop"
 DEFAULT_STOP_FILES = (STOP_LOOP_FILE, ORCHESTRATOR_STOP_FILE)
@@ -94,26 +104,42 @@ def _routing_decision_for_item(item: dict, instruction: str) -> dict | None:
     )
 
 
-def _apply_routing_to_provider(provider, provider_name: str, decision: dict | None) -> None:
+def _apply_routing_to_provider(
+    provider,
+    provider_name: str,
+    decision: dict | None,
+    *,
+    baseline_model: str | None = None,
+) -> dict | None:
     if not decision:
-        return
-    for name, value in model_routing.provider_env(provider_name, decision["selected_tier"]).items():
+        return None
+    route = model_routing.resolve_provider_route(
+        provider_name,
+        decision["selected_tier"],
+        requested_tier=decision.get("policy_tier"),
+        baseline_model=baseline_model,
+    )
+    for name, value in dict(route.get("provider_env") or {}).items():
         import os
         os.environ[name] = value
         if name in ("CLAUDE_AGENT_MODEL", "CODEX_PROVIDER_MODEL") and hasattr(provider, "model"):
             setattr(provider, "model", value)
+    return route
 
 
-def _routing_result_fields(decision: dict | None) -> dict:
-    if not decision:
-        return {}
-    return {
-        "routing_grade": decision["grade"],
-        "policy_model": decision["policy_tier"],
-        "selected_model": decision["selected_tier"],
-        "routing_signals": list(decision.get("signals") or []),
-        "routing_reason": decision.get("reason", ""),
-    }
+def _routing_result_fields(
+    decision: dict | None,
+    route: dict | None,
+    observation: dict,
+    *,
+    dispatch_id: str,
+) -> dict:
+    return _provider_routing_event_fields(
+        decision,
+        route,
+        observation,
+        dispatch_id=dispatch_id,
+    )
 
 
 def _positive_int(value) -> int | None:
@@ -134,6 +160,74 @@ def _eval_baseline_tokens(item: dict) -> int | None:
     )
 
 
+def _eval_baseline_model(item: dict) -> str | None:
+    context = dict(item.get("context", {}) or {})
+    for value in (
+        item.get("eval_baseline_model"),
+        item.get("baseline_model"),
+        context.get("eval_baseline_model"),
+        context.get("baseline_model"),
+    ):
+        model = str(value or "").strip()
+        if model:
+            return model
+    return None
+
+
+def _optional_nonnegative_float(value) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if math.isfinite(parsed) and parsed >= 0 else None
+
+
+def _not_dispatched_observation() -> dict:
+    return {
+        "observed_provider": None,
+        "observed_model": None,
+        "observed_reasoning_effort": None,
+        "model_observation_status": "unverified",
+        "token_usage_status": "not_dispatched",
+        "tokens_in": None,
+        "tokens_out": None,
+        "latency_status": "unavailable",
+        "latency_ms": None,
+        "billed_cost_status": "unavailable",
+        "billed_cost": None,
+        "currency": None,
+    }
+
+
+def _eval_baseline_cost(item: dict) -> tuple[float | None, str | None]:
+    context = dict(item.get("context", {}) or {})
+    cost = None
+    for value in (
+        item.get("eval_baseline_billed_cost"),
+        item.get("baseline_billed_cost"),
+        context.get("eval_baseline_billed_cost"),
+        context.get("baseline_billed_cost"),
+    ):
+        cost = _optional_nonnegative_float(value)
+        if cost is not None:
+            break
+    currency = None
+    for value in (
+        item.get("eval_baseline_currency"),
+        item.get("baseline_currency"),
+        context.get("eval_baseline_currency"),
+        context.get("baseline_currency"),
+    ):
+        currency = str(value or "").strip().upper() or None
+        if currency:
+            break
+    if cost is None or currency is None:
+        return None, None
+    return cost, currency
+
+
 def _metadata_task_id(meta: dict, fallback: str | None = None) -> str:
     task_id = str(meta.get("task_id") or "").strip()
     if task_id and task_id.lower() not in {"none", "unknown", "null"}:
@@ -141,46 +235,64 @@ def _metadata_task_id(meta: dict, fallback: str | None = None) -> str:
     return str(fallback or meta.get("id") or "none")
 
 
-def _routing_eval_skip_reason(provider, provider_name: str, routing_decision: dict | None) -> str | None:
-    if not routing_decision:
-        return None
-    selected = str(routing_decision.get("selected_tier") or "").lower()
-    if not selected:
+def _routing_eval_skip_reason(
+    routing_decision: dict | None,
+    route: dict | None,
+    observation: dict,
+    *,
+    baseline_tokens: int | None,
+    baseline_model: str | None,
+) -> str | None:
+    if not routing_decision or not route:
+        return "routing_not_resolved"
+    if not observation.get("observed_model"):
+        return "model_observation_unavailable"
+    if route.get("application_status") != "applied":
         return "routing_not_applied"
-    if model_routing.provider_env(provider_name, routing_decision["selected_tier"]):
-        return None
-    provider_model = str(getattr(provider, "model", None) or "").lower()
-    if provider_model == selected:
-        return None
-    if selected in {"haiku", "sonnet", "opus"} and selected in provider_model:
-        return None
-    return "routing_not_applied"
+    if not baseline_model:
+        return "baseline_model_unavailable"
+    if route.get("model_changed") is not True:
+        return "route_not_effective"
+    if observation.get("token_usage_status") == "unavailable":
+        return "token_usage_unavailable"
+    if baseline_tokens is None:
+        return "baseline_usage_unavailable"
+    return None
 
 
 def _record_eval_outcome(
     item: dict,
-    provider,
     provider_name: str,
     routing_decision: dict | None,
-    tokens: int,
+    route: dict | None,
+    observation: dict,
     finish_reason: str,
     error,
     eval_log_path: Path | None,
 ) -> tuple[bool, str | None]:
     if not routing_decision:
         return False, None
-    skip_reason = _routing_eval_skip_reason(provider, provider_name, routing_decision)
+    baseline = _eval_baseline_tokens(item)
+    baseline_model = _eval_baseline_model(item)
+    skip_reason = _routing_eval_skip_reason(
+        routing_decision,
+        route,
+        observation,
+        baseline_tokens=baseline,
+        baseline_model=baseline_model,
+    )
     if skip_reason:
         return False, skip_reason
-    baseline = _eval_baseline_tokens(item)
-    if baseline is None:
-        return False, None
+    tokens = int(observation.get("tokens_in") or 0) + int(
+        observation.get("tokens_out") or 0
+    )
     context = dict(item.get("context", {}) or {})
+    baseline_cost, baseline_currency = _eval_baseline_cost(item)
     eval_harness.record_outcome(
         str(context.get("task_id") or item.get("task_id") or "none"),
         routing_decision["grade"],
-        str(getattr(provider, "model", None) or routing_decision["selected_tier"] or provider_name),
-        int(tokens or 0),
+        str(observation["observed_model"]),
+        tokens,
         finish_reason=str(finish_reason or "stop"),
         outcome="ok" if not error else "gate-error",
         path=eval_log_path or eval_harness.EVAL_LOG,
@@ -188,7 +300,19 @@ def _record_eval_outcome(
         selected_model=routing_decision["selected_tier"],
         routing_signals=list(routing_decision.get("signals") or []),
         baseline_tokens=baseline,
-        actual_tokens_known=bool(int(tokens or 0) > 0),
+        actual_tokens_known=True,
+        provider=provider_name,
+        requested_tier=route.get("requested_tier"),
+        resolved_model=route.get("resolved_model"),
+        observed_model=observation.get("observed_model"),
+        model_changed=route.get("model_changed"),
+        route_status=route.get("route_status"),
+        application_status=route.get("application_status"),
+        baseline_model=baseline_model,
+        billed_cost=observation.get("billed_cost"),
+        currency=observation.get("currency"),
+        baseline_billed_cost=baseline_cost,
+        baseline_currency=baseline_currency,
     )
     return True, None
 
@@ -321,6 +445,7 @@ def run_bounded_dispatch(
     stop_files=DEFAULT_STOP_FILES,
     write_back: bool = False,
     eval_log_path: Path | None = None,
+    events_dir: Path | None = None,
     out=None,
 ) -> dict:
     """Dispatch each work item synchronously under hard bounds.
@@ -338,6 +463,7 @@ def run_bounded_dispatch(
     so a claimed message is never left orphaned.
     """
     out = out if out is not None else sys.stdout
+    events_dir = EVENTS_DIR if events_dir is None else Path(events_dir)
     provider = get_provider(provider_name)  # live-gate enforced here (CYCLE-075)
     budget = SessionBudget(total=session_budget)
     results: list[dict] = []
@@ -356,16 +482,45 @@ def run_bounded_dispatch(
         role = str(item.get("role", "worker"))
         instruction = str(item.get("instruction", ""))
         context = dict(item.get("context", {}) or {})
+        dispatch_id = str(
+            item.get("dispatch_id")
+            or context.get("dispatch_id")
+            or f"dispatch-{uuid.uuid4().hex[:12]}"
+        )
         source = item.get("_source_path") if write_back else None
         if budget.exhausted():
             halt_reason = f"session_budget ({budget.total})"
             break
         routing_decision = _routing_decision_for_item(item, instruction)
-        _apply_routing_to_provider(provider, provider_name, routing_decision)
+        baseline_model = _eval_baseline_model(item)
+        planned_route = _apply_routing_to_provider(
+            provider,
+            provider_name,
+            routing_decision,
+            baseline_model=baseline_model,
+        )
         dispatch_ceiling = _provider_dispatch_ceiling(provider)
         if dispatch_ceiling is not None and dispatch_ceiling > budget.remaining():
             halt_reason = f"session_budget ({budget.total})"
-            results.append(_budget_skip_result(i, role, budget, dispatch_ceiling))
+            observation = _not_dispatched_observation()
+            skipped = {
+                **_budget_skip_result(i, role, budget, dispatch_ceiling),
+                **_routing_result_fields(
+                    routing_decision,
+                    planned_route,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
+            }
+            results.append(skipped)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_skipped",
+                provider=provider_name,
+                dispatch_status="skipped",
+                **{key: value for key, value in skipped.items() if key != "role"},
+            )
             break
         if dispatch_ceiling is not None and hasattr(provider, "per_dispatch_cap"):
             try:
@@ -373,9 +528,13 @@ def run_bounded_dispatch(
             except (TypeError, ValueError):
                 pass
         context["session_budget_remaining"] = budget.remaining()
+        context["dispatch_id"] = dispatch_id
         if routing_decision:
             context["routing"] = routing_decision
-            context["provider_model"] = getattr(provider, "model", None)
+            context["provider_model"] = (
+                planned_route.get("resolved_model") if planned_route else None
+            )
+            context["provider_route"] = planned_route
 
         if source is not None:
             # --- write-back path: claim BEFORE any billable call ---
@@ -383,25 +542,60 @@ def run_bounded_dispatch(
             if claimed is None:
                 # Lost the claim (a worker took it, or it is no longer open).
                 # No dispatch => no spend: the anti-waste invariant holds.
-                results.append({
+                observation = _not_dispatched_observation()
+                skipped = {
                     "index": i, "role": role, "tokens": 0,
                     "finish_reason": "skipped", "error": "claim_lost", "reply": None,
-                })
+                    **_routing_result_fields(
+                        routing_decision,
+                        planned_route,
+                        observation,
+                        dispatch_id=dispatch_id,
+                    ),
+                }
+                results.append(skipped)
+                append_event(
+                    events_dir,
+                    role,
+                    "auto_dispatch_skipped",
+                    provider=provider_name,
+                    dispatch_status="skipped",
+                    **{key: value for key, value in skipped.items() if key != "role"},
+                )
                 continue
             src_meta, _ = claimed
+            call_started = time.monotonic()
             try:
                 res = provider.run(role, instruction, context)
                 reply_text = (getattr(res, "text", "") or getattr(res, "error", "") or "").strip()
                 tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
                 finish = getattr(res, "finish_reason", "stop")
                 err = getattr(res, "error", None)
+                observation = _completion_observation(
+                    res, (time.monotonic() - call_started) * 1000
+                )
             except Exception as exc:  # reply with the error so the claim is never orphaned
                 reply_text = f"[{role}] dispatch error: {exc.__class__.__name__}: {exc}"
                 tokens, finish, err = 0, "error", f"{exc.__class__.__name__}: {exc}"
+                observation = _completion_observation(
+                    None, (time.monotonic() - call_started) * 1000
+                )
+            completion_route = _route_with_observation(
+                provider_name,
+                routing_decision,
+                baseline_model=baseline_model,
+                observation=observation,
+            )
             budget.record(tokens)  # synchronous: recorded before next dispatch
             eval_recorded, eval_skip_reason = _record_eval_outcome(
-                item, provider, provider_name, routing_decision,
-                tokens, finish, err, eval_log_path,
+                item,
+                provider_name,
+                routing_decision,
+                completion_route,
+                observation,
+                finish,
+                err,
+                eval_log_path,
             )
             reply_path = _write_back_reply(role, src_meta, reply_text, Path(source))
             result = {
@@ -409,48 +603,118 @@ def run_bounded_dispatch(
                 "finish_reason": finish, "error": err,
                 "reply": reply_path.name if reply_path else None,
                 "eval_recorded": eval_recorded,
-                **_routing_result_fields(routing_decision),
+                **_routing_result_fields(
+                    routing_decision,
+                    completion_route,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
             }
             if eval_skip_reason:
                 result["eval_skip_reason"] = eval_skip_reason
             results.append(result)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_completed",
+                provider=provider_name,
+                dispatch_status="completed" if not err else "error",
+                **{key: value for key, value in result.items() if key != "role"},
+            )
             continue
 
+        call_started = time.monotonic()
         try:
             res = provider.run(role, instruction, context)
             tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
+            observation = _completion_observation(
+                res, (time.monotonic() - call_started) * 1000
+            )
+            completion_route = _route_with_observation(
+                provider_name,
+                routing_decision,
+                baseline_model=baseline_model,
+                observation=observation,
+            )
             budget.record(tokens)  # synchronous: recorded before next dispatch
             finish = getattr(res, "finish_reason", "stop")
             err = getattr(res, "error", None)
             eval_recorded, eval_skip_reason = _record_eval_outcome(
-                item, provider, provider_name, routing_decision,
-                tokens, finish, err, eval_log_path,
+                item,
+                provider_name,
+                routing_decision,
+                completion_route,
+                observation,
+                finish,
+                err,
+                eval_log_path,
             )
             result = {
                 "index": i, "role": role, "tokens": tokens,
                 "finish_reason": finish,
                 "error": err,
                 "eval_recorded": eval_recorded,
-                **_routing_result_fields(routing_decision),
+                **_routing_result_fields(
+                    routing_decision,
+                    completion_route,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
             }
             if eval_skip_reason:
                 result["eval_skip_reason"] = eval_skip_reason
             results.append(result)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_completed",
+                provider=provider_name,
+                dispatch_status="completed" if not err else "error",
+                **{key: value for key, value in result.items() if key != "role"},
+            )
         except Exception as exc:  # capture — never orphan, never abort accounting
             err = f"{exc.__class__.__name__}: {exc}"
+            observation = _completion_observation(
+                None, (time.monotonic() - call_started) * 1000
+            )
+            completion_route = _route_with_observation(
+                provider_name,
+                routing_decision,
+                baseline_model=baseline_model,
+                observation=observation,
+            )
             eval_recorded, eval_skip_reason = _record_eval_outcome(
-                item, provider, provider_name, routing_decision,
-                0, "error", err, eval_log_path,
+                item,
+                provider_name,
+                routing_decision,
+                completion_route,
+                observation,
+                "error",
+                err,
+                eval_log_path,
             )
             result = {
                 "index": i, "role": role, "tokens": 0,
                 "finish_reason": "error", "error": err,
                 "eval_recorded": eval_recorded,
-                **_routing_result_fields(routing_decision),
+                **_routing_result_fields(
+                    routing_decision,
+                    completion_route,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
             }
             if eval_skip_reason:
                 result["eval_skip_reason"] = eval_skip_reason
             results.append(result)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_completed",
+                provider=provider_name,
+                dispatch_status="error",
+                **{key: value for key, value in result.items() if key != "role"},
+            )
 
     replied = sum(1 for r in results if r.get("reply"))
     summary = {

@@ -39,11 +39,22 @@ import atomic_io
 import backlog_board
 import claim_guard
 import compound_record
+import model_routing
 import plan_assumption_gate
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
 from pane_event_log import append_event
+
+try:
+    import a2a_claim_emitter
+except ImportError:  # optional in the portable project template
+    a2a_claim_emitter = None
+
+try:
+    import role_routing
+except ImportError:  # optional in the portable project template
+    role_routing = None
 
 
 def _claim_autocommit_enabled() -> bool:
@@ -303,11 +314,104 @@ def _knowledge_lookup(
     return signatures, bounded
 
 
+def _unit_spec_escalation_triggers(root: Path, unit_spec: str) -> list[str]:
+    """Read a unit definition's frontmatter ``escalation_triggers``.
+
+    Mirrors :func:`_unit_spec_target_files`: resolves ``unit_spec`` relative to
+    ``root``, parses the frontmatter, and normalizes ``escalation_triggers`` to
+    a list of non-empty stripped strings (accepting either a YAML list or a
+    comma-separated string). Tolerant of a missing file/field/parse error -> [].
+    """
+    spec_value = str(unit_spec or "").strip()
+    if not spec_value:
+        return []
+    spec_path = Path(spec_value)
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    if not spec_path.is_file():
+        return []
+    try:
+        text = spec_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    meta, _ = backlog_board.parse_frontmatter(text)
+    value = meta.get("escalation_triggers")
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [part.strip() for part in value.split(",") if part.strip()]
+    return []
+
+
+def _work_item_meta(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
+    except OSError:
+        return {}
+    return dict(meta)
+
+
+def _task_meta(root: Path, task_id: str) -> dict[str, Any]:
+    return _work_item_meta(
+        root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+
+
+def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
+    value = str(unit_spec or "").strip()
+    if not value:
+        return {}
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    return _work_item_meta(path)
+
+
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
     declared = _normalize_target_files(tuple(args.target_file or ()))
     if declared:
         return declared
     return _unit_spec_target_files(root, args.unit_spec)
+
+
+def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
+    """Union of explicit ``--escalation-trigger`` args and the unit's inherited
+    frontmatter triggers, deduped while preserving order (explicit-first).
+
+    Explicit-first means an operator override is preserved ahead of inherited
+    signals. The unit's triggers are stored verbatim (no pre-filter): the
+    release seam intersects them with ``HIGH_RISK_TRIGGERS`` downstream.
+    """
+    explicit = [str(t).strip() for t in (args.escalation_trigger or ()) if str(t).strip()]
+    task_inherited = _frontmatter_list(
+        root / "agents" / "lead_engineer" / "tasks" / f"{args.task_id}.md",
+        "escalation_triggers",
+    )
+    unit_inherited = _unit_spec_escalation_triggers(root, args.unit_spec)
+    return list(dict.fromkeys(explicit + task_inherited + unit_inherited))
+
+
+def _resolve_claim_routing(
+    root: Path,
+    args: argparse.Namespace,
+    escalation_triggers: list[str],
+) -> dict[str, Any]:
+    task_meta = _task_meta(root, args.task_id)
+    unit_meta = _unit_meta(root, args.unit_spec)
+    if args.model_tier:
+        unit_meta["model_tier"] = args.model_tier
+    unit_meta["escalation_triggers"] = list(escalation_triggers)
+    decision = model_routing.resolve_work_item_tier(task_meta, unit_meta)
+    decision["routing_status"] = (
+        "unverified"
+        if decision["unknown_triggers"]
+        else "escalated"
+        if decision["selected_tier"] != decision["requested_tier"]
+        else "selected"
+    )
+    return decision
 
 
 def _is_footprint_active(payload: dict[str, Any]) -> bool:
@@ -390,6 +494,8 @@ def _build_claim(
     records: list[tuple[Path, dict[str, Any]]],
     *,
     target_files: list[str],
+    escalation_triggers: list[str],
+    routing_decision: dict[str, Any],
     defect_signatures: list[str],
     knowledge_matches: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -432,7 +538,16 @@ def _build_claim(
         "project_id": args.project_id,
         "unit_id": args.unit_id,
         "unit_spec": args.unit_spec,
-        "model_tier": args.model_tier,
+        "requested_model_tier": routing_decision["requested_tier"],
+        "selected_model_tier": routing_decision["selected_tier"],
+        "model_tier": routing_decision["selected_tier"],
+        "provider_tier": routing_decision["provider_tier"],
+        "routing_status": routing_decision["routing_status"],
+        "routing_reason": routing_decision["reason"],
+        "routing_signals": list(routing_decision["escalation_triggers"]),
+        "routing_unknown_triggers": list(routing_decision["unknown_triggers"]),
+        "actual_model": None,
+        "actual_model_status": "unverified",
         "wip_slot": args.wip_slot,
         "stop_condition": args.stop_condition,
         "phase": args.phase,
@@ -455,6 +570,7 @@ def _build_claim(
         "log_path": log_path,
         "allow_parallel_task_set": bool(args.allow_parallel_task_set),
         "tags": list(args.tag or ()),
+        "escalation_triggers": list(escalation_triggers),
         "defect_signatures": list(defect_signatures),
         "knowledge_lookup": {
             "status": "matched" if knowledge_matches else "clear",
@@ -605,10 +721,13 @@ def cmd_create(args: argparse.Namespace) -> int:
         for finding in exc.findings:
             print(f"- {finding}", file=sys.stderr)
         return 1
+    escalation_triggers = _resolve_escalation_triggers(root, args)
     claim = _build_claim(
         args,
         records,
         target_files=_resolve_target_files(root, args),
+        escalation_triggers=escalation_triggers,
+        routing_decision=_resolve_claim_routing(root, args, escalation_triggers),
         defect_signatures=defect_signatures,
         knowledge_matches=knowledge_matches,
     )
@@ -654,7 +773,10 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- project_id: {claim['project_id']}",
                 f"- unit_id: {claim['unit_id']}",
                 f"- unit_spec: {claim['unit_spec']}",
+                f"- requested_model_tier: {claim['requested_model_tier']}",
+                f"- selected_model_tier: {claim['selected_model_tier']}",
                 f"- model_tier: {claim['model_tier']}",
+                f"- routing_status: {claim['routing_status']}",
                 f"- wip_slot: {claim['wip_slot']}",
                 f"- stop_condition: {claim['stop_condition']}",
                 f"- phase: {claim['phase']}",
@@ -679,7 +801,10 @@ def cmd_create(args: argparse.Namespace) -> int:
                 f"- project_id: {claim['project_id']}",
                 f"- unit_id: {claim['unit_id']}",
                 f"- unit_spec: {claim['unit_spec']}",
+                f"- requested_model_tier: {claim['requested_model_tier']}",
+                f"- selected_model_tier: {claim['selected_model_tier']}",
                 f"- model_tier: {claim['model_tier']}",
+                f"- routing_status: {claim['routing_status']}",
                 f"- wip_slot: {claim['wip_slot']}",
                 f"- stop_condition: {claim['stop_condition']}",
                 f"- status_text: {claim['status_text']}",
@@ -707,6 +832,12 @@ def cmd_create(args: argparse.Namespace) -> int:
             "ts": claim["claimed_at"],
         },
     )
+    # Live A2A traffic: a real claim create opens the request->review->decision->
+    # correction lifecycle on the runtime message stream. Additive observability
+    # only — it RECORDS, it never changes who gets the claim, and a failure here
+    # must never break claim creation (the emitter swallows its own errors).
+    if a2a_claim_emitter is not None:
+        a2a_claim_emitter.emit_claim_request(claim, root=root)
     # Crash-safety guard: commit the claim immediately so a sibling session's
     # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
     # (incident 2026-06-12). Best-effort — never fails claim creation.
@@ -909,6 +1040,52 @@ def cmd_release(args: argparse.Namespace) -> int:
             "ts": now_text,
         },
     )
+    # Live A2A traffic: release closes the lifecycle the create-time `request`
+    # opened, emitting review -> decision -> correction so the runtime message
+    # stream carries a full, reconstructable request->review->decision->correction
+    # chain per claim (what a2a_trace_gate validates). Additive observability only;
+    # best-effort — the emitter swallows its own errors so release never breaks.
+    if a2a_claim_emitter is not None:
+        a2a_claim_emitter.emit_claim_release_chain(
+            claim,
+            root=root,
+            verified_by=verified_by,
+            verifier_role=verifier_role,
+            verification_evidence=evidence_ref,
+        )
+    # Dormant-role routing seam (TASK-AR-592): a claim release is a task
+    # closeout, a high-risk event the audit flagged as never exercising the
+    # review roles. When AR_ROLE_ROUTING is ON, dispatch an ADDITIVE reviewer
+    # pass against a DISTINCT synthetic task id; it runs in parallel and never
+    # removes or mutates this lead-engineer claim. A HIGH-RISK claim (one
+    # carrying escalation_triggers or a risk tag matching an ESCALATION_TRIGGER)
+    # ALSO auto-dispatches an adversarial skeptic pass. Flag-OFF (default) and
+    # any routing fault are no-ops — a routing failure must NEVER break the
+    # release (mirrors the a2a_claim_emitter robustness above).
+    try:
+        triggers = list(claim.get("escalation_triggers") or []) + [
+            t for t in (claim.get("tags") or []) if t in model_routing.ESCALATION_TRIGGERS
+        ]
+        overlay_marker = claim.get("overlay")
+        if isinstance(overlay_marker, str):
+            is_overlay = overlay_marker.strip().lower() not in {"", "0", "false", "no", "off", "none", "null"}
+        elif overlay_marker is None:
+            is_overlay = False
+        elif isinstance(overlay_marker, (bool, int, float)):
+            is_overlay = bool(overlay_marker)
+        else:
+            is_overlay = True
+        if not is_overlay and role_routing is not None:
+            role_routing.route_review_pass(
+                root,
+                task_id=str(claim.get("task_id") or ""),
+                task_set_id=str(claim.get("task_set_id") or ""),
+                event="closeout",
+                triggers=triggers,
+                now=now_text,
+            )
+    except Exception:  # noqa: BLE001 - routing is best-effort overlay only
+        pass
     if str(claim.get("phase") or "").strip().lower() == "taskset-completed":
         # Taskset boundary reached: emit a completion signal so the runtime
         # (boundary guard + UI banner) can enforce STOP-and-report rather than
@@ -975,7 +1152,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=[],
         help="Declared footprint entry, repo-relative (repeatable); derived from --unit-spec when omitted",
     )
-    create.add_argument("--model-tier", default="")
+    create.add_argument(
+        "--model-tier",
+        default="",
+        help="Requested PM tier; derives from unit/task metadata when omitted",
+    )
     create.add_argument("--wip-slot", type=int, default=0)
     create.add_argument("--stop-condition", default="")
     create.add_argument("--mode", default="work")
@@ -991,6 +1172,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         help="Explicit defect signature or raw stable defect phrase (repeatable)",
+    )
+    create.add_argument(
+        "--escalation-trigger",
+        action="append",
+        default=[],
+        help=(
+            "High-risk escalation signal carried on the claim (repeatable), e.g. "
+            "high_risk / security / external_effect / cross_cutting / "
+            "repeated_failure. Read at closeout to route an adversarial review."
+        ),
     )
     create.add_argument("--now")
     create.add_argument("--suffix")

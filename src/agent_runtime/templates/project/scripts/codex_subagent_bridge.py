@@ -3,8 +3,8 @@
 
 This module does not pretend that repository Python can call Codex platform
 developer tools. Instead, it creates an auditable packet for the *parent Codex
-session* to execute with `multi_agent_v1.spawn_agent`, then records the result
-back into the existing message bus.
+session* to execute through its native subagent-spawn capability, then records
+the result back into the existing message bus.
 
 Workflow:
   1. dispatch       -> render prompt + optional subagent_call + packet JSON
@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import math
 import sys
 import uuid
 from pathlib import Path
@@ -33,10 +34,11 @@ if sys.platform == "win32":
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import subagent_council as sc  # noqa: E402
 import subagent_dispatch as sd  # noqa: E402
+import model_routing  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 BRIDGE_DIR = ROOT / "agents" / "runtime" / "codex_subagents"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _now() -> _dt.datetime:
@@ -99,16 +101,102 @@ def _suggested_agent_type(role_id: str) -> str:
     return "worker" if role_id == "implementer" else "explorer"
 
 
-def _execution_instructions(role_id: str) -> dict:
+def _task_name(role_id: str, task_id: str) -> str:
+    raw = f"{role_id}_{task_id}".lower()
+    name = "".join(ch if ch.isalnum() else "_" for ch in raw)
+    return "_".join(part for part in name.split("_") if part)[:64] or "subagent"
+
+
+def _execution_instructions(
+    role_id: str,
+    task_id: str,
+    prompt: str,
+    route: dict,
+) -> dict:
     return {
-        "tool": "multi_agent_v1.spawn_agent",
+        "capability": "native_subagent_spawn",
+        "tool_hint": "collaboration.spawn_agent",
         "suggested_agent_type": _suggested_agent_type(role_id),
         "parent_session_only": True,
+        "spawn_args": {
+            "task_name": _task_name(role_id, task_id),
+            "message": prompt,
+            "model": route.get("resolved_model"),
+            "reasoning_effort": route.get("reasoning_effort"),
+        },
         "after_completion": (
             "Run `python scripts/codex_subagent_bridge.py record-reply "
             "--bridge-id <id> --verdict <APPROVED|NEEDS_CHANGES|...> "
             "--summary-file <file>` from the parent Codex session."
         ),
+    }
+
+
+def _optional_nonnegative_int(value: int | str | None, field: str) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field} must be a non-negative integer") from exc
+    if parsed < 0:
+        raise ValueError(f"{field} must be a non-negative integer")
+    return parsed
+
+
+def _optional_nonnegative_float(
+    value: float | str | None,
+    field: str,
+) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field} must be a non-negative number") from exc
+    if not math.isfinite(parsed) or parsed < 0:
+        raise ValueError(f"{field} must be a non-negative number")
+    return parsed
+
+
+def _completion_observation(
+    *,
+    provider: str | None = None,
+    model: str | None = None,
+    reasoning_effort: str | None = None,
+    tokens_in: int | str | None = None,
+    tokens_out: int | str | None = None,
+    latency_ms: float | str | None = None,
+    billed_cost: float | str | None = None,
+    currency: str | None = None,
+) -> dict:
+    observed_in = _optional_nonnegative_int(tokens_in, "tokens_in")
+    observed_out = _optional_nonnegative_int(tokens_out, "tokens_out")
+    observed_latency = _optional_nonnegative_float(latency_ms, "latency_ms")
+    observed_cost = _optional_nonnegative_float(billed_cost, "billed_cost")
+    observed_currency = str(currency or "").strip().upper() or None
+    if observed_cost is not None and observed_currency is None:
+        raise ValueError("currency is required when billed_cost is supplied")
+    token_status = (
+        "observed"
+        if observed_in is not None and observed_out is not None
+        else "partial"
+        if observed_in is not None or observed_out is not None
+        else "unavailable"
+    )
+    return {
+        "observed_provider": str(provider or "").strip() or None,
+        "observed_model": str(model or "").strip() or None,
+        "observed_reasoning_effort": str(reasoning_effort or "").strip() or None,
+        "model_observation_status": "observed" if model else "unverified",
+        "token_usage_status": token_status,
+        "tokens_in": observed_in,
+        "tokens_out": observed_out,
+        "latency_status": "observed" if observed_latency is not None else "unavailable",
+        "latency_ms": observed_latency,
+        "billed_cost_status": "observed" if observed_cost is not None else "unavailable",
+        "billed_cost": observed_cost,
+        "currency": observed_currency,
     }
 
 
@@ -154,6 +242,22 @@ def _parse_verdicts(items: list[str]) -> list[sc.Verdict]:
     return verdicts
 
 
+def _parse_observations(items: list[str]) -> dict[str, dict]:
+    observations: dict[str, dict] = {}
+    for raw in items or []:
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"--observation must be a JSON object: {exc}") from exc
+        if not isinstance(payload, dict):
+            raise ValueError("--observation must be a JSON object")
+        role = str(payload.pop("role", "")).strip()
+        if not role:
+            raise ValueError("--observation JSON requires a role field")
+        observations[role] = payload
+    return observations
+
+
 def create_dispatch_packet(
     *,
     role_id: str,
@@ -162,11 +266,45 @@ def create_dispatch_packet(
     context_packet_path: str | None = None,
     sender: str = "lead-engineer",
     evidence: list[str] | None = None,
+    requested_tier: str | None = None,
+    escalation_triggers: list[str] | None = None,
+    preflight_status: str | None = None,
+    preflight_evidence: list[str] | None = None,
     emit_call: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """Create a single Codex subagent dispatch packet."""
     sd.get_role(role_id)
+    preflight = model_routing.deterministic_preflight(
+        intent,
+        status=preflight_status,
+        evidence=preflight_evidence,
+    )
+    if preflight["status"] == "completed_sufficient":
+        return {
+            "id": _new_id("CODEX-SUBAGENT"),
+            "schema_version": SCHEMA_VERSION,
+            "kind": "codex_session_subagent_dispatch",
+            "runtime": "codex-session",
+            "status": "deterministic_complete_no_spawn",
+            "task_id": task_id,
+            "role": role_id,
+            "intent": intent,
+            "deterministic_preflight": preflight,
+            "execution": None,
+        }
+    if not preflight["allow_dispatch"]:
+        raise ValueError(f"model dispatch blocked: {preflight['reason']}")
+    tier_route = model_routing.resolve_subagent_tier(
+        role_id,
+        requested_tier=requested_tier,
+        escalation_triggers=escalation_triggers,
+    )
+    provider_route = model_routing.resolve_provider_route(
+        "native-codex",
+        tier_route["selected_tier"],
+        requested_tier=tier_route["requested_tier"],
+    )
     bridge_id = _new_id("CODEX-SUBAGENT")
     prompt = sd.render_prompt(
         role_id=role_id,
@@ -175,9 +313,11 @@ def create_dispatch_packet(
         context_packet_path=context_packet_path,
         extra_context=(
             "Codex runtime note: this is a session-layer subagent dispatch. "
-            "The parent Codex session will call `multi_agent_v1.spawn_agent`; "
+            "The parent Codex session will use its native subagent capability; "
             "repository Python only records the packet and evidence."
         ),
+        tier_route=tier_route,
+        provider_route=provider_route,
     )
     packet_path = _packet_path(bridge_id)
     ev = list(evidence or [])
@@ -192,6 +332,8 @@ def create_dispatch_packet(
             intent=intent,
             sender=sender,
             evidence=ev,
+            tier_route=tier_route,
+            provider_route=provider_route,
             dry_run=dry_run,
         )
         event_path = sd.emit_event(
@@ -203,6 +345,13 @@ def create_dispatch_packet(
                 "bridge_id": bridge_id,
                 "message_id": call_path.stem,
                 "intent": intent,
+                **sd.routing_event_fields(
+                    None,
+                    dispatch_id=bridge_id,
+                    provider="native-codex",
+                    route=provider_route,
+                    preflight=preflight,
+                ),
             },
             dry_run=dry_run,
         )
@@ -218,12 +367,20 @@ def create_dispatch_packet(
         "task_id": task_id,
         "role": role_id,
         "intent": intent,
+        "dispatch_id": bridge_id,
         "context_packet": context_packet_path,
         "evidence": ev,
         "prompt": prompt,
+        "routing": {
+            **tier_route,
+            **provider_route,
+        },
+        "deterministic_preflight": preflight,
         "call_message": _display(call_path),
         "dispatch_event": _display(event_path),
-        "execution": _execution_instructions(role_id),
+        "execution": _execution_instructions(
+            role_id, task_id, prompt, provider_route
+        ),
     }
     _write_packet(packet, dry_run=dry_run)
     return packet
@@ -240,6 +397,14 @@ def record_reply(
     summary: str | None = None,
     summary_file: str | None = None,
     evidence: list[str] | None = None,
+    observed_provider: str | None = None,
+    observed_model: str | None = None,
+    observed_reasoning_effort: str | None = None,
+    tokens_in: int | str | None = None,
+    tokens_out: int | str | None = None,
+    latency_ms: float | str | None = None,
+    billed_cost: float | str | None = None,
+    currency: str | None = None,
     dry_run: bool = False,
 ) -> dict:
     """Record a completed Codex subagent result as subagent_reply evidence."""
@@ -272,6 +437,28 @@ def record_reply(
         evidence=ev,
         dry_run=dry_run,
     )
+    observation = _completion_observation(
+        provider=observed_provider,
+        model=observed_model,
+        reasoning_effort=observed_reasoning_effort,
+        tokens_in=tokens_in,
+        tokens_out=tokens_out,
+        latency_ms=latency_ms,
+        billed_cost=billed_cost,
+        currency=currency,
+    )
+    requested_route = dict(packet.get("routing") or {})
+    completed_route = model_routing.resolve_provider_route(
+        "native-codex",
+        str(requested_route.get("selected_tier") or "worker_standard"),
+        requested_tier=str(
+            requested_route.get("requested_tier")
+            or requested_route.get("selected_tier")
+            or "worker_standard"
+        ),
+        observed_model=observation["observed_model"],
+        observed_reasoning_effort=observation["observed_reasoning_effort"],
+    )
     event_path = sd.emit_event(
         role_id=role,
         task_id=task,
@@ -282,6 +469,14 @@ def record_reply(
             "message_id": reply_path.stem,
             "in_reply_to": parent,
             "verdict": verdict,
+            **sd.routing_event_fields(
+                None,
+                dispatch_id=str(packet.get("dispatch_id") or bridge_id),
+                provider="native-codex",
+                route=completed_route,
+                preflight=dict(packet.get("deterministic_preflight") or {}),
+            ),
+            **observation,
         },
         dry_run=dry_run,
     )
@@ -293,6 +488,8 @@ def record_reply(
         "reply_message": _display(reply_path),
         "reply_event": _display(event_path),
         "parent_marked_answered": marked,
+        "completion_observation": observation,
+        "routing_completion": completed_route,
     }
     _update_packet(bridge_id, updates, dry_run=dry_run)
     return {**updates, "role": role, "task_id": task, "summary": text}
@@ -307,12 +504,34 @@ def create_council_packet(
     context_packet_path: str | None = None,
     sender: str = "lead-engineer",
     evidence: list[str] | None = None,
+    preflight_status: str | None = None,
+    preflight_evidence: list[str] | None = None,
     emit_calls: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """Create a Codex subagent council packet with one prompt per member."""
     if method not in sc.CONSENSUS_METHODS:
         raise ValueError(f"method must be one of {sorted(sc.CONSENSUS_METHODS)}")
+    preflight = model_routing.deterministic_preflight(
+        intent,
+        status=preflight_status,
+        evidence=preflight_evidence,
+    )
+    if not preflight["allow_dispatch"]:
+        if preflight["status"] == "completed_sufficient":
+            return {
+                "id": _new_id("CODEX-COUNCIL"),
+                "schema_version": SCHEMA_VERSION,
+                "kind": "codex_session_subagent_council",
+                "runtime": "codex-session",
+                "status": "deterministic_complete_no_spawn",
+                "task_id": task_id,
+                "members": members,
+                "intent": intent,
+                "deterministic_preflight": preflight,
+                "execution": None,
+            }
+        raise ValueError(f"model dispatch blocked: {preflight['reason']}")
     prompts = sc.render_council_prompts(
         task_id=task_id,
         members=members,
@@ -325,14 +544,53 @@ def create_council_packet(
     ev.append(_display(packet_path) or str(packet_path))
 
     calls: list[dict] = []
+    member_execution: dict[str, dict] = {}
+    for member in members:
+        tier_route = model_routing.resolve_subagent_tier(member)
+        provider_route = model_routing.resolve_provider_route(
+            "native-codex",
+            tier_route["selected_tier"],
+            requested_tier=tier_route["requested_tier"],
+        )
+        prompts[member] = sd.render_prompt(
+            role_id=member,
+            task_id=task_id,
+            intent=intent,
+            context_packet_path=context_packet_path,
+            extra_context=(
+                f"Codex council member: {member}. The parent session executes "
+                "the exact native spawn arguments recorded in this packet."
+            ),
+            tier_route=tier_route,
+            provider_route=provider_route,
+        )
+        member_execution[member] = {
+            "routing": {**tier_route, **provider_route},
+            "spawn_args": _execution_instructions(
+                member, task_id, prompts[member], provider_route
+            )["spawn_args"],
+        }
     if emit_calls:
         for member in members:
+            member_route = member_execution[member]["routing"]
             call_path = sd.emit_call_message(
                 role_id=member,
                 task_id=task_id,
                 intent=f"{intent} (council member: {member})",
                 sender=sender,
                 evidence=ev,
+                tier_route={
+                    key: value
+                    for key, value in member_route.items()
+                    if key
+                    in {
+                        "role",
+                        "escalation_triggers",
+                        "unknown_triggers",
+                        "reason",
+                    }
+                },
+                provider_route=member_route,
                 dry_run=dry_run,
             )
             event_path = sd.emit_event(
@@ -345,6 +603,13 @@ def create_council_packet(
                     "council_member": member,
                     "message_id": call_path.stem,
                     "intent": intent,
+                    **sd.routing_event_fields(
+                        None,
+                        dispatch_id=f"{bridge_id}:{member}",
+                        provider="native-codex",
+                        route=member_route,
+                        preflight=preflight,
+                    ),
                 },
                 dry_run=dry_run,
             )
@@ -352,6 +617,7 @@ def create_council_packet(
                 "role": member,
                 "call_message": _display(call_path),
                 "dispatch_event": _display(event_path),
+                "routing": member_route,
             })
 
     packet = {
@@ -369,11 +635,18 @@ def create_council_packet(
         "context_packet": context_packet_path,
         "evidence": ev,
         "prompts": prompts,
+        "deterministic_preflight": preflight,
+        "member_execution": member_execution,
         "call_messages": calls,
         "execution": {
-            "tool": "multi_agent_v1.spawn_agent",
+            "capability": "native_subagent_spawn",
+            "tool_hint": "collaboration.spawn_agent",
             "parent_session_only": True,
             "suggested_parallelism": "spawn one Codex subagent per member",
+            "spawn_args_by_member": {
+                role: data["spawn_args"]
+                for role, data in member_execution.items()
+            },
             "after_completion": (
                 "Run `python scripts/codex_subagent_bridge.py council-record "
                 "--bridge-id <id> --task-id <task> --method <method> "
@@ -392,6 +665,7 @@ def record_council(
     method: str | None,
     verdicts: list[sc.Verdict],
     sender: str = "lead-engineer",
+    observations: dict[str, dict] | None = None,
     dry_run: bool = False,
 ) -> dict:
     packet = _load_packet(bridge_id)
@@ -406,6 +680,33 @@ def record_council(
         sender=sender,
         dry_run=dry_run,
     )
+    supplied_observations = observations or {}
+    member_observations = {
+        role: _completion_observation(
+            **dict(supplied_observations.get(role) or {})
+        )
+        for role in packet.get("members") or []
+    }
+    member_routing: dict[str, dict] = {}
+    for role in packet.get("members") or []:
+        requested = dict(
+            (packet.get("member_execution") or {}).get(role, {}).get("routing")
+            or {}
+        )
+        observation = member_observations[role]
+        member_routing[role] = model_routing.resolve_provider_route(
+            "native-codex",
+            str(requested.get("selected_tier") or "worker_standard"),
+            requested_tier=str(
+                requested.get("requested_tier")
+                or requested.get("selected_tier")
+                or "worker_standard"
+            ),
+            observed_model=observation.get("observed_model"),
+            observed_reasoning_effort=observation.get(
+                "observed_reasoning_effort"
+            ),
+        )
     event_path = sd.emit_event(
         role_id="council",
         task_id=task,
@@ -416,6 +717,33 @@ def record_council(
             "method": result.method,
             "final": result.final,
             "message_id": consensus_path.stem,
+            "dispatch_id": bridge_id,
+            "provider": "native-codex",
+            "execution_surface": "native_subagent_spawn",
+            "requested_tier": "per_member",
+            "selected_tier": "per_member",
+            "provider_tier": "per_member",
+            "resolved_model": "per_member",
+            "model_source": "per_member",
+            "reasoning_effort": "per_member",
+            "route_status": "per_member",
+            "equivalence_status": "per_member",
+            "application_status": "per_member",
+            "model_observation_status": "per_member",
+            "token_usage_status": "per_member",
+            "latency_status": "per_member",
+            "billed_cost_status": "per_member",
+            "deterministic_preflight": str(
+                (packet.get("deterministic_preflight") or {}).get(
+                    "status", "not_recorded"
+                )
+            ),
+            "deterministic_evidence": list(
+                (packet.get("deterministic_preflight") or {}).get("evidence")
+                or []
+            ),
+            "member_routing": member_routing,
+            "member_observations": member_observations,
         },
         dry_run=dry_run,
     )
@@ -435,6 +763,8 @@ def record_council(
         "consensus_message": _display(consensus_path),
         "verdict_event": _display(event_path),
         "parent_calls_marked_answered": marked_calls,
+        "member_routing_completion": member_routing,
+        "member_observations": member_observations,
     }
     _update_packet(bridge_id, updates, dry_run=dry_run)
     return {**updates, "task_id": task, "method": result.method}
@@ -453,7 +783,7 @@ def _print_packet(packet: dict, as_json: bool) -> None:
         print("call_messages:")
         for call in packet["call_messages"]:
             print(f"  - {call['role']}: {call['call_message']}")
-    print("execution: parent Codex session must call multi_agent_v1.spawn_agent")
+    print("execution: parent Codex session must use native_subagent_spawn")
     if "prompt" in packet:
         print("\n--- prompt ---")
         print(packet["prompt"])
@@ -464,16 +794,24 @@ def _print_packet(packet: dict, as_json: bool) -> None:
 
 
 def _cmd_dispatch(args: argparse.Namespace) -> int:
-    packet = create_dispatch_packet(
-        role_id=args.role,
-        task_id=args.task_id,
-        intent=args.intent,
-        context_packet_path=args.context_packet,
-        sender=args.sender,
-        evidence=args.evidence or [],
-        emit_call=args.emit_call,
-        dry_run=args.dry_run,
-    )
+    try:
+        packet = create_dispatch_packet(
+            role_id=args.role,
+            task_id=args.task_id,
+            intent=args.intent,
+            context_packet_path=args.context_packet,
+            sender=args.sender,
+            evidence=args.evidence or [],
+            requested_tier=args.pm_tier,
+            escalation_triggers=args.escalation_trigger,
+            preflight_status=args.preflight_status,
+            preflight_evidence=args.preflight_evidence,
+            emit_call=args.emit_call,
+            dry_run=args.dry_run,
+        )
+    except (ValueError, KeyError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     _print_packet(packet, args.json)
     return 0
 
@@ -490,6 +828,14 @@ def _cmd_record_reply(args: argparse.Namespace) -> int:
             summary=args.summary,
             summary_file=args.summary_file,
             evidence=args.evidence or [],
+            observed_provider=args.observed_provider,
+            observed_model=args.observed_model,
+            observed_reasoning_effort=args.observed_reasoning_effort,
+            tokens_in=args.tokens_in,
+            tokens_out=args.tokens_out,
+            latency_ms=args.latency_ms,
+            billed_cost=args.billed_cost,
+            currency=args.currency,
             dry_run=args.dry_run,
         )
     except (FileNotFoundError, ValueError, KeyError) as exc:
@@ -510,6 +856,8 @@ def _cmd_council_plan(args: argparse.Namespace) -> int:
             context_packet_path=args.context_packet,
             sender=args.sender,
             evidence=args.evidence or [],
+            preflight_status=args.preflight_status,
+            preflight_evidence=args.preflight_evidence,
             emit_calls=args.emit_calls,
             dry_run=args.dry_run,
         )
@@ -523,12 +871,14 @@ def _cmd_council_plan(args: argparse.Namespace) -> int:
 def _cmd_council_record(args: argparse.Namespace) -> int:
     try:
         verdicts = _parse_verdicts(args.verdict)
+        observations = _parse_observations(args.observation)
         result = record_council(
             bridge_id=args.bridge_id,
             task_id=args.task_id,
             method=args.method,
             verdicts=verdicts,
             sender=args.sender,
+            observations=observations,
             dry_run=args.dry_run,
         )
     except (FileNotFoundError, ValueError, KeyError) as exc:
@@ -552,6 +902,13 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--context-packet")
     d.add_argument("--sender", default="lead-engineer")
     d.add_argument("--evidence", action="append")
+    d.add_argument("--pm-tier", choices=sorted(model_routing.ALLOWED_PM_TIERS))
+    d.add_argument("--escalation-trigger", action="append", default=[])
+    d.add_argument(
+        "--preflight-status",
+        choices=sorted(model_routing.PREFLIGHT_STATUSES),
+    )
+    d.add_argument("--preflight-evidence", action="append", default=[])
     d.add_argument("--emit-call", action="store_true")
     d.add_argument("--dry-run", action="store_true")
     d.add_argument("--json", action="store_true")
@@ -567,6 +924,14 @@ def build_parser() -> argparse.ArgumentParser:
     rr.add_argument("--summary-file")
     rr.add_argument("--sender", default="lead-engineer")
     rr.add_argument("--evidence", action="append")
+    rr.add_argument("--observed-provider")
+    rr.add_argument("--observed-model")
+    rr.add_argument("--observed-reasoning-effort")
+    rr.add_argument("--tokens-in", type=int)
+    rr.add_argument("--tokens-out", type=int)
+    rr.add_argument("--latency-ms", type=float)
+    rr.add_argument("--billed-cost", type=float)
+    rr.add_argument("--currency")
     rr.add_argument("--dry-run", action="store_true")
     rr.set_defaults(func=_cmd_record_reply)
 
@@ -579,6 +944,11 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--context-packet")
     cp.add_argument("--sender", default="lead-engineer")
     cp.add_argument("--evidence", action="append")
+    cp.add_argument(
+        "--preflight-status",
+        choices=sorted(model_routing.PREFLIGHT_STATUSES),
+    )
+    cp.add_argument("--preflight-evidence", action="append", default=[])
     cp.add_argument("--emit-calls", action="store_true")
     cp.add_argument("--dry-run", action="store_true")
     cp.add_argument("--json", action="store_true")
@@ -591,6 +961,12 @@ def build_parser() -> argparse.ArgumentParser:
     cr.add_argument("--verdict", action="append", required=True,
                     help="role=vote[:summary], repeatable")
     cr.add_argument("--sender", default="lead-engineer")
+    cr.add_argument(
+        "--observation",
+        action="append",
+        default=[],
+        help='Member observation JSON, e.g. {"role":"reviewer","model":"...","tokens_in":1}',
+    )
     cr.add_argument("--dry-run", action="store_true")
     cr.set_defaults(func=_cmd_council_record)
 

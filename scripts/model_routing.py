@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Deterministic model-tier routing for task and unit records."""
+"""Provider-aware model routing and deterministic-first dispatch policy.
+
+PM tiers are the stable repository contract.  Haiku/sonnet/opus are retained
+as compatibility aliases for older Claude-facing records; they are not treated
+as proof that another provider changed models.
+"""
 
 from __future__ import annotations
 
@@ -34,6 +39,39 @@ CODEX_AGENT_MODEL_ENV = {
     "opus": ("CODEX_AGENT_OPUS_MODEL", "gpt-5.2-codex"),
 }
 
+NATIVE_CODEX_MODEL_ENV = {
+    "worker_low": (
+        "CODEX_NATIVE_WORKER_LOW_MODEL",
+        "gpt-5.6-terra",
+        "CODEX_NATIVE_WORKER_LOW_REASONING",
+        "low",
+    ),
+    "worker_standard": (
+        "CODEX_NATIVE_WORKER_STANDARD_MODEL",
+        "gpt-5.6-terra",
+        "CODEX_NATIVE_WORKER_STANDARD_REASONING",
+        "medium",
+    ),
+    "planner_high": (
+        "CODEX_NATIVE_STRONG_MODEL",
+        "gpt-5.6-sol",
+        "CODEX_NATIVE_PLANNER_HIGH_REASONING",
+        "high",
+    ),
+    "reviewer_standard": (
+        "CODEX_NATIVE_STRONG_MODEL",
+        "gpt-5.6-sol",
+        "CODEX_NATIVE_REVIEWER_STANDARD_REASONING",
+        "high",
+    ),
+    "reviewer_high": (
+        "CODEX_NATIVE_STRONG_MODEL",
+        "gpt-5.6-sol",
+        "CODEX_NATIVE_REVIEWER_HIGH_REASONING",
+        "xhigh",
+    ),
+}
+
 # provider name -> (provider env var carrying the resolved model, tier->model map).
 # Any provider absent from this table (incl. bare "claude") gets no routed model.
 PROVIDER_MODEL_ENV = {
@@ -53,6 +91,7 @@ PM_TIER_TO_PROVIDER_TIER = {
 ALLOWED_PM_TIERS = set(PM_TIER_TO_PROVIDER_TIER)
 ESCALATION_TRIGGERS = {
     "ambiguity",
+    "data_integrity",
     "high_risk",
     "security",
     "cross_cutting",
@@ -61,11 +100,27 @@ ESCALATION_TRIGGERS = {
 }
 HIGH_TIER_TRIGGERS = {
     "ambiguity",
+    "data_integrity",
     "high_risk",
     "security",
     "cross_cutting",
     "external_effect",
     "repeated_failure",
+}
+
+SUBAGENT_ROLE_PM_TIER = {
+    "explorer": "worker_low",
+    "implementer": "worker_low",
+    "strategist": "planner_high",
+    "reviewer": "reviewer_standard",
+    "auditor": "reviewer_high",
+    "skeptic": "reviewer_high",
+}
+
+PREFLIGHT_STATUSES = {
+    "not_required",
+    "attempted_insufficient",
+    "completed_sufficient",
 }
 
 SIMPLE_LOOKUP_RE = re.compile(
@@ -255,6 +310,360 @@ def resolve_work_item_tier(
             if selected_tier != requested_tier
             else "task/unit tier policy"
         ),
+    }
+
+
+def resolve_subagent_tier(
+    role_id: str,
+    *,
+    requested_tier: str | None = None,
+    escalation_triggers: Iterable[str] | None = None,
+) -> dict[str, Any]:
+    """Resolve a subagent role into a PM tier without naming a provider model."""
+    role = str(role_id or "").strip().lower()
+    default = SUBAGENT_ROLE_PM_TIER.get(role, "worker_standard")
+    requested = normalize_pm_tier(requested_tier, default=default)
+    triggers = sorted(set(_as_list(escalation_triggers)))
+    unknown = [trigger for trigger in triggers if trigger not in ESCALATION_TRIGGERS]
+    selected = requested
+    if set(triggers) & HIGH_TIER_TRIGGERS:
+        if requested.startswith("worker_"):
+            selected = "planner_high"
+        elif requested == "reviewer_standard":
+            selected = "reviewer_high"
+    return {
+        "role": role,
+        "requested_tier": requested,
+        "selected_tier": selected,
+        "provider_tier": PM_TIER_TO_PROVIDER_TIER[selected],
+        "escalation_triggers": triggers,
+        "unknown_triggers": unknown,
+        "routing_status": (
+            "unverified"
+            if unknown
+            else "escalated"
+            if selected != requested
+            else "selected"
+        ),
+        "reason": (
+            "unknown escalation trigger requires review"
+            if unknown
+            else "escalated by registered high-risk trigger"
+            if selected != requested
+            else f"default tier for {role or 'unregistered'} role"
+        ),
+    }
+
+
+def deterministic_preflight(
+    prompt: str,
+    *,
+    status: str | None = None,
+    evidence: Iterable[str] | None = None,
+) -> dict[str, Any]:
+    """Return the deterministic-first gate for a possible model dispatch.
+
+    Lookup-only work must either finish without a model call or carry bounded
+    evidence that deterministic tools were attempted and were insufficient.
+    This function records policy only; it never executes a tool.
+    """
+    signals = _signals(prompt)
+    required = "simple_lookup" in signals and "deep_reasoning" not in signals
+    supplied = str(status or "").strip().lower()
+    items = _as_list(evidence)
+    if not required:
+        effective = supplied if supplied in PREFLIGHT_STATUSES else "not_required"
+        allow = effective != "completed_sufficient"
+        return {
+            "required": False,
+            "status": effective,
+            "evidence": items,
+            "allow_dispatch": allow,
+            "dispatch_required": allow,
+            "reason": (
+                "deterministic work completed; no model dispatch"
+                if not allow
+                else "deterministic preflight not required"
+            ),
+        }
+    if supplied == "completed_sufficient":
+        return {
+            "required": True,
+            "status": supplied,
+            "evidence": items,
+            "allow_dispatch": False,
+            "dispatch_required": False,
+            "reason": "deterministic work completed sufficiently; no model dispatch",
+        }
+    if supplied == "attempted_insufficient" and items:
+        return {
+            "required": True,
+            "status": supplied,
+            "evidence": items,
+            "allow_dispatch": True,
+            "dispatch_required": True,
+            "reason": "bounded deterministic attempt was insufficient",
+        }
+    return {
+        "required": True,
+        "status": "required_unresolved",
+        "evidence": items,
+        "allow_dispatch": False,
+        "dispatch_required": False,
+        "reason": (
+            "attempted_insufficient requires bounded evidence"
+            if supplied == "attempted_insufficient"
+            else "lookup-only dispatch requires deterministic preflight"
+        ),
+    }
+
+
+def _provider_mapping(
+    provider_name: str,
+    pm_tier: str,
+) -> dict[str, Any] | None:
+    provider = str(provider_name or "").strip().lower()
+    if provider in {"native-codex", "codex-session", "codex-native"}:
+        model_env, default_model, reasoning_env, default_reasoning = NATIVE_CODEX_MODEL_ENV[pm_tier]
+        model_is_override = model_env in os.environ
+        reasoning_is_override = reasoning_env in os.environ
+        return {
+            "provider": "native-codex",
+            "execution_surface": "native_subagent_spawn",
+            "resolved_model": os.environ.get(model_env, default_model),
+            "model_source": (
+                f"environment:{model_env}"
+                if model_is_override
+                else f"adapter_default:{model_env}"
+            ),
+            "reasoning_effort": os.environ.get(reasoning_env, default_reasoning),
+            "reasoning_source": (
+                f"environment:{reasoning_env}"
+                if reasoning_is_override
+                else f"adapter_default:{reasoning_env}"
+            ),
+        }
+    mapping = PROVIDER_MODEL_ENV.get(provider)
+    if mapping is None:
+        return None
+    env_var_name, tier_map = mapping
+    provider_tier = PM_TIER_TO_PROVIDER_TIER[pm_tier]
+    env_name, default_model = tier_map[provider_tier]
+    return {
+        "provider": provider,
+        "execution_surface": "provider_worker",
+        "resolved_model": os.environ.get(env_name, default_model),
+        "model_source": (
+            f"environment:{env_name}"
+            if env_name in os.environ
+            else f"adapter_default:{env_name}"
+        ),
+        "reasoning_effort": None,
+        "reasoning_source": "unsupported",
+        "provider_env_name": env_var_name,
+    }
+
+
+def _tier_from_compatibility(value: str | None) -> str | None:
+    text = str(value or "").strip().lower()
+    if text in ALLOWED_PM_TIERS:
+        return text
+    return {
+        "haiku": "worker_low",
+        "sonnet": "worker_standard",
+        "opus": "planner_high",
+    }.get(text)
+
+
+def provider_routing_matrix(provider_name: str) -> dict[str, Any]:
+    """Describe configured tier mappings without making a provider call."""
+    rows: list[dict[str, Any]] = []
+    groups: dict[str, list[str]] = {}
+    for tier in PM_TIER_TO_PROVIDER_TIER:
+        resolved = _provider_mapping(provider_name, tier)
+        if resolved is None:
+            continue
+        model = str(resolved["resolved_model"])
+        groups.setdefault(model, []).append(tier)
+        rows.append(
+            {
+                "pm_tier": tier,
+                "provider_tier": PM_TIER_TO_PROVIDER_TIER[tier],
+                **resolved,
+                "availability_status": "configured_unverified",
+            }
+        )
+    for row in rows:
+        equivalent = groups[str(row["resolved_model"])]
+        row["equivalent_tiers"] = list(equivalent)
+        row["equivalence_status"] = (
+            "equivalent" if len(equivalent) > 1 else "distinct"
+        )
+        row["route_status"] = (
+            "ineffective_equivalent" if len(equivalent) > 1 else "unverified"
+        )
+        row["economic_claim_status"] = (
+            "ineligible_equivalent" if len(equivalent) > 1 else "unverified"
+        )
+    return {
+        "provider": (
+            "native-codex"
+            if str(provider_name).lower() in {"native-codex", "codex-session", "codex-native"}
+            else str(provider_name)
+        ),
+        "status": "configured_unverified" if rows else "unsupported",
+        "rows": rows,
+        "equivalence_groups": [
+            {"resolved_model": model, "tiers": tiers}
+            for model, tiers in sorted(groups.items())
+            if len(tiers) > 1
+        ],
+    }
+
+
+def resolve_provider_route(
+    provider_name: str,
+    selected_tier: str,
+    *,
+    requested_tier: str | None = None,
+    baseline_tier: str | None = None,
+    baseline_model: str | None = None,
+    observed_model: str | None = None,
+    observed_reasoning_effort: str | None = None,
+) -> dict[str, Any]:
+    """Resolve configured provider/native intent and optional observations.
+
+    ``resolved_model`` is configuration intent.  ``observed_model`` is only
+    populated from an explicit completion observation supplied by the caller.
+    The latter is never inferred from a tier, callsign, or request environment.
+    """
+    selected_pm = _tier_from_compatibility(selected_tier)
+    requested_pm = _tier_from_compatibility(requested_tier) or selected_pm
+    if selected_pm is None:
+        mapping = PROVIDER_MODEL_ENV.get(str(provider_name or "").strip().lower())
+        if mapping is None:
+            return {
+                "provider": str(provider_name or ""),
+                "execution_surface": "unsupported",
+                "requested_tier": str(requested_tier or selected_tier),
+                "selected_tier": str(selected_tier),
+                "provider_tier": None,
+                "resolved_model": None,
+                "model_source": "unsupported",
+                "reasoning_effort": None,
+                "availability_status": "unsupported",
+                "route_status": "unsupported",
+                "application_status": "not_applied",
+                "economic_claim_status": "ineligible_unsupported",
+                "observed_model": observed_model,
+                "observed_reasoning_effort": observed_reasoning_effort,
+                "model_observation_status": (
+                    "observed" if observed_model else "unverified"
+                ),
+                "model_changed": None,
+            }
+        env_var_name, _tier_map = mapping
+        raw_model = str(selected_tier).strip()
+        return {
+            "provider": str(provider_name),
+            "execution_surface": "provider_worker",
+            "requested_tier": str(requested_tier or selected_tier),
+            "selected_tier": str(selected_tier),
+            "provider_tier": None,
+            "resolved_model": raw_model,
+            "model_source": "explicit_model",
+            "provider_env": {env_var_name: raw_model},
+            "reasoning_effort": None,
+            "availability_status": "configured_unverified",
+            "route_status": "unverified",
+            "application_status": (
+                "applied" if observed_model == raw_model else
+                "not_applied" if observed_model else "configured_unverified"
+            ),
+            "economic_claim_status": "unverified",
+            "observed_model": observed_model,
+            "observed_reasoning_effort": observed_reasoning_effort,
+            "model_observation_status": "observed" if observed_model else "unverified",
+            "model_changed": None,
+        }
+
+    resolved = _provider_mapping(provider_name, selected_pm)
+    if resolved is None:
+        return resolve_provider_route(
+            provider_name,
+            "__unsupported__",
+            requested_tier=requested_tier,
+            observed_model=observed_model,
+            observed_reasoning_effort=observed_reasoning_effort,
+        )
+    matrix = provider_routing_matrix(provider_name)
+    row = next(item for item in matrix["rows"] if item["pm_tier"] == selected_pm)
+    comparison_model = str(baseline_model or "").strip() or None
+    comparison_source = "explicit_baseline_model" if comparison_model else None
+    if comparison_model is None and baseline_tier:
+        baseline_pm = _tier_from_compatibility(baseline_tier)
+        baseline = _provider_mapping(provider_name, baseline_pm) if baseline_pm else None
+        if baseline:
+            comparison_model = str(baseline["resolved_model"])
+            comparison_source = f"baseline_tier:{baseline_pm}"
+    if comparison_model is None and requested_pm and requested_pm != selected_pm:
+        requested = _provider_mapping(provider_name, requested_pm)
+        if requested:
+            comparison_model = str(requested["resolved_model"])
+            comparison_source = f"requested_tier:{requested_pm}"
+    model_changed = (
+        None
+        if comparison_model is None
+        else comparison_model != str(resolved["resolved_model"])
+    )
+    if model_changed is True:
+        route_status = "effective"
+    elif model_changed is False or row["equivalence_status"] == "equivalent":
+        route_status = "ineffective_equivalent"
+    else:
+        route_status = "unverified"
+    application_status = "configured_unverified"
+    if observed_model:
+        application_status = (
+            "applied"
+            if observed_model == resolved["resolved_model"]
+            else "not_applied"
+        )
+    economic_status = "unverified"
+    if model_changed is False or row["equivalence_status"] == "equivalent":
+        economic_status = "ineligible_equivalent"
+    elif application_status == "applied" and model_changed is True:
+        economic_status = "needs_usage_evidence"
+    elif application_status == "not_applied":
+        economic_status = "ineligible_not_applied"
+    provider_env_value: dict[str, str] = {}
+    if resolved.get("provider_env_name"):
+        provider_env_value[str(resolved["provider_env_name"])] = str(
+            resolved["resolved_model"]
+        )
+    return {
+        "provider": resolved["provider"],
+        "execution_surface": resolved["execution_surface"],
+        "requested_tier": requested_pm or str(requested_tier or selected_tier),
+        "selected_tier": selected_pm,
+        "provider_tier": PM_TIER_TO_PROVIDER_TIER[selected_pm],
+        "resolved_model": resolved["resolved_model"],
+        "model_source": resolved["model_source"],
+        "provider_env": provider_env_value,
+        "reasoning_effort": resolved["reasoning_effort"],
+        "reasoning_source": resolved["reasoning_source"],
+        "baseline_model": comparison_model,
+        "baseline_model_source": comparison_source,
+        "equivalent_tiers": row["equivalent_tiers"],
+        "equivalence_status": row["equivalence_status"],
+        "model_changed": model_changed,
+        "availability_status": "configured_unverified",
+        "route_status": route_status,
+        "application_status": application_status,
+        "economic_claim_status": economic_status,
+        "observed_model": observed_model,
+        "observed_reasoning_effort": observed_reasoning_effort,
+        "model_observation_status": "observed" if observed_model else "unverified",
     }
 
 
