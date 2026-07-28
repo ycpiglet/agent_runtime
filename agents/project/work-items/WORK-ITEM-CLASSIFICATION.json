@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T06:03:29+09:00",
+  "generated_at": "2026-07-29T06:35:04+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5599,7 +5599,7 @@
       "number": "41.1.8.1",
       "label": "Unit 41.1.8.1",
       "id": "UNIT-TASK-AR-646-001",
-      "title": "UNIT-TASK-AR-646-001 - Add effective-tier detection and dispatch cost ledger",
+      "title": "UNIT-TASK-AR-646-001 - Add provider-aware routing and dispatch telemetry",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md",
       "parent_id": "TASK-AR-646",
       "status": "worker_ready"
