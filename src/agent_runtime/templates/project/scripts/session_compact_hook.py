@@ -35,7 +35,9 @@ def main(argv=None):
  try:event=json.load(sys.stdin)
  except Exception:event={}
  d=a.root/"agents/runtime/session_checkpoints"; d.mkdir(parents=True,exist_ok=True); out=d/"latest.json"; sid=re.sub(r"[^A-Za-z0-9_-]","_",str(event.get("session_id") or "default"))[:80]; per=d/f"{sid}.json"
- git=lambda *x: subprocess.run(["git","-C",str(a.root),*x],capture_output=True,text=True).stdout.strip()
+ def git(*args):
+  try: return subprocess.run(["git","-C",str(a.root),*args],capture_output=True,text=True,timeout=2).stdout.strip()
+  except Exception: return ""
  data={"schema":"agent-runtime-compact-checkpoint/v1","session_id":sid,"trigger":str(event.get("trigger") or "unknown")[:80],"phase":a.phase,"recorded_at":datetime.now(timezone.utc).isoformat(),**pointer_state(a.root/"agents/project/NEXT-SESSION-POINTER.yml"),"active_claims":active_claims(a.root),"git":{"branch":git("branch","--show-current"),"head":git("rev-parse","--short","HEAD"),"dirty_count":len(git("status","--porcelain").splitlines())},"rebootstrap_required":a.phase=="post-compact"}
  if a.phase=="post-compact" and per.exists():
   try:data.update(json.loads(per.read_text(encoding="utf-8")))

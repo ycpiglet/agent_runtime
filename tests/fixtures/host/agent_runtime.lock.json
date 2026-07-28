@@ -58,7 +58,7 @@
       "agents/project/PROJECT-CONTEXT.example.yml": "sha256:080571491dd6629b71cace425b9f4f9e7dd2984f08ca54ceab25cec57b239817",
       "agents/project/README.md": "sha256:91b62e1ae52a1b4cdb5a008daf6f230695f0c72772dd38acf36eb3122eacdeb5",
       "agents/project/ROADMAP.md": "sha256:50dac5ec32d2eb6386aa11fd98e4a19583564cfe053ac32da2d7a7a5e4f94ba6",
-      "agents/project/RUNTIME-ASSET-REGISTRY.json": "sha256:d123f31602d0f224be475317f94cd2dddd203d21417ea21b91a26aeaea1e4c33",
+      "agents/project/RUNTIME-ASSET-REGISTRY.json": "sha256:a1526f43c2b428a75668da667c116a671699c5e72d7e89f54a75e3b8fdc2f246",
       "agents/project/RUNTIME-PROFILE-MANIFEST.json": "sha256:ca130a24ffb1318ad2a27bc1d905892df69831959cf53c446cd5c988a8fa7cfb",
       "agents/project/SKILL-DATA-MAP.example.yml": "sha256:05da0f74b8a9a62a715091d164622efb6c3bb6fe0692e96a072edd19af121957",
       "agents/project/SKILL-GOVERNANCE.md": "sha256:29ba10607a25f7db5d4f9e8d990a06547c864fbfb9d6e2dcc6e41a659591faeb",
@@ -205,7 +205,7 @@
       "scripts/scribe_due.py": "sha256:3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
-      "scripts/session_compact_hook.py": "sha256:61aaa46507e319496cdd7173b683ada6bc87bfacf3e8453cacd4e041fa537a25",
+      "scripts/session_compact_hook.py": "sha256:3b9bacd25cb7badf8edd0abbba4c31ff855880710a31d4894da7994ba633935e",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
       "scripts/session_start_hook.py": "sha256:272d4e6f167aa3155702122b57f79cfb10b8a32a7b61043a08ca2d12a4424abf",
@@ -499,7 +499,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:cd2b204168dbb098987083f5bf8270380575d88005af19ca4c8be37d01ad7135",
+    "template_digest": "sha256:d3cec086b4f703cd0af7043423282d26c2042c34ce82b332b7c9605aef6b99e1",
     "template_files": 244
   },
   "profiles": [
