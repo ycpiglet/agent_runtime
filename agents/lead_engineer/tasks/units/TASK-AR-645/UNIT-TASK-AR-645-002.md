@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T03:29:46+09:00
+updated_at: 2026-07-29T04:52:04+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -23,8 +23,9 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
-context: At main d41da008 scribe_due reports ok with zero hot items for Agent Runtime's 1688-line STATUS because it recognizes one exact Korean heading. Config v2 already records scalar state_adapters but no runtime consumes them. Bean Wiki uses BACKLOG.md, Allimbot uses docs/PROJECT_STATUS.ko.md, and Autofolio retains a 1460-line host STATUS.
+context: At main 8cff865b Unit 001 is integrated and closed, but scribe_due still reports ok with zero hot items for Agent Runtime's 1688-line STATUS because it recognizes one exact Korean heading. Config v2 records scalar state_adapters but no runtime consumes them. Bean Wiki uses BACKLOG.md, Allimbot uses docs/PROJECT_STATUS.ko.md, and Autofolio retains a 1460-line host STATUS. Unit 002 must add the scribe obligation without weakening Unit 001's task-linked closure behavior.
 inputs:
+  - reviews/REVIEW-2026-07-29-task-ar-645-unit-002-t3-replan.md
   - reviews/REVIEW-2026-07-29-task-ar-645-w0-t3-replan.md
   - scripts/scribe_due.py
   - src/agent_runtime/templates/project/scripts/scribe_due.py
@@ -53,6 +54,11 @@ target_files:
   - tests/test_inventory_sync_sanitize.py
   - tests/test_template_smoke.py
   - tests/fixtures/host/agent_runtime.lock.json
+  - new:tests/fixtures/state_projection/agent-runtime-status.md
+  - new:tests/fixtures/state_projection/bean-wiki-backlog.md
+  - new:tests/fixtures/state_projection/allimbot-project-status.ko.md
+  - new:tests/fixtures/state_projection/autofolio-status.md
+  - new:tests/fixtures/state_projection/generic-state.json
 scope: Consume config v2 state_adapters or bounded conventional fallbacks, parse generic Markdown and JSON sources, and atomically emit a bounded generated scribe projection without editing host canonical state. Surface missing/stale sources in doctor and SessionStart, and block only substantial closeout when an overdue projection remains unresolved.
 acceptance:
   - No exact Korean heading is required.
@@ -73,15 +79,18 @@ stop_condition: Stop before changing host status/backlog files, embedding host p
 
 ## Context
 
-At Agent Runtime `main` `d41da008`, `scribe_due.py` reports `ok` with zero hot
+At Agent Runtime `main` `8cff865b`, Unit 001 is integrated and closed, but
+`scribe_due.py` still reports `ok` with zero hot
 items for Agent Runtime's 1,688-line `STATUS.md` because it recognizes one
 exact Korean heading. Config v2 already records scalar `state_adapters`, but
 no runtime consumes them. Bean Wiki uses `BACKLOG.md`, Allimbot uses
 `docs/PROJECT_STATUS.ko.md`, and Autofolio retains a 1,460-line host
-`STATUS.md`.
+`STATUS.md`. Unit 002 must add the scribe obligation without weakening Unit
+001's task-linked closure behavior.
 
 ## Inputs
 
+- reviews/REVIEW-2026-07-29-task-ar-645-unit-002-t3-replan.md
 - reviews/REVIEW-2026-07-29-task-ar-645-w0-t3-replan.md
 - scripts/scribe_due.py
 - src/agent_runtime/templates/project/scripts/scribe_due.py
@@ -112,6 +121,11 @@ no runtime consumes them. Bean Wiki uses `BACKLOG.md`, Allimbot uses
 - tests/test_inventory_sync_sanitize.py
 - tests/test_template_smoke.py
 - tests/fixtures/host/agent_runtime.lock.json
+- new:tests/fixtures/state_projection/agent-runtime-status.md
+- new:tests/fixtures/state_projection/bean-wiki-backlog.md
+- new:tests/fixtures/state_projection/allimbot-project-status.ko.md
+- new:tests/fixtures/state_projection/autofolio-status.md
+- new:tests/fixtures/state_projection/generic-state.json
 
 ## Scope
 
