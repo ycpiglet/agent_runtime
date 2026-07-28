@@ -9,11 +9,11 @@ task_id: TASK-AR-644
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T02:50:18+09:00
+updated_at: 2026-07-29T03:13:45+09:00
 started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -108,14 +108,22 @@ handoff: Provide the client/OS hook matrix, simulated manual/automatic compact a
 stop_condition: Stop before editing per-user agent settings without explicit Owner action.
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
-verified_at: 2026-07-29T02:50:18+09:00
-verified_by: codex-root-v080-ci-followup
+verified_at: 2026-07-29T03:06:36+09:00
+verified_by: codex-root-v080-w6
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729030636.json
+review_refs:
+  - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md
+  - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001-ci-followup.md
+resolution: done
+completed_at: 2026-07-29T03:13:45+09:00
+closed_by: codex-root-v080-w6
+measurement_unavailable_reason: "\u001eagent-runtime-work-scalar-v1:Work included portable hook implementation, bounded checkpoint and resume proof, doctor and packaging coverage, independent W4b review, sanitizer CI repair, Python 3.10-3.12 CI, claim release, PR #368 integration, and merged-main verification before reliable per-unit time and token metering was available."
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
@@ -249,3 +257,19 @@ implementation head for independent W4b.
 ## Stop Boundary
 
 Stop before editing per-user agent settings without explicit Owner action.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T03:13:45+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Work included portable hook implementation, bounded checkpoint and resume proof, doctor and packaging coverage, independent W4b review, sanitizer CI repair, Python 3.10-3.12 CI, claim release, PR #368 integration, and merged-main verification before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-v080-w6`
+- Evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729023334.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729025018.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729030636.json`
+<!-- work-close:end -->
