@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 def run(root, script, *, root_arg=True):
  try:
-  args=[sys.executable,str(root/"scripts"/script)]+(["--root",str(root)] if root_arg else [])
+  args=([sys.executable,"-m","agent_runtime.cli","update-notify","--root",str(root)] if script == "update-notify" else [sys.executable,str(root/"scripts"/script)]+(["--root",str(root)] if root_arg else []))
   result=subprocess.run(args,capture_output=True,text=True,timeout=8,cwd=root)
   text=(result.stdout or result.stderr).strip().replace("\n"," ")
   return text[:500] if result.returncode == 0 and text else "unavailable"
@@ -25,9 +25,9 @@ def main(argv=None):
  except Exception: event={}
  session_id=str(event.get("session_id") or "")[:80]; source=str(event.get("source") or event.get("trigger") or "unknown")[:80]
  checkpoint=r/"agents/runtime/session_checkpoints/latest.json"; lines=[f"agent-runtime host={r} source={source}",checkpoint_summary(checkpoint,session_id)]
- # These mutations must stay ordered; all remaining collectors are read-only.
+ # Baseline/reaper are ordered mutations; remaining collectors are advisory (update notice may refresh its cache).
  lines += [f"baseline: {run(r,'session_baseline.py')}",f"claim-reaper: {run(r,'claim_reaper_hook.py')}"]
- collectors=(("dashboard","session_dashboard.py"),("interrupted","interrupted_run_detector.py"),("resume","session_resume_check.py"))
+ collectors=(("dashboard","session_dashboard.py"),("interrupted","interrupted_run_detector.py"),("resume","session_resume_check.py"),("update-notify","update-notify"))
  with ThreadPoolExecutor(max_workers=3) as pool:
   futures=[(label,pool.submit(run,r,script)) for label,script in collectors]
   lines += [f"{label}: {future.result()}" for label,future in futures]

@@ -538,7 +538,7 @@ The update path must preserve host edits and only apply managed template files.
 New upstream releases are announced through the portable `.codex/hooks.json`
 dispatcher (`python3 -m agent_runtime.hook_runtime session-start`; Windows
 `py -3 -m agent_runtime.hook_runtime session-start`). Its bounded SessionStart
-summary covers continuity only; check updates explicitly with `agent_runtime update-plan --check`. On notice: bump `upstream.ref` in `agent_runtime.yml`, then run
+summary includes a bounded advisory update notice (which may refresh its local cache). On notice: bump `upstream.ref` in `agent_runtime.yml`, then run
 `update-plan --check` and the `update --check/--diff/--apply` chain above.
 Failures (offline, timeout) exit 0 silently and never block a session.
 

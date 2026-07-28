@@ -89,7 +89,7 @@ def test_start_reads_compact_session_and_emits_bounded_safe_json(tmp_path: Path)
     assert f"host={root}" in context and "source=compact" in context and "TASK-X" in context and "compound: count=1, latest=COMPOUND-42 latest lesson" in context
     assert "DO NOT ECHO" not in context and len(context) <= 6000
     assert calls[:2] == ["session_baseline.py", "claim_reaper_hook.py"]
-    assert set(calls[2:]) == {"session_dashboard.py", "interrupted_run_detector.py", "session_resume_check.py"}
+    assert set(calls[2:]) == {"session_dashboard.py", "interrupted_run_detector.py", "session_resume_check.py", "update-notify"}
 
 
 def test_dispatcher_discovers_git_root_and_preserves_blocking_streams(tmp_path: Path) -> None:

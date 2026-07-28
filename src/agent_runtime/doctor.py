@@ -201,8 +201,11 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
             command = str(hook.get("command") or "").replace("\\", "/")
             if ".cmd" in command or "scripts/" in command or ":/" in command:
                 _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="stale-hook-command", detail=f"{event}: {command}")
-            if not hook.get("commandWindows"):
+            windows = str(hook.get("commandWindows") or "").replace("\\", "/")
+            if not windows:
                 _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="missing-command-windows", detail=event)
+            elif f"agent_runtime.hook_runtime {mode}" not in windows or ".cmd" in windows or "scripts/" in windows or ":/" in windows:
+                _findings_append(findings, "blocker", area="codex-hooks", path=".codex/hooks.json", kind="stale-command-windows", detail=f"{event}: {windows}")
         if not (root / target).exists():
             _findings_append(findings, "blocker", area="codex-hooks", path=target, kind="missing-hook-target", detail=f"required by {event}:{mode}")
     if not ((root / "src/agent_runtime/hook_runtime.py").exists() or (root / "agent_runtime/hook_runtime.py").exists() or importlib.util.find_spec("agent_runtime.hook_runtime")):

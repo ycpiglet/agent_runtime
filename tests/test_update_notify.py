@@ -333,9 +333,6 @@ def test_template_wires_session_start_update_notify_hook():
     hooks = json.loads((template_root / ".codex" / "hooks.json").read_text(encoding="utf-8"))
     session_start = hooks["hooks"]["SessionStart"]
     commands = [hook["command"] for group in session_start for hook in group["hooks"]]
-    assert "scripts\\update_notify_hook.cmd" in commands
-    wrapper = template_root / "scripts" / "update_notify_hook.cmd"
-    assert wrapper.exists()
-    text = wrapper.read_text(encoding="utf-8")
-    assert "-m agent_runtime.cli update-notify" in text
-    assert "exit /b 0" in text
+    assert commands == ["python3 -m agent_runtime.hook_runtime session-start"]
+    start = (template_root / "scripts" / "session_start_hook.py").read_text(encoding="utf-8")
+    assert '"-m","agent_runtime.cli","update-notify"' in start

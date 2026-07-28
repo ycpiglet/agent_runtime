@@ -208,7 +208,7 @@
       "scripts/session_compact_hook.py": "sha256:61aaa46507e319496cdd7173b683ada6bc87bfacf3e8453cacd4e041fa537a25",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:d0748b81e105c3216300ce9a9fedbe26e9a4d857d0511d2e4dec65a22519b0b1",
+      "scripts/session_start_hook.py": "sha256:272d4e6f167aa3155702122b57f79cfb10b8a32a7b61043a08ca2d12a4424abf",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -499,7 +499,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:1f4cd979d0cb71ac8ea6a2e0b0e444cd7ad216aab27d0b643164a6c3360a6604",
+    "template_digest": "sha256:cd2b204168dbb098987083f5bf8270380575d88005af19ca4c8be37d01ad7135",
     "template_files": 244
   },
   "profiles": [

@@ -128,7 +128,7 @@ Do not infer timestamps from memory or the chat clock.
 At session start, the `.codex/hooks.json` SessionStart hook invokes the portable
 dispatcher `python3 -m agent_runtime.hook_runtime session-start` (Windows:
 `py -3 -m agent_runtime.hook_runtime session-start`). The dispatcher reports
-continuity only; check the upstream explicitly with `agent_runtime update-plan --check`.
+continuity plus a bounded, non-blocking update advisory.
 
 When you see the notice:
 
