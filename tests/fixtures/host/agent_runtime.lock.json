@@ -152,7 +152,7 @@
       "scripts/goal_supervisor.py": "sha256:818a734d008563aeeb4b3bee02a15b80c754d1229e03cad0111ca39f1846f181",
       "scripts/governance_ops_report.py": "sha256:a4f100c46a2f1227a2fc60ab3170aebf98b3e872dcc570b705d8dbe4cf8f2595",
       "scripts/inflight_overlay.py": "sha256:16be0bdf91d7549c07d14683f2688c5aa75388de3bc1254b5b06e87c3fb1f32b",
-      "scripts/install_hooks.py": "sha256:8629b654c8137896578695239a06db4079f2078c172d0d2b7e3e38d3500f0fea",
+      "scripts/install_hooks.py": "sha256:36b27356e164bc7fccbbf3f9a5afe2cb0ee8af8a12bfaa73e86efc9f3ebeb36e",
       "scripts/interrupted_run_detector.py": "sha256:98b5207c74f2b01caf22e321f18a70ea1aac9eff74cd41b7ff648c949965c5ed",
       "scripts/kedb_search.py": "sha256:b2b714723f8be28fb9f09de571b2b5414ff6c0213c98d35dc9cc42e102e38b82",
       "scripts/knowledge_ask.py": "sha256:2b518d182c76f7383f050478650373d083e6f5d06b87df7ad16005a33b82959b",
@@ -207,7 +207,7 @@
       "scripts/session_compact_hook.py": "sha256:6fd7b702a62c3ef1ab985afae365d0a7369d5a3dcac96677a45fca05ad2573ef",
       "scripts/session_dashboard.py": "sha256:45fa7cf2c1e09aabfc8ecfc1198f9fb42dcfdca8e59bba5e48b4f8030eb5bc97",
       "scripts/session_resume_check.py": "sha256:5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88",
-      "scripts/session_start_hook.py": "sha256:a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86",
+      "scripts/session_start_hook.py": "sha256:69804f679da41690d26d310afe52572622437118fa6562cb07a9bf1d637a3d48",
       "scripts/state_machine_gate.py": "sha256:b1ce42970658b1d7eed94b0285a47fca74e2566ff9094b71ed99a5ad10206e7f",
       "scripts/state_sync_gate.py": "sha256:b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd",
       "scripts/status_alias.py": "sha256:9d1ac9fab5c716b617a183188091e53f50aedeb2db1b20d87f3585532b14de7c",
@@ -497,7 +497,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:7686156b8bd1f838d8cf9b96ecec287b79bb457c826c14aaa48bda32a619650e",
+    "template_digest": "sha256:8be6839743621a2a09c84d9c07d074c2c0e2f57156bd5d8ba5c6dbace9629c6f",
     "template_files": 243
   },
   "profiles": [

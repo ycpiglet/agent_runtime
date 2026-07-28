@@ -34,6 +34,8 @@ except Exception:
 
 HOOK_SCRIPTS: dict[str, str] = {
     "SessionStart": "scripts/session_start_hook.py",
+    "PreCompact": "scripts/session_compact_hook.py --phase pre-compact",
+    "PostCompact": "scripts/session_compact_hook.py --phase post-compact",
     "UserPromptSubmit": "scripts/prompt_clarity_hook.py",
 }
 
