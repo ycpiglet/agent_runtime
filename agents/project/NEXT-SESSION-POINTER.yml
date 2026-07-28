@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-28T18:34:43+09:00
-updated_by: codex-root-v080-orchestrator
+updated_at: 2026-07-28T18:46:25+09:00
+updated_by: le-20260728-task-ar-639-002-terra
 current_state:
-  summary: "UNIT-TASK-AR-639-002 repaired the recorded W4b blockers and passed fresh W4a; independent re-review is pending."
+  summary: "UNIT-TASK-AR-639-002 self-verified the W4b recheck repairs; independent re-review is pending."
   status: review
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 4
   step_total: 6
   progress_pct: 90
-  status_text: "Fresh W4a passed after blocker repair; independent W4b re-review pending."
+  status_text: "Fresh W4a passed after recheck repairs; independent W4b re-review pending."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260728-175515-task-ar-639-639002
