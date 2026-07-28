@@ -27,7 +27,7 @@
   "team_id": "agent-runtime-core",
   "unit_id": "UNIT-TASK-AR-641-001",
   "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md",
-  "updated_at": "2026-07-28T20:54:00+09:00",
+  "updated_at": "2026-07-28T21:12:01+09:00",
   "workspace": "",
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-641"
 }
