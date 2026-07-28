@@ -1,29 +1,37 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T00:57:16+09:00
-updated_by: codex-root-v080-w6
+updated_at: 2026-07-29T01:25:32+09:00
+updated_by: le-20260729-0128-kst-644001
 current_state:
-  summary: "TASK-AR-643 dependency closure is merged, independently approved, verified on merged main, and closed; TASK-AR-644 is next."
-  status: planned
+  summary: "UNIT-TASK-AR-644-001 is implementing portable lifecycle hooks, bounded compact checkpoints, and visible doctor contracts."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 1
   step_total: 6
   progress_pct: 0
-  status_text: "TASK-AR-643 W4b approved at 96/100; PR #364 passed Python 3.10-3.12 CI, merged at 442d31ef, and passed post-merge task/unit/full verification."
+  status_text: "W0/T3 assumptions are pinned; TASK-AR-644 implementation is isolated in its claimed worktree."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260729-012532-task-ar-644-644001
+      agent_role: lead-engineer
+      agent_instance_id: le-20260729-0128-kst-644001
+      display_name: lead_engineer@unit-644-001-terra
+      callsite_id: codex:subagent:w3-task-ar-644-001
+      pane_id: codex:subagent:w3-task-ar-644-001
+  current_teams:
+    - agent-runtime-core
 resume:
   active_task: TASK-AR-644
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Begin TASK-AR-644 at W0 and revalidate cross-platform start, compact, and resume hooks; stop before TASK-AR-645+, consumer mutation, release, tag, publish, or per-user agent setting changes."
+  branch_policy: "Continue only UNIT-TASK-AR-644-001 in .worktrees/TASK-AR-644; stop before TASK-AR-645+, consumer mutation, release, tag, publish, prompt/transcript persistence, or real per-user setting changes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -42,7 +50,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-644
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

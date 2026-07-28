@@ -9,11 +9,12 @@ task_id: TASK-AR-644
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T01:16:58+09:00
+updated_at: 2026-07-29T01:25:32+09:00
+started_at: 2026-07-29T01:25:32+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -67,6 +68,8 @@ verification:
   - python -m pytest -q
 handoff: Provide the client/OS hook matrix, simulated manual/automatic compact and restart logs, doctor failure fixtures, bounded checkpoint proof, and exact implementation head for independent W4b.
 stop_condition: Stop before editing per-user agent settings without explicit Owner action.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.json
 ---
 
 # UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints
