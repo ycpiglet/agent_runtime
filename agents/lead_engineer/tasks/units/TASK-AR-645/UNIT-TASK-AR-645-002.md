@@ -9,11 +9,12 @@ task_id: TASK-AR-645
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T04:52:04+09:00
+updated_at: 2026-07-29T04:59:49+09:00
+started_at: 2026-07-29T04:59:49+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -73,6 +74,8 @@ verification:
   - python -m agent_runtime.cli sanitize --root . --check
 handoff: Provide fixture outputs for runtime, Bean Wiki, Allimbot, and Autofolio; prove projection freshness, bounded/redacted content, read-only doctor/start, substantial closeout enforcement, and mini-task exemption.
 stop_condition: Stop before changing host status/backlog files, embedding host product semantics in core, persisting prompt/transcript content, or mutating consumer repositories.
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-045949-task-ar-645-645002.json
 ---
 
 # UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections

@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T04:52:04+09:00
+updated_at: 2026-07-29T04:59:49+09:00
 started_at: 2026-07-29T03:43:12+09:00
 title: Make compound and scribe task-linked and host-configurable
 status: in_progress
@@ -35,6 +35,7 @@ tags:
   - work-cli-created
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-034312-task-ar-645-645001.json
+  - agents/runtime/task_claims/CLAIM-20260729-045949-task-ar-645-645002.json
 ---
 
 # TASK-AR-645 - Make compound and scribe task-linked and host-configurable
