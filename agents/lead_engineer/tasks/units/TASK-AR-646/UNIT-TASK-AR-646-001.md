@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T06:42:09+09:00
+updated_at: 2026-07-29T07:28:48+09:00
 started_at: 2026-07-29T06:42:09+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -83,6 +83,10 @@ verification:
   - python -m pytest -q
 handoff: Provide Claude, Codex API, and native Codex routing matrices; deterministic-preflight failures; sample dispatch/completion records; and token-versus-billed-cost reporting examples.
 stop_condition: Stop before live billable calls, unverified economic claims, provider credential storage, global Codex config changes, a shared persistent budget authority, consumer mutation, or release/version operations.
+verified_at: 2026-07-29T07:28:48+09:00
+verified_by: le-20260729-kst-646001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848.json
 ---
 
 # UNIT-TASK-AR-646-001 - Add provider-aware routing and dispatch telemetry
