@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-27T11:12:43+09:00
-record_count: 489
+generated_at: 2026-07-28T16:38:07+09:00
+record_count: 519
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `489` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `519` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `41` records |
-| Tasksets | pass | `65` records |
-| Tasks | pass | `302` records |
-| Units | pass | `81` records |
+| Initiatives | pass | `42` records |
+| Tasksets | pass | `66` records |
+| Tasks | pass | `315` records |
+| Units | pass | `96` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -519,8 +519,8 @@ record_count: 489
 | 40.1 | Taskset 40.1 | taskset | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | `INIT-AR-CONSOLE-OVERHAUL-P1` | active | `BACKLOG-BOARD.md` | Console Overhaul P1 — Core Structure |
 | 40.1.1 | Task 40.1.1 | task | `TASK-AR-630` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-630.md` | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
 | 40.1.1.1 | Unit 40.1.1.1 | unit | `UNIT-TASK-AR-630-001` | `TASK-AR-630` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-630/UNIT-TASK-AR-630-001.md` | UNIT-TASK-AR-630-001 - attention 신호 단일 정본화 |
-| 40.1.2 | Task 40.1.2 | task | `TASK-AR-631` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-631.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
-| 40.1.2.1 | Unit 40.1.2.1 | unit | `UNIT-TASK-AR-631-001` | `TASK-AR-631` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md` | UNIT-TASK-AR-631-001 - 홈 Decision Screenfit |
+| 40.1.2 | Task 40.1.2 | task | `TASK-AR-631` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | review | `agents/lead_engineer/tasks/TASK-AR-631.md` | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
+| 40.1.2.1 | Unit 40.1.2.1 | unit | `UNIT-TASK-AR-631-001` | `TASK-AR-631` | review | `agents/lead_engineer/tasks/units/TASK-AR-631/UNIT-TASK-AR-631-001.md` | UNIT-TASK-AR-631-001 - 홈 Decision Screenfit |
 | 40.1.3 | Task 40.1.3 | task | `TASK-AR-632` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-632.md` | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
 | 40.1.4 | Task 40.1.4 | task | `TASK-AR-633` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-633.md` | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
 | 40.1.5 | Task 40.1.5 | task | `TASK-AR-634` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-634.md` | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
@@ -528,6 +528,36 @@ record_count: 489
 | 40.1.7 | Task 40.1.7 | task | `TASK-AR-636` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-636.md` | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
 | 40.1.8 | Task 40.1.8 | task | `TASK-AR-637` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-637.md` | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
 | 40.1.9 | Task 40.1.9 | task | `TASK-AR-638` | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | planned | `agents/lead_engineer/tasks/TASK-AR-638.md` | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
+| 41 | Initiative 41 | initiative | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | - | active | `agents/project/initiatives/INIT-AR-V080-ADOPTION-ENFORCEMENT.md` | Agent Runtime v0.8 Adoption and Enforcement |
+| 41.1 | Taskset 41.1 | taskset | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | `INIT-AR-V080-ADOPTION-ENFORCEMENT` | active | `BACKLOG-BOARD.md` | v0.8 Adoption and Enforcement |
+| 41.1.1 | Task 41.1.1 | task | `TASK-AR-639` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-639.md` | Make registered work executable and make implemented-but-unclaimed work visible witho… |
+| 41.1.1.1 | Unit 41.1.1.1 | unit | `UNIT-TASK-AR-639-001` | `TASK-AR-639` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md` | UNIT-TASK-AR-639-001 - Align work registration output with verify and close consumers |
+| 41.1.1.2 | Unit 41.1.1.2 | unit | `UNIT-TASK-AR-639-002` | `TASK-AR-639` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-002.md` | UNIT-TASK-AR-639-002 - Block task-claim-projection split-brain and support explicit recovery |
+| 41.1.2 | Task 41.1.2 | task | `TASK-AR-640` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-640.md` | Represent shared capabilities and host ownership without requiring a project-specific… |
+| 41.1.2.1 | Unit 41.1.2.1 | unit | `UNIT-TASK-AR-640-001` | `TASK-AR-640` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md` | UNIT-TASK-AR-640-001 - Add backward-compatible profile and ownership config schema |
+| 41.1.3 | Task 41.1.3 | task | `TASK-AR-641` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-641.md` | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
+| 41.1.3.1 | Unit 41.1.3.1 | unit | `UNIT-TASK-AR-641-001` | `TASK-AR-641` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md` | UNIT-TASK-AR-641-001 - Implement read-only brownfield adoption planner |
+| 41.1.4 | Task 41.1.4 | task | `TASK-AR-642` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-642.md` | Update safe runtime files without overwriting host state or allowing one expected sea… |
+| 41.1.4.1 | Unit 41.1.4.1 | unit | `UNIT-TASK-AR-642-001` | `TASK-AR-642` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md` | UNIT-TASK-AR-642-001 - Implement ownership manifest and sync reconcile |
+| 41.1.5 | Task 41.1.5 | task | `TASK-AR-643` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-643.md` | Guarantee that every capability advertised to a clean host has all executable depende… |
+| 41.1.5.1 | Unit 41.1.5.1 | unit | `UNIT-TASK-AR-643-001` | `TASK-AR-643` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md` | UNIT-TASK-AR-643-001 - Add profile-aware asset dependency closure and clean-host lifecycle smoke |
+| 41.1.6 | Task 41.1.6 | task | `TASK-AR-644` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-644.md` | Make the harness actually enter and re-enter its governance path on supported agent c… |
+| 41.1.6.1 | Unit 41.1.6.1 | unit | `UNIT-TASK-AR-644-001` | `TASK-AR-644` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md` | UNIT-TASK-AR-644-001 - Replace platform-specific hook shims with verified Python entrypoints |
+| 41.1.7 | Task 41.1.7 | task | `TASK-AR-645` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-645.md` | Prevent repeated mistakes and accumulated context without forcing every host into one… |
+| 41.1.7.1 | Unit 41.1.7.1 | unit | `UNIT-TASK-AR-645-001` | `TASK-AR-645` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md` | UNIT-TASK-AR-645-001 - Introduce per-entry task-linked compound records and retrieval |
+| 41.1.7.2 | Unit 41.1.7.2 | unit | `UNIT-TASK-AR-645-002` | `TASK-AR-645` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md` | UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections |
+| 41.1.8 | Task 41.1.8 | task | `TASK-AR-646` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-646.md` | Use lower-cost native subagents by default where appropriate and prove when escalatio… |
+| 41.1.8.1 | Unit 41.1.8.1 | unit | `UNIT-TASK-AR-646-001` | `TASK-AR-646` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md` | UNIT-TASK-AR-646-001 - Add effective-tier detection and dispatch cost ledger |
+| 41.1.9 | Task 41.1.9 | task | `TASK-AR-647` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-647.md` | Use current durable, allowlisted Allimbot delivery and add reusable security/external… |
+| 41.1.9.1 | Unit 41.1.9.1 | unit | `UNIT-TASK-AR-647-001` | `TASK-AR-647` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md` | UNIT-TASK-AR-647-001 - Replace legacy notifier with optional native ProjectEmitter adapter |
+| 41.1.10 | Task 41.1.10 | task | `TASK-AR-648` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-648.md` | Prove lightweight adoption preserves the existing editorial harness while adding task… |
+| 41.1.10.1 | Unit 41.1.10.1 | unit | `UNIT-TASK-AR-648-001` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md` | UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki |
+| 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
+| 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
+| 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
+| 41.1.12.1 | Unit 41.1.12.1 | unit | `UNIT-TASK-AR-650-001` | `TASK-AR-650` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md` | UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal |
+| 41.1.13 | Task 41.1.13 | task | `TASK-AR-651` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-651.md` | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
+| 41.1.13.1 | Unit 41.1.13.1 | unit | `UNIT-TASK-AR-651-001` | `TASK-AR-651` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md` | UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

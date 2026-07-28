@@ -1,22 +1,24 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-24T16:27:00+09:00
-updated_by: codex-root
+updated_at: 2026-07-28T16:36:01+09:00
+updated_by: codex-root-v080-recovery-20260728
 current_state:
-  summary: "TASK-AR-622 and its taskset are complete after PR #346 plus post-merge main CI; all claims are released and the live backlog has no open tasks."
-  status: completed
-  task_set_status: completed
-  task_set_id: "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY"
-  step_index: 5
-  step_total: 5
-  progress_pct: 100
-  status_text: "TASK-AR-622 complete; PR #346 and main CI passed, with W4b approval at 99/98."
+  summary: "TASK-AR-631 product implementation passed independent W4b; its historical missing-claim and stale projection gap is recorded, and TASKSET-AR-V080-ADOPTION-ENFORCEMENT is registered. Integration and W6 closeout remain."
+  status: waiting_integration
+  task_set_status: active
+  task_set_id: "TASKSET-AR-CONSOLE-OVERHAUL-P1"
+  step_index: 4
+  step_total: 6
+  progress_pct: 80
+  status_text: "TASK-AR-631 W4a/W4b passed at 8be1fe24; lifecycle recovery metadata and v0.8 registration await integration."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - codex-root-v080-recovery-20260728
+  current_teams:
+    - agent-runtime-core
 resume:
-  active_task: none
-  active_task_set: none
-  branch_policy: "Use dispatcher-created worktrees for new task-set work; do not edit root for claimed task implementation except live claim/pointer metadata."
+  active_task: TASK-AR-631
+  active_task_set: TASKSET-AR-CONSOLE-OVERHAUL-P1
+  branch_policy: "Integrate and close TASK-AR-631 first. Then start UNIT-TASK-AR-639-001 through a fresh claim and dispatcher-created worktree; do not implement it in this root checkout."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -25,6 +27,9 @@ roles:
 pointers:
   active_claims: []
   registered_followups:
+    - task_id: TASK-AR-639
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
@@ -319,6 +324,8 @@ pointers:
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-221-quality-loop-closeout.md
     - reviews/REVIEW-2026-06-10-agent-runtime-task-ar-243-planning-evidence-link.md
 next_actions:
+  - "Integrate TASK-AR-631 with its exact-commit W4b and lifecycle recovery evidence, then close the unit/task without inventing a historical claim."
+  - "Start UNIT-TASK-AR-639-001 through W0-W2 claim-first in a clean worktree; this unit fixes work.py registration-to-verify parity and honest unavailable measurements."
   - "Execute TASK-AR-622 in TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY through a fresh W0~W6 lifecycle, then reassess the current-head release queue."
   - "Continue TASKSET-AR-AGENT-ORG-DELEGATION units TASK-AR-558..562 (each via superpowers:writing-plans; pattern: docs/superpowers/plans/2026-06-15-agent-org-delegation-unit1-role-registry.md). Spec: docs/superpowers/specs/2026-06-14-agent-org-delegation-model-design.md; research: reviews/RESEARCH-2026-06-14-agent-org-design-references.md."
   - "Resume UI redesign + product-structure change: brainstorm sub-project #1 (decision-first IA) then #3 (visual identity / 2.5D agent characters / insight graph). Entry: reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md."

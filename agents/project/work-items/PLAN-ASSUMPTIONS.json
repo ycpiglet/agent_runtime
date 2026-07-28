@@ -920,6 +920,74 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md",
+          "value": "0144d6277d4939333d2682ed5546badae548bde5945935018ccb3fc6cd538590"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/closure_gate.py",
+          "value": "479806ae1be4501d503cbedb153dc71dd36b29a153da0822edc6396f7419dc2c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/compound_cadence_gate.py",
+          "value": "6ba22bd5ead4d460777c73c15d42f4fbd77abee8b5728b85e1b3b51dd9c5a086"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/model_routing.py",
+          "value": "dbf72e76b277a023e2bdb55bfc6d572ac4aeae6438cb2b9292e866a3f9681ab7"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/pilot_acceptance.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/release_cadence_trigger.py",
+          "value": "74a99681642f840757806e96889b9cab5ece948803f321f44711340507daa242"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/release_version_cascade.py",
+          "value": "ae5d4f91e8494ed17707c37723336cb33ec168c86fa41202b3269f6851de85f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/runtime_asset_usage.py",
+          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/scribe_due.py",
+          "value": "3ba9579be478a9e0a6e0983d4847074f6a503ba64eb67d060ca56ff548c449bb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/state_sync_gate.py",
+          "value": "414748a65191d7ff3924e6f4a786c2f8b7b926f4d675b193d4f1463e90476c2a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "a2ce8d15519b20b1bff1b2744d695cca62888880c8d152f79cb3b433551bc3ec"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "efb96fa7f4283a11501cf19ffc8177a432d048b2dcc854e0ab7bd59ed363d17a"
+        }
+      ],
+      "design_record": "reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md",
+      "recorded_at": "2026-07-28T16:36:02+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md",
           "value": "c93551e9f2b50b26f56a7a2d3c61c4a7fdf598f5ad5b09a7db589d7c7371e4b1"
         },
@@ -1128,5 +1196,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-26T20:41:05+09:00"
+  "updated_at": "2026-07-28T16:36:02+09:00"
 }

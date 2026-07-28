@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-27T11:12:43+09:00
-task_count: 302
-open_count: 16
+generated_at: 2026-07-28T16:38:07+09:00
+task_count: 315
+open_count: 29
 completed_count: 286
-task_set_count: 2
+task_set_count: 3
 completed_task_set_count: 63
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `16` open or active tasks; `286` completed tasks are archived from this live board.
+- Summary: `29` open or active tasks; `286` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `13` / Ask `3` / Review `0` / Later `0` / Done `286`.
-- Task Sets: `2` active workflows; `63` completed workflows are hidden from the live action board.
+- Status: Action `23` / Ask `5` / Review `1` / Later `0` / Done `286`.
+- Task Sets: `3` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -67,12 +67,33 @@ completed_task_set_count: 63
 | `TASK-AR-630` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 6h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 보드 Rollups 휴리스틱과 콘솔 attention_inbox를 하나의 모듈로 통합해 두 표면이 다른 현황을 말하는 구조를 원천 차단하고, watch… |
 | `TASK-AR-636` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P1 | High | Medium | 7h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | 저위험 승인을 council 위임으로 돌려 퀴즈/체크포인트로 늘어나는 Owner 접점을 상쇄한다. |
 | `TASK-AR-634` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | Medium | 8h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | acceptance criterion에 ID를 부여하고 검증 명령과 매핑해 dangling(검증 없는 요구/요구 없는 검증)을 기계 적발한다. |
-| `TASK-AR-631` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
 | `TASK-AR-633` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 12h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | 엔지니어링 요구에 대해 모호성을 탐지하고 불일치 지점만 인터뷰해 합의된 EARS 수용 기준을 강제한다. |
 | `TASK-AR-635` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P1 | High | High | 14h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | diff를 이해했는지 pre-PR 단계에서 독립 출제자가 퀴즈로 검증하고, 통과 못 하면 teach-back으로 반복 학습시킨다. |
 | `TASK-AR-632` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 매 4초 37개 렌더 함수 전량 재실행을 활성 뷰+콕핏 선택 렌더로 바꾸고 4s/8s/15s+SSE 4중 경로를 단일 디스패처로 통합한다. |
 | `TASK-AR-637` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Action | P2 | Medium | High | 10h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | 흐름 인사이트를 주간 다이제스트로 자동 전달하고, 주체별 점유를 측정 가능하게 만들어 독박을 지표로 확인한다. |
+| `TASK-AR-631` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | review | Review | P1 | High | High | 12h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Review evidence | 스크롤 없이 5초 내 '개입 필요 여부'에 예/아니오로 답하는 단일 화면을 완성한다. |
 | `TASK-AR-638` | INIT-AR-CONSOLE-OVERHAUL-P1 | PROJECT-AGENT-RUNTIME | - | planned | Ask | P2 | Medium | High | 12h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | 홈 재구성과 병행해 한국어 단독 Owner와의 언어 불일치를 끝내고, 컬러/토큰/아이콘/칸반의 시각 언어를 '조용한 의사결정 콘솔'로 재정렬한다. |
+
+### v0.8 Adoption and Enforcement (`TASKSET-AR-V080-ADOPTION-ENFORCEMENT`)
+
+- Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
+- Progress: `0/13` done; `13` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md | planned | Action | P0 | Critical | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove lightweight adoption preserves the existing editorial harness while adding task… |
+| `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
+| `TASK-AR-639` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-639/UNIT-TASK-AR-639-001.md | planned | Action | P0 | Critical | High | 10h/24000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make registered work executable and make implemented-but-unclaimed work visible witho… |
+| `TASK-AR-640` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-640/UNIT-TASK-AR-640-001.md | planned | Ask | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Represent shared capabilities and host ownership without requiring a project-specific… |
+| `TASK-AR-643` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Guarantee that every capability advertised to a clean host has all executable depende… |
+| `TASK-AR-644` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Make the harness actually enter and re-enter its governance path on supported agent c… |
+| `TASK-AR-646` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md | planned | Action | P0 | Critical | High | 10h/24000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Use lower-cost native subagents by default where appropriate and prove when escalatio… |
+| `TASK-AR-647` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Use current durable, allowlisted Allimbot delivery and add reusable security/external… |
+| `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
+| `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
+| `TASK-AR-641` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-641/UNIT-TASK-AR-641-001.md | planned | Action | P0 | Critical | High | 12h/26000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Let an existing repository understand exactly what Agent Runtime would add, own, pres… |
+| `TASK-AR-642` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-642/UNIT-TASK-AR-642-001.md | planned | Action | P0 | Critical | High | 12h/26000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Update safe runtime files without overwriting host state or allowing one expected sea… |
+| `TASK-AR-645` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-001.md | planned | Action | P0 | Critical | High | 12h/26000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent repeated mistakes and accumulated context without forcing every host into one… |
 
 ## Archived Task Sets
 
@@ -146,9 +167,9 @@ completed_task_set_count: 63
 ## Rollups
 - Overview-first: this board is an attention surface. Bulk archives are summarized here as counts + pointers, not dumped inline (TASK-AR-533).
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
-- Owner lanes: triage awaiting `0`, owner-decision (Ask) `3` (TASK-AR-538).
+- Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `16` open across `2` task sets (see Action Board above).
+- Active: `29` open across `3` task sets (see Action Board above).
 - Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `286` — see `ARCHIVE-INDEX.md`.

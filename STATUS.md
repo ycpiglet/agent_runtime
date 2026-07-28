@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-28 - TASK-AR-631 W4b complete; v0.8 Adoption and Enforcement registered
+
+- Active: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed independent W4b at implementation commit `8be1fe24`; lifecycle-only recovery records and integration remain.
+- Recovery: the missing historical claim is recorded explicitly and is not being fabricated retroactively. Task/unit/pointer/status surfaces now expose the integration-pending state.
+- Registered: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` contains `TASK-AR-639` through `TASK-AR-651`, with 15 worker-ready units covering lifecycle truth, brownfield profiles/adoption/sync, consumer closure, hooks, compound/scribe, model economy, Allimbot, pilots, migration, and RC.
+- Next: integrate and close TASK-AR-631, then claim `UNIT-TASK-AR-639-001` in a clean worktree before any further implementation.
+
 ## 2026-07-23 - TASK-AR-621 complete; TASK-AR-622 next
 
 - Completed: PR #344 merged at `c600bf1cbaafe6319529b7126574ae1316f73984`; pull-request run `29988050884` and post-merge main run `29988207028` passed Python 3.10, 3.11, and 3.12.

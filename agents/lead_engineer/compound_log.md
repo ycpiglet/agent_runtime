@@ -394,3 +394,61 @@
 
 ### Status
 - Recorded by `scripts/self_improvement_cycle.py cycle`.
+
+## COMPOUND-2026-07-28-001: Implemented work disappeared from lifecycle projections
+
+### Bottom Line
+- TASK-AR-631 had an implementation commit and passed W4a evidence, while the
+  task remained `planned`, the unit remained `worker_ready`, active claims were
+  zero, and the next-session pointer said there was no open work.
+- This recurs the same source-of-truth failure class recorded in
+  `COMPOUND-2026-06-10-004`: one projection was trusted without reconciling
+  canonical work records and execution evidence.
+- The immediate work was independently verified and recovered without
+  fabricating a historical claim. The permanent fix is TASK-AR-639.
+
+### 5W1H
+| Field | Record |
+|---|---|
+| Who | Console worker, lifecycle closeout path, and session pointer writer; affected the Owner's work visibility. |
+| What | Product code and W4a existed, but task, unit, claim, pointer, board, and branch surfaces did not describe one consistent state. |
+| When | Implementation on 2026-07-27; discovered during v0.8 pre-release audit on 2026-07-28. |
+| Where | `feat/task-ar-631-decision-screenfit`, `TASK-AR-631.md`, its unit, task claims, and `NEXT-SESSION-POINTER.yml`. |
+| Why | Product implementation could proceed outside a claim, verification did not transition task state, and the state-sync gate did not correlate branch/diff evidence with task/claim/pointer projections. |
+| How | Each individual artifact remained syntactically valid, so existing gates passed even though their combined meaning was contradictory. |
+
+### Recurrence Pattern
+- Symptom: UI or pointer reports no active work while an implementation branch
+  and passed verification exist.
+- Trigger: a worker writes code and W4a evidence without a durable W2 claim and
+  without W5/W6 projection regeneration.
+- Failure mode: per-file schema checks pass; cross-source lifecycle truth is
+  never evaluated.
+- Related prior compound: `COMPOUND-2026-06-10-004`.
+
+### Forced Rule
+- An implementation diff must correlate to an active claim, a released claim,
+  or an explicit `recovered_without_claim` record with reason and independent
+  evidence.
+- Task, unit, verification, claim, branch, pointer, board, and UI state are
+  checked as one lifecycle tuple before integration or release.
+- Never create a retroactive claim that falsely implies W2 preceded
+  implementation.
+
+### Preventive Action
+- TASK-AR-639 / UNIT-TASK-AR-639-001 fixes `work.py new` -> `work.py verify`
+  producer-consumer parity.
+- TASK-AR-639 / UNIT-TASK-AR-639-002 adds the cross-source reconciliation gate
+  and explicit recovery representation.
+- Bean Wiki and Allimbot pilots must include one restart/recovery scenario.
+
+### Evidence
+- `reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md`
+- `reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md`
+- `agents/project/work-items/REGISTRATION-2026-07-28-v080-adoption-enforcement.json`
+
+### Status
+- signal: watch
+- score: 72
+- Immediate recovery is in progress; executable prevention is registered but
+  not yet implemented.

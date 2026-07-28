@@ -9,11 +9,12 @@ task_id: TASK-AR-631
 task_set_id: TASKSET-AR-CONSOLE-OVERHAUL-P1
 initiative_id: INIT-AR-CONSOLE-OVERHAUL-P1
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: review
 verification_status: passed
 owner: lead_engineer
-created_at: 2026-07-27T11:30:00+09:00
-updated_at: 2026-07-27T11:12:27+09:00
+created_at: 2026-07-27T11:12:27+09:00
+updated_at: 2026-07-28T16:31:01+09:00
+timestamp_quality: backfilled
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-26-console-overhaul-owner-decisions.md
 created_by: claude-worker-631
@@ -53,6 +54,8 @@ verified_at: 2026-07-27T11:12:27+09:00
 verified_by: work.py verify
 evidence_refs:
   - reviews/VERIFY-2026-07-27-unit-task-ar-631-001-20260727111227.json
+review_refs:
+  - reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md
 ---
 
 # UNIT-TASK-AR-631-001 - 홈 Decision Screenfit

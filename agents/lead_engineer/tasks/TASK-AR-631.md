@@ -9,9 +9,11 @@ kind: task
 parent_id: TASKSET-AR-CONSOLE-OVERHAUL-P1
 registered_at: 2026-07-26T20:41:04+09:00
 created_at: 2026-07-26T20:41:04+09:00
-updated_at: 2026-07-26T20:41:04+09:00
+started_at: 2026-07-27T11:12:27+09:00
+timestamp_quality: backfilled
+updated_at: 2026-07-28T16:30:46+09:00
 title: 홈 Decision Screenfit 완성
-status: planned
+status: review
 priority: P1
 difficulty: L
 est_hours: 12
@@ -31,6 +33,16 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+verification:
+  - python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_console_microinteractions.py -q
+  - python scripts/nav_budget_gate.py
+review_refs:
+  - reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md
+verification_status: passed
+verified_at: 2026-07-28T16:30:46+09:00
+verified_by: codex-root-v080-recovery-20260728
+evidence_refs:
+  - reviews/VERIFY-2026-07-28-task-ar-631-20260728163046.json
 ---
 
 # TASK-AR-631 - 홈 Decision Screenfit 완성
@@ -53,4 +65,4 @@ tags:
 ## Verification
 
 - `python -m pytest tests/test_ui_console.py tests/test_ui_console_e2e.py tests/test_ui_console_microinteractions.py -q`
-- `python scripts/nav_budget_gate.py --check`
+- `python scripts/nav_budget_gate.py`
