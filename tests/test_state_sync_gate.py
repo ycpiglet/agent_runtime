@@ -402,6 +402,43 @@ def test_linked_checkout_resolves_relative_worker_path_from_primary_checkout(tmp
     assert not [f for f in findings if f.severity == "block"]
 
 
+def test_active_worker_claim_targeting_primary_checkout_blocks_with_portable_git_detection(tmp_path):
+    gate = load_module()
+    primary = tmp_path / "primary"
+    subprocess.run(["git", "init", "-q", "-b", "base", str(primary)], check=True)
+    subprocess.run(["git", "-C", str(primary), "config", "user.email", "tests@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(primary), "config", "user.name", "State Sync Tests"], check=True)
+    subprocess.run(["git", "-C", str(primary), "commit", "--allow-empty", "-qm", "base"], check=True)
+    write_task(primary, "TASK-AR-631", "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(primary, "TASK-AR-631", "UNIT-TASK-AR-631-001")
+    claim_path = "agents/runtime/task_claims/CLAIM-TEST-001.json"
+    write(
+        primary / claim_path,
+        json.dumps({
+            "schema": "agent-runtime-task-claim/v1",
+            "claim_id": "CLAIM-TEST-001",
+            "task_id": "TASK-AR-631",
+            "task_set_id": "TASKSET-AR-GOVERNANCE-OPS",
+            "unit_id": "UNIT-TASK-AR-631-001",
+            "agent_role": "lead-engineer",
+            "agent_instance_id": "worker-test",
+            "status": "claimed",
+            "worktree_path": ".",
+            "branch": "base",
+        }),
+    )
+    attach_claim_refs(primary, "TASK-AR-631", "UNIT-TASK-AR-631-001", claim_path)
+    write_claim_pointer(primary, "TASK-AR-631", claim_path)
+    write(primary / "BACKLOG-BOARD.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(primary / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(primary / "STATUS.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+
+    findings = gate.analyze(primary)
+
+    assert any(f.subject == "claim:main-worktree:CLAIM-TEST-001" for f in findings)
+    assert not any(f.subject == "claim:branch-mismatch:CLAIM-TEST-001" for f in findings)
+
+
 def test_two_active_workers_can_share_one_primary_pointer_when_both_are_projected(tmp_path):
     gate = load_module()
     primary = ("TASK-AR-631", "UNIT-TASK-AR-631-001", "TASKSET-AR-GOVERNANCE-OPS", "CLAIM-TEST-001", "worker-test")
