@@ -32,6 +32,7 @@ inputs:
   - src/agent_runtime/templates/project/scripts/session_start_hook.py
   - src/agent_runtime/templates/project/scripts/install_hooks.py
 target_files:
+  - agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md
   - .codex/hooks.json
   - scripts/bootstrap_dev_env.py
   - scripts/verify_wheel_dotfiles.py
@@ -68,6 +69,7 @@ target_files:
   - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
   - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
   - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+  - reviews/INDEX.md
 scope: Use one allowlisted Python dispatcher with POSIX and commandWindows commands, add bounded derived compact checkpoints and SessionStart reinjection, retain explicit owner-run Claude installation, and verify tracked hook health. Do not mutate consumer repositories or real per-user settings, persist prompt/transcript content, redesign compound/scribe, commit checkpoint state, or perform a release.
 acceptance:
   - No POSIX path depends on a .cmd file.
@@ -107,6 +109,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 
 ## Target Files
 
+- agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md
 - .codex/hooks.json
 - scripts/bootstrap_dev_env.py
 - scripts/verify_wheel_dotfiles.py
@@ -143,6 +146,7 @@ Codex and Claude hook contracts support `SessionStart`, `PreCompact`, and
 - agents/runtime/task_claims/CLAIM-20260729-012532-task-ar-644-644001.handoff.md
 - reviews/W4A-2026-07-29-unit-task-ar-644-001.md
 - reviews/W4B-2026-07-29-unit-task-ar-644-001.md
+- reviews/INDEX.md
 
 ## Scope
 
