@@ -920,18 +920,23 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-28-task-ar-643-w0-t3-replan.md",
-          "value": "08d83c7f1a9c7ce59d0d1fbcb26e50cf343985d85ee3acdfc4003b955efe92c7"
+          "path": "reviews/REVIEW-2026-07-29-task-ar-644-w0-t3-replan.md",
+          "value": "83d2b3411dec5b19f0cff2dc544de4f793d7c1f6d1549bc41617b10a8c1a4d82"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-643.md",
-          "value": "3f366731b8b80fc5ed8bb37ad84c5f3dbb72e86a40e9ade042995bc92bf1db67"
+          "path": "reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md",
+          "value": "0144d6277d4939333d2682ed5546badae548bde5945935018ccb3fc6cd538590"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-643/UNIT-TASK-AR-643-001.md",
-          "value": "fcdb489b31f4bedb23bdffdffb2f2d709f3e6df099c3b960bbbacdd755406130"
+          "path": "agents/lead_engineer/tasks/TASK-AR-644.md",
+          "value": "25afc00ac9c170492c180d0ac880a6483f4daacae23eed3e872746615aa5d154"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-644/UNIT-TASK-AR-644-001.md",
+          "value": "4a3962ad8bc9342ebf5fbabb3777a9d3c8a77e59a9c643950319f65eee67dfd5"
         },
         {
           "kind": "sha256",
@@ -945,122 +950,137 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/runtime_asset_usage.py",
-          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+          "path": ".codex/hooks.json",
+          "value": "02ac857cfd9d99f617bd071ce0d844de0f5d06b766fc844a0cdc244014abd936"
         },
         {
           "kind": "sha256",
-          "path": "scripts/verify_wheel_dotfiles.py",
-          "value": "7934ae5f61ccb7a9db198ff1d6cd69d914b3751611a1deb0ae3489c915c498a8"
+          "path": "scripts/bootstrap_dev_env.py",
+          "value": "1b9464253d9077179ca490828b2758bf89d95a107fbd13e37d5afcff96459445"
         },
         {
           "kind": "absent",
-          "path": "src/agent_runtime/template_profiles.py",
+          "path": "scripts/session_start_hook.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/session_compact_hook.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/session_resume_check.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/hook_runtime.py",
           "value": ""
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/sync.py",
-          "value": "d5fc33e78ebb6fc230d5eebf1ae63f17ec746a48665ef31bd2f7e98b85f13c56"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/adoption.py",
-          "value": "6cce35744371510d72880ace96519f65ef74eca24d870a58c30205b3ab3d90df"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/lock.py",
-          "value": "9074e9880e90b65b04c558e02f0bf0cae4b4c5674b6d1b0dea4db9c878ea7a0e"
-        },
-        {
-          "kind": "absent",
-          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
-          "value": ""
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
-          "value": "048e4cd44f246ab0e8a1f89747650bb8a1820d00ae51e3cb6508ebe4faf34de6"
+          "path": "src/agent_runtime/doctor.py",
+          "value": "36568a1273efa3259dd7eeb86ad9558b469b230c3623a910734fc2d0f6875624"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/.codex/hooks.json",
-          "value": "947dc7366dbff526e3a13a403989ea2fd75ce6f363a8ca02c92b9b5c36ba6bc8"
+          "value": "0ce8889258365b8dc239053c0a02f932369c0a865a02880e8881cee65ce72080"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/runtime_asset_usage.py",
-          "value": "5209e4446b96a1a7752856865492debab0d69eaeed62e38d8c1843d28eecff38"
+          "path": "src/agent_runtime/templates/project/scripts/session_start_hook.py",
+          "value": "a688e6e77d3bf156ddac3409082b224775732ec0d86bd581332b1274b5ef4e86"
         },
         {
           "kind": "absent",
-          "path": "src/agent_runtime/templates/project/scripts/work.py",
-          "value": ""
-        },
-        {
-          "kind": "absent",
-          "path": "src/agent_runtime/templates/project/scripts/session_baseline.py",
-          "value": ""
-        },
-        {
-          "kind": "absent",
-          "path": "src/agent_runtime/templates/project/scripts/dirty_intake.py",
-          "value": ""
-        },
-        {
-          "kind": "absent",
-          "path": "src/agent_runtime/templates/project/scripts/save_report.py",
+          "path": "src/agent_runtime/templates/project/scripts/session_compact_hook.py",
           "value": ""
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/skills/release-conductor/SKILL.md",
-          "value": "85bead6cd21dd5ebd1f104c68e73777e3abeb67a6fb25938b3793d88ba0b3629"
+          "path": "src/agent_runtime/templates/project/scripts/session_resume_check.py",
+          "value": "5a21ce70f57d8987c63699acfa03e88c9b14a24c8483027a025bb86fb43a4c88"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/skills/independent-verification/SKILL.md",
-          "value": "13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0"
+          "path": "src/agent_runtime/templates/project/scripts/install_hooks.py",
+          "value": "8629b654c8137896578695239a06db4079f2078c172d0d2b7e3e38d3500f0fea"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/skills/session-closeout/SKILL.md",
-          "value": "547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570"
+          "path": "src/agent_runtime/templates/project/AGENTS.md",
+          "value": "eb76c85b035397bfc622a15b367376257f60fe68032ed6282f68875c0146014b"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/skills/work-analytics/SKILL.md",
-          "value": "bd63dbfaa4edba888c0683e41cae5b72fcddc7d3618197c0d23f5e41bb7d156a"
+          "path": "src/agent_runtime/templates/project/CLAUDE.md",
+          "value": "2ee98f198d4a5dc878da096a2b827a818a027fad31d1b2583f94079a116b39e2"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_runtime_asset_usage.py",
-          "value": "5f6fdbf8eb0610ba3029f5d244bd0bee8d0efe2e2361b790d8d89f26171a7569"
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+          "value": "d123f31602d0f224be475317f94cd2dddd203d21417ea21b91a26aeaea1e4c33"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/test_session_continuity_hooks.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_bootstrap_dev_env.py",
+          "value": "0b90f71d01b87759c4ebc7d33975d98215129cc783da0421aee51deb12ceba8b"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_session_resume_check.py",
+          "value": "3a5123c2328241d7b07f504259178d7b01ef4fe2e42047a35f9b64e3a034fe5d"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_interrupted_run_detector.py",
+          "value": "a371fe3fa6bee2f4afc7d79dd0de158d4d3c6032be49e29cc19bb303a98f0d88"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_doctor.py",
+          "value": "3a523f47baefa5417627f4e0f3499062ac9a7ce275413ea213c582d429c79773"
         },
         {
           "kind": "sha256",
           "path": "tests/test_template_smoke.py",
-          "value": "cc9041cfb5a252ca967fc259129b1c5f28edaf85e1bbf1a302101178f712b534"
+          "value": "da6521746619f1ab78aadf27da8732a324eddc805fc719e393d8bd812cbb6b26"
         },
         {
           "kind": "sha256",
           "path": "tests/test_wheel_dotfiles_packaging.py",
-          "value": "766f893b3510d8b312681c5cafde69b17d32bdfa65838700e00d12e6a551d954"
+          "value": "0e29d1bc13485f52358f020a7ccb78995a3652642ef94f361d2c8a587543c390"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_adoption.py",
-          "value": "d68147c63bc571e9321a33a49a9174af6d7fd4d50013a5f35ac49f7e21859b65"
+          "path": "tests/test_session_dashboard.py",
+          "value": "973bbbda96abd48eb671a3bd71cf602e95af42907c2b1472da289560e4d5eb17"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "cfdfea0a21fe108c17fdf865a0458fe70f71e835f80702c925f75cd8960d6185"
+          "path": "tests/test_update_notify.py",
+          "value": "104f1628e6fbb1361adb5880101a5188e2b1bd12087324da35b23d8bbae9ae63"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_stop_hook_owner_governance.py",
+          "value": "1a19764eec57e4b8e1382b785e10e6f256e734051431f8a76701f9fb024c46ed"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_allimbot.py",
+          "value": "26323dca6ed7fa9f2caf2fe92e8882cd6c8492a899773209c9b66d5f6b580b1c"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-28-task-ar-643-w0-t3-replan.md",
-      "recorded_at": "2026-07-28T23:38:15+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-644-w0-t3-replan.md",
+      "recorded_at": "2026-07-29T01:19:28+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1276,5 +1296,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-28T23:38:15+09:00"
+  "updated_at": "2026-07-29T01:19:28+09:00"
 }
