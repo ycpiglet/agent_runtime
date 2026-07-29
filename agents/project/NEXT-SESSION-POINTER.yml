@@ -16,6 +16,8 @@ active_work:
       agent_role: lead-engineer
       agent_instance_id: le-20260729-task-ar-648-001-codex
       display_name: lead_engineer@unit-648-001-codex
+      callsite_id: codex:root:task-ar-648-unit-001
+      pane_id: codex:root:task-ar-648-unit-001
       task_id: TASK-AR-648
       unit_id: UNIT-TASK-AR-648-001
       worktree_path: /home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648
