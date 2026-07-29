@@ -920,72 +920,67 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-t3-replan.md",
-          "value": "48e3e99ba48e484e9714e418a97ff184555f4412d5c489487e09c3c7066f0c7d"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan.md",
+          "value": "1d2ce264a64c21f21f3fbbb73cb054f0ff1384898c1c72a36ac443aa8ac9eed1"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4A-2026-07-30-unit-task-ar-648-012.md",
-          "value": "a6bb386d04e8f4cdd503293776fcca329216ec6d279cf126f324ad737a1156e0"
+          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md",
+          "value": "c5749497193f9160d7d50cbf09d00a5d9d0570c6b14a20fd441880d2665c2d47"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-012.md",
-          "value": "c8d52da8e2da2370be45f4534d1501927fc930a793d9a96408a6e02aa69f7cf8"
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-648-013.md",
+          "value": "e51430c0d0f601fe16b88a80de44fa775c1f02f3ed05a2c1fd867ddd607ca332"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-013.md",
+          "value": "b1f4179ab71f55ca95d841c10d1fc5b7682b20853374bc72a4bfc1ac3dda9c8a"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "1551a36749e5aec557071c7bdbeb6fe64078f35f846e65d7d2b12017d561be4a"
+          "value": "2ab8e885449732026e1c34ea9710ef730725d678522309c8e0767901c8ab7452"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md",
-          "value": "8e6493803a244330935e0863df17d800643faa04b464dc4e93ccceced82273f8"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md",
+          "value": "f48dcb401d02d543e75b3ef15ca8dce6676c0d0f1e35d3112ea31163205eb4b7"
         },
         {
           "kind": "sha256",
-          "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b.json",
-          "value": "03b1a949bac63b16765fa0f054ada0831625a7bcfcf94d003c3a9ff83dcff74d"
+          "path": "docs/pilot-isolation-contract.md",
+          "value": "44d0997a0af53c2bea06e41ddf8d8ebb4434960942ea40ffcfab1d037047b64f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/pilot_isolation_gate.py",
+          "value": "d6b3c8fa0d13a3783a38be57f2f60c0fa7485ea46435375d2d362101236dd7e2"
         },
         {
           "kind": "sha256",
           "path": "scripts/template_mirror_gate.py",
-          "value": "b786335ca052abf3252a702ca2d872fefbc3ca309e955a8fe40a43a319a2d62b"
+          "value": "8a649bc9d4253651ef1cb7626ca07acd81b7cb5a512bee9368dc79c32c3bce07"
         },
         {
           "kind": "sha256",
           "path": "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
-          "value": "d5e048be829088e1c7acbef158c9dc28119f72781f24973b7c00ec56803eea10"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_template_mirror_gate.py",
-          "value": "d6d015fbf4ddeb14f0a9216f22fc3d6cc06af087c5ef3269b6a26b8e3ef84d58"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/owner_governance_gate.py",
-          "value": "6d3efb90f52521c93e3d97a3bf7a5ecf9568bbdcbdc24e13fcb364f8cd2050a9"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_owner_governance_chain_parity.py",
-          "value": "4833fdea75826c4120727dc568166f00a0ffd31e32984808a50db1b14622de16"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/work.py",
-          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+          "value": "6fd07a1d43c34e655a51e99b07fd085cb7e3f84add4aa7ad6db087a6a8dbae86"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
           "value": "89c5d2751781623a126bb93424fcb944b3272c4ae8a3f2b00de0d9d5b5acf2e1"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration.md",
-      "recorded_at": "2026-07-30T04:21:35+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration.md",
+      "recorded_at": "2026-07-30T04:48:50+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1201,5 +1196,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T04:21:35+09:00"
+  "updated_at": "2026-07-30T04:48:50+09:00"
 }
