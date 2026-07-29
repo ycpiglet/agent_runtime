@@ -1,0 +1,21 @@
+# Handoff: lead_engineer@orchestrator-01
+
+- claim_id: CLAIM-20260730-075500-task-ar-653-merge-queue-safety
+- task_id: TASK-AR-653
+- worktree_path: .worktrees/TASK-AR-653
+- branch: codex/unit-task-ar-653-001-wave
+- task_set_id: TASKSET-AR-MERGE-QUEUE-SAFETY
+- project_id: PROJECT-AGENT-RUNTIME
+- unit_id: UNIT-TASK-AR-653-001
+- unit_spec: agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md
+- requested_model_tier: worker_low
+- selected_model_tier: worker_low
+- model_tier: worker_low
+- routing_status: selected
+- wip_slot: 0
+- stop_condition: Stop if another active claim overlaps any of the five target files, if the Git common directory cannot be resolved safely, or if compatibility requires changing dispatcher/workflow files reserved by another session.
+- phase: wave-claimed
+- step: 1/6
+- progress_pct: 0
+- status_text: Wave 1 dispatch: UNIT-TASK-AR-653-001
+- status: claimed

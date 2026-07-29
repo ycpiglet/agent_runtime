@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1",
+  "task_id": "SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1",
+  "task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+  "active_scope": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+  "agent_role": "progress-scout",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "progress-scout-CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1",
+  "display_name": "progress-scout@scout-sweep",
+  "mode": "scout-sweep",
+  "status": "released",
+  "status_text": "Progress-scout sweep for TASKSET-AR-MERGE-QUEUE-SAFETY wave 1",
+  "claimed_at": "2026-07-30T07:55:00+09:00",
+  "last_heartbeat": "2026-07-30T08:29:07+09:00",
+  "updated_at": "2026-07-30T08:29:07+09:00",
+  "tags": [
+    "scout",
+    "sweep",
+    "wave:1"
+  ],
+  "overlay": true,
+  "parent_task_id": "",
+  "parent_task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1.log.md",
+  "released_at": "2026-07-30T08:29:07+09:00",
+  "verified_by": "qa-20260730-080600-task-ar-653",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/VERIFY-2026-07-30-task-ar-653-independent.md"
+}

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T16:59:34+09:00",
-  "record_count": 520,
+  "generated_at": "2026-07-30T07:42:31+09:00",
+  "record_count": 524,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5723,6 +5723,50 @@
       "title": "UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md",
       "parent_id": "TASK-AR-651",
+      "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-PARALLEL-INTEGRATION-INTEGRITY",
+      "level": "initiative",
+      "number": "42",
+      "label": "Initiative 42",
+      "id": "INIT-AR-PARALLEL-INTEGRATION-INTEGRITY",
+      "title": "Parallel Integration Integrity",
+      "path": "agents/project/initiatives/INIT-AR-PARALLEL-INTEGRATION-INTEGRITY.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "level": "taskset",
+      "number": "42.1",
+      "label": "Taskset 42.1",
+      "id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "title": "Merge Queue Safety",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-PARALLEL-INTEGRATION-INTEGRITY",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-653",
+      "level": "task",
+      "number": "42.1.1",
+      "label": "Task 42.1.1",
+      "id": "TASK-AR-653",
+      "title": "Serialize all queue mutations through a repository-common lock, persist queue state a…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
+      "parent_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-653-001",
+      "level": "unit",
+      "number": "42.1.1.1",
+      "label": "Unit 42.1.1.1",
+      "id": "UNIT-TASK-AR-653-001",
+      "title": "UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
+      "parent_id": "TASK-AR-653",
       "status": "worker_ready"
     }
   ]

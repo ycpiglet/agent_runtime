@@ -1690,8 +1690,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-653",
+      "expires_at": "2026-07-31T07:45:00+09:00",
+      "fulfilled_at": "2026-07-30T07:45:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-653.md",
+      "fulfilled_task_id": "TASK-AR-653",
+      "fulfilled_task_uid": "f7ef3b94-9c25-4e2c-b0a0-da98e1d67a6b",
+      "initiative_id": "INIT-AR-PARALLEL-INTEGRATION-INTEGRITY",
+      "kind": "task",
+      "owner_id": "codex-root",
+      "reason": "work registration TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "reservation_group_id": "RES-20260730-074500-b6288939",
+      "reservation_id": "RES-20260730-074500-b6288939-01",
+      "reserved_at": "2026-07-30T07:45:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-28T16:36:01+09:00"
+  "updated_at": "2026-07-30T07:45:00+09:00"
 }
