@@ -9,6 +9,7 @@ The runner exposes a small command surface only, with explicit policy profiles:
 
 from __future__ import annotations
 
+import fnmatch
 import shlex
 import subprocess
 import re
@@ -21,6 +22,26 @@ class GuardrailError(Exception):
 
 
 SECRET_NAMES = {".env"}
+# Matched by filename, because an exact-name denylist let the model read a
+# variant (`.env.local`, `.env.production`) or a stray key/cert and copy it into
+# model output or a transcript. `notifications.local.json` is this template's
+# documented store for webhook URLs, bot tokens, and SMTP credentials.
+SECRET_NAME_GLOBS = (
+    ".env",
+    ".env.*",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "id_rsa*",
+    "id_ecdsa*",
+    "id_ed25519*",
+    "notifications.local.json",
+    "secrets.toml",
+)
+# Placeholder templates carry no live values and are legitimate reading for
+# scaffolding work, so they stay readable despite matching `.env.*`.
+SECRET_NAME_EXCEPTIONS = {".env.example", ".env.sample", ".env.template"}
 READONLY_GIT_SUBCMDS = {"status", "diff", "log", "branch", "rev-parse", "show"}
 FORBIDDEN_GIT_SUBCMDS = {
     "add", "commit", "checkout", "restore", "stash", "reset", "clean",
@@ -128,6 +149,15 @@ def _python_script_allowlist(profile: str) -> set[str]:
     return set(ALLOWED_ROOT_SCRIPTS_CI)
 
 
+def is_secret_name(name: str) -> bool:
+    """Return whether `name` is a secret-bearing filename the tools must refuse."""
+    if name in SECRET_NAME_EXCEPTIONS:
+        return False
+    if name in SECRET_NAMES:
+        return True
+    return any(fnmatch.fnmatch(name, pattern) for pattern in SECRET_NAME_GLOBS)
+
+
 def resolve_in_root(root: Path, path: str) -> Path:
     """Resolve `path` under `root`, rejecting escapes and secret files."""
     root = Path(root).resolve()
@@ -136,7 +166,7 @@ def resolve_in_root(root: Path, path: str) -> Path:
         p.relative_to(root)
     except ValueError:
         raise GuardrailError(f"path escapes repo root: {path}")
-    if p.name in SECRET_NAMES:
+    if is_secret_name(p.name):
         raise GuardrailError(f"access to secret file denied: {path}")
     return p
 

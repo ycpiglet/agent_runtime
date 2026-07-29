@@ -46,3 +46,14 @@ __pycache__/
 /.codex/notifications.local.json
 notifications.local.json
 .hypothesis/
+
+# Provider credentials and key material. This repo is public and the project
+# template loads ANTHROPIC_API_KEY* from a repo-root `.env`, so an unignored
+# `.env` here is one `git add -A` away from a published live key. Only the
+# *.example placeholders are tracked.
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key

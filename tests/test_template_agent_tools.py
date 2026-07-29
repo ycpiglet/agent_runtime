@@ -438,3 +438,45 @@ def test_run_command_profile_case_insensitive_and_unknown_profile_rejected(tmp_p
 
     with pytest.raises(module.GuardrailError):
         module.ToolRunner(tmp_path, command_profile="ops")
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        ".env",
+        ".env.local",
+        ".env.production",
+        "server.pem",
+        "session.key",
+        "id_rsa",
+        "id_ed25519",
+        "bundle.p12",
+        "notifications.local.json",
+        "secrets.toml",
+    ],
+)
+def test_secret_files_are_denied_by_name_variant(tmp_path, name):
+    module = _load_agent_tools_module()
+    (tmp_path / name).write_text("SECRET=live-value\n", encoding="utf-8")
+
+    with pytest.raises(module.GuardrailError):
+        module.resolve_in_root(tmp_path, name)
+
+
+@pytest.mark.parametrize("name", [".env.example", ".env.sample", ".env.template"])
+def test_placeholder_env_templates_stay_readable(tmp_path, name):
+    module = _load_agent_tools_module()
+    (tmp_path / name).write_text("API_KEY=replace-me\n", encoding="utf-8")
+
+    assert module.resolve_in_root(tmp_path, name).name == name
+
+
+def test_secret_denial_survives_nested_and_traversal_paths(tmp_path):
+    module = _load_agent_tools_module()
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / ".env.local").write_text("TOKEN=live\n", encoding="utf-8")
+
+    with pytest.raises(module.GuardrailError):
+        module.resolve_in_root(tmp_path, "config/.env.local")
+    with pytest.raises(module.GuardrailError):
+        module.resolve_in_root(tmp_path, "./config/../config/.env.local")
