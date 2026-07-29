@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -12,9 +13,15 @@ from scripts.parallel_worktree_gate import ClaimRecord, _continuity_findings
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
+TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
+TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v1"
 
 
-def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
+def _run_gate(
+    root: Path,
+    *,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), "--check"],
         cwd=REPO_ROOT,
@@ -23,6 +30,7 @@ def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
+        env=env,
     )
 
 
@@ -276,6 +284,43 @@ def test_gate_blocks_missing_taskset_progress_fields_for_active_claim(tmp_path: 
     assert "task-claim:missing-status-text" in result.stdout
 
 
+def test_gate_allows_only_explicit_overlay_to_omit_worker_checkout_fields(
+    tmp_path: Path,
+):
+    (tmp_path / "STATUS.md").write_text(
+        "## Next Steps\n- run the review overlay\n",
+        encoding="utf-8",
+    )
+    _write_claim(
+        tmp_path,
+        "CLAIM-REVIEW-1",
+        task_id="REVIEW-TASK-AR-246-independent-auditor",
+        agent_role="independent-auditor",
+        agent_instance_id="independent-auditor-CLAIM-REVIEW-1",
+        display_name="independent-auditor@review",
+        callsite_id="role-routing:closeout:TASK-AR-246:independent-auditor",
+        pane_id="overlay:CLAIM-REVIEW-1",
+        mode="review",
+        overlay=True,
+        allow_parallel_task_set=True,
+        parent_task_id="TASK-AR-246",
+        parent_task_set_id="TASKSET-AR-PANE-PROGRESS",
+        worktree_path=None,
+        branch=None,
+        handoff_path="STATUS.md",
+        log_path="STATUS.md",
+        persistence={
+            "mode": "working_tree",
+            "scm_commit_authorized": False,
+        },
+    )
+
+    result = _run_gate(tmp_path)
+
+    assert result.returncode == 0, result.stdout
+    assert "block=0" in result.stdout
+
+
 def _git(cwd: Path, *args: str) -> None:
     subprocess.run(
         ["git", "-C", str(cwd), *args],
@@ -301,6 +346,56 @@ def _init_git_repo(tmp_path: Path) -> Path:
     _git(repo, "add", "-A")
     _git(repo, "commit", "-m", "init")
     return repo
+
+
+def _transaction_env(
+    repo: Path,
+    claim_path: Path,
+    *,
+    persist_record: bool = True,
+    root_value: str | None = None,
+    claim_paths: list[str] | None = None,
+    owner_pid: int | None = None,
+    head: str | None = None,
+) -> tuple[dict[str, str], Path]:
+    nonce = "0123456789abcdef0123456789abcdef"
+    rel = claim_path.relative_to(repo).as_posix()
+    marker = {
+        "schema": TRANSACTION_SCHEMA,
+        "root": root_value or str(repo.resolve()),
+        "claim_paths": claim_paths or [rel],
+        "nonce": nonce,
+        "owner_pid": owner_pid if owner_pid is not None else os.getpid(),
+        "head": head or subprocess.run(
+            ["git", "-C", str(repo), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip(),
+    }
+    raw = json.dumps(marker, sort_keys=True, separators=(",", ":"))
+    git_path = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "rev-parse",
+            "--git-path",
+            f"agent-runtime/claim-commit/{nonce}.json",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    record_path = Path(git_path)
+    if not record_path.is_absolute():
+        record_path = repo / record_path
+    if persist_record:
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        record_path.write_text(raw + "\n", encoding="utf-8")
+    env = dict(os.environ)
+    env[TRANSACTION_ENV] = raw
+    return env, record_path
 
 
 def _add_task_worktree(repo: Path, name: str = "TASK-AR-900", branch: str = "claude/task-ar-900-demo") -> Path:
@@ -442,6 +537,134 @@ def test_gate_blocks_staged_only_claim_after_explicit_scm_commit_authorization(
     assert result.returncode == 1
     assert "task-claim:authorized-commit-not-persisted" in result.stdout
     assert "block=1" in result.stdout
+
+
+def test_gate_allows_exact_staged_claim_only_inside_live_commit_transaction(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    env, _record = _transaction_env(repo, claim_path)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 0, result.stdout
+    assert "task-claim:authorized-commit-transaction" in result.stdout
+    assert "block=0" in result.stdout
+
+
+def test_gate_rejects_ambient_transaction_marker_without_private_record(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    env, _record = _transaction_env(repo, claim_path, persist_record=False)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("case", "marker_kwargs"),
+    [
+        ("wrong-root", {"root_value": "/tmp/not-this-repository"}),
+        (
+            "wrong-path",
+            {"claim_paths": ["agents/runtime/task_claims/CLAIM-other.json"]},
+        ),
+        ("dead-owner", {"owner_pid": 99999999}),
+        ("wrong-head", {"head": "0" * 40}),
+    ],
+)
+def test_gate_rejects_mismatched_commit_transaction(
+    tmp_path: Path,
+    case: str,
+    marker_kwargs: dict[str, object],
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    env, _record = _transaction_env(repo, claim_path, **marker_kwargs)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1, case
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
+def test_gate_rejects_transaction_when_claim_is_unstaged_or_index_mismatched(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    env, _record = _transaction_env(repo, claim_path)
+    unstaged = _run_gate(repo, env=env)
+    assert unstaged.returncode == 1
+
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status_text"] = "changed after staging"
+    claim_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    mismatched = _run_gate(repo, env=env)
+    assert mismatched.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in mismatched.stdout
+
+
+def test_transaction_marker_does_not_upgrade_working_tree_persistence(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "working_tree",
+            "scm_commit_authorized": False,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    env, _record = _transaction_env(repo, claim_path)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 0, result.stdout
+    assert "task-claim:working-tree-persistence" in result.stdout
+    assert "task-claim:authorized-commit-transaction" not in result.stdout
 
 
 @pytest.mark.parametrize(

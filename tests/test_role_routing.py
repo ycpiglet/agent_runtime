@@ -276,6 +276,20 @@ def test_high_risk_trigger_adds_skeptic_overlay_alongside_auditor(tmp_path, monk
     assert "independent-auditor" in roles
     assert "skeptic" in roles
     assert len(result["created"]) == 2
+    for overlay in result["created"]:
+        assert overlay["callsite_id"]
+        assert overlay["pane_id"]
+        assert overlay["phase"] == "claim-created"
+        assert overlay["progress_pct"] == 0
+        assert overlay["allow_parallel_task_set"] is True
+        assert overlay["persistence"] == {
+            "mode": "working_tree",
+            "scm_commit_authorized": False,
+        }
+        assert overlay["parent_task_id"] == "TASK-AR-900"
+        assert overlay["parent_task_set_id"] == "TASKSET-AR-900"
+        assert "worktree_path" not in overlay
+        assert "branch" not in overlay
 
     claims = _load_claims(tmp_path)
     skeptics = [c for c in claims if c["agent_role"] == "skeptic"]

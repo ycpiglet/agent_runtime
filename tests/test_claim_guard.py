@@ -8,6 +8,8 @@ makes it part of HEAD, which survives both reset and clean.
 
 from __future__ import annotations
 
+import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -39,6 +41,52 @@ def _write_claim(root: Path, name: str = "CLAIM-test.json") -> Path:
     path = claims / name
     path.write_text('{"claim_id": "CLAIM-test"}\n', encoding="utf-8")
     return path
+
+
+def _write_runtime_claim(root: Path) -> tuple[Path, Path, Path]:
+    claims = root / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True, exist_ok=True)
+    claim = claims / "CLAIM-runtime-hook.json"
+    handoff = claims / "CLAIM-runtime-hook.handoff.md"
+    log = claims / "CLAIM-runtime-hook.log.md"
+    handoff.write_text("# Handoff\n\n- Next Steps: verify\n", encoding="utf-8")
+    log.write_text("# Claim Log\n\n- transaction test\n", encoding="utf-8")
+    claim.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-runtime-hook",
+                "task_id": "TASK-AR-648",
+                "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+                "agent_role": "orchestrator",
+                "team_id": "evaluation-office",
+                "agent_instance_id": "claim-hook-test",
+                "display_name": "claim-hook@test",
+                "callsite_id": "pytest:claim-hook",
+                "pane_id": "pytest:claim-hook",
+                "mode": "orchestrator",
+                "status": "claimed",
+                "phase": "claim-created",
+                "progress_pct": 0,
+                "status_text": "Verify explicit claim commit transaction",
+                "worktree_path": ".",
+                "branch": "test/claim-hook",
+                "claimed_at": "2026-07-29T19:00:00+09:00",
+                "last_heartbeat": "2026-07-29T19:00:00+09:00",
+                "handoff_path": handoff.relative_to(root).as_posix(),
+                "log_path": log.relative_to(root).as_posix(),
+                "persistence": {
+                    "mode": "scm_commit",
+                    "scm_commit_authorized": True,
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return claim, handoff, log
 
 
 def test_is_git_repo(tmp_path):
@@ -124,3 +172,49 @@ def test_commit_only_touches_claim_paths(tmp_path):
     claim_guard.commit_claim_artifacts(tmp_path, claim, claim_id="CLAIM-test")
     status = _git(tmp_path, "status", "--porcelain").stdout
     assert "other.txt" in status  # still uncommitted / untracked
+
+
+def test_runtime_precommit_allows_exact_explicit_claim_transaction(tmp_path):
+    """The Runtime gate must not reject the claim-only commit it is guarding."""
+    _init_repo(tmp_path)
+    (tmp_path / "STATUS.md").write_text(
+        "## Next Steps\n- finish the claim transaction\n",
+        encoding="utf-8",
+    )
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "parallel_worktree_gate.py").write_text(
+        (ROOT / "scripts" / "parallel_worktree_gate.py").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    hooks = tmp_path / ".githooks"
+    hooks.mkdir()
+    hook = hooks / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\nexec python3 scripts/parallel_worktree_gate.py --check\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    _git(tmp_path, "config", "core.hooksPath", ".githooks")
+    _git(tmp_path, "add", "STATUS.md", "scripts/parallel_worktree_gate.py", ".githooks/pre-commit")
+    assert _git(tmp_path, "commit", "-m", "runtime hook fixture").returncode == 0
+
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    assert result["committed"] is True
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() != before
+    assert "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION" not in os.environ
+    transaction_dir = Path(
+        _git(tmp_path, "rev-parse", "--git-path", "agent-runtime/claim-commit").stdout.strip()
+    )
+    if not transaction_dir.is_absolute():
+        transaction_dir = tmp_path / transaction_dir
+    assert not list(transaction_dir.glob("*.json"))

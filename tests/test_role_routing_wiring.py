@@ -33,6 +33,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CLAIM_DISPATCHER = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 WAVE_DISPATCHER = REPO_ROOT / "scripts" / "wave_dispatcher.py"
+PARALLEL_GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 ROLE_ROUTING_FLAG = "AR_ROLE_ROUTING"
 SCOUT_COUNCIL_FLAG = "AR_SCOUT_COUNCIL"
 TASKSET = "TASKSET-AR-WIRE-TEST"
@@ -79,6 +80,18 @@ def _run_wave(root: Path, *args: str, env: dict[str, str] | None = None) -> subp
         encoding="utf-8",
         errors="replace",
         env=env or _env(),
+    )
+
+
+def _run_parallel_gate(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(PARALLEL_GATE), "--root", str(root), "--check"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
 
@@ -337,6 +350,16 @@ def test_high_risk_release_dispatches_auditor_and_skeptic(tmp_path: Path) -> Non
     assert skeptic["mode"] == "review"
     assert "high-risk" in (skeptic.get("tags") or [])
     assert "high_risk" in (skeptic.get("tags") or [])
+
+    # Producer-to-validator regression: the real release seam must emit claims
+    # that the canonical parallel gate can consume immediately.
+    (tmp_path / "STATUS.md").write_text(
+        "## Next Steps\n- run the independent closeout passes\n",
+        encoding="utf-8",
+    )
+    gate = _run_parallel_gate(tmp_path)
+    assert gate.returncode == 0, gate.stdout
+    assert "block=0" in gate.stdout
 
 
 def test_high_risk_release_via_tag_also_dispatches_skeptic(tmp_path: Path) -> None:

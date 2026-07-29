@@ -981,7 +981,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_claim_guard.py",
-          "value": "0794e69738551829124c7b3154815b37aebf92b94ad2f6dee6a1854e1b47ee3d"
+          "value": "e5cbf14237e3d6882205153b4b10280eb7f286ee700922fbc310d14725356779"
         },
         {
           "kind": "sha256",
@@ -991,12 +991,12 @@
         {
           "kind": "sha256",
           "path": "tests/test_role_routing.py",
-          "value": "8eacfb983ca93cb6b2ba73af5e92409d3fe63a48eb16728a1ed4a7cafd9a03aa"
+          "value": "429361c10064eede6f564a00a293904b6069487a134a292bdea54011d0b8a858"
         },
         {
           "kind": "sha256",
           "path": "tests/test_role_routing_wiring.py",
-          "value": "d07f51f46642c3cc5320c19fb3bd37e4e16ae2b2d92c39f02cca86abce7f8ca7"
+          "value": "6bdc4f3dc18d6355e4365fba8fd7856d9bfa720de351abe759ab971a45296f92"
         },
         {
           "kind": "sha256",
@@ -1011,7 +1011,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_parallel_worktree_gate.py",
-          "value": "67056109f6a1e1c5e3f275e7c27614d88028b71d91de1bc83a5dd12618f5a3ed"
+          "value": "17dce0bf5421cf3012c63f1524006c5091da66f6b78c72f2f922d65310022615"
         },
         {
           "kind": "sha256",
@@ -1040,7 +1040,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-      "recorded_at": "2026-07-29T19:52:24+09:00",
+      "recorded_at": "2026-07-29T19:58:13+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1256,5 +1256,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T19:52:24+09:00"
+  "updated_at": "2026-07-29T19:58:13+09:00"
 }
