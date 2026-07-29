@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T04:45:18+09:00
-updated_at: 2026-07-30T04:45:18+09:00
+updated_at: 2026-07-30T04:49:19+09:00
+started_at: 2026-07-30T04:49:19+09:00
 origin_type: pilot_replay
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-013.md
 created_by: codex-root-v080-planner
 summary: Replay Bean Wiki from a fifth fresh disposable checkout with a new frozen control after the exact Runtime mirror and isolation repairs passed independent review
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
 escalation_triggers:
   - data_integrity
   - repeated_failure

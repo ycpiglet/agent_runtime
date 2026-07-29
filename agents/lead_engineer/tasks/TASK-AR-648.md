@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T04:45:18+09:00
+updated_at: 2026-07-30T04:49:19+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -47,6 +47,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.json
   - agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json
   - agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json
+  - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -165,6 +166,9 @@ claim_refs:
   control, and the live primary only as a non-causal observation. Exactly
   three offline traces are allowed; Allimbot and release work remain blocked
   until canonical W4a and fresh independent W4b approve the replay.
+  UNIT-014 is now claimed in default working-tree mode. Runtime HEAD remained
+  at the registration boundary; exact product, fresh control, and disposable
+  target creation plus pre-write isolation capture are next.
 
 ## Goal
 
