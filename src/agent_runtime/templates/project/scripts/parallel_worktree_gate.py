@@ -10,9 +10,10 @@ The runtime protocol is intentionally simple:
   resume without reconstructing state from chat history;
 - claim-first: every task worktree must be covered by an active claim
   (watch by default; block when claim-less work is already happening);
-- claim files must be committed immediately -- untracked CLAIM-*.json files
-  are erased by a concurrent session's reset+clean (2026-06-12 incident:
-  CLAIM-...-task-ar-500-25db was lost and had to be recreated as -66ed).
+- every claim declares `working_tree` or `scm_commit` persistence; intentional
+  working-tree persistence is visible as a reset/clean risk, while ambiguous
+  legacy claims and failed explicitly authorized commits remain blocking
+  (2026-06-12 incident: CLAIM-...-task-ar-500-25db was lost and recreated).
 
 The gate evaluates the repository it runs in (``--root``). When it runs from
 a linked git worktree, the claim snapshot may predate claims committed on the
@@ -579,6 +580,28 @@ def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fi
         if not (name.startswith("CLAIM-") and name.endswith(".json")):
             continue
         record = by_rel.get(rel_path.lower())
+        persistence = record.payload.get("persistence") if record is not None else None
+        mode = str(persistence.get("mode") or "").strip().lower() if isinstance(persistence, dict) else ""
+        authorized = persistence.get("scm_commit_authorized") if isinstance(persistence, dict) else None
+        if mode == "working_tree" and authorized is False:
+            findings.append(
+                Finding(
+                    "watch",
+                    f"{rel_path}: task-claim:working-tree-persistence: claim intentionally "
+                    f"persists outside Git and leaves HEAD unchanged; {CLAIM_LOSS_INCIDENT}; "
+                    "preserve the worktree or use an explicit authorized claim commit",
+                )
+            )
+            continue
+        if mode == "scm_commit" and authorized is True:
+            findings.append(
+                Finding(
+                    "block",
+                    f"{rel_path}: task-claim:authorized-commit-not-persisted: claim explicitly "
+                    f"authorized SCM persistence but remains untracked; {CLAIM_LOSS_INCIDENT}",
+                )
+            )
+            continue
         if record is not None and record.spike:
             findings.append(
                 Finding(
@@ -592,7 +615,7 @@ def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fi
             Finding(
                 "block",
                 f"{rel_path}: task-claim:claim-not-committed: claim file is not tracked by git; "
-                f"{CLAIM_LOSS_INCIDENT}; commit claim files immediately",
+                f"{CLAIM_LOSS_INCIDENT}; persistence mode is missing, ambiguous, or inconsistent",
             )
         )
     return findings

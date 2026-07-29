@@ -155,6 +155,105 @@ def test_synced_host_scribe_projection_is_explicit_and_bounded(tmp_path):
     assert source.stat().st_mtime_ns == source_mtime
 
 
+def test_synced_host_state_scripts_run_without_source_package_or_pythonpath(
+    tmp_path: Path,
+) -> None:
+    host = _host_from_fixture(tmp_path)
+    sync_env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=sync_env,
+    )
+
+    task_id = "TASK-AR-648"
+    task_set_id = "TASKSET-PORTABLE-STATE"
+    task = host / "agents/lead_engineer/tasks" / f"{task_id}.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text(
+        "\n".join(
+            [
+                "---",
+                f"id: {task_id}",
+                "status: in_progress",
+                f"task_set_id: {task_set_id}",
+                "verification_status: pending",
+                "---",
+                "",
+                "# Portable state task",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (host / "BACKLOG-BOARD.md").write_text(
+        f"# Board\n\n{task_set_id}\n{task_id}\n",
+        encoding="utf-8",
+    )
+    (host / "BACKLOG.md").write_text(
+        f"# Backlog\n\n{task_set_id}\n",
+        encoding="utf-8",
+    )
+    (host / "STATUS.md").write_text(
+        f"# Status\n\n{task_set_id}\n{task_id}\n" + "".join(
+            f"- active {index}\n" for index in range(16)
+        ),
+        encoding="utf-8",
+    )
+    pointer = host / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(
+        "\n".join(
+            [
+                "current_state:",
+                "  status: active",
+                f"  task_set_id: {task_set_id}",
+                "resume:",
+                f"  active_task: {task_id}",
+                f"  active_task_set: {task_set_id}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    isolated_env = dict(os.environ)
+    isolated_env.pop("PYTHONPATH", None)
+    isolated_env["PYTHONNOUSERSITE"] = "1"
+    isolated_env["PYTHONIOENCODING"] = "utf-8"
+
+    written = _run(
+        [
+            PYTHON,
+            "-S",
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--write-projection",
+            "--now",
+            "2026-07-29T00:00:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=isolated_env,
+    )
+    assert json.loads(written.stdout)["projection"]["status"] == "fresh"
+
+    checked = _run(
+        [
+            PYTHON,
+            "-S",
+            "scripts/state_sync_gate.py",
+            "--root",
+            str(host),
+            "--check",
+        ],
+        cwd=host,
+        env=isolated_env,
+    )
+    assert "state-sync-gate: pass" in checked.stdout
+
+
 def test_synced_host_creates_and_searches_canonical_compound_record(tmp_path):
     host = _host_from_fixture(tmp_path)
     env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))

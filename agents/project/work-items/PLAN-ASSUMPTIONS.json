@@ -921,7 +921,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md",
-          "value": "90953345367624e313502513fcf24b9b53fc429784eba64b431db778a9a6d0f6"
+          "value": "5dcb6980c40e8434df7faea59306bda4115ca898ddc27d7b3022ce450699744a"
         },
         {
           "kind": "sha256",
@@ -941,12 +941,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "5e102d05bb7ba4a793e4d5dcab14cfc7931d84b7203f885694f94569765cf02f"
+          "value": "fd422608dc1ae5c13087c6a04fda422c4d9cc6ec94daf95b7998232f1ba2ac58"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md",
-          "value": "056ed60d3b6f6cbf1822df89e54fab3ca9b5d04da9688bd60eb4edbf69f3d75f"
+          "value": "6af2fd906cc9a2dd112d628a742574e05f6d7949012e63a5600efb1a07739157"
         },
         {
           "kind": "sha256",
@@ -956,17 +956,17 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "dce5515e8f887ac8eedafbbdc63c8edefd74be640d5cfd55b148a64c2250ecb4"
+          "value": "75c2dbd3dea2cec2dd3d498786514747f39a78e9925c3979ffba87bc2d915f8f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "dce5515e8f887ac8eedafbbdc63c8edefd74be640d5cfd55b148a64c2250ecb4"
+          "value": "75c2dbd3dea2cec2dd3d498786514747f39a78e9925c3979ffba87bc2d915f8f"
         },
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "dd0387b4c51003426bd6982a209dc64b330140d3a6c45184770fd5bb57f72102"
+          "value": "36d6450cc0321805149a7c0b1a0e9a5f8bce206c7cee4917fec5cbf044d307f8"
         },
         {
           "kind": "sha256",
@@ -975,48 +975,63 @@
         },
         {
           "kind": "sha256",
+          "path": "scripts/parallel_worktree_gate.py",
+          "value": "ff7e226bf63c7c89606143cf6619854a8bcc429aeec306774f1550512fc4f278"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+          "value": "ff7e226bf63c7c89606143cf6619854a8bcc429aeec306774f1550512fc4f278"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_parallel_worktree_gate.py",
+          "value": "394bc636ecd0b8611e49c5a54dff35a65f4be9d256a6f173fc7567040ae3426d"
+        },
+        {
+          "kind": "sha256",
           "path": "AGENTS.md",
-          "value": "20f3c6c84e32cc8aeb8033a75d750f30455e4c6a785acf3cab2b3173ca82cd14"
+          "value": "77704a8296860ac4373abb633d7d2a76dabd28006f1b46d6691fdfe5acf6948c"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/AGENTS.md",
-          "value": "964c6c705bd78efe3d5bfeac85c04f2d4f894d3da66ed615158f56f4f1d170fe"
+          "value": "a2842367470afad27b667ecbb91ed20befc2b18672b5700993c19d5d53138c02"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md",
-          "value": "3d010d7eca7bbe571d5260792da04ca47a889ad15485aa6a6aca3fdbfc693bf9"
+          "value": "ad2349c18c93e4a49ef2c4c6870e5b89d6edc3b09efc50e977b57ac0076d593a"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "scripts/agent_runtime/__init__.py",
-          "value": ""
+          "value": "f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "scripts/agent_runtime/config.py",
-          "value": ""
+          "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "scripts/agent_runtime/state_projection.py",
-          "value": ""
+          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_runtime/__init__.py",
-          "value": ""
+          "value": "f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_runtime/config.py",
-          "value": ""
+          "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py",
-          "value": ""
+          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
         },
         {
           "kind": "sha256",
@@ -1036,12 +1051,12 @@
         {
           "kind": "sha256",
           "path": "tests/test_scribe_due.py",
-          "value": "52ce97cec8cb2ce08ff8e89847f643eee4754e9379efbfb6cf736fef8bd3f0ec"
+          "value": "7d6667b564431f38a61a28a37f3f369b7ddaacb6c0267cfa5859a431412e04bf"
         },
         {
           "kind": "sha256",
           "path": "tests/test_template_smoke.py",
-          "value": "2a8531ef5d4c8479a5fc8fc4ec97451172b5de6ace57b203f47296ba14148702"
+          "value": "915d4375bc4676ade5ac9543373040ef02e42ee8250ead1588e9ec4b539808d8"
         },
         {
           "kind": "sha256",
@@ -1051,17 +1066,17 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "c8cf544ac36a6a084b65e90e9b9b467f9fb9b64a4e0318d030b445b8331ca17b"
+          "value": "8a5b1b51be3d5b6fb3563faabb7903a00e550b3369952e822d2d37f87d53114b"
         },
         {
           "kind": "sha256",
           "path": "agents/project/RUNTIME-ASSET-REGISTRY.json",
-          "value": "76c4ca46ffdfec4a53f5be6357b07a8fb049a7eea0b84d8a6b793460b0a15e34"
+          "value": "33f0fdb3c3b084dd59b4fdf51fc1da7af34200ed8f6d19892eb712c6405a845b"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
-          "value": "7945f80a3f8e57d54dd96163adeacd3302d7749a8fd9931ce229017812141707"
+          "value": "98d09c825ff497276bfe94c43d2f51883bcf06b653e0401122dff0429100efdc"
         },
         {
           "kind": "sha256",
@@ -1095,7 +1110,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md",
-      "recorded_at": "2026-07-29T18:38:44+09:00",
+      "recorded_at": "2026-07-29T18:49:27+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1311,5 +1326,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T18:38:44+09:00"
+  "updated_at": "2026-07-29T18:49:27+09:00"
 }

@@ -60,11 +60,30 @@ except ImportError:  # optional in the portable project template
     role_routing = None
 
 
-def _claim_autocommit_enabled() -> bool:
-    # Default ON; opt out with AGENT_RUNTIME_CLAIM_AUTOCOMMIT=0 (e.g. bespoke flows).
-    return os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", "1").strip().lower() not in {
-        "0", "false", "no", "off",
-    }
+def _claim_autocommit_enabled(*, cli_opt_in: bool = False) -> bool:
+    """Return whether this invocation explicitly authorizes an SCM commit.
+
+    Claim files are normal Runtime persistence; changing a host's Git HEAD is
+    a separate external effect.  Keep the crash-safety path available for
+    trusted control repositories, but never infer that authority from an
+    absent or malformed environment value.
+    """
+
+    if cli_opt_in:
+        return True
+    raw = os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT")
+    if raw is None:
+        return False
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized not in {"0", "false", "no", "off", ""}:
+        print(
+            "warning: invalid AGENT_RUNTIME_CLAIM_AUTOCOMMIT value; "
+            "claim artifacts will remain uncommitted",
+            file=sys.stderr,
+        )
+    return False
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
@@ -1238,6 +1257,9 @@ def cmd_create(args: argparse.Namespace) -> int:
         for finding in exc.findings:
             print(f"- {finding}", file=sys.stderr)
         return 1
+    claim_commit_authorized = _claim_autocommit_enabled(
+        cli_opt_in=args.commit_claim_artifacts
+    )
     escalation_triggers = _resolve_escalation_triggers(root, args)
     target_files = _resolve_target_files(root, args)
     claim = _build_claim(
@@ -1249,6 +1271,10 @@ def cmd_create(args: argparse.Namespace) -> int:
         defect_signatures=defect_signatures,
         knowledge_matches=knowledge_matches,
     )
+    claim["persistence"] = {
+        "mode": "scm_commit" if claim_commit_authorized else "working_tree",
+        "scm_commit_authorized": claim_commit_authorized,
+    }
     creation_errors = _claim_creation_errors(root, claim, records)
     if creation_errors:
         for error in creation_errors:
@@ -1359,7 +1385,7 @@ def cmd_create(args: argparse.Namespace) -> int:
     # Crash-safety guard: commit the claim immediately so a sibling session's
     # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
     # (incident 2026-06-12). Best-effort — never fails claim creation.
-    if _claim_autocommit_enabled():
+    if claim_commit_authorized:
         guard = claim_guard.commit_claim_artifacts(
             root,
             claim_path,
@@ -1713,6 +1739,14 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--log-path")
     create.add_argument("--lease-minutes", type=int, default=30)
     create.add_argument("--allow-parallel-task-set", action="store_true")
+    create.add_argument(
+        "--commit-claim-artifacts",
+        action="store_true",
+        help=(
+            "Explicitly authorize one Git commit containing only the claim "
+            "JSON, handoff, and log. Default claim creation never changes HEAD."
+        ),
+    )
     create.add_argument(
         "--skip-plan-check",
         action="store_true",

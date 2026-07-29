@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: planned
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T18:34:22+09:00
-updated_at: 2026-07-29T18:34:22+09:00
+updated_at: 2026-07-29T18:40:02+09:00
+started_at: 2026-07-29T18:40:02+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md
 created_by: codex-root-v080-planner
 summary: Make claim SCM mutation explicit, package standalone state dependencies, and replay Bean Wiki from a second clean worktree
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
 escalation_triggers:
   - data_integrity
   - external_effect
@@ -36,6 +39,9 @@ target_files:
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_claim_guard.py
+  - scripts/parallel_worktree_gate.py
+  - src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py
+  - tests/test_parallel_worktree_gate.py
   - AGENTS.md
   - src/agent_runtime/templates/project/AGENTS.md
   - src/agent_runtime/templates/project/docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md
@@ -64,6 +70,7 @@ acceptance:
   - Default task_claim_dispatcher create persists claim files but leaves exact Git HEAD unchanged in a clean adopted host.
   - An explicit CLI flag or true-valued compatibility environment setting commits only the claim JSON, handoff, and log; false and malformed settings never authorize a commit.
   - Existing claim_guard crash-safety and idempotency regressions remain green.
+  - Claim records persist the selected working-tree or SCM-commit mode; the parallel-worktree gate watches intentional working-tree persistence but still blocks legacy ambiguity and failed explicit commit persistence.
   - A synced host with no source checkout, editable install, or ambient PYTHONPATH runs state_sync_gate.py and scribe_due.py using the packaged portable modules.
   - Canonical src modules, root portable modules, and template portable modules are byte-identical; package selection, lock, and sanitizer evidence include them.
   - A second fresh Bean replay has zero P0s, zero classifier staleness, zero reconcile conflicts, zero unexpected host/content changes, zero host commits, and zero external effects.

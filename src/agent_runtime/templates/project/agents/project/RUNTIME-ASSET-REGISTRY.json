@@ -40,7 +40,11 @@
       "kind": "gate",
       "status": "active",
       "lifecycle": "keep",
-      "paths": ["scripts/state_sync_gate.py"],
+      "paths": [
+        "scripts/state_sync_gate.py",
+        "scripts/agent_runtime/config.py",
+        "scripts/agent_runtime/state_projection.py"
+      ],
       "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/NEXT-SESSION-POINTER.yml"],
       "tokens": ["state_sync_gate.py", "TASKSET-AR-GOVERNANCE-OPS"],
       "min_recent_uses": 1

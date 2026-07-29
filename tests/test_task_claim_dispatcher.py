@@ -39,10 +39,20 @@ def _routing_off_env() -> dict[str, str]:
     )
     for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
         env.pop(flag, None)
+    # Claim SCM policy must be explicit in each regression. An ambient setting
+    # must never turn a nominal host test into a committing test.
+    env.pop("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", None)
     return env
 
 
-def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_dispatcher(
+    root: Path,
+    *args: str,
+    env_overrides: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    env = _routing_off_env()
+    if env_overrides:
+        env.update(env_overrides)
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
         cwd=REPO_ROOT,
@@ -51,7 +61,7 @@ def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
-        env=_routing_off_env(),
+        env=env,
     )
 
 
@@ -109,6 +119,19 @@ def _run_git(root: Path, *args: str) -> None:
     assert result.returncode == 0, result.stderr or result.stdout
 
 
+def _git_stdout(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    return result.stdout.strip()
+
+
 def _init_git_worktree(tmp_path: Path, name: str) -> tuple[Path, Path]:
     primary = tmp_path / name
     primary.mkdir()
@@ -121,6 +144,115 @@ def _init_git_worktree(tmp_path: Path, name: str) -> tuple[Path, Path]:
     linked = tmp_path / f"{name}-linked"
     _run_git(primary, "worktree", "add", "-b", f"{name}-worker", str(linked))
     return primary, linked
+
+
+def _create_linked_claim(
+    linked: Path,
+    *,
+    suffix: str,
+    extra_args: tuple[str, ...] = (),
+    env_overrides: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    return _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        f"TASK-AR-{suffix}",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        suffix,
+        "--json",
+        *extra_args,
+        env_overrides=env_overrides,
+    )
+
+
+def test_default_claim_creation_persists_files_without_changing_host_head(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "default-files-only")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(linked, suffix="648-default")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert (linked / payload["path"]).is_file()
+    assert payload["claim"]["persistence"] == {
+        "mode": "working_tree",
+        "scm_commit_authorized": False,
+    }
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+
+
+def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit")
+    unrelated = linked / "unrelated.txt"
+    unrelated.write_text("must stay uncommitted\n", encoding="utf-8")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-cli-opt-in",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    after = _git_stdout(linked, "rev-parse", "HEAD")
+    assert after != before
+    changed = set(_git_stdout(linked, "diff-tree", "--no-commit-id", "--name-only", "-r", after).splitlines())
+    claim_id = json.loads(result.stdout)["claim"]["claim_id"]
+    assert changed == {
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+    assert "?? unrelated.txt" in _git_stdout(linked, "status", "--porcelain")
+
+
+@pytest.mark.parametrize("setting", ["0", "false", "off", "not-a-policy"])
+def test_false_or_malformed_compatibility_setting_never_commits(
+    tmp_path: Path,
+    setting: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"claim-policy-{setting}")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"648-{setting}",
+        env_overrides={"AGENT_RUNTIME_CLAIM_AUTOCOMMIT": setting},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"]["mode"] == "working_tree"
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+
+
+def test_true_compatibility_setting_retains_authorized_crash_safety(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-policy-true")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-env-opt-in",
+        env_overrides={"AGENT_RUNTIME_CLAIM_AUTOCOMMIT": "1"},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"]["mode"] == "scm_commit"
+    assert _git_stdout(linked, "rev-parse", "HEAD") != before
 
 
 def test_create_claim_allows_registered_linked_worktree_as_runtime_root(tmp_path: Path) -> None:

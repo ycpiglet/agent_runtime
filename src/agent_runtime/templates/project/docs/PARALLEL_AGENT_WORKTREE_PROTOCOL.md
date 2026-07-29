@@ -66,6 +66,13 @@ python scripts/task_claim_dispatcher.py create --task-id TASK-EXAMPLE --agent-ro
 git worktree add .worktrees/TASK-EXAMPLE -b codex/task-example-design-01 main
 ```
 
+The create command writes the claim JSON, handoff, and log but leaves Git
+`HEAD` unchanged. In a control repository where an SCM commit is separately
+authorized, add `--commit-claim-artifacts`; that opt-in commits only those
+three claim artifacts. `AGENT_RUNTIME_CLAIM_AUTOCOMMIT=1` remains an explicit
+compatibility opt-in. Missing, false, or malformed environment values never
+authorize a commit.
+
 Then start the agent inside that worktree with a task packet that names the task
 ID, allowed files, forbidden shared docs, verification commands, evidence
 outputs, and claim metadata.

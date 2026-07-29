@@ -334,3 +334,40 @@ def test_root_and_template_scribe_cli_are_exact_mirrors() -> None:
     assert (ROOT / "scripts/scribe_due.py").read_bytes() == (
         ROOT / "src/agent_runtime/templates/project/scripts/scribe_due.py"
     ).read_bytes()
+
+
+@pytest.mark.parametrize("module", ["config.py", "state_projection.py"])
+def test_portable_state_modules_are_exact_canonical_and_template_mirrors(
+    module: str,
+) -> None:
+    canonical = ROOT / "src" / "agent_runtime" / module
+    portable = ROOT / "scripts" / "agent_runtime" / module
+    packaged = (
+        ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "agent_runtime"
+        / module
+    )
+
+    assert portable.read_bytes() == canonical.read_bytes()
+    assert packaged.read_bytes() == canonical.read_bytes()
+
+
+def test_portable_state_package_initializers_are_exact_mirrors() -> None:
+    portable = ROOT / "scripts/agent_runtime/__init__.py"
+    packaged = (
+        ROOT
+        / "src/agent_runtime/templates/project/scripts/agent_runtime/__init__.py"
+    )
+    assert portable.read_bytes() == packaged.read_bytes()
+    canonical_version = next(
+        line for line in (ROOT / "src/agent_runtime/__init__.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+        if line.startswith("__version__ = ")
+    )
+    assert canonical_version in portable.read_text(encoding="utf-8")

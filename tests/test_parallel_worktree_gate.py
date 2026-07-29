@@ -380,6 +380,69 @@ def test_gate_blocks_untracked_claim_file(tmp_path: Path):
     assert "2026-06-12" in result.stdout
 
 
+def test_gate_watches_explicit_working_tree_claim_persistence(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "working_tree",
+            "scm_commit_authorized": False,
+        },
+    )
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 0, result.stdout
+    assert "task-claim:working-tree-persistence" in result.stdout
+    assert "block=0" in result.stdout
+    assert "watch=1" in result.stdout
+
+
+def test_gate_blocks_untracked_claim_after_explicit_scm_commit_authorization(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+    assert "block=1" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "persistence",
+    [
+        None,
+        {},
+        {"mode": "working_tree", "scm_commit_authorized": True},
+        {"mode": "scm_commit", "scm_commit_authorized": False},
+        {"mode": "unknown", "scm_commit_authorized": False},
+    ],
+)
+def test_gate_blocks_ambiguous_or_inconsistent_untracked_claim_persistence(
+    tmp_path: Path,
+    persistence: object,
+):
+    repo = _init_git_repo(tmp_path)
+    overrides = {} if persistence is None else {"persistence": persistence}
+    _write_claim(repo, "CLAIM-1", **overrides)
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "task-claim:claim-not-committed" in result.stdout
+
+
 def test_gate_exempts_spike_marker_worktree_with_watch_note(tmp_path: Path):
     repo = _init_git_repo(tmp_path)
     worktree = _add_task_worktree(repo)

@@ -36,21 +36,25 @@ Allimbot and release work remain stopped.
 3. Add a visible `--commit-claim-artifacts` opt-in and retain the explicit
    `AGENT_RUNTIME_CLAIM_AUTOCOMMIT=1` compatibility path. Absence of both must
    never mutate SCM.
-4. Package only the two dependency modules needed by the installed state
+4. Persist the selected claim mode in the claim record. The worktree gate may
+   warn about reset/clean exposure for an intentional `working_tree` claim,
+   but must still block an untracked legacy claim or a failed explicit
+   `scm_commit` claim.
+5. Package only the two dependency modules needed by the installed state
    surfaces plus a namespace-safe initializer. Do not copy the full
    application package into consumer projects.
-5. Treat canonical `src/agent_runtime/{config,state_projection}.py` as the
+6. Treat canonical `src/agent_runtime/{config,state_projection}.py` as the
    source of truth. Root portable and packaged-template copies must be
    byte-identical and parity-tested.
-6. Regenerate the host lock fixture and record the new selected-file count and
+7. Regenerate the host lock fixture and record the new selected-file count and
    template digest; do not preserve the obsolete 243 count as a false
    constant.
-7. Run focused/full tests and independent integrated W4b.
-8. Start Bean attempt 2 in a brand-new worktree at
+8. Run focused/full tests and independent integrated W4b.
+9. Start Bean attempt 2 in a brand-new worktree at
    `357eee4fd8c29c33a949adbe3a0ffa80c874bf42`.
-9. Run every consumer command with an empty or explicitly sanitized
+10. Run every consumer command with an empty or explicitly sanitized
    `PYTHONPATH`. Record exact template root/ref/digest for reconcile.
-10. After the final task/claim projection, regenerate classifier output and
+11. After the final task/claim projection, regenerate classifier output and
     require `--check` to pass before capturing evidence.
 
 ## Evidence Separation
