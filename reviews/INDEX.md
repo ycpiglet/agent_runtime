@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T04:21:24+09:00
-record_count: 1089
+generated_at: 2026-07-30T04:33:35+09:00
+record_count: 1090
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1089` review and evidence records under `reviews/`.
+- Summary: indexed `1090` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1089` files |
+| Reviews covered | pass | `1090` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -961,6 +961,7 @@ record_count: 1089
 | `reviews/W4A-2026-07-30-unit-task-ar-648-010.md` | `W4A-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-011.md` | `W4A-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4a — UNIT-TASK-AR-648-011 |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-012.md` | `W4A-2026-07-30-unit-task-ar-648-012` | md | approved | approve | W4a — UNIT-TASK-AR-648-012 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-013.md` | `W4A-2026-07-30-unit-task-ar-648-013` | md | approved | approve | W4a — UNIT-TASK-AR-648-013 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
