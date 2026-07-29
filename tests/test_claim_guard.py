@@ -14,6 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -87,6 +89,62 @@ def _write_runtime_claim(root: Path) -> tuple[Path, Path, Path]:
         encoding="utf-8",
     )
     return claim, handoff, log
+
+
+def _install_runtime_gate_hook(
+    root: Path,
+    *,
+    mutate_after_gate: str = "",
+) -> None:
+    (root / "STATUS.md").write_text(
+        "## Next Steps\n- finish the claim transaction\n",
+        encoding="utf-8",
+    )
+    scripts = root / "scripts"
+    scripts.mkdir(exist_ok=True)
+    (scripts / "parallel_worktree_gate.py").write_text(
+        (ROOT / "scripts" / "parallel_worktree_gate.py").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    hooks = root / ".githooks"
+    hooks.mkdir(exist_ok=True)
+    hook = hooks / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "python3 scripts/parallel_worktree_gate.py --check || exit 1\n"
+        f"{mutate_after_gate}",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    _git(root, "config", "core.hooksPath", ".githooks")
+    _git(root, "add", "STATUS.md", "scripts/parallel_worktree_gate.py", ".githooks/pre-commit")
+    assert _git(root, "commit", "-m", "runtime hook fixture").returncode == 0
+
+
+def _post_gate_mutator(relative_path: str) -> str:
+    if relative_path.endswith(".json"):
+        mutation = (
+            "import json, pathlib\n"
+            f"path = pathlib.Path({relative_path!r})\n"
+            "payload = json.loads(path.read_text(encoding='utf-8'))\n"
+            "payload['status_text'] = 'modified after successful gate validation'\n"
+            "path.write_text(json.dumps(payload, indent=2) + '\\n', encoding='utf-8')\n"
+        )
+    else:
+        mutation = (
+            "import pathlib\n"
+            f"path = pathlib.Path({relative_path!r})\n"
+            "path.write_text(path.read_text(encoding='utf-8') + "
+            "'\\nmodified after successful gate validation\\n', encoding='utf-8')\n"
+        )
+    return (
+        f"if [ -f {relative_path!r} ]; then\n"
+        "python3 - <<'PY'\n"
+        f"{mutation}"
+        "PY\n"
+        f"git add -- {relative_path!r} || exit 1\n"
+        "fi\n"
+    )
 
 
 def test_is_git_repo(tmp_path):
@@ -177,27 +235,7 @@ def test_commit_only_touches_claim_paths(tmp_path):
 def test_runtime_precommit_allows_exact_explicit_claim_transaction(tmp_path):
     """The Runtime gate must not reject the claim-only commit it is guarding."""
     _init_repo(tmp_path)
-    (tmp_path / "STATUS.md").write_text(
-        "## Next Steps\n- finish the claim transaction\n",
-        encoding="utf-8",
-    )
-    scripts = tmp_path / "scripts"
-    scripts.mkdir()
-    (scripts / "parallel_worktree_gate.py").write_text(
-        (ROOT / "scripts" / "parallel_worktree_gate.py").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
-    hooks = tmp_path / ".githooks"
-    hooks.mkdir()
-    hook = hooks / "pre-commit"
-    hook.write_text(
-        "#!/bin/sh\nexec python3 scripts/parallel_worktree_gate.py --check\n",
-        encoding="utf-8",
-    )
-    hook.chmod(0o755)
-    _git(tmp_path, "config", "core.hooksPath", ".githooks")
-    _git(tmp_path, "add", "STATUS.md", "scripts/parallel_worktree_gate.py", ".githooks/pre-commit")
-    assert _git(tmp_path, "commit", "-m", "runtime hook fixture").returncode == 0
+    _install_runtime_gate_hook(tmp_path)
 
     claim, handoff, log = _write_runtime_claim(tmp_path)
     before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
@@ -218,3 +256,78 @@ def test_runtime_precommit_allows_exact_explicit_claim_transaction(tmp_path):
     if not transaction_dir.is_absolute():
         transaction_dir = tmp_path / transaction_dir
     assert not list(transaction_dir.glob("*.json"))
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "agents/runtime/task_claims/CLAIM-runtime-hook.json",
+        "agents/runtime/task_claims/CLAIM-runtime-hook.handoff.md",
+        "agents/runtime/task_claims/CLAIM-runtime-hook.log.md",
+    ],
+)
+def test_runtime_precommit_rejects_artifact_restage_after_successful_gate(
+    tmp_path: Path,
+    relative_path: str,
+) -> None:
+    """The hook-reviewed blob set, not merely its paths, must reach HEAD."""
+
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(
+        tmp_path,
+        mutate_after_gate=_post_gate_mutator(relative_path),
+    )
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert "transaction" in result["reason"]
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    staged = set(_git(tmp_path, "diff", "--cached", "--name-only").stdout.splitlines())
+    assert {
+        claim.relative_to(tmp_path).as_posix(),
+        handoff.relative_to(tmp_path).as_posix(),
+        log.relative_to(tmp_path).as_posix(),
+    }.issubset(staged)
+    gate = subprocess.run(
+        [sys.executable, "scripts/parallel_worktree_gate.py", "--check"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert gate.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in gate.stdout
+    transaction_dir = Path(
+        _git(tmp_path, "rev-parse", "--git-path", "agent-runtime/claim-commit").stdout.strip()
+    )
+    if not transaction_dir.is_absolute():
+        transaction_dir = tmp_path / transaction_dir
+    assert not list(transaction_dir.glob("*"))
+
+
+def test_explicit_claim_transaction_rejects_detached_head(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    assert _git(tmp_path, "checkout", "--detach").returncode == 0
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert result["reason"] == "claim-commit-detached-head"
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before

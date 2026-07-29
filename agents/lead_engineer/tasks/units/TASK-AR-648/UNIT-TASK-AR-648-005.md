@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T20:34:38+09:00
+updated_at: 2026-07-29T20:37:04+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
