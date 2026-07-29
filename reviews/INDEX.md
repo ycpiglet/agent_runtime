@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T07:20:24+09:00
-record_count: 1107
+generated_at: 2026-07-30T07:32:00+09:00
+record_count: 1108
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1107` review and evidence records under `reviews/`.
+- Summary: indexed `1108` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1107` files |
+| Reviews covered | pass | `1108` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -638,6 +638,7 @@ record_count: 1107
 | `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration` | md | active | pass | TASK-AR-648 Template Mirror and Pilot Isolation Repair Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan` | md | approved | pass | TASK-AR-648 Template Mirror and Pilot Isolation T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md` | `REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan` | md | approved | pass | TASK-AR-649 Allimbot Pilot T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

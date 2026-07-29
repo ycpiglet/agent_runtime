@@ -1,33 +1,57 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T07:30:00+09:00
-updated_by: codex-root-v080-planner
+updated_at: 2026-07-30T07:44:00+09:00
+updated_by: codex-root-task-ar-649-001
 current_state:
-  summary: "Bean Wiki attempt 6 passed canonical verification, W4a, and independent W4b; TASK-AR-648 is complete and Allimbot is the next separately claimed pilot."
+  summary: "TASK-AR-649 is claimed without SCM mutation; exact Runtime product and fresh Allimbot target/control creation are next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 0
   step_total: 0
   progress_pct: 0
-  status_text: "No active claim. TASK-AR-649 Allimbot must be re-anchored, verified ready, and claimed before any consumer write."
+  status_text: "UNIT-001 is claimed; capture product, target, control, and dirty-primary isolation before any target write."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: "CLAIM-20260730-074400-task-ar-649-ar649001"
+      agent_role: "lead-engineer"
+      team_id: "risk-and-safety"
+      agent_instance_id: "codex-root-task-ar-649-001"
+      display_name: "TASK-AR-649 Allimbot green pilot"
+      callsite_id: "codex:root:task-ar-649:unit-001"
+      pane_id: "codex:root:task-ar-649:unit-001"
+      task_id: "TASK-AR-649"
+      unit_id: "UNIT-TASK-AR-649-001"
+      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+      status: "claimed"
+      phase: "unit-claimed"
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: "UNIT-001 claimed; create exact product, target, and frozen control before consumer writes"
+      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+      branch: "codex/unit-task-ar-648-002-implementation"
+      claim_path: "agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.json"
+      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.handoff.md"
+      log_path: "agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.log.md"
+      last_heartbeat: "2026-07-30T07:44:00+09:00"
+  current_teams:
+    - "risk-and-safety"
 resume:
   active_task: "TASK-AR-649"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Freeze Runtime product 4929415d and all completed Bean evidence. Register and claim a disposable Allimbot target plus same-commit control before consumer writes; keep Allimbot primary observation-only."
+  branch_policy: "Freeze Runtime product 4929415d and completed Bean evidence. Only the newly declared disposable Allimbot target may be written; control and dirty primary are observation-only."
   next_actions:
-    - "Inspect TASK-AR-649 and Allimbot read-only, then re-anchor its Unit against exact Runtime product 4929415d and current Allimbot HEAD."
-    - "Pass readiness and canonical selection, create a default working-tree Runtime claim, and capture target/control/primary isolation before writes."
-    - "Run the bounded offline Allimbot adoption pilot with no primary mutation, consumer commit, provider-live call, or release action."
+    - "Create a detached exact-product Runtime checkout and fresh Allimbot target/control at 5cc15ff3."
+    - "Capture target/control/product/primary and historical consumer baselines before the first target write."
+    - "Run exactly three offline traces after conflict-free core+security-service adoption; never flush or deliver an event."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - "agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.json"
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -61,7 +85,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-649
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

@@ -920,33 +920,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan.md",
-          "value": "a968991f09870ef32e04577082830524d2c71f4032c5b5ad8ffaa3ad32b9f4ce"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md",
+          "value": "0c5920a33182a3997bac8ba59ac83aed37154dca17d7ff3c3c1c1242d88d5271"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4A-2026-07-30-unit-task-ar-648-015.md",
-          "value": "a1e8f9bafeaffef76f63e5087cc50c72efbf4f8a120df052242b168bc1ab732b"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md",
+          "value": "5fdca7f44afed5ae8fa9909c0065fda74166591ec34934691c8787707a1118ec"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-015.md",
-          "value": "f933b208795ac25d5fbd88c7f17d9f8fa372705668dea48a09951f0c8a941dff"
-        },
-        {
-          "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "659ba2fee93e25da6b6fe70d55b9b2a826f254e63ae397cf06eecbaf14c27400"
-        },
-        {
-          "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
-          "value": "b7ab4b6d6493751970bdd9991fe8c7b6eca4f90975b8305c2ede4fe5da688c05"
-        },
-        {
-          "kind": "sha256",
-          "path": "docs/pilot-acceptance-contract.md",
-          "value": "2dfd068e8e8d294ead0e8d26dedabc8d9c584fcd6d4a3376c7bf34399b08275a"
+          "path": "docs/ALLIMBOT-INTEGRATION.md",
+          "value": "c5fda009bdca7c61c26e742b898d1e671d95f28c7dc5e617536b0f5be4925010"
         },
         {
           "kind": "sha256",
@@ -955,13 +940,8 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/pilot_acceptance.py",
-          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/pilot_isolation_gate.py",
-          "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
+          "path": "docs/pilot-acceptance-contract.md",
+          "value": "2dfd068e8e8d294ead0e8d26dedabc8d9c584fcd6d4a3376c7bf34399b08275a"
         },
         {
           "kind": "sha256",
@@ -970,12 +950,17 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/work.py",
-          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+          "path": "scripts/pilot_isolation_gate.py",
+          "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/pilot_acceptance.py",
+          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration.md",
-      "recorded_at": "2026-07-30T06:31:13+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md",
+      "recorded_at": "2026-07-30T07:31:59+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1191,5 +1176,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T06:31:13+09:00"
+  "updated_at": "2026-07-30T07:31:59+09:00"
 }

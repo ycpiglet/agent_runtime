@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T07:20:23+09:00
+generated_at: 2026-07-30T07:31:59+09:00
 task_count: 315
 open_count: 18
 completed_count: 297
@@ -77,11 +77,11 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `10/13` done; `3` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | in_progress | Action | P0 | Critical | High | 10h/22000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
-| `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
 
 ## Archived Task Sets
