@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T23:31:10+09:00
-record_count: 1058
+generated_at: 2026-07-29T23:39:27+09:00
+record_count: 1060
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1058` review and evidence records under `reviews/`.
+- Summary: indexed `1060` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1058` files |
+| Reviews covered | pass | `1060` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -603,6 +603,7 @@ record_count: 1058
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md` | `REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-2 Registration |
 | `reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan` | md | active | pass | TASK-AR-648 Bean Attempt-2 T3 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan` | md | active | stop | TASK-AR-648 Blocked Unit Redispatch P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan` | planning | record | pass | TASK-AR-648 Claim Tree TOCTOU P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan` | md | active | block | TASK-AR-648 Symbolic HEAD Lock Handoff P0 Replan |
@@ -611,6 +612,7 @@ record_count: 1058
 | `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan` | md | active | stop | TASK-AR-648 Portable Continuity P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-remediation-registration.md` | `REVIEW-2026-07-29-task-ar-648-portable-continuity-remediation-registration` | md | active | pass | TASK-AR-648 Portable Continuity Remediation Registration |
 | `reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Post-Commit HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Symbolic HEAD Race P0 Replan |

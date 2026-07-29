@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T23:31:09+09:00",
-  "record_count": 524,
+  "generated_at": "2026-07-29T23:39:27+09:00",
+  "record_count": 526,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5702,6 +5702,28 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md",
       "parent_id": "TASK-AR-648",
       "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-007",
+      "level": "unit",
+      "number": "41.1.10.7",
+      "label": "Unit 41.1.10.7",
+      "id": "UNIT-TASK-AR-648-007",
+      "title": "UNIT-TASK-AR-648-007 - Blocked Unit Redispatch Guard",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md",
+      "parent_id": "TASK-AR-648",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-008",
+      "level": "unit",
+      "number": "41.1.10.8",
+      "label": "Unit 41.1.10.8",
+      "id": "UNIT-TASK-AR-648-008",
+      "title": "UNIT-TASK-AR-648-008 - Portable Continuity Contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md",
+      "parent_id": "TASK-AR-648",
+      "status": "planned"
     },
     {
       "key": "task:TASK-AR-649",

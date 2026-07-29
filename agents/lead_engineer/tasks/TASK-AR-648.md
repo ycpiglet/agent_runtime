@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T23:29:30+09:00
+updated_at: 2026-07-29T23:37:32+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -96,6 +96,11 @@ claim_refs:
   UNIT-006 and its Runtime claim are blocked/released, Bean attempt 2 is frozen,
   and Allimbot remains stopped pending a Runtime-only portable-continuity repair
   plus a new independently approved Bean replay.
+  The required pre-claim taskset plan then selected historical blocked
+  UNIT-002 instead of the new planned repair. No claim was created. UNIT-007 is
+  now the isolated blocked-unit redispatch guard; portable continuity moved to
+  UNIT-008 and remains unclaimed. Both units forbid every consumer and release
+  action.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

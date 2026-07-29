@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T23:29:30+09:00
-updated_by: codex-root-task-ar-648-006
+updated_at: 2026-07-29T23:37:32+09:00
+updated_by: codex-root-task-ar-648-007-planner
 current_state:
-  summary: "TASK-AR-648 UNIT-006 is blocked: independent W4b confirmed a portable continuity P0 in fresh core adoption."
-  status: blocked
-  task_set_status: blocked
+  summary: "TASK-AR-648 UNIT-007 is registered to stop taskset planning from redispatching historical blocked units; continuity is UNIT-008."
+  status: planned
+  task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 3
-  step_total: 9
-  progress_pct: 25
-  status_text: "Bean attempt 2 is frozen with zero host/content/external effects; Runtime-only remediation must pass W4a/W4b before replay."
+  step_index: 1
+  step_total: 6
+  progress_pct: 0
+  status_text: "Refresh assumptions for selector repair, prove plan selects UNIT-007, then claim without bypass."
 active_work:
   current_agents: []
   current_teams: []
@@ -18,9 +18,9 @@ resume:
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
   branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
   next_actions:
-    - "Record the cross-layer P0 as Compound knowledge before the next claim."
-    - "Register and claim a Runtime-only portable continuity remediation unit."
-    - "Add RED journey and negative pointer tests before implementation."
+    - "Record the blocked-unit selector defect as Compound knowledge."
+    - "Refresh UNIT-007 plan assumptions; preserve the wrong UNIT-002 plan output as RED evidence."
+    - "Explicitly claim only the registered UNIT-007 without T2 bypass, then repair and re-run the planner."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

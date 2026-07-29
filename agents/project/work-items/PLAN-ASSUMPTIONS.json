@@ -920,8 +920,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md",
-          "value": "077d29cb03481b8262333200338994eba1814b078777f2ce43912fc43b3b7e2a"
+          "path": "reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md",
+          "value": "5a5e41622955b28b2f4e13c9c8c08bcf15cd6fc561074832cd5b7cb3dc7b67ff"
         },
         {
           "kind": "sha256",
@@ -935,17 +935,22 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/claim_guard.py",
-          "value": "8b1ebc3e11b2d4975bfb1fd8501350ec7ed41e500cb39c7fae64e4fb22533111"
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
         },
         {
           "kind": "sha256",
-          "path": "scripts/parallel_worktree_gate.py",
-          "value": "52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b"
+          "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
+          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_taskset_dispatcher.py",
+          "value": "8b750182dbcff422cbc956b95883e44407e9f234a6ebea0d82e696af7c993aea"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md",
-      "recorded_at": "2026-07-29T23:08:03+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md",
+      "recorded_at": "2026-07-29T23:39:26+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1161,5 +1166,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T23:08:03+09:00"
+  "updated_at": "2026-07-29T23:39:26+09:00"
 }

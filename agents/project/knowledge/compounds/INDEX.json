@@ -26,6 +26,9 @@
     ],
     "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
+    ],
+    "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1": [
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
     ]
   },
   "by_work": {
@@ -42,7 +45,8 @@
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
       "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
-      "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+      "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef",
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -60,9 +64,12 @@
     ],
     "UNIT-TASK-AR-648-006": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+    ],
+    "UNIT-TASK-AR-648-007": [
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
     ]
   },
-  "record_count": 7,
+  "record_count": 8,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -170,8 +177,23 @@
         "TASK-AR-648",
         "UNIT-TASK-AR-648-006"
       ]
+    },
+    {
+      "created_at": "2026-07-29T23:38:30+09:00",
+      "defect_signatures": [
+        "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1"
+      ],
+      "id": "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Blocked unit history must never be a dispatch fallback",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-007"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:76b38e2d1a8fbb148044767ddd57757f0891125ee44aeedd760fd0221a94df4c"
+  "source_digest": "sha256:256d4c77903a4f177f26709147e664ab2f6bfc9cdbffa36a9abed4d75964c42b"
 }
