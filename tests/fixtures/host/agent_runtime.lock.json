@@ -18,7 +18,7 @@
       ".githooks/post-merge": "sha256:b112da8578360cd49b871f518afa9c2ffb9f266c416daa02a8a9b17a84196e39",
       ".githooks/pre-commit": "sha256:9b5b120d9b18f39977021db0b543953267cbfcd60f817cf92edd93812d560457",
       ".github/workflows/owner-doc-format.yml": "sha256:173fdbbd463b87c882a38651d6caeddf24ddfee7dbe4de7df72725da7b77537e",
-      "AGENT_RUNTIME.md": "sha256:e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78",
+      "AGENT_RUNTIME.md": "sha256:d62e1ac808d27fbd3b63555aa2aaff8de4bd5af1d92c8cd6ba606be71cb6bcf8",
       "agents/SKILL-STRUCTURE.md": "sha256:4747052912525e6643b36f50f96d506b0fa66a5e6f7539560f53b4de9ad38d64",
       "agents/backend_engineer/SKILL.md": "sha256:24c98e780646ea5b3fdc14892a844998200c6022321d8f60823e8bb971aa30f7",
       "agents/beta_tester/GOTCHAS.md": "sha256:e05af92c734526eb7e2010db38c7795134a5669ea2245f232b8625c11ced6f70",
@@ -137,7 +137,7 @@
       "scripts/collaboration_governance_gate.py": "sha256:e290b3f222a0a6761f8be61658facdfdffd7be920de024d7c943dff0a58636e5",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
       "scripts/compound_record.py": "sha256:82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206",
-      "scripts/continuity_contract_gate.py": "sha256:51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc",
+      "scripts/continuity_contract_gate.py": "sha256:ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030",
       "scripts/conversation_work_audit.py": "sha256:371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:7041a4b4bc5c102323135f85a13773b48be1185101f97eb9515a239817773ab1",
+    "template_digest": "sha256:01081d14515de618914fab4e3b9193c6d247a23dfe455941e94aa37cb0263c22",
     "template_files": 251
   },
   "profiles": [

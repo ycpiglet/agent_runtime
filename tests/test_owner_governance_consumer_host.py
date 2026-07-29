@@ -199,4 +199,4 @@ def test_consumer_owner_gate_runs_ownership_aware_continuity_check(
 
     assert gate.skip_reason(["scripts/continuity_contract_gate.py", "--check"]) == ""
     assert gate.run(["scripts/continuity_contract_gate.py", "--check"]) == 0
-    assert "continuity-contract-gate: pass" in capsys.readouterr().out
+    assert "scripts/continuity_contract_gate.py --check -> 0" in capsys.readouterr().out

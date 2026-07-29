@@ -2,6 +2,40 @@
 
 Runtime model for the repository's local agent automation.
 
+## 한국어
+
+이 문서는 설치된 Agent Runtime이 직접 관리하는 공통 계약이다. 프로젝트가
+`AGENTS.md`와 `CLAUDE.md`를 호스트 소유로 유지하더라도
+`agents/project/NEXT-SESSION-POINTER.yml`의 `active_work`, `pane_id`,
+`progress_pct`를 갱신하고 `agents/project/`에 근거를 남긴다.
+
+반복 요청은 Repeated Request API 원칙에 따라 function/API, 스크립트 또는
+게이트로 승격한다. 반복 실수와 비판은 Compound에 자동·필수로 기록하고,
+실패 사례와 edge case를 golden set으로 보존한다. 개선은
+Evaluate -> Propose -> Verify -> Merge 순서를 따르며 최종 기준과 병합 권한은
+Owner에게 있다.
+
+## English
+
+This is the managed common contract for an installed Agent Runtime. A project
+may keep `AGENTS.md` and `CLAUDE.md` host-owned, but it must maintain
+`agents/project/NEXT-SESSION-POINTER.yml`, including `active_work`, `pane_id`,
+and `progress_pct`, and preserve evidence under `agents/project/`.
+
+The Repeated Request API promotes repetition into a function/API, script, or
+gate. Compound capture is automatic and mandatory for repeated mistakes and
+criticism. Preserve failures and edge cases as a golden set. Improvement
+follows Evaluate -> Propose -> Verify -> Merge, while Owner retains final
+criteria and merge authority.
+
+## Portable Continuity Contract
+
+- The pointer schema and required fields remain mandatory in every project.
+- Host-owned documents are never rewritten merely to satisfy Runtime wording.
+- Managed Runtime contracts must match the installed v2 lock.
+- Missing or inconsistent configuration, lock, ownership, contract, or pointer
+  evidence fails closed.
+
 ## Mental Model
 
 ```text
