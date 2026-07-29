@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from agent_runtime import knowledge_records
 
 
@@ -139,6 +141,24 @@ def _install_real_security_gate(root: Path) -> None:
     gate.write_bytes(
         (REPO_ROOT / "scripts" / "security_service_gate.py").read_bytes()
     )
+
+
+def _write_runtime_config(root: Path, *profiles: str) -> None:
+    lines = [
+        "schema: agent-runtime-config/v2",
+        "project: dispatcher-test",
+        "profiles:",
+    ]
+    lines.extend(f"  - {profile}" for profile in profiles)
+    lines.extend(
+        [
+            "sync:",
+            "  mode: check-diff-apply",
+            "  allow_silent_overwrite: false",
+            "",
+        ]
+    )
+    (root / "agent_runtime.yml").write_text("\n".join(lines), encoding="utf-8")
 
 
 def test_create_claim_separates_system_identity_from_readable_display_name(tmp_path: Path):
@@ -733,6 +753,80 @@ def test_drifted_regular_security_gate_refuses_claim(
     assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
 
 
+@pytest.mark.parametrize(
+    "profile_evidence",
+    ["config-only", "full-runtime", "partial-assets", "lock-only"],
+)
+def test_selected_security_profile_with_missing_gate_refuses_claim(
+    tmp_path: Path,
+    profile_evidence: str,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    unit = tmp_path / unit_rel
+    unit.write_text(
+        unit.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - .env.production",
+        ),
+        encoding="utf-8",
+    )
+    if profile_evidence == "config-only":
+        _write_runtime_config(tmp_path, "core", "security-service")
+    if profile_evidence == "full-runtime":
+        _write_runtime_config(tmp_path, "full-runtime")
+    if profile_evidence == "partial-assets":
+        _install_real_security_gate(tmp_path)
+        (tmp_path / ".allimbot.json").write_bytes(
+            (
+                REPO_ROOT
+                / "src"
+                / "agent_runtime"
+                / "templates"
+                / "project"
+                / ".allimbot.json"
+            ).read_bytes()
+        )
+        (tmp_path / "scripts" / "security_service_gate.py").unlink()
+    if profile_evidence == "lock-only":
+        (tmp_path / "agent_runtime.lock.json").write_text(
+            json.dumps(
+                {
+                    "schema": "agent-runtime-lock/v2",
+                    "profiles": ["core", "security-service"],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:55+09:00",
+        "--suffix",
+        f"security-gate-missing-{profile_evidence}",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "selected or partially installed profile" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
 def test_malformed_host_config_blocks_at_claim_dispatch_seam(
     tmp_path: Path,
 ) -> None:
@@ -877,6 +971,7 @@ def test_create_claim_has_zero_security_profile_burden_when_gate_absent(
     task_id = "TASK-AR-648"
     _write_worktree(tmp_path, task_id)
     unit_rel = _write_routing_work(tmp_path, task_id)
+    _write_runtime_config(tmp_path, "core # core-only host")
 
     result = _run_dispatcher(
         tmp_path,

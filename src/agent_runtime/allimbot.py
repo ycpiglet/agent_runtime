@@ -18,6 +18,7 @@ import sys
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +48,11 @@ _ORG_MODEL_TOP_LEVEL_KEYS = frozenset(
 _ORG_MODEL_TEAM_KEYS = frozenset({"id", "display_name"})
 _ORG_MODEL_ROLE_KEYS = frozenset({"id", "tier", "team", "aliases"})
 _ORG_MODEL_ALIAS = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
+_ORG_MODEL_UPDATED_AT = re.compile(
+    r"^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+    r"(?:Z|[+-][0-9]{2}:[0-9]{2})|YYYY-MM-DDTHH:MM:SS[+-][0-9]{2}:[0-9]{2})$"
+)
+_ORG_MODEL_DISPLAY_NAME = re.compile(r"^[^\W_][\w .&/()+-]{0,127}$", re.UNICODE)
 _SYSTEM_TASK_IDS = frozenset(
     {"agent-runtime", "owner-governance", "unscoped"}
 )
@@ -336,14 +342,24 @@ def _org_inline_list(value: str, *, allow_empty: bool) -> tuple[str, ...]:
     return items
 
 
-def _org_scalar(value: str) -> str:
-    if (
-        not 1 <= len(value) <= 128
-        or value != value.strip()
-        or any(ord(character) < 32 for character in value)
-        or any(character in "[]{}#" for character in value)
-    ):
-        raise ValueError("invalid scalar")
+def _org_scalar(value: str, pattern: re.Pattern[str]) -> str:
+    if value != value.strip() or pattern.fullmatch(value) is None:
+        raise ValueError("unsupported plain scalar")
+    return value
+
+
+def _org_updated_at(value: str) -> str:
+    value = _org_scalar(value, _ORG_MODEL_UPDATED_AT)
+    if value.startswith("YYYY-"):
+        return value
+    try:
+        parsed = datetime.fromisoformat(
+            value[:-1] + "+00:00" if value.endswith("Z") else value
+        )
+    except ValueError as exc:
+        raise ValueError("invalid updated_at timestamp") from exc
+    if parsed.tzinfo is None:
+        raise ValueError("updated_at timestamp must include a timezone")
     return value
 
 
@@ -385,8 +401,10 @@ def _parse_org_model(text: str) -> frozenset[str]:
                     raise ValueError("top-level scalar is missing")
                 if key == "tiers":
                     top[key] = _org_inline_list(value, allow_empty=False)
+                elif key == "updated_at":
+                    top[key] = _org_updated_at(value)
                 else:
-                    top[key] = _org_scalar(value)
+                    top[key] = value
                 section = None
                 active = None
             continue
@@ -420,7 +438,12 @@ def _parse_org_model(text: str) -> frozenset[str]:
             active[key] = (
                 _org_inline_list(value, allow_empty=True)
                 if key == "aliases"
-                else _org_scalar(value)
+                else _org_scalar(
+                    value,
+                    _ORG_MODEL_DISPLAY_NAME
+                    if section == "teams"
+                    else _ROLE_IDENTIFIER,
+                )
             )
             continue
 

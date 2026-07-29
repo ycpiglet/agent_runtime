@@ -452,6 +452,30 @@ def test_registered_task_and_owner_role_are_resolved_from_runtime_ssot(
             "    display_name: Engineering\n",
             "    display_name:\n",
         ),
+        VALID_ORG_MODEL.replace(
+            "updated_at: 2026-07-29T00:00:00+09:00\n",
+            'updated_at: "\n',
+        ),
+        VALID_ORG_MODEL.replace(
+            "updated_at: 2026-07-29T00:00:00+09:00\n",
+            "updated_at: !timestamp\n",
+        ),
+        VALID_ORG_MODEL.replace(
+            "updated_at: 2026-07-29T00:00:00+09:00\n",
+            "updated_at: 2026-99-99T99:99:99+99:99\n",
+        ),
+        VALID_ORG_MODEL.replace(
+            "    display_name: Engineering\n",
+            "    display_name: &engineering\n",
+        ),
+        VALID_ORG_MODEL.replace(
+            "    display_name: Engineering\n",
+            "    display_name: |\n",
+        ),
+        VALID_ORG_MODEL.replace(
+            "    display_name: Engineering\n",
+            '    display_name: "Engineering"\n',
+        ),
         VALID_ORG_MODEL.replace(ORG_ROLE_ENTRY, ""),
     ],
     ids=[
@@ -461,6 +485,12 @@ def test_registered_task_and_owner_role_are_resolved_from_runtime_ssot(
         "incomplete-role",
         "malformed-alias-list",
         "missing-team-scalar",
+        "unterminated-updated-at-quote",
+        "tagged-updated-at",
+        "invalid-updated-at",
+        "anchored-display-name",
+        "block-display-name",
+        "quoted-display-name",
         "empty-roles",
     ],
 )
@@ -485,6 +515,37 @@ def test_malformed_owner_registry_fails_before_optional_import(
                 "from_state": "review",
                 "to_state": "completed",
                 "owner_role": "lead-engineer",
+            },
+            root=tmp_path,
+        )
+
+
+def test_unterminated_scalar_cannot_authorize_arbitrary_direct_role(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    registry = tmp_path / "agents" / "project" / "ORG-MODEL.yml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        VALID_ORG_MODEL.replace(
+            "updated_at: 2026-07-29T00:00:00+09:00\n",
+            'updated_at: "\n',
+        ).replace("lead-engineer", "discord"),
+        encoding="utf-8",
+    )
+
+    def unexpected_import(_name):
+        raise AssertionError("invalid scalar must not authorize a direct role")
+
+    monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
+    with pytest.raises(allimbot.EventPolicyError, match="registry"):
+        allimbot.emit_event(
+            "task.state.changed",
+            {
+                "task_id": "agent-runtime",
+                "from_state": "review",
+                "to_state": "completed",
+                "owner_role": "discord",
             },
             root=tmp_path,
         )
