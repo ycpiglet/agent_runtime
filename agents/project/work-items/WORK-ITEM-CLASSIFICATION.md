@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T02:46:15+09:00
+generated_at: 2026-07-30T02:48:21+09:00
 record_count: 529
 ---
 
@@ -561,7 +561,7 @@ record_count: 529
 | 41.1.10.8 | Unit 41.1.10.8 | unit | `UNIT-TASK-AR-648-008` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md` | UNIT-TASK-AR-648-008 - Portable Continuity Contract |
 | 41.1.10.9 | Unit 41.1.10.9 | unit | `UNIT-TASK-AR-648-009` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md` | UNIT-TASK-AR-648-009 - Bean Wiki Green Replay Attempt 3 |
 | 41.1.10.10 | Unit 41.1.10.10 | unit | `UNIT-TASK-AR-648-010` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md` | UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract |
-| 41.1.10.11 | Unit 41.1.10.11 | unit | `UNIT-TASK-AR-648-011` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md` | UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4 |
+| 41.1.10.11 | Unit 41.1.10.11 | unit | `UNIT-TASK-AR-648-011` | `TASK-AR-648` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md` | UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4 |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
