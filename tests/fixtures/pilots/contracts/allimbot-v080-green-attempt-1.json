@@ -1,0 +1,90 @@
+{
+  "schema": "agent-runtime-pilot-contract/v1",
+  "host": "allimbot",
+  "pilot_id": "allimbot-v080-green-attempt-1",
+  "evidence_semantic_sha256": "5e5a5b904cb9572c3ec101fe3721754fa5fa7a045ffcb8c04309bab81b569bdf",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+    "runtime_commit": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+    "runtime_product_tree": "b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f",
+    "runtime_template_tree": "e45e7aaeeb0639c24f5e9e80c18d5e203b98ba8f",
+    "runtime_template_scripts_tree": "62311b7847f66206a2a33e4bd497750bf074384f"
+  },
+  "selected_template_files": 251,
+  "web_content_incremental_files": 0,
+  "content_file_count": 276,
+  "post_registration_conflicts": [],
+  "expected_task_count": 3,
+  "tasks": {
+    "TASK-AR-301": {
+      "unit_id": "UNIT-TASK-AR-301-001",
+      "claim_id": "CLAIM-20260730-074200-task-ar-301-green1301",
+      "task_status": "completed",
+      "claim_status": "released"
+    },
+    "TASK-AR-302": {
+      "unit_id": "UNIT-TASK-AR-302-001",
+      "claim_id": "CLAIM-20260730-074600-task-ar-302-green1302",
+      "task_status": "completed",
+      "claim_status": "released"
+    },
+    "TASK-AR-303": {
+      "unit_id": "UNIT-TASK-AR-303-001",
+      "claim_id": "CLAIM-20260730-075800-task-ar-303-green1303",
+      "task_status": "completed",
+      "claim_status": "released"
+    }
+  },
+  "findings": {
+    "allimbot-github-oauth-token-browser-session": "P1",
+    "allimbot-static-deployment-secret-boundary": "P2",
+    "runtime-distribution-source-path-required": "P2",
+    "runtime-scribe-status-classifier-overcounts": "P2",
+    "runtime-taskset-release-terminalization-manual-repair": "P2",
+    "runtime-taskset-order-required-local-registration-repair": "P2",
+    "runtime-task-verification-prose-executed-as-shell": "P2",
+    "runtime-routing-usage-unverified": "P2",
+    "allimbot-web-tests-not-run-no-install-boundary": "P2"
+  },
+  "verification": {
+    "lock_findings": 0,
+    "final_reconcile_conflicts": 0,
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "python_test_returncode": 0,
+    "python_tests_passed": 388,
+    "python_tests_skipped": 1,
+    "python_subtests_passed": 121,
+    "state_sync_blockers": 0,
+    "continuity_contract_findings": 0,
+    "owner_governance_blockers": 0,
+    "work_item_classifier_findings": 0,
+    "taskset_gate_findings": 0,
+    "security_service_findings": 0,
+    "isolation_blockers": 0,
+    "isolation_watches": 0
+  },
+  "required_external_effects": [
+    "publish",
+    "deploy",
+    "origin_push",
+    "host_commit",
+    "credential_read",
+    "network_delivery",
+    "package_install",
+    "provider_live_call",
+    "content_mutation",
+    "migration",
+    "spool_flush",
+    "consumer_commit"
+  ],
+  "artifact_bindings": [
+    {
+      "kind": "pilot_isolation",
+      "path": "tests/fixtures/pilots/allimbot/isolation-green-attempt-1.json",
+      "semantic_sha256": "6434415de42ef0e53f2e0e4367df3aa5da4626b9ac05d3ab7b982e3b85fa4e5c",
+      "raw_evidence_sha256": "c812105c2849593ca4142ccb88de1471b2235167a44c6b9e6ca45b565bf660be"
+    }
+  ]
+}

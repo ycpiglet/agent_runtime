@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T07:44:00+09:00
+updated_at: 2026-07-30T08:35:05+09:00
 started_at: 2026-07-30T07:44:00+09:00
 title: Run the Allimbot security-service pilot
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -35,6 +35,30 @@ tags:
   - work-cli-created
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-649-skeptic-closeout.json
+verification:
+  - python scripts/pilot_isolation_gate.py --evidence tests/fixtures/pilots/allimbot/isolation-green-attempt-1.json --check --json
+  - python scripts/pilot_acceptance.py --host allimbot --fixture tests/fixtures/pilots/allimbot/evidence-green-attempt-1.json --check --json
+  - python scripts/pilot_acceptance.py --host bean-wiki --fixture tests/fixtures/pilots/bean-wiki/evidence-green-attempt-6.json --check --json
+  - python -m pytest tests/test_pilot_isolation_gate.py tests/test_pilot_acceptance.py tests/test_allimbot.py tests/test_security_service.py -q
+  - python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_continuity_contract_gate.py tests/test_owner_governance_consumer_host.py tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q
+  - python scripts/template_mirror_gate.py --check
+  - python scripts/runtime_asset_usage.py --check
+  - PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check
+verification_status: passed
+verified_at: 2026-07-30T08:31:00+09:00
+verified_by: codex-root-task-ar-649
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-task-ar-649-20260730083100.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-649-001.md
+  - reviews/W4B-2026-07-30-unit-task-ar-649-001.md
+  - reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md
+resolution: done
+completed_at: 2026-07-30T08:35:05+09:00
+closed_by: codex-root-task-ar-649
+measurement_unavailable_reason: Offline pilot did not expose trustworthy task-hour, provider-token, or cost telemetry.
 ---
 
 # TASK-AR-649 - Run the Allimbot security-service pilot
@@ -82,9 +106,35 @@ claim_refs:
 
 ## Verification
 
-- Exact-product pilot isolation and Allimbot acceptance checks
-- Runtime acceptance, native-event, security-service, adoption, and continuity
-  focused tests
-- Clean-target Allimbot Python and web/security tests using existing local
-  dependencies only; unavailable suites are reported rather than installed
-- W4a plus fresh independent W4b with no Runtime P0/P1
+- `python scripts/pilot_isolation_gate.py --evidence tests/fixtures/pilots/allimbot/isolation-green-attempt-1.json --check --json`
+- `python scripts/pilot_acceptance.py --host allimbot --fixture tests/fixtures/pilots/allimbot/evidence-green-attempt-1.json --check --json`
+- `python scripts/pilot_acceptance.py --host bean-wiki --fixture tests/fixtures/pilots/bean-wiki/evidence-green-attempt-6.json --check --json`
+- Focused Runtime pilot, claim, state, continuity, Owner, adoption, and config
+  regression commands are pinned in frontmatter.
+- Clean-target Allimbot Python tests use existing local dependencies only;
+  unavailable web suites are reported rather than installed.
+- W4a plus fresh independent W4b must have no Runtime P0/P1.
+
+## Superseded Verification Attempts
+
+- `reviews/VERIFY-2026-07-30-task-ar-649-20260730083005.json` preserves the
+  failure-first evidence where descriptive verification prose was consumed as
+  shell commands. It was replaced by the explicit eight-command frontmatter
+  set and is historical, not active closeout evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T08:35:05+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Offline pilot did not expose trustworthy task-hour, provider-token, or cost telemetry.
+- Closed by: `codex-root-task-ar-649`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-task-ar-649-20260730083100.json`
+- Reviews:
+  - `reviews/W4A-2026-07-30-unit-task-ar-649-001.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-649-001.md`
+  - `reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md`
+<!-- work-close:end -->

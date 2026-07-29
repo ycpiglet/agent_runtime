@@ -9,12 +9,12 @@ task_id: TASK-AR-649
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 team: risk-and-safety
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T07:44:00+09:00
+updated_at: 2026-07-30T08:35:00+09:00
 started_at: 2026-07-30T07:44:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -36,7 +36,7 @@ repository_path: /home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-a
 worktree_path: /home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl
 branch: codex/unit-task-ar-648-002-implementation
 base_ref: d2e89c74db6d4d5e0cec5b061bd5563e5acb12d7
-adopt_existing_branch: true
+adopt_existing_branch: "\u001eagent-runtime-work-scalar-v1:true"
 context: Allimbot already has mature product security and durable event integration but no common development-process task/claim/compound/scribe/model-cost harness. Bean Wiki is independently green. The exact Runtime product is frozen at 4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2. Allimbot primary is dirty with unrelated Owner work and is observation-only; target and control must start clean at 5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd.
 inputs:
   - reviews/W4B-2026-07-30-unit-task-ar-648-016.md
@@ -97,6 +97,17 @@ verification:
   - PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check
 handoff: Attach exact Runtime/Allimbot provenance, target/control/primary snapshots, adoption and preservation counts, three route/claim traces, Critical metadata and independent review, event-spool/restart/secret-rejection evidence, Compound and Scribe results, host test results, raw/portable isolation digests, exact acceptance identity, integer-zero effects, W4a, and independent W4b.
 stop_condition: Stop on any Runtime P0/P1, product drift, dirty-primary targeting, frozen-control mutation, write outside the disposable target, host/product overwrite, consumer commit, unreviewed Critical claim, event-policy fail-open, secret-like spool content, flush or delivery call, credential access, dependency install, provider-live execution, migration, external effect, contract ambiguity, release, version, tag, package, push, publish, or deploy action.
+verified_at: 2026-07-30T08:30:00+09:00
+verified_by: codex-root-task-ar-649
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-649-001.md
+  - reviews/W4B-2026-07-30-unit-task-ar-649-001.md
+resolution: done
+completed_at: 2026-07-30T08:35:00+09:00
+closed_by: codex-root-task-ar-649
+measurement_unavailable_reason: Offline pilot did not expose trustworthy task-hour, provider-token, or cost telemetry.
 ---
 
 # UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot
@@ -114,7 +125,7 @@ primary contains unrelated Owner changes and is never a pilot target.
 - Runtime lifecycle baseline `d2e89c74`
 - Clean Allimbot baseline `5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd`
 - Allimbot primary pre-existing status digest
-  `19f6706dc44e5f3d2484715723fc2c2414218f8ec5949872c8a4ddd3f5a956a8`
+  `0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b`
 - Allimbot primary pre-existing tracked-diff digest
   `c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69`
 - Bean attempt-6 W4b and Runtime pilot isolation/acceptance contracts
@@ -195,3 +206,19 @@ zero-effect counters, W4a, and independent W4b.
 Stop before any primary/control/product write, product-file edit, consumer
 commit, secret or credential read, install, flush, network/provider call,
 migration, deploy, release, version, tag, package, push, or publication action.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T08:35:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Offline pilot did not expose trustworthy task-hour, provider-token, or cost telemetry.
+- Closed by: `codex-root-task-ar-649`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000.json`
+- Reviews:
+  - `reviews/W4A-2026-07-30-unit-task-ar-649-001.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-649-001.md`
+<!-- work-close:end -->

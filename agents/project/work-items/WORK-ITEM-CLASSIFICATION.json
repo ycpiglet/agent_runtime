@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T07:31:59+09:00",
+  "generated_at": "2026-07-30T08:27:14+09:00",
   "record_count": 534,
   "finding_count": 0,
   "findings": [],
@@ -5822,7 +5822,7 @@
       "title": "Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi…",
       "path": "agents/lead_engineer/tasks/TASK-AR-649.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-649-001",
@@ -5833,7 +5833,7 @@
       "title": "UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md",
       "parent_id": "TASK-AR-649",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-650",

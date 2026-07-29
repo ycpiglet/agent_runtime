@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T07:31:59+09:00
+generated_at: 2026-07-30T08:27:14+09:00
 record_count: 534
 ---
 
@@ -567,8 +567,8 @@ record_count: 534
 | 41.1.10.14 | Unit 41.1.10.14 | unit | `UNIT-TASK-AR-648-014` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md` | UNIT-TASK-AR-648-014 - Bean Wiki Green Replay Attempt 5 |
 | 41.1.10.15 | Unit 41.1.10.15 | unit | `UNIT-TASK-AR-648-015` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md` | UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts |
 | 41.1.10.16 | Unit 41.1.10.16 | unit | `UNIT-TASK-AR-648-016` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md` | UNIT-TASK-AR-648-016 - Bean Wiki Green Replay Attempt 6 |
-| 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
-| 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
+| 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
+| 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | completed | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
 | 41.1.12.1 | Unit 41.1.12.1 | unit | `UNIT-TASK-AR-650-001` | `TASK-AR-650` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md` | UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal |
 | 41.1.13 | Task 41.1.13 | task | `TASK-AR-651` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-651.md` | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |

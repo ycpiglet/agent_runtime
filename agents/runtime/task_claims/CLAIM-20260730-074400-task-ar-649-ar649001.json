@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-649:unit-001",
   "pane_id": "codex:root:task-ar-649:unit-001",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -41,12 +41,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-30T07:44:00+09:00",
-  "last_heartbeat": "2026-07-30T07:44:00+09:00",
-  "updated_at": "2026-07-30T07:44:00+09:00",
+  "last_heartbeat": "2026-07-30T08:35:10+09:00",
+  "updated_at": "2026-07-30T08:35:10+09:00",
   "expires_at": "2026-07-30T13:44:00+09:00",
   "lease": {
     "claimed_at": "2026-07-30T07:44:00+09:00",
-    "heartbeat_at": "2026-07-30T07:44:00+09:00",
+    "heartbeat_at": "2026-07-30T08:35:10+09:00",
     "expires_at": "2026-07-30T13:44:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-074400-task-ar-649-ar649001.handoff.md",
@@ -96,5 +96,9 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-30T08:35:10+09:00",
+  "verified_by": "codex-independent-runtime-unit-649-001-w4b",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-649-001.md"
 }

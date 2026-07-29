@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T07:32:00+09:00
-record_count: 1108
+generated_at: 2026-07-30T08:27:14+09:00
+record_count: 1115
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1108` review and evidence records under `reviews/`.
+- Summary: indexed `1115` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1108` files |
+| Reviews covered | pass | `1115` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -165,6 +165,7 @@ record_count: 1108
 | `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json` | `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final` | json | record | n/a | OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final |
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
+| `reviews/PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1.md` | `PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1` | md | record | pass | Allimbot Agent Runtime v0.8 Green Pilot — Attempt 1 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 4 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 5 |
@@ -708,6 +709,7 @@ record_count: 1108
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-21-business-operating-system.md` | `SEMINAR-2026-06-21-business-operating-system` | seminar | recorded | pass | Business Operating System Seminar |
 | `reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md` | `SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract` | md | request_changes | block | TASK-AR-648 Skeptic Audit — Closeout Overlay Claim Contract |
+| `reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md` | `SKEPTIC-2026-07-30-task-ar-649-closeout` | md | passed | pass | TASK-AR-649 Closeout Skeptic Review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -943,11 +945,14 @@ record_count: 1108
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310 |
 | `reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json` | `VERIFY-2026-07-30-task-ar-648-20260730072800` | json | record | n/a | VERIFY-2026-07-30-task-ar-648-20260730072800 |
+| `reviews/VERIFY-2026-07-30-task-ar-649-20260730083005.json` | `VERIFY-2026-07-30-task-ar-649-20260730083005` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083005 |
+| `reviews/VERIFY-2026-07-30-task-ar-649-20260730083100.json` | `VERIFY-2026-07-30-task-ar-649-20260730083100` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083100 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json` | `VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json` | `VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000.json` | `VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000.json` | `VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -976,6 +981,7 @@ record_count: 1108
 | `reviews/W4A-2026-07-30-unit-task-ar-648-014.md` | `W4A-2026-07-30-unit-task-ar-648-014` | md | blocked | block | W4a — UNIT-TASK-AR-648-014 |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-015.md` | `W4A-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4a — UNIT-TASK-AR-648-015 |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-016.md` | `W4A-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4a — UNIT-TASK-AR-648-016 |
+| `reviews/W4A-2026-07-30-unit-task-ar-649-001.md` | `W4A-2026-07-30-unit-task-ar-649-001` | md | passed | n/a | W4a — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1139,6 +1145,7 @@ record_count: 1108
 | `reviews/W4B-2026-07-30-unit-task-ar-648-014.md` | `W4B-2026-07-30-unit-task-ar-648-014` | md | blocked | block | W4b — UNIT-TASK-AR-648-014 |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-015.md` | `W4B-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4b — UNIT-TASK-AR-648-015 |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
+| `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
