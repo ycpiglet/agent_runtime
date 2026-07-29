@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:02:11+09:00
-updated_at: 2026-07-29T23:02:11+09:00
+updated_at: 2026-07-29T23:07:08+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md
 created_by: codex-root-v080-planner
@@ -41,6 +41,7 @@ target_files:
   - new:reviews/W4A-2026-07-29-unit-task-ar-648-006.md
   - new:reviews/W4B-2026-07-29-unit-task-ar-648-006.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md
+  - new:reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md
   - agents/lead_engineer/tasks/TASK-AR-648.md
   - agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md
   - agents/project/NEXT-SESSION-POINTER.yml

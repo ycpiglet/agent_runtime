@@ -920,8 +920,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
-          "value": "1bca263d742353660e4473deaddb33e11301f28a2a50a08265e4708740efc0e0"
+          "path": "reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md",
+          "value": "077d29cb03481b8262333200338994eba1814b078777f2ce43912fc43b3b7e2a"
         },
         {
           "kind": "sha256",
@@ -931,21 +931,21 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "88b10afeef39717c3c57298f05419dbc7fbff30f16d65b45004ced31000cbaef"
+          "value": "a4ae2185c2cce2abdb27e1444f0b190f821d11faa7543a498fd0bf988fa8d37e"
         },
         {
           "kind": "sha256",
           "path": "scripts/claim_guard.py",
-          "value": "9419e5a89f211cf388c05137b925fa44ed8e373bbd5ab325cf2b390731a33aa3"
+          "value": "8b1ebc3e11b2d4975bfb1fd8501350ec7ed41e500cb39c7fae64e4fb22533111"
         },
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
-          "value": "d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28"
+          "value": "52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
-      "recorded_at": "2026-07-29T20:32:39+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md",
+      "recorded_at": "2026-07-29T23:08:03+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1161,5 +1161,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T20:32:39+09:00"
+  "updated_at": "2026-07-29T23:08:03+09:00"
 }
