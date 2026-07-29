@@ -55,6 +55,9 @@ def _write_unit(
     triggers: tuple[str, ...] = (),
     sections: tuple[str, ...] = (),
 ) -> Path:
+    task = root / "agents" / "lead_engineer" / "tasks" / "TASK-1.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text("---\nwork_id: TASK-1\n---\n", encoding="utf-8")
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / "TASK-1" / "UNIT-TASK-1-001.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
@@ -73,7 +76,7 @@ def _write_unit(
     for section in sections:
         lines.extend([f"## {section}", "", "Bounded test contract.", ""])
     path.write_text("\n".join(lines), encoding="utf-8")
-    return path
+    return path.relative_to(root)
 
 
 def test_root_template_and_package_policy_are_exact_mirrors() -> None:
@@ -224,12 +227,150 @@ def test_explicit_safe_snapshot_cannot_hide_registered_risky_target(
     } == {(".env.production", "secrets")}
 
 
+def test_unit_spec_must_be_the_canonical_registered_relative_path(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    review = tmp_path / "reviews" / "safe-unit.md"
+    review.parent.mkdir(parents=True)
+    review.write_text(
+        (tmp_path / unit).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    for substitute in (tmp_path / unit, Path("reviews/safe-unit.md")):
+        with pytest.raises(
+            security_service.SecurityPolicyError,
+            match="canonical repository-relative",
+        ):
+            security_service.analyze_unit(
+                tmp_path,
+                substitute,
+                task_id="TASK-1",
+                unit_id="UNIT-TASK-1-001",
+                policy_path=policy,
+            )
+
+
+def test_requested_and_frontmatter_identity_must_match_canonical_unit(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="requested task identity",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-2",
+            unit_id="UNIT-TASK-2-001",
+            policy_path=policy,
+        )
+
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "task_id: TASK-1",
+            "task_id: TASK-2",
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="frontmatter identity",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
+def test_duplicate_unit_frontmatter_fields_fail_closed(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "target_files:",
+            "target_files:\n  - .env.production\ntarget_files:",
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="duplicate fields",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
+def test_symlinked_unit_spec_is_never_treated_as_registered(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    path = tmp_path / unit
+    substitute = tmp_path / "reviews" / "safe-unit.md"
+    substitute.parent.mkdir(parents=True)
+    substitute.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+    path.unlink()
+    path.symlink_to(substitute)
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="unavailable or not canonical",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
 def test_missing_config_is_a_valid_empty_host_overlay(tmp_path) -> None:
     policy = _write_policy(tmp_path)
     unit = _write_unit(
         tmp_path,
         targets=("services/prod/client.py",),
     )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        policy_path=policy,
+    )
+
+    assert report.status == "pass"
+    assert report.classifications == ()
+
+
+def test_omitted_host_risk_paths_is_a_valid_empty_host_overlay(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("services/prod/client.py",))
 
     report = security_service.analyze_unit(
         tmp_path,
@@ -278,6 +419,45 @@ def test_malformed_or_unsafe_host_risk_paths_fail_closed(
         )
 
 
+@pytest.mark.parametrize("kind", ["directory", "symlink", "unreadable"])
+def test_non_regular_host_config_fails_closed(
+    tmp_path,
+    kind: str,
+) -> None:
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("services/prod/client.py",))
+    config = tmp_path / "agent_runtime.yml"
+    if kind == "directory":
+        config.mkdir()
+    elif kind == "symlink":
+        target = tmp_path / "host-config-target.yml"
+        target.write_text(
+            "schema: agent-runtime-config/v2\nproject: security-test\n",
+            encoding="utf-8",
+        )
+        config.symlink_to(target)
+    else:
+        config.write_text(
+            "schema: agent-runtime-config/v2\nproject: security-test\n",
+            encoding="utf-8",
+        )
+        config.chmod(0)
+
+    try:
+        with pytest.raises(
+            security_service.SecurityPolicyError,
+            match="host risk-path configuration",
+        ):
+            security_service.analyze_unit(
+                tmp_path,
+                unit,
+                policy_path=policy,
+            )
+    finally:
+        if kind == "unreadable":
+            config.chmod(0o600)
+
+
 def test_active_claim_recheck_uses_claim_target_snapshot(tmp_path) -> None:
     _write_config(tmp_path)
     policy = _write_policy(tmp_path)
@@ -296,7 +476,9 @@ def test_active_claim_recheck_uses_claim_target_snapshot(tmp_path) -> None:
         json.dumps(
             {
                 "status": "claimed",
-                "unit_spec": unit.relative_to(tmp_path).as_posix(),
+                "task_id": "TASK-1",
+                "unit_id": "UNIT-TASK-1-001",
+                "unit_spec": unit.as_posix(),
                 "target_files": [".env.production"],
             }
         ),
@@ -325,7 +507,9 @@ def test_active_claim_with_empty_snapshot_still_checks_registered_targets(
         json.dumps(
             {
                 "status": "claimed",
-                "unit_spec": unit.relative_to(tmp_path).as_posix(),
+                "task_id": "TASK-1",
+                "unit_id": "UNIT-TASK-1-001",
+                "unit_spec": unit.as_posix(),
                 "target_files": [],
             }
         ),
@@ -342,12 +526,50 @@ def test_active_claim_with_empty_snapshot_still_checks_registered_targets(
     assert reports[0].classifications[0].path == ".env.production"
 
 
+def test_active_claim_identity_cannot_substitute_another_unit(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-1.json").write_text(
+        json.dumps(
+            {
+                "status": "claimed",
+                "task_id": "TASK-2",
+                "unit_id": "UNIT-TASK-2-001",
+                "unit_spec": unit.as_posix(),
+                "target_files": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="requested task identity",
+    ):
+        security_service.analyze_active_claims(
+            tmp_path,
+            policy_path=policy,
+        )
+
+
 @pytest.mark.parametrize(
     "claim",
     [
-        {"status": "claimed", "target_files": [".env.production"]},
         {
             "status": "claimed",
+            "task_id": "TASK-1",
+            "unit_id": "UNIT-TASK-1-001",
+            "target_files": [".env.production"],
+        },
+        {
+            "status": "claimed",
+            "task_id": "TASK-1",
+            "unit_id": "UNIT-TASK-1-001",
             "unit_spec": "agents/tasks/UNIT-1.md",
             "target_files": ".env.production",
         },
@@ -392,8 +614,7 @@ def test_malformed_claim_record_fails_closed(tmp_path) -> None:
 
 def test_current_registered_unit_passes_managed_gate() -> None:
     unit = (
-        ROOT
-        / "agents"
+        Path("agents")
         / "lead_engineer"
         / "tasks"
         / "units"

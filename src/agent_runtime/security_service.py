@@ -4,6 +4,7 @@ from __future__ import annotations
 import fnmatch
 import json
 import re
+import stat
 from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
@@ -21,6 +22,7 @@ RISK_CLASSES = (
 ACTIVE_CLAIM_STATUSES = frozenset(
     {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 )
+_TASK_IDENTIFIER = re.compile(r"^TASK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 
 MANAGED_POLICY: dict[str, Any] = {
     "schema": POLICY_SCHEMA,
@@ -216,8 +218,22 @@ def _matches(path: str, pattern: str) -> bool:
 
 def _host_risk_paths(root: Path) -> tuple[str, ...]:
     config_path = root / "agent_runtime.yml"
-    if not config_path.is_file():
+    try:
+        mode = config_path.lstat().st_mode
+    except FileNotFoundError:
         return ()
+    except OSError:
+        raise SecurityPolicyError(
+            "host risk-path configuration is unavailable or malformed"
+        ) from None
+    if (
+        stat.S_ISLNK(mode)
+        or not stat.S_ISREG(mode)
+        or mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH) == 0
+    ):
+        raise SecurityPolicyError(
+            "host risk-path configuration is unavailable or malformed"
+        )
     try:
         return tuple(load_config(root).risk_paths)
     except Exception:
@@ -324,6 +340,10 @@ def _unit_document(path: Path) -> tuple[dict[str, object], set[str]]:
             continue
         key, raw = line.split(":", 1)
         key = key.strip()
+        if key in metadata:
+            raise SecurityPolicyError(
+                "unit specification frontmatter contains duplicate fields"
+            )
         if raw.strip():
             metadata[key] = _parse_scalar(raw)
             current_list = None
@@ -336,6 +356,122 @@ def _unit_document(path: Path) -> tuple[dict[str, object], set[str]]:
         if (match := re.match(r"^##\s+(.+?)\s*$", line))
     }
     return metadata, sections
+
+
+def _regular_repository_path(
+    root: Path,
+    relative: PurePosixPath,
+    field: str,
+) -> Path:
+    current = root
+    for index, part in enumerate(relative.parts):
+        current = current / part
+        try:
+            mode = current.lstat().st_mode
+        except OSError as exc:
+            raise SecurityPolicyError(
+                f"{field} is unavailable or not canonical"
+            ) from exc
+        if stat.S_ISLNK(mode):
+            raise SecurityPolicyError(
+                f"{field} is unavailable or not canonical"
+            )
+        final = index == len(relative.parts) - 1
+        if final and not stat.S_ISREG(mode):
+            raise SecurityPolicyError(
+                f"{field} is unavailable or not canonical"
+            )
+        if not final and not stat.S_ISDIR(mode):
+            raise SecurityPolicyError(
+                f"{field} is unavailable or not canonical"
+            )
+    return current
+
+
+def _canonical_unit_document(
+    root: Path,
+    unit_spec: str | Path,
+    *,
+    task_id: str | None,
+    unit_id: str | None,
+) -> tuple[Path, str, dict[str, object], set[str], str, str]:
+    if not isinstance(unit_spec, (str, Path)):
+        raise SecurityPolicyError(
+            "unit specification must be a canonical repository-relative path"
+        )
+    raw = str(unit_spec)
+    relative = PurePosixPath(raw)
+    if (
+        not raw
+        or raw != raw.strip()
+        or "\\" in raw
+        or raw.startswith("/")
+        or relative.as_posix() != raw
+        or any(part in {"", ".", ".."} for part in relative.parts)
+        or len(relative.parts) != 6
+        or relative.parts[:4]
+        != ("agents", "lead_engineer", "tasks", "units")
+    ):
+        raise SecurityPolicyError(
+            "unit specification must be a canonical repository-relative path"
+        )
+
+    path_task_id = relative.parts[4]
+    filename = relative.parts[5]
+    path_unit_id = filename.removesuffix(".md")
+    if (
+        not filename.endswith(".md")
+        or _TASK_IDENTIFIER.fullmatch(path_task_id) is None
+        or re.fullmatch(
+            rf"UNIT-{re.escape(path_task_id)}-[0-9]{{3}}",
+            path_unit_id,
+        )
+        is None
+    ):
+        raise SecurityPolicyError(
+            "unit specification must be a canonical repository-relative path"
+        )
+    canonical = (
+        f"agents/lead_engineer/tasks/units/{path_task_id}/"
+        f"{path_unit_id}.md"
+    )
+    if raw != canonical:
+        raise SecurityPolicyError(
+            "unit specification must be a canonical repository-relative path"
+        )
+    if task_id is not None and task_id != path_task_id:
+        raise SecurityPolicyError(
+            "unit specification does not match the requested task identity"
+        )
+    if unit_id is not None and unit_id != path_unit_id:
+        raise SecurityPolicyError(
+            "unit specification does not match the requested unit identity"
+        )
+
+    task_relative = PurePosixPath(
+        "agents",
+        "lead_engineer",
+        "tasks",
+        f"{path_task_id}.md",
+    )
+    _regular_repository_path(root, task_relative, "task specification")
+    spec = _regular_repository_path(root, relative, "unit specification")
+    metadata, sections = _unit_document(spec)
+    if (
+        metadata.get("task_id") != path_task_id
+        or metadata.get("unit_id") != path_unit_id
+    ):
+        raise SecurityPolicyError(
+            "unit frontmatter identity does not match its canonical path"
+        )
+    return (
+        spec,
+        canonical,
+        metadata,
+        sections,
+        path_task_id,
+        path_unit_id,
+    )
 
 
 def _list_value(metadata: Mapping[str, object], key: str) -> tuple[str, ...]:
@@ -412,14 +548,25 @@ def analyze_unit(
     root: str | Path,
     unit_spec: str | Path,
     *,
+    task_id: str | None = None,
+    unit_id: str | None = None,
     target_files: Iterable[object] | None = None,
     policy_path: str | Path | None = None,
 ) -> SecurityReport:
     resolved_root = Path(root).resolve()
-    spec = Path(unit_spec)
-    if not spec.is_absolute():
-        spec = resolved_root / spec
-    metadata, sections = _unit_document(spec)
+    (
+        _spec,
+        canonical_spec,
+        metadata,
+        sections,
+        _path_task_id,
+        _path_unit_id,
+    ) = _canonical_unit_document(
+        resolved_root,
+        unit_spec,
+        task_id=task_id,
+        unit_id=unit_id,
+    )
     registered_value = metadata.get("target_files")
     if not isinstance(registered_value, list):
         raise SecurityPolicyError(
@@ -456,9 +603,7 @@ def analyze_unit(
         )
     return SecurityReport(
         status="pass" if not findings else "block",
-        unit_spec=spec.relative_to(resolved_root).as_posix()
-        if spec.is_relative_to(resolved_root)
-        else str(spec),
+        unit_spec=canonical_spec,
         classifications=classifications,
         findings=tuple(findings),
     )
@@ -489,11 +634,33 @@ def analyze_active_claims(
         ):
             continue
         unit_value = claim.get("unit_spec")
-        if not isinstance(unit_value, str) or not unit_value.strip():
+        if (
+            not isinstance(unit_value, str)
+            or not unit_value
+            or unit_value != unit_value.strip()
+        ):
             raise SecurityPolicyError(
                 "active claim must reference a registered unit specification"
             )
-        unit_spec = unit_value.strip()
+        unit_spec = unit_value
+        task_id = claim.get("task_id")
+        unit_id = claim.get("unit_id")
+        if (
+            not isinstance(task_id, str)
+            or not task_id
+            or task_id != task_id.strip()
+        ):
+            raise SecurityPolicyError(
+                "active claim must reference a registered task identity"
+            )
+        if (
+            not isinstance(unit_id, str)
+            or not unit_id
+            or unit_id != unit_id.strip()
+        ):
+            raise SecurityPolicyError(
+                "active claim must reference a registered unit identity"
+            )
         snapshot = claim.get("target_files")
         if not isinstance(snapshot, list):
             raise SecurityPolicyError(
@@ -503,6 +670,8 @@ def analyze_active_claims(
             analyze_unit(
                 resolved_root,
                 unit_spec,
+                task_id=task_id,
+                unit_id=unit_id,
                 target_files=snapshot,
                 policy_path=policy_path,
             )

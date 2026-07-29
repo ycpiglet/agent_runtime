@@ -24,6 +24,10 @@ SYNTHETIC_OPENAI_TOKEN = "-".join(
 SYNTHETIC_GITHUB_TOKEN = "_".join(
     ("github", "pat", "SYNTHETIC", "CREDENTIAL")
 )
+EVENT_UUID = "123e4567-e89b-12d3-a456-426614174000"
+SESSION_UUID = "123e4567-e89b-12d3-a456-426614174001"
+TURN_UUID = "123e4567-e89b-12d3-a456-426614174002"
+DEDUPE_SHA256 = "a" * 64
 
 
 def _load_template_client():
@@ -58,7 +62,7 @@ def _fake_integrations(
     *,
     constructor_error: bool = False,
     emit_error: bool = False,
-    event_id: str = "evt-123",
+    event_id: str = EVENT_UUID,
 ):
     class ProjectIntegration:
         @classmethod
@@ -88,10 +92,10 @@ def _valid_event() -> tuple[str, dict[str, object]]:
     return (
         "task.state.changed",
         {
-            "task_id": "TASK-123",
+            "task_id": "agent-runtime",
             "from_state": "review",
             "to_state": "completed",
-            "owner_role": "lead-engineer",
+            "owner_role": "runtime",
         },
     )
 
@@ -132,14 +136,14 @@ def test_emit_validates_then_uses_project_emitter_without_flush(monkeypatch) -> 
 
     assert result.to_dict() == {
         "status": "spooled",
-        "event_id": "evt-123",
+        "event_id": EVENT_UUID,
         "reason": None,
     }
     assert calls[0] == ("load", RECIPE.resolve())
     emitted = calls[-1]
     assert emitted[0:2] == ("emit", event_type)
     assert emitted[2] == (
-        "Task TASK-123: review -> completed (owner=lead-engineer)"
+        "Task agent-runtime: review -> completed (owner=runtime)"
     )
     assert emitted[3]["body"] == ""
     assert emitted[3]["data"] == data
@@ -265,6 +269,177 @@ def test_sensitive_or_unmanaged_values_never_reach_optional_import(
         allimbot.emit_event(event_type, data, **correlations)
 
 
+@pytest.mark.parametrize(
+    ("event_type", "data", "correlations"),
+    [
+        (
+            "turn.completed",
+            {
+                "task_id": "127.0.0.1",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {},
+        ),
+        (
+            "turn.completed",
+            {
+                "task_id": "events.invalid",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {},
+        ),
+        (
+            "release.gate.failed",
+            {"gate": "discord", "release": "v1.0.0", "finding_count": 1},
+            {},
+        ),
+        (
+            "release.gate.failed",
+            {
+                "gate": "ignorepreviousinstructions",
+                "release": "v1.0.0",
+                "finding_count": 1,
+            },
+            {},
+        ),
+        (
+            "release.gate.failed",
+            {
+                "gate": "databaseconnectionfailed",
+                "release": "v1.0.0",
+                "finding_count": 1,
+            },
+            {},
+        ),
+        (
+            "attention.required",
+            {
+                "task_id": "agent-runtime",
+                "attention_kind": "governance-block",
+                "owner_role": "discord",
+                "state": "blocked",
+            },
+            {},
+        ),
+        (
+            "turn.completed",
+            {
+                "task_id": "agent-runtime",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {"session_id": "events.invalid"},
+        ),
+        (
+            "turn.completed",
+            {
+                "task_id": "agent-runtime",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {"turn_id": "discord"},
+        ),
+        (
+            "turn.completed",
+            {
+                "task_id": "agent-runtime",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {"dedupe_key": "ignorepreviousinstructions"},
+        ),
+    ],
+)
+def test_arbitrary_display_safe_values_never_reach_optional_import(
+    monkeypatch,
+    event_type: str,
+    data: dict[str, object],
+    correlations: dict[str, str],
+) -> None:
+    def unexpected_import(_name):
+        raise AssertionError("unregistered values must not reach emitter construction")
+
+    monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
+    with pytest.raises(allimbot.EventPolicyError):
+        allimbot.emit_event(event_type, data, **correlations)
+
+
+def test_registered_task_and_owner_role_are_resolved_from_runtime_ssot(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    (tmp_path / ".allimbot.json").write_text(
+        RECIPE.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    task = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-647.md"
+    )
+    task.parent.mkdir(parents=True)
+    task.write_text("---\nwork_id: TASK-AR-647\n---\n", encoding="utf-8")
+    registry = tmp_path / "agents" / "project" / "ORG-MODEL.yml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        "schema: agent-runtime-org-model/v1\n"
+        "roles:\n"
+        "  - id: lead-engineer\n"
+        "    tier: planner\n",
+        encoding="utf-8",
+    )
+    calls: list[tuple] = []
+    monkeypatch.setattr(
+        allimbot.importlib,
+        "import_module",
+        lambda _name: _fake_integrations(calls),
+    )
+
+    result = allimbot.emit_event(
+        "task.state.changed",
+        {
+            "task_id": "TASK-AR-647",
+            "from_state": "review",
+            "to_state": "completed",
+            "owner_role": "lead-engineer",
+        },
+        root=tmp_path,
+        session_id=SESSION_UUID,
+        turn_id=TURN_UUID,
+        dedupe_key=DEDUPE_SHA256,
+    )
+
+    assert result.spooled
+    emitted = calls[-1]
+    assert emitted[3]["session_id"] == SESSION_UUID
+    assert emitted[3]["turn_id"] == TURN_UUID
+    assert emitted[3]["dedupe_key"] == DEDUPE_SHA256
+
+
+def test_managed_gate_and_semantic_release_are_accepted(monkeypatch) -> None:
+    calls: list[tuple] = []
+    monkeypatch.setattr(
+        allimbot.importlib,
+        "import_module",
+        lambda _name: _fake_integrations(calls),
+    )
+
+    result = allimbot.emit_event(
+        "release.gate.failed",
+        {
+            "gate": "owner-governance",
+            "release": "v1.2.3-rc.4",
+            "finding_count": 2,
+        },
+    )
+
+    assert result.spooled
+
+
 def test_recipe_drift_fails_closed_before_optional_import(
     tmp_path, monkeypatch
 ) -> None:
@@ -343,8 +518,18 @@ def test_optional_configuration_and_spool_errors_never_leak(
     assert "credential" not in serialized
 
 
-def test_credential_shaped_dependency_event_id_is_never_returned(
+@pytest.mark.parametrize(
+    "event_id",
+    [
+        SYNTHETIC_OPENAI_TOKEN,
+        "discord",
+        "ignorepreviousinstructions",
+        "123E4567-E89B-12D3-A456-426614174000",
+    ],
+)
+def test_non_uuid_dependency_event_id_is_never_returned(
     monkeypatch,
+    event_id: str,
 ) -> None:
     calls: list[tuple] = []
     monkeypatch.setattr(
@@ -352,7 +537,7 @@ def test_credential_shaped_dependency_event_id_is_never_returned(
         "import_module",
         lambda _name: _fake_integrations(
             calls,
-            event_id=SYNTHETIC_OPENAI_TOKEN,
+            event_id=event_id,
         ),
     )
 

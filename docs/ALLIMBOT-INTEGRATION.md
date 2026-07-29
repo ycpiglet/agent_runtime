@@ -32,11 +32,14 @@ Callers cannot supply a summary or body. Prompts, arbitrary messages,
 exception text, tracebacks, credentials, environment values, endpoints,
 provider names, and destinations are outside the API.
 
-State, result-state, and attention-kind fields use Runtime-owned
-allowlists. Task, release, gate, role, and correlation fields accept only
-canonical display-safe identifiers; URI syntax and credential-, provider-,
-prompt-, or exception-shaped values are rejected before the optional
-Allimbot package is imported.
+State, result-state, attention-kind, and gate fields use Runtime-owned
+allowlists. Non-system task IDs must name a regular canonical task file under
+`agents/lead_engineer/tasks/`, and non-system owner roles must be canonical
+IDs in `agents/project/ORG-MODEL.yml`. Release values are strict semantic
+release tags. Session and turn correlations are canonical UUIDs, dedupe keys
+are lowercase SHA-256 digests, and Allimbot must return a canonical UUID event
+ID. Arbitrary display-safe strings therefore cannot cross the producer
+boundary, even when they do not resemble a known credential or endpoint.
 
 ## Profile and configuration
 

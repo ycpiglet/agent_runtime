@@ -30,6 +30,8 @@ def main(argv: list[str] | None = None) -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--unit-spec")
     mode.add_argument("--check-active", action="store_true")
+    parser.add_argument("--task-id")
+    parser.add_argument("--unit-id")
     parser.add_argument("--target-file", action="append", default=[])
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -40,10 +42,16 @@ def main(argv: list[str] | None = None) -> int:
         if args.check_active:
             reports = analyze_active_claims(root, policy_path=policy_path)
         else:
+            if not args.task_id or not args.unit_id:
+                raise SecurityPolicyError(
+                    "unit checks require canonical task and unit identities"
+                )
             reports = (
                 analyze_unit(
                     root,
                     args.unit_spec,
+                    task_id=args.task_id,
+                    unit_id=args.unit_id,
                     target_files=args.target_file or None,
                     policy_path=policy_path,
                 ),

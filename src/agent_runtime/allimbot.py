@@ -12,7 +12,9 @@ import importlib
 import json
 import math
 import re
+import stat
 import sys
+import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -24,40 +26,48 @@ PROJECT_SOURCE = "agent-runtime"
 MAX_IDENTIFIER_LENGTH = 128
 MAX_COUNT = 1_000_000
 MAX_DURATION_SECONDS = 7 * 24 * 60 * 60
-_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_TASK_IDENTIFIER = re.compile(
+    r"^TASK-[A-Z0-9]+(?:-[A-Z0-9]+)*$"
+)
 _ROLE_IDENTIFIER = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
-_CREDENTIAL_PREFIX = re.compile(
-    r"(?i)^(?:sk(?:-proj)?|gh[pousr]|github_pat|xox[baprs]|glpat|npm|pypi|hf)[-_]"
+_SEMANTIC_RELEASE = re.compile(
+    r"^v(?:0|[1-9][0-9]{0,3})\.(?:0|[1-9][0-9]{0,3})\."
+    r"(?:0|[1-9][0-9]{0,3})(?:-(?:alpha|beta|rc)\."
+    r"(?:0|[1-9][0-9]{0,3}))?$"
 )
-_AWS_ACCESS_KEY = re.compile(r"^(?:AKIA|ASIA)[A-Z0-9]{12,}$")
-_GOOGLE_API_KEY = re.compile(r"^AIza[A-Za-z0-9_-]{20,}$")
-_SENDGRID_API_KEY = re.compile(
-    r"^SG\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$"
+_SHA256_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_SYSTEM_TASK_IDS = frozenset(
+    {"agent-runtime", "owner-governance", "unscoped"}
 )
-_JWT_SHAPE = re.compile(
-    r"^[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$"
-)
-_FORBIDDEN_VALUE_SEGMENTS = frozenset(
+_SYSTEM_OWNER_ROLES = frozenset({"owner", "runtime"})
+_MANAGED_GATES = frozenset(
     {
-        "apikey",
-        "bearer",
-        "credential",
-        "destination",
-        "endpoint",
-        "exception",
-        "ntfy",
-        "opsgenie",
-        "pagerduty",
-        "password",
-        "prompt",
-        "provider",
-        "secret",
-        "slack",
-        "smtp",
-        "telegram",
-        "token",
-        "traceback",
-        "webhook",
+        "attribution",
+        "automation-rules",
+        "collaboration-governance",
+        "continuity-contract",
+        "conversation-work-audit",
+        "dependency-cycle",
+        "design-system",
+        "footprint-conflict",
+        "knowledge-lint",
+        "org-model",
+        "owner-governance",
+        "plan-assumption",
+        "release-cadence",
+        "release-council",
+        "response-contract",
+        "runtime-asset-usage",
+        "scheduled-dispatch",
+        "security-service",
+        "state-machine",
+        "state-sync",
+        "task-identity",
+        "taskset-boundary",
+        "taskset-work",
+        "verification-freshness",
+        "work-schema",
+        "worktree-lifecycle",
     }
 )
 _ATTENTION_KINDS = frozenset(
@@ -194,32 +204,77 @@ def _load_managed_recipe(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _identifier(value: object, field: str) -> str:
-    if (
-        not isinstance(value, str)
-        or len(value) > MAX_IDENTIFIER_LENGTH
-        or _SAFE_IDENTIFIER.fullmatch(value) is None
-    ):
-        raise EventPolicyError(f"{field} must be a bounded display-safe identifier")
-    folded = value.casefold()
-    segments = {
-        part
-        for part in re.split(r"[._-]+", folded)
-        if part
-    }
-    if (
-        "://" in folded
-        or "api-key" in folded
-        or "api_key" in folded
-        or _CREDENTIAL_PREFIX.match(value) is not None
-        or _AWS_ACCESS_KEY.fullmatch(value) is not None
-        or _GOOGLE_API_KEY.fullmatch(value) is not None
-        or _SENDGRID_API_KEY.fullmatch(value) is not None
-        or _JWT_SHAPE.fullmatch(value) is not None
-        or segments & _FORBIDDEN_VALUE_SEGMENTS
-    ):
-        raise EventPolicyError(f"{field} is outside the managed event vocabulary")
+def _regular_file(root: Path, relative: Path, field: str) -> Path:
+    current = root
+    parts = relative.parts
+    for index, part in enumerate(parts):
+        current = current / part
+        try:
+            mode = current.lstat().st_mode
+        except OSError as exc:
+            raise EventPolicyError(
+                f"{field} is not registered in the Runtime repository"
+            ) from exc
+        final = index == len(parts) - 1
+        if (
+            stat.S_ISLNK(mode)
+            or (final and not stat.S_ISREG(mode))
+            or (not final and not stat.S_ISDIR(mode))
+        ):
+            raise EventPolicyError(
+                f"{field} is not registered in the Runtime repository"
+            )
+    return current
+
+
+def _task_id(value: object, root: Path | None) -> str:
+    if not isinstance(value, str) or len(value) > MAX_IDENTIFIER_LENGTH:
+        raise EventPolicyError("task_id must be a registered Runtime task identifier")
+    if value in _SYSTEM_TASK_IDS:
+        return value
+    if _TASK_IDENTIFIER.fullmatch(value) is None or root is None:
+        raise EventPolicyError("task_id must be a registered Runtime task identifier")
+    _regular_file(
+        root,
+        Path("agents", "lead_engineer", "tasks", f"{value}.md"),
+        "task_id",
+    )
     return value
+
+
+def _registered_owner_roles(root: Path) -> frozenset[str]:
+    registry = _regular_file(
+        root,
+        Path("agents", "project", "ORG-MODEL.yml"),
+        "owner_role",
+    )
+    try:
+        lines = registry.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as exc:
+        raise EventPolicyError(
+            "owner_role registry is unavailable or malformed"
+        ) from exc
+
+    schema_ok = False
+    in_roles = False
+    roles: list[str] = []
+    for raw_line in lines:
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line:
+            continue
+        if not line.startswith(" "):
+            if line == "schema: agent-runtime-org-model/v1":
+                schema_ok = True
+            in_roles = line == "roles:"
+            continue
+        if not in_roles:
+            continue
+        match = re.fullmatch(r"  - id: ([a-z][a-z0-9-]{0,63})", line)
+        if match:
+            roles.append(match.group(1))
+    if not schema_ok or not roles or len(roles) != len(set(roles)):
+        raise EventPolicyError("owner_role registry is unavailable or malformed")
+    return frozenset(roles)
 
 
 def _managed_value(
@@ -227,17 +282,43 @@ def _managed_value(
     field: str,
     allowed: frozenset[str],
 ) -> str:
-    normalized = _identifier(value, field)
-    if normalized not in allowed:
+    if not isinstance(value, str) or value not in allowed:
         raise EventPolicyError(f"{field} is outside the managed event vocabulary")
-    return normalized
+    return value
 
 
-def _owner_role(value: object) -> str:
-    normalized = _identifier(value, "owner_role")
-    if _ROLE_IDENTIFIER.fullmatch(normalized) is None:
-        raise EventPolicyError("owner_role must be a canonical role identifier")
-    return normalized
+def _owner_role(value: object, root: Path | None) -> str:
+    if not isinstance(value, str) or _ROLE_IDENTIFIER.fullmatch(value) is None:
+        raise EventPolicyError("owner_role must be a registered Runtime role")
+    if value in _SYSTEM_OWNER_ROLES:
+        return value
+    if root is None or value not in _registered_owner_roles(root):
+        raise EventPolicyError("owner_role must be a registered Runtime role")
+    return value
+
+
+def _release(value: object) -> str:
+    if not isinstance(value, str) or _SEMANTIC_RELEASE.fullmatch(value) is None:
+        raise EventPolicyError("release must be a canonical semantic release tag")
+    return value
+
+
+def _uuid_value(value: object, field: str) -> str:
+    if not isinstance(value, str):
+        raise EventPolicyError(f"{field} must be a canonical UUID")
+    try:
+        parsed = uuid.UUID(value)
+    except (ValueError, AttributeError, TypeError) as exc:
+        raise EventPolicyError(f"{field} must be a canonical UUID") from exc
+    if str(parsed) != value:
+        raise EventPolicyError(f"{field} must be a canonical UUID")
+    return value
+
+
+def _dedupe_key(value: object) -> str:
+    if not isinstance(value, str) or _SHA256_DIGEST.fullmatch(value) is None:
+        raise EventPolicyError("dedupe_key must be a lowercase SHA-256 digest")
+    return value
 
 
 def _non_negative_integer(value: object, field: str) -> int:
@@ -255,7 +336,11 @@ def _duration(value: object) -> int | float:
     return value
 
 
-def _validate_event(event_type: object, data: object) -> tuple[str, dict[str, Any]]:
+def _validate_event(
+    event_type: object,
+    data: object,
+    root: Path | None,
+) -> tuple[str, dict[str, Any]]:
     if not isinstance(event_type, str) or event_type not in _EVENT_FIELDS:
         raise EventPolicyError("event type is not enabled by the managed policy")
     if not isinstance(data, Mapping):
@@ -281,9 +366,15 @@ def _validate_event(event_type: object, data: object) -> tuple[str, dict[str, An
         elif field == "result_state":
             normalized[field] = _managed_value(value, field, _TURN_RESULTS)
         elif field == "owner_role":
-            normalized[field] = _owner_role(value)
+            normalized[field] = _owner_role(value, root)
+        elif field == "task_id":
+            normalized[field] = _task_id(value, root)
+        elif field == "gate":
+            normalized[field] = _managed_value(value, field, _MANAGED_GATES)
+        elif field == "release":
+            normalized[field] = _release(value)
         else:
-            normalized[field] = _identifier(value, field)
+            raise EventPolicyError(f"{field} has no managed value contract")
     return event_type, normalized
 
 
@@ -348,7 +439,12 @@ def emit_event(
     configuration, and spool failures return a bounded ``unavailable`` result.
     """
 
-    normalized_type, normalized_data = _validate_event(event_type, data)
+    resolved_root = Path(root).resolve() if root is not None else None
+    normalized_type, normalized_data = _validate_event(
+        event_type,
+        data,
+        resolved_root,
+    )
     summary = _summary(normalized_type, normalized_data)
     if not 1 <= len(summary) <= 300:
         raise EventPolicyError("rendered event summary exceeds the managed bound")
@@ -359,12 +455,16 @@ def emit_event(
     }
     for field, value in correlations.items():
         if value is not None:
-            correlations[field] = _identifier(value, field)
+            correlations[field] = (
+                _dedupe_key(value)
+                if field == "dedupe_key"
+                else _uuid_value(value, field)
+            )
 
     if recipe_path is not None:
         resolved_recipe = Path(recipe_path).resolve()
-    elif root is not None:
-        resolved_recipe = Path(root).resolve() / ".allimbot.json"
+    elif resolved_root is not None:
+        resolved_recipe = resolved_root / ".allimbot.json"
         if not resolved_recipe.is_file():
             return _unavailable("profile_not_selected")
     else:
@@ -406,7 +506,7 @@ def emit_event(
     except Exception:
         return _unavailable("spool_unavailable")
     try:
-        normalized_event_id = _identifier(event_id, "event_id")
+        normalized_event_id = _uuid_value(event_id, "event_id")
     except EventPolicyError:
         return _unavailable("invalid_event_id")
     return EmitResult(status="spooled", event_id=normalized_event_id)

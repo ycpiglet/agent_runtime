@@ -692,17 +692,31 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
 
 def _security_service_refusal(
     root: Path,
+    task_id: str,
+    unit_id: str,
     unit_spec: str,
     target_files: list[str],
 ) -> bool:
     """Run the profile gate only when the security-service asset is installed."""
 
     gate = root / "scripts" / "security_service_gate.py"
-    if not gate.is_file():
+    if not gate.exists() and not gate.is_symlink():
         return False
-    if not str(unit_spec or "").strip():
+    if gate.is_symlink() or not gate.is_file():
         print(
-            "security-service profile requires a registered unit specification; "
+            "security-service claim gate is not a regular managed file; "
+            "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if (
+        not str(task_id or "").strip()
+        or not str(unit_id or "").strip()
+        or not str(unit_spec or "").strip()
+    ):
+        print(
+            "security-service profile requires registered task and unit identities "
+            "plus a canonical unit specification; "
             "claim creation refused",
             file=sys.stderr,
         )
@@ -712,6 +726,10 @@ def _security_service_refusal(
         str(gate),
         "--root",
         str(root),
+        "--task-id",
+        str(task_id),
+        "--unit-id",
+        str(unit_id),
         "--unit-spec",
         str(unit_spec),
     ]
@@ -766,6 +784,15 @@ def cmd_create(args: argparse.Namespace) -> int:
     ):
         return 1
 
+    explicit_targets = _normalize_target_files(tuple(args.target_file or ()))
+    if _security_service_refusal(
+        root,
+        args.task_id,
+        args.unit_id,
+        args.unit_spec,
+        explicit_targets,
+    ):
+        return 1
     try:
         defect_signatures, knowledge_matches = _knowledge_lookup(root, args)
     except compound_record.CompoundRecordError as exc:
@@ -775,8 +802,6 @@ def cmd_create(args: argparse.Namespace) -> int:
         return 1
     escalation_triggers = _resolve_escalation_triggers(root, args)
     target_files = _resolve_target_files(root, args)
-    if _security_service_refusal(root, args.unit_spec, target_files):
-        return 1
     claim = _build_claim(
         args,
         records,

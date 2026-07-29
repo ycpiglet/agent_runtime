@@ -23,12 +23,15 @@ claim when `scripts/security_service_gate.py` is installed. Core-only hosts do
 not ship the gate and incur no claim-time dependency. Owner governance
 rechecks active claims to expose post-claim metadata drift.
 
-The installed profile fails closed when a claim has no registered unit
-specification, an active claim record or target snapshot is malformed, or an
-existing `agent_runtime.yml` cannot be parsed safely. Explicit claim targets
-are added to—not substituted for—the unit's registered `target_files`, so a
-narrow snapshot cannot hide a risky registered path. An absent configuration
-file or a valid empty `host.risk_paths` list is a valid empty host overlay.
+The installed profile fails closed when a claim has no registered task/unit
+identity, its unit path is not the one canonical repository-relative path
+derived from those IDs, frontmatter identities disagree, a task/unit path is
+missing or symlinked, an active claim record or target snapshot is malformed,
+or an existing `agent_runtime.yml` is not a readable regular file that parses
+safely. Explicit claim targets are added to—not substituted for—the unit's
+registered `target_files`, so a narrow snapshot cannot hide a risky registered
+path. An absent configuration file, or a valid v2 configuration that omits
+`host.risk_paths`, is the canonical empty host overlay.
 
 ## Security Controls
 
