@@ -1,25 +1,25 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T05:34:36+09:00
-updated_by: codex-root-task-ar-648-014
+updated_at: 2026-07-30T05:37:59+09:00
+updated_by: codex-root-task-ar-648-015-planner
 current_state:
-  summary: "Bean attempt 5 completed its consumer journey but UNIT-014 is blocked by the Runtime red-only acceptance contract and raw-isolation sanitization conflict."
-  status: blocked
+  summary: "UNIT-015 is registered to repair fail-closed pilot contract selection and raw-to-sanitized isolation evidence before any new consumer replay."
+  status: planned
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 6
+  step_index: 0
   step_total: 6
-  progress_pct: 90
-  status_text: "Attempt 5 is frozen pending independent W4b; Allimbot and release remain blocked."
+  progress_pct: 0
+  status_text: "UNIT-015 registration and T3 replan recorded; readiness and canonical selection are next."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Freeze Runtime product 34427e1f and Bean attempt 5. Bean controls, primary, prior attempts, Autofolio, and Allimbot are read-only. Runtime repair requires a separately registered unit."
+  branch_policy: "UNIT-015 may change only Runtime pilot acceptance/isolation evidence contracts and declared lifecycle files. Bean attempts, controls, primary, Autofolio, and Allimbot are read-only."
   next_actions:
-    - "Obtain fresh independent W4b for UNIT-014's acceptance-contract and evidence-portability blockers."
-    - "Release the blocked claim, register a fail-closed Runtime-only repair unit, and keep Allimbot frozen."
+    - "Re-anchor T3 assumptions, run UNIT-015 readiness, and require canonical selection without bypass."
+    - "Claim UNIT-015 in default working-tree mode, then implement RED-to-GREEN contract and projection regressions."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

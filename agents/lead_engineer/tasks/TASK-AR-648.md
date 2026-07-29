@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T04:49:19+09:00
+updated_at: 2026-07-30T05:37:59+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -172,6 +172,12 @@ claim_refs:
   pass the public sanitizer. Attempt 5 and its claim are frozen/released.
   The next action is a separately registered Runtime-only, fail-closed
   multi-contract and evidence-portability repair. Allimbot remains blocked.
+  UNIT-015 is that repair. It keeps shared pilot safety invariants executable,
+  moves exact run observations into strict `(host, pilot_id)` contracts,
+  preserves both red and green semantic evidence, and introduces a
+  digest-bound public projection only after raw physical-root isolation
+  passes. It is Runtime-only; Bean attempt 6 and Allimbot remain blocked until
+  one exact repaired product passes W4a and fresh independent W4b.
 
 ## Goal
 

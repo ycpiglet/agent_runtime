@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T05:35:57+09:00
-record_count: 1096
+generated_at: 2026-07-30T05:43:37+09:00
+record_count: 1098
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1096` review and evidence records under `reviews/`.
+- Summary: indexed `1098` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1096` files |
+| Reviews covered | pass | `1098` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -630,6 +630,8 @@ record_count: 1096
 | `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan` | md | approved | pass | Consumer Continuity Ownership T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration.md` | `REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration` | md | active | pass | TASK-AR-648 Expected Common Mirror Inventory Repair Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-t3-replan` | md | approved | pass | TASK-AR-648 Expected Common Mirror Inventory T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration.md` | `REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration` | md | active | pass | TASK-AR-648 Pilot Evidence Contract Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan` | md | approved | pass | TASK-AR-648 Pilot Evidence Contract T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration` | md | active | pass | TASK-AR-648 Template Mirror and Pilot Isolation Repair Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan` | md | approved | pass | TASK-AR-648 Template Mirror and Pilot Isolation T3 Replan |

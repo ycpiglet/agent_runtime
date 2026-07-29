@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T05:35:56+09:00",
-  "record_count": 532,
+  "generated_at": "2026-07-30T05:44:22+09:00",
+  "record_count": 533,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5790,6 +5790,17 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md",
       "parent_id": "TASK-AR-648",
       "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-015",
+      "level": "unit",
+      "number": "41.1.10.15",
+      "label": "Unit 41.1.10.15",
+      "id": "UNIT-TASK-AR-648-015",
+      "title": "UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md",
+      "parent_id": "TASK-AR-648",
+      "status": "ready"
     },
     {
       "key": "task:TASK-AR-649",
