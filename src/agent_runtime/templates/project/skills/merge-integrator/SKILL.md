@@ -1,6 +1,6 @@
 ---
 name: merge-integrator
-version: 1.1.0
+version: 1.1.1
 description: Use when the user asks to integrate parallel worker branches, run the merge queue, serially rebase-test-merge branches into main, or hand off branches as PRs after a wave completes.
 triggers:
   - merge queue
@@ -20,8 +20,8 @@ Single-integrator serial queue that joins parallel worker branches into the
 integration base one at a time: `fetch -> rebase -> narrow verification ->
 merge (local) or print PR commands (--pr-mode) -> next -> regenerate the board
 once per batch`. Mutating commands enforce a repository-common cross-process
-lock and atomically replace queue state, so invocations from linked worktrees
-cannot silently overwrite one another.
+lock and atomically replace one queue state file in the primary checkout, so
+invocations from linked worktrees cannot split or silently overwrite state.
 
 ## When To Use
 
@@ -44,8 +44,9 @@ Default narrow verification is `python scripts/owner_governance_gate.py`; add
 queue history until their dependents are processed. Before any git mutation,
 the queue fails closed on an unknown predecessor, a failed/in-flight unmet
 predecessor, or a cycle, and otherwise uses stable topological order rather
-than FIFO. In PR mode, `pr-handoff` satisfies queue ordering only; the
-orchestrator still confirms the remote merge before removing history.
+than FIFO. Dependency-bearing entries are local-mode only: `--pr-mode` refuses
+them because printing a PR handoff cannot prove that the predecessor reached
+the remote base.
 
 ## Process (serial)
 
@@ -56,32 +57,38 @@ python scripts/merge_queue.py process --dry-run
 # local serial merge into the integration branch
 python scripts/merge_queue.py process --all --base origin/main
 
-# PR handoff: rebase + plain push + print gh commands (no remote merge here)
+# Dependency-free PR handoff: rebase + plain push + print gh commands
+# (no remote merge here)
 python scripts/merge_queue.py process --all --pr-mode
 ```
 
 `--once` processes only the first pending entry. A failing entry is marked
 `failed` with a `feedback-<branch>.md` file telling the worker how to rebase,
-re-verify, and re-enqueue; the queue continues and never poisons the
-integration branch. After a clean local batch, the board is regenerated once
-(`python scripts/backlog_board.py --write`).
+re-verify, and re-enqueue; the queue continues with eligible independent
+entries and never poisons the integration branch. After a clean local batch,
+the board is regenerated once (`python scripts/backlog_board.py --write`).
 
 ## Safety Boundaries (hard invariants)
 
 - Every `enqueue`, `remove`, and non-dry-run `process` holds the same lock under
   `git rev-parse --git-common-dir`; contention times out with an actionable
   error (`MERGE_QUEUE_LOCK_TIMEOUT_SECONDS` controls the bounded wait).
+- Every linked worktree resolves `queue.json` and feedback files to the primary
+  checkout, so the common lock protects one physical state file rather than
+  several per-worktree copies.
 - `queue.json` is written to a same-directory temporary file, flushed, and
   atomically replaced. `list` and `process --dry-run` create no lock or state
   mutation and observe either the old or new complete JSON.
 - Dependency validation and ordering finish before fetch, checkout, rebase, or
   merge. A predecessor that fails during the same batch leaves its dependents
-  pending and stops further dependent integration.
+  pending while later independent entries remain eligible.
 - NEVER force-pushes and NEVER deletes branches.
 - Failed rebases/merges are aborted and the work tree is restored.
 - `--pr-mode` performs no remote merge: it pushes the rebased branch only when
   the push is a plain fast-forward/new ref, then PRINTS the `gh pr create` /
   `gh pr merge` / `merge_queue.py remove` commands for the orchestrator.
+- `--pr-mode` fails closed if a selected entry declares dependencies;
+  `pr-handoff` is never treated as proof that a predecessor merged.
 - Preflight refuses to run with a dirty integrator checkout or detached HEAD.
 - Remote pushes and `gh` mutations are Owner/orchestrator actions: the queue
   prints them, the Owner runs them.

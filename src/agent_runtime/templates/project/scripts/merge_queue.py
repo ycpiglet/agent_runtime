@@ -9,11 +9,13 @@ flow (PRs #45-#53) as a single-integrator serial queue:
   verification -> merge (local mode) or print PR commands (--pr-mode) -> next
   entry -> regenerate the board once per processed batch.
 
-Queue state lives at ``agents/runtime/merge_queue/queue.json`` (schema
-``agent-runtime-merge-queue/v1``) so ui-console can observe progress. A
-failing entry is marked ``failed`` with a reason plus a worker feedback file
+Queue state lives in the primary checkout at
+``agents/runtime/merge_queue/queue.json`` (schema
+``agent-runtime-merge-queue/v1``) so ui-console and every linked worktree
+observe one state file. A failing entry is marked ``failed`` with a reason
+plus a worker feedback file beside the shared queue
 (``agents/runtime/merge_queue/feedback-<branch>.md``); the queue continues
-with the next entry and never poisons the integration branch.
+with the next eligible entry and never poisons the integration branch.
 
 Safety invariants:
   - every mutating command holds one cross-process lock in the Git common
@@ -46,6 +48,7 @@ import argparse
 import datetime as dt
 import heapq
 import json
+import math
 import os
 import re
 import shlex
@@ -78,7 +81,7 @@ DEFAULT_COMMAND_TIMEOUT_SECONDS = 600.0
 DEFAULT_LOCK_TIMEOUT_SECONDS = 10.0
 LOCK_POLL_SECONDS = 0.05
 LOCK_FILENAME = "agent-runtime-merge-queue.lock"
-DEPENDENCY_SUCCESS_STATUSES = {"merged", "pr-handoff"}
+DEPENDENCY_SUCCESS_STATUSES = {"merged"}
 
 
 class MergeQueueError(Exception):
@@ -113,7 +116,7 @@ def _say(message: str) -> None:
 
 
 def queue_path(root: Path) -> Path:
-    return root / QUEUE_REL
+    return shared_state_root(root) / QUEUE_REL
 
 
 def _empty_queue() -> dict[str, Any]:
@@ -234,7 +237,7 @@ def _lock_timeout_seconds() -> float:
             value = float(raw)
         except ValueError:
             value = 0.0
-        if value > 0:
+        if value > 0 and math.isfinite(value):
             return value
     return DEFAULT_LOCK_TIMEOUT_SECONDS
 
@@ -257,6 +260,29 @@ def git_common_dir(root: Path) -> Path:
 
 def queue_lock_path(root: Path) -> Path:
     return git_common_dir(root) / LOCK_FILENAME
+
+
+def shared_state_root(root: Path) -> Path:
+    """Resolve the primary checkout shared by every linked worktree."""
+
+    common_dir = git_common_dir(root)
+    result = _git(root, "worktree", "list", "--porcelain")
+    for line in (result.stdout or "").splitlines():
+        if not line.startswith("worktree "):
+            continue
+        candidate_text = line.removeprefix("worktree ").strip()
+        if not candidate_text:
+            continue
+        try:
+            candidate = Path(candidate_text).resolve(strict=True)
+        except OSError:
+            continue
+        if git_common_dir(candidate) == common_dir:
+            return candidate
+        break
+    raise MergeQueueError(
+        f"primary worktree is unavailable for shared merge queue state: {root}"
+    )
 
 
 def _prepare_lock_handle(path: Path) -> BinaryIO:
@@ -402,7 +428,11 @@ def _safe_branch_name(branch: str) -> str:
 
 
 def feedback_path(root: Path, branch: str) -> Path:
-    return root / FEEDBACK_DIR_REL / f"feedback-{_safe_branch_name(branch)}.md"
+    return (
+        shared_state_root(root)
+        / FEEDBACK_DIR_REL
+        / f"feedback-{_safe_branch_name(branch)}.md"
+    )
 
 
 def write_feedback(
@@ -525,8 +555,9 @@ class ProcessContext:
         self.start_branch = _current_branch(self.root)
         if self.start_branch == "HEAD":
             raise MergeQueueError("integrator checkout is on a detached HEAD")
+        state_root = shared_state_root(self.root)
         tracked = _git(
-            self.root, "ls-files", "--error-unmatch", QUEUE_REL, check=False
+            state_root, "ls-files", "--error-unmatch", QUEUE_REL, check=False
         )
         if tracked.returncode == 0:
             _say(
@@ -580,7 +611,7 @@ def _fail_entry(
     save_queue(root, queue)
     path = write_feedback(root, entry, stage, reason, output_tail, ctx.rebase_target)
     _say(f"FAILED {entry['branch']} at {stage}: {reason}")
-    _say(f"feedback written: {path.relative_to(root).as_posix()}")
+    _say(f"feedback written: {path}")
 
 
 def _print_pr_handoff(ctx: ProcessContext, entry: dict[str, Any], pushed: bool) -> None:
@@ -952,6 +983,21 @@ def cmd_process(args: argparse.Namespace) -> int:
     if args.once:
         pending = pending[:1]
 
+    if args.pr_mode:
+        dependency_entries = [
+            entry for entry in pending if _depends_on_task_ids(entry)
+        ]
+        if dependency_entries:
+            tasks = ", ".join(
+                str(entry.get("task_id") or "?") for entry in dependency_entries
+            )
+            raise MergeQueueError(
+                "dependency-bearing entries cannot run in --pr-mode because "
+                "a PR handoff does not prove the predecessor reached the remote "
+                f"base (blocked tasks: {tasks}); merge predecessors first or "
+                "use local serial mode"
+            )
+
     if args.dry_run:
         mode = "pr" if args.pr_mode else "local"
         _say(
@@ -979,7 +1025,7 @@ def cmd_process(args: argparse.Namespace) -> int:
             if blocked:
                 _say(f"ERROR dependency changed before merge: {blocked}")
                 failed += 1
-                break
+                continue
             if process_entry(ctx, queue, entry):
                 merged += 1
             else:
