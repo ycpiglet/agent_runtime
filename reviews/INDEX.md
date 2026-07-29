@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T22:59:36+09:00
-record_count: 1054
+generated_at: 2026-07-29T23:03:41+09:00
+record_count: 1055
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1054` review and evidence records under `reviews/`.
+- Summary: indexed `1055` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1054` files |
+| Reviews covered | pass | `1055` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -601,6 +601,7 @@ record_count: 1054
 | `reviews/REVIEW-2026-07-29-task-ar-645-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-645-w0-t3-replan` | md | record | pass | TASK-AR-645 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-646-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-646-w0-t3-replan` | md | record | pass | TASK-AR-646 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md` | `REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-2 Registration |
 | `reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan` | planning | record | pass | TASK-AR-648 Claim Tree TOCTOU P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan` | md | active | block | TASK-AR-648 Symbolic HEAD Lock Handoff P0 Replan |

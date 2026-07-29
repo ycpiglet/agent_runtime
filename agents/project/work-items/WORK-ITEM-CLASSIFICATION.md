@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-29T22:59:35+09:00
-record_count: 523
+generated_at: 2026-07-29T23:03:40+09:00
+record_count: 524
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `523` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `524` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 523
 | Initiatives | pass | `42` records |
 | Tasksets | pass | `66` records |
 | Tasks | pass | `315` records |
-| Units | pass | `100` records |
+| Units | pass | `101` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -556,6 +556,7 @@ record_count: 523
 | 41.1.10.3 | Unit 41.1.10.3 | unit | `UNIT-TASK-AR-648-003` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md` | UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime |
 | 41.1.10.4 | Unit 41.1.10.4 | unit | `UNIT-TASK-AR-648-004` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md` | UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract |
 | 41.1.10.5 | Unit 41.1.10.5 | unit | `UNIT-TASK-AR-648-005` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md` | UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees |
+| 41.1.10.6 | Unit 41.1.10.6 | unit | `UNIT-TASK-AR-648-006` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md` | UNIT-TASK-AR-648-006 - Bean Wiki Green Replay Attempt 2 |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
