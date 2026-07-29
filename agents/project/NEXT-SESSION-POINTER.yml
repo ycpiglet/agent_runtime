@@ -1,25 +1,47 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T02:00:33+09:00
+updated_at: 2026-07-30T02:02:55+09:00
 updated_by: codex-root-task-ar-648-010
 current_state:
-  summary: "UNIT-010 is registered and T3-anchored to repair the P1 consumer documentation ownership conflict without weakening pointer enforcement."
-  status: ready
+  summary: "UNIT-010 is claimed in default working-tree mode and is adding fail-closed consumer ownership RED tests before implementation."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 1
   step_total: 6
-  progress_pct: 5
-  status_text: "UNIT-010 readiness and selector checks pass; create a default working-tree claim before product edits."
+  progress_pct: 10
+  status_text: "Plan anchors, readiness, routing escalation, Compound lookup, and no-commit claim persistence passed."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: "CLAIM-20260730-020255-task-ar-648-648010"
+      agent_role: "lead-engineer"
+      team_id: "evaluation-office"
+      agent_instance_id: "codex-root-task-ar-648-010"
+      display_name: "lead_engineer@orchestrator-01"
+      callsite_id: "codex:root:task-ar-648:unit-010"
+      pane_id: "codex:root:task-ar-648:unit-010"
+      task_id: "TASK-AR-648"
+      unit_id: "UNIT-TASK-AR-648-010"
+      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+      status: "claimed"
+      phase: "red-tests"
+      progress_pct: 10
+      step_index: 1
+      step_total: 6
+      status_text: "Writing fail-closed consumer ownership RED tests"
+      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+      branch: "codex/unit-task-ar-648-002-implementation"
+      claim_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.json"
+      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.handoff.md"
+      log_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.log.md"
+      last_heartbeat: "2026-07-30T02:02:55+09:00"
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Create the UNIT-010 default working-tree claim with the canonical stop condition and escalation signals."
     - "Add RED ownership-aware consumer tests before implementation."
+    - "Implement only after the focused RED cases fail for the intended ownership boundary."
     - "Keep Bean attempt 3 and Allimbot frozen."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -27,7 +49,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.json"
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

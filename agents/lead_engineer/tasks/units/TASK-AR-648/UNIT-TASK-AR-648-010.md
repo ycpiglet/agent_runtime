@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T01:58:46+09:00
-updated_at: 2026-07-30T01:58:46+09:00
+updated_at: 2026-07-30T02:02:55+09:00
+started_at: 2026-07-30T02:02:55+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-009.md
 created_by: codex-root-v080-planner
 summary: Make the installed continuity documentation contract ownership-aware without weakening portable pointer enforcement
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.json
 escalation_triggers:
   - data_integrity
   - repeated_failure

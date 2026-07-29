@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T02:00:51+09:00",
+  "generated_at": "2026-07-30T02:04:12+09:00",
   "record_count": 528,
   "finding_count": 0,
   "findings": [],
@@ -5745,7 +5745,7 @@
       "title": "UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
       "parent_id": "TASK-AR-648",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-649",
