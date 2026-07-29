@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T16:29:38+09:00",
-  "record_count": 519,
+  "generated_at": "2026-07-29T16:59:34+09:00",
+  "record_count": 520,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5647,6 +5647,17 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md",
       "parent_id": "TASK-AR-648",
       "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-002",
+      "level": "unit",
+      "number": "41.1.10.2",
+      "label": "Unit 41.1.10.2",
+      "id": "UNIT-TASK-AR-648-002",
+      "title": "UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",

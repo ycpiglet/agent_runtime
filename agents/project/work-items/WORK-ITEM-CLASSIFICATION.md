@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-29T16:29:38+09:00
-record_count: 519
+generated_at: 2026-07-29T16:59:34+09:00
+record_count: 520
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `519` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `520` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 519
 | Initiatives | pass | `42` records |
 | Tasksets | pass | `66` records |
 | Tasks | pass | `315` records |
-| Units | pass | `96` records |
+| Units | pass | `97` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -552,6 +552,7 @@ record_count: 519
 | 41.1.9.1 | Unit 41.1.9.1 | unit | `UNIT-TASK-AR-647-001` | `TASK-AR-647` | completed | `agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md` | UNIT-TASK-AR-647-001 - Add native events and security-service guardrails |
 | 41.1.10 | Task 41.1.10 | task | `TASK-AR-648` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-648.md` | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
 | 41.1.10.1 | Unit 41.1.10.1 | unit | `UNIT-TASK-AR-648-001` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md` | UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki |
+| 41.1.10.2 | Unit 41.1.10.2 | unit | `UNIT-TASK-AR-648-002` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md` | UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
