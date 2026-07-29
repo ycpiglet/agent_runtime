@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T04:33:35+09:00
-record_count: 1090
+generated_at: 2026-07-30T04:38:48+09:00
+record_count: 1091
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1090` review and evidence records under `reviews/`.
+- Summary: indexed `1091` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1090` files |
+| Reviews covered | pass | `1091` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1121,6 +1121,7 @@ record_count: 1090
 | `reviews/W4B-2026-07-30-unit-task-ar-648-010.md` | `W4B-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-011.md` | `W4B-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4b — UNIT-TASK-AR-648-011 |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-012.md` | `W4B-2026-07-30-unit-task-ar-648-012` | md | blocked | block | W4b — UNIT-TASK-AR-648-012 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-013.md` | `W4B-2026-07-30-unit-task-ar-648-013` | md | approved | approve | W4b — UNIT-TASK-AR-648-013 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
