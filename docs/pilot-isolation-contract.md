@@ -4,6 +4,12 @@ Consumer pilots must prove that Runtime-driven writes occurred only in a new,
 disposable target checkout. A live primary checkout is an observation surface,
 not a test target and not a byte-stability oracle.
 
+The contract separates local physical proof from portable public evidence:
+
+- raw v1 validates absolute checkout topology and write containment;
+- sanitized v2 preserves the decision and non-secret identities without local
+  paths.
+
 ## Required checkout roles
 
 | Role | Required | May change? | Allowed attribution | Gate result |
@@ -12,78 +18,60 @@ not a test target and not a byte-stability oracle.
 | `frozen_control` | at least one | no | `none` | any snapshot change blocks |
 | `live_observation` | optional | independently | `external_or_unattributed` when changed | watch, not block |
 
-Checkout roots must be absolute, canonical, and pairwise disjoint. Equal or
-nested roots block. Every entry in `observed_write_roots` must be the disposable
-target root or a descendant of one.
-
 `pilot_caused` is never valid for a changed live observation. Pilot causality is
-supported only by the declared disposable write surface; claiming causality
-outside it blocks.
+supported only by the declared disposable write surface.
 
-## Snapshot fields
+## Raw v1: physical proof
 
-Capture the following immediately before and after the pilot window:
+Schema `agent-runtime-pilot-isolation/v1` contains canonical absolute `root`
+values and `observed_write_roots`. Checkout roots must be absolute, canonical,
+and pairwise disjoint. Equal or nested roots block. Every observed write must be
+the disposable target root or a descendant of it.
 
-- `head`: the 40-hex Git commit ID.
-- `status_sha256`: SHA-256 of the complete porcelain status observation.
+Capture each checkout immediately before and after the pilot:
+
+- `head`: the 40-hex Git commit ID;
+- `status_sha256`: SHA-256 of the complete porcelain status observation; and
 - `tracked_diff_sha256`: SHA-256 of the complete tracked diff observation.
 
-The same deterministic commands and byte encoding must be used for each side of
-a comparison. The gate compares the recorded digests; it does not mutate or
-re-read the checkouts.
+Use the same commands and byte encoding on both sides. The gate evaluates the
+recorded observations; it does not mutate or re-read a checkout.
 
-## Evidence shape
-
-Evidence uses schema `agent-runtime-pilot-isolation/v1`:
-
-```json
-{
-  "schema": "agent-runtime-pilot-isolation/v1",
-  "pilot_id": "bean-wiki-attempt-5",
-  "observed_write_roots": ["/absolute/path/to/attempt-5"],
-  "checkouts": [
-    {
-      "id": "attempt-5",
-      "role": "disposable_target",
-      "root": "/absolute/path/to/attempt-5",
-      "before": {
-        "head": "0000000000000000000000000000000000000000",
-        "status_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-        "tracked_diff_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
-      },
-      "after": {
-        "head": "0000000000000000000000000000000000000000",
-        "status_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
-        "tracked_diff_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
-      },
-      "change_attribution": "authorized_target"
-    },
-    {
-      "id": "attempt-4",
-      "role": "frozen_control",
-      "root": "/absolute/path/to/attempt-4-frozen",
-      "before": {
-        "head": "2222222222222222222222222222222222222222",
-        "status_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
-        "tracked_diff_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
-      },
-      "after": {
-        "head": "2222222222222222222222222222222222222222",
-        "status_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
-        "tracked_diff_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
-      },
-      "change_attribution": "none"
-    }
-  ]
-}
-```
-
-Run:
+Validate raw evidence before projection:
 
 ```text
-python scripts/pilot_isolation_gate.py --evidence <evidence.json> --check --json
+python scripts/pilot_isolation_gate.py \
+  --evidence <private-raw-v1.json> --check --json
 ```
 
-A frozen-control change, overlapping root, write outside the disposable target,
-or unsupported causality claim returns a blocking exit status. Unrelated live
-drift returns `pass_with_watch`, preserving evidence without blaming the pilot.
+## Sanitized v2: portable projection
+
+Only a raw decision with zero blockers can produce schema
+`agent-runtime-pilot-isolation/v2`. The projection:
+
+- removes `root` and `observed_write_roots`;
+- retains checkout IDs, roles, snapshots, and attribution;
+- maps observed writes to `observed_write_checkout_ids`; and
+- records the raw file's byte SHA-256, status, blocker/watch counts, and watch
+  codes in `raw_proof`.
+
+Generate it atomically:
+
+```text
+python scripts/pilot_isolation_gate.py \
+  --evidence <private-raw-v1.json> \
+  --sanitize-out <public-v2.json> \
+  --check --json
+```
+
+The output is deterministic for the same raw JSON bytes. Keep raw v1 in the
+local evidence boundary; commit or distribute only v2. An acceptance contract
+can bind both the v2 semantic digest and the raw v1 byte digest.
+
+The v2 gate rejects absolute paths, malformed or blocking raw decisions,
+duplicate/unknown checkout identities, writes mapped outside a disposable
+target, snapshot drift with invalid attribution, and unexpected fields.
+
+A frozen-control change, overlapping raw root, write outside the disposable
+target, or unsupported causality claim blocks. Unrelated live drift returns
+`pass_with_watch`, preserving the observation without blaming the pilot.
