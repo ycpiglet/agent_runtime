@@ -69,7 +69,9 @@
 | 528 | `TASKSET-AR-AGENT-ORG-DELEGATION` | Org Conductor |
 | 529 | `TASKSET-AR-DECISION-FIRST-CONSOLE-IA` | Decision Cockpit |
 | 600 | `TASKSET-AR-AUTO-MERGE-INTEGRITY` | Merge Truth Keeper |
+| 601 | `TASKSET-AR-CONSOLE-OVERHAUL-P0` | Console Overhaul P0 — Trust & Hygiene |
 | 601 | `TASKSET-AR-JULY-RELEASE-IMPACT-REMEDIATION` | Release Impact Remediator |
+| 602 | `TASKSET-AR-CONSOLE-OVERHAUL-P1` | Console Overhaul P1 — Core Structure |
 | 602 | `TASKSET-AR-PR303-CI-SCHEMA-RECOVERY` | CI Schema Recovery |
 | 603 | `TASKSET-AR-BACKLOG-TASKSET-TEST-RECOVERY` | Backlog Taskset Test Recovery |
 | 604 | `TASKSET-AR-TERMINAL-STATUS-START-GUARD` | Terminal Status Start Guard |
@@ -88,6 +90,7 @@
 | 624 | `TASKSET-AR-RELEASE-AUTO-NONCRITICAL` | Noncritical Release Auto-Execution |
 | 625 | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | Visual Asset Adoption |
 | 626 | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | Visual System Integration & Verification |
+| 640 | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | v0.8 Adoption and Enforcement |
 | 723 | `TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY` | Release Cadence Query Recovery |
 | 724 | `TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY` | Self-Eval Query Integrity |
 | 725 | `TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY` | Release-Auto Fixture HEAD Recovery |

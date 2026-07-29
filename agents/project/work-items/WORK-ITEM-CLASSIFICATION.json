@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T14:51:48+09:00",
+  "generated_at": "2026-07-29T15:19:33+09:00",
   "record_count": 519,
   "finding_count": 0,
   "findings": [],
@@ -5632,7 +5632,7 @@
       "number": "41.1.10",
       "label": "Task 41.1.10",
       "id": "TASK-AR-648",
-      "title": "Prove lightweight adoption preserves the existing editorial harness while adding task…",
+      "title": "Determine, with replayable evidence, whether reversible Agent Runtime adoption preser…",
       "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
       "status": "planned"
