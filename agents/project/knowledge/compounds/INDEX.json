@@ -21,6 +21,9 @@
     "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4": [
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
     ],
+    "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+    ],
     "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
     ],
@@ -46,7 +49,8 @@
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
       "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef",
-      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -67,9 +71,12 @@
     ],
     "UNIT-TASK-AR-648-007": [
       "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+    ],
+    "UNIT-TASK-AR-648-010": [
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ]
   },
-  "record_count": 8,
+  "record_count": 9,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -192,8 +199,23 @@
         "TASK-AR-648",
         "UNIT-TASK-AR-648-007"
       ]
+    },
+    {
+      "created_at": "2026-07-30T02:22:53+09:00",
+      "defect_signatures": [
+        "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab"
+      ],
+      "id": "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Portable governance must respect consumer document ownership",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-010"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:256d4c77903a4f177f26709147e664ab2f6bfc9cdbffa36a9abed4d75964c42b"
+  "source_digest": "sha256:71999dfa13fbf1c441ed63d21f1b409073910a3350b8784b320ff186aad0bdf9"
 }

@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T01:58:46+09:00
-updated_at: 2026-07-30T02:02:55+09:00
+updated_at: 2026-07-30T02:27:30+09:00
 started_at: 2026-07-30T02:02:55+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-009.md
@@ -46,7 +46,9 @@ target_files:
   - tests/fixtures/host/agent_runtime.lock.json
   - new:reviews/W4A-2026-07-30-unit-task-ar-648-010.md
   - new:reviews/W4B-2026-07-30-unit-task-ar-648-010.md
-  - new:reviews/VERIFY-2026-07-30-unit-task-ar-648-010.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json
+  - agents/project/knowledge/compounds/INDEX.json
+  - new:agents/project/knowledge/compounds/records/COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808.json
   - reviews/PILOT-BEAN-WIKI-v080-GREEN.md
   - agents/lead_engineer/tasks/TASK-AR-648.md
   - agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md
@@ -77,6 +79,10 @@ verification:
   - python -m pytest -q
 handoff: Return the exact pre/post product commits and trees, consumer-mode proof requirements, source strictness regressions, pointer fail-closed cases, root/template parity, lock freshness, clean installed-host journey, complete verification counts, W4a, and independent W4b.
 stop_condition: Stop on any source-repository weakening, blanket consumer skip, pointer fail-open, ownership decision without valid config-and-lock agreement, consumer document workaround, Bean mutation, unsupported provider/model/cost claim, Allimbot action, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T02:24:00+09:00
+verified_by: codex-root-task-ar-648-010
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json
 ---
 
 # UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract

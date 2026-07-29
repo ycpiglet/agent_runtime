@@ -1,0 +1,88 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400",
+  "work_id": "UNIT-TASK-AR-648-010",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-648",
+  "unit_id": "UNIT-TASK-AR-648-010",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T02:24:00+09:00",
+  "verified_by": "codex-root-task-ar-648-010",
+  "command_count": 8,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_continuity_contract_gate.py tests/test_owner_governance_consumer_host.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:23:32+09:00",
+      "finished_at": "2026-07-30T02:23:33+09:00",
+      "stdout": ".......................                                                  [100%]\n23 passed in 0.84s\n",
+      "stderr": ""
+    },
+    {
+      "command": "cmp -s scripts/continuity_contract_gate.py src/agent_runtime/templates/project/scripts/continuity_contract_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:23:33+09:00",
+      "finished_at": "2026-07-30T02:23:33+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_template_smoke.py tests/test_adoption.py tests/test_config_v2.py tests/test_doctor.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:23:33+09:00",
+      "finished_at": "2026-07-30T02:24:09+09:00",
+      "stdout": "........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 35.87s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:24:09+09:00",
+      "finished_at": "2026-07-30T02:24:21+09:00",
+      "stdout": "........................................................................ [ 43%]\n........................................................................ [ 86%]\n.......................                                                  [100%]\n167 passed in 10.40s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/runtime_asset_usage.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:24:21+09:00",
+      "finished_at": "2026-07-30T02:24:22+09:00",
+      "stdout": ": {\"dependency_edges\": 41, \"selected_files\": 246}, \"full-runtime\": {\"dependency_edges\": 41, \"selected_files\": 251}}\n- metric gate.owner_governance kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=3 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=3 usage=6 reuse=2\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=62 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric gate.footprint_conflict kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.worktree_lifecycle kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric gate.attribution kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric gate.verification_freshness kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.release_cadence kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric gate.conversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.compound_record kind=script status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:24:22+09:00",
+      "finished_at": "2026-07-30T02:24:27+09:00",
+      "stdout": " usage=17 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.8.0\nrelease-cadence: baseline tag=v0.7.0 commits=315 feat=13 fix=55 breaking=0 days=6 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 315); feat>=5 (actual 13)\nrelease-cadence: minor bump reasons: template-deleted-or-renamed:src/agent_runtime/templates/project/scripts/allimbot_stop_hook.cmd; schema-changed:schemas/task-unit.schema.json\nrelease-cadence: current version=0.7.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nplanning_records=31\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=76>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nreviews=394\ncompounds=13\nretros=12\ncompound_retro_total=25\nratio=15.8\nthreshold=20\nwatch=0\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 0\n",
+      "stderr": ""
+    },
+    {
+      "command": "PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:24:27+09:00",
+      "finished_at": "2026-07-30T02:24:28+09:00",
+      "stdout": "# Agent Runtime Public Sanitization\n\nfindings=0\n\n| Path | Kind | Detail |\n|------|------|--------|\n| - | ok | No forbidden public package content found. |\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T02:24:28+09:00",
+      "finished_at": "2026-07-30T02:26:51+09:00",
+      "stdout": "........................................................................ [  2%]\n........................................................................ [  5%]\n........................................................................ [  8%]\n........................................................................ [ 10%]\n........................................................................ [ 13%]\n........................................................................ [ 16%]\n........................................................................ [ 18%]\n........................................................................ [ 21%]\n........................................................................ [ 24%]\n........................................................................ [ 26%]\n........................................................................ [ 29%]\n........................................................................ [ 32%]\n........................................................................ [ 34%]\n........................................................................ [ 37%]\n........................................................................ [ 40%]\n........................................................................ [ 42%]\n........................................................................ [ 45%]\n........................................................................ [ 48%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 56%]\n........................................................................ [ 58%]\n........................................................................ [ 61%]\n........................................................................ [ 64%]\n........................................................................ [ 66%]\n........................................................................ [ 69%]\n........................................................................ [ 72%]\n........................................................................ [ 74%]\n........................................................................ [ 77%]\n........................................................................ [ 80%]\n.............................................................ss......... [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 88%]\n........................................................................ [ 90%]\n........................................................................ [ 93%]\n........................................................................ [ 96%]\n........................................................................ [ 98%]\ns..............................                                          [100%]\n=============================== warnings summary ===============================\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\ntests/test_ui_console_beta_exploration.py::test_http_get_route_sweep_never_5xx\n  <unknown>:8274: DeprecationWarning: invalid escape sequence '\\/'\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2692 passed, 3 skipped, 4 warnings in 142.35s (0:02:22)\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T02:02:55+09:00
+updated_at: 2026-07-30T02:27:30+09:00
 updated_by: codex-root-task-ar-648-010
 current_state:
-  summary: "UNIT-010 is claimed in default working-tree mode and is adding fail-closed consumer ownership RED tests before implementation."
+  summary: "UNIT-010 exact product dd279cd5 passed canonical W4a; independent W4b is the remaining Runtime repair gate."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
+  step_index: 5
   step_total: 6
-  progress_pct: 10
-  status_text: "Plan anchors, readiness, routing escalation, Compound lookup, and no-commit claim persistence passed."
+  progress_pct: 85
+  status_text: "RED, implementation, root/template parity, generated lock, Compound, 8-command VERIFY, and W4a passed on the exact product."
 active_work:
   current_agents:
     - claim_id: "CLAIM-20260730-020255-task-ar-648-648010"
@@ -23,25 +23,25 @@ active_work:
       unit_id: "UNIT-TASK-AR-648-010"
       task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
       status: "claimed"
-      phase: "red-tests"
-      progress_pct: 10
-      step_index: 1
+      phase: "w4a-complete"
+      progress_pct: 85
+      step_index: 5
       step_total: 6
-      status_text: "Writing fail-closed consumer ownership RED tests"
+      status_text: "Exact product dd279cd5 passed canonical verification and W4a; awaiting independent W4b"
       worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
       branch: "codex/unit-task-ar-648-002-implementation"
       claim_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.json"
       handoff_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.handoff.md"
       log_path: "agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.log.md"
-      last_heartbeat: "2026-07-30T02:02:55+09:00"
+      last_heartbeat: "2026-07-30T02:27:30+09:00"
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Add RED ownership-aware consumer tests before implementation."
-    - "Implement only after the focused RED cases fail for the intended ownership boundary."
+    - "Obtain independent adversarial W4b against exact product dd279cd5613578c87ed6c4c24b37325084449d82."
+    - "Release and close UNIT-010 only if W4b reports no P0/P1."
     - "Keep Bean attempt 3 and Allimbot frozen."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
