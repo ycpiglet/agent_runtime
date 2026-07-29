@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T14:12:30+09:00
-record_count: 1017
+generated_at: 2026-07-29T14:32:11+09:00
+record_count: 1018
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1017` review and evidence records under `reviews/`.
+- Summary: indexed `1018` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1017` files |
+| Reviews covered | pass | `1018` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1047,6 +1047,7 @@ record_count: 1017
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r5.md` | `W4B-2026-07-29-unit-task-ar-647-001-r5` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Integrity Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r6.md` | `W4B-2026-07-29-unit-task-ar-647-001-r6` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Missing-Gate and Scalar Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r7.md` | `W4B-2026-07-29-unit-task-ar-647-001-r7` | md | changes_required | block | TASK-AR-647 UNIT-001 Independent W4b Security Metadata Remediation Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
