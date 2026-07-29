@@ -608,6 +608,36 @@ def test_explicit_claim_transaction_keeps_symbolic_head_on_sealed_branch(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
+def test_post_commit_hook_cannot_switch_symbolic_head_after_publication(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    assert _git(tmp_path, "branch", "concurrent-branch").returncode == 0
+    original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    post_hook = tmp_path / ".githooks" / "post-commit"
+    post_hook.write_text(
+        "#!/bin/sh\n"
+        "git symbolic-ref HEAD refs/heads/concurrent-branch\n",
+        encoding="utf-8",
+    )
+    post_hook.chmod(0o755)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    assert "post_commit_warning" in result
+    assert _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
 def test_explicit_claim_transaction_respects_external_head_lock(
     tmp_path: Path,
 ) -> None:

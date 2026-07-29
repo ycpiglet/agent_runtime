@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T21:19:58+09:00
-record_count: 1044
+generated_at: 2026-07-29T21:39:06+09:00
+record_count: 1046
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1044` review and evidence records under `reviews/`.
+- Summary: indexed `1046` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1044` files |
+| Reviews covered | pass | `1046` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -606,6 +606,7 @@ record_count: 1044
 | `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Post-Commit HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Symbolic HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
@@ -909,6 +910,7 @@ record_count: 1044
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303.json` | `VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919.json` | `VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
