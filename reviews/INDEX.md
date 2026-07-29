@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T01:35:26+09:00
-record_count: 1070
+generated_at: 2026-07-30T01:39:35+09:00
+record_count: 1071
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1070` review and evidence records under `reviews/`.
+- Summary: indexed `1071` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1070` files |
+| Reviews covered | pass | `1071` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,6 +166,7 @@ record_count: 1070
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN.md` | `PILOT-BEAN-WIKI-v080-GREEN` | md | in_progress | watch | Bean Wiki v0.8 Green Pilot Attempt 3 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
