@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T23:34:46+09:00
-updated_at: 2026-07-30T01:15:04+09:00
+updated_at: 2026-07-30T01:21:30+09:00
 started_at: 2026-07-30T00:22:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md
@@ -83,6 +83,21 @@ verification:
   - python -m pytest -q
 handoff: Report the original RED command and finding, the exact pointer/claim field matrix and negative cases, doctor path decision, installed-host journey, source-template hashes, unchanged default SCM behavior, focused/routing/full counts, exact product SHA, Compound retrieval, W4a evidence, and independent W4b verdict.
 stop_condition: Stop on a fail-open pointer fallback, stale or partial state acceptance, automatic claim-time pointer mutation, weakened present-STATUS validation, source/template drift, missing RED evidence, new P0/P1, consumer mutation, Allimbot work, release/version/tag/package action, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T01:16:30+09:00
+verified_by: codex-root-task-ar-648-008
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-008.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-008.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef.json
+defect_signatures:
+  - defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8
+resolution: done
+completed_at: 2026-07-30T01:21:30+09:00
+closed_by: codex-root-task-ar-648-008
+measurement_unavailable_reason: Portable-continuity work spanned the broader TASK-AR-648 remediation session without reliable per-unit wall-clock and token metering.
 ---
 
 # UNIT-TASK-AR-648-008 - Portable Continuity Contract
@@ -182,3 +197,21 @@ W4b verdict.
 
 Any fail-open continuity result or independent P0/P1 freezes this unit and
 requires another separately claimed repair before consumer replay.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T01:21:30+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Portable-continuity work spanned the broader TASK-AR-648 remediation session without reliable per-unit wall-clock and token metering.
+- Closed by: `codex-root-task-ar-648-008`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json`
+- Reviews:
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-008.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-008.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef.json`
+<!-- work-close:end -->

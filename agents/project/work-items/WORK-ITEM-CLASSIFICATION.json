@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T01:15:46+09:00",
+  "generated_at": "2026-07-30T01:23:27+09:00",
   "record_count": 526,
   "finding_count": 0,
   "findings": [],
@@ -5723,7 +5723,7 @@
       "title": "UNIT-TASK-AR-648-008 - Portable Continuity Contract",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md",
       "parent_id": "TASK-AR-648",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-649",
