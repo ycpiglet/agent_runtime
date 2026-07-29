@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T21:40:00+09:00
+updated_at: 2026-07-29T21:47:00+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -36,6 +36,7 @@ inputs:
   - reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242.json
   - reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
   - agent-runtime@76212dc0c1898c35542cf2838039b5ee88af360f
 target_files:
   - scripts/claim_guard.py
@@ -54,6 +55,8 @@ target_files:
   - new:reviews/W4B-2026-07-29-unit-task-ar-648-005.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md
+  - new:agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
+  - agents/project/knowledge/compounds/INDEX.json
   - reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
   - reviews/INDEX.md
 scope: Replace only the explicit claim-artifact SCM transaction. Build a private index from the starting HEAD, seal the exact JSON/handoff/log blobs and immutable tree object, run repository commit checks against that private index, revalidate the sealed tree and working blobs after all pre-commit work, create a commit from the immutable tree, and advance the symbolic branch with compare-and-swap. Keep ordinary working-tree claim persistence and overlay behavior unchanged. Do not create a Bean or Allimbot worktree in this unit.
@@ -85,6 +88,10 @@ defect_signatures:
   - defect:claim-commit-final-tree-toctou:f39b32eb331a6963
   - defect:claim-commit-symbolic-head-race:f2860072798c6ac5
   - defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1
+verified_at: 2026-07-29T21:44:18+09:00
+verified_by: codex-root-task-ar-648-005
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json
 ---
 
 # UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees
@@ -179,7 +186,7 @@ telemetry, and UI behavior are out of scope.
 
 Report red/green reproductions, marker and private-index schema, hook
 semantics, real-index preservation hashes, exact product SHA, W4a evidence,
-and independent W4b verdict.
+task-linked Compound retrieval, and independent W4b verdict.
 
 ## Deliberate Exclusions
 

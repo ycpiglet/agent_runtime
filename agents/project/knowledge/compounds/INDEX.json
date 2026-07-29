@@ -6,6 +6,15 @@
     "defect:ci-flaky-temp-git:d1ff9421d45168c6": [
       "COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65"
     ],
+    "defect:claim-commit-final-tree-toctou:f39b32eb331a6963": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-commit-symbolic-head-race:f2860072798c6ac5": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
     "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ]
@@ -20,6 +29,9 @@
     "TASK-AR-647": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
     ],
+    "TASK-AR-648": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -28,9 +40,12 @@
     ],
     "UNIT-TASK-AR-647-001": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
+    ],
+    "UNIT-TASK-AR-648-005": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ]
   },
-  "record_count": 3,
+  "record_count": 4,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -76,8 +91,25 @@
         "TASK-AR-647",
         "UNIT-TASK-AR-647-001"
       ]
+    },
+    {
+      "created_at": "2026-07-29T21:46:00+09:00",
+      "defect_signatures": [
+        "defect:claim-commit-final-tree-toctou:f39b32eb331a6963",
+        "defect:claim-commit-symbolic-head-race:f2860072798c6ac5",
+        "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1"
+      ],
+      "id": "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Claim authorization must cover the final publication boundary",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-005"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:2a01b5f05963b856d77f113431d69b194a73ce372d02ca373bf3e6fc6aa822ab"
+  "source_digest": "sha256:7f3ab8c9a8fcc49b32d94ae0eb0a8f85a2b6b4142bfab818a81eb8bd023dee1a"
 }

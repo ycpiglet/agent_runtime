@@ -1,0 +1,35 @@
+{
+  "cause": "The transaction was initially modeled as authorization of paths, then as an immutable tree plus branch CAS, without enumerating every state transition through the API return boundary; independent and self-adversarial review exposed each omitted consumer of that authorization.",
+  "created_at": "2026-07-29T21:46:00+09:00",
+  "created_by": "codex-root-task-ar-648-005",
+  "defect_signatures": [
+    "defect:claim-commit-final-tree-toctou:f39b32eb331a6963",
+    "defect:claim-commit-symbolic-head-race:f2860072798c6ac5",
+    "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1"
+  ],
+  "id": "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
+  "prevention": "For every privileged SCM action, enumerate the complete publication timeline and bind exact content, real worktree identity, ref target, compare-and-swap value, owned locks, configured hooks, cleanup, and return-state verification; require deterministic adjacent-state attacks before consumer adoption.",
+  "prevention_refs": [
+    "scripts/claim_guard.py",
+    "tests/test_claim_guard.py",
+    "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md"
+  ],
+  "recurrence_count": 3,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-07-29-unit-task-ar-648-004.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md"
+  ],
+  "status": "mitigated",
+  "summary": "Three successive claim-SCM defects passed narrower checks while leaving the committed tree, symbolic-HEAD target, or Runtime-invoked post-hook outside the protected authorization boundary.",
+  "title": "Claim authorization must cover the final publication boundary",
+  "verification_refs": [
+    "reviews/W4A-2026-07-29-unit-task-ar-648-005-r3.md",
+    "reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-005"
+  ]
+}
