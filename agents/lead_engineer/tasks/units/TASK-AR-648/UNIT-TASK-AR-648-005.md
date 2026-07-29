@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T22:57:32+09:00
+updated_at: 2026-07-29T22:58:28+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -118,6 +118,14 @@ review_refs:
   - reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md
 verified_at: 2026-07-29T22:43:10+09:00
 verified_by: codex-root-task-ar-648-005
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json
+resolution: done
+completed_at: 2026-07-29T22:58:28+09:00
+closed_by: codex-root-task-ar-648-005
+measurement_unavailable_reason: The unit spanned iterative red reproductions, five remediation rounds, canonical W4a, and independent W4b before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees
@@ -245,3 +253,26 @@ task-linked Compound retrieval, and independent W4b verdict.
 No consumer worktree, release, publish, deploy, push, credential read, network
 delivery, ambient marker bypass, mutation of unrelated staged work, or
 non-atomic ref update.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T22:58:28+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The unit spanned iterative red reproductions, five remediation rounds, canonical W4a, and independent W4b before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-task-ar-648-005`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310.json`
+- Reviews:
+  - `reviews/W4A-2026-07-29-unit-task-ar-648-005-r3.md`
+  - `reviews/W4B-2026-07-29-unit-task-ar-648-005.md`
+  - `reviews/W4A-2026-07-29-unit-task-ar-648-005-r4.md`
+  - `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json`
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json`
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json`
+<!-- work-close:end -->

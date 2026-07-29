@@ -1,41 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T21:08:00+09:00
+updated_at: 2026-07-29T22:58:28+09:00
 updated_by: codex-root-task-ar-648-005
 current_state:
-  summary: "TASK-AR-648 UNIT-005 W4a passed at e8d25d08; independent W4b remains before any consumer replay."
+  summary: "TASK-AR-648 UNIT-005 closed after W4a/W4b approval of product 6ccfd919; register Bean attempt 2 as UNIT-006."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 5
+  step_index: 6
   step_total: 7
-  progress_pct: 75
-  status_text: "W4a passed (2629 passed, 3 skipped); obtain fresh independent W4b for exact product SHA e8d25d08."
+  progress_pct: 82
+  status_text: "UNIT-005 W4b approved 97/100 with no P0/P1; next is a fresh baseline-357 Bean Wiki attempt 2 under UNIT-006."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260729-203438-task-ar-648-648005
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-648-005
-      display_name: codex-root@orchestrator-01
-      callsite_id: codex:root:task-ar-648-005
-      pane_id: codex:task-ar-648-005
-      task_id: TASK-AR-648
-      unit_id: UNIT-TASK-AR-648-005
-      worktree_path: .
-      branch: codex/unit-task-ar-648-002-implementation
-  current_teams:
-    - evaluation-office
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-648
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Stay in the clean Agent Runtime implementation worktree for UNIT-005. Do not create Bean or Allimbot worktrees, push, deploy, publish, version, tag, package, or release before independent approval."
+  branch_policy: "Register and claim UNIT-006 before creating the fresh Bean Wiki attempt-2 worktree. Keep Allimbot, push, deploy, publish, version, tag, package, and release stopped until Bean W4b approval."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
