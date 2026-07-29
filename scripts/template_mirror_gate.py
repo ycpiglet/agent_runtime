@@ -1,8 +1,9 @@
 """Block silent drift between source and packaged project scripts.
 
-Common portable scripts must be byte-identical. A small number of deliberate
-source/consumer variants may differ only when both byte digests and a bounded
-reason are pinned in the mirror contract.
+The mirror contract pins the exact paths expected on both sides. Those scripts
+must be byte-identical unless a deliberate source/consumer variant pins both
+byte digests and a bounded reason. Root-only and template-only scripts remain
+valid when they are outside the expected-common inventory.
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 
-SCHEMA = "agent-runtime-template-mirror-contract/v1"
+SCHEMA = "agent-runtime-template-mirror-contract/v2"
 SOURCE_REL = Path("scripts")
 TEMPLATE_REL = Path("src/agent_runtime/templates/project/scripts")
 CONTRACT_REL = Path("agents/project/TEMPLATE-MIRROR-CONTRACT.json")
@@ -59,7 +60,7 @@ def _eligible(directory: Path) -> dict[str, Path]:
     }
 
 
-def _safe_exception_path(value: object) -> str | None:
+def _safe_script_path(value: object) -> str | None:
     if not isinstance(value, str) or not value or "\\" in value:
         return None
     candidate = PurePosixPath(value)
@@ -73,10 +74,13 @@ def _safe_exception_path(value: object) -> str | None:
     return value
 
 
-def _load_contract(path: Path, findings: list[str]) -> dict[str, Any]:
+def _load_contract(
+    path: Path,
+    findings: list[str],
+) -> tuple[list[str], dict[str, Any]]:
     if not path.is_file():
         findings.append(f"mirror:missing-contract:{CONTRACT_REL.as_posix()}")
-        return {}
+        return [], {}
     try:
         payload = json.loads(
             path.read_text(encoding="utf-8"),
@@ -84,20 +88,41 @@ def _load_contract(path: Path, findings: list[str]) -> dict[str, Any]:
         )
     except DuplicateContractKey as exc:
         findings.append(f"mirror:duplicate-contract-key:{exc.key}")
-        return {}
+        return [], {}
     except (OSError, json.JSONDecodeError) as exc:
         findings.append(f"mirror:invalid-contract-json:{CONTRACT_REL.as_posix()}:{exc}")
-        return {}
+        return [], {}
     if not isinstance(payload, dict):
         findings.append(f"mirror:invalid-contract-root:{CONTRACT_REL.as_posix()}")
-        return {}
+        return [], {}
     if payload.get("schema") != SCHEMA:
         findings.append(f"mirror:invalid-contract-schema:{CONTRACT_REL.as_posix()}")
+
+    expected_raw = payload.get("expected_common")
+    expected: list[str] = []
+    if not isinstance(expected_raw, list):
+        findings.append("mirror:invalid-expected-common-list")
+    else:
+        if all(isinstance(item, str) for item in expected_raw):
+            if expected_raw != sorted(expected_raw):
+                findings.append("mirror:unsorted-expected-common")
+        seen: set[str] = set()
+        for raw_path in expected_raw:
+            path_value = _safe_script_path(raw_path)
+            if path_value is None:
+                findings.append(f"mirror:invalid-expected-path:{raw_path}")
+                continue
+            if path_value in seen:
+                findings.append(f"mirror:duplicate-expected-path:{path_value}")
+                continue
+            seen.add(path_value)
+            expected.append(path_value)
+
     divergences = payload.get("intentional_divergences")
     if not isinstance(divergences, dict):
         findings.append(f"mirror:invalid-divergence-map:{CONTRACT_REL.as_posix()}")
-        return {}
-    return divergences
+        return expected, {}
+    return expected, divergences
 
 
 def analyze(root: Path) -> dict[str, object]:
@@ -113,15 +138,28 @@ def analyze(root: Path) -> dict[str, object]:
     source = _eligible(source_dir)
     template = _eligible(template_dir)
     common = sorted(source.keys() & template.keys())
-    contract = _load_contract(root / CONTRACT_REL, findings)
+    expected, contract = _load_contract(root / CONTRACT_REL, findings)
+    expected_set = set(expected)
+    common_set = set(common)
+
+    for path in expected:
+        if path not in source:
+            findings.append(f"mirror:expected-source-missing:{path}")
+        if path not in template:
+            findings.append(f"mirror:expected-template-missing:{path}")
+    for path in sorted(common_set - expected_set):
+        findings.append(f"mirror:unexpected-common:{path}")
 
     valid_contract: dict[str, dict[str, str]] = {}
     for raw_path, raw_entry in sorted(contract.items(), key=lambda item: str(item[0])):
-        path = _safe_exception_path(raw_path)
+        path = _safe_script_path(raw_path)
         if path is None:
             findings.append(f"mirror:invalid-exception-path:{raw_path}")
             continue
-        if path not in common:
+        if path not in expected_set:
+            findings.append(f"mirror:exception-not-expected:{path}")
+            continue
+        if path not in common_set:
             findings.append(f"mirror:exception-not-common:{path}")
             continue
         if not isinstance(raw_entry, dict):
@@ -154,7 +192,7 @@ def analyze(root: Path) -> dict[str, object]:
 
     identical = 0
     intentional = 0
-    for path in common:
+    for path in sorted(expected_set & common_set):
         source_digest = _digest(source[path])
         template_digest = _digest(template[path])
         entry = valid_contract.get(path)
@@ -180,6 +218,8 @@ def analyze(root: Path) -> dict[str, object]:
 
     return {
         "schema": SCHEMA,
+        "expected_common": len(expected),
+        "current_common": len(common),
         "eligible_common": len(common),
         "identical": identical,
         "intentional": intentional,
@@ -194,7 +234,8 @@ def render(payload: dict[str, object], *, as_json: bool) -> str:
     lines = [
         (
             "template-mirror: "
-            f"common={payload['eligible_common']} "
+            f"expected={payload['expected_common']} "
+            f"common={payload['current_common']} "
             f"identical={payload['identical']} "
             f"intentional={payload['intentional']} "
             f"findings={len(findings)}"
