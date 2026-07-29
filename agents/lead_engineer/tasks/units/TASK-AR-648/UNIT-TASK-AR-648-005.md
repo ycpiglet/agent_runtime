@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T21:03:30+09:00
+updated_at: 2026-07-29T21:22:00+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -32,6 +32,8 @@ inputs:
   - reviews/W4B-2026-07-29-unit-task-ar-648-004.md
   - reviews/W4A-2026-07-29-unit-task-ar-648-004.md
   - reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
+  - reviews/W4A-2026-07-29-unit-task-ar-648-005.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - agent-runtime@76212dc0c1898c35542cf2838039b5ee88af360f
 target_files:
   - scripts/claim_guard.py
@@ -45,7 +47,9 @@ target_files:
   - src/agent_runtime/templates/project/docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md
   - tests/fixtures/host/agent_runtime.lock.json
   - new:reviews/W4A-2026-07-29-unit-task-ar-648-005.md
+  - new:reviews/W4A-2026-07-29-unit-task-ar-648-005-r2.md
   - new:reviews/W4B-2026-07-29-unit-task-ar-648-005.md
+  - new:reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
   - reviews/INDEX.md
 scope: Replace only the explicit claim-artifact SCM transaction. Build a private index from the starting HEAD, seal the exact JSON/handoff/log blobs and immutable tree object, run repository commit checks against that private index, revalidate the sealed tree and working blobs after all pre-commit work, create a commit from the immutable tree, and advance the symbolic branch with compare-and-swap. Keep ordinary working-tree claim persistence and overlay behavior unchanged. Do not create a Bean or Allimbot worktree in this unit.
@@ -56,6 +60,7 @@ acceptance:
   - A hook that changes and stages the claim JSON after the canonical gate reproducer cannot advance HEAD; marker/private-index files are removed and the ordinary gate reports authorized-commit-not-persisted.
   - Handoff-only and log-only mutation or omission fail closed.
   - The final commit tree exactly equals the pre-hook sealed tree, and symbolic HEAD advances by one compare-and-swap update only when the starting HEAD still matches.
+  - The real worktree HEAD cannot switch branches between final validation and branch compare-and-swap; the transaction holds the real worktree HEAD lock while updating the original branch through an isolated detached Git administrative context.
   - Detached HEAD, concurrent ref movement, hook failure, malformed/stale/dead-owner/wrong-root/wrong-index/wrong-path/wrong-HEAD/wrong-tree/wrong-blob markers all fail without advancing the claim transaction.
   - Existing unrelated staged, partially staged, unstaged, and untracked user changes retain their exact real-index and working-tree state across both success and failure.
   - On success the three artifacts are clean against HEAD, the claim survives reset plus clean, and the ordinary post-transaction gate has zero block findings.
@@ -73,10 +78,7 @@ handoff: Report the independent red reproducer, sealed marker/tree schema, exact
 stop_condition: Stop on a path-only authorization, normal git-commit TOCTOU, post-hoc rollback as the primary integrity control, mutation of unrelated real-index state, hook bypass, detached-HEAD ref write, non-CAS branch update, marker/private-index leak, weakened ordinary claim gate, evidence rewrite, new P0, consumer worktree creation, publish, deploy, push, credential access, or network delivery.
 defect_signatures:
   - defect:claim-commit-final-tree-toctou:f39b32eb331a6963
-verified_at: 2026-07-29T21:03:30+09:00
-verified_by: codex-root-task-ar-648-005
-evidence_refs:
-  - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330.json
+  - defect:claim-commit-symbolic-head-race:f2860072798c6ac5
 ---
 
 # UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees
@@ -123,8 +125,10 @@ telemetry, and UI behavior are out of scope.
    private index.
 5. After every pre-commit action returns, require the private index tree and
    target working blobs to equal the seal.
-6. Create the commit from the already immutable tree object and advance only
-   the current symbolic branch using `update-ref <new> <old>`.
+6. Create the commit from the already immutable tree object, lock the real
+   worktree `HEAD`, revalidate its symbolic target, and advance only that
+   branch with `update-ref <new> <old>` through an isolated detached Git
+   administrative context.
 7. Clean the marker and private index on every exit. On failure, leave the
    ordinary staged claim state visible so the canonical gate blocks.
 
@@ -138,11 +142,13 @@ telemetry, and UI behavior are out of scope.
    tree plus target working blobs after hook return.
 4. Create a commit from the sealed tree and update the symbolic branch with a
    compare-and-swap old value.
-5. Add detached-HEAD, ref-race, hook-failure, identity/OID mismatch, cleanup,
-   and reset-plus-clean regressions.
-6. Mirror root/template assets, regenerate the host lock, and run focused plus
-   full W4a.
-7. Obtain a fresh independent W4b before registering any consumer replay.
+5. Add detached-HEAD, ref-race, symbolic-HEAD-switch, external-HEAD-lock,
+   hook-failure, identity/OID mismatch, cleanup, and reset-plus-clean
+   regressions.
+6. Preserve the first W4a as historical evidence, mirror root/template
+   assets, regenerate the host lock, and run focused plus full W4a R2.
+7. Obtain a fresh independent W4b against the R2 product SHA before
+   registering any consumer replay.
 
 ## Acceptance Criteria
 
@@ -170,6 +176,8 @@ and independent W4b verdict.
 ## Deliberate Exclusions
 
 - Marker OIDs plus hook reordering alone are not called race-free.
+- A branch CAS without preventing the equal-OID symbolic-HEAD switch is not
+  called atomic.
 - A bad normal commit followed by rollback is not used as the integrity
   boundary.
 - Bean Wiki and Allimbot remain outside this unit.

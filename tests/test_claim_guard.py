@@ -554,6 +554,59 @@ def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
+def test_explicit_claim_transaction_keeps_symbolic_head_on_sealed_branch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The ref CAS must not succeed after HEAD switches to an equal-OID branch."""
+
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    assert _git(tmp_path, "branch", "concurrent-branch").returncode == 0
+    original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    original_git = claim_guard._git
+    switch: dict[str, object] = {}
+
+    def switching_git(
+        root: Path,
+        args: list[str],
+        *,
+        env: dict[str, str] | None = None,
+    ) -> dict[str, object]:
+        if args and args[0] == "update-ref" and not switch:
+            switch_env = dict(os.environ)
+            for key in (
+                "GIT_DIR",
+                "GIT_COMMON_DIR",
+                "GIT_WORK_TREE",
+                "GIT_INDEX_FILE",
+                claim_guard.CLAIM_COMMIT_TRANSACTION_ENV,
+            ):
+                switch_env.pop(key, None)
+            switched = original_git(
+                root,
+                ["symbolic-ref", "HEAD", "refs/heads/concurrent-branch"],
+                env=switch_env,
+            )
+            switch.update(switched)
+        return original_git(root, args, env=env)
+
+    monkeypatch.setattr(claim_guard, "_git", switching_git)
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert switch["code"] != 0
+    assert result["ok"] is True, result
+    assert _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
 def test_explicit_claim_transaction_rejects_detached_head(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     _install_runtime_gate_hook(tmp_path)

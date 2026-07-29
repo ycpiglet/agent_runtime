@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T20:34:38+09:00
+updated_at: 2026-07-29T21:22:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -63,9 +63,12 @@ claim_refs:
   approves it, so the unit is blocked before Bean.
 - `UNIT-TASK-AR-648-005` replaces the path-only exception with an immutable
   private-index/tree transaction, preserves unrelated staged changes, and
-  requires a fresh independent W4b. Bean replay moves to a separate unit only
-  after that approval. P1 profile, overlay-execution, and provider-observability
-  work remains separately queued.
+  requires a fresh independent W4b. Its first W4a is historical only after
+  RED-R2 exposed an equal-OID symbolic-HEAD switch race; the repair now adds a
+  real worktree HEAD lock around final validation and Git CAS through an
+  isolated detached administrative context. Bean replay moves to a separate
+  unit only after W4a R2 and W4b approval. P1 profile, overlay-execution, and
+  provider-observability work remains separately queued.
 
 ## Goal
 
