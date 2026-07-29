@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T18:34:22+09:00
-updated_at: 2026-07-29T18:40:02+09:00
+updated_at: 2026-07-29T19:01:44+09:00
 started_at: 2026-07-29T18:40:02+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md
@@ -86,6 +86,12 @@ verification:
   - python -m pytest -q
 handoff: Report both new failing/passing reproducers, exact HEAD invariants, explicit crash-safety compatibility, portable module parity, installed-host commands with sanitized PYTHONPATH, selected-file/digest changes, Bean attempt-2 hashes/counts/effects, green fixture semantic digest, independent W4b verdict, and exact-main CI.
 stop_condition: Stop on implicit SCM mutation, source-checkout import dependence, red/attempt-1 evidence mutation, new P0, host/content mutation, credential access, network delivery, publish, deploy, origin push, unsupported model/cost claim, or failed independent verification.
+verified_at: 2026-07-29T19:01:44+09:00
+verified_by: codex-root-task-ar-648-003
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144.json
+review_refs:
+  - reviews/W4A-2026-07-29-unit-task-ar-648-003.md
 ---
 
 # UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime
