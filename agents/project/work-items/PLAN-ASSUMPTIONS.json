@@ -920,23 +920,68 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan.md",
-          "value": "404037b87a8a546f6cabb191e8c3911759cfa66c191f050a2cdfe183fe9a72f6"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md",
+          "value": "de18f57a0b5dc915c22493b092211b190767309c39471831f61a93aeaa612043"
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration.md",
-          "value": "9751206cbb7f9dc36bff473bdb08b8da3a877db2bcec97b44f32b5132f1c3682"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md",
+          "value": "5b90d3231f0819db8ab196935cba385db99dfdb6107c6faa5404beb90e29947c"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
+          "value": "bdfed115932fa065df97c2852e073c34e848b0a130d4ba91fb71868dfc1a6f4a"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-009.md",
+          "value": "3665450bbe1d8ee21803142614f704456fabcdb3a6c38254c5af8655ebde8f84"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "65d0f42f8e122421d0a1e88f95311ae2871c249bec2611c0d88a387617d94bf0"
+          "value": "4b53383f4baff2c75cad4aef45c292b027f89aead29847a309d1982093a4c2cf"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md",
-          "value": "02f9bc0b1d62ffea1bc30da812f5cc3a4c7a1e1f7b5bd7825e3cf8215d18a961"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
+          "value": "4f24d70d4355feb0a2a822e3a45210c00615cbdd5c953bada637217a49e93e66"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/continuity_contract_gate.py",
+          "value": "51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/continuity_contract_gate.py",
+          "value": "51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/AGENT_RUNTIME.md",
+          "value": "e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/agent_runtime/config.py",
+          "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_continuity_contract_gate.py",
+          "value": "aea8beda8979299ed4048ccae687d1438166cbf0f183c82e98fd8f41c756083a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_owner_governance_consumer_host.py",
+          "value": "4fba58bedbfd5ffe7d9a2c98183383c47729ce9ee77364c958bca03090c41330"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "b052dc5b0df4fba5fb63c5b11f33d113eb54bc07a22eb05d718ffb0fbf70ae0b"
         },
         {
           "kind": "sha256",
@@ -952,55 +997,10 @@
           "kind": "sha256",
           "path": "scripts/task_unit_readiness_gate.py",
           "value": "79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/parallel_worktree_gate.py",
-          "value": "c388465a4c2fde1a1919b0efe822fd3043b0fdf993534a98b447c6c20fdfd63d"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
-          "value": "c388465a4c2fde1a1919b0efe822fd3043b0fdf993534a98b447c6c20fdfd63d"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/doctor.py",
-          "value": "0d3d1816ef8be85c96685640d0de84da05d8a12b6d0e6f4cbae9fdd0e302fc33"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml",
-          "value": "c60dc7305f8e4bfb4e41641c1b39c3e5ab25d5808b698912b48e4529dbdb40f2"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/pilot_acceptance.py",
-          "value": "8fcec748486bc0697bee6da088c963626421beb6c6597f57446f27c4c62b4747"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_pilot_acceptance.py",
-          "value": "88255c04ec10b2a3737ad2daf290b0a5352008c472930161ae5d42633ee43b90"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-008.md",
-          "value": "6493e1359a3c1ba9dffcac844a9103ac8e19e546d0bf4a2fe66d5141456b8485"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json",
-          "value": "49ec7cc28e908d2a6f02eb9a068d2fae06522ec0b9018b3ac2088a6ee1d00dd5"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "b052dc5b0df4fba5fb63c5b11f33d113eb54bc07a22eb05d718ffb0fbf70ae0b"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan.md",
-      "recorded_at": "2026-07-30T01:32:44+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md",
+      "recorded_at": "2026-07-30T02:00:26+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1216,5 +1216,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T01:32:44+09:00"
+  "updated_at": "2026-07-30T02:00:26+09:00"
 }

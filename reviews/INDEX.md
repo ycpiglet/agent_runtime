@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T01:56:19+09:00
-record_count: 1073
+generated_at: 2026-07-30T02:00:51+09:00
+record_count: 1075
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1073` review and evidence records under `reviews/`.
+- Summary: indexed `1075` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1073` files |
+| Reviews covered | pass | `1075` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -620,6 +620,8 @@ record_count: 1073
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-3 Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan` | md | approved | pass | TASK-AR-648 Bean Attempt-3 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration` | md | active | pass | Consumer Continuity Ownership Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan` | md | approved | pass | Consumer Continuity Ownership T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

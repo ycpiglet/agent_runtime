@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T01:55:41+09:00
-updated_by: codex-root-task-ar-648-009
+updated_at: 2026-07-30T02:00:33+09:00
+updated_by: codex-root-task-ar-648-010
 current_state:
-  summary: "UNIT-009 and Bean attempt 3 are blocked on a fresh P1 consumer documentation ownership conflict; no consumer workaround is permitted."
-  status: blocked
+  summary: "UNIT-010 is registered and T3-anchored to repair the P1 consumer documentation ownership conflict without weakening pointer enforcement."
+  status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 5
-  step_total: 8
-  progress_pct: 45
-  status_text: "Bean attempt 3 passed portable pointer continuity but failed the ownership-insensitive continuity documentation gate; independent W4b confirmed BLOCK/P1."
+  step_index: 1
+  step_total: 6
+  progress_pct: 5
+  status_text: "UNIT-010 readiness and selector checks pass; create a default working-tree claim before product edits."
 active_work:
   current_agents: []
   current_teams: []
@@ -18,9 +18,9 @@ resume:
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Register a separate Runtime repair unit for the P1 consumer documentation ownership conflict."
-    - "Keep pointer schema, active-claim, sidecar, state-sync, RBAC, and parallel checks fail-closed."
-    - "Replay from Bean baseline 357eee4 only after canonical W4a and fresh independent W4b pass."
+    - "Create the UNIT-010 default working-tree claim with the canonical stop condition and escalation signals."
+    - "Add RED ownership-aware consumer tests before implementation."
+    - "Keep Bean attempt 3 and Allimbot frozen."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
