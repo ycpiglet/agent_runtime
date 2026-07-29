@@ -1,5 +1,6 @@
 {
   "schema": "agent-runtime-pilot-evidence/v1",
+  "host": "bean-wiki",
   "pilot_id": "bean-wiki-v080-red-pilot",
   "result": "blocked",
   "baselines": {
@@ -253,6 +254,7 @@
   },
   "verification": {
     "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
     "check_content_returncode": 0,
     "check_editorial_returncode": 0,
     "build_content": {

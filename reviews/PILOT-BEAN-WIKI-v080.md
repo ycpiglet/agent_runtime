@@ -256,11 +256,13 @@ PYTHONPATH=src python scripts/pilot_acceptance.py --host bean-wiki --check
   pass; findings=0
 
 PYTHONPATH=src python -m pytest tests/test_pilot_acceptance.py -q
-  6 passed
+  14 passed
 ```
 
 Here `findings=0` means the evidence document is internally consistent; it
 does not erase the seven pilot findings contained in that document.
+The validator also pins the fixture's canonical semantic SHA-256 so an
+otherwise unrecognized field mutation cannot silently pass.
 
 ## Decision and Next Gate
 

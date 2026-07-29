@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -22,6 +23,49 @@ EXPECTED_EXTERNAL_EFFECTS = (
     "network_delivery",
     "content_mutation",
 )
+HOST_CONTRACTS: dict[str, dict[str, Any]] = {
+    "bean-wiki": {
+        "semantic_sha256": "e8a6119f3c6cef815c352600188f57c48e669e9d650b3e4e1b67f751a1d8582e",
+        "pilot_id": "bean-wiki-v080-red-pilot",
+        "result": "blocked",
+        "baselines": {
+            "host_commit": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+            "runtime_commit": "4ab35b89023f23c032fc574a12a8679f1ea57d33",
+        },
+        "selected_template_files": 243,
+        "content_file_count": 125,
+        "post_registration_conflicts": ["owner-docs.yml"],
+        "tasks": {
+            "TASK-AR-001": {
+                "unit_id": "UNIT-TASK-AR-001-001",
+                "claim_id": "CLAIM-20260729-154746-task-ar-001-bean001",
+                "task_status": "blocked",
+                "claim_status": "blocked",
+            },
+            "TASK-AR-002": {
+                "unit_id": "UNIT-TASK-AR-002-001",
+                "claim_id": "CLAIM-20260729-155712-task-ar-002-bean002",
+                "task_status": "completed",
+                "claim_status": "released",
+            },
+            "TASK-AR-003": {
+                "unit_id": "UNIT-TASK-AR-003-001",
+                "claim_id": "CLAIM-20260729-160224-task-ar-003-bean003",
+                "task_status": "completed",
+                "claim_status": "released",
+            },
+        },
+        "findings": {
+            "registered-taskset-undispatchable": "P0",
+            "linked-worktree-self-claim-refused": "P0",
+            "template-example-classified-as-orphan": "P0",
+            "host-state-runtime-taskset-collision": "P0",
+            "managed-file-mutated-by-runtime-producer": "P0",
+            "web-content-profile-empty": "P1",
+            "role-overlay-not-executed": "P1",
+        },
+    }
+}
 ROUTING_FIELDS = (
     "requested_model_tier",
     "selected_model_tier",
@@ -58,23 +102,71 @@ def _valid_sha(value: object) -> bool:
     return bool(SHA256_RE.fullmatch(str(value or "").strip()))
 
 
+def _semantic_sha256(payload: dict[str, Any]) -> str:
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _absolute_string_paths(value: object, path: str = "$") -> list[str]:
+    findings: list[str] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            findings.extend(_absolute_string_paths(item, f"{path}.{key}"))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            findings.extend(_absolute_string_paths(item, f"{path}[{index}]"))
+    elif isinstance(value, str):
+        text = value.strip().replace("\\", "/")
+        if text.startswith("/") or re.match(r"^[A-Za-z]:/", text):
+            findings.append(path)
+    return findings
+
+
 def _count(record: dict[str, Any], key: str) -> int | None:
     value = record.get(key)
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
-def validate_evidence(payload: object) -> list[dict[str, str]]:
+def validate_evidence(
+    payload: object,
+    *,
+    expected_host: str | None = None,
+) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
     if not isinstance(payload, dict):
         return [_finding("invalid-root", "$", "evidence must be a JSON object")]
     if payload.get("schema") != SCHEMA:
         findings.append(_finding("invalid-schema", "schema", f"expected {SCHEMA}"))
 
+    host = expected_host or str(payload.get("host") or "")
+    contract = HOST_CONTRACTS.get(host)
+    if not contract:
+        findings.append(_finding("unknown-host-contract", "host", "a pinned host contract is required"))
+        contract = {}
+    if payload.get("host") != host:
+        findings.append(_finding("host-contract-mismatch", "host", f"expected {host}"))
+    if contract and payload.get("pilot_id") != contract["pilot_id"]:
+        findings.append(_finding("pilot-contract-mismatch", "pilot_id", f"expected {contract['pilot_id']}"))
+    if contract and payload.get("result") != contract["result"]:
+        findings.append(_finding("result-contract-mismatch", "result", f"expected {contract['result']}"))
+    if contract and _semantic_sha256(payload) != contract["semantic_sha256"]:
+        findings.append(_finding("fixture-semantic-digest-mismatch", "$", "fixture differs from the pinned semantic evidence contract"))
+    absolute_paths = _absolute_string_paths(payload)
+    if absolute_paths:
+        findings.append(_finding("absolute-path-leak", absolute_paths[0], "fixture strings must not contain absolute local paths"))
+
     baselines = _mapping(payload.get("baselines"))
     for key in ("host_commit", "runtime_commit"):
         value = str(baselines.get(key) or "")
         if not re.fullmatch(r"[0-9a-f]{40}", value):
             findings.append(_finding("invalid-baseline", f"baselines.{key}", "expected a full git SHA"))
+        elif contract and value != contract["baselines"][key]:
+            findings.append(_finding("baseline-contract-mismatch", f"baselines.{key}", "value differs from pinned pilot contract"))
 
     adoption = _mapping(payload.get("adoption"))
     selected = _count(adoption, "selected_template_files")
@@ -98,6 +190,22 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
         findings.append(_finding("unstable-apply", "adoption.immediate_post_apply_reconcile", "safe apply must settle with zero updates and conflicts"))
     if adoption.get("web_content_incremental_files") != 0:
         findings.append(_finding("fixture-drift", "adoption.web_content_incremental_files", "Bean Wiki baseline measured zero profile-specific files"))
+    if contract and selected != contract["selected_template_files"]:
+        findings.append(_finding("selection-contract-mismatch", "adoption.selected_template_files", "value differs from pinned pilot contract"))
+    post_registration = _mapping(adoption.get("post_work_registration_reconcile"))
+    post_conflicts = _list(post_registration.get("conflict_paths"))
+    if (
+        _count(post_registration, "safe_updates") != 0
+        or _count(post_registration, "conflicts") != len(post_conflicts)
+        or post_conflicts != contract.get("post_registration_conflicts", [])
+    ):
+        findings.append(
+            _finding(
+                "post-registration-reconcile-mismatch",
+                "adoption.post_work_registration_reconcile",
+                "conflict count and paths must match the pinned red-pilot observation",
+            )
+        )
 
     preservation = _mapping(payload.get("preservation"))
     assets = _list(preservation.get("host_assets"))
@@ -119,6 +227,8 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
     if preservation.get("unexpected_overwrite_count") != 0:
         findings.append(_finding("unexpected-overwrite", "preservation.unexpected_overwrite_count", "must be zero"))
     content = _mapping(preservation.get("content"))
+    if _count(content, "file_count") != contract.get("content_file_count"):
+        findings.append(_finding("content-file-count-mismatch", "preservation.content.file_count", "value differs from pinned pilot contract"))
     if not _valid_sha(content.get("before")) or not _valid_sha(content.get("after")):
         findings.append(_finding("invalid-content-digest", "preservation.content", "content manifests must be SHA-256 values"))
     elif content.get("before") != content.get("after"):
@@ -127,8 +237,9 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
     bootstrap = _mapping(payload.get("bootstrap"))
     if not CLAIM_RE.fullmatch(str(bootstrap.get("upstream_claim_id") or "")):
         findings.append(_finding("missing-bootstrap-claim", "bootstrap.upstream_claim_id", "bootstrap must map to a persisted upstream claim"))
-    if bootstrap.get("unmapped_diff_count") != 0:
-        findings.append(_finding("unmapped-diff", "bootstrap.unmapped_diff_count", "every pilot diff must have provenance"))
+    for key in ("unmapped_diff_count", "consumer_commit_count", "consumer_push_count"):
+        if _count(bootstrap, key) != 0:
+            findings.append(_finding("bootstrap-effect-nonzero", f"bootstrap.{key}", "must be the integer zero"))
 
     expected_task_count = payload.get("expected_task_count")
     tasks = _list(payload.get("tasks"))
@@ -149,6 +260,16 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
             findings.append(_finding("claim-identity-mismatch", f"{prefix}.claim_trace", "claim/task/unit identities must agree"))
         if claim.get("status") not in {"blocked", "released"}:
             findings.append(_finding("invalid-claim-status", f"{prefix}.claim_trace.status", "terminal pilot claim must be blocked or released"))
+        expected_task = _mapping(_mapping(contract.get("tasks")).get(task_id))
+        if not expected_task:
+            findings.append(_finding("unexpected-task-trace", prefix, "task is not in the pinned host contract"))
+        elif (
+            task.get("unit_id") != expected_task.get("unit_id")
+            or task.get("status") != expected_task.get("task_status")
+            or claim.get("claim_id") != expected_task.get("claim_id")
+            or claim.get("status") != expected_task.get("claim_status")
+        ):
+            findings.append(_finding("task-contract-mismatch", prefix, "task, unit, claim, or terminal status differs from the pinned host contract"))
         outputs = _list(task.get("output_refs"))
         if not outputs or any(not _safe_relative(path) for path in outputs):
             findings.append(_finding("missing-task-output", f"{prefix}.output_refs", "task must have safe bounded output refs"))
@@ -167,8 +288,26 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
         usage_values = tuple(routing.get(key) for key in ("input_tokens", "output_tokens", "cost"))
         if any(value is not None for value in usage_values) and not verified_usage:
             findings.append(_finding("unverified-provider-usage", f"{prefix}.routing", "tokens or cost require verified provider usage"))
-        if routing.get("savings_claim") != "unavailable" and not verified_usage:
-            findings.append(_finding("unsupported-savings-claim", f"{prefix}.routing.savings_claim", "savings require verified provider usage"))
+        if verified_usage:
+            token_values = tuple(routing.get(key) for key in ("input_tokens", "output_tokens"))
+            cost = routing.get("cost")
+            if (
+                routing.get("actual_model_status") != "verified"
+                or not str(observed or "").strip()
+                or not str(routing.get("observation_source") or "").strip()
+                or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in token_values)
+                or not isinstance(cost, (int, float))
+                or isinstance(cost, bool)
+                or cost < 0
+            ):
+                findings.append(_finding("invalid-provider-usage-proof", f"{prefix}.routing", "verified usage requires an observed model, source, nonnegative integer tokens, and nonnegative numeric cost"))
+        savings_claim = routing.get("savings_claim")
+        if savings_claim != "unavailable" and (
+            not verified_usage
+            or not str(routing.get("savings_observation_source") or "").strip()
+            or not str(routing.get("comparison_baseline") or "").strip()
+        ):
+            findings.append(_finding("unsupported-savings-claim", f"{prefix}.routing.savings_claim", "savings require verified usage, an observation source, and a comparison baseline"))
 
     compound = _mapping(payload.get("compound"))
     if compound.get("negative_fixture_matched") is not True:
@@ -191,12 +330,35 @@ def validate_evidence(payload: object) -> list[dict[str, str]]:
 
     effects = _mapping(payload.get("external_effects"))
     for key in EXPECTED_EXTERNAL_EFFECTS:
-        if effects.get(key) != 0:
-            findings.append(_finding("external-effect-nonzero", f"external_effects.{key}", "offline pilot requires zero"))
+        if _count(effects, key) != 0:
+            findings.append(_finding("external-effect-nonzero", f"external_effects.{key}", "offline pilot requires the integer zero"))
 
-    priorities = {str(_mapping(item).get("priority") or "") for item in _list(payload.get("findings"))}
+    observed_findings: dict[str, str] = {}
+    duplicate_finding_codes: set[str] = set()
+    for item in _list(payload.get("findings")):
+        record = _mapping(item)
+        code = str(record.get("code") or "")
+        if code in observed_findings:
+            duplicate_finding_codes.add(code)
+        observed_findings[code] = str(record.get("priority") or "")
+    if duplicate_finding_codes or observed_findings != contract.get("findings", {}):
+        findings.append(_finding("finding-contract-mismatch", "findings", "codes and priorities must exactly match the pinned host contract"))
+    priorities = set(observed_findings.values())
     if "P0" in priorities and payload.get("result") != "blocked":
         findings.append(_finding("p0-not-blocking", "result", "a P0 finding must block the pilot"))
+
+    verification = _mapping(payload.get("verification"))
+    expected_verification = {
+        "doctor_post_repair_blockers": 0,
+        "doctor_post_repair_warnings": 8,
+        "check_content_returncode": 0,
+        "check_editorial_returncode": 0,
+        "state_sync_blockers": 2,
+        "work_item_classifier_findings": 2,
+    }
+    for key, expected in expected_verification.items():
+        if _count(verification, key) != expected:
+            findings.append(_finding("verification-contract-mismatch", f"verification.{key}", f"expected integer {expected}"))
     return findings
 
 
@@ -217,15 +379,25 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(__file__).resolve().parent.parent
     path = args.fixture or root / "tests" / "fixtures" / "pilots" / args.host / "evidence.json"
     try:
+        fixture_label = path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        fixture_label = path.name
+    try:
         payload = load_evidence(path)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
-        findings = [_finding("fixture-unavailable", path.as_posix(), str(exc))]
+        findings = [
+            _finding(
+                "fixture-unavailable",
+                fixture_label,
+                f"{type(exc).__name__}: fixture could not be loaded",
+            )
+        ]
     else:
-        findings = validate_evidence(payload)
+        findings = validate_evidence(payload, expected_host=args.host)
     result = {
         "schema": "agent-runtime-pilot-acceptance-result/v1",
         "host": args.host,
-        "fixture": path.as_posix(),
+        "fixture": fixture_label,
         "status": "pass" if not findings else "fail",
         "finding_count": len(findings),
         "findings": findings,
@@ -235,7 +407,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(f"pilot-acceptance: {result['status']}")
         print(f"host={args.host}")
-        print(f"fixture={path}")
+        print(f"fixture={fixture_label}")
         print(f"findings={len(findings)}")
         for finding in findings:
             print(f"- {finding['code']} {finding['path']}: {finding['detail']}")
