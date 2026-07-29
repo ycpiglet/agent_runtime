@@ -1,6 +1,8 @@
 ---
 title: TASK-AR-647 W0 T3 Replan
 date: 2026-07-29
+task_id: TASK-AR-647
+unit_id: UNIT-TASK-AR-647-001
 signal: pass
 score: 96
 priority: P0

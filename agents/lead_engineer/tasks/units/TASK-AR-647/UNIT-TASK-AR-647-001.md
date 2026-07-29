@@ -9,11 +9,11 @@ task_id: TASK-AR-647
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T14:05:50+09:00
+updated_at: 2026-07-29T14:52:00+09:00
 started_at: 2026-07-29T08:54:44+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -106,6 +106,17 @@ evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326.json
   - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md
+  - reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0.json
+defect_signatures:
+  - defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220
+resolution: done
+completed_at: 2026-07-29T14:52:00+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact per-unit hours and token telemetry were not captured across repeated independent W4b remediation rounds; no live provider usage, delivery, or billable external action occurred.
 ---
 
 # UNIT-TASK-AR-647-001 - Add native events and security-service guardrails
@@ -267,3 +278,28 @@ This unit may remove legacy external-delivery wiring, but it must not send a
 notification, invoke `flush`, access a production endpoint/token, install or
 change a provider account, or publish a package/release. The later Allimbot
 pilot owns consumer configuration and real-host evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T14:52:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact per-unit hours and token telemetry were not captured across repeated independent W4b remediation rounds; no live provider usage, delivery, or billable external action occurred.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729102332.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729111858.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729120428.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729124908.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326.json`
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md`
+  - `reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0.json`
+<!-- work-close:end -->
