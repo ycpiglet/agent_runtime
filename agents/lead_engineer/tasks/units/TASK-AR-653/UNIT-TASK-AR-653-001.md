@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-MERGE-QUEUE-SAFETY
 initiative_id: INIT-AR-PARALLEL-INTEGRATION-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
 status: worker_ready
-verification_status: pending
+verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T07:45:00+09:00
-updated_at: 2026-07-30T07:45:00+09:00
+updated_at: 2026-07-30T08:05:09+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-parallel-union-harness
 created_by: codex-root
@@ -47,6 +47,10 @@ verification:
   - cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
 handoff: Provide the claimed unit ID, implementation commit, focused test evidence, independent verifier result, and merge readiness without touching the reserved TASK-AR-648 or TASK-AR-652 scopes.
 stop_condition: Stop if another active claim overlaps any of the five target files, if the Git common directory cannot be resolved safely, or if compatibility requires changing dispatcher/workflow files reserved by another session.
+verified_at: 2026-07-30T08:05:09+09:00
+verified_by: le-20260730-075500-kst-merge-queue-safety
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509.json
 ---
 
 # UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing
