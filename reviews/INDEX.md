@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T10:51:11+09:00
-record_count: 996
+generated_at: 2026-07-29T11:25:38+09:00
+record_count: 999
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `996` review and evidence records under `reviews/`.
+- Summary: indexed `999` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `996` files |
+| Reviews covered | pass | `999` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -866,6 +866,7 @@ record_count: 996
 | `reviews/VERIFY-2026-07-29-task-ar-646-20260729073520.json` | `VERIFY-2026-07-29-task-ar-646-20260729073520` | json | record | n/a | VERIFY-2026-07-29-task-ar-646-20260729073520 |
 | `reviews/VERIFY-2026-07-29-task-ar-647-20260729094525.json` | `VERIFY-2026-07-29-task-ar-647-20260729094525` | json | record | n/a | VERIFY-2026-07-29-task-ar-647-20260729094525 |
 | `reviews/VERIFY-2026-07-29-task-ar-647-20260729102601.json` | `VERIFY-2026-07-29-task-ar-647-20260729102601` | json | record | n/a | VERIFY-2026-07-29-task-ar-647-20260729102601 |
+| `reviews/VERIFY-2026-07-29-task-ar-647-20260729112131.json` | `VERIFY-2026-07-29-task-ar-647-20260729112131` | json | record | n/a | VERIFY-2026-07-29-task-ar-647-20260729112131 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236.json` | `VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-643-001-20260729003236 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339.json` | `VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-643-001-20260729005339 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142.json` | `VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-644-001-20260729022142 |
@@ -880,12 +881,14 @@ record_count: 996
 | `reviews/VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848.json` | `VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729102332.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729102332` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729102332 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729111858.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729111858` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729111858 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-002.md` | `W4A-2026-07-29-unit-task-ar-645-002` | md | passed | pass | TASK-AR-645 UNIT-002 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-646-001.md` | `W4A-2026-07-29-unit-task-ar-646-001` | md | passed | pass | TASK-AR-646 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001-r2.md` | `W4A-2026-07-29-unit-task-ar-647-001-r2` | md | passed | pass | TASK-AR-647 UNIT-001 W4a Remediation Self-Review |
+| `reviews/W4A-2026-07-29-unit-task-ar-647-001-r3.md` | `W4A-2026-07-29-unit-task-ar-647-001-r3` | md | passed | pass | TASK-AR-647 UNIT-001 W4a Structural-Boundary Remediation Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001.md` | `W4A-2026-07-29-unit-task-ar-647-001` | md | passed | pass | TASK-AR-647 UNIT-001 W4a Self-Review |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
