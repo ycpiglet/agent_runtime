@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T03:38:47+09:00
-updated_at: 2026-07-30T03:42:14+09:00
+updated_at: 2026-07-30T04:13:03+09:00
 started_at: 2026-07-30T03:42:14+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-011.md
@@ -182,3 +182,14 @@ and independent W4b.
 
 Do not edit Bean, Allimbot, Autofolio, any frozen pilot, or any release/version
 surface. Stop on an unbounded exception or a weakened consumer guard.
+
+## Independent W4b Result
+
+Exact product `f49ff61bb7dcac7466ae76b6cfc775864d1a83ab` is blocked with
+P0 0, P1 1, and P2 1. The gate compares only the source/template intersection,
+so deleting an eligible portable script from either side removes it from the
+checked surface and returns zero findings. See
+`reviews/W4B-2026-07-30-unit-task-ar-648-012.md`.
+
+Freeze this product. Repair the missing-side inventory boundary in a separate
+unit before any Bean attempt 5 or Allimbot work.
