@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T15:36:41+09:00
+updated_at: 2026-07-29T16:57:16+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,12 +22,12 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
-origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md
+origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
 created_by: codex-root-v080-planner
-summary: Measure whether a reversible core plus web-content adoption preserves Bean Wiki's editorial harness while adding truthful task trace, compound, Scribe, continuity, and model-routing evidence.
+summary: Repair the five release-blocking defects observed by the reversible Bean Wiki pilot, then replay the adoption from a fresh pinned worktree without weakening host ownership or evidence truth.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -38,6 +38,15 @@ claim_refs:
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
+
+## Current Phase
+
+- `UNIT-TASK-AR-648-001` completed the red pilot and independently verified
+  five P0 defects. Its evidence is integrated at Agent Runtime
+  `main@ec08a3d8c2a6613f508f1d9fd3f2f67693b4a92b`.
+- `UNIT-TASK-AR-648-002` repairs only those five P0 defects and reruns the
+  adoption from a fresh Bean Wiki worktree. P1 profile, overlay-execution, and
+  provider-observability work remains separately queued.
 
 ## Goal
 
@@ -52,9 +61,11 @@ claim_refs:
 
 - Use a clean worktree pinned to Bean Wiki
   `origin/main@357eee4fd8c29c33a949adbe3a0ffa80c874bf42`.
-- Plan first, then apply the pinned Agent Runtime
-  `main@e23ed65da8de8a9fe6305c3a6ca9955bb0e5c0fb` package template with
-  `profiles: [web-content]` (`core` is implicit) and v2 ownership.
+- Preserve the completed red-pilot baseline at Agent Runtime
+  `main@e23ed65da8de8a9fe6305c3a6ca9955bb0e5c0fb`; implement remediation from
+  `main@ec08a3d8c2a6613f508f1d9fd3f2f67693b4a92b`, then apply the repaired
+  package template with `profiles: [web-content]` (`core` is implicit) and v2
+  ownership in a fresh disposable worktree.
 - Preserve Bean Wiki's `AGENTS.md`, `CLAUDE.md`, `BACKLOG.md`,
   `.claude/agents/**`, `.claude/skills/**`, and editorial documents as
   host-owned inputs. Use `BACKLOG.md` as the Scribe state adapter.
@@ -92,9 +103,16 @@ claim_refs:
   delivery occurs. External-effect counters remain zero.
 - Findings are triaged as release-blocking P0, pre-GA P1, or later P2. A P0
   pilot finding blocks `TASK-AR-651` rather than being narrated as success.
+- Register-then-dispatch, linked-worktree self-claim, installed-example
+  classification, configured state projection, and post-registration
+  reconcile all have focused regressions and pass in a fresh Bean replay.
+- The green replay has zero P0 findings, zero reconcile conflicts, zero
+  unexpected host/content mutations, and zero external effects. The original
+  red evidence remains immutable and distinguishable from the replay.
 
 ## Verification
 
-- `python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py tests/test_model_routing.py tests/test_scribe_due.py -q`
+- `python -m pytest tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_work_item_classifier.py tests/test_state_sync_gate.py -q`
+- `python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q`
 - `python scripts/pilot_acceptance.py --host bean-wiki --check`
 - `python -m pytest tests/test_pilot_acceptance.py -q`
