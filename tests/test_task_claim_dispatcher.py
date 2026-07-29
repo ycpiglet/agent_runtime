@@ -97,6 +97,95 @@ def _write_worktree(root: Path, task_id: str) -> None:
     (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
 
 
+def _run_git(root: Path, *args: str) -> None:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
+def _init_git_worktree(tmp_path: Path, name: str) -> tuple[Path, Path]:
+    primary = tmp_path / name
+    primary.mkdir()
+    _run_git(primary, "init")
+    _run_git(primary, "config", "user.email", "dispatcher-test@example.invalid")
+    _run_git(primary, "config", "user.name", "Dispatcher Test")
+    (primary / "README.md").write_text("fixture\n", encoding="utf-8")
+    _run_git(primary, "add", "README.md")
+    _run_git(primary, "commit", "-m", "fixture")
+    linked = tmp_path / f"{name}-linked"
+    _run_git(primary, "worktree", "add", "-b", f"{name}-worker", str(linked))
+    return primary, linked
+
+
+def test_create_claim_allows_registered_linked_worktree_as_runtime_root(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "runtime")
+    (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        "linked-root",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["worktree_path"] == "."
+
+
+def test_create_claim_refuses_primary_checkout_even_when_registered(tmp_path: Path) -> None:
+    primary, _linked = _init_git_worktree(tmp_path, "runtime")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "primary checkout" in result.stderr
+
+
+def test_create_claim_refuses_registered_worktree_from_other_repository(tmp_path: Path) -> None:
+    primary, _linked = _init_git_worktree(tmp_path, "runtime")
+    _other_primary, other_linked = _init_git_worktree(tmp_path, "other")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(other_linked),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "different git repository" in result.stderr
+
+
 def _write_routing_work(
     root: Path,
     task_id: str,

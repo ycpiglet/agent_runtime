@@ -114,6 +114,12 @@ summary: Test dynamic task set.
     )
 
 
+def _write_taskset_registry(root: Path, rows: list[object], *, schema: str = "agent-runtime-taskset-definitions/v1") -> None:
+    path = root / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"schema": schema, "tasksets": rows}), encoding="utf-8")
+
+
 def _write_unit(
     root: Path,
     task_id: str,
@@ -1502,6 +1508,61 @@ def test_start_active_taskset_claim_blocks_before_subprocess(
 
     assert dispatcher.cmd_start(_start_args(tmp_path)) == 1
     assert payload["task_set_id"] in capsys.readouterr().err
+
+
+def test_taskset_registry_is_canonical_and_dispatchable_without_markdown(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-REGISTERED-LANE"
+    _write_taskset_registry(
+        tmp_path,
+        [
+            {
+                "task_set_id": task_set_id,
+                "display_name": "Registered Lane",
+                "summary": "Created by work.py new.",
+                "order": 500,
+            }
+        ],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id)
+
+    result = _run(tmp_path, "plan", "registered-lane", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["task_set_id"] == task_set_id
+
+
+def test_taskset_registry_overrides_matching_static_definition(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-AR-QUALITY-LOOP"
+    _write_taskset_registry(
+        tmp_path,
+        [{"task_set_id": task_set_id, "display_name": "Host Quality Lane", "summary": "Host override.", "order": 500}],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id)
+
+    for alias in ("host-quality-lane", "2"):
+        result = _run(tmp_path, "plan", alias, "--json")
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        assert json.loads(result.stdout)["display_name"] == "Host Quality Lane"
+
+
+@pytest.mark.parametrize(
+    ("rows", "message"),
+    [
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": "500"}], "order"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500}] * 2, "duplicate task_set_id"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Shared", "summary": "", "order": 500}, {"task_set_id": "TASKSET-OTHER", "display_name": "Shared", "summary": "", "order": 501}], "duplicate task set alias"),
+    ],
+)
+def test_taskset_registry_fails_closed_for_invalid_rows_or_aliases(
+    tmp_path: Path, rows: list[object], message: str
+) -> None:
+    _write_taskset_registry(tmp_path, rows)
+
+    result = _run(tmp_path, "plan", "taskset-bad", "--json")
+
+    assert result.returncode == 1
+    assert message in (result.stderr or result.stdout)
 
 
 def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(

@@ -48,6 +48,8 @@ DONE_STATUSES = {
 }
 
 CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
+TASKSET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
+TASKSET_REGISTRY_PATH = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
 STRUCTURED_WORKTREE_FIELDS = ("repository_path", "worktree_path", "branch", "base_ref")
 PROTECTED_BRANCHES = {"develop", "development", "main", "master", "production", "release"}
 SAFE_GIT_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
@@ -136,13 +138,80 @@ def _canonical_taskset_records(
     that order is advisory so unrelated IDs are ignored and omitted members
     retain score-based fallback order.
     """
-    tasksets_dir = root / "agents" / "project" / "initiatives"
-    if not tasksets_dir.is_dir():
-        return []
-
     tasksets: list[
         tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool]
     ] = []
+    seen_ids: set[str] = set()
+
+    # ``work.py new`` writes this registry but deliberately does not fabricate
+    # a legacy initiative Markdown record.  Treat it as the current canonical
+    # source so newly registered tasksets are dispatchable in the same turn.
+    registry_path = root / TASKSET_REGISTRY_PATH
+    if registry_path.exists():
+        try:
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(
+                f"invalid task set registry: {_rel(root, registry_path)}: {exc}"
+            ) from exc
+        errors: list[str] = []
+        if not isinstance(registry, dict):
+            errors.append("root must be an object")
+        elif registry.get("schema") != TASKSET_REGISTRY_SCHEMA:
+            errors.append(
+                f"schema must be {TASKSET_REGISTRY_SCHEMA!r}, got {registry.get('schema')!r}"
+            )
+        raw_rows = registry.get("tasksets") if isinstance(registry, dict) else None
+        if not isinstance(raw_rows, list):
+            errors.append("tasksets must be a list")
+            raw_rows = []
+        for index, row in enumerate(raw_rows, start=1):
+            if not isinstance(row, dict):
+                errors.append(f"tasksets[{index}] must be an object")
+                continue
+            task_set_id = row.get("task_set_id")
+            display_name = row.get("display_name")
+            summary = row.get("summary")
+            order = row.get("order")
+            row_errors: list[str] = []
+            if not isinstance(task_set_id, str) or not re.fullmatch(
+                r"TASKSET-[A-Z0-9][A-Z0-9-]*", task_set_id
+            ):
+                row_errors.append("task_set_id must be an uppercase TASKSET-* id")
+            if not isinstance(display_name, str) or not display_name.strip():
+                row_errors.append("display_name must be a non-empty string")
+            if not isinstance(summary, str):
+                row_errors.append("summary must be a string")
+            if isinstance(order, bool) or not isinstance(order, int):
+                row_errors.append("order must be an integer")
+            if isinstance(task_set_id, str) and task_set_id in seen_ids:
+                row_errors.append(f"duplicate task_set_id: {task_set_id}")
+            if row_errors:
+                errors.append(f"tasksets[{index}]: " + "; ".join(row_errors))
+                continue
+            seen_ids.add(task_set_id)
+            tasksets.append(
+                (
+                    backlog_board.TaskSetInfo(
+                        task_set_id=task_set_id,
+                        display_name=display_name.strip(),
+                        summary=summary.strip(),
+                        order=order,
+                    ),
+                    None,
+                    False,
+                )
+            )
+        if errors:
+            raise SystemExit(
+                f"invalid task set registry: {_rel(root, registry_path)}: "
+                + "; ".join(errors)
+            )
+
+    tasksets_dir = root / "agents" / "project" / "initiatives"
+    if not tasksets_dir.is_dir():
+        return tasksets
+
     paths = sorted(tasksets_dir.glob("TASKSET-*.md"), key=lambda item: item.name.lower())
     for index, path in enumerate(paths, start=1):
         try:
@@ -197,6 +266,13 @@ def _canonical_taskset_records(
             raise SystemExit(
                 f"invalid canonical task set record: {_rel(root, path)}: " + "; ".join(errors)
             )
+
+        if work_id in seen_ids:
+            raise SystemExit(
+                "duplicate canonical task set id: "
+                f"{work_id} ({_rel(root, registry_path)}, {_rel(root, path)})"
+            )
+        seen_ids.add(work_id)
 
         display_name = str(meta.get("title") or work_id).strip() or work_id
         summary = str(meta.get("summary") or "").strip()
@@ -267,22 +343,19 @@ def _taskset_aliases(root: Path | None = None) -> dict[str, backlog_board.TaskSe
 
     if root is not None:
         for info in _canonical_tasksets(root.resolve()):
-            existing = next(
-                (
-                    static
-                    for static in backlog_board.TASK_SET_DEFINITIONS
-                    if static.task_set_id == info.task_set_id
-                ),
-                None,
-            )
-            resolved_info = existing or info
+            for alias, existing in tuple(aliases.items()):
+                if existing.task_set_id == info.task_set_id:
+                    aliases[alias] = info
             values = {
                 info.task_set_id,
                 _taskset_slug(info.task_set_id),
                 _slug(info.display_name),
             }
             for value in values:
-                _register_alias(aliases, value, resolved_info)
+                # A checked-in host record (including the work.py registry)
+                # is canonical; the static table remains a compatibility
+                # fallback only when that host does not define the taskset.
+                _register_alias(aliases, value, info)
     return aliases
 
 

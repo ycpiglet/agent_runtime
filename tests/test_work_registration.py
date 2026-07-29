@@ -10,6 +10,7 @@ from scripts import backlog_board, org_model_gate
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
+TASKSET_DISPATCHER = REPO_ROOT / "scripts" / "taskset_dispatcher.py"
 UNIT_GATE = REPO_ROOT / "scripts" / "task_unit_readiness_gate.py"
 
 
@@ -28,6 +29,18 @@ def _run(root: Path, input_path: Path, *args: str) -> subprocess.CompletedProces
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(TASKSET_DISPATCHER), "--root", str(root), *args],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -258,6 +271,20 @@ def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: 
     assert "`TASK-AR-901`" in classification
     owner_docs = (tmp_path / "owner-docs.yml").read_text(encoding="utf-8")
     assert "reviews/REVIEW-2026-06-12-taskset-test-work-cli-registration.md" in owner_docs
+
+
+def test_work_new_taskset_registry_is_immediately_dispatchable(tmp_path: Path) -> None:
+    input_path = _write_input(tmp_path, _payload())
+
+    registered = _run(tmp_path, input_path)
+    planned = _run_dispatcher(tmp_path, "plan", "test-work-cli", "--json")
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert planned.returncode == 0, planned.stderr or planned.stdout
+    payload = json.loads(planned.stdout)
+    assert payload["task_set_id"] == "TASKSET-TEST-WORK-CLI"
+    assert payload["display_name"] == "Work CLI Test"
+    assert payload["next_task_id"] == "TASK-AR-901"
 
 
 def test_work_new_is_idempotent_for_same_structured_input(tmp_path: Path) -> None:

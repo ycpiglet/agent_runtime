@@ -110,6 +110,8 @@ def _unit_records(root: Path) -> list[tuple[Path, dict[str, object], str]]:
         return []
     records: list[tuple[Path, dict[str, object], str]] = []
     for path in sorted(base.glob("**/UNIT-*.md")):
+        if path.is_relative_to(base / "examples"):
+            continue
         meta, body = _parse_meta(path)
         if meta:
             records.append((path, meta, body))

@@ -8,6 +8,15 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work_item_classifier.py"
+TEMPLATE_SCRIPT = (
+    REPO_ROOT
+    / "src"
+    / "agent_runtime"
+    / "templates"
+    / "project"
+    / "scripts"
+    / "work_item_classifier.py"
+)
 
 
 def _write(path: Path, text: str) -> None:
@@ -15,9 +24,11 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run(
+    root: Path, *args: str, script: Path = SCRIPT
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--root", str(root), *args],
+        [sys.executable, str(script), "--root", str(root), *args],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -222,3 +233,67 @@ def test_work_item_classifier_allows_empty_bootstrap_without_generated_files(tmp
 
     assert result.returncode == 0
     assert "work-item-classifier: pass" in result.stdout
+
+
+def test_work_item_classifier_excludes_installed_unit_examples_but_reports_real_orphans(
+    tmp_path: Path,
+) -> None:
+    _seed(tmp_path)
+    examples = tmp_path / "agents" / "lead_engineer" / "tasks" / "units" / "examples"
+    _write(
+        examples / "UNIT-EXAMPLE-CANONICAL.md",
+        """---
+unit_id: UNIT-EXAMPLE-CANONICAL
+task_id: TASK-AR-901
+status: worker_ready
+---
+
+# Canonical-Looking Example
+""",
+    )
+    _write(
+        examples / "nested" / "UNIT-EXAMPLE-ORPHAN.md",
+        """---
+unit_id: UNIT-EXAMPLE-ORPHAN
+task_id: TASK-AR-NOT-REGISTERED
+status: worker_ready
+---
+
+# Orphan-Looking Example
+""",
+    )
+    real_orphan = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-NOT-REGISTERED"
+        / "UNIT-TASK-AR-NOT-REGISTERED-001.md"
+    )
+    _write(
+        real_orphan,
+        """---
+unit_id: UNIT-TASK-AR-NOT-REGISTERED-001
+task_id: TASK-AR-NOT-REGISTERED
+status: worker_ready
+---
+
+# Real Orphan
+""",
+    )
+
+    for script in (SCRIPT, TEMPLATE_SCRIPT):
+        result = _run(tmp_path, "--write", script=script)
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        payload = _payload(tmp_path)
+        unit_ids = {row["id"] for row in payload["records"] if row["level"] == "unit"}
+        assert "UNIT-EXAMPLE-CANONICAL" not in unit_ids
+        assert "UNIT-EXAMPLE-ORPHAN" not in unit_ids
+        assert unit_ids == {"UNIT-TASK-AR-901-001"}
+        assert payload["findings"] == [
+            "unit:orphan-task:agents/lead_engineer/tasks/units/"
+            "TASK-AR-NOT-REGISTERED/UNIT-TASK-AR-NOT-REGISTERED-001.md:"
+            "TASK-AR-NOT-REGISTERED"
+        ]

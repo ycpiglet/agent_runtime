@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from agent_runtime import state_projection
+
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "state_sync_gate.py"
 
@@ -55,6 +57,26 @@ resume:
     write(root / "BACKLOG-BOARD.md", f"# Board\n\n{task_set_id}\n{active_task}\n")
     write(root / "BACKLOG.md", f"# Backlog\n\n{task_set_id}\n")
     write(root / "STATUS.md", f"# Status\n\n{task_set_id}\n{active_task}\n")
+
+
+def write_v2_state_adapter(root: Path, *, source: str = "BACKLOG.md") -> None:
+    write(
+        root / "agent_runtime.yml",
+        f"""schema: agent-runtime-config/v2
+project: state-sync-test
+upstream:
+  package: agent-runtime
+  ref: test
+sync:
+  mode: preserve-local
+  allow_silent_overwrite: false
+profiles:
+  - core
+host:
+  state_adapters:
+    host-state: {source}
+""",
+    )
 
 
 def write_unit(root: Path, task_id: str, unit_id: str, *, task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS", status: str = "review", verified: bool = False, recovery: str = "") -> None:
@@ -204,6 +226,92 @@ def test_board_missing_active_taskset_blocks(tmp_path):
     findings = gate.analyze(tmp_path)
 
     assert any(finding.subject == "surface:missing-taskset:BACKLOG-BOARD.md" for finding in findings)
+
+
+def test_configured_v2_adapter_uses_fresh_projection_without_runtime_ids_or_status(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Editorial queue\n")
+    (tmp_path / "STATUS.md").unlink()
+    write_v2_state_adapter(tmp_path)
+    state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T08:00:00+00:00",
+    )
+
+    findings = gate.analyze(tmp_path)
+
+    assert not [finding for finding in findings if finding.severity == "block"]
+    assert not any(finding.path in {"BACKLOG.md", "STATUS.md"} for finding in findings)
+
+
+def test_configured_v2_adapter_blocks_missing_or_stale_projection(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Initial item\n")
+    write_v2_state_adapter(tmp_path)
+
+    missing = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:projection-missing"
+        and finding.severity == "block"
+        for finding in missing
+    )
+
+    state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T08:00:00+00:00",
+    )
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Changed after projection\n")
+
+    stale = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:projection-stale"
+        and finding.severity == "block"
+        for finding in stale
+    )
+
+
+def test_configured_v2_adapter_blocks_invalid_configuration(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "docs/HOST-STATE.md", "# Host state\n")
+    write_v2_state_adapter(tmp_path, source="docs/HOST-STATE.md")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:config-invalid"
+        and finding.severity == "block"
+        for finding in findings
+    )
+
+
+def test_legacy_state_contract_still_requires_backlog_and_status(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    (tmp_path / "BACKLOG.md").unlink()
+    (tmp_path / "STATUS.md").unlink()
+
+    findings = gate.analyze(tmp_path)
+
+    subjects = {finding.subject for finding in findings}
+    assert "surface:missing:BACKLOG.md" in subjects
+    assert "surface:missing:STATUS.md" in subjects
 
 
 def test_pointer_active_but_all_tasks_done_blocks(tmp_path):

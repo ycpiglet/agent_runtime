@@ -200,6 +200,93 @@ def _has_git_worktree_marker(path: Path) -> bool:
     return path.is_dir() and (path / ".git").exists()
 
 
+def _git_worktree_context(path: Path) -> tuple[Path, Path, bool] | None:
+    """Return ``(top_level, common_dir, is_primary)`` for a registered worktree.
+
+    A linked worktree has a ``.git`` *file*, while the primary checkout has a
+    ``.git`` directory.  That distinction alone is not sufficient: a copied
+    marker, a different repository, or an unregistered directory can look
+    plausible.  Ask Git for both its common directory and registered worktree
+    list, and fail closed when either identity cannot be established.
+
+    ``None`` deliberately preserves the legacy marker-only behavior for the
+    lightweight non-Git fixture hosts used by downstream adopters.  Callers
+    that have already established a Git runtime root must reject ``None`` for
+    the claimed worktree.
+    """
+    try:
+        identity = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(path),
+                "rev-parse",
+                "--path-format=absolute",
+                "--show-toplevel",
+                "--git-common-dir",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if identity.returncode != 0:
+        return None
+    values = [line.strip() for line in identity.stdout.splitlines() if line.strip()]
+    if len(values) != 2:
+        return None
+    top_level = Path(values[0]).resolve()
+    common_dir = Path(values[1]).resolve()
+    try:
+        listing = subprocess.run(
+            ["git", "-C", str(top_level), "worktree", "list", "--porcelain"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if listing.returncode != 0:
+        return None
+    registered = [
+        Path(line[9:]).resolve()
+        for line in listing.stdout.splitlines()
+        if line.startswith("worktree ")
+    ]
+    if registered.count(top_level) != 1:
+        return None
+    primary = [
+        candidate
+        for candidate in registered
+        if (candidate / ".git").is_dir()
+        and (candidate / ".git").resolve() == common_dir
+    ]
+    if len(primary) != 1:
+        return None
+    return top_level, common_dir, top_level == primary[0]
+
+
+def _is_git_repository(path: Path) -> bool:
+    """Whether Git recognizes ``path`` as being inside any repository."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--is-inside-work-tree"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return False
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def _is_orchestrator_claim(payload: dict[str, Any]) -> bool:
     role = str(payload.get("agent_role") or "").strip().lower()
     if role in ORCHESTRATOR_ROLES:
@@ -221,15 +308,38 @@ def _claim_creation_errors(
             errors.append("task worktree is not ready: missing worktree_path")
         else:
             worktree = _resolved_worktree(root, worktree_value)
-            if worktree == root.resolve():
-                errors.append("task worktree is not ready: worker claims must not point at the main checkout")
-            elif not worktree.is_dir():
+            if not worktree.is_dir():
                 errors.append(
                     f"task worktree is not ready: {worktree_value} does not exist; "
                     f"run: git worktree add -b {claim.get('branch')} {worktree_value}"
                 )
             elif not _has_git_worktree_marker(worktree):
                 errors.append(f"task worktree is not ready: {worktree_value} is not a git worktree")
+            else:
+                root_context = _git_worktree_context(root)
+                worktree_context = _git_worktree_context(worktree)
+                if root_context is not None:
+                    if worktree_context is None:
+                        errors.append(
+                            f"task worktree is not ready: {worktree_value} is not a registered git worktree"
+                        )
+                    elif root_context[1] != worktree_context[1]:
+                        errors.append(
+                            f"task worktree is not ready: {worktree_value} belongs to a different git repository"
+                        )
+                    elif worktree_context[2]:
+                        errors.append(
+                            "task worktree is not ready: worker claims must not point at the primary checkout"
+                        )
+                elif _is_git_repository(root):
+                    errors.append(
+                        "task worktree is not ready: runtime root is not an unambiguous registered git worktree"
+                    )
+                elif worktree == root.resolve():
+                    # Preserve the old fail-closed behavior for non-Git
+                    # fixture hosts, where a marker alone cannot prove a
+                    # linked-worktree identity.
+                    errors.append("task worktree is not ready: worker claims must not point at the main checkout")
 
     task_set_id = str(claim.get("task_set_id") or "").strip()
     allow_parallel = str(claim.get("allow_parallel_task_set") or "").strip().lower() == "true"

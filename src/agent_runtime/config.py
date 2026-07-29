@@ -40,6 +40,7 @@ DEFAULT_OWNERSHIP = (
             "CLAUDE.md",
             "CURSOR.md",
             "GEMINI.md",
+            "owner-docs.yml",
             "agents/project/NEXT-SESSION-POINTER.yml",
             "agents/lead_engineer/compound_log.md",
         ),

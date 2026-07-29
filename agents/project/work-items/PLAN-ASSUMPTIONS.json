@@ -921,7 +921,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "de743451ed7e674545a0606ba4d768b95465ae47799b43982766440795ee5ff8"
+          "value": "6311b665b1058c025adab9fd68ec5b701020a297b6924490dbc11f262761b8ae"
         },
         {
           "kind": "sha256",
@@ -931,7 +931,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md",
-          "value": "d475446a996f37158d5206f96337d0b3281894b065dba43d512d6d19b5842194"
+          "value": "eee239b061178ef2e1895995e019123adb71a0d6c6b062e713ec57d9af606d16"
         },
         {
           "kind": "sha256",
@@ -962,6 +962,11 @@
           "kind": "sha256",
           "path": "reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md",
           "value": "0144d6277d4939333d2682ed5546badae548bde5945935018ccb3fc6cd538590"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md",
+          "value": "a1b9f02ab9e6eb57e882191b7a59edad6d0b9889eb3dd2f98807c8fa9389a6e8"
         },
         {
           "kind": "sha256",
@@ -1006,17 +1011,12 @@
         {
           "kind": "sha256",
           "path": "scripts/state_sync_gate.py",
-          "value": "b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd"
+          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "6db9d6c1af921a488ed0e52cfdd2aaa8896b7d60c6b77895437405095f6427df"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/taskset_dispatcher.py",
-          "value": "0d0947d2cd88b3f53ddef384f1520bb3e1ec3ca2a2bbf66f48f4a22b60d5bfe5"
+          "value": "34baf95042f725489e7ab2928783bee016c89e05cb312ce23047c736f6517918"
         },
         {
           "kind": "sha256",
@@ -1025,8 +1025,13 @@
         },
         {
           "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/work_item_classifier.py",
-          "value": "8d4b5fd8e8c2552d661f92f03d0212cc5dc5e8fafd815a41d70c45be3bbd591c"
+          "value": "03237128665f2756847845528bf910a7a8143c1892220402088354f5eb96b926"
         },
         {
           "kind": "sha256",
@@ -1036,7 +1041,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/config.py",
-          "value": "b235961fafe1304487b0c2f98f4b46c8ba57f9db7c9515dd24b8be9e737b9333"
+          "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
         },
         {
           "kind": "sha256",
@@ -1070,13 +1075,13 @@
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
-          "value": "4475abdecda3d538e4c53244313881b0050f1e944877e8355c00177bd9ab5458"
+          "path": "src/agent_runtime/templates/project/.codex/hooks.json",
+          "value": "bb5a6d4f27b6efaa76dc2c0b9f6e5a2cca87e22a8d6dfba4e2162a92ee5bf3a4"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/.codex/hooks.json",
-          "value": "bb5a6d4f27b6efaa76dc2c0b9f6e5a2cca87e22a8d6dfba4e2162a92ee5bf3a4"
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
+          "value": "4475abdecda3d538e4c53244313881b0050f1e944877e8355c00177bd9ab5458"
         },
         {
           "kind": "sha256",
@@ -1096,27 +1101,37 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
-          "value": "b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd"
+          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "6db9d6c1af921a488ed0e52cfdd2aaa8896b7d60c6b77895437405095f6427df"
+          "value": "34baf95042f725489e7ab2928783bee016c89e05cb312ce23047c736f6517918"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
-          "value": "0d0947d2cd88b3f53ddef384f1520bb3e1ec3ca2a2bbf66f48f4a22b60d5bfe5"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/work_item_classifier.py",
-          "value": "a4db5698381de9b9abb90132393da5b03f018de400c21fba7b6fac4ae7e566bb"
+          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/work.py",
           "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/work_item_classifier.py",
+          "value": "9304034af97387a02e1bc5bd39ecbd04c67de9b7ba5741817b7057ec8dbfd6ac"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "b85beb7e16d311d1a43798618e3c48bf375db82da1d65b6c2fa19b00f9397283"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/owner-docs.yml",
+          "value": "20c836791f2263a7b7a61eeac7893da9f8c22f93b06a7e1cac0e0bc89a02582e"
         },
         {
           "kind": "sha256",
@@ -1131,12 +1146,17 @@
         {
           "kind": "sha256",
           "path": "tests/test_config_v2.py",
-          "value": "8d3b6c55103eed7e9fb0db90472d42cc892cb116cf27a2551c3f6f7041dff1d8"
+          "value": "870b05f5ddced463250c99af449ee50ffdfa2ac50db8617c26227846a07b1077"
         },
         {
           "kind": "sha256",
           "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "895ef90c72d6ad399d14fcbdf5a86e7c7e700b2f6b11ae6487e4e4d140171414"
+          "value": "a6953921d26879abc53ec188261bd651a7b005579960fbe5736de6b9aac8f608"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_lock_merge_driver.py",
+          "value": "7b6e8af8f8c89ba48a4d0582aa47740b3d85f13b8cbb96fa17fd6ca53f33d015"
         },
         {
           "kind": "sha256",
@@ -1161,17 +1181,17 @@
         {
           "kind": "sha256",
           "path": "tests/test_state_sync_gate.py",
-          "value": "f0b14440d6da0dd4001ea6f8902a5cbd127bb08d3fa584290f233a10570d576e"
+          "value": "1545e9be210b426ea85f9fe3464179e41fe2ea0fe337af47a9d21d836ab9a8ab"
         },
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "81cb92fafa59bdd8be40759d7a0f8d626dbcf52d9103525b24f7550f1c3aadaa"
+          "value": "0dcf72bd7aeb3bb66cee2f654cd803087534909a5e38a53b4ad549293ce8f8af"
         },
         {
           "kind": "sha256",
           "path": "tests/test_taskset_dispatcher.py",
-          "value": "7d63a04f3e5434ec7e8ccb8e77871a61dd507929c8174acddebbc7c9ce4dfa7b"
+          "value": "8b750182dbcff422cbc956b95883e44407e9f234a6ebea0d82e696af7c993aea"
         },
         {
           "kind": "sha256",
@@ -1181,16 +1201,16 @@
         {
           "kind": "sha256",
           "path": "tests/test_work_item_classifier.py",
-          "value": "cd9725ec4eb46028ca701067a51bf0f4a1792051ee44392691e8681ad9b87351"
+          "value": "6097844f3895fe17d7196ef459f6978c95e2cfc4399a6bbe430fa3c34f067235"
         },
         {
           "kind": "sha256",
           "path": "tests/test_work_registration.py",
-          "value": "6899ff5d7082f6d539a5f143004d55baa565d96174137ece3955052556d997b9"
+          "value": "11d18573edd40872e4870d6621412df192977cd5d3dd925b49954216e0b5ae13"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md",
-      "recorded_at": "2026-07-29T17:00:36+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md",
+      "recorded_at": "2026-07-29T17:53:21+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1406,5 +1426,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T17:00:36+09:00"
+  "updated_at": "2026-07-29T17:53:21+09:00"
 }

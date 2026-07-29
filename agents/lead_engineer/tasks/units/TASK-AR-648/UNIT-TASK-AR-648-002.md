@@ -52,6 +52,9 @@ target_files:
   - src/agent_runtime/config.py
   - tests/test_config_v2.py
   - tests/test_inventory_sync_sanitize.py
+  - tests/fixtures/host/agent_runtime.lock.json
+  - tests/fixtures/host/owner-docs.yml
+  - tests/test_lock_merge_driver.py
   - scripts/pilot_acceptance.py
   - tests/fixtures/pilots/bean-wiki/evidence.json
   - tests/test_pilot_acceptance.py
@@ -114,6 +117,11 @@ systems.
   installed-example tests.
 - State: `scripts/state_sync_gate.py`, its packaged copy, configuration
   ownership, and state/sync tests.
+- Lock fixture: `tests/fixtures/host/agent_runtime.lock.json`, regenerated
+  mechanically after the ownership-default change, plus the canonical
+  `tests/fixtures/host/owner-docs.yml` seed required to make the installed-host
+  fixture self-contained and `tests/test_lock_merge_driver.py` to copy that
+  complete fixture during stale-lock recovery.
 - Evidence: the Bean pilot validator, fixture, tests, and report.
 
 ## Scope

@@ -340,6 +340,103 @@ def test_compound_store_defaults_preserve_exclude_and_lock_ownership(tmp_path):
     assert not ({legacy, record, index} & set(lock["installed"]["managed_files"]))
 
 
+def test_owner_docs_seed_survives_work_registration_without_sync_conflict(tmp_path):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    _write_host_config(host)
+    _write(
+        templates / "owner-docs.yml",
+        "schema: agent-runtime-owner-docs/v1\nowner_docs: []\n",
+    )
+
+    initial = build_sync_plan(host, template_root=templates)
+    owner_docs_update = next(
+        item for item in initial.updates if item.path == "owner-docs.yml"
+    )
+    assert owner_docs_update.action == "seed"
+    assert owner_docs_update.ownership == "seed_once"
+    assert apply_safe_updates(initial) == 0
+    assert run_lock(host, mode="write", template_root=templates) == 0
+
+    registration = {
+        "schema_version": "agent-runtime-work-registration/v1",
+        "project_id": "PROJECT-OWNER-DOCS-TEST",
+        "origin_type": "owner_request",
+        "origin_ref": "reviews/REVIEW-OWNER-DOCS-TEST.md",
+        "created_by": "owner-docs-test",
+        "now": "2026-07-29T09:00:00+09:00",
+        "initiative": {
+            "id": "INIT-OWNER-DOCS-TEST",
+            "title": "Owner Docs Test",
+            "summary": "Exercise the producer-mutated owner document registry.",
+            "owner": "lead_engineer",
+        },
+        "taskset": {
+            "id": "TASKSET-OWNER-DOCS-TEST",
+            "display_name": "Owner Docs Test",
+            "summary": "Register work after the Runtime seed is locked.",
+            "order": 901,
+            "plan_slug": "2026-07-29-owner-docs-test",
+        },
+        "tasks": [
+            {
+                "display_id": "TASK-AR-991",
+                "title": "Mutate the owner docs registry",
+                "goal": "Prove work registration remains reconcilable.",
+                "acceptance": ["The registration review is listed."],
+                "verification": [
+                    "python scripts/owner_governance_gate.py",
+                ],
+            }
+        ],
+    }
+    input_path = host / "registration.json"
+    input_path.write_text(
+        json.dumps(registration, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    registered = subprocess.run(
+        [
+            sys.executable,
+            str(PACKAGE_ROOT / "scripts" / "work.py"),
+            "--root",
+            str(host),
+            "new",
+            "--input",
+            str(input_path),
+            "--json",
+            "--no-plan-snapshot",
+        ],
+        cwd=PACKAGE_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    owner_docs_text = (host / "owner-docs.yml").read_text(encoding="utf-8")
+    assert (
+        "reviews/REVIEW-2026-07-29-taskset-owner-docs-test-registration.md"
+        in owner_docs_text
+    )
+
+    reconciled = build_sync_plan(host, template_root=templates)
+    assert reconciled.conflicts == ()
+    owner_docs_preserved = next(
+        item for item in reconciled.preserved if item.path == "owner-docs.yml"
+    )
+    assert owner_docs_preserved.ownership == "seed_once"
+    assert run_lock(host, mode="check", template_root=templates) == 0
+
+    lock = json.loads((host / "agent_runtime.lock.json").read_text(encoding="utf-8"))
+    installed = lock["installed"]
+    assert installed["ownership"]["owner-docs.yml"] == "seed_once"
+    assert "owner-docs.yml" in installed["seeded"]
+    assert "owner-docs.yml" not in installed["managed_files"]
+
+
 def test_sync_check_reads_host_config_without_writing(tmp_path, capsys):
     config = tmp_path / "agent_runtime.yml"
     config.write_text(
