@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T01:32:29+09:00",
+  "generated_at": "2026-07-30T01:35:26+09:00",
   "record_count": 527,
   "finding_count": 0,
   "findings": [],
@@ -5734,7 +5734,7 @@
       "title": "UNIT-TASK-AR-648-009 - Bean Wiki Green Replay Attempt 3",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md",
       "parent_id": "TASK-AR-648",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-649",

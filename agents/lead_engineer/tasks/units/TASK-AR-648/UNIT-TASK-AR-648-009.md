@@ -9,18 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T01:28:00+09:00
-updated_at: 2026-07-30T01:28:00+09:00
+updated_at: 2026-07-30T01:35:00+09:00
+started_at: 2026-07-30T01:33:40+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration.md
 created_by: codex-root-v080-planner
 summary: Replay Bean Wiki adoption from a fresh pinned worktree after the independently approved portable-continuity repair
 horizon: unit
 model_tier: worker_standard
-claim_refs: []
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.json
 escalation_triggers:
   - data_integrity
   - repeated_failure
