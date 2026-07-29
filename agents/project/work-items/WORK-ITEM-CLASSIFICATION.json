@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T07:42:31+09:00",
+  "generated_at": "2026-07-30T08:48:28+09:00",
   "record_count": 524,
   "finding_count": 0,
   "findings": [],
@@ -5745,7 +5745,7 @@
       "title": "Merge Queue Safety",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-PARALLEL-INTEGRATION-INTEGRITY",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-653",
@@ -5756,7 +5756,7 @@
       "title": "Serialize all queue mutations through a repository-common lock, persist queue state a…",
       "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
       "parent_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-653-001",
@@ -5767,7 +5767,7 @@
       "title": "UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
       "parent_id": "TASK-AR-653",
-      "status": "worker_ready"
+      "status": "completed"
     }
   ]
 }

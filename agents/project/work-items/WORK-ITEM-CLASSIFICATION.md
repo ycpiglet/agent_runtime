@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T07:42:31+09:00
+generated_at: 2026-07-30T08:48:28+09:00
 record_count: 524
 ---
 
@@ -560,9 +560,9 @@ record_count: 524
 | 41.1.13 | Task 41.1.13 | task | `TASK-AR-651` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-651.md` | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | 41.1.13.1 | Unit 41.1.13.1 | unit | `UNIT-TASK-AR-651-001` | `TASK-AR-651` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md` | UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate |
 | 42 | Initiative 42 | initiative | `INIT-AR-PARALLEL-INTEGRATION-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-PARALLEL-INTEGRATION-INTEGRITY.md` | Parallel Integration Integrity |
-| 42.1 | Taskset 42.1 | taskset | `TASKSET-AR-MERGE-QUEUE-SAFETY` | `INIT-AR-PARALLEL-INTEGRATION-INTEGRITY` | active | `BACKLOG-BOARD.md` | Merge Queue Safety |
-| 42.1.1 | Task 42.1.1 | task | `TASK-AR-653` | `TASKSET-AR-MERGE-QUEUE-SAFETY` | planned | `agents/lead_engineer/tasks/TASK-AR-653.md` | Serialize all queue mutations through a repository-common lock, persist queue state a… |
-| 42.1.1.1 | Unit 42.1.1.1 | unit | `UNIT-TASK-AR-653-001` | `TASK-AR-653` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md` | UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing |
+| 42.1 | Taskset 42.1 | taskset | `TASKSET-AR-MERGE-QUEUE-SAFETY` | `INIT-AR-PARALLEL-INTEGRATION-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Merge Queue Safety |
+| 42.1.1 | Task 42.1.1 | task | `TASK-AR-653` | `TASKSET-AR-MERGE-QUEUE-SAFETY` | completed | `agents/lead_engineer/tasks/TASK-AR-653.md` | Serialize all queue mutations through a repository-common lock, persist queue state a… |
+| 42.1.1.1 | Unit 42.1.1.1 | unit | `UNIT-TASK-AR-653-001` | `TASK-AR-653` | completed | `agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md` | UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

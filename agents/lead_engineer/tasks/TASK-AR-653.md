@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-MERGE-QUEUE-SAFETY
 registered_at: 2026-07-30T07:45:00+09:00
 created_at: 2026-07-30T07:45:00+09:00
-updated_at: 2026-07-30T07:45:00+09:00
+updated_at: 2026-07-30T08:48:28+09:00
+started_at: 2026-07-30T07:55:00+09:00
 title: Harden merge queue concurrency and dependency ordering
-status: planned
+status: completed
 priority: P1
 difficulty: M
 est_hours: 1
@@ -43,6 +44,15 @@ verification:
   - python -m pytest tests/test_merge_queue.py
   - cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py
   - cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
+verification_status: passed
+verified_at: 2026-07-30T08:48:10+09:00
+verified_by: codex-root-task-ar-653-w6
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-task-ar-653-20260730084810.json
+resolution: done
+completed_at: 2026-07-30T08:48:28+09:00
+closed_by: codex-root-task-ar-653-w6
+measurement_unavailable_reason: The session spanned delegated review, CI reruns, and external merge automation without trustworthy task-level elapsed-time or token attribution.
 ---
 
 # TASK-AR-653 - Harden merge queue concurrency and dependency ordering
@@ -70,3 +80,16 @@ verification:
 - `python -m pytest tests/test_merge_queue.py`
 - `cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py`
 - `cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T08:48:28+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The session spanned delegated review, CI reruns, and external merge automation without trustworthy task-level elapsed-time or token attribution.
+- Closed by: `codex-root-task-ar-653-w6`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-task-ar-653-20260730084810.json`
+<!-- work-close:end -->
