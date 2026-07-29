@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T16:24:12+09:00
-record_count: 1021
+generated_at: 2026-07-29T16:27:55+09:00
+record_count: 1022
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1021` review and evidence records under `reviews/`.
+- Summary: indexed `1022` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1021` files |
+| Reviews covered | pass | `1022` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1052,6 +1052,7 @@ record_count: 1021
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r7.md` | `W4B-2026-07-29-unit-task-ar-647-001-r7` | md | changes_required | block | TASK-AR-647 UNIT-001 Independent W4b Security Metadata Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
