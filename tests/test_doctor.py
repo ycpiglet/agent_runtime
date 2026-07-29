@@ -150,6 +150,69 @@ def test_doctor_success_for_synced_host(tmp_path):
     )
 
 
+def test_doctor_reports_effective_standby_pointer_continuity_path(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+
+    plan, _ = doctor.build_doctor_plan(root)
+    payload = json.loads(doctor.render_json(plan))
+
+    assert plan.continuity == {
+        "status": "pass",
+        "mode": "pointer+sidecars",
+        "pointer": "agents/project/NEXT-SESSION-POINTER.yml",
+        "active_claims": 0,
+        "findings": [],
+    }
+    assert payload["continuity"] == plan.continuity
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "effective-path"
+        and finding.severity == "info"
+        and "pointer+sidecars" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_blocks_missing_or_placeholder_standby_pointer(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    pointer = root / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.unlink()
+
+    missing, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "pointer-missing"
+        and finding.severity == "blocker"
+        for finding in missing.findings
+    )
+
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(
+        "schema: agent-runtime-next-session-pointer/v1\n"
+        "updated_at: YYYY-MM-DDTHH:MM:SS+09:00\n"
+        "active_work:\n"
+        "  current_agents: []\n"
+        "resume:\n"
+        "  active_task: TASK-NNN\n"
+        "  active_task_set: TASKSET-AR-EXAMPLE\n"
+        "  next_actions:\n"
+        "    - Replace this placeholder.\n"
+        "pointers:\n"
+        "  active_claims: []\n",
+        encoding="utf-8",
+    )
+
+    placeholder, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "pointer-placeholder"
+        and finding.severity == "blocker"
+        for finding in placeholder.findings
+    )
+
+
 def test_doctor_reports_provider_routing_equivalence_without_live_probe(
     tmp_path,
 ):

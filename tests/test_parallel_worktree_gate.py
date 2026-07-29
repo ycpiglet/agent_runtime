@@ -81,6 +81,149 @@ def _write_status(root: Path, relative_path: str, text: str) -> Path:
     return path
 
 
+POINTER_AGENT_FIELDS = (
+    "claim_id",
+    "agent_role",
+    "team_id",
+    "agent_instance_id",
+    "display_name",
+    "callsite_id",
+    "pane_id",
+    "task_id",
+    "unit_id",
+    "task_set_id",
+    "status",
+    "phase",
+    "progress_pct",
+    "step_index",
+    "step_total",
+    "status_text",
+    "worktree_path",
+    "branch",
+    "claim_path",
+    "handoff_path",
+    "log_path",
+    "last_heartbeat",
+)
+
+
+def _portable_claim(root: Path, claim_id: str = "CLAIM-PORTABLE-1") -> ClaimRecord:
+    claim_dir = root / "agents/runtime/task_claims"
+    claim_dir.mkdir(parents=True, exist_ok=True)
+    handoff = f"agents/runtime/task_claims/{claim_id}.handoff.md"
+    log_path = f"agents/runtime/task_claims/{claim_id}.log.md"
+    (root / handoff).write_text("# Handoff\n\nContinue the unit.\n", encoding="utf-8")
+    (root / log_path).write_text("# Log\n\nClaim created.\n", encoding="utf-8")
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": "TASK-AR-648",
+        "unit_id": "UNIT-TASK-AR-648-008",
+        "task_set_id": "TASKSET-AR-PORTABLE-CONTINUITY",
+        "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "agent_instance_id": "lead-engineer-portable-1",
+        "display_name": "lead_engineer@portable-01",
+        "callsite_id": "codex:portable:01",
+        "pane_id": "codex:portable:01",
+        "status": "claimed",
+        "phase": "red-baseline",
+        "progress_pct": 10,
+        "step_index": 1,
+        "step_total": 8,
+        "status_text": "Reproducing the fresh core continuity journey",
+        "worktree_path": ".worktrees/TASK-AR-648",
+        "branch": "codex/task-ar-648-portable-continuity",
+        "claimed_at": "2026-07-30T00:00:00+09:00",
+        "last_heartbeat": "2026-07-30T00:05:00+09:00",
+        "handoff_path": handoff,
+        "log_path": log_path,
+    }
+    path = claim_dir / f"{claim_id}.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return ClaimRecord(path=path, payload=payload)
+
+
+def _pointer_scalar(value: object) -> str:
+    if value is None:
+        return "null"
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def _write_portable_pointer(
+    root: Path,
+    records: list[ClaimRecord],
+    *,
+    updated_at: str = "2026-07-30T00:05:00+09:00",
+    claim_refs: list[str] | None = None,
+    omit_agent_field: str = "",
+    agent_overrides: dict[str, object] | None = None,
+    duplicate_agent: bool = False,
+    next_actions: tuple[str, ...] = ("Run the portable continuity gate.",),
+) -> Path:
+    refs = claim_refs
+    if refs is None:
+        refs = [record.path.relative_to(root).as_posix() for record in records]
+    agents: list[dict[str, object]] = []
+    for record in records:
+        agent = {
+            field: (
+                record.path.relative_to(root).as_posix()
+                if field == "claim_path"
+                else record.payload.get(field)
+            )
+            for field in POINTER_AGENT_FIELDS
+            if field != omit_agent_field
+        }
+        if agent_overrides:
+            agent.update(agent_overrides)
+        agents.append(agent)
+    if duplicate_agent and agents:
+        agents.append(dict(agents[0]))
+
+    primary = records[0].payload if records else {}
+    lines = [
+        "schema: agent-runtime-next-session-pointer/v1",
+        f"updated_at: {_pointer_scalar(updated_at)}",
+        "updated_by: portable-continuity-test",
+        "current_state:",
+        f"  status: {'active' if records else 'idle'}",
+        f"  task_set_id: {_pointer_scalar(primary.get('task_set_id'))}",
+        "active_work:",
+    ]
+    if agents:
+        lines.append("  current_agents:")
+        for agent in agents:
+            for index, (field, value) in enumerate(agent.items()):
+                prefix = "    - " if index == 0 else "      "
+                lines.append(f"{prefix}{field}: {_pointer_scalar(value)}")
+    else:
+        lines.append("  current_agents: []")
+    lines.extend(
+        [
+            "  current_teams: []",
+            "resume:",
+            f"  active_task: {_pointer_scalar(primary.get('task_id'))}",
+            f"  active_task_set: {_pointer_scalar(primary.get('task_set_id'))}",
+        ]
+    )
+    if next_actions:
+        lines.append("  next_actions:")
+        lines.extend(f"    - {_pointer_scalar(action)}" for action in next_actions)
+    else:
+        lines.append("  next_actions: []")
+    lines.append("pointers:")
+    if refs:
+        lines.append("  active_claims:")
+        lines.extend(f"    - {_pointer_scalar(ref)}" for ref in refs)
+    else:
+        lines.append("  active_claims: []")
+    path = root / "agents/project/NEXT-SESSION-POINTER.yml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
 @pytest.mark.parametrize(
     "marker",
     ["Handoff Checklist", "Next Steps", "다음 세션", "다음 단계", "인수인계"],
@@ -116,13 +259,118 @@ def test_continuity_prefers_root_status_over_valid_host_fallback(tmp_path: Path)
     assert "agents/lead_engineer/STATUS.md" not in findings[0]
 
 
-def test_continuity_missing_status_lists_both_candidate_paths(tmp_path: Path):
+def test_continuity_missing_status_requires_canonical_pointer(tmp_path: Path):
     findings = _continuity_findings(tmp_path, [_active_claim(tmp_path)])
 
     assert len(findings) == 1
-    assert "continuity:status-missing" in findings[0]
-    assert "STATUS.md" in findings[0]
-    assert "agents/lead_engineer/STATUS.md" in findings[0]
+    assert "continuity:pointer-missing" in findings[0]
+    assert "agents/project/NEXT-SESSION-POINTER.yml" in findings[0]
+
+
+def test_continuity_accepts_exact_pointer_and_sidecars_without_status(tmp_path: Path):
+    record = _portable_claim(tmp_path)
+    _write_portable_pointer(tmp_path, [record])
+
+    assert _continuity_findings(tmp_path, [record]) == []
+
+
+def test_continuity_present_invalid_status_cannot_be_bypassed_by_pointer(tmp_path: Path):
+    record = _portable_claim(tmp_path)
+    _write_portable_pointer(tmp_path, [record])
+    _write_status(tmp_path, "STATUS.md", "# STATUS\n\n## Current Work\n")
+
+    findings = _continuity_findings(tmp_path, [record])
+
+    assert len(findings) == 1
+    assert "continuity:status-handoff-missing" in findings[0]
+
+
+@pytest.mark.parametrize(
+    ("case", "reason"),
+    [
+        ("placeholder", "continuity:pointer-placeholder"),
+        ("malformed", "continuity:pointer-malformed"),
+        ("stale", "continuity:pointer-stale"),
+        ("duplicate-ref", "continuity:pointer-duplicate-active-claim"),
+        ("extra-ref", "continuity:pointer-active-claims-mismatch"),
+        ("partial-agent", "continuity:pointer-agent-field-missing"),
+        ("mismatched-agent", "continuity:pointer-agent-field-mismatch"),
+        ("duplicate-agent", "continuity:pointer-duplicate-current-agent"),
+        ("missing-next-action", "continuity:pointer-next-actions-missing"),
+    ],
+)
+def test_continuity_pointer_fallback_fails_closed_with_stable_reasons(
+    tmp_path: Path,
+    case: str,
+    reason: str,
+):
+    record = _portable_claim(tmp_path)
+    ref = record.path.relative_to(tmp_path).as_posix()
+    if case == "malformed":
+        pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+        pointer.parent.mkdir(parents=True, exist_ok=True)
+        pointer.write_text(
+            "schema: agent-runtime-next-session-pointer/v1\n"
+            "active_work:\n"
+            "  current_agents\n",
+            encoding="utf-8",
+        )
+    else:
+        _write_portable_pointer(
+            tmp_path,
+            [record],
+            updated_at=(
+                "YYYY-MM-DDTHH:MM:SS+09:00"
+                if case == "placeholder"
+                else "2026-07-30T00:04:59+09:00"
+                if case == "stale"
+                else "2026-07-30T00:05:00+09:00"
+            ),
+            claim_refs=(
+                [ref, ref]
+                if case == "duplicate-ref"
+                else [ref, "agents/runtime/task_claims/CLAIM-EXTRA.json"]
+                if case == "extra-ref"
+                else None
+            ),
+            omit_agent_field="log_path" if case == "partial-agent" else "",
+            agent_overrides={"branch": "codex/wrong-branch"}
+            if case == "mismatched-agent"
+            else None,
+            duplicate_agent=case == "duplicate-agent",
+            next_actions=() if case == "missing-next-action" else ("Resume the unit.",),
+        )
+
+    findings = _continuity_findings(tmp_path, [record])
+
+    assert any(reason in finding for finding in findings), findings
+
+
+def test_continuity_only_json_reports_effective_pointer_path(tmp_path: Path):
+    record = _portable_claim(tmp_path)
+    _write_portable_pointer(tmp_path, [record])
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(tmp_path),
+            "--continuity-only",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "pass"
+    assert payload["mode"] == "pointer+sidecars"
 
 
 def test_continuity_missing_marker_names_selected_host_path(tmp_path: Path):

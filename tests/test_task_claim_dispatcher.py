@@ -688,10 +688,15 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
     )
     assert created.returncode == 0, created.stderr or created.stdout
     claim = json.loads(created.stdout)["claim"]
+    pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: serial-projection-owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
 
     result = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
 
     assert result.returncode == 0, result.stderr or result.stdout
+    assert pointer.read_bytes() == pointer_before
     projection = json.loads(result.stdout)
     assert projection["operation"] == "merge"
     assert projection["task_claim_ref"].endswith(f"{claim['claim_id']}.json")
@@ -699,10 +704,26 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
     assert projection["pointer"]["current_agents"] == [{
         "claim_id": claim["claim_id"],
         "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
         "agent_instance_id": claim["agent_instance_id"],
         "display_name": claim["display_name"],
         "callsite_id": claim["callsite_id"],
         "pane_id": claim["pane_id"],
+        "task_id": "TASK-AR-246",
+        "unit_id": "UNIT-TASK-AR-246-001",
+        "task_set_id": "TASKSET-AR-PROJECTION",
+        "status": "claimed",
+        "phase": "claim-created",
+        "progress_pct": 0,
+        "step_index": 1,
+        "step_total": 6,
+        "status_text": "Claim created",
+        "worktree_path": ".worktrees/TASK-AR-246",
+        "branch": claim["branch"],
+        "claim_path": projection["task_claim_ref"],
+        "handoff_path": claim["handoff_path"],
+        "log_path": claim["log_path"],
+        "last_heartbeat": "2026-06-10T14:30:12+09:00",
     }]
 
 
