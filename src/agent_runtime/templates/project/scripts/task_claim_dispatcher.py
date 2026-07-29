@@ -29,6 +29,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -690,6 +691,51 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
     return True
 
 
+def _security_service_refusal(
+    root: Path,
+    unit_spec: str,
+    target_files: list[str],
+) -> bool:
+    """Run the profile gate only when the security-service asset is installed."""
+
+    gate = root / "scripts" / "security_service_gate.py"
+    if not gate.is_file() or not str(unit_spec or "").strip():
+        return False
+    command = [
+        sys.executable,
+        str(gate),
+        "--root",
+        str(root),
+        "--unit-spec",
+        str(unit_spec),
+    ]
+    for path in target_files:
+        command.extend(["--target-file", path])
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+        )
+    except (OSError, subprocess.SubprocessError):
+        print(
+            "security-service claim gate unavailable; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if result.returncode == 0:
+        return False
+    detail = (result.stderr or result.stdout).strip()
+    print("security-service claim gate refused claim creation", file=sys.stderr)
+    if detail:
+        print(detail, file=sys.stderr)
+    return True
+
+
 def cmd_create(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     errors = _validate_create_args(args)
@@ -722,10 +768,13 @@ def cmd_create(args: argparse.Namespace) -> int:
             print(f"- {finding}", file=sys.stderr)
         return 1
     escalation_triggers = _resolve_escalation_triggers(root, args)
+    target_files = _resolve_target_files(root, args)
+    if _security_service_refusal(root, args.unit_spec, target_files):
+        return 1
     claim = _build_claim(
         args,
         records,
-        target_files=_resolve_target_files(root, args),
+        target_files=target_files,
         escalation_triggers=escalation_triggers,
         routing_decision=_resolve_claim_routing(root, args, escalation_triggers),
         defect_signatures=defect_signatures,

@@ -70,11 +70,11 @@ def test_kill_does_not_claim_unverified_task_completion(tmp_path: Path, monkeypa
         tmp_path / f"{agent_id}.json",
         {"agent_id": agent_id, "task_id": "TASK-123", "status": "active"},
     )
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, dict[str, object]]] = []
     monkeypatch.setattr(
-        mod.allimbot,
-        "notify",
-        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+        mod,
+        "emit_allimbot_event",
+        lambda event_type, data: calls.append((event_type, dict(data))),
     )
 
     outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="completed"))
@@ -103,17 +103,27 @@ def test_kill_notifies_only_authoritative_task_completion(tmp_path: Path, monkey
         "---\nid: TASK-123\nstatus: completed\nverification_status: passed\n---\n",
         encoding="utf-8",
     )
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, dict[str, object]]] = []
     monkeypatch.setattr(
-        mod.allimbot,
-        "notify",
-        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+        mod,
+        "emit_allimbot_event",
+        lambda event_type, data: calls.append((event_type, dict(data))),
     )
 
     outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="completed"))
 
     assert outcome.code == 0
-    assert calls == [("TASK-123 completed and verified", "agent_runtime task completed")]
+    assert calls == [
+        (
+            "task.state.changed",
+            {
+                "task_id": "TASK-123",
+                "from_state": "review",
+                "to_state": "completed",
+                "owner_role": "runtime",
+            },
+        )
+    ]
 
 
 def test_kill_failure_is_labeled_as_worker_report(tmp_path: Path, monkeypatch) -> None:
@@ -124,17 +134,27 @@ def test_kill_failure_is_labeled_as_worker_report(tmp_path: Path, monkeypatch) -
         tmp_path / f"{agent_id}.json",
         {"agent_id": agent_id, "task_id": "TASK-789", "status": "active"},
     )
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, dict[str, object]]] = []
     monkeypatch.setattr(
-        mod.allimbot,
-        "notify",
-        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+        mod,
+        "emit_allimbot_event",
+        lambda event_type, data: calls.append((event_type, dict(data))),
     )
 
     outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="failed"))
 
     assert outcome.code == 0
-    assert calls == [("TASK-789 worker session reported failed", "agent_runtime worker failure")]
+    assert calls == [
+        (
+            "task.state.changed",
+            {
+                "task_id": "TASK-789",
+                "from_state": "working",
+                "to_state": "failed",
+                "owner_role": "runtime",
+            },
+        )
+    ]
 
 
 def test_kill_default_stop_does_not_claim_task_completion(tmp_path: Path, monkeypatch) -> None:
@@ -146,10 +166,10 @@ def test_kill_default_stop_does_not_claim_task_completion(tmp_path: Path, monkey
         {"agent_id": agent_id, "task_id": "TASK-456", "status": "active"},
     )
 
-    def unexpected_notify(*_args, **_kwargs):
+    def unexpected_emit(*_args, **_kwargs):
         raise AssertionError("a stopped session is not a completed task")
 
-    monkeypatch.setattr(mod.allimbot, "notify", unexpected_notify)
+    monkeypatch.setattr(mod, "emit_allimbot_event", unexpected_emit)
     outcome = mod.cmd_kill(Namespace(agent_id=agent_id, dry_run=False, outcome="stopped"))
     assert outcome.code == 0
     record = json.loads((tmp_path / f"{agent_id}.json").read_text(encoding="utf-8"))

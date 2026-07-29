@@ -33,6 +33,7 @@ where = ["src"]
 agent_runtime = [
     "templates/project/**/*",
     "templates/project/.gitattributes",
+    "templates/project/.allimbot.json",
     "templates/project/.env.example",
     "templates/project/.githooks/**/*",
     "templates/project/.github/**/*",

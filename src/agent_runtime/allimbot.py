@@ -1,131 +1,376 @@
-"""Optional, dependency-free allimbot notification client.
+"""Strict, optional producer boundary for native Allimbot project events.
 
-Delivery is deliberately best-effort: missing configuration is a silent no-op,
-all exceptions are swallowed, and every network attempt is capped at three
-seconds. The local allimbot dashboard is tried before the ntfy fallback.
+Agent Runtime owns the event vocabulary and value policy.  Installed Allimbot
+owns the durable SQLite spool and every delivery mechanism.  This module calls
+``ProjectEmitter.emit`` only; it never flushes or sends an event over a network.
 """
 from __future__ import annotations
 
 import argparse
 import functools
+import importlib
 import json
-import os
-import time
-import urllib.request
-from collections.abc import Callable
+import math
+import re
+import sys
+from collections.abc import Callable, Mapping
+from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
 
-DEFAULT_TIMEOUT = 3.0
-DEFAULT_URL = "http://127.0.0.1:8787"
-LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
-__all__ = ["notify", "notify_on_complete"]
+PROJECT_SPEC = "allimbot.project/v1"
+PROJECT_NAME = "agent-runtime"
+PROJECT_SOURCE = "agent-runtime"
+MAX_IDENTIFIER_LENGTH = 128
+MAX_COUNT = 1_000_000
+MAX_DURATION_SECONDS = 7 * 24 * 60 * 60
+_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
+
+MANAGED_RECIPE: dict[str, Any] = {
+    "spec": PROJECT_SPEC,
+    "project": PROJECT_NAME,
+    "source": PROJECT_SOURCE,
+    "events": {
+        "attention.required": {
+            "severity": "warning",
+            "data_allowlist": [
+                "task_id",
+                "attention_kind",
+                "owner_role",
+                "state",
+            ],
+        },
+        "task.state.changed": {
+            "severity": "info",
+            "data_allowlist": [
+                "task_id",
+                "from_state",
+                "to_state",
+                "owner_role",
+            ],
+        },
+        "release.gate.failed": {
+            "severity": "error",
+            "data_allowlist": ["gate", "release", "finding_count"],
+        },
+        "turn.completed": {
+            "severity": "info",
+            "data_allowlist": [
+                "task_id",
+                "result_state",
+                "duration_seconds",
+            ],
+        },
+    },
+}
+
+_EVENT_FIELDS = {
+    event_type: tuple(policy["data_allowlist"])
+    for event_type, policy in MANAGED_RECIPE["events"].items()
+}
+_UNAVAILABLE_REASONS = frozenset(
+    {
+        "profile_not_selected",
+        "dependency_missing",
+        "dependency_unavailable",
+        "dependency_incompatible",
+        "configuration_unavailable",
+        "spool_unavailable",
+        "invalid_event_id",
+    }
+)
+
+__all__ = [
+    "EmitResult",
+    "EventPolicyError",
+    "MANAGED_RECIPE",
+    "emit_event",
+    "notify",
+    "notify_on_complete",
+]
 
 
-def _bounded_timeout(timeout: float) -> float:
+class EventPolicyError(ValueError):
+    """Raised before optional delivery when an event violates Runtime policy."""
+
+
+@dataclass(frozen=True)
+class EmitResult:
+    """Bounded result that never contains exception, credential, or body text."""
+
+    status: str
+    event_id: str | None = None
+    reason: str | None = None
+
+    @property
+    def spooled(self) -> bool:
+        return self.status == "spooled"
+
+    def to_dict(self) -> dict[str, str | None]:
+        return asdict(self)
+
+    def __bool__(self) -> bool:
+        return self.spooled
+
+
+def managed_recipe_path() -> Path:
+    return Path(__file__).resolve().parent / "templates" / "project" / ".allimbot.json"
+
+
+def _unavailable(reason: str) -> EmitResult:
+    if reason not in _UNAVAILABLE_REASONS:
+        reason = "dependency_unavailable"
+    return EmitResult(status="unavailable", reason=reason)
+
+
+def _load_managed_recipe(path: Path) -> dict[str, Any]:
     try:
-        return min(DEFAULT_TIMEOUT, max(0.1, float(timeout)))
-    except (TypeError, ValueError):
-        return DEFAULT_TIMEOUT
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise EventPolicyError("managed Allimbot recipe is unavailable or malformed") from exc
+    if payload != MANAGED_RECIPE:
+        raise EventPolicyError("managed Allimbot recipe drift detected")
+    return payload
 
 
-def _post_json(url: str, payload: dict[str, str], timeout: float) -> bool:
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(
-        url,
-        data=body,
-        headers={"Content-Type": "application/json; charset=utf-8"},
+def _identifier(value: object, field: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) > MAX_IDENTIFIER_LENGTH
+        or _SAFE_IDENTIFIER.fullmatch(value) is None
+    ):
+        raise EventPolicyError(f"{field} must be a bounded display-safe identifier")
+    return value
+
+
+def _non_negative_integer(value: object, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= MAX_COUNT:
+        raise EventPolicyError(f"{field} must be a bounded non-negative integer")
+    return value
+
+
+def _duration(value: object) -> int | float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise EventPolicyError("duration_seconds must be a bounded non-negative number")
+    converted = float(value)
+    if not math.isfinite(converted) or not 0 <= converted <= MAX_DURATION_SECONDS:
+        raise EventPolicyError("duration_seconds must be a bounded non-negative number")
+    return value
+
+
+def _validate_event(event_type: object, data: object) -> tuple[str, dict[str, Any]]:
+    if not isinstance(event_type, str) or event_type not in _EVENT_FIELDS:
+        raise EventPolicyError("event type is not enabled by the managed policy")
+    if not isinstance(data, Mapping):
+        raise EventPolicyError("event data must be an object")
+    expected = set(_EVENT_FIELDS[event_type])
+    provided = set(data)
+    if provided != expected or any(not isinstance(key, str) for key in provided):
+        raise EventPolicyError("event data fields do not match the managed policy")
+
+    normalized: dict[str, Any] = {}
+    for field in _EVENT_FIELDS[event_type]:
+        value = data[field]
+        if field == "finding_count":
+            normalized[field] = _non_negative_integer(value, field)
+        elif field == "duration_seconds":
+            normalized[field] = _duration(value)
+        else:
+            normalized[field] = _identifier(value, field)
+    return event_type, normalized
+
+
+def _summary(event_type: str, data: Mapping[str, Any]) -> str:
+    if event_type == "attention.required":
+        return (
+            f"Attention required: {data['attention_kind']} [{data['state']}] "
+            f"({data['task_id']}, owner={data['owner_role']})"
+        )
+    if event_type == "task.state.changed":
+        return (
+            f"Task {data['task_id']}: {data['from_state']} -> {data['to_state']} "
+            f"(owner={data['owner_role']})"
+        )
+    if event_type == "release.gate.failed":
+        return (
+            f"Release {data['release']}: gate {data['gate']} failed "
+            f"({data['finding_count']} findings)"
+        )
+    return (
+        f"Turn completed for {data['task_id']}: {data['result_state']} "
+        f"({float(data['duration_seconds']):g}s)"
     )
-    with urllib.request.urlopen(request, timeout=_bounded_timeout(timeout)) as response:  # noqa: S310
-        return 200 <= response.status < 300
 
 
-def _dashboard_trigger_url(raw_url: str) -> str | None:
-    """Return a loopback-only trigger URL so a token cannot be sent remotely."""
-    try:
-        parsed = urlparse(raw_url)
+def _integration_matches(integration: object) -> bool:
+    if (
+        getattr(integration, "spec", None) != PROJECT_SPEC
+        or getattr(integration, "project", None) != PROJECT_NAME
+        or getattr(integration, "source", None) != PROJECT_SOURCE
+    ):
+        return False
+    events = getattr(integration, "events", None)
+    if not isinstance(events, Mapping) or set(events) != set(MANAGED_RECIPE["events"]):
+        return False
+    for event_type, expected in MANAGED_RECIPE["events"].items():
+        policy = events[event_type]
         if (
-            parsed.scheme not in {"http", "https"}
-            or parsed.hostname not in LOOPBACK_HOSTS
-            or parsed.username is not None
-            or parsed.password is not None
-            or parsed.query
-            or parsed.fragment
+            getattr(policy, "severity", None) != expected["severity"]
+            or bool(getattr(policy, "sensitive", False))
+            != bool(expected.get("sensitive", False))
+            or tuple(getattr(policy, "data_allowlist", ()))
+            != tuple(expected["data_allowlist"])
         ):
-            return None
-        return raw_url.rstrip("/") + "/trigger"
+            return False
+    return True
+
+
+def emit_event(
+    event_type: str,
+    data: Mapping[str, Any],
+    *,
+    root: str | Path | None = None,
+    recipe_path: str | Path | None = None,
+    session_id: str | None = None,
+    turn_id: str | None = None,
+    dedupe_key: str | None = None,
+) -> EmitResult:
+    """Validate and enqueue one event through installed Allimbot.
+
+    Policy violations raise :class:`EventPolicyError`.  Optional dependency,
+    configuration, and spool failures return a bounded ``unavailable`` result.
+    """
+
+    normalized_type, normalized_data = _validate_event(event_type, data)
+    summary = _summary(normalized_type, normalized_data)
+    if not 1 <= len(summary) <= 300:
+        raise EventPolicyError("rendered event summary exceeds the managed bound")
+    correlations = {
+        "session_id": session_id,
+        "turn_id": turn_id,
+        "dedupe_key": dedupe_key,
+    }
+    for field, value in correlations.items():
+        if value is not None:
+            correlations[field] = _identifier(value, field)
+
+    if recipe_path is not None:
+        resolved_recipe = Path(recipe_path).resolve()
+    elif root is not None:
+        resolved_recipe = Path(root).resolve() / ".allimbot.json"
+        if not resolved_recipe.is_file():
+            return _unavailable("profile_not_selected")
+    else:
+        resolved_recipe = managed_recipe_path()
+    _load_managed_recipe(resolved_recipe)
+
+    try:
+        integrations = importlib.import_module("allimbot.integrations")
+    except ModuleNotFoundError as exc:
+        reason = "dependency_missing" if exc.name in {"allimbot", "allimbot.integrations"} else "dependency_unavailable"
+        return _unavailable(reason)
     except Exception:
-        return None
+        return _unavailable("dependency_unavailable")
+
+    try:
+        integration = integrations.ProjectIntegration.load(resolved_recipe)
+    except Exception:
+        # Distinguish a concurrently changed managed file (policy failure) from
+        # an optional package whose integration API is incompatible.
+        _load_managed_recipe(resolved_recipe)
+        return _unavailable("dependency_incompatible")
+    if not _integration_matches(integration):
+        raise EventPolicyError("installed Allimbot integration disagrees with managed policy")
+
+    try:
+        emitter = integrations.ProjectEmitter(integration)
+    except Exception:
+        return _unavailable("configuration_unavailable")
+    try:
+        event_id = emitter.emit(
+            normalized_type,
+            summary,
+            body="",
+            data=normalized_data,
+            session_id=correlations["session_id"],
+            turn_id=correlations["turn_id"],
+            dedupe_key=correlations["dedupe_key"],
+        )
+    except Exception:
+        return _unavailable("spool_unavailable")
+    if (
+        not isinstance(event_id, str)
+        or not event_id
+        or len(event_id) > MAX_IDENTIFIER_LENGTH
+        or _SAFE_IDENTIFIER.fullmatch(event_id) is None
+    ):
+        return _unavailable("invalid_event_id")
+    return EmitResult(status="spooled", event_id=event_id)
+
+
+def _legacy_event() -> EmitResult:
+    return emit_event(
+        "attention.required",
+        {
+            "task_id": "agent-runtime",
+            "attention_kind": "legacy-notification",
+            "owner_role": "owner",
+            "state": "attention",
+        },
+    )
 
 
 def notify(
     message: str,
     title: str = "agent_runtime",
     provider: str | None = None,
-    timeout: float = DEFAULT_TIMEOUT,
+    timeout: float = 3.0,
 ) -> bool:
-    """Send one best-effort notification; never raise or print."""
-    try:
-        resolved_provider = provider or os.environ.get("ALLIMBOT_PROVIDER", "")
-        token = os.environ.get("ALLIMBOT_TOKEN", "")
-        topic = os.environ.get("ALLIMBOT_NTFY_TOPIC", "")
-        if not token and not topic:
-            return False
+    """One-release compatibility signal; supplied free text is never forwarded."""
 
-        if token:
-            trigger_url = _dashboard_trigger_url(os.environ.get("ALLIMBOT_URL", DEFAULT_URL))
-            try:
-                if trigger_url and _post_json(
-                    trigger_url,
-                    {
-                        "token": token,
-                        "message": str(message),
-                        "title": str(title),
-                        "provider": resolved_provider,
-                    },
-                    timeout,
-                ):
-                    return True
-            except Exception:
-                pass
-
-        if topic:
-            try:
-                return _post_json(
-                    "https://ntfy.sh",
-                    {"topic": topic, "title": str(title), "message": str(message)},
-                    timeout,
-                )
-            except Exception:
-                pass
-    except Exception:
-        pass
-    return False
+    del message, title, provider, timeout
+    return bool(_legacy_event())
 
 
-def notify_on_complete(title: str | None = None, provider: str | None = None) -> Callable:
-    """Decorate a function with best-effort success/failure notifications."""
+def notify_on_complete(
+    title: str | None = None,
+    provider: str | None = None,
+) -> Callable:
+    """Decorate a function with secret-free structured state transitions."""
+
+    del title, provider
 
     def decorator(function: Callable) -> Callable:
         @functools.wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            started = time.monotonic()
             try:
                 result = function(*args, **kwargs)
-            except Exception as exc:
-                elapsed = time.monotonic() - started
-                notify(
-                    f"{function.__name__} failed ({elapsed:.0f}s): {exc.__class__.__name__}",
-                    title=title or "agent_runtime task failed",
-                    provider=provider,
-                )
+            except Exception:
+                try:
+                    emit_event(
+                        "task.state.changed",
+                        {
+                            "task_id": "agent-runtime",
+                            "from_state": "running",
+                            "to_state": "failed",
+                            "owner_role": "runtime",
+                        },
+                    )
+                except Exception:
+                    pass
                 raise
-            elapsed = time.monotonic() - started
-            notify(
-                f"{function.__name__} completed ({elapsed:.0f}s)",
-                title=title or "agent_runtime task completed",
-                provider=provider,
-            )
+            try:
+                emit_event(
+                    "task.state.changed",
+                    {
+                        "task_id": "agent-runtime",
+                        "from_state": "running",
+                        "to_state": "completed",
+                        "owner_role": "runtime",
+                    },
+                )
+            except Exception:
+                pass
             return result
 
         return wrapper
@@ -133,16 +378,58 @@ def notify_on_complete(title: str | None = None, provider: str | None = None) ->
     return decorator
 
 
+def _stdin_payload() -> dict[str, Any]:
+    try:
+        payload = json.loads(sys.stdin.read())
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise EventPolicyError("structured event input must be a JSON object") from exc
+    if not isinstance(payload, dict):
+        raise EventPolicyError("structured event input must be a JSON object")
+    allowed = {
+        "event_type",
+        "data",
+        "session_id",
+        "turn_id",
+        "dedupe_key",
+    }
+    if set(payload) - allowed:
+        raise EventPolicyError("structured event input contains unexpected fields")
+    return payload
+
+
 def _main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Send an optional allimbot notification")
-    parser.add_argument("message")
-    parser.add_argument("-t", "--title", default="agent_runtime")
-    parser.add_argument("-p", "--provider", default=None)
-    parser.add_argument("--verbose", action="store_true")
+    parser = argparse.ArgumentParser(description="Enqueue a strict native Allimbot project event")
+    parser.add_argument("message", nargs="?", help="legacy message (ignored)")
+    parser.add_argument("-t", "--title", default="agent_runtime", help=argparse.SUPPRESS)
+    parser.add_argument("-p", "--provider", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--root", type=Path)
+    parser.add_argument("--stdin", action="store_true", help="read structured event JSON from stdin")
+    parser.add_argument("--json", action="store_true", help="print a bounded result object")
     args = parser.parse_args(argv)
-    delivered = notify(args.message, title=args.title, provider=args.provider)
-    if args.verbose:
-        print("notification delivered" if delivered else "notification not delivered")
+
+    try:
+        if args.stdin:
+            payload = _stdin_payload()
+            result = emit_event(
+                payload.get("event_type"),
+                payload.get("data"),
+                root=args.root,
+                session_id=payload.get("session_id"),
+                turn_id=payload.get("turn_id"),
+                dedupe_key=payload.get("dedupe_key"),
+            )
+        elif args.message is not None:
+            # Do not pass any positional/title/provider content into the event.
+            result = _legacy_event()
+        else:
+            parser.error("provide --stdin or a legacy positional message")
+    except EventPolicyError:
+        if args.json:
+            print(json.dumps({"status": "rejected", "reason": "policy_error"}))
+        return 2
+
+    if args.json:
+        print(json.dumps(result.to_dict(), sort_keys=True))
     return 0
 
 

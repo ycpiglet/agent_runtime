@@ -23,12 +23,19 @@ ROOT_STATE_CHECKS = {"scripts/state_sync_gate.py", "scripts/taskset_work_gate.py
 
 def notify_governance_block(returncode: int) -> None:
     """Best-effort alert for a blocking owner gate; never changes the gate result."""
+    if not (ROOT / "scripts" / "allimbot.py").is_file():
+        return
     try:
         import allimbot
 
-        allimbot.notify(
-            f"owner governance gate blocked (exit {returncode})",
-            title="agent_runtime governance blocked",
+        allimbot.emit_event(
+            "attention.required",
+            {
+                "task_id": "owner-governance",
+                "attention_kind": "governance-block",
+                "owner_role": "owner",
+                "state": "blocked",
+            },
         )
     except Exception:
         pass
@@ -85,6 +92,7 @@ def main() -> int:
         ["scripts/task_identity.py", "check", "--check"],
         ["scripts/work_item_classifier.py", "--check"],
         ["scripts/work_schema_gate.py", "--items", "--check"],
+        ["scripts/security_service_gate.py", "--check-active"],
         ["scripts/footprint_conflict_gate.py", "--check"],
         ["scripts/dependency_cycle_gate.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],

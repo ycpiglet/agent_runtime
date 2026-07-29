@@ -17,11 +17,16 @@ def notify_governance_block(returncode: int) -> None:
         source_root = str(ROOT / "src")
         if source_root not in sys.path:
             sys.path.insert(0, source_root)
-        from agent_runtime.allimbot import notify
+        from agent_runtime.allimbot import emit_event
 
-        notify(
-            f"owner governance gate blocked (exit {returncode})",
-            title="agent_runtime governance blocked",
+        emit_event(
+            "attention.required",
+            {
+                "task_id": "owner-governance",
+                "attention_kind": "governance-block",
+                "owner_role": "owner",
+                "state": "blocked",
+            },
         )
     except Exception:
         pass
@@ -63,6 +68,7 @@ def main() -> int:
         ["scripts/org_model_gate.py", "--check"],
         ["scripts/design_system_gate.py", "--check"],
         ["scripts/work_schema_gate.py", "--items", "--check"],
+        ["scripts/security_service_gate.py", "--check-active"],
         ["scripts/footprint_conflict_gate.py", "--check"],
         ["scripts/dependency_cycle_gate.py", "--check"],
         ["scripts/taskset_work_gate.py", "--check"],

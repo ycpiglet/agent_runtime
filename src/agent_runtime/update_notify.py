@@ -162,8 +162,17 @@ def run_update_notify(root: Path, *, no_cache: bool = False, verbose: bool = Fal
         lines = _notice_lines(pinned_ref, latest_tag)
         for line in lines:
             print(line)
-        if lines:
-            allimbot.notify("\n".join(lines), title="agent_runtime update available")
+        if lines and (resolved_root / ".allimbot.json").is_file():
+            allimbot.emit_event(
+                "attention.required",
+                {
+                    "task_id": "agent-runtime",
+                    "attention_kind": "runtime-update",
+                    "owner_role": "owner",
+                    "state": "available",
+                },
+                root=resolved_root,
+            )
         if not lines and verbose:
             print(f"agent-runtime up to date: {pinned_ref} (latest release tag: {latest_tag})")
         return 0

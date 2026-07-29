@@ -524,6 +524,80 @@ def test_create_claim_visibly_escalates_data_integrity_signal(
     assert claim["routing_unknown_triggers"] == []
 
 
+def test_create_claim_runs_installed_security_service_gate_before_persistence(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-647"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    gate = tmp_path / "scripts" / "security_service_gate.py"
+    gate.parent.mkdir(parents=True, exist_ok=True)
+    gate.write_text(
+        "import sys\n"
+        "print('managed security gate refused risky unit', file=sys.stderr)\n"
+        "raise SystemExit(1)\n",
+        encoding="utf-8",
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:03:00+09:00",
+        "--suffix",
+        "security-block",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "managed security gate refused risky unit" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_create_claim_has_zero_security_profile_burden_when_gate_absent(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:00+09:00",
+        "--suffix",
+        "core-no-gate",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
 def test_create_claim_keeps_unknown_routing_signal_visible(
     tmp_path: Path,
 ) -> None:

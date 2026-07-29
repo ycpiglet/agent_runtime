@@ -134,8 +134,15 @@ def test_profile_matrix_is_deterministic_and_security_is_additive():
     core = usage._profile_paths(root, ("core",))
     security = usage._profile_paths(root, ("core", "security-service"))
     assert "scripts/allimbot.py" not in core
-    assert "scripts/allimbot.py" in security
+    assert {
+        ".allimbot.json",
+        "agents/project/SECURITY-SERVICE-POLICY.json",
+        "docs/security-service.md",
+        "scripts/allimbot.py",
+        "scripts/security_service_gate.py",
+    } <= security
     assert "scripts/allimbot_stop_hook.cmd" not in core
+    assert "scripts/allimbot_stop_hook.cmd" not in security
 
 
 def test_missing_and_cross_profile_findings_are_distinct(tmp_path):
