@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T23:58:30+09:00
-record_count: 1061
+generated_at: 2026-07-30T00:21:11+09:00
+record_count: 1065
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1061` review and evidence records under `reviews/`.
+- Summary: indexed `1065` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1061` files |
+| Reviews covered | pass | `1065` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -617,6 +617,7 @@ record_count: 1061
 | `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Symbolic HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -920,6 +921,8 @@ record_count: 1061
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1092,6 +1095,7 @@ record_count: 1061
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md` | `W4B-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Independent W4b R4 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md` | `W4B-2026-07-29-unit-task-ar-648-006-continuity-block` | md | failed | block | Bean Wiki Attempt-2 Portable Continuity Independent Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-007.md` | `W4B-2026-07-30-unit-task-ar-648-007` | md | passed | pass | TASK-AR-648 UNIT-007 Blocked Unit Redispatch Guard W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

@@ -920,8 +920,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md",
-          "value": "5a5e41622955b28b2f4e13c9c8c08bcf15cd6fc561074832cd5b7cb3dc7b67ff"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md",
+          "value": "1b7d4525ebcfb5b0702cb6f771d839efc3b23ddac4a1fa178e103069b97bd59c"
         },
         {
           "kind": "sha256",
@@ -935,22 +935,87 @@
         },
         {
           "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "a4ae2185c2cce2abdb27e1444f0b190f821d11faa7543a498fd0bf988fa8d37e"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
+          "value": "32b1b3f9745ef7c21c0f18412a8fc7053e20f3fd387dada9448e1da6b3666dfc"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py",
-          "value": "30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a"
+          "value": "32b1b3f9745ef7c21c0f18412a8fc7053e20f3fd387dada9448e1da6b3666dfc"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_taskset_dispatcher.py",
-          "value": "8b750182dbcff422cbc956b95883e44407e9f234a6ebea0d82e696af7c993aea"
+          "path": "scripts/parallel_worktree_gate.py",
+          "value": "52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+          "value": "52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/doctor.py",
+          "value": "945cdb3c4b470095f1b27ae5af3710b44b0e2791032e57b31b36bac6eff72ca5"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/check_agent_docs.py",
+          "value": "eb61475ed9252fb9341ced57ae85596a962b70cabcda8f1eed81236d7fd77d10"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml",
+          "value": "f52ca90fa32fb24251b68d4919ebd14190b91aab8a710a35c13a058766cffc8a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_parallel_worktree_gate.py",
+          "value": "2ef63bc3b43739e977bbdaddca78c98e90c2e22fa7b27573c53c11d6073fcf96"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_task_claim_dispatcher.py",
+          "value": "7969a3642fd2fa70cded01ca356e36357fdcef7121d03ef64638dab6dde4224c"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_doctor.py",
+          "value": "fc0ef5a2ac04c0580f247de2ffe9b7c61f071aba5a40fb919250db274a876d51"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_template_smoke.py",
+          "value": "915d4375bc4676ade5ac9543373040ef02e42ee8250ead1588e9ec4b539808d8"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_inventory_sync_sanitize.py",
+          "value": "a6953921d26879abc53ec188261bd651a7b005579960fbe5736de6b9aac8f608"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "e6ce58eef8e508753a82598e8427d93358a5370d027f1926245f11dd79753c98"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
+          "value": "54dcbb79d0efd25417c81c3489f577169c82859706714baecf97308029ee96f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md",
+          "value": "7c8cefc283b76d89068905b52ebad8ac3aa344c5cb6efd5cca38dead0114be17"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md",
-      "recorded_at": "2026-07-29T23:39:26+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md",
+      "recorded_at": "2026-07-30T00:20:44+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1166,5 +1231,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T23:39:26+09:00"
+  "updated_at": "2026-07-30T00:20:44+09:00"
 }

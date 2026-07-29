@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T23:37:32+09:00
-updated_at: 2026-07-29T23:57:00+09:00
+updated_at: 2026-07-30T00:14:58+09:00
 started_at: 2026-07-29T23:42:00+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md
@@ -69,6 +69,21 @@ verification:
   - python -m pytest -q
 handoff: Report the exact pre-fix plan output, runnable-status matrix, canonical unit_spec precedence, no-runnable failure, dependency/routing preservation, source-template hashes, exact product SHA, focused/full counts, Compound retrieval, W4a evidence, and independent W4b verdict.
 stop_condition: Stop on any blocked or ambiguous unit selection, implicit resume, unknown-status acceptance, dependency bypass, source/template drift, new P0/P1, Bean or Allimbot mutation, consumer commit, release/version/tag/package action, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T00:11:27+09:00
+verified_by: codex-root-task-ar-648-007
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-007.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-007.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152.json
+defect_signatures:
+  - defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1
+resolution: done
+completed_at: 2026-07-30T00:14:58+09:00
+closed_by: codex-root-task-ar-648-007
+measurement_unavailable_reason: The selector remediation was completed within the broader TASK-AR-648 session before reliable per-unit time and token metering was available.
 ---
 
 # UNIT-TASK-AR-648-007 - Blocked Unit Redispatch Guard
@@ -97,3 +112,21 @@ new planned continuity remediation. The claim command was not executed.
 ## Stop Boundary
 
 Any plan that can emit a claim command for blocked history is terminal.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T00:14:58+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The selector remediation was completed within the broader TASK-AR-648 session before reliable per-unit time and token metering was available.
+- Closed by: `codex-root-task-ar-648-007`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json`
+- Reviews:
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-007.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-007.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152.json`
+<!-- work-close:end -->

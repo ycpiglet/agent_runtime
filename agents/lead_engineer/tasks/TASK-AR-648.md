@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T23:42:00+09:00
+updated_at: 2026-07-30T00:16:51+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -105,7 +105,13 @@ claim_refs:
   UNIT-007 was explicitly claimed only after T2 passed; this recovery does not
   use the planner's rejected UNIT-002 command or `--skip-plan-check`. Default
   claim persistence left Runtime `HEAD` unchanged and its Compound lookup
-  retrieved the exact selector record first with score 180.
+  retrieved the exact selector record first with score 180. Exact product
+  `a3a5eebe0584a7d5359a15c43f205b9770b7cbce` then passed W4a,
+  independent W4b at 99/100 with no P0/P1, and canonical verification
+  (`113` selector, `83` claim/readiness, full `2658 passed, 3 skipped`).
+  UNIT-007 is completed and its claim is released. The canonical next unit is
+  now UNIT-008, but its claim remains blocked until the selector-induced plan
+  drift is recorded and re-anchored through a T3 review.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

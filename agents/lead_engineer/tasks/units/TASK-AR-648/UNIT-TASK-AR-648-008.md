@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: planned
+status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:34:46+09:00
-updated_at: 2026-07-29T23:34:46+09:00
+updated_at: 2026-07-30T00:20:04+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md
 created_by: codex-root-v080-planner
@@ -90,6 +90,31 @@ Frozen Bean attempt 2 exposed a cross-layer bootstrap contradiction after a
 valid no-commit claim. Independent review rejected the product and selected a
 strict canonical-pointer fallback over a static STATUS seed.
 
+## Inputs
+
+- `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md`
+- `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md`
+- `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md`
+- `agents/project/knowledge/compounds/records/COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef.json`
+- Agent Runtime baseline `a3a5eebe0584a7d5359a15c43f205b9770b7cbce`
+
+## Target Files
+
+- Root and packaged `parallel_worktree_gate.py`
+- Root and packaged `task_claim_dispatcher.py`
+- `src/agent_runtime/doctor.py`
+- Installed pointer and document-check templates
+- Parallel-gate, claim, doctor, template-smoke, inventory, and routing tests
+- Host lock, Runtime protocol, W4a/W4b, and lifecycle evidence
+
+## Scope
+
+Implement and verify a strict pointer-plus-claim-sidecar continuity fallback
+inside Agent Runtime. Preserve present-STATUS behavior, default claim
+non-persistence, source/template parity, and every consumer/external-effect
+stop boundary. Do not implement unrelated readiness-dispatch, UI, profile
+thinning, evidence-history, or provider work in this unit.
+
 ## Decision
 
 Use the artifacts already owned by portable core: one live pointer, exact
@@ -107,6 +132,41 @@ validation.
 6. Run a clean installed-host claim/projection/governance journey.
 7. Run focused, routing, ownership, sanitizer, governance, and full W4a.
 8. Obtain a fresh independent W4b on the exact product SHA.
+
+## Acceptance Criteria
+
+- Preserve a deterministic RED reproduction of the frozen Bean status-missing
+  failure before product changes.
+- A present invalid STATUS blocks even when a valid pointer exists.
+- With no STATUS, only an exact fresh pointer matching all active non-overlay
+  claims and current-agent fields passes.
+- Missing, placeholder, malformed, stale, duplicate, extra, partial, or
+  mismatching pointer state fails with stable reason codes.
+- Every active claim continues to require handoff and log sidecars.
+- Claim creation stays claim-only; projection emits required fields without
+  writing the pointer or moving HEAD.
+- Doctor and installed document checks report the effective continuity path.
+- A clean installed core host completes the claim-to-governance journey
+  without a STATUS seed.
+- Root/template parity, lock, inventory, sanitizer, focused, routing, full
+  W4a, and independent W4b all pass on one exact SHA with no P0/P1.
+
+## Verification
+
+- `python -m pytest tests/test_parallel_worktree_gate.py tests/test_task_claim_dispatcher.py tests/test_doctor.py tests/test_template_smoke.py tests/test_inventory_sync_sanitize.py -q`
+- `python -m pytest tests/test_role_routing.py tests/test_role_routing_wiring.py -q`
+- `python scripts/runtime_asset_usage.py --check`
+- `python scripts/owner_governance_gate.py`
+- `PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check`
+- `python -m pytest -q`
+
+## Handoff
+
+Record the original RED, pointer/claim field matrix, all stable negative
+reasons, present-STATUS precedence, doctor decision, installed-host journey,
+source/template hashes, unchanged default SCM behavior, exact product SHA,
+focused/routing/full counts, Compound retrieval, W4a evidence, and independent
+W4b verdict.
 
 ## Deliberate Exclusions
 
