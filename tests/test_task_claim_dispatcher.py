@@ -870,6 +870,63 @@ def test_malformed_host_config_blocks_at_claim_dispatch_seam(
     assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
 
 
+def test_unterminated_required_security_metadata_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-649"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(
+        tmp_path,
+        task_id,
+        triggers=["security"],
+    )
+    unit = tmp_path / unit_rel
+    unit_text = unit.read_text(encoding="utf-8")
+    unit_text = unit_text.replace(
+        "  - scripts/routing_target.py",
+        "  - .env.production",
+    ).replace(
+        "target_files:",
+        'risk_tier: "high\n'
+        'security_sensitive: "true\n'
+        'approval_required: "true\n'
+        "target_files:",
+    )
+    unit.write_text(
+        unit_text + "\n## Security Controls\n\nSynthetic test boundary.\n",
+        encoding="utf-8",
+    )
+    _write_runtime_config(tmp_path, "core", "security-service")
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:05:30+09:00",
+        "--suffix",
+        "unterminated-security-metadata",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "policy_error" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
 def test_safe_review_document_cannot_substitute_for_requested_unit(
     tmp_path: Path,
 ) -> None:

@@ -156,6 +156,242 @@ def test_fully_declared_cross_risk_unit_passes(tmp_path) -> None:
     assert len(report.classifications) == 4
 
 
+@pytest.mark.parametrize(
+    ("field", "valid_value", "malformed_value"),
+    [
+        ("risk_tier", "high", '"high'),
+        ("security_sensitive", "true", '"true'),
+        ("approval_required", "true", '"true'),
+        ("risk_tier", "high", "'high"),
+        ("risk_tier", "high", "!high"),
+        ("risk_tier", "high", "&high"),
+        ("risk_tier", "high", "*high"),
+        ("risk_tier", "high", "|"),
+        ("risk_tier", "high", "|+"),
+        ("risk_tier", "high", ">2"),
+        ("risk_tier", "high", "{value: high}"),
+        ("risk_tier", "high", "]"),
+        ("risk_tier", "high", "high # comment"),
+        ("risk_tier", "high", 'high"'),
+    ],
+)
+def test_malformed_security_decision_scalars_fail_closed(
+    tmp_path,
+    field: str,
+    valid_value: str,
+    malformed_value: str,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier="high",
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+        sections=("Security Controls",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            f"{field}: {valid_value}",
+            f"{field}: {malformed_value}",
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(security_service.SecurityPolicyError):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["security_sensitive", "approval_required"],
+)
+def test_quoted_boolean_string_never_satisfies_security_requirement(
+    tmp_path,
+    field: str,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier='"high"',
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+        sections=("Security Controls",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            f"{field}: true",
+            f'{field}: "true"',
+        ),
+        encoding="utf-8",
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    assert report.status == "block"
+    assert any(finding.requirement == field for finding in report.findings)
+
+
+def test_security_trigger_must_be_a_list_value(tmp_path) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier="high",
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+        sections=("Security Controls",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "escalation_triggers:\n  - security",
+            "escalation_triggers: security",
+        ),
+        encoding="utf-8",
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    assert report.status == "block"
+    assert any(
+        finding.requirement == "escalation_trigger:security"
+        for finding in report.findings
+    )
+
+
+def test_quoted_decision_values_are_not_whitespace_normalized(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier='" high "',
+        security_sensitive=True,
+        approval_required=True,
+        triggers=('" security "',),
+        sections=("Security Controls",),
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    requirements = {finding.requirement for finding in report.findings}
+    assert report.status == "block"
+    assert "risk_tier" in requirements
+    assert "escalation_trigger:security" in requirements
+
+
+@pytest.mark.parametrize(
+    "fake_section",
+    [
+        "```text\n## Security Controls\n```",
+        "<!--\n## Security Controls\n-->",
+    ],
+    ids=["fenced-heading", "commented-heading"],
+)
+def test_non_rendered_heading_cannot_satisfy_security_section(
+    tmp_path,
+    fake_section: str,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier="high",
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8") + "\n" + fake_section + "\n",
+        encoding="utf-8",
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    assert report.status == "block"
+    assert any(
+        finding.requirement == "section:Security Controls"
+        for finding in report.findings
+    )
+
+
+def test_supported_inline_list_and_quoted_text_remain_valid(tmp_path) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier='"high"',
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+        sections=("Security Controls",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "escalation_triggers:\n  - security",
+            "escalation_triggers: [security]",
+        ),
+        encoding="utf-8",
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    assert report.status == "pass"
+    assert report.findings == ()
+
+
 def test_classifier_never_reads_target_contents(
     tmp_path, monkeypatch
 ) -> None:
@@ -338,6 +574,64 @@ def test_symlinked_unit_spec_is_never_treated_as_registered(
     with pytest.raises(
         security_service.SecurityPolicyError,
         match="unavailable or not canonical",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
+def test_oversized_unit_document_fails_closed(tmp_path) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    path = tmp_path / unit
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("x" * security_service.UNIT_DOCUMENT_MAX_BYTES)
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="bound",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            task_id="TASK-1",
+            unit_id="UNIT-TASK-1-001",
+            policy_path=policy,
+        )
+
+
+def test_unit_document_change_during_snapshot_fails_closed(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("README.md",))
+    path = tmp_path / unit
+    original_text = path.read_text(encoding="utf-8")
+    original_lstat = Path.lstat
+    unit_lstat_calls = 0
+
+    def racing_lstat(candidate: Path):
+        nonlocal unit_lstat_calls
+        if candidate == path:
+            unit_lstat_calls += 1
+            if unit_lstat_calls == 2:
+                path.write_text(
+                    original_text + "\nchanged during snapshot\n",
+                    encoding="utf-8",
+                )
+        return original_lstat(candidate)
+
+    monkeypatch.setattr(Path, "lstat", racing_lstat)
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="changed while it was read",
     ):
         security_service.analyze_unit(
             tmp_path,

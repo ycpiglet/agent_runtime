@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import re
 import stat
 from collections.abc import Iterable, Mapping
@@ -23,6 +24,8 @@ ACTIVE_CLAIM_STATUSES = frozenset(
     {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
 )
 _TASK_IDENTIFIER = re.compile(r"^TASK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
+_UNIT_FRONTMATTER_KEY = re.compile(r"^[a-z][a-z0-9_]*$")
+UNIT_DOCUMENT_MAX_BYTES = 256 * 1024
 
 MANAGED_POLICY: dict[str, Any] = {
     "schema": POLICY_SCHEMA,
@@ -303,25 +306,146 @@ def classify_targets(
     )
 
 
+def _single_quoted_scalar(value: str) -> str:
+    if len(value) < 2 or not value.endswith("'"):
+        raise SecurityPolicyError(
+            "unit specification contains an unterminated quoted scalar"
+        )
+    body = value[1:-1]
+    decoded: list[str] = []
+    index = 0
+    while index < len(body):
+        if body[index] != "'":
+            decoded.append(body[index])
+            index += 1
+            continue
+        if index + 1 >= len(body) or body[index + 1] != "'":
+            raise SecurityPolicyError(
+                "unit specification contains malformed quoted scalar"
+            )
+        decoded.append("'")
+        index += 2
+    return "".join(decoded)
+
+
 def _parse_scalar(value: str) -> object:
-    normalized = value.strip().strip("\"'")
-    if normalized.lower() == "true":
+    normalized = value.strip()
+    if (
+        not normalized
+        or normalized != value
+        or any(ord(character) < 32 for character in normalized)
+    ):
+        raise SecurityPolicyError(
+            "unit specification contains an unsupported scalar"
+        )
+    if normalized.startswith('"'):
+        try:
+            decoded = json.loads(normalized)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise SecurityPolicyError(
+                "unit specification contains malformed quoted scalar"
+            ) from exc
+        if not isinstance(decoded, str):
+            raise SecurityPolicyError(
+                "unit specification quoted scalar must be text"
+            )
+        return decoded
+    if normalized.startswith("'"):
+        return _single_quoted_scalar(normalized)
+    if normalized.endswith(("'", '"')):
+        raise SecurityPolicyError(
+            "unit specification contains an unmatched quote"
+        )
+    if (
+        normalized[0] in {"!", "&", "*", "|", ">", "{", "}", "[", "]"}
+        or re.search(r"(?:^|\s)[!&*](?=\S)", normalized)
+        or re.search(r"\s#", normalized)
+    ):
+        raise SecurityPolicyError(
+            "unit specification contains unsupported YAML scalar syntax"
+        )
+    if normalized == "true":
         return True
-    if normalized.lower() == "false":
+    if normalized == "false":
         return False
     return normalized
 
 
-def _unit_document(path: Path) -> tuple[dict[str, object], set[str]]:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except (OSError, UnicodeError) as exc:
-        raise SecurityPolicyError("unit specification is unavailable") from exc
+def _inline_list(value: str) -> list[object]:
+    if not value.startswith("[") or not value.endswith("]"):
+        raise SecurityPolicyError(
+            "unit specification contains malformed inline list"
+        )
+    body = value[1:-1]
+    if not body.strip():
+        return []
+    items = body.split(",")
+    if any(not item.strip() for item in items):
+        raise SecurityPolicyError(
+            "unit specification contains malformed inline list"
+        )
+    return [_parse_scalar(item.strip()) for item in items]
+
+
+def _markdown_sections(lines: list[str]) -> set[str]:
+    sections: set[str] = set()
+    fence_character: str | None = None
+    fence_length = 0
+    in_html_comment = False
+    for raw_line in lines:
+        if fence_character is not None:
+            closing = re.match(
+                rf"^ {{0,3}}({re.escape(fence_character)}"
+                rf"{{{fence_length},}})\s*$",
+                raw_line,
+            )
+            if closing is not None:
+                fence_character = None
+                fence_length = 0
+            continue
+
+        visible = raw_line
+        while visible:
+            if in_html_comment:
+                comment_end = visible.find("-->")
+                if comment_end < 0:
+                    visible = ""
+                    break
+                visible = visible[comment_end + 3 :]
+                in_html_comment = False
+                continue
+            comment_start = visible.find("<!--")
+            if comment_start < 0:
+                break
+            comment_end = visible.find("-->", comment_start + 4)
+            if comment_end < 0:
+                visible = visible[:comment_start]
+                in_html_comment = True
+                break
+            visible = visible[:comment_start] + visible[comment_end + 3 :]
+
+        fence = re.match(r"^ {0,3}(`{3,}|~{3,}).*$", visible)
+        if fence is not None:
+            marker = fence.group(1)
+            fence_character = marker[0]
+            fence_length = len(marker)
+            continue
+        heading = re.match(r"^##\s+(.+?)\s*$", visible)
+        if heading is not None:
+            sections.add(heading.group(1).strip().casefold())
+    return sections
+
+
+def _unit_document(text: str) -> tuple[dict[str, object], set[str]]:
+    if "\x00" in text or "\t" in text:
+        raise SecurityPolicyError(
+            "unit specification contains unsupported characters"
+        )
     lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
+    if not lines or lines[0] != "---":
         raise SecurityPolicyError("unit specification has no frontmatter")
     try:
-        end = next(index for index in range(1, len(lines)) if lines[index].strip() == "---")
+        end = next(index for index in range(1, len(lines)) if lines[index] == "---")
     except StopIteration as exc:
         raise SecurityPolicyError("unit specification frontmatter is unterminated") from exc
 
@@ -336,26 +460,128 @@ def _unit_document(path: Path) -> tuple[dict[str, object], set[str]]:
             metadata[current_list].append(value)
             continue
         if line.startswith(" ") or ":" not in line:
-            current_list = None
-            continue
+            raise SecurityPolicyError(
+                "unit specification contains unsupported frontmatter structure"
+            )
         key, raw = line.split(":", 1)
-        key = key.strip()
+        if _UNIT_FRONTMATTER_KEY.fullmatch(key) is None:
+            raise SecurityPolicyError(
+                "unit specification contains malformed frontmatter key"
+            )
         if key in metadata:
             raise SecurityPolicyError(
                 "unit specification frontmatter contains duplicate fields"
             )
-        if raw.strip():
-            metadata[key] = _parse_scalar(raw)
+        if raw:
+            if not raw.startswith(" ") or not raw[1:]:
+                raise SecurityPolicyError(
+                    "unit specification contains malformed frontmatter scalar"
+                )
+            value = raw[1:]
+            metadata[key] = (
+                _inline_list(value)
+                if value.startswith("[")
+                else _parse_scalar(value)
+            )
             current_list = None
         else:
             metadata[key] = []
             current_list = key
-    sections = {
-        match.group(1).strip().casefold()
-        for line in lines[end + 1 :]
-        if (match := re.match(r"^##\s+(.+?)\s*$", line))
-    }
+    sections = _markdown_sections(lines[end + 1 :])
     return metadata, sections
+
+
+def _stat_signature(value: os.stat_result) -> tuple[int, int, int, int, int, int]:
+    return (
+        value.st_dev,
+        value.st_ino,
+        value.st_mode,
+        value.st_size,
+        value.st_mtime_ns,
+        value.st_ctime_ns,
+    )
+
+
+def _bounded_repository_text(
+    root: Path,
+    relative: PurePosixPath,
+    field: str,
+) -> tuple[Path, str]:
+    current = root
+    components: list[tuple[Path, tuple[int, int, int, int, int, int]]] = []
+    try:
+        root_stat = root.lstat()
+        if stat.S_ISLNK(root_stat.st_mode) or not stat.S_ISDIR(root_stat.st_mode):
+            raise SecurityPolicyError(
+                f"{field} is unavailable or not canonical"
+            )
+        components.append((root, _stat_signature(root_stat)))
+        for index, part in enumerate(relative.parts):
+            current = current / part
+            item_stat = current.lstat()
+            final = index == len(relative.parts) - 1
+            if (
+                stat.S_ISLNK(item_stat.st_mode)
+                or (final and not stat.S_ISREG(item_stat.st_mode))
+                or (not final and not stat.S_ISDIR(item_stat.st_mode))
+            ):
+                raise SecurityPolicyError(
+                    f"{field} is unavailable or not canonical"
+                )
+            if final and (
+                item_stat.st_size > UNIT_DOCUMENT_MAX_BYTES
+                or item_stat.st_mode
+                & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+                == 0
+            ):
+                raise SecurityPolicyError(
+                    f"{field} is unavailable or outside the managed bound"
+                )
+            components.append((current, _stat_signature(item_stat)))
+
+        flags = os.O_RDONLY
+        flags |= getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        flags |= getattr(os, "O_NONBLOCK", 0)
+        descriptor = os.open(current, flags)
+        try:
+            with os.fdopen(descriptor, "rb") as handle:
+                opened_before = os.fstat(handle.fileno())
+                payload = handle.read(UNIT_DOCUMENT_MAX_BYTES + 1)
+                opened_after = os.fstat(handle.fileno())
+        except Exception:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+            raise
+
+        if (
+            not stat.S_ISREG(opened_before.st_mode)
+            or _stat_signature(opened_before) != _stat_signature(opened_after)
+            or _stat_signature(opened_before) != components[-1][1]
+            or len(payload) > UNIT_DOCUMENT_MAX_BYTES
+        ):
+            raise SecurityPolicyError(
+                f"{field} changed while it was read"
+            )
+        for path, before_signature in components:
+            if _stat_signature(path.lstat()) != before_signature:
+                raise SecurityPolicyError(
+                    f"{field} changed while it was read"
+                )
+    except SecurityPolicyError:
+        raise
+    except (OSError, UnicodeError) as exc:
+        raise SecurityPolicyError(
+            f"{field} is unavailable or not canonical"
+        ) from exc
+    try:
+        return current, payload.decode("utf-8")
+    except UnicodeError as exc:
+        raise SecurityPolicyError(
+            f"{field} is unavailable or malformed"
+        ) from exc
 
 
 def _regular_repository_path(
@@ -455,8 +681,12 @@ def _canonical_unit_document(
         f"{path_task_id}.md",
     )
     _regular_repository_path(root, task_relative, "task specification")
-    spec = _regular_repository_path(root, relative, "unit specification")
-    metadata, sections = _unit_document(spec)
+    spec, unit_text = _bounded_repository_text(
+        root,
+        relative,
+        "unit specification",
+    )
+    metadata, sections = _unit_document(unit_text)
     if (
         metadata.get("task_id") != path_task_id
         or metadata.get("unit_id") != path_unit_id
@@ -476,10 +706,8 @@ def _canonical_unit_document(
 
 def _list_value(metadata: Mapping[str, object], key: str) -> tuple[str, ...]:
     value = metadata.get(key, ())
-    if isinstance(value, list):
-        return tuple(str(item).strip() for item in value if str(item).strip())
-    if isinstance(value, str) and value.strip():
-        return (value.strip(),)
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        return tuple(value)
     return ()
 
 
@@ -492,7 +720,11 @@ def _requirement_findings(
     findings: list[SecurityFinding] = []
 
     allowed_tiers = tuple(str(item) for item in required["risk_tier"])
-    if str(metadata.get("risk_tier") or "").strip().lower() not in allowed_tiers:
+    risk_tier = metadata.get("risk_tier")
+    if (
+        not isinstance(risk_tier, str)
+        or risk_tier not in allowed_tiers
+    ):
         findings.append(
             SecurityFinding(
                 classification.path,
