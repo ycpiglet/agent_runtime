@@ -1,25 +1,25 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T04:13:03+09:00
-updated_by: codex-root-task-ar-648-012
+updated_at: 2026-07-30T04:19:04+09:00
+updated_by: codex-root-v080-planner
 current_state:
-  summary: "UNIT-012 is independently blocked because the mirror intersection ignores a script missing from either side; a separate Runtime repair is next."
+  summary: "UNIT-013 is registered to replace current-intersection parity with an exact expected-common inventory; claim and RED proof are next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 5
-  step_total: 6
-  progress_pct: 90
-  status_text: "Exact product f49ff61b is frozen after W4b BLOCK (P0 0/P1 1/P2 1); Bean attempt 5 and Allimbot remain blocked."
+  step_index: 1
+  step_total: 5
+  progress_pct: 5
+  status_text: "UNIT-012 product f49ff61b remains frozen; UNIT-013 is registered and Bean attempt 5 plus Allimbot remain blocked."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Freeze UNIT-012 product f49ff61b. Register a separate Runtime-only missing-side inventory repair. Never mutate Bean primary or frozen attempts 1-4, Autofolio, or Allimbot."
+  branch_policy: "Work only in the existing Runtime implementation worktree for UNIT-013. Never mutate Bean primary or frozen attempts 1-4, Autofolio, or Allimbot."
   next_actions:
-    - "Register a separate unit for an explicit expected-common portable-script inventory."
-    - "Add source-only, template-only, and formerly-common deletion regressions before implementation."
+    - "Record T3 assumptions, prove readiness/selection, and claim UNIT-013 without SCM mutation."
+    - "Record the intersection-derived fail-open in Compound and commit source-only, template-only, and formerly-common deletion RED tests."
     - "Keep Bean attempt 5 and Allimbot frozen until the repaired exact product passes new W4a and independent W4b."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

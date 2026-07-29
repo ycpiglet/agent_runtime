@@ -7,14 +7,14 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T04:15:32+09:00
-record_count: 530
+generated_at: 2026-07-30T04:21:24+09:00
+record_count: 531
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `530` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `531` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
@@ -23,7 +23,7 @@ record_count: 530
 | Initiatives | pass | `42` records |
 | Tasksets | pass | `66` records |
 | Tasks | pass | `315` records |
-| Units | pass | `107` records |
+| Units | pass | `108` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -563,6 +563,7 @@ record_count: 530
 | 41.1.10.10 | Unit 41.1.10.10 | unit | `UNIT-TASK-AR-648-010` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md` | UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract |
 | 41.1.10.11 | Unit 41.1.10.11 | unit | `UNIT-TASK-AR-648-011` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md` | UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4 |
 | 41.1.10.12 | Unit 41.1.10.12 | unit | `UNIT-TASK-AR-648-012` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md` | UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation |
+| 41.1.10.13 | Unit 41.1.10.13 | unit | `UNIT-TASK-AR-648-013` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md` | UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T04:15:32+09:00",
-  "record_count": 530,
+  "generated_at": "2026-07-30T04:21:24+09:00",
+  "record_count": 531,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5768,6 +5768,17 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md",
       "parent_id": "TASK-AR-648",
       "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-013",
+      "level": "unit",
+      "number": "41.1.10.13",
+      "label": "Unit 41.1.10.13",
+      "id": "UNIT-TASK-AR-648-013",
+      "title": "UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",

@@ -24,6 +24,9 @@
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
+    "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799": [
+      "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
+    ],
     "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c": [
       "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
     ],
@@ -80,9 +83,12 @@
     ],
     "UNIT-TASK-AR-648-011": [
       "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
+    ],
+    "UNIT-TASK-AR-648-013": [
+      "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
     ]
   },
-  "record_count": 10,
+  "record_count": 11,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -234,8 +240,22 @@
       "work_ids": [
         "UNIT-TASK-AR-648-011"
       ]
+    },
+    {
+      "created_at": "2026-07-30T04:19:04+09:00",
+      "defect_signatures": [
+        "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799"
+      ],
+      "id": "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Intersection parity cannot detect a missing side",
+      "work_ids": [
+        "UNIT-TASK-AR-648-013"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:d29ee7d3d4561a6cf4ff6a7d866b89bbe734ccaae6579dfb1d7c66d6326e4c0d"
+  "source_digest": "sha256:865ededdc9aae24ec89d33e2568f747f35b1825233d82f1ff708c019e68b7a3e"
 }
