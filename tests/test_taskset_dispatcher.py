@@ -631,6 +631,28 @@ def test_plan_prefers_in_progress_before_canonical_planned_unit(
     assert json.loads(result.stdout)["unit_id"] == f"UNIT-{task_id}-003"
 
 
+def test_plan_treats_legacy_assigned_unit_as_planned(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-ASSIGNED-COMPATIBILITY"
+    task_id = "TASK-901"
+    assigned = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-002.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=assigned)
+    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
+    _write_unit(tmp_path, task_id, unit_number=2, status="assigned")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-002"
+    assert payload["unit_spec_path"] == assigned
+
+
 @pytest.mark.parametrize(
     "status",
     [

@@ -233,7 +233,7 @@
       "scripts/task_mcp.py": "sha256:b257379d6269dd70d85df7eb5523c6de83f11d197d25ca96f69e69a2af7b5018",
       "scripts/task_unit_readiness_gate.py": "sha256:79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372",
       "scripts/taskset_boundary_gate.py": "sha256:0cc438aeec1f24540ddc6838837d24cf1c4444799781ee6ca8f175be392a86f0",
-      "scripts/taskset_dispatcher.py": "sha256:352309666aeab9483db6fc279f46a72db6c3795a431d85a453079da36f5a97d6",
+      "scripts/taskset_dispatcher.py": "sha256:32b1b3f9745ef7c21c0f18412a8fc7053e20f3fd387dada9448e1da6b3666dfc",
       "scripts/taskset_prompt_hook.cmd": "sha256:f6914c735d43c8ab967158fa84439753a6dd555c2df2c4192c0213c08b72b81e",
       "scripts/taskset_prompt_hook.py": "sha256:13eef2aa9d927be6ac52456266ef3f40b76442b5dad3a5bcaeb46e0f69e08e70",
       "scripts/taskset_work_gate.py": "sha256:fe840225c2fe9e6a11769d370f3f9920f532bd95fcc20a59a75449ff226652e6",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:f4b213e75ce12582cb63ae6cb1a917b4c3be1dc230fb90172719fa0494bf158f",
+    "template_digest": "sha256:64d0a14b1a5d284285bf7ac89c27c702adfbeb7f8b32c25a818b131fe5cd55e6",
     "template_files": 251
   },
   "profiles": [

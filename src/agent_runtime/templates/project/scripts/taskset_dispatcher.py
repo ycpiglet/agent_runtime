@@ -53,6 +53,7 @@ RUNNABLE_UNIT_PRIORITIES = {
     "worker_ready": 1,
     "ready": 1,  # established pre-schema compatibility value
     "planned": 2,
+    "assigned": 2,  # established pre-schema compatibility value
 }
 
 NON_RUNNABLE_UNIT_STATUSES = DONE_STATUSES | {
