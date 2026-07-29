@@ -32,21 +32,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop on path-only authorization, normal-commit rollback, user-index mutation, hook bypass, non-CAS ref update, transaction leak, weakened ordinary gate, new P0, consumer worktree creation, or external effect.",
-  "phase": "red-r4",
-  "progress_pct": 70,
+  "phase": "implementation-r5",
+  "progress_pct": 76,
   "step_index": 5,
   "step_total": 7,
-  "status_text": "RED-R4 fixed: normal and linked claim transactions both omit the actual worktree HEAD reflog (2 failed). Repair, W4a, and fresh W4b remain required.",
+  "status_text": "R5 closes the Git-to-Runtime HEAD.lock handoff with an open symbolic-HEAD inode seal; focused 154 and routing 49 pass. Product commit, W4a, and fresh W4b remain required.",
   "worktree_path": ".",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-29T20:34:38+09:00",
-  "last_heartbeat": "2026-07-29T22:03:00+09:00",
-  "updated_at": "2026-07-29T22:03:00+09:00",
-  "expires_at": "2026-07-29T23:03:00+09:00",
+  "last_heartbeat": "2026-07-29T22:36:00+09:00",
+  "updated_at": "2026-07-29T22:36:00+09:00",
+  "expires_at": "2026-07-29T23:36:00+09:00",
   "lease": {
     "claimed_at": "2026-07-29T20:34:38+09:00",
-    "heartbeat_at": "2026-07-29T22:03:00+09:00",
-    "expires_at": "2026-07-29T23:03:00+09:00"
+    "heartbeat_at": "2026-07-29T22:36:00+09:00",
+    "expires_at": "2026-07-29T23:36:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.log.md",
@@ -56,7 +56,8 @@
     "claim-tree-toctou",
     "symbolic-head-race",
     "post-commit-head-race",
-    "actual-head-reflog"
+    "actual-head-reflog",
+    "head-lock-handoff"
   ],
   "escalation_triggers": [
     "data_integrity",
@@ -67,7 +68,8 @@
     "defect:claim-commit-final-tree-toctou:f39b32eb331a6963",
     "defect:claim-commit-symbolic-head-race:f2860072798c6ac5",
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1",
-    "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4"
+    "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4",
+    "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89"
   ],
   "knowledge_lookup": {
     "status": "clear",
@@ -77,6 +79,8 @@
   "target_files": [
     "scripts/claim_guard.py",
     "src/agent_runtime/templates/project/scripts/claim_guard.py",
+    "scripts/task_claim_dispatcher.py",
+    "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
     "tests/test_claim_guard.py",
     "scripts/parallel_worktree_gate.py",
     "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
@@ -88,13 +92,16 @@
     "reviews/W4A-2026-07-29-unit-task-ar-648-005.md",
     "reviews/W4A-2026-07-29-unit-task-ar-648-005-r2.md",
     "reviews/W4A-2026-07-29-unit-task-ar-648-005-r3.md",
+    "reviews/W4A-2026-07-29-unit-task-ar-648-005-r4.md",
     "reviews/W4B-2026-07-29-unit-task-ar-648-005.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md",
     "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json",
     "agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json",
     "agents/project/knowledge/compounds/INDEX.json",
     "reviews/INDEX.md"
   ],

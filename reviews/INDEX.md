@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T21:58:05+09:00
-record_count: 1050
+generated_at: 2026-07-29T22:41:03+09:00
+record_count: 1051
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1050` review and evidence records under `reviews/`.
+- Summary: indexed `1051` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1050` files |
+| Reviews covered | pass | `1051` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -603,6 +603,7 @@ record_count: 1050
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan` | planning | record | pass | TASK-AR-648 Claim Tree TOCTOU P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
+| `reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan` | md | active | block | TASK-AR-648 Symbolic HEAD Lock Handoff P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan` | planning | record | fail | TASK-AR-648 Actual Worktree HEAD Reflog P1 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |

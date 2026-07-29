@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T22:03:00+09:00
+updated_at: 2026-07-29T22:36:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -75,8 +75,16 @@ claim_refs:
   because its private ref publication omitted the actual worktree `HEAD`
   reflog. UNIT-005 now adds normal and linked-worktree reflog parity inside
   the protected publication boundary; RED-R4 deterministically fails both
-  reflog parity tests on the rejected product. Bean replay moves to a separate
-  unit only after a new W4a and independent W4b approve a new exact product SHA.
+  reflog parity tests on the rejected product. An adversarial design review of
+  the first repair then found that a final-state-preserving equal-OID
+  `A -> B -> A` switch could hide between Git releasing `HEAD.lock` and
+  Runtime reacquiring it. The R5 repair keeps the actual symbolic `HEAD` file
+  open across that handoff, verifies the same device/inode under both locks,
+  and makes any published-but-unverified result terminal and non-retriable.
+  Explicit SCM fails before publication where the POSIX no-follow primitive is
+  unavailable; default working-tree claims are unchanged. Bean replay moves
+  to a separate unit only after a new W4a and independent W4b approve a new
+  exact product SHA.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

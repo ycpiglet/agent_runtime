@@ -12,6 +12,9 @@
     "defect:claim-commit-symbolic-head-race:f2860072798c6ac5": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
+    "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89": [
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
+    ],
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
@@ -34,7 +37,8 @@
     ],
     "TASK-AR-648": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
-      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
+      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -47,10 +51,11 @@
     ],
     "UNIT-TASK-AR-648-005": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
-      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
+      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
     ]
   },
-  "record_count": 5,
+  "record_count": 6,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -128,8 +133,23 @@
         "TASK-AR-648",
         "UNIT-TASK-AR-648-005"
       ]
+    },
+    {
+      "created_at": "2026-07-29T22:36:00+09:00",
+      "defect_signatures": [
+        "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89"
+      ],
+      "id": "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json",
+      "recurrence_count": 5,
+      "status": "active",
+      "title": "Symbolic HEAD publication needs a verifiable lock handoff",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-005"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:022210354897c209bd78b055be678a7b4cc9854d058ff54a80ad63a2fb230340"
+  "source_digest": "sha256:abb34ce319d351fbc61a02901b5c36670d66b1becca685f8c0483c2d8cf160e5"
 }
