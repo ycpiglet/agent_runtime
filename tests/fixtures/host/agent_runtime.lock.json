@@ -174,7 +174,7 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:6fde177bd0631d90c2bae1dcfced06d25ebf607319ec28a74ef0dcc7473c6168",
+      "scripts/owner_governance_gate.py": "sha256:ca9709a1323800d113d51963e902a8ce5d48d9f6ae07b5e0be74e0c49c2b32b8",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
       "scripts/parallel_worktree_gate.py": "sha256:c388465a4c2fde1a1919b0efe822fd3043b0fdf993534a98b447c6c20fdfd63d",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:e1d844c8f60edde8bfcfee9712b5610c62cf6e6fc82ab21fe8fda6fed1077cdd",
+    "template_digest": "sha256:7041a4b4bc5c102323135f85a13773b48be1185101f97eb9515a239817773ab1",
     "template_files": 251
   },
   "profiles": [

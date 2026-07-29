@@ -20,6 +20,8 @@ ROOT_STATE_SURFACES = ("BACKLOG-BOARD.md", "BACKLOG.md", "STATUS.md")
 SOURCE_ONLY_CHECKS = {"scripts/collaboration_governance_gate.py", "scripts/runtime_asset_usage.py"}
 LEGACY_ROOT_STATE_CHECKS = {"scripts/taskset_work_gate.py"}
 PORTABLE_STATE_CHECKS = {"scripts/state_sync_gate.py"}
+# Public compatibility projection used by existing host tests and extensions.
+ROOT_STATE_CHECKS = LEGACY_ROOT_STATE_CHECKS | PORTABLE_STATE_CHECKS
 PORTABLE_STATE_SURFACES = (
     "BACKLOG-BOARD.md",
     "agents/project/NEXT-SESSION-POINTER.yml",
@@ -58,8 +60,14 @@ def skip_reason(args: list[str]) -> str:
     ):
         missing = ", ".join(p for p in ROOT_STATE_SURFACES if not (ROOT / p).exists())
         return f"host checkout skip: root state surfaces absent ({missing})"
-    if script in PORTABLE_STATE_CHECKS and not all(
+    portable_state_present = all(
         (ROOT / p).exists() for p in PORTABLE_STATE_SURFACES
+    )
+    legacy_state_present = all((ROOT / p).exists() for p in ROOT_STATE_SURFACES)
+    if (
+        script in PORTABLE_STATE_CHECKS
+        and not portable_state_present
+        and not legacy_state_present
     ):
         missing = ", ".join(
             p for p in PORTABLE_STATE_SURFACES if not (ROOT / p).exists()
