@@ -9,18 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:34:46+09:00
-updated_at: 2026-07-30T00:20:04+09:00
+updated_at: 2026-07-30T00:23:19+09:00
+started_at: 2026-07-30T00:22:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md
 created_by: codex-root-v080-planner
 summary: Close the portable pointer, claim, sidecar, and gate continuity contract before any new consumer replay
 horizon: unit
 model_tier: worker_standard
-claim_refs: []
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-002220-task-ar-648-648008.json
 escalation_triggers:
   - cross_cutting
   - data_integrity

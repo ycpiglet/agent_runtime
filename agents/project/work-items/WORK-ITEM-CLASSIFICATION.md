@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T00:21:11+09:00
+generated_at: 2026-07-30T00:24:07+09:00
 record_count: 526
 ---
 
@@ -558,7 +558,7 @@ record_count: 526
 | 41.1.10.5 | Unit 41.1.10.5 | unit | `UNIT-TASK-AR-648-005` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md` | UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees |
 | 41.1.10.6 | Unit 41.1.10.6 | unit | `UNIT-TASK-AR-648-006` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md` | UNIT-TASK-AR-648-006 - Bean Wiki Green Replay Attempt 2 |
 | 41.1.10.7 | Unit 41.1.10.7 | unit | `UNIT-TASK-AR-648-007` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md` | UNIT-TASK-AR-648-007 - Blocked Unit Redispatch Guard |
-| 41.1.10.8 | Unit 41.1.10.8 | unit | `UNIT-TASK-AR-648-008` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md` | UNIT-TASK-AR-648-008 - Portable Continuity Contract |
+| 41.1.10.8 | Unit 41.1.10.8 | unit | `UNIT-TASK-AR-648-008` | `TASK-AR-648` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md` | UNIT-TASK-AR-648-008 - Portable Continuity Contract |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
