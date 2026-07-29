@@ -1,0 +1,73 @@
+{
+  "schema": "agent-runtime-pilot-isolation/v1",
+  "pilot_id": "bean-wiki-v080-green-attempt-5",
+  "observed_write_roots": [
+    "/home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-green-5"
+  ],
+  "checkouts": [
+    {
+      "id": "bean-attempt-5",
+      "role": "disposable_target",
+      "root": "/home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-green-5",
+      "before": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "after": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none"
+    },
+    {
+      "id": "bean-control-5",
+      "role": "frozen_control",
+      "root": "/home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-control-5",
+      "before": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "after": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none"
+    },
+    {
+      "id": "bean-primary",
+      "role": "live_observation",
+      "root": "/home/keti-itp-01/ycpiglet/bean-wiki",
+      "before": {
+        "head": "808309a7b41b80b901e79a1fa6ad546871187ab9",
+        "status_sha256": "a4590744fedfc3dd9fbd91b87f30ee40f878d8a51c92651a2e05713d41575c15",
+        "tracked_diff_sha256": "65a25c028a52d8da39dc7d595d4e7add3ee64cac70c1a531ee12a47e3d6ec995"
+      },
+      "after": {
+        "head": "808309a7b41b80b901e79a1fa6ad546871187ab9",
+        "status_sha256": "a4590744fedfc3dd9fbd91b87f30ee40f878d8a51c92651a2e05713d41575c15",
+        "tracked_diff_sha256": "65a25c028a52d8da39dc7d595d4e7add3ee64cac70c1a531ee12a47e3d6ec995"
+      },
+      "change_attribution": "none"
+    },
+    {
+      "id": "allimbot-primary",
+      "role": "live_observation",
+      "root": "/home/keti-itp-01/ycpiglet/allimbot",
+      "before": {
+        "head": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+        "status_sha256": "0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b",
+        "tracked_diff_sha256": "c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69"
+      },
+      "after": {
+        "head": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+        "status_sha256": "0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b",
+        "tracked_diff_sha256": "c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69"
+      },
+      "change_attribution": "none"
+    }
+  ]
+}
