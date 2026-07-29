@@ -26,9 +26,11 @@ not an opt-in per taskset.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import uuid
@@ -66,6 +68,18 @@ def _claim_autocommit_enabled() -> bool:
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
+SECURITY_SERVICE_GATE_SHA256 = (
+    "a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce"
+)
+SECURITY_SERVICE_GATE_MAX_BYTES = 64 * 1024
+SECURITY_SERVICE_GATE_BOOTSTRAP = (
+    "import sys\n"
+    "_gate_path = sys.argv[1]\n"
+    "sys.argv = sys.argv[1:]\n"
+    "_source = sys.stdin.buffer.read()\n"
+    "exec(compile(_source, _gate_path, 'exec'), "
+    "{'__name__': '__main__', '__file__': _gate_path})\n"
+)
 ACTIVE_STATUSES = {
     "assigned",
     "claimed",
@@ -699,13 +713,116 @@ def _security_service_refusal(
 ) -> bool:
     """Run the profile gate only when the security-service asset is installed."""
 
-    gate = root / "scripts" / "security_service_gate.py"
-    if not gate.exists() and not gate.is_symlink():
+    scripts = root / "scripts"
+    gate = scripts / "security_service_gate.py"
+    try:
+        scripts_before = scripts.lstat()
+    except FileNotFoundError:
         return False
-    if gate.is_symlink() or not gate.is_file():
+    except OSError:
         print(
-            "security-service claim gate is not a regular managed file; "
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; "
             "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if stat.S_ISLNK(scripts_before.st_mode) or not stat.S_ISDIR(
+        scripts_before.st_mode
+    ):
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    try:
+        gate_before = gate.lstat()
+    except FileNotFoundError:
+        try:
+            scripts_after = scripts.lstat()
+        except OSError:
+            scripts_after = None
+        if (
+            scripts_after is not None
+            and (scripts_before.st_dev, scripts_before.st_ino, scripts_before.st_mode)
+            == (scripts_after.st_dev, scripts_after.st_ino, scripts_after.st_mode)
+        ):
+            return False
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    except OSError:
+        gate_before = None
+
+    gate_source: str | None = None
+    if (
+        gate_before is not None
+        and not stat.S_ISLNK(gate_before.st_mode)
+        and stat.S_ISREG(gate_before.st_mode)
+        and gate_before.st_size <= SECURITY_SERVICE_GATE_MAX_BYTES
+    ):
+        try:
+            with gate.open("rb") as handle:
+                opened_before = os.fstat(handle.fileno())
+                payload = handle.read(SECURITY_SERVICE_GATE_MAX_BYTES + 1)
+                opened_after = os.fstat(handle.fileno())
+            gate_after = gate.lstat()
+            scripts_after = scripts.lstat()
+            gate_signature = (
+                gate_before.st_dev,
+                gate_before.st_ino,
+                gate_before.st_mode,
+                gate_before.st_size,
+                gate_before.st_mtime_ns,
+            )
+            if (
+                len(payload) <= SECURITY_SERVICE_GATE_MAX_BYTES
+                and gate_signature
+                == (
+                    opened_before.st_dev,
+                    opened_before.st_ino,
+                    opened_before.st_mode,
+                    opened_before.st_size,
+                    opened_before.st_mtime_ns,
+                )
+                == (
+                    opened_after.st_dev,
+                    opened_after.st_ino,
+                    opened_after.st_mode,
+                    opened_after.st_size,
+                    opened_after.st_mtime_ns,
+                )
+                == (
+                    gate_after.st_dev,
+                    gate_after.st_ino,
+                    gate_after.st_mode,
+                    gate_after.st_size,
+                    gate_after.st_mtime_ns,
+                )
+                and (
+                    scripts_before.st_dev,
+                    scripts_before.st_ino,
+                    scripts_before.st_mode,
+                )
+                == (
+                    scripts_after.st_dev,
+                    scripts_after.st_ino,
+                    scripts_after.st_mode,
+                )
+                and hashlib.sha256(payload).hexdigest()
+                == SECURITY_SERVICE_GATE_SHA256
+            ):
+                gate_source = payload.decode("utf-8")
+        except (OSError, UnicodeError):
+            gate_source = None
+    if gate_source is None:
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
             file=sys.stderr,
         )
         return True
@@ -723,6 +840,8 @@ def _security_service_refusal(
         return True
     command = [
         sys.executable,
+        "-c",
+        SECURITY_SERVICE_GATE_BOOTSTRAP,
         str(gate),
         "--root",
         str(root),
@@ -743,6 +862,7 @@ def _security_service_refusal(
             text=True,
             encoding="utf-8",
             errors="replace",
+            input=gate_source,
             timeout=20,
         )
     except (OSError, subprocess.SubprocessError):

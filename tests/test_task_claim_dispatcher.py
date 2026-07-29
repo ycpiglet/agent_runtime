@@ -136,11 +136,8 @@ def _install_real_security_gate(root: Path) -> None:
     )
     gate = root / "scripts" / "security_service_gate.py"
     gate.parent.mkdir(parents=True, exist_ok=True)
-    gate.write_text(
-        "import runpy\n"
-        f"runpy.run_path({str(REPO_ROOT / 'scripts' / 'security_service_gate.py')!r}, "
-        "run_name='__main__')\n",
-        encoding="utf-8",
+    gate.write_bytes(
+        (REPO_ROOT / "scripts" / "security_service_gate.py").read_bytes()
     )
 
 
@@ -555,14 +552,15 @@ def test_create_claim_runs_installed_security_service_gate_before_persistence(
     task_id = "TASK-AR-647"
     _write_worktree(tmp_path, task_id)
     unit_rel = _write_routing_work(tmp_path, task_id)
-    gate = tmp_path / "scripts" / "security_service_gate.py"
-    gate.parent.mkdir(parents=True, exist_ok=True)
-    gate.write_text(
-        "import sys\n"
-        "print('managed security gate refused risky unit', file=sys.stderr)\n"
-        "raise SystemExit(1)\n",
+    unit = tmp_path / unit_rel
+    unit.write_text(
+        unit.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - .env.production",
+        ),
         encoding="utf-8",
     )
+    _install_real_security_gate(tmp_path)
 
     result = _run_dispatcher(
         tmp_path,
@@ -584,7 +582,7 @@ def test_create_claim_runs_installed_security_service_gate_before_persistence(
 
     assert result.returncode == 1
     assert "security-service claim gate refused claim creation" in result.stderr
-    assert "managed security gate refused risky unit" in result.stderr
+    assert ".env.production" in result.stderr
     claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
     assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
 
@@ -597,9 +595,7 @@ def test_installed_security_profile_refuses_claim_without_unit_spec(
     )
     task_id = "TASK-AR-648"
     _write_worktree(tmp_path, task_id)
-    gate = tmp_path / "scripts" / "security_service_gate.py"
-    gate.parent.mkdir(parents=True, exist_ok=True)
-    gate.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    _install_real_security_gate(tmp_path)
 
     result = _run_dispatcher(
         tmp_path,
@@ -659,6 +655,84 @@ def test_non_regular_installed_security_gate_refuses_claim(
     assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
 
 
+def test_symlinked_security_gate_parent_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    external_scripts = tmp_path / "external-scripts"
+    external_scripts.mkdir()
+    (external_scripts / "security_service_gate.py").write_text(
+        "raise SystemExit(0)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "scripts").symlink_to(external_scripts, target_is_directory=True)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:40+09:00",
+        "--suffix",
+        "security-gate-parent-link",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "not a regular managed file" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_drifted_regular_security_gate_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    gate = tmp_path / "scripts" / "security_service_gate.py"
+    gate.parent.mkdir(parents=True)
+    gate.write_text("raise SystemExit(0)\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:50+09:00",
+        "--suffix",
+        "security-gate-drift",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "drifted" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
 def test_malformed_host_config_blocks_at_claim_dispatch_seam(
     tmp_path: Path,
 ) -> None:
@@ -668,30 +742,12 @@ def test_malformed_host_config_blocks_at_claim_dispatch_seam(
     task_id = "TASK-AR-649"
     _write_worktree(tmp_path, task_id)
     unit_rel = _write_routing_work(tmp_path, task_id)
-    policy = tmp_path / "agents" / "project" / "SECURITY-SERVICE-POLICY.json"
-    policy.parent.mkdir(parents=True, exist_ok=True)
-    policy.write_text(
-        (
-            REPO_ROOT
-            / "agents"
-            / "project"
-            / "SECURITY-SERVICE-POLICY.json"
-        ).read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
+    _install_real_security_gate(tmp_path)
     (tmp_path / "agent_runtime.yml").write_text(
         "schema: agent-runtime-config/v2\n"
         "project: broken\n"
         "host:\n"
         "  risk_paths: nope\n",
-        encoding="utf-8",
-    )
-    gate = tmp_path / "scripts" / "security_service_gate.py"
-    gate.parent.mkdir(parents=True, exist_ok=True)
-    gate.write_text(
-        "import runpy\n"
-        f"runpy.run_path({str(REPO_ROOT / 'scripts' / 'security_service_gate.py')!r}, "
-        "run_name='__main__')\n",
         encoding="utf-8",
     )
 

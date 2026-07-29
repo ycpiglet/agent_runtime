@@ -11,6 +11,7 @@ import functools
 import importlib
 import json
 import math
+import os
 import re
 import stat
 import sys
@@ -36,6 +37,16 @@ _SEMANTIC_RELEASE = re.compile(
     r"(?:0|[1-9][0-9]{0,3}))?$"
 )
 _SHA256_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_ORG_MODEL_SCHEMA = "agent-runtime-org-model/v1"
+_ORG_MODEL_MAX_BYTES = 128 * 1024
+_ORG_MODEL_MAX_ENTRIES = 512
+_ORG_MODEL_MAX_LIST_ITEMS = 512
+_ORG_MODEL_TOP_LEVEL_KEYS = frozenset(
+    {"schema", "updated_at", "tiers", "teams", "roles"}
+)
+_ORG_MODEL_TEAM_KEYS = frozenset({"id", "display_name"})
+_ORG_MODEL_ROLE_KEYS = frozenset({"id", "tier", "team", "aliases"})
+_ORG_MODEL_ALIAS = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
 _SYSTEM_TASK_IDS = frozenset(
     {"agent-runtime", "owner-governance", "unscoped"}
 )
@@ -242,6 +253,209 @@ def _task_id(value: object, root: Path | None) -> str:
     return value
 
 
+def _read_bounded_regular_file(path: Path, max_bytes: int) -> str:
+    """Read one stable, non-symlink file snapshot without crossing the bound."""
+
+    before = path.lstat()
+    if stat.S_ISLNK(before.st_mode) or not stat.S_ISREG(before.st_mode):
+        raise OSError("not a regular file")
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(path, flags)
+    try:
+        opened_before = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened_before.st_mode)
+            or (opened_before.st_dev, opened_before.st_ino)
+            != (before.st_dev, before.st_ino)
+            or opened_before.st_size > max_bytes
+        ):
+            raise OSError("file changed before it could be read")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read(max_bytes + 1)
+        opened_after = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    after = path.lstat()
+    before_signature = (
+        before.st_dev,
+        before.st_ino,
+        before.st_mode,
+        before.st_size,
+        before.st_mtime_ns,
+    )
+    opened_before_signature = (
+        opened_before.st_dev,
+        opened_before.st_ino,
+        opened_before.st_mode,
+        opened_before.st_size,
+        opened_before.st_mtime_ns,
+    )
+    opened_after_signature = (
+        opened_after.st_dev,
+        opened_after.st_ino,
+        opened_after.st_mode,
+        opened_after.st_size,
+        opened_after.st_mtime_ns,
+    )
+    after_signature = (
+        after.st_dev,
+        after.st_ino,
+        after.st_mode,
+        after.st_size,
+        after.st_mtime_ns,
+    )
+    if (
+        len(payload) > max_bytes
+        or before_signature != opened_before_signature
+        or opened_before_signature != opened_after_signature
+        or opened_after_signature != after_signature
+    ):
+        raise OSError("file changed while it was read")
+    return payload.decode("utf-8")
+
+
+def _org_inline_list(value: str, *, allow_empty: bool) -> tuple[str, ...]:
+    if len(value) > 16 * 1024 or not value.startswith("[") or not value.endswith("]"):
+        raise ValueError("unsupported inline list")
+    body = value[1:-1]
+    if not body.strip():
+        if allow_empty and not body:
+            return ()
+        raise ValueError("empty inline list")
+    raw_items = body.split(",")
+    if len(raw_items) > _ORG_MODEL_MAX_LIST_ITEMS:
+        raise ValueError("inline list exceeds bound")
+    items = tuple(item.strip() for item in raw_items)
+    if (
+        any(_ORG_MODEL_ALIAS.fullmatch(item) is None for item in items)
+        or len(items) != len(set(items))
+    ):
+        raise ValueError("invalid or duplicate inline-list item")
+    return items
+
+
+def _org_scalar(value: str) -> str:
+    if (
+        not 1 <= len(value) <= 128
+        or value != value.strip()
+        or any(ord(character) < 32 for character in value)
+        or any(character in "[]{}#" for character in value)
+    ):
+        raise ValueError("invalid scalar")
+    return value
+
+
+def _parse_org_model(text: str) -> frozenset[str]:
+    """Parse the deliberately small ORG-MODEL subset used for authorization."""
+
+    if "\x00" in text or "\t" in text:
+        raise ValueError("unsupported character")
+    top: dict[str, object] = {}
+    entries: dict[str, list[dict[str, object]]] = {"teams": [], "roles": []}
+    section: str | None = None
+    active: dict[str, object] | None = None
+
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line:
+            continue
+        indentation = len(line) - len(line.lstrip(" "))
+        if indentation == 0:
+            match = re.fullmatch(r"([a-z_]+):(.*)", line)
+            if match is None:
+                raise ValueError("malformed top-level entry")
+            key, raw_value = match.groups()
+            if (
+                key not in _ORG_MODEL_TOP_LEVEL_KEYS
+                or key in top
+                or (raw_value and not raw_value.startswith(" "))
+            ):
+                raise ValueError("unsupported or duplicate top-level entry")
+            value = raw_value[1:] if raw_value else ""
+            if key in {"teams", "roles"}:
+                if value:
+                    raise ValueError("list section must not have a scalar value")
+                top[key] = entries[key]
+                section = key
+                active = None
+            else:
+                if not value:
+                    raise ValueError("top-level scalar is missing")
+                if key == "tiers":
+                    top[key] = _org_inline_list(value, allow_empty=False)
+                else:
+                    top[key] = _org_scalar(value)
+                section = None
+                active = None
+            continue
+
+        if indentation == 2:
+            if section not in entries:
+                raise ValueError("list item is outside a supported section")
+            match = re.fullmatch(r"  - id: ([a-z][a-z0-9-]{0,63})", line)
+            if match is None:
+                raise ValueError("unsupported nested or malformed list item")
+            if len(entries[section]) >= _ORG_MODEL_MAX_ENTRIES:
+                raise ValueError("section exceeds entry bound")
+            active = {"id": match.group(1)}
+            entries[section].append(active)
+            continue
+
+        if indentation == 4:
+            if section not in entries or active is None:
+                raise ValueError("property is outside a direct list item")
+            match = re.fullmatch(r"    ([a-z_]+): (.+)", line)
+            if match is None:
+                raise ValueError("malformed list-item property")
+            key, value = match.groups()
+            allowed = (
+                _ORG_MODEL_TEAM_KEYS
+                if section == "teams"
+                else _ORG_MODEL_ROLE_KEYS
+            )
+            if key == "id" or key not in allowed or key in active:
+                raise ValueError("unsupported or duplicate list-item property")
+            active[key] = (
+                _org_inline_list(value, allow_empty=True)
+                if key == "aliases"
+                else _org_scalar(value)
+            )
+            continue
+
+        raise ValueError("unsupported indentation")
+
+    if set(top) != _ORG_MODEL_TOP_LEVEL_KEYS:
+        raise ValueError("required top-level entry is missing")
+    if top["schema"] != _ORG_MODEL_SCHEMA:
+        raise ValueError("unsupported schema")
+    tiers = top["tiers"]
+    teams = entries["teams"]
+    roles = entries["roles"]
+    if (
+        not isinstance(tiers, tuple)
+        or not tiers
+        or any(_ROLE_IDENTIFIER.fullmatch(tier) is None for tier in tiers)
+        or not teams
+        or not roles
+        or any(set(team) != _ORG_MODEL_TEAM_KEYS for team in teams)
+        or any(set(role) != _ORG_MODEL_ROLE_KEYS for role in roles)
+    ):
+        raise ValueError("registry contains an incomplete section or entry")
+
+    team_ids = tuple(str(team["id"]) for team in teams)
+    role_ids = tuple(str(role["id"]) for role in roles)
+    if len(team_ids) != len(set(team_ids)) or len(role_ids) != len(set(role_ids)):
+        raise ValueError("registry contains duplicate identifiers")
+    tier_ids = frozenset(tiers)
+    team_id_set = frozenset(team_ids)
+    for role in roles:
+        if role["tier"] not in tier_ids or role["team"] not in team_id_set:
+            raise ValueError("role references an unregistered tier or team")
+    return frozenset(role_ids)
+
+
 def _registered_owner_roles(root: Path) -> frozenset[str]:
     registry = _regular_file(
         root,
@@ -249,32 +463,12 @@ def _registered_owner_roles(root: Path) -> frozenset[str]:
         "owner_role",
     )
     try:
-        lines = registry.read_text(encoding="utf-8").splitlines()
-    except (OSError, UnicodeError) as exc:
+        text = _read_bounded_regular_file(registry, _ORG_MODEL_MAX_BYTES)
+        return _parse_org_model(text)
+    except (OSError, UnicodeError, ValueError) as exc:
         raise EventPolicyError(
             "owner_role registry is unavailable or malformed"
         ) from exc
-
-    schema_ok = False
-    in_roles = False
-    roles: list[str] = []
-    for raw_line in lines:
-        line = raw_line.split("#", 1)[0].rstrip()
-        if not line:
-            continue
-        if not line.startswith(" "):
-            if line == "schema: agent-runtime-org-model/v1":
-                schema_ok = True
-            in_roles = line == "roles:"
-            continue
-        if not in_roles:
-            continue
-        match = re.fullmatch(r"  - id: ([a-z][a-z0-9-]{0,63})", line)
-        if match:
-            roles.append(match.group(1))
-    if not schema_ok or not roles or len(roles) != len(set(roles)):
-        raise EventPolicyError("owner_role registry is unavailable or malformed")
-    return frozenset(roles)
 
 
 def _managed_value(

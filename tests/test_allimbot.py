@@ -28,6 +28,22 @@ EVENT_UUID = "123e4567-e89b-12d3-a456-426614174000"
 SESSION_UUID = "123e4567-e89b-12d3-a456-426614174001"
 TURN_UUID = "123e4567-e89b-12d3-a456-426614174002"
 DEDUPE_SHA256 = "a" * 64
+ORG_ROLE_ENTRY = (
+    "  - id: lead-engineer\n"
+    "    tier: planner\n"
+    "    team: engineering\n"
+    "    aliases: [lead, lead_engineer]\n"
+)
+VALID_ORG_MODEL = (
+    "schema: agent-runtime-org-model/v1\n"
+    "updated_at: 2026-07-29T00:00:00+09:00\n"
+    "tiers: [director, planner]\n"
+    "teams:\n"
+    "  - id: engineering\n"
+    "    display_name: Engineering\n"
+    "roles:\n"
+    f"{ORG_ROLE_ENTRY}"
+)
 
 
 def _load_template_client():
@@ -385,13 +401,7 @@ def test_registered_task_and_owner_role_are_resolved_from_runtime_ssot(
     task.write_text("---\nwork_id: TASK-AR-647\n---\n", encoding="utf-8")
     registry = tmp_path / "agents" / "project" / "ORG-MODEL.yml"
     registry.parent.mkdir(parents=True)
-    registry.write_text(
-        "schema: agent-runtime-org-model/v1\n"
-        "roles:\n"
-        "  - id: lead-engineer\n"
-        "    tier: planner\n",
-        encoding="utf-8",
-    )
+    registry.write_text(VALID_ORG_MODEL, encoding="utf-8")
     calls: list[tuple] = []
     monkeypatch.setattr(
         allimbot.importlib,
@@ -418,6 +428,108 @@ def test_registered_task_and_owner_role_are_resolved_from_runtime_ssot(
     assert emitted[3]["session_id"] == SESSION_UUID
     assert emitted[3]["turn_id"] == TURN_UUID
     assert emitted[3]["dedupe_key"] == DEDUPE_SHA256
+
+
+@pytest.mark.parametrize(
+    "registry_text",
+    [
+        VALID_ORG_MODEL + "this is not yaml\n",
+        VALID_ORG_MODEL.replace(
+            ORG_ROLE_ENTRY,
+            "  child:\n"
+            "    - id: discord\n",
+        ),
+        VALID_ORG_MODEL + "roles:\n",
+        VALID_ORG_MODEL.replace(
+            "    aliases: [lead, lead_engineer]\n",
+            "",
+        ),
+        VALID_ORG_MODEL.replace(
+            "    aliases: [lead, lead_engineer]\n",
+            "    aliases: lead\n",
+        ),
+        VALID_ORG_MODEL.replace(
+            "    display_name: Engineering\n",
+            "    display_name:\n",
+        ),
+        VALID_ORG_MODEL.replace(ORG_ROLE_ENTRY, ""),
+    ],
+    ids=[
+        "trailing-garbage",
+        "nested-role-id",
+        "duplicate-roles-section",
+        "incomplete-role",
+        "malformed-alias-list",
+        "missing-team-scalar",
+        "empty-roles",
+    ],
+)
+def test_malformed_owner_registry_fails_before_optional_import(
+    tmp_path,
+    monkeypatch,
+    registry_text: str,
+) -> None:
+    registry = tmp_path / "agents" / "project" / "ORG-MODEL.yml"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(registry_text, encoding="utf-8")
+
+    def unexpected_import(_name):
+        raise AssertionError("malformed registry must not reach emitter construction")
+
+    monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
+    with pytest.raises(allimbot.EventPolicyError, match="registry"):
+        allimbot.emit_event(
+            "task.state.changed",
+            {
+                "task_id": "agent-runtime",
+                "from_state": "review",
+                "to_state": "completed",
+                "owner_role": "lead-engineer",
+            },
+            root=tmp_path,
+        )
+
+
+def test_symlinked_owner_registry_fails_before_optional_import(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    external = tmp_path / "outside-org-model.yml"
+    external.write_text(VALID_ORG_MODEL, encoding="utf-8")
+    registry = tmp_path / "agents" / "project" / "ORG-MODEL.yml"
+    registry.parent.mkdir(parents=True)
+    registry.symlink_to(external)
+
+    def unexpected_import(_name):
+        raise AssertionError("symlinked registry must not reach emitter construction")
+
+    monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
+    with pytest.raises(allimbot.EventPolicyError, match="registered"):
+        allimbot.emit_event(
+            "attention.required",
+            {
+                "task_id": "agent-runtime",
+                "attention_kind": "governance-block",
+                "owner_role": "lead-engineer",
+                "state": "blocked",
+            },
+            root=tmp_path,
+        )
+
+
+@pytest.mark.parametrize(
+    "registry",
+    [
+        ROOT / "agents" / "project" / "ORG-MODEL.yml",
+        TEMPLATE_ROOT / "agents" / "project" / "ORG-MODEL.yml",
+    ],
+)
+def test_managed_owner_registries_conform_to_strict_authorization_shape(
+    registry: Path,
+) -> None:
+    roles = allimbot._parse_org_model(registry.read_text(encoding="utf-8"))
+
+    assert "lead-engineer" in roles
 
 
 def test_managed_gate_and_semantic_release_are_accepted(monkeypatch) -> None:
