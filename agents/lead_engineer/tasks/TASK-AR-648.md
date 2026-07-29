@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T21:57:00+09:00
+updated_at: 2026-07-29T22:03:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -74,8 +74,9 @@ claim_refs:
   and a task-linked Compound record, but independent W4b rejected that product
   because its private ref publication omitted the actual worktree `HEAD`
   reflog. UNIT-005 now adds normal and linked-worktree reflog parity inside
-  the protected publication boundary. Bean replay moves to a separate unit
-  only after a new W4a and independent W4b approve a new exact product SHA.
+  the protected publication boundary; RED-R4 deterministically fails both
+  reflog parity tests on the rejected product. Bean replay moves to a separate
+  unit only after a new W4a and independent W4b approve a new exact product SHA.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

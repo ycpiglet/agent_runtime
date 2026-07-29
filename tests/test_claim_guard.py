@@ -27,6 +27,12 @@ def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=str(root), capture_output=True, text=True)
 
 
+def _reflog_rows(root: Path, ref: str) -> list[str]:
+    result = _git(root, "reflog", "show", "--format=%H%x00%gs", ref)
+    assert result.returncode == 0, result.stderr
+    return result.stdout.splitlines()
+
+
 def _init_repo(tmp_path: Path) -> Path:
     _git(tmp_path, "init", "-q")
     _git(tmp_path, "config", "user.email", "t@example.com")
@@ -638,6 +644,37 @@ def test_post_commit_hook_cannot_switch_symbolic_head_after_publication(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
+def test_explicit_claim_transaction_updates_actual_head_and_branch_reflogs(
+    tmp_path: Path,
+) -> None:
+    """Crash-safe publication must retain native worktree recovery semantics."""
+
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    symbolic_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    head_before = _reflog_rows(tmp_path, "HEAD")
+    branch_before = _reflog_rows(tmp_path, symbolic_ref)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    expected = (
+        f"{result['commit']}\x00"
+        "claim-guard: chore(claim): persist CLAIM-runtime-hook "
+        "(crash-safety guard)"
+    )
+    head_after = _reflog_rows(tmp_path, "HEAD")
+    branch_after = _reflog_rows(tmp_path, symbolic_ref)
+    assert head_after == [expected, *head_before]
+    assert branch_after == [expected, *branch_before]
+
+
 def test_explicit_claim_transaction_respects_external_head_lock(
     tmp_path: Path,
 ) -> None:
@@ -792,6 +829,52 @@ def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
         == start_head
     )
     assert not list(_transaction_dir(linked).glob("*"))
+
+
+def test_linked_claim_transaction_updates_only_its_actual_head_reflog(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    linked = tmp_path / "linked"
+    source.mkdir()
+    _init_repo(source)
+    added = _git(
+        source,
+        "worktree",
+        "add",
+        "-q",
+        "-b",
+        "claim-linked",
+        str(linked),
+    )
+    assert added.returncode == 0, added.stderr
+    _install_runtime_gate_hook(linked)
+    assert (
+        _git(linked, "config", "extensions.worktreeConfig", "true").returncode
+        == 0
+    )
+    symbolic_ref = _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    source_head_before = _reflog_rows(source, "HEAD")
+    linked_head_before = _reflog_rows(linked, "HEAD")
+    branch_before = _reflog_rows(linked, symbolic_ref)
+    claim, handoff, log = _write_runtime_claim(linked)
+
+    result = claim_guard.commit_claim_artifacts(
+        linked,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    expected = (
+        f"{result['commit']}\x00"
+        "claim-guard: chore(claim): persist CLAIM-runtime-hook "
+        "(crash-safety guard)"
+    )
+    assert _reflog_rows(linked, "HEAD") == [expected, *linked_head_before]
+    assert _reflog_rows(linked, symbolic_ref) == [expected, *branch_before]
+    assert _reflog_rows(source, "HEAD") == source_head_before
 
 
 def test_claim_transaction_ignores_repository_redirecting_environment(
