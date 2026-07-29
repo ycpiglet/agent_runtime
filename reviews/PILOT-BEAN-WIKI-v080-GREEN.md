@@ -123,3 +123,19 @@ behavior.
 Register, claim, implement, and independently verify the Runtime-only repair.
 Then create a fresh pinned product worktree and Bean attempt 4; keep every
 earlier attempt and Allimbot read-only.
+
+## Runtime Repair Disposition
+
+The attempt-3 verdict remains immutable failure evidence. Its blocker was
+repaired only in Agent Runtime UNIT-010 at exact product
+`dd279cd5613578c87ed6c4c24b37325084449d82`, tree
+`ea843b6ca5661f04179376df92a11f4416217ab1`.
+
+Canonical verification passed with focused counts `23`, `82`, and `167`, plus
+the complete Runtime suite at `2692 passed, 3 skipped`. Independent W4b
+approved the same exact product at 99/100 with no P0/P1:
+`reviews/W4B-2026-07-30-unit-task-ar-648-010.md`.
+
+This repair does not convert attempt 3 into a passing pilot and does not
+authorize a consumer-side document edit. It clears only the prerequisite for
+a separately registered, fresh attempt 4 from Bean baseline `357eee4`.

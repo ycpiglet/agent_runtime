@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T01:58:46+09:00
-updated_at: 2026-07-30T02:27:30+09:00
+updated_at: 2026-07-30T02:40:00+09:00
 started_at: 2026-07-30T02:02:55+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-009.md
@@ -83,6 +83,17 @@ verified_at: 2026-07-30T02:24:00+09:00
 verified_by: codex-root-task-ar-648-010
 evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-010.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-010.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808.json
+defect_signatures:
+  - defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab
+resolution: done
+completed_at: 2026-07-30T02:40:00+09:00
+closed_by: codex-root-task-ar-648-010
+measurement_unavailable_reason: UNIT-010 execution occurred inside the broader TASK-AR-648 remediation session without reliable per-unit wall-clock or token metering; no provider usage was observed.
 ---
 
 # UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract
@@ -154,3 +165,21 @@ counts, W4a, and independent W4b.
 
 Do not weaken pointer enforcement, add a blanket host skip, edit a Bean
 checkout, touch Allimbot, or perform any release/external action.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T02:40:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: UNIT-010 execution occurred inside the broader TASK-AR-648 remediation session without reliable per-unit wall-clock or token metering; no provider usage was observed.
+- Closed by: `codex-root-task-ar-648-010`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json`
+- Reviews:
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-010.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-010.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808.json`
+<!-- work-close:end -->

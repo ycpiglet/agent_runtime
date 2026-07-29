@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T02:02:55+09:00
+updated_at: 2026-07-30T02:40:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -112,15 +112,23 @@ claim_refs:
   `a3a5eebe0584a7d5359a15c43f205b9770b7cbce` then passed W4a,
   independent W4b at 99/100 with no P0/P1, and canonical verification
   (`113` selector, `83` claim/readiness, full `2658 passed, 3 skipped`).
-  UNIT-007 is completed and its claim is released. The canonical next unit is
-  UNIT-008, which closed the portable-continuity contract at exact product
+  UNIT-007 is completed and its claim is released. UNIT-008 then closed the
+  portable-continuity contract at exact product
   `b82042eba58f1e06e1e73130a189cb72245462a0`. Canonical W4a, fresh
   independent W4b at 99/100, and canonical six-command verification passed
-  with no P0/P1; its claim is released and the unit is completed. UNIT-009 is
-  now the only runnable unit and governs a fresh Bean attempt 3 from the
-  original pinned baseline. No Bean worktree may be created until UNIT-009 is
-  T3-anchored, selected by the canonical plan, and claimed without moving
-  Runtime HEAD.
+  with no P0/P1. UNIT-009 replayed Bean from the original pinned baseline and
+  passed adoption, lock, doctor, standby/active pointer continuity, state sync,
+  Scribe, RBAC, and preservation, but the installed continuity gate imposed
+  Runtime source wording on Bean's host-owned documentation. Independent W4b
+  froze attempt 3 as `BLOCK / P1` with no consumer workaround.
+  UNIT-010 repaired only that source/consumer ownership boundary at exact
+  product `dd279cd5613578c87ed6c4c24b37325084449d82`. It requires agreeing v2
+  config and lock provenance plus digest-matched managed Runtime contracts,
+  keeps source and pointer checks strict, and preserves host-owned project
+  documents. Canonical verification and independent W4b both passed; W4b
+  scored 99/100 with no P0/P1. UNIT-010 is closed. The next action is a
+  separately registered attempt-4 replay from Bean baseline `357eee4`; the
+  first three attempts and Allimbot remain frozen until that replay passes.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 
