@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T03:41:11+09:00",
+  "generated_at": "2026-07-30T03:43:09+09:00",
   "record_count": 530,
   "finding_count": 0,
   "findings": [],
@@ -5767,7 +5767,7 @@
       "title": "UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md",
       "parent_id": "TASK-AR-648",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-649",

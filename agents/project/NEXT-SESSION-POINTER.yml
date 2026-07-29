@@ -1,25 +1,47 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T03:38:47+09:00
-updated_by: codex-root-task-ar-648-012-planner
+updated_at: 2026-07-30T03:42:14+09:00
+updated_by: codex-root-task-ar-648-012
 current_state:
-  summary: "UNIT-012 is registered to repair packaged mirror parity and causal pilot isolation before another Bean replay."
+  summary: "UNIT-012 is claimed after T3/readiness/selector approval; Runtime RED regressions are next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
+  step_index: 2
   step_total: 6
-  progress_pct: 10
-  status_text: "UNIT-012 registered; T3/readiness/claim are next. Bean attempt 4 remains frozen and Allimbot remains blocked."
+  progress_pct: 15
+  status_text: "Default Runtime claim persisted in working-tree mode with unchanged HEAD; no consumer checkout is targeted."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: "CLAIM-20260730-034214-task-ar-648-648012"
+      agent_role: "lead-engineer"
+      team_id: "evaluation-office"
+      agent_instance_id: "codex-root-task-ar-648-012"
+      display_name: "TASK-AR-648 mirror isolation repair"
+      callsite_id: "codex:root:task-ar-648:unit-012"
+      pane_id: "codex:root:task-ar-648:unit-012"
+      task_id: "TASK-AR-648"
+      unit_id: "UNIT-TASK-AR-648-012"
+      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+      status: "claimed"
+      phase: "unit-claimed"
+      progress_pct: 5
+      step_index: 2
+      step_total: 6
+      status_text: "UNIT-012 claimed; RED mirror and isolation regressions next"
+      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+      branch: "codex/unit-task-ar-648-002-implementation"
+      claim_path: "agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json"
+      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.handoff.md"
+      log_path: "agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.log.md"
+      last_heartbeat: "2026-07-30T03:42:14+09:00"
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Work only in Runtime for UNIT-012. Never mutate Bean primary or frozen attempts 1-4, Autofolio, or Allimbot. Obtain exact-product W4a/W4b before creating a fresh Bean attempt 5 from 357eee4."
   next_actions:
-    - "T3-anchor, readiness-check, select, and claim UNIT-TASK-AR-648-012 without moving Runtime HEAD."
-    - "Implement and verify digest-pinned template mirror parity plus causal pilot isolation."
+    - "Add fail-before mirror, packaged timestamp/work-now, and pilot-isolation regressions."
+    - "Implement and verify digest-pinned template mirror parity plus causal pilot isolation on one exact Runtime product."
     - "Keep Bean attempt 5 and Allimbot frozen until the Runtime repair independently passes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -27,7 +49,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - "agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json"
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

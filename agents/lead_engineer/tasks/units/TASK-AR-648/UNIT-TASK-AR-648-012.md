@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T03:38:47+09:00
-updated_at: 2026-07-30T03:38:47+09:00
+updated_at: 2026-07-30T03:42:14+09:00
+started_at: 2026-07-30T03:42:14+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-011.md
 created_by: codex-root-v080-planner
 summary: Enforce packaged script mirror parity and replace the live-primary immutability oracle with a causal pilot-isolation contract
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json
 escalation_triggers:
   - cross_cutting
   - data_integrity
