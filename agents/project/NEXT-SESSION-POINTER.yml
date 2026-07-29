@@ -1,25 +1,25 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T18:40:02+09:00
-updated_by: codex-root-task-ar-648-003
+updated_at: 2026-07-29T19:50:26+09:00
+updated_by: codex-root-task-ar-648-004
 current_state:
-  summary: "TASK-AR-648 UNIT-003 is claimed to repair implicit consumer SCM mutation and installed state runtime portability before Bean replay attempt 2."
+  summary: "TASK-AR-648 UNIT-004 is claimed to align overlay claim durability and explicit claim-commit transactions before Bean replay attempt 2."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 1
-  step_total: 9
-  progress_pct: 5
-  status_text: "Second remediation claim is projected; add red-first SCM and installed-host portability regressions."
+  step_total: 10
+  progress_pct: 0
+  status_text: "Overlay and explicit claim-commit P0 repair is claimed; write red-first producer-to-gate regressions before product edits."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260729-184002-task-ar-648-648003
+    - claim_id: CLAIM-20260729-195026-task-ar-648-648004
       agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-648-003
+      agent_instance_id: codex-root-task-ar-648-004
       display_name: codex-root@orchestrator-01
-      callsite_id: codex:root:task-ar-648-003
-      pane_id: codex:task-ar-648-003
+      callsite_id: codex:root:task-ar-648-004
+      pane_id: codex:task-ar-648-004
       task_id: TASK-AR-648
-      unit_id: UNIT-TASK-AR-648-003
+      unit_id: UNIT-TASK-AR-648-004
       worktree_path: .
       branch: codex/unit-task-ar-648-002-implementation
   current_teams:
@@ -35,7 +35,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
+    - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

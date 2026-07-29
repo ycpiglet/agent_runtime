@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T19:42:00+09:00
+updated_at: 2026-07-29T19:50:26+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -37,6 +37,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-153641-task-ar-648-648001.json
   - agents/runtime/task_claims/CLAIM-20260729-171404-task-ar-648-648002.json
   - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
+  - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -56,9 +57,10 @@ claim_refs:
   repair, but the resulting high-risk release exposed a self-blocking
   auto-review overlay claim and stopped the Bean replay.
 - `UNIT-TASK-AR-648-004` aligns role-routing overlay claims with the canonical
-  gate/persistence contract, then repeats the replay in a second fresh Bean
-  Wiki worktree. P1 profile, overlay-execution, and provider-observability work
-  remains separately queued.
+  gate/persistence contract and makes explicit claim commits pass only within
+  an exact transaction-scoped pre-commit context, then repeats the replay in a
+  second fresh Bean Wiki worktree. P1 profile, overlay-execution, and
+  provider-observability work remains separately queued.
 
 ## Goal
 

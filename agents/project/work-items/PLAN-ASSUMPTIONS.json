@@ -921,7 +921,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-          "value": "d20b48dc6f7c663209fc42788f20e2eff0b410adf0d25fd56500212be96cd994"
+          "value": "09cfef0607236ab35c0f8279f00df302805ef4825fd91153e471498d36d6c8e9"
         },
         {
           "kind": "sha256",
@@ -951,17 +951,42 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "e0aac9711f0bbdd84d6a8fbca6935500be29dd1b4e93d8b0106f879d931f54f8"
+          "value": "2398b5af7d52d33dd9b803c04610586a28586db7971f0fc85a0b937627a2b294"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
-          "value": "e85064fdde86c183ae69456049999d58fc98bc9947f6cc89920f730f00188c22"
+          "value": "69c3993cc3c6493d549b9779eedb55e6d56aebb7cf96f94c6c4311b01e44fb37"
         },
         {
           "kind": "sha256",
           "path": "scripts/role_routing.py",
           "value": "666e8aea824c9d41b0efb6143f9df566589ddceb1d030db76839cb2f9c769660"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_guard.py",
+          "value": "0847f45c722e94cf356cc99355bacea03fedab1c79cd6cc7abb77a60dbca4232"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "88b10afeef39717c3c57298f05419dbc7fbff30f16d65b45004ced31000cbaef"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "88b10afeef39717c3c57298f05419dbc7fbff30f16d65b45004ced31000cbaef"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_claim_guard.py",
+          "value": "0794e69738551829124c7b3154815b37aebf92b94ad2f6dee6a1854e1b47ee3d"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_task_claim_dispatcher.py",
+          "value": "e170dcada67f07b06e3e709d49d8d6e7dc4d28a2fa73ec960a725dd720ed19fc"
         },
         {
           "kind": "sha256",
@@ -1015,7 +1040,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-      "recorded_at": "2026-07-29T19:44:08+09:00",
+      "recorded_at": "2026-07-29T19:52:24+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1231,5 +1256,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T19:44:08+09:00"
+  "updated_at": "2026-07-29T19:52:24+09:00"
 }

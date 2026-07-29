@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-29T19:43:21+09:00
+generated_at: 2026-07-29T19:53:07+09:00
 record_count: 522
 ---
 
@@ -554,7 +554,7 @@ record_count: 522
 | 41.1.10.1 | Unit 41.1.10.1 | unit | `UNIT-TASK-AR-648-001` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md` | UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki |
 | 41.1.10.2 | Unit 41.1.10.2 | unit | `UNIT-TASK-AR-648-002` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md` | UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green |
 | 41.1.10.3 | Unit 41.1.10.3 | unit | `UNIT-TASK-AR-648-003` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md` | UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime |
-| 41.1.10.4 | Unit 41.1.10.4 | unit | `UNIT-TASK-AR-648-004` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md` | UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract |
+| 41.1.10.4 | Unit 41.1.10.4 | unit | `UNIT-TASK-AR-648-004` | `TASK-AR-648` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md` | UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
