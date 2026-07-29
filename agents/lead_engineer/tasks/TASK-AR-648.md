@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T19:50:26+09:00
+updated_at: 2026-07-29T20:28:29+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -57,10 +57,14 @@ claim_refs:
   repair, but the resulting high-risk release exposed a self-blocking
   auto-review overlay claim and stopped the Bean replay.
 - `UNIT-TASK-AR-648-004` aligns role-routing overlay claims with the canonical
-  gate/persistence contract and makes explicit claim commits pass only within
-  an exact transaction-scoped pre-commit context, then repeats the replay in a
-  second fresh Bean Wiki worktree. P1 profile, overlay-execution, and
-  provider-observability work remains separately queued.
+  gate/persistence contract. The overlay seam passed, but independent W4b
+  proved that a later hook command can replace the claim blob after the gate
+  approves it, so the unit is blocked before Bean.
+- `UNIT-TASK-AR-648-005` replaces the path-only exception with an immutable
+  private-index/tree transaction, preserves unrelated staged changes, and
+  requires a fresh independent W4b. Bean replay moves to a separate unit only
+  after that approval. P1 profile, overlay-execution, and provider-observability
+  work remains separately queued.
 
 ## Goal
 

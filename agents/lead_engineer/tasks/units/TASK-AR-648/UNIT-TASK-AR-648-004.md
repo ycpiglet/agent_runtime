@@ -9,11 +9,12 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: passed
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-29T19:42:00+09:00
-updated_at: 2026-07-29T20:09:19+09:00
+updated_at: 2026-07-29T20:28:29+09:00
+blocked_at: 2026-07-29T20:28:29+09:00
 started_at: 2026-07-29T19:50:26+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md
@@ -89,6 +90,7 @@ verified_at: 2026-07-29T20:09:19+09:00
 verified_by: codex-root-task-ar-648-004
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919.json
+  - reviews/W4B-2026-07-29-unit-task-ar-648-004.md
 ---
 
 # UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract
@@ -131,3 +133,17 @@ profiles, or provider telemetry.
 No consumer pilot before independent approval and no publish, deploy, push,
 credential read, network delivery, content mutation, implicit commit, ambient
 transaction bypass, broad gate exemption, or unsupported model/cost claim.
+
+## Independent W4b Outcome
+
+Independent W4b returned `REQUEST_CHANGES` at product SHA
+`76212dc0c1898c35542cf2838039b5ee88af360f`. The overlay contract passed, but
+the explicit claim commit remained vulnerable after the canonical pre-commit
+gate returned: a later hook command could modify and re-stage the authorized
+claim JSON, and Git committed that unverified blob.
+
+Per the registered stop rule, this unit is blocked and no Bean attempt-2
+worktree was created. The report at
+`reviews/W4B-2026-07-29-unit-task-ar-648-004.md` is immutable red evidence.
+The final-content transaction repair continues only through separately claimed
+`UNIT-TASK-AR-648-005`.

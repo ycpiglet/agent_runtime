@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T19:53:07+09:00",
-  "record_count": 522,
+  "generated_at": "2026-07-29T20:32:38+09:00",
+  "record_count": 523,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5679,7 +5679,18 @@
       "title": "UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
       "parent_id": "TASK-AR-648",
-      "status": "in_progress"
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-005",
+      "level": "unit",
+      "number": "41.1.10.5",
+      "label": "Unit 41.1.10.5",
+      "id": "UNIT-TASK-AR-648-005",
+      "title": "UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",

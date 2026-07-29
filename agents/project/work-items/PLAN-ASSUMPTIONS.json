@@ -920,53 +920,13 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-          "value": "09cfef0607236ab35c0f8279f00df302805ef4825fd91153e471498d36d6c8e9"
+          "path": "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
+          "value": "1bca263d742353660e4473deaddb33e11301f28a2a50a08265e4708740efc0e0"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-29-unit-task-ar-648-003-r2.md",
-          "value": "28c5ff17cbdb1c0f052b843dd2e1fa0a00fdce0ddd56b2e0869c7eca5aedff91"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md",
-          "value": "53467e0371c9ebdb4e3c1dcf49c08847ce83b49adea127b8c02db7ccbf896026"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/PILOT-BEAN-WIKI-v080.md",
-          "value": "a8ad2dfb7f8b1e81c6606d4a51157270ca7fcfe24e0bd3750281d08a163a7a48"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md",
-          "value": "1418a0253cbd0e7684656ce13882ba27f31427321a5f6d6a79410c2ebca96a74"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/pilots/bean-wiki/evidence.json",
-          "value": "e035fa71b0a826d4a4e6d9c6f55ea5bdfe08da540017d24cf28016c73ba459cb"
-        },
-        {
-          "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "2398b5af7d52d33dd9b803c04610586a28586db7971f0fc85a0b937627a2b294"
-        },
-        {
-          "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
-          "value": "2b588142c4dd625d90898e7b2b547b1bd914c0431b18981549f1d7d44a8737c1"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/role_routing.py",
-          "value": "cef7a72652a2b44c78aed76edb813eb37fea884a01464f244be904dc2b41f831"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/claim_guard.py",
-          "value": "9419e5a89f211cf388c05137b925fa44ed8e373bbd5ab325cf2b390731a33aa3"
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
         },
         {
           "kind": "sha256",
@@ -975,72 +935,17 @@
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "88b10afeef39717c3c57298f05419dbc7fbff30f16d65b45004ced31000cbaef"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_claim_guard.py",
-          "value": "e5cbf14237e3d6882205153b4b10280eb7f286ee700922fbc310d14725356779"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_task_claim_dispatcher.py",
-          "value": "5399d445db8702dff7a08d7ad5adb0272efa7990992f1b171119f180e373ed50"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_role_routing.py",
-          "value": "429361c10064eede6f564a00a293904b6069487a134a292bdea54011d0b8a858"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_role_routing_wiring.py",
-          "value": "6bdc4f3dc18d6355e4365fba8fd7856d9bfa720de351abe759ab971a45296f92"
+          "path": "scripts/claim_guard.py",
+          "value": "9419e5a89f211cf388c05137b925fa44ed8e373bbd5ab325cf2b390731a33aa3"
         },
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
           "value": "d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
-          "value": "d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_parallel_worktree_gate.py",
-          "value": "6e88d4299d44ad4925b741ba82832dd2cb07e33fcb276299f2ffaf21d4e9534a"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "5274f5692a037218824f24b17e4a544ca95047060e7ae13ad942bd0b4203cc48"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/pilot_acceptance.py",
-          "value": "8fcec748486bc0697bee6da088c963626421beb6c6597f57446f27c4c62b4747"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_pilot_acceptance.py",
-          "value": "88255c04ec10b2a3737ad2daf290b0a5352008c472930161ae5d42633ee43b90"
-        },
-        {
-          "kind": "absent",
-          "path": "tests/fixtures/pilots/bean-wiki/evidence-green.json",
-          "value": ""
-        },
-        {
-          "kind": "absent",
-          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
-          "value": ""
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-      "recorded_at": "2026-07-29T20:13:35+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
+      "recorded_at": "2026-07-29T20:32:39+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1256,5 +1161,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T20:13:35+09:00"
+  "updated_at": "2026-07-29T20:32:39+09:00"
 }
