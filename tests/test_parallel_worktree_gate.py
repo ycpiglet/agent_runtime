@@ -290,12 +290,15 @@ def test_continuity_present_invalid_status_cannot_be_bypassed_by_pointer(tmp_pat
     [
         ("placeholder", "continuity:pointer-placeholder"),
         ("malformed", "continuity:pointer-malformed"),
+        ("schema-invalid", "continuity:pointer-schema-invalid"),
+        ("timestamp-invalid", "continuity:pointer-updated-at-invalid"),
         ("stale", "continuity:pointer-stale"),
         ("duplicate-ref", "continuity:pointer-duplicate-active-claim"),
         ("extra-ref", "continuity:pointer-active-claims-mismatch"),
         ("partial-agent", "continuity:pointer-agent-field-missing"),
         ("mismatched-agent", "continuity:pointer-agent-field-mismatch"),
         ("duplicate-agent", "continuity:pointer-duplicate-current-agent"),
+        ("resume-mismatch", "continuity:pointer-resume-mismatch"),
         ("missing-next-action", "continuity:pointer-next-actions-missing"),
     ],
 )
@@ -322,6 +325,8 @@ def test_continuity_pointer_fallback_fails_closed_with_stable_reasons(
             updated_at=(
                 "YYYY-MM-DDTHH:MM:SS+09:00"
                 if case == "placeholder"
+                else "not-a-timestamp"
+                if case == "timestamp-invalid"
                 else "2026-07-30T00:04:59+09:00"
                 if case == "stale"
                 else "2026-07-30T00:05:00+09:00"
@@ -340,10 +345,64 @@ def test_continuity_pointer_fallback_fails_closed_with_stable_reasons(
             duplicate_agent=case == "duplicate-agent",
             next_actions=() if case == "missing-next-action" else ("Resume the unit.",),
         )
+        pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+        if case == "schema-invalid":
+            pointer.write_text(
+                pointer.read_text(encoding="utf-8").replace(
+                    "agent-runtime-next-session-pointer/v1",
+                    "agent-runtime-next-session-pointer/v999",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+        if case == "resume-mismatch":
+            pointer.write_text(
+                pointer.read_text(encoding="utf-8").replace(
+                    '  active_task: "TASK-AR-648"',
+                    '  active_task: "TASK-AR-WRONG"',
+                    1,
+                ),
+                encoding="utf-8",
+            )
 
     findings = _continuity_findings(tmp_path, [record])
 
     assert any(reason in finding for finding in findings), findings
+
+
+def test_continuity_retains_handoff_and_log_sidecar_checks_with_pointer(
+    tmp_path: Path,
+):
+    record = _portable_claim(tmp_path)
+    _write_portable_pointer(tmp_path, [record])
+    (tmp_path / str(record.payload["handoff_path"])).unlink()
+    (tmp_path / str(record.payload["log_path"])).unlink()
+
+    findings = _continuity_findings(tmp_path, [record])
+
+    assert any("task-claim:handoff-path-missing-file" in item for item in findings)
+    assert any("task-claim:log-path-missing-file" in item for item in findings)
+
+
+def test_continuity_rejects_unparseable_claim_heartbeat(tmp_path: Path):
+    record = _portable_claim(tmp_path)
+    record.payload["last_heartbeat"] = "not-a-timestamp"
+    record.path.write_text(
+        json.dumps(record.payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    _write_portable_pointer(
+        tmp_path,
+        [record],
+        updated_at="2026-07-30T00:05:00+09:00",
+    )
+
+    findings = _continuity_findings(tmp_path, [record])
+
+    assert any(
+        "continuity:pointer-claim-heartbeat-invalid" in item
+        for item in findings
+    )
 
 
 def test_continuity_only_json_reports_effective_pointer_path(tmp_path: Path):

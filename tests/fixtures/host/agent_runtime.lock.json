@@ -79,7 +79,7 @@
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
       "agents/uiux_designer/SKILL.md": "sha256:c0b980b2be22bd1e0350393599189dcff47c56a8303ab6df2e3f4f5914c571f6",
-      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:8d01d39eaf9c8add34288b6abebe2ab62a5a2672100c3f4d4c08b4ede53a3e44",
+      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:5109f3f98fd8247b37aa325e3b7f7a81af9b366ea781535ce95bc0c21178a010",
       "docs/agent_bootstrap/README.md": "sha256:905fefa4ffb6c6beb051fbbcbc2b7b02ce5dfdf71ddb2b4308a3219a438f12dd",
       "docs/agent_bootstrap/claude.md": "sha256:63ee4a32a83cf1af5176b8287a0ad6bce019119713b17b3a3d204a9df2cc6b3e",
       "docs/agent_bootstrap/codex.md": "sha256:694d45acbecedf3d201ff6ba4b22e6b52b3efe4b0b9a0ca7346bb3f0a0a1cca0",
@@ -121,7 +121,7 @@
       "scripts/beta_tester_due.py": "sha256:32e9d7b142a4ca829f15dc7cdf403873dc08fe1ebceaf5c02226f2314b03c85f",
       "scripts/budget_estimate.py": "sha256:5d180aa4854f8923a631790d38eeeeb26639ca836d4738d600d0900fa8d31d13",
       "scripts/build_task_index.py": "sha256:142ed66412b3dc2ab93705e23e04640652ff7055f907a7e181b1c06fa7ed95c8",
-      "scripts/check_agent_docs.py": "sha256:eb61475ed9252fb9341ced57ae85596a962b70cabcda8f1eed81236d7fd77d10",
+      "scripts/check_agent_docs.py": "sha256:08ffa4600dfe0ec7e996a0e7d77970aa30d1f54a6368453bf7797eeda7fe2865",
       "scripts/check_messages.py": "sha256:88d82bfb0a0786ad1b33391c294a152b93f1007309f75f94a328bc2ee511e3ab",
       "scripts/check_repo_structure.py": "sha256:57914d739308ab831191c8f7dd2c66a2b73e2cd5742d604a9cbe0f03f6bb2a6f",
       "scripts/check_skill_structure.py": "sha256:b7b2626a713a0689b0b94a3875c65dcf844f4d636710305b4d3ad4e325f09aea",
@@ -174,9 +174,9 @@
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
-      "scripts/owner_governance_gate.py": "sha256:4ddd219dadc2d8952cd7b2ec1e60c9db4c084ca3a53945323a9c99af422a56e9",
+      "scripts/owner_governance_gate.py": "sha256:6fde177bd0631d90c2bae1dcfced06d25ebf607319ec28a74ef0dcc7473c6168",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
-      "scripts/parallel_worktree_gate.py": "sha256:52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b",
+      "scripts/parallel_worktree_gate.py": "sha256:c388465a4c2fde1a1919b0efe822fd3043b0fdf993534a98b447c6c20fdfd63d",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
       "scripts/plan_assumption_gate.py": "sha256:6fc083b0c3a724c252ac64e31d6232203b04aa4fd64db01c9243ed9553e7d06c",
       "scripts/precommit_check.py": "sha256:ca4134f95ed06cb84151dec02a2397b51ed670e31d4cf2d97d545b3469e251ce",
@@ -226,7 +226,7 @@
       "scripts/subagent_dispatch.py": "sha256:922c23eba1e25f290f90ce87fc1b6c58a9dafcb0bfd844cb71cc1387d1be70c1",
       "scripts/summarize_warning_summary_gate_report.py": "sha256:1c77c2d444b3d732dd2aff431317f4468dfed1fa3fad8b18fbefd1294b2b5c53",
       "scripts/task_api.py": "sha256:423a76253d47d195901dd836bd6edc08c4011338263ee0abc4b382b1f53f0540",
-      "scripts/task_claim_dispatcher.py": "sha256:a4ae2185c2cce2abdb27e1444f0b190f821d11faa7543a498fd0bf988fa8d37e",
+      "scripts/task_claim_dispatcher.py": "sha256:89c5d2751781623a126bb93424fcb944b3272c4ae8a3f2b00de0d9d5b5acf2e1",
       "scripts/task_events.py": "sha256:3b1d74eb84591a651e1afaca07613f6ac261438335fb8d9760211afac2c37d6a",
       "scripts/task_id_contract.py": "sha256:6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8",
       "scripts/task_identity.py": "sha256:b91a07348e7a513a348509a68d08e0a56a12efa599945576dfaea5aebe6892bb",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:64d0a14b1a5d284285bf7ac89c27c702adfbeb7f8b32c25a818b131fe5cd55e6",
+    "template_digest": "sha256:e1d844c8f60edde8bfcfee9712b5610c62cf6e6fc82ab21fe8fda6fed1077cdd",
     "template_files": 251
   },
   "profiles": [

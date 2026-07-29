@@ -4,6 +4,7 @@ import argparse
 import importlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -34,6 +35,7 @@ class DoctorPlan:
     root: Path
     findings: tuple[DoctorFinding, ...]
     config_loaded: bool = False
+    continuity: dict[str, object] | None = None
     scribe: dict[str, object] | None = None
     routing: dict[str, object] | None = None
     security_service: dict[str, object] | None = None
@@ -336,6 +338,77 @@ def _run_subcommand(root: Path, script_name: str, args: tuple[str, ...], timeout
         timeout=timeout,
     )
     return process.returncode, (process.stdout or "") + (process.stderr or "")
+
+
+def _continuity_report(
+    root: Path,
+    findings: list[DoctorFinding],
+) -> dict[str, object]:
+    rc, output = _run_subcommand(
+        root,
+        "parallel_worktree_gate.py",
+        ("--continuity-only", "--require-standby-pointer", "--json"),
+    )
+    try:
+        payload = json.loads(output.strip())
+    except (json.JSONDecodeError, TypeError):
+        report = {
+            "status": "fail",
+            "mode": "unavailable",
+            "pointer": "agents/project/NEXT-SESSION-POINTER.yml",
+            "active_claims": 0,
+            "findings": [output.strip() or "continuity diagnostic produced no output"],
+        }
+        _findings_append(
+            findings,
+            "blocker",
+            area="continuity",
+            path="scripts/parallel_worktree_gate.py",
+            kind="diagnostic-failed",
+            detail=f"continuity diagnostic failed with rc={rc}: {report['findings'][0]}",
+        )
+        return report
+    if not isinstance(payload, dict):
+        payload = {}
+    raw_findings = payload.get("findings")
+    report_findings = (
+        [str(item) for item in raw_findings]
+        if isinstance(raw_findings, list)
+        else ["continuity diagnostic returned malformed findings"]
+    )
+    report = {
+        "status": str(payload.get("status") or ("fail" if rc else "pass")),
+        "mode": str(payload.get("mode") or "unavailable"),
+        "pointer": str(
+            payload.get("pointer")
+            or "agents/project/NEXT-SESSION-POINTER.yml"
+        ),
+        "active_claims": int(payload.get("active_claims") or 0),
+        "findings": report_findings,
+    }
+    if report["status"] == "pass" and rc == 0:
+        _findings_append(
+            findings,
+            "info",
+            area="continuity",
+            path=str(report["pointer"]),
+            kind="effective-path",
+            detail=(
+                f"mode={report['mode']} active_claims={report['active_claims']}"
+            ),
+        )
+        return report
+    for detail in report_findings:
+        match = re.search(r"continuity:([a-z0-9-]+):", detail)
+        _findings_append(
+            findings,
+            "blocker",
+            area="continuity",
+            path=str(report["pointer"]),
+            kind=match.group(1) if match else "continuity-invalid",
+            detail=detail,
+        )
+    return report
 
 
 def _hook_entries(hooks: dict[str, object], event: str) -> list[dict[str, object]]:
@@ -913,6 +986,8 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
                 detail="required template artifact is missing",
             )
 
+    continuity_report = _continuity_report(root, findings)
+
     for rel in REQUIRED_DOC_FILES:
         target = root / rel
         if not target.exists():
@@ -1146,6 +1221,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         root=root,
         findings=tuple(findings),
         config_loaded=cfg_ok,
+        continuity=continuity_report,
         scribe=scribe_report,
         routing=routing_report,
         security_service=security_service_report,
@@ -1201,6 +1277,10 @@ def render(plan: DoctorPlan) -> str:
                 f"security_service_selected={str(selected).lower()}",
                 f"allimbot_dependency={dependency_status}",
             ]
+        )
+    if plan.continuity is not None:
+        lines.append(
+            f"continuity_mode={plan.continuity.get('mode', 'unavailable')}"
         )
     lines.extend(
         [
@@ -1298,6 +1378,8 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
     }
     if plan.scribe is not None:
         payload["scribe"] = plan.scribe
+    if plan.continuity is not None:
+        payload["continuity"] = plan.continuity
     if plan.routing is not None:
         payload["routing"] = plan.routing
     if plan.security_service is not None:

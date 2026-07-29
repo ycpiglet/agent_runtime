@@ -18,7 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_TEMPLATE_ROOT = ROOT / "src" / "agent_runtime" / "templates" / "project"
 ROOT_STATE_SURFACES = ("BACKLOG-BOARD.md", "BACKLOG.md", "STATUS.md")
 SOURCE_ONLY_CHECKS = {"scripts/collaboration_governance_gate.py", "scripts/runtime_asset_usage.py"}
-ROOT_STATE_CHECKS = {"scripts/state_sync_gate.py", "scripts/taskset_work_gate.py"}
+LEGACY_ROOT_STATE_CHECKS = {"scripts/taskset_work_gate.py"}
+PORTABLE_STATE_CHECKS = {"scripts/state_sync_gate.py"}
+PORTABLE_STATE_SURFACES = (
+    "BACKLOG-BOARD.md",
+    "agents/project/NEXT-SESSION-POINTER.yml",
+)
 
 
 def notify_governance_block(returncode: int) -> None:
@@ -48,9 +53,18 @@ def skip_reason(args: list[str]) -> str:
         return f"script missing: {script}"
     if script in SOURCE_ONLY_CHECKS and not SOURCE_TEMPLATE_ROOT.exists():
         return f"host checkout skip: {SOURCE_TEMPLATE_ROOT.relative_to(ROOT).as_posix()} is absent"
-    if script in ROOT_STATE_CHECKS and not all((ROOT / p).exists() for p in ROOT_STATE_SURFACES):
+    if script in LEGACY_ROOT_STATE_CHECKS and not all(
+        (ROOT / p).exists() for p in ROOT_STATE_SURFACES
+    ):
         missing = ", ".join(p for p in ROOT_STATE_SURFACES if not (ROOT / p).exists())
         return f"host checkout skip: root state surfaces absent ({missing})"
+    if script in PORTABLE_STATE_CHECKS and not all(
+        (ROOT / p).exists() for p in PORTABLE_STATE_SURFACES
+    ):
+        missing = ", ".join(
+            p for p in PORTABLE_STATE_SURFACES if not (ROOT / p).exists()
+        )
+        return f"host checkout skip: portable state surfaces absent ({missing})"
     return ""
 
 

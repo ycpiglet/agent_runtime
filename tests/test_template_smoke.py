@@ -85,6 +85,9 @@ def _write_live_pointer_from_projection(
         "current_state:",
         "  status: active",
         f"  task_set_id: {_yaml_scalar(pointer['active_task_set'])}",
+        f"  step_index: {_yaml_scalar(agent['step_index'])}",
+        f"  step_total: {_yaml_scalar(agent['step_total'])}",
+        f"  status_text: {_yaml_scalar(agent['status_text'])}",
         "active_work:",
         "  current_agents:",
     ]
@@ -100,12 +103,27 @@ def _write_live_pointer_from_projection(
             f"  active_task_set: {_yaml_scalar(pointer['active_task_set'])}",
             "  next_actions:",
             "    - Run the claim governance gates.",
+            "roles:",
+            "  accountable: Lead Engineer",
+            "  reviewers: []",
             "pointers:",
             "  active_claims:",
         ]
     )
     lines.extend(
         f"    - {_yaml_scalar(ref)}" for ref in pointer["active_claims"]
+    )
+    lines.extend(
+        [
+            "rules:",
+            "  present_status_precedence: A present STATUS candidate remains strict.",
+            "  pointer_fallback: Without STATUS, require the exact live claim projection.",
+            "verification:",
+            "  required:",
+            "    - python scripts/parallel_worktree_gate.py --check",
+            "  last_known:",
+            "    status: not-run",
+        ]
     )
     path = host / "agents/project/NEXT-SESSION-POINTER.yml"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -211,13 +229,35 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
     unit = host / f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
     task.parent.mkdir(parents=True, exist_ok=True)
     unit.parent.mkdir(parents=True, exist_ok=True)
+    (host / "README.md").write_text(
+        "# Portable Core Host\n\n"
+        "## 한국어\n\n"
+        "AGENTS.md, CLAUDE.md, agents/project/NEXT-SESSION-POINTER.yml을 먼저 읽습니다.\n\n"
+        "## English\n\n"
+        "Read AGENTS.md, CLAUDE.md, and agents/project/NEXT-SESSION-POINTER.yml first.\n",
+        encoding="utf-8",
+    )
     task.write_text(
         "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
         f"id: {task_id}\n"
+        f"work_id: {task_id}\n"
+        "work_uid: 71e29977-1fd8-4563-bb89-735e03b8ebd1\n"
         f"task_id: {task_id}\n"
+        "task_uid: 71e29977-1fd8-4563-bb89-735e03b8ebd1\n"
+        "kind: task\n"
+        f"parent_id: {task_set_id}\n"
         f"task_set_id: {task_set_id}\n"
         "status: in_progress\n"
         "verification_status: pending\n"
+        "owner: lead-engineer\n"
+        "registered_at: 2026-07-30T00:00:00+09:00\n"
+        "created_at: 2026-07-30T00:00:00+09:00\n"
+        "updated_at: 2026-07-30T00:00:00+09:00\n"
+        "started_at: 2026-07-30T00:00:00+09:00\n"
+        "origin_type: owner_request\n"
+        "origin_ref: tests/test_template_smoke.py\n"
+        "created_by: test\n"
         "---\n\n# Portable core task\n",
         encoding="utf-8",
     )
@@ -225,6 +265,7 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
         "---\n"
         "schema_version: agent-runtime-work-item/v1\n"
         f"work_id: {unit_id}\n"
+        "work_uid: f7228336-9c01-4f8f-8f1a-309bfe729112\n"
         f"unit_id: {unit_id}\n"
         f"task_id: {task_id}\n"
         f"parent_id: {task_id}\n"
@@ -352,6 +393,16 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
             "2026-07-30T00:05:00+09:00",
             "--json",
         ],
+        cwd=runtime_root,
+        env=env,
+    )
+    _run(
+        [PYTHON, "scripts/work_item_classifier.py", "--root", str(runtime_root), "--write"],
+        cwd=runtime_root,
+        env=env,
+    )
+    _run(
+        [PYTHON, "scripts/evidence_index_generator.py", "--root", str(runtime_root), "--write"],
         cwd=runtime_root,
         env=env,
     )

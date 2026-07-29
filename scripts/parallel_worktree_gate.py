@@ -30,6 +30,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
@@ -77,6 +78,38 @@ STATUS_CANDIDATES = (
     Path("STATUS.md"),
     Path("agents/lead_engineer/STATUS.md"),
 )
+POINTER_PATH = Path("agents/project/NEXT-SESSION-POINTER.yml")
+POINTER_SCHEMA = "agent-runtime-next-session-pointer/v1"
+POINTER_MAX_BYTES = 128 * 1024
+POINTER_PLACEHOLDER_RE = re.compile(
+    r"(?:YYYY-MM-DD|TASK-NNN|CLAIM-example|role-or-agent-id|"
+    r"Replace this|replace this|<[^>\n]+>|\bTBD\b)"
+)
+POINTER_AGENT_FIELDS = (
+    "claim_id",
+    "agent_role",
+    "team_id",
+    "agent_instance_id",
+    "display_name",
+    "callsite_id",
+    "pane_id",
+    "task_id",
+    "unit_id",
+    "task_set_id",
+    "status",
+    "phase",
+    "progress_pct",
+    "step_index",
+    "step_total",
+    "status_text",
+    "worktree_path",
+    "branch",
+    "claim_path",
+    "handoff_path",
+    "log_path",
+    "last_heartbeat",
+)
+NULL_POINTER_SCALARS = {"", "null", "none", "~"}
 HANDOFF_MARKERS = (
     "Handoff Checklist",
     "Next Steps",
@@ -98,6 +131,28 @@ CLAIM_COMMIT_TRANSACTION_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 class Finding:
     severity: str  # "block" | "watch"
     message: str
+
+
+@dataclass(frozen=True)
+class ContinuityReport:
+    status: str
+    mode: str
+    pointer: str
+    active_claims: int
+    findings: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "status": self.status,
+            "mode": self.mode,
+            "pointer": self.pointer,
+            "active_claims": self.active_claims,
+            "findings": list(self.findings),
+        }
+
+
+class _PointerMalformed(ValueError):
+    pass
 
 
 @dataclass(frozen=True)
@@ -399,29 +454,435 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord], primary_root: P
     return findings
 
 
-def _continuity_findings(root: Path, active_claims: Iterable[ClaimRecord]) -> list[str]:
+def _pointer_scalar(raw: str) -> str:
+    value = raw.strip()
+    if not value:
+        return ""
+    if value.startswith('"'):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise _PointerMalformed("malformed quoted scalar") from exc
+        if not isinstance(decoded, str):
+            raise _PointerMalformed("pointer scalars must be strings")
+        return decoded
+    if value.startswith("'"):
+        if len(value) < 2 or not value.endswith("'"):
+            raise _PointerMalformed("malformed quoted scalar")
+        return value[1:-1].replace("''", "'")
+    comment = re.search(r"\s+#", value)
+    if comment:
+        value = value[: comment.start()].rstrip()
+    return value
+
+
+def _pointer_mapping(
+    lines: list[str],
+    key: str,
+    *,
+    indent: int,
+) -> tuple[int, str]:
+    prefix = " " * indent + key + ":"
+    matches: list[tuple[int, str]] = []
+    for index, line in enumerate(lines):
+        if not line.startswith(prefix):
+            continue
+        if line[:indent] != " " * indent:
+            continue
+        remainder = line[len(prefix) :]
+        matches.append((index, remainder))
+    if len(matches) != 1:
+        raise _PointerMalformed(f"expected one {key} field")
+    return matches[0]
+
+
+def _pointer_block(
+    lines: list[str],
+    key: str,
+    *,
+    indent: int,
+) -> list[str]:
+    index, raw = _pointer_mapping(lines, key, indent=indent)
+    if raw.strip():
+        raise _PointerMalformed(f"{key} must be a mapping block")
+    body: list[str] = []
+    for line in lines[index + 1 :]:
+        if line.strip():
+            child_indent = len(line) - len(line.lstrip(" "))
+            if child_indent <= indent:
+                break
+        body.append(line)
+    return body
+
+
+def _pointer_block_scalar(lines: list[str], key: str, *, indent: int) -> str:
+    _, raw = _pointer_mapping(lines, key, indent=indent)
+    if not raw.strip():
+        raise _PointerMalformed(f"{key} must be a scalar")
+    return _pointer_scalar(raw)
+
+
+def _pointer_list(lines: list[str], key: str, *, indent: int) -> list[str]:
+    index, raw = _pointer_mapping(lines, key, indent=indent)
+    if raw.strip():
+        if raw.strip() == "[]":
+            return []
+        raise _PointerMalformed(f"{key} must be a list")
+    values: list[str] = []
+    for line in lines[index + 1 :]:
+        if not line.strip():
+            continue
+        child_indent = len(line) - len(line.lstrip(" "))
+        if child_indent <= indent:
+            break
+        if child_indent != indent + 2 or not line[indent + 2 :].startswith("- "):
+            raise _PointerMalformed(f"{key} has malformed list indentation")
+        values.append(_pointer_scalar(line[indent + 4 :]))
+    return values
+
+
+def _pointer_agents(lines: list[str]) -> list[dict[str, str]]:
+    index, raw = _pointer_mapping(lines, "current_agents", indent=2)
+    if raw.strip():
+        if raw.strip() == "[]":
+            return []
+        raise _PointerMalformed("current_agents must be a record list")
+    agents: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    for line in lines[index + 1 :]:
+        if not line.strip():
+            continue
+        child_indent = len(line) - len(line.lstrip(" "))
+        if child_indent <= 2:
+            break
+        if child_indent == 4 and line[4:].startswith("- "):
+            if current is not None:
+                agents.append(current)
+            current = {}
+            entry = line[6:]
+        elif child_indent == 6 and current is not None:
+            entry = line[6:]
+        else:
+            raise _PointerMalformed("current_agents has malformed record indentation")
+        key, separator, raw_value = entry.partition(":")
+        key = key.strip()
+        if not separator or not key or key in current:
+            raise _PointerMalformed("current_agents has a malformed or duplicate field")
+        current[key] = _pointer_scalar(raw_value)
+    if current is not None:
+        agents.append(current)
+    return agents
+
+
+def _parse_pointer(text: str) -> dict[str, object]:
+    if "\x00" in text or "\t" in text:
+        raise _PointerMalformed("pointer contains an unsupported control character")
+    lines = text.splitlines()
+    for line in lines:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indentation = len(line) - len(line.lstrip(" "))
+        if indentation % 2:
+            raise _PointerMalformed("pointer indentation must use two-space levels")
+    schema = _pointer_block_scalar(lines, "schema", indent=0)
+    updated_at = _pointer_block_scalar(lines, "updated_at", indent=0)
+    _pointer_block(lines, "active_work", indent=0)
+    resume = _pointer_block(lines, "resume", indent=0)
+    pointers = _pointer_block(lines, "pointers", indent=0)
+    return {
+        "schema": schema,
+        "updated_at": updated_at,
+        "current_agents": _pointer_agents(lines),
+        "active_task": _pointer_block_scalar(resume, "active_task", indent=2),
+        "active_task_set": _pointer_block_scalar(
+            resume, "active_task_set", indent=2
+        ),
+        "next_actions": _pointer_list(resume, "next_actions", indent=2),
+        "active_claims": _pointer_list(pointers, "active_claims", indent=2),
+    }
+
+
+def _normalized_pointer_value(value: object) -> str:
+    normalized = "" if value is None else str(value).strip()
+    return "" if normalized.lower() in NULL_POINTER_SCALARS else normalized
+
+
+def _pointer_timestamp(value: object) -> datetime | None:
+    raw = _normalized_pointer_value(value)
+    if not raw:
+        return None
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None
+    return parsed
+
+
+def _pointer_finding(code: str, detail: str) -> str:
+    return f"{POINTER_PATH.as_posix()}: continuity:{code}: {detail}"
+
+
+def _pointer_findings(
+    root: Path,
+    active_claims: list[ClaimRecord],
+    *,
+    require_standby_pointer: bool,
+) -> list[str]:
+    pointer_path = root / POINTER_PATH
+    if not pointer_path.is_file():
+        return [
+            _pointer_finding(
+                "pointer-missing",
+                "canonical pointer is required when STATUS is absent",
+            )
+        ]
+    try:
+        if pointer_path.stat().st_size > POINTER_MAX_BYTES:
+            return [
+                _pointer_finding(
+                    "pointer-too-large",
+                    f"pointer exceeds {POINTER_MAX_BYTES} bytes",
+                )
+            ]
+        text = pointer_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return [_pointer_finding("pointer-unreadable", str(exc))]
+    if POINTER_PLACEHOLDER_RE.search(text):
+        return [
+            _pointer_finding(
+                "pointer-placeholder",
+                "operational continuity cannot use template placeholder values",
+            )
+        ]
+    try:
+        pointer = _parse_pointer(text)
+    except _PointerMalformed as exc:
+        return [_pointer_finding("pointer-malformed", str(exc))]
+
     findings: list[str] = []
-    active = list(active_claims)
+    if pointer["schema"] != POINTER_SCHEMA:
+        findings.append(
+            _pointer_finding(
+                "pointer-schema-invalid",
+                f"expected {POINTER_SCHEMA}",
+            )
+        )
+    pointer_time = _pointer_timestamp(pointer["updated_at"])
+    if pointer_time is None:
+        findings.append(
+            _pointer_finding(
+                "pointer-updated-at-invalid",
+                "updated_at must be an ISO-8601 timestamp with a timezone",
+            )
+        )
+
+    pointer_refs = [str(value).strip() for value in pointer["active_claims"]]
+    if len(pointer_refs) != len(set(pointer_refs)):
+        findings.append(
+            _pointer_finding(
+                "pointer-duplicate-active-claim",
+                "pointers.active_claims contains a duplicate claim path",
+            )
+        )
+    agents = pointer["current_agents"]
+    assert isinstance(agents, list)
+    agent_ids = [
+        _normalized_pointer_value(agent.get("claim_id"))
+        for agent in agents
+        if isinstance(agent, dict)
+    ]
+    if len(agent_ids) != len(set(agent_ids)):
+        findings.append(
+            _pointer_finding(
+                "pointer-duplicate-current-agent",
+                "active_work.current_agents contains a duplicate claim_id",
+            )
+        )
+    next_actions = [
+        _normalized_pointer_value(value) for value in pointer["next_actions"]
+    ]
+    if not next_actions or not all(next_actions):
+        findings.append(
+            _pointer_finding(
+                "pointer-next-actions-missing",
+                "resume.next_actions must contain at least one concrete action",
+            )
+        )
+
+    expected_refs = [_rel(root, record.path) for record in active_claims]
+    expected_ids = [
+        _normalized_pointer_value(record.payload.get("claim_id"))
+        for record in active_claims
+    ]
+    if not active_claims:
+        if pointer_refs:
+            findings.append(
+                _pointer_finding(
+                    "pointer-active-claims-mismatch",
+                    "standby pointer must not retain active claim paths",
+                )
+            )
+        if agents:
+            findings.append(
+                _pointer_finding(
+                    "pointer-current-agents-mismatch",
+                    "standby pointer must not retain current agent records",
+                )
+            )
+        if any(
+            _normalized_pointer_value(pointer[field])
+            for field in ("active_task", "active_task_set")
+        ):
+            findings.append(
+                _pointer_finding(
+                    "pointer-resume-mismatch",
+                    "standby pointer must use null active task and task-set values",
+                )
+            )
+        return findings
+
+    if set(pointer_refs) != set(expected_refs) or len(pointer_refs) != len(
+        expected_refs
+    ):
+        findings.append(
+            _pointer_finding(
+                "pointer-active-claims-mismatch",
+                "pointers.active_claims must exactly match active non-overlay claims",
+            )
+        )
+    if set(agent_ids) != set(expected_ids) or len(agent_ids) != len(expected_ids):
+        findings.append(
+            _pointer_finding(
+                "pointer-current-agents-mismatch",
+                "current_agents claim ids must exactly match active non-overlay claims",
+            )
+        )
+
+    agents_by_id = {
+        _normalized_pointer_value(agent.get("claim_id")): agent
+        for agent in agents
+        if isinstance(agent, dict)
+        and _normalized_pointer_value(agent.get("claim_id"))
+    }
+    heartbeat_times: list[datetime] = []
+    for record in active_claims:
+        claim_id = _normalized_pointer_value(record.payload.get("claim_id"))
+        heartbeat = _pointer_timestamp(record.payload.get("last_heartbeat"))
+        if heartbeat is None:
+            findings.append(
+                _pointer_finding(
+                    "pointer-claim-heartbeat-invalid",
+                    f"{claim_id} last_heartbeat is not a timezone-aware ISO-8601 timestamp",
+                )
+            )
+        else:
+            heartbeat_times.append(heartbeat)
+        agent = agents_by_id.get(claim_id)
+        if agent is None:
+            continue
+        for field in POINTER_AGENT_FIELDS:
+            if field not in agent:
+                findings.append(
+                    _pointer_finding(
+                        "pointer-agent-field-missing",
+                        f"{claim_id} is missing {field}",
+                    )
+                )
+                continue
+            expected = (
+                _rel(root, record.path)
+                if field == "claim_path"
+                else record.payload.get(field)
+            )
+            if _normalized_pointer_value(agent[field]) != _normalized_pointer_value(
+                expected
+            ):
+                findings.append(
+                    _pointer_finding(
+                        "pointer-agent-field-mismatch",
+                        f"{claim_id} field {field} differs from its claim",
+                    )
+                )
+    if pointer_time is not None and heartbeat_times and pointer_time < max(
+        heartbeat_times
+    ):
+        findings.append(
+            _pointer_finding(
+                "pointer-stale",
+                "pointer updated_at predates an active claim heartbeat",
+            )
+        )
+
+    resume_pair = (
+        _normalized_pointer_value(pointer["active_task"]),
+        _normalized_pointer_value(pointer["active_task_set"]),
+    )
+    claim_pairs = {
+        (
+            _normalized_pointer_value(record.payload.get("task_id")),
+            _normalized_pointer_value(record.payload.get("task_set_id")),
+        )
+        for record in active_claims
+    }
+    if resume_pair not in claim_pairs:
+        findings.append(
+            _pointer_finding(
+                "pointer-resume-mismatch",
+                "resume active task and task-set must select an active claim",
+            )
+        )
+    return findings
+
+
+def continuity_report(
+    root: Path,
+    active_claims: Iterable[ClaimRecord] | None = None,
+    *,
+    require_standby_pointer: bool = False,
+) -> ContinuityReport:
+    root = root.resolve()
+    parse_findings: list[str] = []
+    if active_claims is None:
+        records, parse_findings = _read_claims(root)
+        active = [record for record in records if record.active]
+    else:
+        active = list(active_claims)
+    active_workers = [record for record in active if not record.overlay]
+    findings = list(parse_findings)
     status = next(
         (root / relative for relative in STATUS_CANDIDATES if (root / relative).is_file()),
         None,
     )
-    if not active and status is None:
-        return findings
-    if status is None:
-        candidates = ", ".join(path.as_posix() for path in STATUS_CANDIDATES)
-        findings.append(
-            f"{candidates}: continuity:status-missing: one status candidate must exist for session resume"
-        )
-    else:
-        text = status.read_text(encoding="utf-8")
-        if not any(marker in text for marker in HANDOFF_MARKERS):
-            relative = _rel(root, status)
-            markers = ", ".join(HANDOFF_MARKERS)
+    mode = "idle"
+    if status is not None:
+        mode = "status+sidecars"
+        try:
+            text = status.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
             findings.append(
-                f"{relative}: continuity:status-handoff-missing: "
-                f"status must include one resume marker: {markers}"
+                f"{_rel(root, status)}: continuity:status-unreadable: {exc}"
             )
+        else:
+            if not any(marker in text for marker in HANDOFF_MARKERS):
+                relative = _rel(root, status)
+                markers = ", ".join(HANDOFF_MARKERS)
+                findings.append(
+                    f"{relative}: continuity:status-handoff-missing: "
+                    f"status must include one resume marker: {markers}"
+                )
+    elif active_workers or require_standby_pointer:
+        mode = "pointer+sidecars"
+        findings.extend(
+            _pointer_findings(
+                root,
+                active_workers,
+                require_standby_pointer=require_standby_pointer,
+            )
+        )
 
     for record in active:
         rel = _rel(root, record.path)
@@ -431,7 +892,17 @@ def _continuity_findings(root: Path, active_claims: Iterable[ClaimRecord]) -> li
             findings.append(f"{rel}: task-claim:handoff-path-missing-file: {handoff}")
         if log_path and not (root / log_path).exists():
             findings.append(f"{rel}: task-claim:log-path-missing-file: {log_path}")
-    return findings
+    return ContinuityReport(
+        status="fail" if findings else "pass",
+        mode=mode,
+        pointer=POINTER_PATH.as_posix(),
+        active_claims=len(active_workers),
+        findings=tuple(findings),
+    )
+
+
+def _continuity_findings(root: Path, active_claims: Iterable[ClaimRecord]) -> list[str]:
+    return list(continuity_report(root, active_claims).findings)
 
 
 def _git_scans_enabled(root: Path) -> bool:
@@ -975,9 +1446,36 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Parallel worktree/task claim gate")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository or host root")
     parser.add_argument("--check", action="store_true", help="Return non-zero when block findings exist")
+    parser.add_argument(
+        "--continuity-only",
+        action="store_true",
+        help="Evaluate only the effective STATUS or pointer-plus-sidecars path",
+    )
+    parser.add_argument(
+        "--require-standby-pointer",
+        action="store_true",
+        help="Require a structurally usable pointer even when no claim is active",
+    )
+    parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
     root = args.root.resolve()
+    if args.continuity_only:
+        report = continuity_report(
+            root,
+            require_standby_pointer=args.require_standby_pointer,
+        )
+        if args.json:
+            print(json.dumps(report.as_dict(), ensure_ascii=False, sort_keys=True))
+        else:
+            print(f"continuity: {report.status}")
+            print(f"mode={report.mode}")
+            print(f"pointer={report.pointer}")
+            print(f"active_claims={report.active_claims}")
+            print(f"findings={len(report.findings)}")
+            for finding in report.findings:
+                print(f"- {finding}")
+        return 1 if report.findings else 0
     findings = check_root(root)
     block = [finding for finding in findings if finding.severity == "block"]
     watch = [finding for finding in findings if finding.severity == "watch"]

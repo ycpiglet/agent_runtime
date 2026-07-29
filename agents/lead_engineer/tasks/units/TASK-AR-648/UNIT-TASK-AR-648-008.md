@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:34:46+09:00
-updated_at: 2026-07-30T00:36:13+09:00
+updated_at: 2026-07-30T00:45:28+09:00
 started_at: 2026-07-30T00:22:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md
@@ -45,6 +45,7 @@ target_files:
   - tests/test_doctor.py
   - src/agent_runtime/templates/project/agents/project/NEXT-SESSION-POINTER.yml
   - src/agent_runtime/templates/project/scripts/check_agent_docs.py
+  - src/agent_runtime/templates/project/scripts/owner_governance_gate.py
   - tests/test_template_smoke.py
   - docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md
   - src/agent_runtime/templates/project/docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md

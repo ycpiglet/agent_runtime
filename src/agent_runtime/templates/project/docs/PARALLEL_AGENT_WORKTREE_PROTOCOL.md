@@ -66,6 +66,33 @@ tasks, missing instance/display metadata, malformed overlay contracts, and
 missing handoff/log pointers. An out-of-`HEAD` working-tree overlay remains
 visible as a reset/clean risk watch.
 
+## Continuity Source Selection
+
+A present `STATUS.md` or `agents/lead_engineer/STATUS.md` remains the primary
+continuity source and must contain an existing resume marker. A malformed
+present status file cannot be bypassed by a pointer.
+
+When both status candidates are absent, the only fallback is
+`agents/project/NEXT-SESSION-POINTER.yml` plus every active claim's handoff and
+log sidecars. The pointer must use the canonical schema, contain no placeholder
+values, be at least as fresh as every active non-overlay claim heartbeat, list
+exactly those claim paths, and contain exactly one full current-agent record
+per claim. Missing, malformed, stale, duplicate, extra, partial, or mismatching
+pointer state blocks.
+
+After claim creation, the serial projection owner runs:
+
+```bash
+python scripts/task_claim_dispatcher.py projection --claim-id CLAIM-ID --json
+```
+
+The emitted record includes claim, agent, team, pane, task, unit, task-set,
+phase/progress/step, worktree/branch, sidecar, and heartbeat fields. Projection
+is read-only: neither claim creation nor this command edits the pointer or
+changes Git `HEAD`. Doctor validates a structurally usable standby pointer
+before first work and reports the effective `status+sidecars` or
+`pointer+sidecars` path.
+
 ## Dispatch Pattern
 
 ```bash

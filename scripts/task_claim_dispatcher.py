@@ -1461,8 +1461,35 @@ def cmd_projection(args: argparse.Namespace) -> int:
     rel_path = _rel(root, path)
     agent = {
         key: claim.get(key)
-        for key in ("claim_id", "agent_role", "agent_instance_id", "display_name", "callsite_id", "pane_id")
+        for key in (
+            "claim_id",
+            "agent_role",
+            "team_id",
+            "agent_instance_id",
+            "display_name",
+            "callsite_id",
+            "pane_id",
+            "task_id",
+            "unit_id",
+            "task_set_id",
+            "status",
+            "phase",
+            "progress_pct",
+            "step_index",
+            "step_total",
+            "status_text",
+            "worktree_path",
+            "branch",
+        )
     }
+    agent.update(
+        {
+            "claim_path": rel_path,
+            "handoff_path": claim.get("handoff_path"),
+            "log_path": claim.get("log_path"),
+            "last_heartbeat": claim.get("last_heartbeat"),
+        }
+    )
     projection = {
         "status": "projection",
         "operation": "merge",
