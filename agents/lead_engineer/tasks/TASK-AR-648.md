@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T23:37:32+09:00
+updated_at: 2026-07-29T23:42:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -40,6 +40,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
   - agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.json
   - agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.json
+  - agents/runtime/task_claims/CLAIM-20260729-234200-task-ar-648-648007.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -101,6 +102,10 @@ claim_refs:
   now the isolated blocked-unit redispatch guard; portable continuity moved to
   UNIT-008 and remains unclaimed. Both units forbid every consumer and release
   action.
+  UNIT-007 was explicitly claimed only after T2 passed; this recovery does not
+  use the planner's rejected UNIT-002 command or `--skip-plan-check`. Default
+  claim persistence left Runtime `HEAD` unchanged and its Compound lookup
+  retrieved the exact selector record first with score 180.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

@@ -1,33 +1,52 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T23:37:32+09:00
-updated_by: codex-root-task-ar-648-007-planner
+updated_at: 2026-07-29T23:42:00+09:00
+updated_by: codex-root-task-ar-648-007
 current_state:
-  summary: "TASK-AR-648 UNIT-007 is registered to stop taskset planning from redispatching historical blocked units; continuity is UNIT-008."
-  status: planned
+  summary: "TASK-AR-648 UNIT-007 is claimed to stop taskset planning from redispatching historical blocked units; continuity remains UNIT-008."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 1
   step_total: 6
-  progress_pct: 0
-  status_text: "Refresh assumptions for selector repair, prove plan selects UNIT-007, then claim without bypass."
+  progress_pct: 5
+  status_text: "T2 passed and explicit UNIT-007 claim left HEAD unchanged; capture RED tests before selector edits."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260729-234200-task-ar-648-648007
+      agent_role: lead-engineer
+      agent_instance_id: codex-root-task-ar-648-007
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex:root:task-ar-648-007
+      pane_id: codex:task-ar-648-007
+      task_id: TASK-AR-648
+      unit_id: UNIT-TASK-AR-648-007
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      phase: selector-red
+      progress_pct: 5
+      status_text: "UNIT-007 claimed explicitly after canonical planner RED selected blocked UNIT-002"
+      worktree_path: .
+      branch: codex/unit-task-ar-648-002-implementation
+      claim_path: agents/runtime/task_claims/CLAIM-20260729-234200-task-ar-648-648007.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260729-234200-task-ar-648-648007.handoff.md
+      last_heartbeat: 2026-07-29T23:42:00+09:00
+  current_teams:
+    - evaluation-office
 resume:
   active_task: TASK-AR-648
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
   branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
   next_actions:
-    - "Record the blocked-unit selector defect as Compound knowledge."
-    - "Refresh UNIT-007 plan assumptions; preserve the wrong UNIT-002 plan output as RED evidence."
-    - "Explicitly claim only the registered UNIT-007 without T2 bypass, then repair and re-run the planner."
+    - "Add the blocked-history plus planned-current RED tests."
+    - "Implement deterministic runnable-unit selection in source and template."
+    - "Re-run taskset plan and require UNIT-007 before W4a."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260729-234200-task-ar-648-648007.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
