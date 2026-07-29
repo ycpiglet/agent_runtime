@@ -1,41 +1,33 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T23:08:58+09:00
+updated_at: 2026-07-29T23:29:30+09:00
 updated_by: codex-root-task-ar-648-006
 current_state:
-  summary: "TASK-AR-648 UNIT-006 claimed after T3 revalidation; capture Bean baselines, then create only the fresh attempt-2 worktree."
-  status: in_progress
-  task_set_status: active
+  summary: "TASK-AR-648 UNIT-006 is blocked: independent W4b confirmed a portable continuity P0 in fresh core adoption."
+  status: blocked
+  task_set_status: blocked
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
+  step_index: 3
   step_total: 9
-  progress_pct: 5
-  status_text: "UNIT-006 claim uses working_tree persistence and left Runtime HEAD unchanged; Bean worktree creation is now authorized."
+  progress_pct: 25
+  status_text: "Bean attempt 2 is frozen with zero host/content/external effects; Runtime-only remediation must pass W4a/W4b before replay."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260729-230858-task-ar-648-648006
-      agent_role: lead-engineer
-      agent_instance_id: codex-root-task-ar-648-006
-      display_name: lead_engineer@orchestrator-01
-      callsite_id: codex:root:task-ar-648-006
-      pane_id: codex:task-ar-648-006
-      task_id: TASK-AR-648
-      unit_id: UNIT-TASK-AR-648-006
-      worktree_path: .
-      branch: codex/unit-task-ar-648-002-implementation
-  current_teams:
-    - evaluation-office
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-648
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Create only the fresh Bean Wiki attempt-2 worktree from 357eee4 after immutable baseline capture. Keep primary Bean, frozen attempt 1, Allimbot, push, deploy, publish, version, tag, package, and release untouched until Bean W4b approval."
+  branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
+  next_actions:
+    - "Record the cross-layer P0 as Compound knowledge before the next claim."
+    - "Register and claim a Runtime-only portable continuity remediation unit."
+    - "Add RED journey and negative pointer tests before implementation."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

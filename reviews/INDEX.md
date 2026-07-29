@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T23:10:02+09:00
-record_count: 1056
+generated_at: 2026-07-29T23:31:10+09:00
+record_count: 1058
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1056` review and evidence records under `reviews/`.
+- Summary: indexed `1058` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1056` files |
+| Reviews covered | pass | `1058` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -610,6 +610,7 @@ record_count: 1056
 | `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan` | md | active | stop | TASK-AR-648 Portable Continuity P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Post-Commit HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Symbolic HEAD Race P0 Replan |
@@ -1087,6 +1088,7 @@ record_count: 1056
 | `reviews/W4B-2026-07-29-unit-task-ar-648-004.md` | `W4B-2026-07-29-unit-task-ar-648-004` | md | failed | block | TASK-AR-648 UNIT-004 Independent W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md` | `W4B-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Independent W4b R4 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md` | `W4B-2026-07-29-unit-task-ar-648-006-continuity-block` | md | failed | block | Bean Wiki Attempt-2 Portable Continuity Independent Review |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

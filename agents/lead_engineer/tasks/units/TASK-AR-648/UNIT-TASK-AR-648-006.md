@@ -9,11 +9,12 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-29T23:02:11+09:00
-updated_at: 2026-07-29T23:08:58+09:00
+updated_at: 2026-07-29T23:29:30+09:00
+blocked_at: 2026-07-29T23:29:30+09:00
 started_at: 2026-07-29T23:08:58+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md
@@ -43,8 +44,10 @@ target_files:
   - new:reviews/PILOT-BEAN-WIKI-v080-GREEN.md
   - new:reviews/W4A-2026-07-29-unit-task-ar-648-006.md
   - new:reviews/W4B-2026-07-29-unit-task-ar-648-006.md
+  - new:reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md
+  - new:reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md
   - agents/lead_engineer/tasks/TASK-AR-648.md
   - agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md
   - agents/project/NEXT-SESSION-POINTER.yml
@@ -165,3 +168,18 @@ fixture digest, W4a, and independent W4b.
 Any P0/P1 or mismatch in Git, content, ownership, task trace, continuity,
 evidence truth, or external-effect counters stops the replay and preserves the
 worktree as failure evidence.
+
+## Outcome
+
+Blocked at step 4. The valid default claim left Bean `HEAD` unchanged, but the
+installed parallel-worktree gate required `STATUS.md` or
+`agents/lead_engineer/STATUS.md`; neither the selected template, adopt plan,
+lock, nor doctor provided or diagnosed either candidate. Independent W4b
+confirmed P0 and `REQUEST_CHANGES` at 45/100.
+
+Attempt 2 is frozen at
+`/home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-green-2`.
+The editorial and restart/Scribe tasks did not start. All host/content digests
+match their baselines and every external-effect counter is zero. See
+`reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md` and
+`reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md`.

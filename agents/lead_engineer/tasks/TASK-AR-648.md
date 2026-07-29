@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T23:08:58+09:00
+updated_at: 2026-07-29T23:29:30+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -88,10 +88,14 @@ claim_refs:
   `154`, routing `49`, and full `2644 passed, 3 skipped`; fresh independent
   W4b R4 then approved the same product at `97/100` with focused `203`, the
   same full-suite result, and no P0/P1. UNIT-005 is completed and its claim is
-  released. UNIT-006 is claimed for a fresh Bean replay from the original
-  pinned baseline. Its default claim persisted in `working_tree` mode without
-  moving Runtime `HEAD`; Allimbot remains stopped until the replay passes
-  independent W4b.
+  released. UNIT-006 replayed Bean from the original pinned baseline and its
+  default claim correctly persisted in `working_tree` mode without moving Bean
+  `HEAD`. That claim then exposed a new P0: the installed core gate requires a
+  STATUS candidate that profile selection, adoption, lock, and doctor neither
+  install nor diagnose. Independent W4b returned `REQUEST_CHANGES` at 45/100.
+  UNIT-006 and its Runtime claim are blocked/released, Bean attempt 2 is frozen,
+  and Allimbot remains stopped pending a Runtime-only portable-continuity repair
+  plus a new independently approved Bean replay.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

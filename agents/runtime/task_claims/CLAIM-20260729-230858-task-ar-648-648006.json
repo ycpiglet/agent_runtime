@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-648-006",
   "pane_id": "codex:task-ar-648-006",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -31,21 +31,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop immediately on any P0/P1, consumer commit, primary or frozen-worktree mutation, host/content overwrite, stale template provenance, false evidence, external effect, Allimbot worktree creation, or release action.",
-  "phase": "bootstrap",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "pilot-blocked",
+  "progress_pct": 25,
+  "step_index": 3,
   "step_total": 9,
-  "status_text": "Bean Wiki attempt 2 claim bootstrap",
+  "status_text": "Released after independent W4b confirmed portable continuity P0; Bean attempt 2 frozen",
   "worktree_path": ".",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-29T23:08:58+09:00",
-  "last_heartbeat": "2026-07-29T23:08:58+09:00",
-  "updated_at": "2026-07-29T23:08:58+09:00",
-  "expires_at": "2026-07-29T23:38:58+09:00",
+  "last_heartbeat": "2026-07-29T23:29:30+09:00",
+  "updated_at": "2026-07-29T23:29:30+09:00",
+  "expires_at": "2026-07-30T00:18:51+09:00",
   "lease": {
     "claimed_at": "2026-07-29T23:08:58+09:00",
-    "heartbeat_at": "2026-07-29T23:08:58+09:00",
-    "expires_at": "2026-07-29T23:38:58+09:00"
+    "heartbeat_at": "2026-07-29T23:29:30+09:00",
+    "expires_at": "2026-07-30T00:18:51+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.log.md",
@@ -126,5 +126,9 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-29T23:29:30+09:00",
+  "verified_by": "p0-integrated-review-continuity-block",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md"
 }
