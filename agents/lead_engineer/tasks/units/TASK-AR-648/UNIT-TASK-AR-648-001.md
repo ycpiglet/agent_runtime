@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T15:36:41+09:00
+updated_at: 2026-07-29T16:29:20+09:00
 started_at: 2026-07-29T15:36:41+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md
@@ -56,6 +56,17 @@ verification:
   - python -m pytest tests/test_pilot_acceptance.py -q
 handoff: Attach pinned SHAs, before/after digests, reconcile counts, duration, footprint, seams, bootstrap provenance, three task traces, Compound query evidence, Scribe/restart evidence, routing truth, Bean verification output, and P0/P1/P2 findings.
 stop_condition: Stop before any live publish, deploy, origin push, host commit, credential access, network delivery, content mutation, unrelated dirty checkout mutation, or unsupported success/cost claim.
+verified_at: 2026-07-29T16:28:58+09:00
+verified_by: le-20260729-task-ar-648-001-codex
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858.json
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-648-001.md
+resolution: done
+completed_at: 2026-07-29T16:29:20+09:00
+closed_by: le-20260729-task-ar-648-001-codex
+actual_hours: 0.88
+measurement_unavailable_reason: Provider token and cost usage were not exposed; elapsed wall time is recorded separately as actual_hours.
 ---
 
 # UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki
@@ -158,3 +169,18 @@ P0/P1/P2 findings.
 Stop before live publish, deploy, origin push, host commit, credential access,
 network delivery, content mutation, modification of either dirty primary
 checkout, or any unsupported success/cost claim.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T16:29:20+09:00`
+- Resolution: `done`
+- Actual hours: `0.88`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Provider token and cost usage were not exposed; elapsed wall time is recorded separately as actual_hours.
+- Closed by: `le-20260729-task-ar-648-001-codex`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858.json`
+- Reviews:
+  - `reviews/W4B-2026-07-29-unit-task-ar-648-001.md`
+<!-- work-close:end -->
