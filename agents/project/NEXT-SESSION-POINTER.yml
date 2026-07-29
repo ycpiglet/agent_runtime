@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T01:22:00+09:00
+updated_at: 2026-07-30T01:28:00+09:00
 updated_by: codex-root-task-ar-648-008
 current_state:
-  summary: "TASK-AR-648 UNIT-008 is closed; Bean attempt-3 registration and T3 anchoring are next."
+  summary: "TASK-AR-648 UNIT-009 is registered; T3 anchoring, readiness, plan selection, and claim creation precede Bean attempt 3."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 7
+  step_index: 1
   step_total: 8
-  progress_pct: 100
-  status_text: "Exact product b82042eb passed W4a, independent W4b, and canonical 6-command verification; UNIT-008 is closed."
+  progress_pct: 10
+  status_text: "UNIT-009 pins Runtime b82042eb and Bean 357eee4; no consumer worktree exists until T3 and claim gates pass."
 active_work:
   current_agents: []
   current_teams: []
@@ -18,7 +18,8 @@ resume:
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
   next_actions:
-    - "Register and T3-anchor a new Bean Wiki attempt-3 unit before creating any consumer worktree."
+    - "Record UNIT-009's T3 plan-assumption snapshot and require the canonical plan to select only UNIT-009."
+    - "Create the UNIT-009 Runtime claim in default working-tree mode and prove Runtime HEAD does not move."
     - "Create attempt 3 only from Bean baseline 357eee4; keep primary and both frozen attempts read-only."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

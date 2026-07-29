@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T00:54:06+09:00
+updated_at: 2026-07-30T01:28:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -111,8 +111,14 @@ claim_refs:
   independent W4b at 99/100 with no P0/P1, and canonical verification
   (`113` selector, `83` claim/readiness, full `2658 passed, 3 skipped`).
   UNIT-007 is completed and its claim is released. The canonical next unit is
-  now UNIT-008, but its claim remains blocked until the selector-induced plan
-  drift is recorded and re-anchored through a T3 review.
+  UNIT-008, which closed the portable-continuity contract at exact product
+  `b82042eba58f1e06e1e73130a189cb72245462a0`. Canonical W4a, fresh
+  independent W4b at 99/100, and canonical six-command verification passed
+  with no P0/P1; its claim is released and the unit is completed. UNIT-009 is
+  now the only runnable unit and governs a fresh Bean attempt 3 from the
+  original pinned baseline. No Bean worktree may be created until UNIT-009 is
+  T3-anchored, selected by the canonical plan, and claimed without moving
+  Runtime HEAD.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 
