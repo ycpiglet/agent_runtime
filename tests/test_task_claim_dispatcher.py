@@ -22,8 +22,21 @@ def _routing_off_env() -> dict[str, str]:
     """Pin the dormant-role routing flags OFF so these baseline claim-lifecycle
     tests assert the unchanged behavior deterministically, regardless of an
     ambient flag in the developer's shell (the live review-routing seam is
-    exercised in tests/test_role_routing_wiring.py)."""
+    exercised in tests/test_role_routing_wiring.py).
+
+    The dispatcher runs the installed security gate from the fixture host as a
+    nested subprocess. Pin the package under test with an absolute path so a
+    relative ambient ``PYTHONPATH=src`` cannot resolve against that temporary
+    host or an editable install from a different Git worktree.
+    """
     env = dict(os.environ)
+    source_root = str((REPO_ROOT / "src").resolve())
+    ambient_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        os.pathsep.join((source_root, ambient_pythonpath))
+        if ambient_pythonpath
+        else source_root
+    )
     for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
         env.pop(flag, None)
     return env
