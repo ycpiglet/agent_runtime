@@ -92,6 +92,9 @@ evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144.json
 review_refs:
   - reviews/W4A-2026-07-29-unit-task-ar-648-003.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-003.md
+defect_signatures:
+  - defect:explicit-scm-claim-staged-but-absent-from-head-p:876b70f8b223ef6c
 ---
 
 # UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime

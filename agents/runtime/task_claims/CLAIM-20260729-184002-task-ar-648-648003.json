@@ -32,21 +32,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop on implicit SCM mutation, source-checkout import dependence, evidence rewrite, new P0, or consumer external effect",
-  "phase": "w4a-complete",
+  "phase": "w4b-changes-requested",
   "progress_pct": 60,
   "step_index": 5,
   "step_total": 9,
-  "status_text": "W4a passed at 31b1a146; awaiting independent integrated W4b",
+  "status_text": "Independent W4b found staged-only explicit SCM persistence bypass; remediating before Bean replay",
   "worktree_path": ".",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-29T18:40:02+09:00",
-  "last_heartbeat": "2026-07-29T19:05:47+09:00",
-  "updated_at": "2026-07-29T19:05:47+09:00",
-  "expires_at": "2026-07-30T19:05:47+09:00",
+  "last_heartbeat": "2026-07-29T19:16:33+09:00",
+  "updated_at": "2026-07-29T19:16:33+09:00",
+  "expires_at": "2026-07-30T19:16:33+09:00",
   "lease": {
     "claimed_at": "2026-07-29T18:40:02+09:00",
-    "heartbeat_at": "2026-07-29T19:05:47+09:00",
-    "expires_at": "2026-07-30T19:05:47+09:00"
+    "heartbeat_at": "2026-07-29T19:16:33+09:00",
+    "expires_at": "2026-07-30T19:16:33+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.log.md",
@@ -61,7 +61,9 @@
     "external_effect",
     "repeated_failure"
   ],
-  "defect_signatures": [],
+  "defect_signatures": [
+    "defect:explicit-scm-claim-staged-but-absent-from-head-p:876b70f8b223ef6c"
+  ],
   "knowledge_lookup": {
     "status": "clear",
     "match_count": 0
