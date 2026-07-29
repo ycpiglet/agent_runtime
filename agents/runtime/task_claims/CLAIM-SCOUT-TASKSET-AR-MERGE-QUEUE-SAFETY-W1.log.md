@@ -1,0 +1,6 @@
+# Claim Log: CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1
+
+- claimed_at: 2026-07-30T07:55:00+09:00
+- task_id: SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1
+- agent_instance_id: progress-scout-CLAIM-SCOUT-TASKSET-AR-MERGE-QUEUE-SAFETY-W1
+- status_text: Progress-scout sweep for TASKSET-AR-MERGE-QUEUE-SAFETY wave 1
