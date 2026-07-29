@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T21:47:00+09:00
+updated_at: 2026-07-29T21:57:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -71,9 +71,12 @@ claim_refs:
   release and could switch symbolic HEAD. The repair keeps that lock through
   post-hook execution. W4a R3 passed at product
   `4c50297416fe4a72673bcf43378e0614c955f0a1` with `2634 passed, 3 skipped`
-  and a task-linked Compound record; Bean replay moves to a separate unit only
-  after an independent W4b approves that exact product SHA. P1 profile,
-  overlay-execution, and
+  and a task-linked Compound record, but independent W4b rejected that product
+  because its private ref publication omitted the actual worktree `HEAD`
+  reflog. UNIT-005 now adds normal and linked-worktree reflog parity inside
+  the protected publication boundary. Bean replay moves to a separate unit
+  only after a new W4a and independent W4b approve a new exact product SHA.
+  P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 
 ## Goal

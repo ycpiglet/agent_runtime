@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T21:47:00+09:00
+updated_at: 2026-07-29T21:57:00+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -36,7 +36,10 @@ inputs:
   - reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242.json
   - reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-005.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md
   - agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json
   - agent-runtime@76212dc0c1898c35542cf2838039b5ee88af360f
 target_files:
   - scripts/claim_guard.py
@@ -55,7 +58,9 @@ target_files:
   - new:reviews/W4B-2026-07-29-unit-task-ar-648-005.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md
   - new:reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md
+  - new:reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md
   - new:agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
+  - new:agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json
   - agents/project/knowledge/compounds/INDEX.json
   - reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
   - reviews/INDEX.md
@@ -69,6 +74,7 @@ acceptance:
   - The final commit tree exactly equals the pre-hook sealed tree, and symbolic HEAD advances by one compare-and-swap update only when the starting HEAD still matches.
   - The real worktree HEAD cannot switch branches between final validation and branch compare-and-swap; the transaction holds the real worktree HEAD lock while updating the original branch through an isolated detached Git administrative context.
   - Runtime-invoked post-commit processing runs before the owned real-worktree HEAD lock is released, so the transaction cannot return success after its own hook switches symbolic HEAD away from the published claim commit.
+  - Successful publication records one verified transition in the actual worktree-specific HEAD reflog, including linked worktrees, without changing another worktree's HEAD reflog.
   - Detached HEAD, concurrent ref movement, hook failure, malformed/stale/dead-owner/wrong-root/wrong-index/wrong-path/wrong-HEAD/wrong-tree/wrong-blob markers all fail without advancing the claim transaction.
   - Existing unrelated staged, partially staged, unstaged, and untracked user changes retain their exact real-index and working-tree state across both success and failure.
   - On success the three artifacts are clean against HEAD, the claim survives reset plus clean, and the ordinary post-transaction gate has zero block findings.
@@ -88,10 +94,10 @@ defect_signatures:
   - defect:claim-commit-final-tree-toctou:f39b32eb331a6963
   - defect:claim-commit-symbolic-head-race:f2860072798c6ac5
   - defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1
-verified_at: 2026-07-29T21:44:18+09:00
-verified_by: codex-root-task-ar-648-005
+  - defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json
+  - reviews/W4B-2026-07-29-unit-task-ar-648-005.md
 ---
 
 # UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees
@@ -162,8 +168,11 @@ telemetry, and UI behavior are out of scope.
    reset-plus-clean regressions.
 6. Preserve the first W4a as historical evidence, mirror root/template
    assets, regenerate the host lock, and run focused plus full W4a R2.
-7. Obtain a fresh independent W4b against the R2 product SHA before
+7. Obtain a fresh independent W4b against the repaired product SHA before
    registering any consumer replay.
+8. Preserve actual worktree `HEAD` reflog parity inside the protected
+   publication boundary for normal and linked worktrees, then repeat W4a and
+   independent W4b.
 
 ## Acceptance Criteria
 
@@ -195,6 +204,8 @@ task-linked Compound retrieval, and independent W4b verdict.
   called atomic.
 - A Runtime-invoked post-commit hook is not treated as an unrelated external
   race; it must not invalidate symbolic HEAD before the guard returns.
+- A branch-only reflog update is not treated as native commit parity; the
+  actual worktree-local `HEAD` reflog must record the protected transition.
 - A bad normal commit followed by rollback is not used as the integrity
   boundary.
 - Bean Wiki and Allimbot remain outside this unit.

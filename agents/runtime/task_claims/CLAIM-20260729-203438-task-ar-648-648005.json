@@ -32,21 +32,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop on path-only authorization, normal-commit rollback, user-index mutation, hook bypass, non-CAS ref update, transaction leak, weakened ordinary gate, new P0, consumer worktree creation, or external effect.",
-  "phase": "w4a-r3-complete",
-  "progress_pct": 80,
+  "phase": "w4b-r3-request-changes",
+  "progress_pct": 68,
   "step_index": 5,
   "step_total": 7,
-  "status_text": "W4a R3 passed at 4c502974 (2634 passed, 3 skipped); task-linked Compound recorded; fresh independent W4b is required before consumers.",
+  "status_text": "Independent W4b rejected 4c502974: actual worktree HEAD reflog was not updated. Bean and Allimbot remain stopped pending RED-R4, repair, W4a, and fresh W4b.",
   "worktree_path": ".",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-29T20:34:38+09:00",
-  "last_heartbeat": "2026-07-29T21:47:00+09:00",
-  "updated_at": "2026-07-29T21:47:00+09:00",
-  "expires_at": "2026-07-29T22:47:00+09:00",
+  "last_heartbeat": "2026-07-29T21:57:00+09:00",
+  "updated_at": "2026-07-29T21:57:00+09:00",
+  "expires_at": "2026-07-29T22:57:00+09:00",
   "lease": {
     "claimed_at": "2026-07-29T20:34:38+09:00",
-    "heartbeat_at": "2026-07-29T21:47:00+09:00",
-    "expires_at": "2026-07-29T22:47:00+09:00"
+    "heartbeat_at": "2026-07-29T21:57:00+09:00",
+    "expires_at": "2026-07-29T22:57:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.log.md",
@@ -55,7 +55,8 @@
     "v080",
     "claim-tree-toctou",
     "symbolic-head-race",
-    "post-commit-head-race"
+    "post-commit-head-race",
+    "actual-head-reflog"
   ],
   "escalation_triggers": [
     "data_integrity",
@@ -65,7 +66,8 @@
   "defect_signatures": [
     "defect:claim-commit-final-tree-toctou:f39b32eb331a6963",
     "defect:claim-commit-symbolic-head-race:f2860072798c6ac5",
-    "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1"
+    "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1",
+    "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4"
   ],
   "knowledge_lookup": {
     "status": "clear",
@@ -90,7 +92,9 @@
     "reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md",
     "reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md",
     "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json",
     "agents/project/knowledge/compounds/INDEX.json",
     "reviews/INDEX.md"
   ],
