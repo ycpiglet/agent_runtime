@@ -113,8 +113,11 @@ private context is used only for the final ref compare-and-swap. Marker,
 index, message, private-context, and owned lock files are removed on every
 exit. A pre-existing `HEAD.lock` is never removed and makes the transaction
 fail closed. Failure leaves the claim artifacts staged so the ordinary gate
-blocks them. `post-commit` runs after publication and lock release; its
-failure is reported as a warning, matching Git's post-publication semantics.
+blocks them. After publication, `post-commit` runs while the owned
+`HEAD.lock` is still held, so Runtime-invoked hook work cannot switch symbolic
+`HEAD` before the guard returns. Its failure is reported as a warning because
+the sealed commit is already published; the lock is then released
+immediately.
 
 Git 2.36 or newer runs hooks through `git hook run`. Older POSIX Git executes
 the configured traditional executable hook directly; older Windows Git fails

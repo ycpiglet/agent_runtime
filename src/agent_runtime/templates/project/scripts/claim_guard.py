@@ -665,6 +665,7 @@ def _claim_transaction_commit(
                 "reason": "claim-commit-head-lock-unavailable",
                 "paths": rels,
             }
+        post: dict[str, Any] = {"code": 0, "out": "", "err": ""}
         try:
             state_error = _transaction_state_error(
                 root,
@@ -731,11 +732,11 @@ def _claim_transaction_commit(
                     "commit": commit_oid,
                     "tree": tree_oid,
                 }
+            post = _run_hook(root, "post-commit", env=commit_env)
         finally:
             _release_owned_lock(head_lock_path, head_lock_token)
             head_lock_token = None
 
-        post = _run_hook(root, "post-commit", env=commit_env)
         result: dict[str, Any] = {
             "ok": True,
             "committed": True,
