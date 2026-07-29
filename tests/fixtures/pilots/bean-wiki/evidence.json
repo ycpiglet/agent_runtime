@@ -1,0 +1,306 @@
+{
+  "schema": "agent-runtime-pilot-evidence/v1",
+  "host": "bean-wiki",
+  "pilot_id": "bean-wiki-v080-red-pilot",
+  "result": "blocked",
+  "baselines": {
+    "host_commit": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+    "runtime_commit": "4ab35b89023f23c032fc574a12a8679f1ea57d33"
+  },
+  "bootstrap": {
+    "upstream_claim_id": "CLAIM-20260729-153641-task-ar-648-648001",
+    "unmapped_diff_count": 0,
+    "consumer_commit_count": 0,
+    "consumer_push_count": 0
+  },
+  "adoption": {
+    "profiles": [
+      "core",
+      "web-content"
+    ],
+    "selected_template_files": 243,
+    "web_content_incremental_files": 0,
+    "initial_reconcile": {
+      "safe_updates": 241,
+      "preserved": 0,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "apply_safe": {
+      "applied": 241,
+      "remaining_conflicts": 0,
+      "elapsed_seconds": 0.15
+    },
+    "immediate_post_apply_reconcile": {
+      "safe_updates": 0,
+      "preserved": 241,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "post_work_registration_reconcile": {
+      "safe_updates": 0,
+      "preserved": 240,
+      "excluded": 2,
+      "conflicts": 1,
+      "conflict_paths": [
+        "owner-docs.yml"
+      ]
+    },
+    "lock_schema": "agent-runtime-lock/v2",
+    "template_digest": "sha256:c2679c1d7698112a11a4f7ada3d5ee18941853a9961f68b161c759549c7a03ef"
+  },
+  "preservation": {
+    "host_asset_count": 16,
+    "unexpected_overwrite_count": 0,
+    "host_assets": [
+      {
+        "path": ".claude/agents/media-curator.md",
+        "before": "c3126d325cbda56ce5ff4dc91f0bc0070d41d6937d4e326931da8d072789cbfa",
+        "after": "c3126d325cbda56ce5ff4dc91f0bc0070d41d6937d4e326931da8d072789cbfa"
+      },
+      {
+        "path": ".claude/agents/persona-barista.md",
+        "before": "4f2854b55b9486092482a51566a240a530a7e51f5014fd648740357a77a3ed99",
+        "after": "4f2854b55b9486092482a51566a240a530a7e51f5014fd648740357a77a3ed99"
+      },
+      {
+        "path": ".claude/agents/persona-farmer.md",
+        "before": "f4ee57730940e95847587be252f37cf30cb0dc604ae313bc351fde75cb77ecb1",
+        "after": "f4ee57730940e95847587be252f37cf30cb0dc604ae313bc351fde75cb77ecb1"
+      },
+      {
+        "path": ".claude/agents/persona-interviewer.md",
+        "before": "7c19bfc77c48a36063ddb162080d79c7a7990a3cb09a5345d3da804af39582f0",
+        "after": "7c19bfc77c48a36063ddb162080d79c7a7990a3cb09a5345d3da804af39582f0"
+      },
+      {
+        "path": ".claude/agents/persona-q-grader.md",
+        "before": "3e0634ea790fe40e0fdf3c1aa38dac754376780642fcf2810be1962b3baa6ee7",
+        "after": "3e0634ea790fe40e0fdf3c1aa38dac754376780642fcf2810be1962b3baa6ee7"
+      },
+      {
+        "path": ".claude/agents/persona-roaster.md",
+        "before": "09072bb9d7c8075a90618b8245c270bd7185ffdcebdb8ece3abc4d9d2ee1972a",
+        "after": "09072bb9d7c8075a90618b8245c270bd7185ffdcebdb8ece3abc4d9d2ee1972a"
+      },
+      {
+        "path": ".claude/agents/persona-writer.md",
+        "before": "632e152a8bb5b34b65e4e21e085788af991d33144bdb4235fcc2e8cfc2cdb4ea",
+        "after": "632e152a8bb5b34b65e4e21e085788af991d33144bdb4235fcc2e8cfc2cdb4ea"
+      },
+      {
+        "path": ".claude/agents/research-librarian.md",
+        "before": "45adfbf9ead20c5c3a15ad2a93fe11a0350945e2b9b19db63d0bb4e57cbda28b",
+        "after": "45adfbf9ead20c5c3a15ad2a93fe11a0350945e2b9b19db63d0bb4e57cbda28b"
+      },
+      {
+        "path": ".claude/skills/enrich-article/SKILL.md",
+        "before": "c0d256df34e6df723e7cd2568b93f477ed2a9fee51188a6ff6008ffb26a956d9",
+        "after": "c0d256df34e6df723e7cd2568b93f477ed2a9fee51188a6ff6008ffb26a956d9"
+      },
+      {
+        "path": ".claude/skills/review-article/SKILL.md",
+        "before": "78d209052f68f4d2826ee0eefbcc2ede68e7c1e72bd6c2ee6d8bce04ffc72dc0",
+        "after": "78d209052f68f4d2826ee0eefbcc2ede68e7c1e72bd6c2ee6d8bce04ffc72dc0"
+      },
+      {
+        "path": ".claude/skills/write-article/SKILL.md",
+        "before": "4249b22af58f299a14c26be5c68ff10f06e9fbef467595cc1685fcf99a2488bc",
+        "after": "4249b22af58f299a14c26be5c68ff10f06e9fbef467595cc1685fcf99a2488bc"
+      },
+      {
+        "path": "AGENTS.md",
+        "before": "e3447d84251880fb34cfae09131cb4c57471529bbfe60976a3245793cf621627",
+        "after": "e3447d84251880fb34cfae09131cb4c57471529bbfe60976a3245793cf621627"
+      },
+      {
+        "path": "BACKLOG.md",
+        "before": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591",
+        "after": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591"
+      },
+      {
+        "path": "CLAUDE.md",
+        "before": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+        "after": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+      },
+      {
+        "path": "docs/AGENT-EDITORIAL-OPS.md",
+        "before": "127196d34be808966baf4d03101288f2f00389c76561d62525d216f54387c859",
+        "after": "127196d34be808966baf4d03101288f2f00389c76561d62525d216f54387c859"
+      },
+      {
+        "path": "docs/EDITORIAL.md",
+        "before": "1b49396acb2156dcbd71e9916b33fcbaf6c768eb7f326d0709caabdc284a547f",
+        "after": "1b49396acb2156dcbd71e9916b33fcbaf6c768eb7f326d0709caabdc284a547f"
+      }
+    ],
+    "content": {
+      "file_count": 125,
+      "before": "cb1ba979576e586dabb235c536b8db7675933782d96d12d7f7dd5cf5808fd1eb",
+      "after": "cb1ba979576e586dabb235c536b8db7675933782d96d12d7f7dd5cf5808fd1eb"
+    }
+  },
+  "expected_task_count": 3,
+  "tasks": [
+    {
+      "task_id": "TASK-AR-001",
+      "unit_id": "UNIT-TASK-AR-001-001",
+      "status": "blocked",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260729-154746-task-ar-001-bean001",
+        "task_id": "TASK-AR-001",
+        "unit_id": "UNIT-TASK-AR-001-001",
+        "status": "blocked"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_process",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/adoption-verification.json",
+        "agents/host/pilot/reviews/W4B-TASK-AR-001.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-002",
+      "unit_id": "UNIT-TASK-AR-002-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260729-155712-task-ar-002-bean002",
+        "task_id": "TASK-AR-002",
+        "unit_id": "UNIT-TASK-AR-002-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "worker_standard",
+        "resolved_provider_tier": "sonnet",
+        "execution_surface": "codex_subagent",
+        "orchestration_requested_model": "gpt-5.6-terra",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/reviews/coffee-flavor-wheel.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-002.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-003",
+      "unit_id": "UNIT-TASK-AR-003-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260729-160224-task-ar-003-bean003",
+        "task_id": "TASK-AR-003",
+        "unit_id": "UNIT-TASK-AR-003-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_processes",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/restart-recovery.json",
+        "agents/host/pilot/reviews/W4B-TASK-AR-003.md"
+      ]
+    }
+  ],
+  "compound": {
+    "negative_fixture_matched": true,
+    "signature": "defect:worker-ready-unit-target-omits-new-prefix-and-po:8d3fd2fbaebb2789",
+    "retrieval_match_count": 1
+  },
+  "restart": {
+    "writer_pid": 2499725,
+    "reader_pid": 2500152,
+    "same_task": true,
+    "same_claim": true,
+    "checkpoint_sha256": "e63f5da708054d7a350631151e53bf4f625a8dc1c815facae0b2fb252b861603"
+  },
+  "scribe": {
+    "projection_status": "fresh",
+    "readiness": "ready",
+    "closure_blocking": false,
+    "source_state": "overdue",
+    "hot_count": 74,
+    "backlog_before": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591",
+    "backlog_after": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591"
+  },
+  "verification": {
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "check_content_returncode": 0,
+    "check_editorial_returncode": 0,
+    "build_content": {
+      "status": "not_run",
+      "reason": "command writes src/content/articles/index.ts and the pilot stop boundary allows content reads only"
+    },
+    "state_sync_blockers": 2,
+    "work_item_classifier_findings": 2
+  },
+  "findings": [
+    {
+      "priority": "P0",
+      "code": "registered-taskset-undispatchable"
+    },
+    {
+      "priority": "P0",
+      "code": "linked-worktree-self-claim-refused"
+    },
+    {
+      "priority": "P0",
+      "code": "template-example-classified-as-orphan"
+    },
+    {
+      "priority": "P0",
+      "code": "host-state-runtime-taskset-collision"
+    },
+    {
+      "priority": "P0",
+      "code": "managed-file-mutated-by-runtime-producer"
+    },
+    {
+      "priority": "P1",
+      "code": "web-content-profile-empty"
+    },
+    {
+      "priority": "P1",
+      "code": "role-overlay-not-executed"
+    }
+  ],
+  "external_effects": {
+    "publish": 0,
+    "deploy": 0,
+    "origin_push": 0,
+    "host_commit": 0,
+    "credential_read": 0,
+    "network_delivery": 0,
+    "content_mutation": 0
+  }
+}

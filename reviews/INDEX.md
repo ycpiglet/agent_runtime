@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T15:21:37+09:00
-record_count: 1020
+generated_at: 2026-07-29T16:29:39+09:00
+record_count: 1023
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1020` review and evidence records under `reviews/`.
+- Summary: indexed `1023` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1020` files |
+| Reviews covered | pass | `1023` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -165,6 +165,7 @@ record_count: 1020
 | `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json` | `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final` | json | record | n/a | OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final |
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
+| `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
@@ -894,6 +895,7 @@ record_count: 1020
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858.json` | `VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1051,6 +1053,7 @@ record_count: 1020
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r7.md` | `W4B-2026-07-29-unit-task-ar-647-001-r7` | md | changes_required | block | TASK-AR-647 UNIT-001 Independent W4b Security Metadata Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

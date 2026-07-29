@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T14:55:00+09:00
+updated_at: 2026-07-29T16:29:30+09:00
 updated_by: codex-root-v080-orchestrator
 current_state:
-  summary: "TASK-AR-647 is closed on verified main; the clean Bean Wiki adoption pilot is next."
+  summary: "TASK-AR-648 UNIT-001 completed as an independently verified red pilot; five P0 repairs and a green replay are required."
   status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
-  step_total: 1
-  progress_pct: 0
-  status_text: "TASK-AR-647 W6 complete; start TASK-AR-648 at W0/T2 in an isolated clean Bean Wiki worktree."
+  step_index: 10
+  step_total: 13
+  progress_pct: 50
+  status_text: "Bean Wiki red-pilot evidence is verified; register and claim UNIT-002 for the five P0 remediations before any downstream pilot or release."
 active_work:
   current_agents: []
   current_teams: []
@@ -54,7 +54,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-648
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
