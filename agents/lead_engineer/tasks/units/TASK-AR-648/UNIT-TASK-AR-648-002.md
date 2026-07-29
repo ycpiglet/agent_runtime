@@ -57,8 +57,13 @@ target_files:
   - tests/test_lock_merge_driver.py
   - scripts/pilot_acceptance.py
   - tests/fixtures/pilots/bean-wiki/evidence.json
+  - tests/fixtures/pilots/bean-wiki/evidence-green.json
   - tests/test_pilot_acceptance.py
   - reviews/PILOT-BEAN-WIKI-v080.md
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-002.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md
+  - reviews/INDEX.md
 scope: Implement one focused repair per observed P0, with source/template parity and adversarial regression tests. Replay the exact adoption path in a newly created clean Bean Wiki worktree, update only sanitized Runtime evidence, and preserve the original red observations. Do not implement profile thinning, host-context or role-overlay execution, first-run UX expansion, or provider token/cost telemetry in this unit.
 acceptance:
   - A taskset created through work.py new is discovered and planned by taskset_dispatcher from the canonical TASKSET-DEFINITIONS registry, with explicit legacy fallback behavior retained.

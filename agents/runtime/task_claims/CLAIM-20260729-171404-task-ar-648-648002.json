@@ -85,7 +85,12 @@
     "tests/test_lock_merge_driver.py",
     "scripts/pilot_acceptance.py",
     "tests/fixtures/pilots/bean-wiki/evidence.json",
+    "tests/fixtures/pilots/bean-wiki/evidence-green.json",
     "tests/test_pilot_acceptance.py",
-    "reviews/PILOT-BEAN-WIKI-v080.md"
+    "reviews/PILOT-BEAN-WIKI-v080.md",
+    "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
+    "reviews/W4B-2026-07-29-unit-task-ar-648-002.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md",
+    "reviews/INDEX.md"
   ]
 }

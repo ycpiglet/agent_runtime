@@ -931,7 +931,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md",
-          "value": "eee239b061178ef2e1895995e019123adb71a0d6c6b062e713ec57d9af606d16"
+          "value": "d51123ce7b278d48dd0e424183bd27f27d14c58df8ac0cf6c666db5d1860bb20"
         },
         {
           "kind": "sha256",
@@ -1207,10 +1207,35 @@
           "kind": "sha256",
           "path": "tests/test_work_registration.py",
           "value": "11d18573edd40872e4870d6621412df192977cd5d3dd925b49954216e0b5ae13"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md",
+          "value": "354c93bee885e5319fbb102d255a09204fdd997b869a2405cb0c401b8c1dc5be"
+        },
+        {
+          "kind": "absent",
+          "path": "tests/fixtures/pilots/bean-wiki/evidence-green.json",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "reviews/W4B-2026-07-29-unit-task-ar-648-002.md",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/INDEX.md",
+          "value": "fa223b42c8c860f96a9a8c5742d2b958e4d1b75cf16f3f725664665fab082e30"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md",
-      "recorded_at": "2026-07-29T18:02:32+09:00",
+      "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md",
+      "recorded_at": "2026-07-29T18:13:33+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1426,5 +1451,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T18:02:32+09:00"
+  "updated_at": "2026-07-29T18:13:33+09:00"
 }
