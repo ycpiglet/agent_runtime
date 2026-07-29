@@ -1,18 +1,41 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T05:37:59+09:00
-updated_by: codex-root-task-ar-648-015-planner
+updated_at: 2026-07-30T05:45:22+09:00
+updated_by: codex-root-task-ar-648-015
 current_state:
-  summary: "UNIT-015 is registered to repair fail-closed pilot contract selection and raw-to-sanitized isolation evidence before any new consumer replay."
-  status: planned
+  summary: "UNIT-015 is claimed without SCM mutation; RED contract-registry and isolation-projection regressions are next."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 0
+  step_index: 1
   step_total: 6
-  progress_pct: 0
-  status_text: "UNIT-015 registration and T3 replan recorded; readiness and canonical selection are next."
+  progress_pct: 5
+  status_text: "UNIT-015 claimed; implement fail-closed pilot contracts and digest-bound portable isolation evidence."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: "CLAIM-20260730-054522-task-ar-648-ar648015"
+      agent_role: "lead-engineer"
+      team_id: "evaluation-office"
+      agent_instance_id: "codex-root-task-ar-648-015"
+      display_name: "TASK-AR-648 pilot evidence contract repair"
+      callsite_id: "codex:root:task-ar-648:unit-015"
+      pane_id: "codex:root:task-ar-648:unit-015"
+      task_id: "TASK-AR-648"
+      unit_id: "UNIT-TASK-AR-648-015"
+      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+      status: "claimed"
+      phase: "unit-claimed"
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: "UNIT-015 claimed; RED contract-registry and isolation-projection tests next"
+      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+      branch: "codex/unit-task-ar-648-002-implementation"
+      claim_path: "agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json"
+      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.handoff.md"
+      log_path: "agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.log.md"
+      last_heartbeat: "2026-07-30T05:45:22+09:00"
+  current_teams:
+    - "evaluation-office"
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
@@ -26,7 +49,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - "agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json"
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

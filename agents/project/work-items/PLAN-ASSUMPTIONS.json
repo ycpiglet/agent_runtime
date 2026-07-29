@@ -926,7 +926,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan.md",
-          "value": "326694ae0e8cf7b47e6dd9a6d7e67f1ee805afe2fb8504200b4c22aa7a47ad0e"
+          "value": "fc736c0bb8950f7ec1eae0b3d02fdd51bd2d1703a50ba241358cee5414b6d5cc"
         },
         {
           "kind": "sha256",
@@ -936,12 +936,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "9a02643c93e2b2fb3c256aeb13d7482e2f0b895161477ab63b3a30487a789a38"
+          "value": "af5a3713035d7d241e7531c04f701360ca06904a1fe97e389b163f0ade3c0aa8"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md",
-          "value": "fb6fab8f356fa9958c4ae39126291d9dfecb9b55dee994590cc99533dd05e543"
+          "value": "ad4cc53faa10284f10d1003f85a50b43aafcedac5dae50ff947965dd0f1461ea"
         },
         {
           "kind": "sha256",

@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T05:37:59+09:00
+updated_at: 2026-07-30T05:45:22+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -48,6 +48,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json
   - agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json
   - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
+  - agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -178,6 +179,10 @@ claim_refs:
   digest-bound public projection only after raw physical-root isolation
   passes. It is Runtime-only; Bean attempt 6 and Allimbot remain blocked until
   one exact repaired product passes W4a and fresh independent W4b.
+  UNIT-015 is now claimed in default working-tree mode. Its requested worker
+  tier is `worker_standard`; policy escalated orchestration to `planner_high`
+  for the three declared risk signals. Claim creation left Runtime HEAD at
+  `598c960bb4431209013e71fea1fa2d0fd0d0bf56`.
 
 ## Goal
 

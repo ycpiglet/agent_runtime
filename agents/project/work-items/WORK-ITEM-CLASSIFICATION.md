@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T05:44:22+09:00
+generated_at: 2026-07-30T05:47:03+09:00
 record_count: 533
 ---
 
@@ -565,7 +565,7 @@ record_count: 533
 | 41.1.10.12 | Unit 41.1.10.12 | unit | `UNIT-TASK-AR-648-012` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md` | UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation |
 | 41.1.10.13 | Unit 41.1.10.13 | unit | `UNIT-TASK-AR-648-013` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md` | UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement |
 | 41.1.10.14 | Unit 41.1.10.14 | unit | `UNIT-TASK-AR-648-014` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md` | UNIT-TASK-AR-648-014 - Bean Wiki Green Replay Attempt 5 |
-| 41.1.10.15 | Unit 41.1.10.15 | unit | `UNIT-TASK-AR-648-015` | `TASK-AR-648` | ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md` | UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts |
+| 41.1.10.15 | Unit 41.1.10.15 | unit | `UNIT-TASK-AR-648-015` | `TASK-AR-648` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md` | UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
 | 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |

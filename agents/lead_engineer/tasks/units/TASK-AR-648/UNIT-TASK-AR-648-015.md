@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T05:37:59+09:00
-updated_at: 2026-07-30T05:37:59+09:00
+updated_at: 2026-07-30T05:45:22+09:00
+started_at: 2026-07-30T05:45:22+09:00
 origin_type: defect_remediation
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-014.md
 created_by: codex-root-v080-planner
 summary: Replace the single red-only pilot oracle with a fail-closed versioned contract registry and bind sanitized isolation projections to validated raw evidence
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
 escalation_triggers:
   - data_integrity
   - repeated_failure
@@ -57,7 +60,11 @@ target_files:
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
   - agents/project/knowledge/compounds/INDEX.json
   - agents/runtime/a2a/messages.jsonl
+  - new:agents/runtime/instances/codex-root-task-ar-648-015.json
   - agents/runtime/pane_events/pane-events.jsonl
+  - new:agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.handoff.md
+  - new:agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
+  - new:agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.log.md
   - BACKLOG-BOARD.md
   - ARCHIVE-INDEX.md
   - reviews/INDEX.md

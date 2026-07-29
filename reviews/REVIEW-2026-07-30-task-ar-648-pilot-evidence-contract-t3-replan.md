@@ -65,6 +65,10 @@ provider/model execution remains unobserved.
 - Requested worker tier: `worker_standard`
 - Policy-selected orchestration tier: `planner_high`
 - Escalation signals: `cross_cutting`, `data_integrity`, `repeated_failure`
+- Default claim:
+  `CLAIM-20260730-054522-task-ar-648-ar648015`
+- Runtime HEAD before/after claim:
+  `598c960bb4431209013e71fea1fa2d0fd0d0bf56`
 - Consumer worktree creation or write: zero
 - Provider/model execution observation: unavailable
 
