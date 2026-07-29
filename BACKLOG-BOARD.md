@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T00:24:07+09:00
+generated_at: 2026-07-30T01:07:03+09:00
 task_count: 315
 open_count: 19
 completed_count: 296
@@ -77,7 +77,7 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `9/13` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.7h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md | in_progress | Action | P0 | Critical | Medium | 8h/16000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
@@ -160,7 +160,7 @@ completed_task_set_count: 63
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `19` open across `3` task sets (see Action Board above).
-- Throughput (7d): `25` tasks completed in the last 7 days (TASK-AR-627).
+- Throughput (7d): `24` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `296` — see `ARCHIVE-INDEX.md`.
 

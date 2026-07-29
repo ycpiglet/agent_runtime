@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T00:54:06+09:00
+updated_at: 2026-07-30T01:02:49+09:00
 updated_by: codex-root-task-ar-648-008
 current_state:
   summary: "TASK-AR-648 UNIT-008 is claimed to repair the portable pointer-plus-sidecar continuity contract."
@@ -8,8 +8,8 @@ current_state:
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 7
   step_total: 8
-  progress_pct: 70
-  status_text: "Full W4a exposed and repaired an installed owner-governance public constant compatibility regression; rerun pending."
+  progress_pct: 80
+  status_text: "W4a passes on product b82042eb: focused 294, routing 49, owner governance, sanitizer, and full 2678 passed; independent W4b pending."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260730-002220-task-ar-648-648008
@@ -23,18 +23,18 @@ active_work:
       unit_id: UNIT-TASK-AR-648-008
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
       status: claimed
-      phase: w4a-repair
-      progress_pct: 70
+      phase: w4a-complete
+      progress_pct: 80
       step_index: 7
       step_total: 8
-      status_text: "Full W4a exposed and repaired an installed owner-governance public constant compatibility regression; rerun pending."
+      status_text: "W4a passes on product b82042eb: focused 294, routing 49, owner governance, sanitizer, and full 2678 passed; independent W4b pending."
       worktree_path: .
       branch: codex/unit-task-ar-648-002-implementation
       claim_path: agents/runtime/task_claims/CLAIM-20260730-002220-task-ar-648-648008.json
       handoff_path: agents/runtime/task_claims/CLAIM-20260730-002220-task-ar-648-648008.handoff.md
       log_path: agents/runtime/task_claims/CLAIM-20260730-002220-task-ar-648-648008.log.md
-      last_heartbeat: 2026-07-30T00:54:06+09:00
-      updated_at: 2026-07-30T00:54:06+09:00
+      last_heartbeat: 2026-07-30T01:02:49+09:00
+      updated_at: 2026-07-30T01:02:49+09:00
   current_teams:
     - agent-runtime-core
 resume:
@@ -42,9 +42,9 @@ resume:
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
   branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
   next_actions:
-    - "Add an installed-core RED that reproduces continuity:status-missing with an active default claim and no STATUS candidate."
-    - "Add strict pointer mismatch and present-STATUS precedence RED cases."
-    - "Only then implement projection, gate, doctor, and document diagnostics."
+    - "Obtain a fresh independent W4b on exact product b82042eba58f1e06e1e73130a189cb72245462a0."
+    - "Stop on any W4b P0/P1; otherwise close and release UNIT-008 with effective passing evidence only."
+    - "Only after UNIT-008 release, create a fresh Bean Wiki attempt 3 from 357eee4; keep frozen attempts read-only."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
