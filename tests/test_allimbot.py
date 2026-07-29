@@ -18,6 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_ROOT = ROOT / "src" / "agent_runtime" / "templates" / "project"
 TEMPLATE_CLIENT = TEMPLATE_ROOT / "scripts" / "allimbot.py"
 RECIPE = TEMPLATE_ROOT / ".allimbot.json"
+SYNTHETIC_OPENAI_TOKEN = "-".join(
+    ("sk", "proj", "SYNTHETIC", "CREDENTIAL", "123")
+)
+SYNTHETIC_GITHUB_TOKEN = "_".join(
+    ("github", "pat", "SYNTHETIC", "CREDENTIAL")
+)
 
 
 def _load_template_client():
@@ -182,6 +188,83 @@ def test_policy_rejects_before_optional_import(
     assert "secret" not in str(raised.value)
 
 
+@pytest.mark.parametrize(
+    ("event_type", "data", "correlations"),
+    [
+        (
+            "task.state.changed",
+            {
+                "task_id": SYNTHETIC_OPENAI_TOKEN,
+                "from_state": "review",
+                "to_state": "completed",
+                "owner_role": "runtime",
+            },
+            {},
+        ),
+        (
+            "task.state.changed",
+            {
+                "task_id": "TASK-1",
+                "from_state": "review",
+                "to_state": "https://events.invalid/destination",
+                "owner_role": "runtime",
+            },
+            {},
+        ),
+        (
+            "task.state.changed",
+            {
+                "task_id": "TASK-1",
+                "from_state": "provider-slack",
+                "to_state": "completed",
+                "owner_role": "runtime",
+            },
+            {},
+        ),
+        (
+            "attention.required",
+            {
+                "task_id": "TASK-1",
+                "attention_kind": "prompt-secret",
+                "owner_role": "owner",
+                "state": "blocked",
+            },
+            {},
+        ),
+        (
+            "release.gate.failed",
+            {
+                "gate": "exception-secret",
+                "release": "v1.0.0",
+                "finding_count": 1,
+            },
+            {},
+        ),
+        (
+            "turn.completed",
+            {
+                "task_id": "TASK-1",
+                "result_state": "completed",
+                "duration_seconds": 1,
+            },
+            {"dedupe_key": SYNTHETIC_GITHUB_TOKEN},
+        ),
+    ],
+)
+def test_sensitive_or_unmanaged_values_never_reach_optional_import(
+    monkeypatch,
+    event_type: str,
+    data: dict[str, object],
+    correlations: dict[str, str],
+) -> None:
+    def unexpected_import(_name):
+        raise AssertionError("rejected values must not reach emitter construction")
+
+    monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
+    with pytest.raises(allimbot.EventPolicyError):
+        allimbot.emit_event(event_type, data, **correlations)
+
+
 def test_recipe_drift_fails_closed_before_optional_import(
     tmp_path, monkeypatch
 ) -> None:
@@ -209,17 +292,9 @@ def test_composed_summary_bound_fails_closed_before_optional_import(
         raise AssertionError("summary policy must run before optional import")
 
     monkeypatch.setattr(allimbot.importlib, "import_module", unexpected_import)
-    long_value = "A" * 128
+    monkeypatch.setattr(allimbot, "_summary", lambda *_args: "A" * 301)
     with pytest.raises(allimbot.EventPolicyError, match="summary"):
-        allimbot.emit_event(
-            "attention.required",
-            {
-                "task_id": long_value,
-                "attention_kind": long_value,
-                "owner_role": long_value,
-                "state": long_value,
-            },
-        )
+        allimbot.emit_event(*_valid_event())
 
 
 def test_missing_profile_and_dependency_are_bounded_unavailable(
@@ -266,6 +341,29 @@ def test_optional_configuration_and_spool_errors_never_leak(
     assert result.reason == reason
     assert "secret" not in serialized
     assert "credential" not in serialized
+
+
+def test_credential_shaped_dependency_event_id_is_never_returned(
+    monkeypatch,
+) -> None:
+    calls: list[tuple] = []
+    monkeypatch.setattr(
+        allimbot.importlib,
+        "import_module",
+        lambda _name: _fake_integrations(
+            calls,
+            event_id=SYNTHETIC_OPENAI_TOKEN,
+        ),
+    )
+
+    result = allimbot.emit_event(*_valid_event())
+
+    assert result.to_dict() == {
+        "status": "unavailable",
+        "event_id": None,
+        "reason": "invalid_event_id",
+    }
+    assert "credential" not in json.dumps(result.to_dict()).casefold()
 
 
 def test_legacy_notify_discards_every_supplied_string(monkeypatch) -> None:

@@ -23,6 +23,13 @@ claim when `scripts/security_service_gate.py` is installed. Core-only hosts do
 not ship the gate and incur no claim-time dependency. Owner governance
 rechecks active claims to expose post-claim metadata drift.
 
+The installed profile fails closed when a claim has no registered unit
+specification, an active claim record or target snapshot is malformed, or an
+existing `agent_runtime.yml` cannot be parsed safely. Explicit claim targets
+are added to—not substituted for—the unit's registered `target_files`, so a
+narrow snapshot cannot hide a risky registered path. An absent configuration
+file or a valid empty `host.risk_paths` list is a valid empty host overlay.
+
 ## Security Controls
 
 - Keep the policy and `.allimbot.json` managed through Runtime sync.

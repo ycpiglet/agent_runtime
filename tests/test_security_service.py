@@ -204,6 +204,80 @@ def test_policy_drift_fails_closed(tmp_path) -> None:
         )
 
 
+def test_explicit_safe_snapshot_cannot_hide_registered_risky_target(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=(".env.production",))
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        target_files=("README.md",),
+        policy_path=policy,
+    )
+
+    assert report.status == "block"
+    assert {
+        (item.path, item.risk_class) for item in report.classifications
+    } == {(".env.production", "secrets")}
+
+
+def test_missing_config_is_a_valid_empty_host_overlay(tmp_path) -> None:
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=("services/prod/client.py",),
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        policy_path=policy,
+    )
+
+    assert report.status == "pass"
+    assert report.classifications == ()
+
+
+@pytest.mark.parametrize(
+    "config_text",
+    [
+        "schema: agent-runtime-config/v2\nproject: broken\nhost:\n  risk_paths: nope\n",
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: unsafe\n"
+            "profiles:\n"
+            "  - security-service\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "host:\n"
+            "  risk_paths:\n"
+            "    - ../production\n"
+        ),
+    ],
+)
+def test_malformed_or_unsafe_host_risk_paths_fail_closed(
+    tmp_path,
+    config_text: str,
+) -> None:
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=("services/prod/client.py",))
+    (tmp_path / "agent_runtime.yml").write_text(config_text, encoding="utf-8")
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="host risk-path configuration",
+    ):
+        security_service.analyze_unit(
+            tmp_path,
+            unit,
+            policy_path=policy,
+        )
+
+
 def test_active_claim_recheck_uses_claim_target_snapshot(tmp_path) -> None:
     _write_config(tmp_path)
     policy = _write_policy(tmp_path)
@@ -237,6 +311,83 @@ def test_active_claim_recheck_uses_claim_target_snapshot(tmp_path) -> None:
     assert len(reports) == 1
     assert reports[0].status == "pass"
     assert reports[0].classifications[0].path == ".env.production"
+
+
+def test_active_claim_with_empty_snapshot_still_checks_registered_targets(
+    tmp_path,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(tmp_path, targets=(".env.production",))
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-1.json").write_text(
+        json.dumps(
+            {
+                "status": "claimed",
+                "unit_spec": unit.relative_to(tmp_path).as_posix(),
+                "target_files": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    reports = security_service.analyze_active_claims(
+        tmp_path,
+        policy_path=policy,
+    )
+
+    assert len(reports) == 1
+    assert reports[0].status == "block"
+    assert reports[0].classifications[0].path == ".env.production"
+
+
+@pytest.mark.parametrize(
+    "claim",
+    [
+        {"status": "claimed", "target_files": [".env.production"]},
+        {
+            "status": "claimed",
+            "unit_spec": "agents/tasks/UNIT-1.md",
+            "target_files": ".env.production",
+        },
+    ],
+)
+def test_active_claim_missing_unit_or_malformed_snapshot_fails_closed(
+    tmp_path,
+    claim: dict[str, object],
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-1.json").write_text(
+        json.dumps(claim),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(security_service.SecurityPolicyError):
+        security_service.analyze_active_claims(
+            tmp_path,
+            policy_path=policy,
+        )
+
+
+def test_malformed_claim_record_fails_closed(tmp_path) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-1.json").write_text("{", encoding="utf-8")
+
+    with pytest.raises(
+        security_service.SecurityPolicyError,
+        match="claim record",
+    ):
+        security_service.analyze_active_claims(
+            tmp_path,
+            policy_path=policy,
+        )
 
 
 def test_current_registered_unit_passes_managed_gate() -> None:

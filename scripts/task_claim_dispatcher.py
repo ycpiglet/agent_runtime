@@ -371,10 +371,9 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
 
 
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
-    declared = _normalize_target_files(tuple(args.target_file or ()))
-    if declared:
-        return declared
-    return _unit_spec_target_files(root, args.unit_spec)
+    explicit = _normalize_target_files(tuple(args.target_file or ()))
+    registered = _unit_spec_target_files(root, args.unit_spec)
+    return list(dict.fromkeys((*explicit, *registered)))
 
 
 def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
@@ -699,8 +698,15 @@ def _security_service_refusal(
     """Run the profile gate only when the security-service asset is installed."""
 
     gate = root / "scripts" / "security_service_gate.py"
-    if not gate.is_file() or not str(unit_spec or "").strip():
+    if not gate.is_file():
         return False
+    if not str(unit_spec or "").strip():
+        print(
+            "security-service profile requires a registered unit specification; "
+            "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
     command = [
         sys.executable,
         str(gate),

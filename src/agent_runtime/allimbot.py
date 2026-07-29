@@ -24,7 +24,68 @@ PROJECT_SOURCE = "agent-runtime"
 MAX_IDENTIFIER_LENGTH = 128
 MAX_COUNT = 1_000_000
 MAX_DURATION_SECONDS = 7 * 24 * 60 * 60
-_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
+_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_ROLE_IDENTIFIER = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
+_CREDENTIAL_PREFIX = re.compile(
+    r"(?i)^(?:sk(?:-proj)?|gh[pousr]|github_pat|xox[baprs]|glpat|npm|pypi|hf)[-_]"
+)
+_AWS_ACCESS_KEY = re.compile(r"^(?:AKIA|ASIA)[A-Z0-9]{12,}$")
+_GOOGLE_API_KEY = re.compile(r"^AIza[A-Za-z0-9_-]{20,}$")
+_SENDGRID_API_KEY = re.compile(
+    r"^SG\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$"
+)
+_JWT_SHAPE = re.compile(
+    r"^[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}$"
+)
+_FORBIDDEN_VALUE_SEGMENTS = frozenset(
+    {
+        "apikey",
+        "bearer",
+        "credential",
+        "destination",
+        "endpoint",
+        "exception",
+        "ntfy",
+        "opsgenie",
+        "pagerduty",
+        "password",
+        "prompt",
+        "provider",
+        "secret",
+        "slack",
+        "smtp",
+        "telegram",
+        "token",
+        "traceback",
+        "webhook",
+    }
+)
+_ATTENTION_KINDS = frozenset(
+    {"governance-block", "legacy-notification", "runtime-update"}
+)
+_ATTENTION_STATES = frozenset({"attention", "available", "blocked"})
+_TASK_STATES = frozenset(
+    {
+        "assigned",
+        "attention",
+        "available",
+        "blocked",
+        "claimed",
+        "completed",
+        "failed",
+        "in-progress",
+        "in_progress",
+        "pending",
+        "released",
+        "review",
+        "running",
+        "waiting",
+        "waiting-review",
+        "waiting_review",
+        "working",
+    }
+)
+_TURN_RESULTS = frozenset({"blocked", "completed"})
 
 MANAGED_RECIPE: dict[str, Any] = {
     "spec": PROJECT_SPEC,
@@ -140,7 +201,43 @@ def _identifier(value: object, field: str) -> str:
         or _SAFE_IDENTIFIER.fullmatch(value) is None
     ):
         raise EventPolicyError(f"{field} must be a bounded display-safe identifier")
+    folded = value.casefold()
+    segments = {
+        part
+        for part in re.split(r"[._-]+", folded)
+        if part
+    }
+    if (
+        "://" in folded
+        or "api-key" in folded
+        or "api_key" in folded
+        or _CREDENTIAL_PREFIX.match(value) is not None
+        or _AWS_ACCESS_KEY.fullmatch(value) is not None
+        or _GOOGLE_API_KEY.fullmatch(value) is not None
+        or _SENDGRID_API_KEY.fullmatch(value) is not None
+        or _JWT_SHAPE.fullmatch(value) is not None
+        or segments & _FORBIDDEN_VALUE_SEGMENTS
+    ):
+        raise EventPolicyError(f"{field} is outside the managed event vocabulary")
     return value
+
+
+def _managed_value(
+    value: object,
+    field: str,
+    allowed: frozenset[str],
+) -> str:
+    normalized = _identifier(value, field)
+    if normalized not in allowed:
+        raise EventPolicyError(f"{field} is outside the managed event vocabulary")
+    return normalized
+
+
+def _owner_role(value: object) -> str:
+    normalized = _identifier(value, "owner_role")
+    if _ROLE_IDENTIFIER.fullmatch(normalized) is None:
+        raise EventPolicyError("owner_role must be a canonical role identifier")
+    return normalized
 
 
 def _non_negative_integer(value: object, field: str) -> int:
@@ -175,6 +272,16 @@ def _validate_event(event_type: object, data: object) -> tuple[str, dict[str, An
             normalized[field] = _non_negative_integer(value, field)
         elif field == "duration_seconds":
             normalized[field] = _duration(value)
+        elif field == "attention_kind":
+            normalized[field] = _managed_value(value, field, _ATTENTION_KINDS)
+        elif field == "state":
+            normalized[field] = _managed_value(value, field, _ATTENTION_STATES)
+        elif field in {"from_state", "to_state"}:
+            normalized[field] = _managed_value(value, field, _TASK_STATES)
+        elif field == "result_state":
+            normalized[field] = _managed_value(value, field, _TURN_RESULTS)
+        elif field == "owner_role":
+            normalized[field] = _owner_role(value)
         else:
             normalized[field] = _identifier(value, field)
     return event_type, normalized
@@ -298,14 +405,11 @@ def emit_event(
         )
     except Exception:
         return _unavailable("spool_unavailable")
-    if (
-        not isinstance(event_id, str)
-        or not event_id
-        or len(event_id) > MAX_IDENTIFIER_LENGTH
-        or _SAFE_IDENTIFIER.fullmatch(event_id) is None
-    ):
+    try:
+        normalized_event_id = _identifier(event_id, "event_id")
+    except EventPolicyError:
         return _unavailable("invalid_event_id")
-    return EmitResult(status="spooled", event_id=event_id)
+    return EmitResult(status="spooled", event_id=normalized_event_id)
 
 
 def _legacy_event() -> EmitResult:

@@ -215,10 +215,23 @@ def _matches(path: str, pattern: str) -> bool:
 
 
 def _host_risk_paths(root: Path) -> tuple[str, ...]:
+    config_path = root / "agent_runtime.yml"
+    if not config_path.is_file():
+        return ()
     try:
         return tuple(load_config(root).risk_paths)
     except Exception:
-        return ()
+        raise SecurityPolicyError(
+            "host risk-path configuration is unavailable or malformed"
+        ) from None
+
+
+def _target_sequence(value: object, field: str) -> tuple[object, ...]:
+    if isinstance(value, (str, bytes, Mapping)) or not isinstance(value, Iterable):
+        raise SecurityPolicyError(
+            f"{field} must be a list of repository-relative paths"
+        )
+    return tuple(value)
 
 
 def classify_targets(
@@ -231,10 +244,11 @@ def classify_targets(
 
     resolved_root = Path(root).resolve()
     policy = load_managed_policy(policy_path)
+    targets = _target_sequence(target_files, "target_files")
     classifications: list[RiskClassification] = []
     seen: set[tuple[str, str]] = set()
     host_paths = _host_risk_paths(resolved_root)
-    for raw_path in target_files:
+    for raw_path in targets:
         path = _safe_target(raw_path)
         for risk_class in RISK_CLASSES:
             rule = policy["risk_classes"][risk_class]
@@ -406,13 +420,28 @@ def analyze_unit(
     if not spec.is_absolute():
         spec = resolved_root / spec
     metadata, sections = _unit_document(spec)
-    if isinstance(target_files, (str, bytes)):
-        raise SecurityPolicyError("target_files must be a list of repository-relative paths")
-    targets = (
-        tuple(target_files)
-        if target_files is not None
-        else _list_value(metadata, "target_files")
+    registered_value = metadata.get("target_files")
+    if not isinstance(registered_value, list):
+        raise SecurityPolicyError(
+            "unit target_files must be a list of repository-relative paths"
+        )
+    registered_targets = _target_sequence(
+        registered_value,
+        "unit target_files",
     )
+    snapshot_targets = (
+        _target_sequence(target_files, "claim target_files")
+        if target_files is not None
+        else ()
+    )
+    normalized_targets: list[str] = []
+    seen_targets: set[str] = set()
+    for raw_target in (*registered_targets, *snapshot_targets):
+        normalized_target = _safe_target(raw_target)
+        if normalized_target not in seen_targets:
+            normalized_targets.append(normalized_target)
+            seen_targets.add(normalized_target)
+    targets = tuple(normalized_targets)
     classifications = classify_targets(
         resolved_root,
         targets,
@@ -449,23 +478,32 @@ def analyze_active_claims(
         try:
             claim = json.loads(claim_path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
-            continue
+            raise SecurityPolicyError(
+                "claim record is unavailable or malformed"
+            ) from None
+        if not isinstance(claim, dict):
+            raise SecurityPolicyError("claim record is unavailable or malformed")
         if (
-            not isinstance(claim, dict)
-            or str(claim.get("status") or "").strip().lower()
+            str(claim.get("status") or "").strip().lower()
             not in ACTIVE_CLAIM_STATUSES
         ):
             continue
-        unit_spec = str(claim.get("unit_spec") or "").strip()
-        if not unit_spec:
-            continue
+        unit_value = claim.get("unit_spec")
+        if not isinstance(unit_value, str) or not unit_value.strip():
+            raise SecurityPolicyError(
+                "active claim must reference a registered unit specification"
+            )
+        unit_spec = unit_value.strip()
+        snapshot = claim.get("target_files")
+        if not isinstance(snapshot, list):
+            raise SecurityPolicyError(
+                "active claim target_files must be a list of repository-relative paths"
+            )
         reports.append(
             analyze_unit(
                 resolved_root,
                 unit_spec,
-                target_files=claim.get("target_files")
-                if isinstance(claim.get("target_files"), list)
-                else None,
+                target_files=snapshot,
                 policy_path=policy_path,
             )
         )

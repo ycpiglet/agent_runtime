@@ -32,6 +32,12 @@ Callers cannot supply a summary or body. Prompts, arbitrary messages,
 exception text, tracebacks, credentials, environment values, endpoints,
 provider names, and destinations are outside the API.
 
+State, result-state, and attention-kind fields use Runtime-owned
+allowlists. Task, release, gate, role, and correlation fields accept only
+canonical display-safe identifiers; URI syntax and credential-, provider-,
+prompt-, or exception-shaped values are rejected before the optional
+Allimbot package is imported.
+
 ## Profile and configuration
 
 Select `security-service` in `agent_runtime.yml`. Its managed projection adds:
