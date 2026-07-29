@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:37:32+09:00
-updated_at: 2026-07-29T23:42:00+09:00
+updated_at: 2026-07-29T23:57:00+09:00
 started_at: 2026-07-29T23:42:00+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md
