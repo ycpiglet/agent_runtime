@@ -219,6 +219,41 @@ def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> Non
     assert "?? unrelated.txt" in _git_stdout(linked, "status", "--porcelain")
 
 
+def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit-hook-failure")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    hook = primary / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    hook.chmod(0o755)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-cli-hook-failure",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+    claim_id = payload["claim"]["claim_id"]
+    assert set(_git_stdout(linked, "diff", "--cached", "--name-only").splitlines()) == {
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+
+    gate = _run_gate(linked)
+
+    assert gate.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in gate.stdout
+
+
 @pytest.mark.parametrize("setting", ["0", "false", "off", "not-a-policy"])
 def test_false_or_malformed_compatibility_setting_never_commits(
     tmp_path: Path,

@@ -30,7 +30,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Iterable
 
 
@@ -84,7 +84,7 @@ HANDOFF_MARKERS = (
     "인수인계",
 )
 CLAIM_LOSS_INCIDENT = (
-    "untracked claims are erased by a concurrent session's reset+clean "
+    "claims absent from HEAD are erased by a concurrent session's reset+clean "
     "(2026-06-12 incident: CLAIM-...-task-ar-500-25db lost, recreated as -66ed)"
 )
 
@@ -564,20 +564,31 @@ def _claim_first_findings(root: Path, records: list[ClaimRecord], primary_root: 
     return findings
 
 
-def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Finding]:
-    if not _git_scans_enabled(root):
-        return []
-    code, out = _git(root, "ls-files", "--others", "--exclude-standard", "--", "agents/runtime/task_claims")
+def _claim_matches_head(root: Path, rel_path: str) -> bool:
+    """Return whether the current claim JSON is persisted exactly in HEAD.
+
+    Merely being present in the index is insufficient: an explicitly
+    authorized claim commit can fail after ``git add`` (for example in a
+    pre-commit hook), leaving a staged file that is still vulnerable to
+    reset+clean. Comparing the worktree path with HEAD covers both that case
+    and later staged or unstaged edits to an otherwise tracked claim.
+    """
+
+    code, _ = _git(root, "cat-file", "-e", f"HEAD:{rel_path}")
     if code != 0:
+        return False
+    code, _ = _git(root, "diff", "--quiet", "HEAD", "--", rel_path)
+    return code == 0
+
+
+def _non_head_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Finding]:
+    if not _git_scans_enabled(root):
         return []
     by_rel = {_rel(root, record.path).lower(): record for record in records}
     findings: list[Finding] = []
-    for line in out.splitlines():
-        rel_path = line.strip().strip('"')
-        if not rel_path:
-            continue
-        name = PurePosixPath(rel_path).name
-        if not (name.startswith("CLAIM-") and name.endswith(".json")):
+    for path in _claim_files(root):
+        rel_path = _rel(root, path)
+        if _claim_matches_head(root, rel_path):
             continue
         record = by_rel.get(rel_path.lower())
         persistence = record.payload.get("persistence") if record is not None else None
@@ -598,7 +609,8 @@ def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fi
                 Finding(
                     "block",
                     f"{rel_path}: task-claim:authorized-commit-not-persisted: claim explicitly "
-                    f"authorized SCM persistence but remains untracked; {CLAIM_LOSS_INCIDENT}",
+                    f"authorized SCM persistence but is absent from or differs from HEAD; "
+                    f"{CLAIM_LOSS_INCIDENT}",
                 )
             )
             continue
@@ -606,7 +618,8 @@ def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fi
             findings.append(
                 Finding(
                     "watch",
-                    f"{rel_path}: task-claim:claim-not-committed: spike-tagged claim file is not tracked by git; "
+                    f"{rel_path}: task-claim:claim-not-committed: spike-tagged claim file "
+                    f"is absent from or differs from HEAD; "
                     f"{CLAIM_LOSS_INCIDENT}",
                 )
             )
@@ -614,7 +627,8 @@ def _untracked_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fi
         findings.append(
             Finding(
                 "block",
-                f"{rel_path}: task-claim:claim-not-committed: claim file is not tracked by git; "
+                f"{rel_path}: task-claim:claim-not-committed: claim file is absent from or "
+                f"differs from HEAD; "
                 f"{CLAIM_LOSS_INCIDENT}; persistence mode is missing, ambiguous, or inconsistent",
             )
         )
@@ -630,7 +644,7 @@ def check_root(root: Path) -> list[Finding]:
     active = [record for record in records if record.active]
     findings.extend(Finding("block", message) for message in _continuity_findings(root, active))
     findings.extend(_claim_first_findings(root, records, primary_root))
-    findings.extend(_untracked_claim_findings(root, records))
+    findings.extend(_non_head_claim_findings(root, records))
     return findings
 
 

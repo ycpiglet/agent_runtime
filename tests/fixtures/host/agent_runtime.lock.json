@@ -176,7 +176,7 @@
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
       "scripts/owner_governance_gate.py": "sha256:4ddd219dadc2d8952cd7b2ec1e60c9db4c084ca3a53945323a9c99af422a56e9",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
-      "scripts/parallel_worktree_gate.py": "sha256:86f905f76ea930e495a54644bda0e420145a5068c0c9e4490277614589cf4f7a",
+      "scripts/parallel_worktree_gate.py": "sha256:cd41529c0c925fd50a7c43380e57be9161ae4e249465d5bfa4a3525e449db087",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
       "scripts/plan_assumption_gate.py": "sha256:6fc083b0c3a724c252ac64e31d6232203b04aa4fd64db01c9243ed9553e7d06c",
       "scripts/precommit_check.py": "sha256:ca4134f95ed06cb84151dec02a2397b51ed670e31d4cf2d97d545b3469e251ce",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:355184fc540f367014887b747c36d7e6d7596286164ce7574d135ea6872e1e51",
+    "template_digest": "sha256:868d6830cc32b217b4b9f1a69c90b3f3d5fc172ab336e75233c4f0db6a3b6a06",
     "template_files": 251
   },
   "profiles": [

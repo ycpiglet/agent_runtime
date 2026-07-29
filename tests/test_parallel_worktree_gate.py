@@ -358,6 +358,10 @@ def test_gate_passes_claimed_task_worktree(tmp_path: Path):
         worktree_path=".worktrees/TASK-AR-900",
         branch="claude/task-ar-900-demo",
         skip_worktree_marker=True,
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
     )
     _git(repo, "add", "agents")
     _git(repo, "commit", "-m", "open claim")
@@ -411,6 +415,27 @@ def test_gate_blocks_untracked_claim_after_explicit_scm_commit_authorization(
             "scm_commit_authorized": True,
         },
     )
+
+    result = _run_gate(repo)
+
+    assert result.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+    assert "block=1" in result.stdout
+
+
+def test_gate_blocks_staged_only_claim_after_explicit_scm_commit_authorization(
+    tmp_path: Path,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
 
     result = _run_gate(repo)
 
