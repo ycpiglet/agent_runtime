@@ -1,26 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T06:21:13+09:00
-updated_by: codex-root-task-ar-648-015
+updated_at: 2026-07-30T06:26:06+09:00
+updated_by: codex-root-task-ar-648-016-planner
 current_state:
-  summary: "UNIT-015 exact product 4929415d passed W4a and independent W4b; a freshly baselined disposable Bean attempt 6 is next."
+  summary: "UNIT-016 registers Bean attempt 6 against exact Runtime product 4929415d with a new frozen control and versioned portable evidence."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 0
   step_total: 0
   progress_pct: 0
-  status_text: "UNIT-015 is completed and released; Bean attempt 6 must be separately registered before consumer mutation."
+  status_text: "UNIT-016 is registered but unclaimed; no Bean worktree or consumer write is authorized before assumptions, readiness, selection, and claim."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Freeze Runtime product 4929415d. Register a separate disposable Bean attempt 6 before any consumer write. Never write Bean primary, attempts 1-5, Autofolio, or Allimbot."
+  branch_policy: "Freeze Runtime product 4929415d. Only a newly claimed attempt-6 target may be written; control-6 is immutable and Bean primary is observation-only. Never write attempts 1-5, Autofolio, or Allimbot."
   next_actions:
-    - "Register UNIT-016 for a new disposable Bean attempt 6 and record a fresh raw isolation baseline before target writes."
-    - "Use attempt 5 only as historical evidence; create a new immutable control for attempt 6."
-    - "Keep Allimbot frozen until Bean attempt 6 passes acceptance, W4a, and independent W4b."
+    - "Record UNIT-016 T3 assumptions, pass readiness, and prove canonical selection before a default Runtime claim."
+    - "After claim, create exact product, fresh control-6, and disposable attempt-6 worktrees; capture isolation baselines before writes."
+    - "Run exactly three offline Bean traces and keep Allimbot frozen until attempt 6 passes exact acceptance, W4a, and independent W4b."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

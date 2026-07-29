@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T06:23:07+09:00
-record_count: 1100
+generated_at: 2026-07-30T06:28:28+09:00
+record_count: 1102
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1100` review and evidence records under `reviews/`.
+- Summary: indexed `1102` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1100` files |
+| Reviews covered | pass | `1102` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -626,6 +626,8 @@ record_count: 1100
 | `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan` | md | approved | pass | TASK-AR-648 Bean Attempt-4 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt 5 Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan` | md | approved | pass | TASK-AR-648 Bean Wiki Attempt 5 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt 6 Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan` | md | approved | pass | TASK-AR-648 Bean Wiki Attempt 6 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration` | md | active | pass | Consumer Continuity Ownership Repair Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan` | md | approved | pass | Consumer Continuity Ownership T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration.md` | `REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration` | md | active | pass | TASK-AR-648 Expected Common Mirror Inventory Repair Registration |

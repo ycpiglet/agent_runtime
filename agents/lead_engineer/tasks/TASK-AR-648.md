@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T05:45:22+09:00
+updated_at: 2026-07-30T06:26:06+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -191,6 +191,12 @@ claim_refs:
   W4b both approve with P0 0/P1 0/P2 1. The claim is ready for normal release.
   The next action is a separately registered, fresh Bean attempt 6 pinned to
   this exact product; Allimbot and every release surface remain blocked.
+  UNIT-016 is that separately registered replay. It uses a new attempt-6
+  disposable target and same-commit frozen control, validates physical
+  isolation before emitting a path-free raw-digest-bound projection, and
+  registers one exact attempt-6 acceptance contract. Exactly three offline
+  traces are allowed; Allimbot remains blocked until W4a and fresh independent
+  W4b approve with no P0/P1.
 
 ## Goal
 

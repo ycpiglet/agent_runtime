@@ -920,48 +920,48 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration.md",
-          "value": "948362374c23cd4523106bccf24e3ea10855faf1488f6fdd4e61d38278a20745"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan.md",
+          "value": "a968991f09870ef32e04577082830524d2c71f4032c5b5ad8ffaa3ad32b9f4ce"
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan.md",
-          "value": "fc736c0bb8950f7ec1eae0b3d02fdd51bd2d1703a50ba241358cee5414b6d5cc"
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-648-015.md",
+          "value": "a1e8f9bafeaffef76f63e5087cc50c72efbf4f8a120df052242b168bc1ab732b"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-014.md",
-          "value": "3857ba0eb7fecbfc814cafd1f704ed220bcc1d5161f36e2925becefc28d93833"
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-015.md",
+          "value": "f933b208795ac25d5fbd88c7f17d9f8fa372705668dea48a09951f0c8a941dff"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "af5a3713035d7d241e7531c04f701360ca06904a1fe97e389b163f0ade3c0aa8"
+          "value": "cb1b91238e07ef1e1c8eb2cccd64f487b192c2f02ba6cd9eda2ba5612b746679"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md",
-          "value": "ad4cc53faa10284f10d1003f85a50b43aafcedac5dae50ff947965dd0f1461ea"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
+          "value": "1d9dc1e95216419de4d0e3c939b5ba83b40697bd462bd65807421f32d2690505"
+        },
+        {
+          "kind": "sha256",
+          "path": "docs/pilot-acceptance-contract.md",
+          "value": "2dfd068e8e8d294ead0e8d26dedabc8d9c584fcd6d4a3376c7bf34399b08275a"
+        },
+        {
+          "kind": "sha256",
+          "path": "docs/pilot-isolation-contract.md",
+          "value": "7e32c0d005ca0bdb46560f4962d8bf8e2960d9373d3953cf04d54c066601e195"
         },
         {
           "kind": "sha256",
           "path": "scripts/pilot_acceptance.py",
-          "value": "8fcec748486bc0697bee6da088c963626421beb6c6597f57446f27c4c62b4747"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_pilot_acceptance.py",
-          "value": "88255c04ec10b2a3737ad2daf290b0a5352008c472930161ae5d42633ee43b90"
+          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
         },
         {
           "kind": "sha256",
           "path": "scripts/pilot_isolation_gate.py",
-          "value": "d6b3c8fa0d13a3783a38be57f2f60c0fa7485ea46435375d2d362101236dd7e2"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_pilot_isolation_gate.py",
-          "value": "c0f32092dd01f8e2a475dc95dae0840c02b8176057a04717c9262b6a71d8e13b"
+          "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
         },
         {
           "kind": "sha256",
@@ -974,8 +974,8 @@
           "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration.md",
-      "recorded_at": "2026-07-30T05:37:59+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration.md",
+      "recorded_at": "2026-07-30T06:28:59+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1191,5 +1191,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T04:48:50+09:00"
+  "updated_at": "2026-07-30T06:28:59+09:00"
 }
