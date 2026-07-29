@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-648:unit-014",
   "pane_id": "codex:root:task-ar-648:unit-014",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -32,21 +32,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 1,
   "stop_condition": "Stop immediately on any P0 or P1, Runtime product drift, consumer commit, frozen-control mutation, observed write outside attempt 5, unsupported causality attribution, host/content overwrite, missing or ambiguous Runtime/template provenance, continuity fail-open, host-document workaround, unverified claim, missing task trace, unrelated Compound retrieval, unsupported model/cost claim, dependency installation, external effect, Allimbot worktree creation, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.",
-  "phase": "unit-claimed",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "acceptance-contract-blocked",
+  "progress_pct": 90,
+  "step_index": 6,
   "step_total": 6,
-  "status_text": "UNIT-014 claimed; exact worktrees and pre-write isolation snapshots next",
+  "status_text": "Attempt 5 frozen after independent W4b confirmed two Runtime evidence-contract P1s; separate repair required and Allimbot remains blocked",
   "worktree_path": "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-30T04:49:19+09:00",
-  "last_heartbeat": "2026-07-30T04:49:19+09:00",
-  "updated_at": "2026-07-30T04:49:19+09:00",
-  "expires_at": "2026-07-30T08:49:19+09:00",
+  "last_heartbeat": "2026-07-30T05:34:36+09:00",
+  "updated_at": "2026-07-30T05:34:36+09:00",
+  "expires_at": "2026-07-30T09:31:18+09:00",
   "lease": {
     "claimed_at": "2026-07-30T04:49:19+09:00",
-    "heartbeat_at": "2026-07-30T04:49:19+09:00",
-    "expires_at": "2026-07-30T08:49:19+09:00"
+    "heartbeat_at": "2026-07-30T05:34:36+09:00",
+    "expires_at": "2026-07-30T09:31:18+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.log.md",
@@ -61,7 +61,10 @@
     "data_integrity",
     "repeated_failure"
   ],
-  "defect_signatures": [],
+  "defect_signatures": [
+    "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e",
+    "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326"
+  ],
   "knowledge_lookup": {
     "status": "matched",
     "match_count": 6
@@ -160,6 +163,8 @@
     "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md",
     "reviews/W4A-2026-07-30-unit-task-ar-648-014.md",
     "reviews/W4B-2026-07-30-unit-task-ar-648-014.md",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e.json",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6.json",
     "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration.md",
     "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan.md",
     "agents/lead_engineer/tasks/TASK-AR-648.md",
@@ -168,11 +173,19 @@
     "agents/project/work-items/PLAN-ASSUMPTIONS.json",
     "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
     "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+    "agents/project/knowledge/compounds/INDEX.json",
+    "agents/runtime/a2a/messages.jsonl",
+    "agents/runtime/pane_events/pane-events.jsonl",
     "BACKLOG-BOARD.md",
+    "ARCHIVE-INDEX.md",
     "reviews/INDEX.md"
   ],
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-30T05:34:36+09:00",
+  "verified_by": "codex-p0-integrated-review-unit014",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-648-014.md"
 }

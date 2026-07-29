@@ -16,10 +16,10 @@
       },
       "after": {
         "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
-        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status_sha256": "fda3bb54bfd21e27c4de46e4fc4213fff5cd9a3c86015337b3086203c79d87a5",
         "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
-      "change_attribution": "none"
+      "change_attribution": "authorized_target"
     },
     {
       "id": "bean-control-5",

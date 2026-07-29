@@ -9,11 +9,12 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T04:45:18+09:00
-updated_at: 2026-07-30T04:49:19+09:00
+updated_at: 2026-07-30T05:34:36+09:00
+blocked_at: 2026-07-30T05:31:18+09:00
 started_at: 2026-07-30T04:49:19+09:00
 origin_type: pilot_replay
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-013.md
@@ -23,6 +24,13 @@ horizon: unit
 model_tier: worker_standard
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
+review_refs:
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md
+  - reviews/W4A-2026-07-30-unit-task-ar-648-014.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-014.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6.json
 escalation_triggers:
   - data_integrity
   - repeated_failure
@@ -46,6 +54,8 @@ target_files:
   - new:reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md
   - new:reviews/W4A-2026-07-30-unit-task-ar-648-014.md
   - new:reviews/W4B-2026-07-30-unit-task-ar-648-014.md
+  - new:agents/project/knowledge/compounds/records/COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e.json
+  - new:agents/project/knowledge/compounds/records/COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6.json
   - new:reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration.md
   - new:reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan.md
   - agents/lead_engineer/tasks/TASK-AR-648.md
@@ -54,7 +64,11 @@ target_files:
   - agents/project/work-items/PLAN-ASSUMPTIONS.json
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.json
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+  - agents/project/knowledge/compounds/INDEX.json
+  - agents/runtime/a2a/messages.jsonl
+  - agents/runtime/pane_events/pane-events.jsonl
   - BACKLOG-BOARD.md
+  - ARCHIVE-INDEX.md
   - reviews/INDEX.md
 scope: After Runtime registration, T3 re-anchoring, readiness, canonical selection, and a default working-tree Runtime claim, create one detached Runtime product worktree pinned to 34427e1fe18d6c4db8a81142616ccad24cc6e7de, one detached Bean frozen-control worktree pinned to 357eee4fd8c29c33a949adbe3a0ffa80c874bf42, and only /home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-green-5 as the writable consumer target on branch codex/task-ar-648-agent-runtime-green-pilot-5 from the same Bean baseline. Capture all isolation snapshots immediately after creation and before target writes. Apply exact core plus web-content templates, preserve Bean editorial assets as host-owned, and run exactly three offline traces: deterministic adoption verification at worker_low, one selectively invoked read-only coffee-flavor-wheel editorial review at worker_standard under bean-wiki-editorial-ops, and deterministic restart plus Compound plus Scribe verification at worker_low. No consumer commit, content edit, dependency installation, provider-live call, publish, deploy, push, credential read, or network delivery is allowed.
 acceptance:
@@ -171,3 +185,13 @@ attempt-5 fixtures, W4a, and independent W4b.
 - No provider-live call or unsupported cost/savings observation.
 - No consumer commit and no release, version, tag, package, remote, publish,
   or deployment action.
+
+## Outcome
+
+The disposable consumer journey passed, but the unit is blocked at Runtime
+evidence acceptance. The accurate green fixture is rejected by twelve fields
+that are pinned to the historical red pilot, and the raw isolation fixture
+cannot simultaneously satisfy the absolute-root gate and the public
+sanitizer. See the pilot report and W4a above. Attempt 5 is frozen, independent
+W4b is required, and any repair must be separately registered before a fresh
+Bean replay.

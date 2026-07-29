@@ -161,14 +161,17 @@ claim_refs:
   `2719 passed, 3 skipped`. Its claim is released. The next action is to
   register a fresh disposable Bean attempt 5 with a newly captured baseline;
   Allimbot remains blocked until that Bean replay passes.
-  UNIT-014 is that separately registered replay. It uses Runtime product
-  `34427e1f`, a new disposable Bean attempt 5, a new same-commit frozen
-  control, and the live primary only as a non-causal observation. Exactly
-  three offline traces are allowed; Allimbot and release work remain blocked
-  until canonical W4a and fresh independent W4b approve the replay.
-  UNIT-014 is now claimed in default working-tree mode. Runtime HEAD remained
-  at the registration boundary; exact product, fresh control, and disposable
-  target creation plus pre-write isolation capture are next.
+  UNIT-014 replayed Runtime product `34427e1f` from a new disposable Bean
+  target and same-commit frozen control. Adoption, exactly three offline
+  traces, preservation, delayed taskset freshness, and causal isolation
+  passed, with no consumer commit or external effect. The article specialist
+  independently returned `REVISE` in its separate publication domain without
+  changing content. Runtime W4a and fresh independent W4b nevertheless block
+  UNIT-014 with P0 0/P1 2/P2 2: the acceptance script binds Bean to one
+  historical red contract, and raw absolute-root isolation proof cannot also
+  pass the public sanitizer. Attempt 5 and its claim are frozen/released.
+  The next action is a separately registered Runtime-only, fail-closed
+  multi-contract and evidence-portability repair. Allimbot remains blocked.
 
 ## Goal
 

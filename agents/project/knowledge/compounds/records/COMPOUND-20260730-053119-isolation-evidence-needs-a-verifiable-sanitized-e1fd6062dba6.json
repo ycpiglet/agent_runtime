@@ -1,0 +1,28 @@
+{
+  "cause": "Raw execution provenance and portable public evidence share one schema without a redaction mapping, stable checkout identity, or digest binding between raw and sanitized representations.",
+  "created_at": "2026-07-30T05:31:19+09:00",
+  "created_by": "codex-root-task-ar-648-014",
+  "defect_signatures": [
+    "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326"
+  ],
+  "id": "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6",
+  "prevention": "Define separate raw and portable evidence representations, bind sanitized checkout aliases to the raw evidence digest and role identity, verify disjointness before redaction, and fail closed on missing or inconsistent mappings.",
+  "prevention_refs": [
+    "reviews/W4A-2026-07-30-unit-task-ar-648-014.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md"
+  ],
+  "status": "active",
+  "summary": "The isolation gate requires canonical machine-local absolute roots while the public sanitizer rejects those same roots, so exact raw evidence cannot be promoted as a repository fixture.",
+  "title": "Isolation evidence needs a verifiable sanitized identity",
+  "verification_refs": [
+    "reviews/W4A-2026-07-30-unit-task-ar-648-014.md"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-014"
+  ]
+}

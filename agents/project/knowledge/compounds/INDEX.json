@@ -24,6 +24,9 @@
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
+    "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
     "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799": [
       "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
     ],
@@ -32,6 +35,9 @@
     ],
     "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+    ],
+    "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e": [
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e"
     ],
     "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -56,7 +62,9 @@
       "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef",
       "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
-      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808",
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -86,9 +94,13 @@
     ],
     "UNIT-TASK-AR-648-013": [
       "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
+    ],
+    "UNIT-TASK-AR-648-014": [
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ]
   },
-  "record_count": 11,
+  "record_count": 13,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -254,8 +266,38 @@
       "work_ids": [
         "UNIT-TASK-AR-648-013"
       ]
+    },
+    {
+      "created_at": "2026-07-30T05:31:18+09:00",
+      "defect_signatures": [
+        "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e"
+      ],
+      "id": "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Pilot acceptance must select an immutable run contract",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-014"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T05:31:19+09:00",
+      "defect_signatures": [
+        "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326"
+      ],
+      "id": "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Isolation evidence needs a verifiable sanitized identity",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-014"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:865ededdc9aae24ec89d33e2568f747f35b1825233d82f1ff708c019e68b7a3e"
+  "source_digest": "sha256:929e2061183d85c4aae5cf7705bc9c527b14295050937a88cbc032af0bcf7a70"
 }
