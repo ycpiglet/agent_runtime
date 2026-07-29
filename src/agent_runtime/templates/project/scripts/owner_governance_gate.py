@@ -141,6 +141,10 @@ def main() -> int:
         ["scripts/agent_identity_gate.py", "--check"],
         ["scripts/attribution_gate.py", "--check"],
         ["scripts/collaboration_governance_gate.py", "--check"],
+        # intentionally omitted: scripts/template_mirror_gate.py -- source-repo-specific
+        # parity gate for scripts/** against src/agent_runtime/templates/project/scripts/**.
+        # Generated projects contain only the consumer side of that comparison.
+        # Mirrored in tests/test_owner_governance_chain_parity.py.
         ["scripts/runtime_asset_usage.py", "--check"],
         ["scripts/state_sync_gate.py", "--check"],
         ["scripts/automation_rules_gate.py", "--check"],

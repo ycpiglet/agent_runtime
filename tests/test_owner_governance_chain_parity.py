@@ -49,6 +49,10 @@ DOCUMENTED_TEMPLATE_OMISSIONS: dict[str, str] = {
         "root-repo-specific: checks Agent Runtime design-system governance artifacts and "
         "changed UI files; generated projects choose their own UI stack and gate timing"
     ),
+    "scripts/template_mirror_gate.py": (
+        "source-repo-specific: compares scripts/** with the packaged template script "
+        "mirror; generated projects contain only the consumer side"
+    ),
 }
 
 # Template chain entries whose script is known to be missing from the

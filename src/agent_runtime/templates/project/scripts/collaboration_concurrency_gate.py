@@ -12,6 +12,23 @@ from typing import Any
 SCHEMA = "agent-runtime-pane-event/v1"
 EVENT_LOG = "agents/runtime/pane_events/pane-events.jsonl"
 ORCHESTRATOR_ACTORS = {"orchestrator", "release-orchestrator"}
+ACTIVE_CLAIM_STATUSES = {"active", "assigned", "claimed", "in_progress", "review", "running", "waiting_review", "working"}
+DONE_CLAIM_STATUSES = {"completed", "done", "released"}
+CLAIM_LIFECYCLE_EVENTS = {
+    "claim_created",
+    "claim_heartbeat",
+    "claim_released",
+    "pane_started",
+    "pane_heartbeat",
+    "pane_handoff",
+    "pane_closed",
+    "started",
+    "claimed",
+    "heartbeat",
+    "handoff",
+    "released",
+    "closed",
+}
 SSOT_PATHS = {
     "BACKLOG.md",
     "BACKLOG-BOARD.md",
@@ -79,10 +96,63 @@ def _validate_events(root: Path, events: list[dict[str, Any]]) -> list[str]:
     return findings
 
 
+def _load_claims(root: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    claims_dir = root / "agents" / "runtime" / "task_claims"
+    if not claims_dir.is_dir():
+        return [], []
+    claims: list[dict[str, Any]] = []
+    findings: list[str] = []
+    for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            findings.append(f"{_rel(root, path)}: collab-concurrency:claim-invalid-json: {exc}")
+            continue
+        if not isinstance(payload, dict):
+            findings.append(f"{_rel(root, path)}: collab-concurrency:claim-invalid-record")
+            continue
+        payload["_path"] = _rel(root, path)
+        claims.append(payload)
+    return claims, findings
+
+
+def _validate_claim_lifecycle(root: Path, claims: list[dict[str, Any]], events: list[dict[str, Any]]) -> list[str]:
+    findings: list[str] = []
+    events_by_claim: dict[str, set[str]] = {}
+    for event in events:
+        claim_id = str(event.get("claim_id") or "").strip()
+        event_name = str(event.get("event") or "").strip()
+        if claim_id and event_name:
+            events_by_claim.setdefault(claim_id, set()).add(event_name)
+    for claim in claims:
+        claim_id = str(claim.get("claim_id") or "").strip()
+        if not claim_id:
+            continue
+        status = str(claim.get("status") or "").strip().lower()
+        lifecycle_events = events_by_claim.get(claim_id, set()) & CLAIM_LIFECYCLE_EVENTS
+        if status in ACTIVE_CLAIM_STATUSES and not lifecycle_events:
+            findings.append(
+                f"{claim.get('_path', 'agents/runtime/task_claims')}: pane-event:missing-lifecycle:{claim_id}: "
+                "active claim has no pane lifecycle event"
+            )
+        task_set_id = str(claim.get("task_set_id") or "").strip()
+        if task_set_id == "TASKSET-AR-MULTIPANE-RUNTIME-ASSURANCE" and status in DONE_CLAIM_STATUSES and not (
+            lifecycle_events & {"claim_released", "pane_handoff", "pane_closed", "handoff", "released", "closed"}
+        ):
+            findings.append(
+                f"{claim.get('_path', 'agents/runtime/task_claims')}: pane-event:missing-release-lifecycle:{claim_id}: "
+                "released claim has no handoff/release/close event"
+            )
+    return findings
+
+
 def check_root(root: Path) -> list[str]:
     root = root.resolve()
     events, findings = _load_events(root)
+    claims, claim_findings = _load_claims(root)
+    findings.extend(claim_findings)
     findings.extend(_validate_events(root, events))
+    findings.extend(_validate_claim_lifecycle(root, claims, events))
     return findings
 
 

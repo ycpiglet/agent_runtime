@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-asset-registry/v1",
   "version": 1,
-  "updated_at": "2026-07-29T04:00:00+09:00",
+  "updated_at": "2026-07-30T03:57:25+09:00",
   "status_scale": ["active", "watch", "deprecated", "removed"],
   "lifecycle_decisions": ["keep", "modify", "deprecate", "remove", "observe"],
   "assets": [
@@ -23,6 +23,26 @@
       "paths": ["scripts/collaboration_governance_gate.py"],
       "evidence_paths": ["scripts/owner_governance_gate.py", "reviews/REVIEW-2026-06-10-agent-runtime-collaboration-governance-redesign.md"],
       "tokens": ["collaboration_governance_gate.py"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.template_mirror",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/template_mirror_gate.py"],
+      "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/TEMPLATE-MIRROR-CONTRACT.json", "tests/test_template_mirror_gate.py"],
+      "tokens": ["template_mirror_gate.py", "agent-runtime-template-mirror-contract/v1"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.pilot_isolation",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/pilot_isolation_gate.py"],
+      "evidence_paths": ["docs/pilot-isolation-contract.md", "tests/test_pilot_isolation_gate.py"],
+      "tokens": ["pilot_isolation_gate.py", "agent-runtime-pilot-isolation/v1"],
       "min_recent_uses": 1
     },
     {

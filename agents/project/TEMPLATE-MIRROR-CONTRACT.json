@@ -1,0 +1,20 @@
+{
+  "schema": "agent-runtime-template-mirror-contract/v1",
+  "intentional_divergences": {
+    "compound_record.py": {
+      "reason": "The source script is a repository entrypoint wrapper, while the packaged script is a standalone consumer implementation.",
+      "source_sha256": "sha256:050b123b6608763a3e7ba1abf8bb733e43df21764decd55a4c4415907ff8b10e",
+      "template_sha256": "sha256:82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
+    },
+    "owner_governance_gate.py": {
+      "reason": "The source chain validates source-template parity and repository-only substrates; the consumer chain documents and guards those omissions.",
+      "source_sha256": "sha256:6d3efb90f52521c93e3d97a3bf7a5ecf9568bbdcbdc24e13fcb364f8cd2050a9",
+      "template_sha256": "sha256:5f773a66c02e1e39d1fe78d6e561dd03e476dee9efa38d699b44086dc0df7331"
+    },
+    "stop_hook_owner_governance.py": {
+      "reason": "The packaged stop hook preserves consumer compatibility flags, while the source hook reports repository-specific governance summaries.",
+      "source_sha256": "sha256:d3fecffb618700cb1898fbc99cc893c918e44666f471e9d6e41f234d7f43ce4e",
+      "template_sha256": "sha256:1263152acb9a4f18a51e77a7895ae03ae0c4027b28a6e873083dab84f0919b2f"
+    }
+  }
+}

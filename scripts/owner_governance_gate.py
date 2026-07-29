@@ -83,6 +83,7 @@ def main() -> int:
         ["scripts/agent_identity_gate.py", "--check"],
         ["scripts/attribution_gate.py", "--check"],
         ["scripts/collaboration_governance_gate.py", "--check"],
+        ["scripts/template_mirror_gate.py", "--check"],
         ["scripts/runtime_asset_usage.py", "--check"],
         ["scripts/state_sync_gate.py", "--check"],
         ["scripts/automation_rules_gate.py", "--check"],
