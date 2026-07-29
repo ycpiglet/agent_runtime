@@ -25,6 +25,13 @@ ACTIVE_CLAIM_STATUSES = frozenset(
 )
 _TASK_IDENTIFIER = re.compile(r"^TASK-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 _UNIT_FRONTMATTER_KEY = re.compile(r"^[a-z][a-z0-9_]*$")
+_RAW_HTML_TAG_START = re.compile(
+    r"^ {0,3}<(?P<tag>script|pre|style|textarea)(?=[\t >]|$)",
+    re.IGNORECASE,
+)
+_GENERIC_HTML_TAG_START = re.compile(
+    r"^ {0,3}</?[A-Za-z][A-Za-z0-9-]*(?=[\t />]|$)"
+)
 UNIT_DOCUMENT_MAX_BYTES = 256 * 1024
 
 MANAGED_POLICY: dict[str, Any] = {
@@ -391,7 +398,8 @@ def _markdown_sections(lines: list[str]) -> set[str]:
     sections: set[str] = set()
     fence_character: str | None = None
     fence_length = 0
-    in_html_comment = False
+    html_terminator: str | None = None
+    html_until_blank = False
     for raw_line in lines:
         if fence_character is not None:
             closing = re.match(
@@ -404,33 +412,73 @@ def _markdown_sections(lines: list[str]) -> set[str]:
                 fence_length = 0
             continue
 
-        visible = raw_line
-        while visible:
-            if in_html_comment:
-                comment_end = visible.find("-->")
-                if comment_end < 0:
-                    visible = ""
-                    break
-                visible = visible[comment_end + 3 :]
-                in_html_comment = False
-                continue
-            comment_start = visible.find("<!--")
-            if comment_start < 0:
-                break
-            comment_end = visible.find("-->", comment_start + 4)
-            if comment_end < 0:
-                visible = visible[:comment_start]
-                in_html_comment = True
-                break
-            visible = visible[:comment_start] + visible[comment_end + 3 :]
+        if html_terminator is not None:
+            if html_terminator.casefold() in raw_line.casefold():
+                html_terminator = None
+            # CommonMark consumes the entire physical line that closes an
+            # HTML block. Never reinterpret text after the terminator as a
+            # Markdown heading.
+            continue
+        if html_until_blank:
+            if not raw_line.strip():
+                html_until_blank = False
+            continue
 
-        fence = re.match(r"^ {0,3}(`{3,}|~{3,}).*$", visible)
+        fence = re.match(r"^ {0,3}(`{3,}|~{3,}).*$", raw_line)
         if fence is not None:
             marker = fence.group(1)
             fence_character = marker[0]
             fence_length = len(marker)
             continue
-        heading = re.match(r"^##\s+(.+?)\s*$", visible)
+
+        stripped = raw_line.lstrip(" ")
+        indent = len(raw_line) - len(stripped)
+        if indent <= 3:
+            if stripped.startswith("<!--"):
+                if "-->" not in stripped[4:]:
+                    html_terminator = "-->"
+                continue
+            if stripped.startswith("<![CDATA["):
+                if "]]>" not in stripped[len("<![CDATA[") :]:
+                    html_terminator = "]]>"
+                continue
+            if stripped.startswith("<?"):
+                if "?>" not in stripped[2:]:
+                    html_terminator = "?>"
+                continue
+            if re.match(r"^<![A-Z]", stripped):
+                if ">" not in stripped[2:]:
+                    html_terminator = ">"
+                continue
+
+            raw_tag = _RAW_HTML_TAG_START.match(raw_line)
+            if raw_tag is not None:
+                closing_tag = f"</{raw_tag.group('tag')}>"
+                if (
+                    closing_tag.casefold()
+                    not in raw_line[raw_tag.end() :].casefold()
+                ):
+                    html_terminator = closing_tag
+                continue
+
+            # CommonMark block-tag and complete-tag blocks consume through
+            # the next blank line. Treat every tag-shaped line at block
+            # indentation this way: false negatives are safe at a claim
+            # authorization boundary, while a false section is not.
+            if _GENERIC_HTML_TAG_START.match(raw_line) is not None:
+                html_until_blank = True
+                continue
+
+        # Inline or malformed comment syntax cannot make a security heading
+        # more trustworthy. Skip the line and retain an unclosed comment
+        # state conservatively.
+        comment_start = raw_line.find("<!--")
+        if comment_start >= 0:
+            if "-->" not in raw_line[comment_start + 4 :]:
+                html_terminator = "-->"
+            continue
+
+        heading = re.match(r"^##\s+(.+?)\s*$", raw_line)
         if heading is not None:
             sections.add(heading.group(1).strip().casefold())
     return sections

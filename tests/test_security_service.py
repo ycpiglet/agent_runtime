@@ -321,8 +321,39 @@ def test_quoted_decision_values_are_not_whitespace_normalized(
     [
         "```text\n## Security Controls\n```",
         "<!--\n## Security Controls\n-->",
+        "<!--\nhidden\n-->## Security Controls",
+        "<!-- hidden -->## Security Controls",
+        "<script>\n## Security Controls\n</script>",
+        "<script\n## Security Controls\n</script>",
+        '<script type="text/plain">\n## Security Controls\n</script>',
+        "<pre>\n## Security Controls\n</pre>",
+        "<style>\n## Security Controls\n</style>",
+        "<textarea>\n## Security Controls\n</textarea>",
+        "<div>\n## Security Controls\n</div>",
+        "<div\n## Security Controls\n",
+        "<security-boundary>\n## Security Controls\n</security-boundary>",
+        "<?runtime\n## Security Controls\n?>",
+        "<![CDATA[\n## Security Controls\n]]>",
+        "<!RUNTIME\n## Security Controls\n>",
     ],
-    ids=["fenced-heading", "commented-heading"],
+    ids=[
+        "fenced-heading",
+        "commented-heading",
+        "comment-close-line-heading",
+        "same-line-comment-heading",
+        "script-block-heading",
+        "script-eol-heading",
+        "script-attribute-heading",
+        "pre-block-heading",
+        "style-block-heading",
+        "textarea-block-heading",
+        "common-block-tag-heading",
+        "common-block-tag-eol-heading",
+        "generic-block-tag-heading",
+        "processing-instruction-heading",
+        "cdata-heading",
+        "declaration-heading",
+    ],
 )
 def test_non_rendered_heading_cannot_satisfy_security_section(
     tmp_path,
@@ -357,6 +388,54 @@ def test_non_rendered_heading_cannot_satisfy_security_section(
         finding.requirement == "section:Security Controls"
         for finding in report.findings
     )
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "<!-- hidden -->",
+        "<!--\nhidden\n-->",
+        "<script>\nhidden\n</script>",
+        "<div>\nhidden\n</div>\n",
+    ],
+    ids=[
+        "closed-comment",
+        "closed-multiline-comment",
+        "closed-script",
+        "blank-after-common-block",
+    ],
+)
+def test_genuine_heading_after_closed_html_block_remains_valid(
+    tmp_path,
+    prefix: str,
+) -> None:
+    _write_config(tmp_path)
+    policy = _write_policy(tmp_path)
+    unit = _write_unit(
+        tmp_path,
+        targets=(".env.production",),
+        risk_tier="high",
+        security_sensitive=True,
+        approval_required=True,
+        triggers=("security",),
+    )
+    path = tmp_path / unit
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + f"\n{prefix}\n## Security Controls\n",
+        encoding="utf-8",
+    )
+
+    report = security_service.analyze_unit(
+        tmp_path,
+        unit,
+        task_id="TASK-1",
+        unit_id="UNIT-TASK-1-001",
+        policy_path=policy,
+    )
+
+    assert report.status == "pass"
+    assert report.findings == ()
 
 
 def test_supported_inline_list_and_quoted_text_remain_valid(tmp_path) -> None:
