@@ -1,57 +1,33 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T04:22:40+09:00
+updated_at: 2026-07-30T04:39:11+09:00
 updated_by: codex-root-task-ar-648-013
 current_state:
-  summary: "UNIT-013 is claimed in the Runtime implementation worktree; exact missing-side RED proof is next."
+  summary: "UNIT-013 exact product 34427e1f passed W4a and independent W4b; a freshly baselined disposable Bean attempt 5 is next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
-  step_total: 5
-  progress_pct: 5
-  status_text: "UNIT-013 claimed without SCM mutation; Bean attempt 5 and Allimbot remain blocked."
+  step_index: 0
+  step_total: 0
+  progress_pct: 0
+  status_text: "UNIT-013 is completed and released; Bean attempt 5 must be separately registered before consumer mutation."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260730-042240-task-ar-648-961f"
-      agent_role: "lead-engineer"
-      team_id: "evaluation-office"
-      agent_instance_id: "codex-root-task-ar-648-013"
-      display_name: "TASK-AR-648 expected mirror inventory repair"
-      callsite_id: "codex:root:task-ar-648:unit-013"
-      pane_id: "codex:root:task-ar-648:unit-013"
-      task_id: "TASK-AR-648"
-      unit_id: "UNIT-TASK-AR-648-013"
-      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-      status: "claimed"
-      phase: "unit-claimed"
-      progress_pct: 5
-      step_index: 1
-      step_total: 5
-      status_text: "UNIT-013 claimed; RED missing-side inventory proof next"
-      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
-      branch: "codex/unit-task-ar-648-002-implementation"
-      claim_path: "agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json"
-      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.handoff.md"
-      log_path: "agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.log.md"
-      last_heartbeat: "2026-07-30T04:22:40+09:00"
-  current_teams:
-    - "evaluation-office"
+  current_agents: []
+  current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Work only in the existing Runtime implementation worktree for UNIT-013. Never mutate Bean primary or frozen attempts 1-4, Autofolio, or Allimbot."
+  branch_policy: "Freeze Runtime product 34427e1f. Register a separate disposable Bean attempt 5 before any consumer write. Never write Bean primary, attempts 1-4, Autofolio, or Allimbot."
   next_actions:
-    - "Record T3 assumptions, prove readiness/selection, and claim UNIT-013 without SCM mutation."
-    - "Record the intersection-derived fail-open in Compound and commit source-only, template-only, and formerly-common deletion RED tests."
-    - "Keep Bean attempt 5 and Allimbot frozen until the repaired exact product passes new W4a and independent W4b."
+    - "Register UNIT-014 for a new disposable Bean attempt 5 and record a fresh isolation baseline."
+    - "Use attempt 4 only as historical evidence; enforce a fresh immutable control during attempt 5 because prior status hashes changed externally."
+    - "Keep Allimbot frozen until Bean attempt 5 passes its own W4a and independent W4b."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - "agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json"
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

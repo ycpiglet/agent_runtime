@@ -9,12 +9,13 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T04:19:04+09:00
-updated_at: 2026-07-30T04:22:40+09:00
+updated_at: 2026-07-30T04:39:11+09:00
 started_at: 2026-07-30T04:22:40+09:00
+completed_at: 2026-07-30T04:39:11+09:00
 origin_type: pilot_finding
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-012.md
 created_by: codex-root-v080-planner
@@ -76,6 +77,21 @@ verification:
   - python -m pytest -q
 handoff: Return the rejected and repaired exact commits and trees, the explicit expected-common count and census, every stable RED finding, proof that legitimate one-sided assets remain allowed, the Compound record, complete verification counts, no-touch consumer snapshots, W4a, and fresh independent W4b.
 stop_condition: Stop on a dynamically derived expected baseline, count-only assertion, wildcard or directory exception, blocking of known legitimate one-sided populations, weakening of the three digest pins, any pilot-isolation or unrelated portable-script change, Bean/Allimbot/Autofolio mutation, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T04:39:11+09:00
+verified_by: codex-root-task-ar-648-013
+evidence_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-013.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-013.md
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-013.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-013.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b.json
+defect_signatures:
+  - defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799
+resolution: done
+closed_by: codex-root-task-ar-648-013
+measurement_unavailable_reason: UNIT-013 execution occurred inside the broader TASK-AR-648 remediation session without reliable per-unit wall-clock or token metering; no provider usage was observed.
 ---
 
 # UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement
@@ -144,3 +160,12 @@ snapshots, and both review stages.
 
 Do not infer the baseline from the trees being checked. Do not modify Bean,
 Allimbot, Autofolio, prior attempts, pilot isolation, releases, or remotes.
+
+## Independent W4b Result
+
+Exact product `34427e1fe18d6c4db8a81142616ccad24cc6e7de` is approved
+with P0 0, P1 0, and P2 1. Independent verification reproduced the
+`84 expected / 84 current / 81 identical / 3 intentional / 0 findings`
+census, all missing-side and inventory-negative cases, source Owner governance,
+sanitizer, and the full `2719 passed, 3 skipped` suite. See
+`reviews/W4B-2026-07-30-unit-task-ar-648-013.md`.

@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T04:22:40+09:00
+updated_at: 2026-07-30T04:39:11+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -154,6 +154,12 @@ claim_refs:
   84-path common inventory, blocks a missing source or template side and
   unexpected common additions, preserves legitimate one-sided populations,
   and requires new W4a/W4b before any Bean attempt 5.
+  UNIT-013 completed at exact product
+  `34427e1fe18d6c4db8a81142616ccad24cc6e7de`. W4a and fresh
+  independent W4b both approve it with no P0/P1; the independent full suite is
+  `2719 passed, 3 skipped`. Its claim is released. The next action is to
+  register a fresh disposable Bean attempt 5 with a newly captured baseline;
+  Allimbot remains blocked until that Bean replay passes.
 
 ## Goal
 
