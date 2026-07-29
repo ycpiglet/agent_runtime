@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T19:28:18+09:00
-record_count: 1034
+generated_at: 2026-07-29T19:43:21+09:00
+record_count: 1037
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1034` review and evidence records under `reviews/`.
+- Summary: indexed `1037` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1034` files |
+| Reviews covered | pass | `1037` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -603,6 +603,7 @@ record_count: 1034
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
+| `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
@@ -674,6 +675,7 @@ record_count: 1034
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-21-business-operating-system.md` | `SEMINAR-2026-06-21-business-operating-system` | seminar | recorded | pass | Business Operating System Seminar |
+| `reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md` | `SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract` | md | request_changes | block | TASK-AR-648 Skeptic Audit — Closeout Overlay Claim Contract |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -1064,6 +1066,7 @@ record_count: 1034
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-002.md` | `W4B-2026-07-29-unit-task-ar-648-002` | md | blocked | fail | TASK-AR-648 UNIT-002 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-003-r2.md` | `W4B-2026-07-29-unit-task-ar-648-003-r2` | md | passed | pass | TASK-AR-648 UNIT-003 Independent W4b R2 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-003.md` | `W4B-2026-07-29-unit-task-ar-648-003` | md | blocked | fail | TASK-AR-648 UNIT-003 독립 W4b 재검증 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-29T18:41:07+09:00",
-  "record_count": 521,
+  "generated_at": "2026-07-29T19:43:21+09:00",
+  "record_count": 522,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5668,7 +5668,18 @@
       "title": "UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md",
       "parent_id": "TASK-AR-648",
-      "status": "in_progress"
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-004",
+      "level": "unit",
+      "number": "41.1.10.4",
+      "label": "Unit 41.1.10.4",
+      "id": "UNIT-TASK-AR-648-004",
+      "title": "UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",

@@ -9,11 +9,12 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: passed
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-29T18:34:22+09:00
-updated_at: 2026-07-29T19:23:03+09:00
+updated_at: 2026-07-29T19:42:00+09:00
+blocked_at: 2026-07-29T19:42:00+09:00
 started_at: 2026-07-29T18:40:02+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md
@@ -96,8 +97,11 @@ review_refs:
   - reviews/W4B-2026-07-29-unit-task-ar-648-003.md
   - reviews/W4A-2026-07-29-unit-task-ar-648-003-r2.md
   - reviews/W4B-2026-07-29-unit-task-ar-648-003-r2.md
+  - reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md
 defect_signatures:
   - defect:explicit-scm-claim-staged-but-absent-from-head-p:876b70f8b223ef6c
+  - defect:auto-review-overlay-claim-self-blocks-gate:a3d83ae935bfebcb
 ---
 
 # UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime
@@ -141,3 +145,11 @@ Do not redesign profiles, role overlays, the UI, or provider telemetry.
 No implicit commit, failed-attempt rewrite, source-checkout dependency,
 consumer content mutation, credential access, network delivery, publish,
 deploy, push, unsupported cost/model claim, or continuation after a new P0.
+
+## Blocked Transition
+
+Independent W4b R2 approved the exact staged-claim and portable-state product
+repair. Its high-risk claim release then auto-dispatched a skeptic overlay
+that violated the canonical active-claim and persistence contracts, producing
+seven parallel-worktree gate blocks. Per this unit's stop condition, Bean
+attempt 2 did not start. Follow-up moved to `UNIT-TASK-AR-648-004`.

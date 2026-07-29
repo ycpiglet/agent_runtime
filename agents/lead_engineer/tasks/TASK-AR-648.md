@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T18:40:02+09:00
+updated_at: 2026-07-29T19:42:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -52,8 +52,13 @@ claim_refs:
   therefore blocked.
 - `UNIT-TASK-AR-648-003` makes claim SCM mutation explicitly opt-in, packages
   the state-projection dependency for standalone installed-host scripts, and
-  repeats the replay in a second fresh Bean Wiki worktree. P1 profile,
-  overlay-execution, and provider-observability work remains separately queued.
+  closes the staged-only commit-failure gap. Independent W4b approved that
+  repair, but the resulting high-risk release exposed a self-blocking
+  auto-review overlay claim and stopped the Bean replay.
+- `UNIT-TASK-AR-648-004` aligns role-routing overlay claims with the canonical
+  gate/persistence contract, then repeats the replay in a second fresh Bean
+  Wiki worktree. P1 profile, overlay-execution, and provider-observability work
+  remains separately queued.
 
 ## Goal
 
