@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T19:42:00+09:00
-updated_at: 2026-07-29T19:50:26+09:00
+updated_at: 2026-07-29T20:09:19+09:00
 started_at: 2026-07-29T19:50:26+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md
@@ -85,6 +85,10 @@ stop_condition: Stop on a broad overlay exemption, implicit SCM mutation, ambien
 defect_signatures:
   - defect:auto-review-overlay-claim-self-blocks-gate:a3d83ae935bfebcb
   - defect:explicit-claim-commit-self-blocked-by-precommit:d2c3c2517cc6eb7f
+verified_at: 2026-07-29T20:09:19+09:00
+verified_by: codex-root-task-ar-648-004
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919.json
 ---
 
 # UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract

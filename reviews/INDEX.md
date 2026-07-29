@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T19:43:21+09:00
-record_count: 1037
+generated_at: 2026-07-29T20:13:20+09:00
+record_count: 1039
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1037` review and evidence records under `reviews/`.
+- Summary: indexed `1039` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1037` files |
+| Reviews covered | pass | `1039` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -905,6 +905,7 @@ record_count: 1037
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858.json` | `VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144.json` | `VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303.json` | `VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919.json` | `VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -919,6 +920,7 @@ record_count: 1037
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001.md` | `W4A-2026-07-29-unit-task-ar-647-001` | md | passed | pass | TASK-AR-647 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-648-003-r2.md` | `W4A-2026-07-29-unit-task-ar-648-003-r2` | md | passed | pass | TASK-AR-648 UNIT-003 HEAD-persisted Claim Gate W4a R2 |
 | `reviews/W4A-2026-07-29-unit-task-ar-648-003.md` | `W4A-2026-07-29-unit-task-ar-648-003` | md | passed | pass | TASK-AR-648 UNIT-003 Claim SCM and Portable State Runtime W4a |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-004.md` | `W4A-2026-07-29-unit-task-ar-648-004` | md | passed | pass | TASK-AR-648 UNIT-004 Overlay and Claim Transaction W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

@@ -956,7 +956,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
-          "value": "69c3993cc3c6493d549b9779eedb55e6d56aebb7cf96f94c6c4311b01e44fb37"
+          "value": "2b588142c4dd625d90898e7b2b547b1bd914c0431b18981549f1d7d44a8737c1"
         },
         {
           "kind": "sha256",
@@ -1040,7 +1040,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-      "recorded_at": "2026-07-29T20:05:43+09:00",
+      "recorded_at": "2026-07-29T20:13:35+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1256,5 +1256,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T20:05:43+09:00"
+  "updated_at": "2026-07-29T20:13:35+09:00"
 }
