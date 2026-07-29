@@ -936,12 +936,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "cb1b91238e07ef1e1c8eb2cccd64f487b192c2f02ba6cd9eda2ba5612b746679"
+          "value": "659ba2fee93e25da6b6fe70d55b9b2a826f254e63ae397cf06eecbaf14c27400"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
-          "value": "1d9dc1e95216419de4d0e3c939b5ba83b40697bd462bd65807421f32d2690505"
+          "value": "b7ab4b6d6493751970bdd9991fe8c7b6eca4f90975b8305c2ede4fe5da688c05"
         },
         {
           "kind": "sha256",
@@ -975,7 +975,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration.md",
-      "recorded_at": "2026-07-30T06:28:59+09:00",
+      "recorded_at": "2026-07-30T06:31:13+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1191,5 +1191,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T06:28:59+09:00"
+  "updated_at": "2026-07-30T06:31:13+09:00"
 }

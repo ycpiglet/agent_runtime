@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T06:26:06+09:00
+updated_at: 2026-07-30T06:29:54+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -49,6 +49,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json
   - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
   - agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
+  - agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -197,6 +198,10 @@ claim_refs:
   registers one exact attempt-6 acceptance contract. Exactly three offline
   traces are allowed; Allimbot remains blocked until W4a and fresh independent
   W4b approve with no P0/P1.
+  UNIT-016 is now claimed in default working-tree mode. Requested execution is
+  `worker_standard`; orchestration policy selected `planner_high` for the
+  declared cross-cutting, data-integrity, and repeated-failure risks. Claim
+  creation left Runtime HEAD at `2025bc75a1c044e69e23bf975ee1243298db7b2c`.
 
 ## Goal
 

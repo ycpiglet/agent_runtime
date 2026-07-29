@@ -1,18 +1,41 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T06:26:06+09:00
-updated_by: codex-root-task-ar-648-016-planner
+updated_at: 2026-07-30T06:29:54+09:00
+updated_by: codex-root-task-ar-648-016
 current_state:
-  summary: "UNIT-016 registers Bean attempt 6 against exact Runtime product 4929415d with a new frozen control and versioned portable evidence."
+  summary: "UNIT-016 is claimed without SCM mutation; fresh Bean attempt-6 checkout creation and pre-write isolation capture are next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   step_index: 0
   step_total: 0
   progress_pct: 0
-  status_text: "UNIT-016 is registered but unclaimed; no Bean worktree or consumer write is authorized before assumptions, readiness, selection, and claim."
+  status_text: "UNIT-016 is claimed; create exact product, frozen control, and disposable target, then capture isolation before target writes."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: "CLAIM-20260730-062954-task-ar-648-ar648016"
+      agent_role: "lead-engineer"
+      team_id: "evaluation-office"
+      agent_instance_id: "codex-root-task-ar-648-016"
+      display_name: "TASK-AR-648 Bean Wiki attempt six"
+      callsite_id: "codex:root:task-ar-648:unit-016"
+      pane_id: "codex:root:task-ar-648:unit-016"
+      task_id: "TASK-AR-648"
+      unit_id: "UNIT-TASK-AR-648-016"
+      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
+      status: "claimed"
+      phase: "unit-claimed"
+      progress_pct: 5
+      step_index: 1
+      step_total: 6
+      status_text: "UNIT-016 claimed; fresh Bean attempt-6 isolation baseline and adoption next"
+      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+      branch: "codex/unit-task-ar-648-002-implementation"
+      claim_path: "agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json"
+      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.handoff.md"
+      log_path: "agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.log.md"
+      last_heartbeat: "2026-07-30T06:29:54+09:00"
+  current_teams:
+    - "evaluation-office"
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
@@ -27,7 +50,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - "agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json"
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

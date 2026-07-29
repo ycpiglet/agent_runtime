@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T06:26:06+09:00
-updated_at: 2026-07-30T06:26:06+09:00
+updated_at: 2026-07-30T06:29:54+09:00
+started_at: 2026-07-30T06:29:54+09:00
 origin_type: pilot_replay
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-015.md
 created_by: codex-root-v080-planner
 summary: Replay Bean Wiki from a sixth fresh disposable checkout using the independently approved versioned acceptance and sanitized-isolation product
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json
 escalation_triggers:
   - data_integrity
   - repeated_failure
@@ -53,7 +56,11 @@ target_files:
   - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
   - agents/project/knowledge/compounds/INDEX.json
   - agents/runtime/a2a/messages.jsonl
+  - new:agents/runtime/instances/codex-root-task-ar-648-016.json
   - agents/runtime/pane_events/pane-events.jsonl
+  - new:agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.handoff.md
+  - new:agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json
+  - new:agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.log.md
   - BACKLOG-BOARD.md
   - ARCHIVE-INDEX.md
   - reviews/INDEX.md
