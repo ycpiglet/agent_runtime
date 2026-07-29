@@ -36,12 +36,14 @@ def _write_task(
     status: str = "planned",
     priority: str = "P1",
     depends_on: list[str] | None = None,
+    unit_spec: str | None = None,
 ) -> None:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     dependency_line = (
         f"depends_on: [{', '.join(depends_on)}]\n" if depends_on is not None else ""
     )
+    unit_spec_line = f"unit_spec: {unit_spec}\n" if unit_spec is not None else ""
     (tasks_dir / f"{task_id}.md").write_text(
         f"""---
 id: {task_id}
@@ -52,7 +54,7 @@ est_hours: 2
 est_tokens: 200
 task_set_id: {task_set_id}
 project_id: PROJECT-AGENT-RUNTIME
-{dependency_line}tags: [test]
+{dependency_line}{unit_spec_line}tags: [test]
 ---
 
 ## Goal
@@ -125,13 +127,14 @@ def _write_unit(
     task_id: str,
     *,
     status: str = "worker_ready",
+    unit_number: int = 1,
     **metadata: str | bool | list[str],
 ) -> None:
     units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
     units_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
-        f"unit_id: UNIT-{task_id}-001",
+        f"unit_id: UNIT-{task_id}-{unit_number:03d}",
         f"task_id: {task_id}",
         f"status: {status}",
         "model_tier: worker_standard",
@@ -145,7 +148,10 @@ def _write_unit(
             encoded = value
         lines.append(f"{key}: {encoded}")
     lines.extend(["---", ""])
-    (units_dir / f"UNIT-{task_id}-001.md").write_text("\n".join(lines), encoding="utf-8")
+    (units_dir / f"UNIT-{task_id}-{unit_number:03d}.md").write_text(
+        "\n".join(lines),
+        encoding="utf-8",
+    )
 
 
 def _run(
@@ -575,7 +581,164 @@ def test_plan_rejects_open_task_when_all_unit_specs_are_completed(tmp_path: Path
     result = _run(tmp_path, "plan", taskset, "--json")
 
     assert result.returncode == 1
-    assert "TASK-901 has unit specs but no open unit" in (result.stderr or result.stdout)
+    assert "TASK-901 has unit specs but no runnable unit" in (
+        result.stderr or result.stdout
+    )
+
+
+def test_plan_prefers_canonical_planned_unit_over_blocked_history(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-BLOCKED-HISTORY"
+    task_id = "TASK-901"
+    current = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-003.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=current)
+    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
+    _write_unit(tmp_path, task_id, unit_number=2, status="completed")
+    _write_unit(tmp_path, task_id, unit_number=3, status="planned")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-003"
+    assert payload["unit_spec_path"] == current
+    assert current in payload["claim_command"]
+
+
+def test_plan_prefers_in_progress_before_canonical_planned_unit(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-IN-PROGRESS-PRIORITY"
+    task_id = "TASK-901"
+    planned = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-001.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=planned)
+    _write_unit(tmp_path, task_id, unit_number=1, status="planned")
+    _write_unit(tmp_path, task_id, unit_number=2, status="worker_ready")
+    _write_unit(tmp_path, task_id, unit_number=3, status="in_progress")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["unit_id"] == f"UNIT-{task_id}-003"
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        "blocked",
+        "hold",
+        "cancelled",
+        "rejected",
+        "failed",
+        "planner_refine_required",
+        "completed",
+    ],
+)
+def test_plan_never_emits_claim_for_non_runnable_unit(
+    tmp_path: Path,
+    status: str,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-NON-RUNNABLE"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, status=status)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert f"{task_id} has unit specs but no runnable unit" in (
+        result.stderr or result.stdout
+    )
+
+
+def test_plan_fails_closed_on_unknown_unit_status(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-UNKNOWN-UNIT-STATUS"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, unit_number=1, status="mystery")
+    _write_unit(tmp_path, task_id, unit_number=2, status="planned")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    message = result.stderr or result.stdout
+    assert "unknown unit status" in message
+    assert "mystery" in message
+
+
+def test_plan_rejects_multiple_in_progress_units(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-AMBIGUOUS-ACTIVE-UNITS"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, unit_number=1, status="in_progress")
+    _write_unit(tmp_path, task_id, unit_number=2, status="in_progress")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "multiple in-progress units" in (result.stderr or result.stdout)
+
+
+def test_plan_uses_only_selected_unit_dependencies_and_routing(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-SELECTED-UNIT-CONTRACT"
+    task_id = "TASK-901"
+    current = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-002.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=current)
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=1,
+        status="blocked",
+        depends_on=["UNIT-TASK-999-001"],
+        model_tier="reviewer_high",
+    )
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=2,
+        status="planned",
+        model_tier="worker_low",
+    )
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-002"
+    assert payload["model_routing"]["requested_tier"] == "worker_low"
+    assert payload["model_routing"]["selected_tier"] == "worker_low"
+
+
+def test_root_and_packaged_taskset_dispatchers_are_byte_identical() -> None:
+    packaged = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "taskset_dispatcher.py"
+    )
+
+    assert (SCRIPTS_DIR / "taskset_dispatcher.py").read_bytes() == packaged.read_bytes()
 
 
 def test_resolve_taskset_preserves_static_alias_import_contract() -> None:

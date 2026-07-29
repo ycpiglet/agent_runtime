@@ -79,7 +79,7 @@
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
       "agents/uiux_designer/SKILL.md": "sha256:c0b980b2be22bd1e0350393599189dcff47c56a8303ab6df2e3f4f5914c571f6",
-      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:87d1977767d70b204e5307a615fd5233bad8963d335c03cc1d666be6a138bdc1",
+      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:8d01d39eaf9c8add34288b6abebe2ab62a5a2672100c3f4d4c08b4ede53a3e44",
       "docs/agent_bootstrap/README.md": "sha256:905fefa4ffb6c6beb051fbbcbc2b7b02ce5dfdf71ddb2b4308a3219a438f12dd",
       "docs/agent_bootstrap/claude.md": "sha256:63ee4a32a83cf1af5176b8287a0ad6bce019119713b17b3a3d204a9df2cc6b3e",
       "docs/agent_bootstrap/codex.md": "sha256:694d45acbecedf3d201ff6ba4b22e6b52b3efe4b0b9a0ca7346bb3f0a0a1cca0",
@@ -233,7 +233,7 @@
       "scripts/task_mcp.py": "sha256:b257379d6269dd70d85df7eb5523c6de83f11d197d25ca96f69e69a2af7b5018",
       "scripts/task_unit_readiness_gate.py": "sha256:79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372",
       "scripts/taskset_boundary_gate.py": "sha256:0cc438aeec1f24540ddc6838837d24cf1c4444799781ee6ca8f175be392a86f0",
-      "scripts/taskset_dispatcher.py": "sha256:30283f0c65befb513201960dcb5cd70280563a1be960cc3ff755a851d394b62a",
+      "scripts/taskset_dispatcher.py": "sha256:352309666aeab9483db6fc279f46a72db6c3795a431d85a453079da36f5a97d6",
       "scripts/taskset_prompt_hook.cmd": "sha256:f6914c735d43c8ab967158fa84439753a6dd555c2df2c4192c0213c08b72b81e",
       "scripts/taskset_prompt_hook.py": "sha256:13eef2aa9d927be6ac52456266ef3f40b76442b5dad3a5bcaeb46e0f69e08e70",
       "scripts/taskset_work_gate.py": "sha256:fe840225c2fe9e6a11769d370f3f9920f532bd95fcc20a59a75449ff226652e6",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:997f334766e76479ef73810ddd83603e3447a38dd809d536c929e4d99aa13549",
+    "template_digest": "sha256:f4b213e75ce12582cb63ae6cb1a917b4c3be1dc230fb90172719fa0494bf158f",
     "template_files": 251
   },
   "profiles": [

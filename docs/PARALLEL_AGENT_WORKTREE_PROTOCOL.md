@@ -168,6 +168,16 @@ cooperative-concurrency boundary. A missing, ambient, stale, malformed,
 dead-owner, wrong-root, wrong-path, wrong-`HEAD`, wrong-ref, wrong-index,
 wrong-tree, or wrong-blob marker never weakens ordinary claim persistence.
 
+## Unit Dispatch Selection
+
+Task-set plan/start dispatches only runnable units. A single `in_progress`
+unit wins; otherwise a runnable task-level `unit_spec` is canonical, followed
+by `worker_ready`/legacy `ready`, then `planned`. Historical `blocked`,
+failed, cancelled, rejected, refinement-required, review, and completed units
+are never fallback work. Multiple in-progress units, unknown statuses, a
+missing canonical unit path, or a task with no runnable unit stop before a
+claim command is emitted.
+
 ## Recovery Pattern
 
 1. Read `STATUS.md` for the current handoff.

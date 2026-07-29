@@ -47,6 +47,27 @@ DONE_STATUSES = {
     "released",
 }
 
+RUNNABLE_UNIT_PRIORITIES = {
+    "in_progress": 0,
+    "active": 0,
+    "worker_ready": 1,
+    "ready": 1,  # established pre-schema compatibility value
+    "planned": 2,
+}
+
+NON_RUNNABLE_UNIT_STATUSES = DONE_STATUSES | {
+    "blocked",
+    "hold",
+    "cancelled",
+    "canceled",
+    "rejected",
+    "failed",
+    "planner_refine_required",
+    "proposed",
+    "review",
+    "waiting_review",
+}
+
 CANONICAL_TASKSET_SCHEMA = "agent-runtime-work-item/v1"
 TASKSET_REGISTRY_SCHEMA = "agent-runtime-taskset-definitions/v1"
 TASKSET_REGISTRY_PATH = Path("agents/project/work-items/TASKSET-DEFINITIONS.json")
@@ -474,23 +495,104 @@ def _unit_specs_for_task(root: Path, task_id: str) -> list[tuple[Path, dict[str,
     return specs
 
 
-def _ready_unit_for_task(root: Path, task_id: str) -> tuple[Path, dict[str, Any], str] | None:
+def _ready_unit_for_task(
+    root: Path,
+    task_id: str,
+    preferred_spec: str = "",
+) -> tuple[Path, dict[str, Any], str] | None:
+    """Return one unambiguous runnable unit without reviving failed history.
+
+    An in-progress unit is the live execution source of truth. Otherwise, a
+    task's canonical ``unit_spec`` wins when it names a runnable unit; this
+    keeps a newly registered continuation ahead of older ready/planned
+    siblings. Blocked and terminal units are never dispatch fallbacks.
+    """
     units = _unit_specs_for_task(root, task_id)
     if not units:
         return None
-    open_units = [
+
+    classified: list[tuple[tuple[Path, dict[str, Any], str], str]] = []
+    known_statuses = set(RUNNABLE_UNIT_PRIORITIES) | NON_RUNNABLE_UNIT_STATUSES
+    for unit in units:
+        raw_status = str(unit[1].get("status") or "").strip()
+        normalized = _normalize_status(raw_status)
+        if normalized not in known_statuses:
+            rendered = raw_status or "<missing>"
+            raise SystemExit(
+                f"task {task_id} has unknown unit status '{rendered}': "
+                f"{_rel(root, unit[0])}"
+            )
+        classified.append((unit, normalized))
+
+    in_progress = [
         unit
-        for unit in units
-        if _normalize_status(str(unit[1].get("status") or "")) not in DONE_STATUSES
+        for unit, status in classified
+        if RUNNABLE_UNIT_PRIORITIES.get(status) == 0
     ]
-    if not open_units:
-        raise SystemExit(f"task {task_id} has unit specs but no open unit")
-    ready = [
-        unit
-        for unit in open_units
-        if str(unit[1].get("status") or "").strip() in {"worker_ready", "ready", "in_progress"}
+    if len(in_progress) > 1:
+        unit_ids = ", ".join(
+            str(unit[1].get("unit_id") or _rel(root, unit[0]))
+            for unit in in_progress
+        )
+        raise SystemExit(
+            f"task {task_id} has multiple in-progress units: {unit_ids}"
+        )
+    if in_progress:
+        return in_progress[0]
+
+    runnable = [
+        (unit, status)
+        for unit, status in classified
+        if status in RUNNABLE_UNIT_PRIORITIES
     ]
-    return (ready or open_units)[0]
+    if not runnable:
+        raise SystemExit(f"task {task_id} has unit specs but no runnable unit")
+
+    if preferred_spec:
+        preferred = Path(preferred_spec)
+        if preferred.is_absolute():
+            raise SystemExit(
+                f"task {task_id} unit_spec must be repo-relative: {preferred_spec}"
+            )
+        preferred_path = (root / preferred).resolve()
+        unit_root = (
+            root
+            / "agents"
+            / "lead_engineer"
+            / "tasks"
+            / "units"
+            / task_id
+        ).resolve()
+        try:
+            preferred_path.relative_to(unit_root)
+        except ValueError as exc:
+            raise SystemExit(
+                f"task {task_id} unit_spec is outside its unit registry: "
+                f"{preferred_spec}"
+            ) from exc
+        preferred_match = next(
+            (
+                (unit, status)
+                for unit, status in classified
+                if unit[0].resolve() == preferred_path
+            ),
+            None,
+        )
+        if preferred_match is None:
+            raise SystemExit(
+                f"task {task_id} unit_spec does not name a registered unit: "
+                f"{preferred_spec}"
+            )
+        if preferred_match[1] in RUNNABLE_UNIT_PRIORITIES:
+            return preferred_match[0]
+
+    return min(
+        runnable,
+        key=lambda item: (
+            RUNNABLE_UNIT_PRIORITIES[item[1]],
+            item[0][0].as_posix(),
+        ),
+    )[0]
 
 
 def _require_unit_dependencies(
@@ -972,7 +1074,11 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     default_branch = f"codex/{task_slug}-{task_set_slug}"
     step_index = tasks.index(task) + 1
     step_total = len(tasks)
-    unit = _ready_unit_for_task(root, task.task_id)
+    unit = _ready_unit_for_task(
+        root,
+        task.task_id,
+        str(task.meta.get("unit_spec") or "").strip(),
+    )
     unit_path = unit[0] if unit else None
     unit_meta = unit[1] if unit else {}
     if unit:
