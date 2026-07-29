@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:54:44+09:00
+updated_at: 2026-07-29T09:42:43+09:00
 started_at: 2026-07-29T08:54:44+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -75,6 +75,7 @@ target_files:
   - tests/test_owner_governance_chain_parity.py
   - tests/test_update_notify.py
   - tests/test_notify_routing.py
+  - tests/test_orchestrator_atomic_writes.py
   - tests/fixtures/host/agent_runtime.lock.json
 scope: Use the installed Allimbot ProjectEmitter as the sole durable enqueue implementation; enforce the exact Agent Runtime recipe and bounded value policy before optional delivery; migrate internal callers; remove direct delivery; and make security-service add a claim-time risk gate. Keep Allimbot optional, do not duplicate its spool, do not add a network sender, and do not mutate consumer repositories.
 acceptance:
@@ -157,6 +158,7 @@ must reuse that boundary rather than recreate it.
 - tests/test_owner_governance_chain_parity.py
 - tests/test_update_notify.py
 - tests/test_notify_routing.py
+- tests/test_orchestrator_atomic_writes.py
 - tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
