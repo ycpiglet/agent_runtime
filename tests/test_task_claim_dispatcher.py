@@ -252,6 +252,13 @@ def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
 
     assert gate.returncode == 1
     assert "task-claim:authorized-commit-not-persisted" in gate.stdout
+    assert "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION" not in os.environ
+    transaction_dir = Path(
+        _git_stdout(linked, "rev-parse", "--git-path", "agent-runtime/claim-commit")
+    )
+    if not transaction_dir.is_absolute():
+        transaction_dir = linked / transaction_dir
+    assert not list(transaction_dir.glob("*.json"))
 
 
 @pytest.mark.parametrize("setting", ["0", "false", "off", "not-a-policy"])

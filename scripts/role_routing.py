@@ -187,18 +187,30 @@ def _write_overlay_claim(
         "team_id": "agent-runtime-core",
         "agent_instance_id": f"{agent_role}-{claim_id}",
         "display_name": f"{agent_role}@{mode}",
+        "callsite_id": (
+            f"role-routing:{event_name or 'overlay'}:"
+            f"{parent_task_id or parent_task_set_id or task_id}:{agent_role}"
+        ),
+        "pane_id": f"overlay:{claim_id}",
         "mode": mode,
         "status": "claimed",
+        "phase": "claim-created",
+        "progress_pct": 0,
         "status_text": status_text,
         "claimed_at": now,
         "last_heartbeat": now,
         "updated_at": now,
         "tags": list(tags or []),
-        "overlay": True,            # additive orchestration overlay marker
+        "overlay": True,  # additive orchestration overlay marker
+        "allow_parallel_task_set": True,
         "parent_task_id": parent_task_id,
         "parent_task_set_id": parent_task_set_id,
         "handoff_path": _rel(root, handoff_path),
         "log_path": _rel(root, log_path),
+        "persistence": {
+            "mode": "working_tree",
+            "scm_commit_authorized": False,
+        },
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     published_artifacts: list[Path] = []
@@ -244,6 +256,8 @@ def _write_overlay_claim(
                 "actor_role": agent_role,
                 "agent_instance_id": claim["agent_instance_id"],
                 "display_name": claim["display_name"],
+                "callsite_id": claim["callsite_id"],
+                "pane_id": claim["pane_id"],
                 "task_id": parent_task_id or task_id,
                 "task_set_id": parent_task_set_id or task_set_id,
                 "claim_id": claim_id,

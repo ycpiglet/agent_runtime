@@ -18,7 +18,12 @@ mixing file edits, git index state, or handoff records.
 6. Active claims must expose task-set progress fields: `task_set_id`,
    `phase`, `progress_pct`, `step_index`, `step_total`, `status_text`, and
    `updated_at`.
-7. Shared SSoT files are not directly edited by workers unless the task packet
+7. An orchestration overlay (`overlay: true`) is not a worker checkout. It may
+   omit only `worktree_path` and `branch`; it must still carry canonical
+   identity/progress fields, parent linkage, `allow_parallel_task_set: true`,
+   handoff/log paths, and
+   `persistence: {mode: working_tree, scm_commit_authorized: false}`.
+8. Shared SSoT files are not directly edited by workers unless the task packet
    names them as owned files. Workers should write proposals or task-local docs.
 
 ## Claim Record
@@ -76,7 +81,9 @@ python scripts/parallel_worktree_gate.py --check
 
 The gate fails for duplicate active task claims, worker claims in the main
 checkout, duplicate agent instances across tasks, duplicate worktrees across
-tasks, missing instance metadata, and missing handoff/log pointers.
+tasks, missing instance metadata, malformed overlay contracts, and missing
+handoff/log pointers. An out-of-`HEAD` working-tree overlay remains visible as
+a reset/clean risk watch.
 
 ## Dispatch Pattern
 
@@ -87,6 +94,16 @@ git worktree add .worktrees/TASK-AR-246 -b codex/task-ar-246-parallel-runtime ma
 Then start the agent inside that worktree with a task packet that names the task
 ID, allowed files, forbidden shared docs, verification commands, evidence
 outputs, and claim metadata.
+
+Claim creation leaves Git `HEAD` unchanged by default. When a control-repository
+workflow explicitly uses `--commit-claim-artifacts`, `claim_guard.py` creates a
+private, short-lived transaction record and passes its marker only to the
+`git commit` child. The pre-commit gate accepts only the exact authorized claim
+JSON when repository, starting `HEAD`, live owner process, private record,
+indexed blob, and working-tree blob all match. The record is removed when
+`git commit` exits. A missing, ambient, stale, malformed, wrong-root,
+wrong-path, unstaged, or mismatched marker never weakens the ordinary
+`HEAD`-persistence block.
 
 ## Recovery Pattern
 

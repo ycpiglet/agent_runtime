@@ -65,6 +65,7 @@ REQUIRED_ACTIVE_FIELDS = (
     "log_path",
 )
 
+OVERLAY_OPTIONAL_ACTIVE_FIELDS = {"worktree_path", "branch"}
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
 
 TASK_WORKTREE_NAME_RE = re.compile(r"^TASK-", re.IGNORECASE)
@@ -87,6 +88,9 @@ CLAIM_LOSS_INCIDENT = (
     "claims absent from HEAD are erased by a concurrent session's reset+clean "
     "(2026-06-12 incident: CLAIM-...-task-ar-500-25db lost, recreated as -66ed)"
 )
+CLAIM_COMMIT_TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
+CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v1"
+CLAIM_COMMIT_TRANSACTION_NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
 
 
 @dataclass(frozen=True)
@@ -154,6 +158,10 @@ class ClaimRecord:
     @property
     def spike(self) -> bool:
         return "spike" in self.tags or self.payload.get("spike") is True
+
+    @property
+    def overlay(self) -> bool:
+        return self.payload.get("overlay") is True
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -284,6 +292,8 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord], primary_root: P
             continue
         active.append(record)
         for field in REQUIRED_ACTIVE_FIELDS:
+            if record.overlay and field in OVERLAY_OPTIONAL_ACTIVE_FIELDS:
+                continue
             value = record.payload.get(field)
             if value is None or str(value).strip() == "":
                 finding_field = field.replace("_", "-")
@@ -299,7 +309,22 @@ def _validate_claims(root: Path, records: Iterable[ClaimRecord], primary_root: P
         if str(record.payload.get("phase", "")).strip() != "claim-created" and not record.task_set_id:
             findings.append(f"{rel}: task-claim:missing-task-set-id: active task-set work claims must include task_set_id")
 
-        if record.worktree_path:
+        if record.overlay:
+            persistence = record.payload.get("persistence")
+            if persistence != {
+                "mode": "working_tree",
+                "scm_commit_authorized": False,
+            }:
+                findings.append(
+                    f"{rel}: task-claim:overlay-persistence-invalid: orchestration overlays "
+                    "must declare working_tree persistence without SCM authorization"
+                )
+            if record.payload.get("allow_parallel_task_set") is not True:
+                findings.append(
+                    f"{rel}: task-claim:overlay-parallel-declaration-missing: orchestration "
+                    "overlays must explicitly allow parallel task-set participation"
+                )
+        elif record.worktree_path:
             worktree = _resolved_worktree(root, record.worktree_path, primary_root)
             if _norm(worktree) in orchestrator_roots and not _is_orchestrator_claim(record):
                 findings.append(
@@ -581,10 +606,137 @@ def _claim_matches_head(root: Path, rel_path: str) -> bool:
     return code == 0
 
 
+def _process_is_alive(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def _transaction_record_path(root: Path, nonce: str) -> Path | None:
+    code, out = _git(
+        root,
+        "rev-parse",
+        "--git-path",
+        f"agent-runtime/claim-commit/{nonce}.json",
+    )
+    if code != 0 or not out.strip():
+        return None
+    path = Path(out.strip())
+    if not path.is_absolute():
+        path = root / path
+    return path
+
+
+def _load_claim_commit_transaction(root: Path) -> dict[str, object] | None:
+    raw = os.environ.get(CLAIM_COMMIT_TRANSACTION_ENV, "")
+    if not raw or len(raw) > 16_384:
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    required = {
+        "schema",
+        "root",
+        "claim_paths",
+        "nonce",
+        "owner_pid",
+        "head",
+    }
+    if not isinstance(payload, dict) or set(payload) != required:
+        return None
+    if payload.get("schema") != CLAIM_COMMIT_TRANSACTION_SCHEMA:
+        return None
+    try:
+        marker_root = Path(str(payload.get("root") or "")).resolve()
+    except OSError:
+        return None
+    if _norm(marker_root) != _norm(root):
+        return None
+    nonce = str(payload.get("nonce") or "")
+    if CLAIM_COMMIT_TRANSACTION_NONCE_RE.fullmatch(nonce) is None:
+        return None
+    owner_pid = payload.get("owner_pid")
+    if not isinstance(owner_pid, int) or isinstance(owner_pid, bool):
+        return None
+    if not _process_is_alive(owner_pid):
+        return None
+    claim_paths = payload.get("claim_paths")
+    if (
+        not isinstance(claim_paths, list)
+        or not claim_paths
+        or len(claim_paths) > 16
+        or len(set(claim_paths)) != len(claim_paths)
+    ):
+        return None
+    for value in claim_paths:
+        if not isinstance(value, str):
+            return None
+        path = Path(value)
+        if (
+            path.is_absolute()
+            or ".." in path.parts
+            or len(path.parts) != 4
+            or path.parts[:3] != ("agents", "runtime", "task_claims")
+            or path.suffix != ".json"
+        ):
+            return None
+    code, head = _git(root, "rev-parse", "HEAD")
+    if code != 0 or head.strip() != str(payload.get("head") or ""):
+        return None
+    record_path = _transaction_record_path(root, nonce)
+    if record_path is None or not record_path.is_file() or record_path.is_symlink():
+        return None
+    try:
+        persisted = json.loads(record_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if persisted != payload:
+        return None
+    return payload
+
+
+def _claim_matches_index(root: Path, rel_path: str) -> bool:
+    code, indexed = _git(root, "rev-parse", f":{rel_path}")
+    if code != 0 or not indexed.strip():
+        return False
+    code, working = _git(root, "hash-object", f"--path={rel_path}", rel_path)
+    if code != 0 or not working.strip():
+        return False
+    return indexed.strip() == working.strip()
+
+
+def _transaction_authorizes_claim(
+    root: Path,
+    rel_path: str,
+    record: ClaimRecord | None,
+    transaction: dict[str, object] | None,
+) -> bool:
+    if record is None or transaction is None:
+        return False
+    persistence = record.payload.get("persistence")
+    if persistence != {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }:
+        return False
+    claim_paths = transaction.get("claim_paths")
+    if not isinstance(claim_paths, list) or rel_path not in claim_paths:
+        return False
+    return _claim_matches_index(root, rel_path)
+
+
 def _non_head_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Finding]:
     if not _git_scans_enabled(root):
         return []
     by_rel = {_rel(root, record.path).lower(): record for record in records}
+    transaction = _load_claim_commit_transaction(root)
     findings: list[Finding] = []
     for path in _claim_files(root):
         rel_path = _rel(root, path)
@@ -605,6 +757,16 @@ def _non_head_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fin
             )
             continue
         if mode == "scm_commit" and authorized is True:
+            if _transaction_authorizes_claim(root, rel_path, record, transaction):
+                findings.append(
+                    Finding(
+                        "watch",
+                        f"{rel_path}: task-claim:authorized-commit-transaction: exact "
+                        "staged claim is being persisted by the active claim-only Git "
+                        "transaction; ordinary post-commit HEAD validation still applies",
+                    )
+                )
+                continue
             findings.append(
                 Finding(
                     "block",

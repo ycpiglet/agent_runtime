@@ -582,6 +582,26 @@ def test_gate_rejects_ambient_transaction_marker_without_private_record(
     assert "task-claim:authorized-commit-not-persisted" in result.stdout
 
 
+def test_gate_rejects_malformed_transaction_marker(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    _git(repo, "add", claim_path.relative_to(repo).as_posix())
+    env = dict(os.environ)
+    env[TRANSACTION_ENV] = "{not-json"
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
 @pytest.mark.parametrize(
     ("case", "marker_kwargs"),
     [

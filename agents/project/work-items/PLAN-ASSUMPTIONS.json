@@ -961,12 +961,12 @@
         {
           "kind": "sha256",
           "path": "scripts/role_routing.py",
-          "value": "666e8aea824c9d41b0efb6143f9df566589ddceb1d030db76839cb2f9c769660"
+          "value": "cef7a72652a2b44c78aed76edb813eb37fea884a01464f244be904dc2b41f831"
         },
         {
           "kind": "sha256",
           "path": "scripts/claim_guard.py",
-          "value": "0847f45c722e94cf356cc99355bacea03fedab1c79cd6cc7abb77a60dbca4232"
+          "value": "9419e5a89f211cf388c05137b925fa44ed8e373bbd5ab325cf2b390731a33aa3"
         },
         {
           "kind": "sha256",
@@ -986,7 +986,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "e170dcada67f07b06e3e709d49d8d6e7dc4d28a2fa73ec960a725dd720ed19fc"
+          "value": "5399d445db8702dff7a08d7ad5adb0272efa7990992f1b171119f180e373ed50"
         },
         {
           "kind": "sha256",
@@ -1001,22 +1001,22 @@
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
-          "value": "cd41529c0c925fd50a7c43380e57be9161ae4e249465d5bfa4a3525e449db087"
+          "value": "d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
-          "value": "cd41529c0c925fd50a7c43380e57be9161ae4e249465d5bfa4a3525e449db087"
+          "value": "d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28"
         },
         {
           "kind": "sha256",
           "path": "tests/test_parallel_worktree_gate.py",
-          "value": "17dce0bf5421cf3012c63f1524006c5091da66f6b78c72f2f922d65310022615"
+          "value": "6e88d4299d44ad4925b741ba82832dd2cb07e33fcb276299f2ffaf21d4e9534a"
         },
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "f37ea0e43d9664b1ecbff5c5f13e9202a20d9ddf1b225e2d9e358e8ae0f1b9c7"
+          "value": "5274f5692a037218824f24b17e4a544ca95047060e7ae13ad942bd0b4203cc48"
         },
         {
           "kind": "sha256",
@@ -1040,7 +1040,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md",
-      "recorded_at": "2026-07-29T19:58:13+09:00",
+      "recorded_at": "2026-07-29T20:05:43+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1256,5 +1256,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T19:58:13+09:00"
+  "updated_at": "2026-07-29T20:05:43+09:00"
 }

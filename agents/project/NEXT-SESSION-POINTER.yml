@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T19:50:26+09:00
+updated_at: 2026-07-29T20:05:00+09:00
 updated_by: codex-root-task-ar-648-004
 current_state:
   summary: "TASK-AR-648 UNIT-004 is claimed to align overlay claim durability and explicit claim-commit transactions before Bean replay attempt 2."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
+  step_index: 4
   step_total: 10
-  progress_pct: 0
-  status_text: "Overlay and explicit claim-commit P0 repair is claimed; write red-first producer-to-gate regressions before product edits."
+  progress_pct: 35
+  status_text: "Red regressions are fixed; focused overlay, claim transaction, dispatcher, adoption, and sanitizer suites pass."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260729-195026-task-ar-648-648004

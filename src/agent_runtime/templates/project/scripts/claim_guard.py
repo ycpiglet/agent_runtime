@@ -15,19 +15,29 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import secrets
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Iterable
 
 CLAIMS_REL = "agents/runtime/task_claims"
+CLAIM_COMMIT_TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
+CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v1"
 
 
-def _git(root: Path, args: list[str]) -> dict[str, Any]:
+def _git(
+    root: Path,
+    args: list[str],
+    *,
+    env: dict[str, str] | None = None,
+) -> dict[str, Any]:
     try:
         proc = subprocess.run(
             ["git", *args], cwd=str(root), capture_output=True, text=True,
             encoding="utf-8", errors="replace", timeout=30,
+            env=env,
         )
     except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
         return {"code": 127, "out": "", "err": repr(exc)}
@@ -47,6 +57,70 @@ def _rel(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+def _claim_json_paths(rels: Iterable[str]) -> list[str]:
+    prefix = f"{CLAIMS_REL}/"
+    return sorted(
+        {
+            rel
+            for rel in rels
+            if rel.startswith(prefix)
+            and Path(rel).suffix == ".json"
+            and len(Path(rel).parts) == 4
+            and ".." not in Path(rel).parts
+        }
+    )
+
+
+def _start_commit_transaction(
+    root: Path,
+    claim_paths: list[str],
+) -> tuple[str, Path] | None:
+    if not claim_paths:
+        return None
+    head = _git(root, ["rev-parse", "HEAD"])
+    if head["code"] != 0 or not head["out"].strip():
+        return None
+    nonce = secrets.token_hex(16)
+    payload = {
+        "schema": CLAIM_COMMIT_TRANSACTION_SCHEMA,
+        "root": str(root.resolve()),
+        "claim_paths": claim_paths,
+        "nonce": nonce,
+        "owner_pid": os.getpid(),
+        "head": head["out"].strip(),
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    resolved = _git(
+        root,
+        [
+            "rev-parse",
+            "--git-path",
+            f"agent-runtime/claim-commit/{nonce}.json",
+        ],
+    )
+    if resolved["code"] != 0 or not resolved["out"].strip():
+        return None
+    record_path = Path(resolved["out"].strip())
+    if not record_path.is_absolute():
+        record_path = root / record_path
+    try:
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor = os.open(
+            record_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(raw + "\n")
+    except OSError:
+        try:
+            record_path.unlink()
+        except OSError:
+            pass
+        return None
+    return raw, record_path
+
+
 def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool = True) -> dict[str, Any]:
     """Commit ONLY the given paths (other staged/untracked work is left untouched)."""
     root = Path(root)
@@ -62,7 +136,33 @@ def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool
     if add["code"] != 0:
         return {"ok": False, "committed": False, "reason": f"git-add-failed: {add['err'][:200]}", "paths": rels}
 
-    commit = _git(root, ["commit", "-m", message, "--", *rels])
+    claim_paths = _claim_json_paths(rels)
+    transaction = _start_commit_transaction(root, claim_paths)
+    if claim_paths and transaction is None:
+        return {
+            "ok": False,
+            "committed": False,
+            "reason": "claim-commit-transaction-failed",
+            "paths": rels,
+        }
+    commit_env = dict(os.environ)
+    commit_env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
+    transaction_path: Path | None = None
+    if transaction is not None:
+        raw, transaction_path = transaction
+        commit_env[CLAIM_COMMIT_TRANSACTION_ENV] = raw
+    try:
+        commit = _git(
+            root,
+            ["commit", "-m", message, "--", *rels],
+            env=commit_env,
+        )
+    finally:
+        if transaction_path is not None:
+            try:
+                transaction_path.unlink()
+            except OSError:
+                pass
     if commit["code"] == 0:
         return {"ok": True, "committed": True, "paths": rels}
     blob = (commit["out"] + commit["err"]).lower()
