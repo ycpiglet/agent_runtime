@@ -699,6 +699,11 @@ def test_clean_host_runs_work_session_report_and_dependency_lifecycle(tmp_path):
     payload = {"schema_version":"agent-runtime-work-registration/v1","project_id":"PROJECT-TEMPLATE-SMOKE","origin_type":"owner_request","origin_ref":"tests","created_by":"test","now":"2026-07-29T00:00:00+09:00","initiative":{"id":"INIT-TEMPLATE-SMOKE","title":"Smoke","summary":"Smoke","owner":"lead_engineer"},"taskset":{"id":"TASKSET-TEMPLATE-SMOKE","display_name":"Smoke","summary":"Smoke","order":990,"plan_slug":"smoke"},"tasks":[{"display_id":"TASK-AR-990","title":"Smoke","goal":"Smoke","acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"units":[{"title":"Unit","context":"Smoke","inputs":["scripts/verification_probe.py"],"target_files":["scripts/verification_probe.py"],"scope":"Smoke","steps":["Run probe"],"acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"handoff":"done","stop_condition":"done"}]}]}
     registration = host / "registration.json"; registration.write_text(json.dumps(payload), encoding="utf-8")
     work = host / "scripts/work.py"
+    now = _run([PYTHON, str(work), "--root", str(host), "now"], cwd=host)
+    assert re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}\n?",
+        now.stdout,
+    )
     _run([PYTHON, str(work), "--root", str(host), "new", "--input", str(registration), "--json"], cwd=host)
     _run([PYTHON, str(work), "--root", str(host), "status", "--json"], cwd=host)
     _run([PYTHON, str(work), "--root", str(host), "verify", "UNIT-TASK-AR-990-001", "--json"], cwd=host)
