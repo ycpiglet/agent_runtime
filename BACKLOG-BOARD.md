@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-29T18:02:24+09:00
-task_count: 315
-open_count: 19
+generated_at: 2026-07-30T07:42:31+09:00
+task_count: 316
+open_count: 20
 completed_count: 296
-task_set_count: 3
+task_set_count: 4
 completed_task_set_count: 63
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `19` open or active tasks; `296` completed tasks are archived from this live board.
+- Summary: `20` open or active tasks; `296` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `15` / Ask `4` / Review `0` / Later `0` / Done `296`.
-- Task Sets: `3` active workflows; `63` completed workflows are hidden from the live action board.
+- Status: Action `16` / Ask `4` / Review `0` / Later `0` / Done `296`.
+- Task Sets: `4` active workflows; `63` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -84,6 +84,15 @@ completed_task_set_count: 63
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
+
+### Merge Queue Safety (`TASKSET-AR-MERGE-QUEUE-SAFETY`)
+
+- Flow: Make the serial integration queue safe across processes and explicit about dependency order.
+- Progress: `0/1` done; `1` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-653` | INIT-AR-PARALLEL-INTEGRATION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md | planned | Action | P1 | High | Medium | 1h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Serialize all queue mutations through a repository-common lock, persist queue state a… |
 
 ## Archived Task Sets
 
@@ -159,8 +168,8 @@ completed_task_set_count: 63
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `19` open across `3` task sets (see Action Board above).
-- Throughput (7d): `32` tasks completed in the last 7 days (TASK-AR-627).
+- Active: `20` open across `4` task sets (see Action Board above).
+- Throughput (7d): `19` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `296` — see `ARCHIVE-INDEX.md`.
 

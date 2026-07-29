@@ -218,6 +218,12 @@
       "order": 640
     },
     {
+      "task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
+      "display_name": "Merge Queue Safety",
+      "summary": "Make the serial integration queue safe across processes and explicit about dependency order.",
+      "order": 653
+    },
+    {
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
       "display_name": "Release Cadence Query Recovery",
       "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",

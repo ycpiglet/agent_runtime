@@ -549,6 +549,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md",
+          "value": "29cdde22f8c34d4613f89505c1417a7eb2f1a889525857772624dfcc8f56985d"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/merge_queue.py",
+          "value": "fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "6db9d6c1af921a488ed0e52cfdd2aaa8896b7d60c6b77895437405095f6427df"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md",
+      "recorded_at": "2026-07-30T07:42:31+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-MERGE-QUEUE-SAFETY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
           "value": "ac78599e2197c7999eaffc406449034dab76e34f11c1dd41da4f555478499a6b"
         },
@@ -1406,5 +1434,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T17:00:36+09:00"
+  "updated_at": "2026-07-30T07:42:31+09:00"
 }
