@@ -9,11 +9,12 @@ task_id: TASK-AR-653
 task_set_id: TASKSET-AR-MERGE-QUEUE-SAFETY
 initiative_id: INIT-AR-PARALLEL-INTEGRATION-INTEGRITY
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: completed
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T07:45:00+09:00
-updated_at: 2026-07-30T08:22:01+09:00
+updated_at: 2026-07-30T08:48:02+09:00
+started_at: 2026-07-30T07:55:00+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-parallel-union-harness
 created_by: codex-root
@@ -52,6 +53,10 @@ verified_by: le-20260730-075500-kst-merge-queue-safety
 evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201.json
+resolution: done
+completed_at: 2026-07-30T08:48:02+09:00
+closed_by: codex-root-task-ar-653-w6
+measurement_unavailable_reason: The session did not expose trustworthy per-unit elapsed-time or token attribution across delegated verification and CI.
 ---
 
 # UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing
@@ -110,3 +115,17 @@ Provide the claimed unit ID, implementation commit, focused test evidence, indep
 ## Stop Boundary
 
 Stop if another active claim overlaps any of the five target files, if the Git common directory cannot be resolved safely, or if compatibility requires changing dispatcher/workflow files reserved by another session.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T08:48:02+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The session did not expose trustworthy per-unit elapsed-time or token attribution across delegated verification and CI.
+- Closed by: `codex-root-task-ar-653-w6`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509.json`
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201.json`
+<!-- work-close:end -->

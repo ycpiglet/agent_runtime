@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T08:34:13+09:00
+generated_at: 2026-07-30T08:50:40+09:00
 task_count: 316
-open_count: 20
-completed_count: 296
-task_set_count: 4
-completed_task_set_count: 63
+open_count: 19
+completed_count: 297
+task_set_count: 3
+completed_task_set_count: 64
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `296` completed tasks are archived from this live board.
+- Summary: `19` open or active tasks; `297` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `4` / Review `0` / Later `0` / Done `296`.
-- Task Sets: `4` active workflows; `63` completed workflows are hidden from the live action board.
+- Status: Action `15` / Ask `4` / Review `0` / Later `0` / Done `297`.
+- Task Sets: `3` active workflows; `64` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -84,15 +84,6 @@ completed_task_set_count: 63
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
 | `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
-
-### Merge Queue Safety (`TASKSET-AR-MERGE-QUEUE-SAFETY`)
-
-- Flow: Make the serial integration queue safe across processes and explicit about dependency order.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-653` | INIT-AR-PARALLEL-INTEGRATION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md | planned | Action | P1 | High | Medium | 1h/1000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Serialize all queue mutations through a repository-common lock, persist queue state a… |
 
 ## Archived Task Sets
 
@@ -156,6 +147,7 @@ completed_task_set_count: 63
 | Noncritical Release Auto-Execution (`TASKSET-AR-RELEASE-AUTO-NONCRITICAL`) | Fix the stale release execution gate (parameterize the hardcoded v0.1.8) and wire a cadence-bound auto-release path that runs the agent-council vote, gates, tag, and push for noncritical releases on green main CI, while keeping major/breaking/critical releases Owner-gated. Correct the release-conductor skill doc to match the implemented tier rule. | `2/2` done | `2` completed task files archived |
 | Visual Asset Adoption (`TASKSET-AR-VISUAL-ASSET-ADOPTION`) | Implement the research-backed visual upgrade: DiceBear CC0 seeded agent avatars with role accents; Dagre+d3-force graph rendering for dependency/state-machine/live-agent views; Geist OFL fonts; Lucide icons; unDraw state illustrations; Radix+Carbon data-viz palette tokens and sparklines. Permissive-only, no-build, self-hosted, token-driven, landed experimental. | `4/4` done | `4` completed task files archived |
 | Visual System Integration & Verification (`TASKSET-AR-VISUAL-SYSTEM-INTEGRATION`) | Wire the new visual components into every relevant live view, boot-verify the served console, fix integration gaps, and run a WCAG AA + responsive pass on the new visual system. Permissive, no-build, token-driven. | `2/2` done | `2` completed task files archived |
+| Merge Queue Safety (`TASKSET-AR-MERGE-QUEUE-SAFETY`) | Make the serial integration queue safe across processes and explicit about dependency order. | `1/1` done | `1` completed task files archived |
 | Release Cadence Query Recovery (`TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY`) | Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior. | `1/1` done | `1` completed task files archived |
 | Self-Eval Query Integrity (`TASKSET-AR-SELF-EVAL-QUERY-INTEGRITY`) | Make self-eval fail loud and preserve structured evidence whenever its shared Git queries exhaust retries. | `1/1` done | `1` completed task files archived |
 | Release-Auto Fixture HEAD Recovery (`TASKSET-AR-RELEASE-AUTO-FIXTURE-HEAD-RECOVERY`) | Make the release-auto test fixture resilient to a proven pre-commit HEAD parse transient without hiding deterministic Git failures. | `1/1` done | `1` completed task files archived |
@@ -168,10 +160,10 @@ completed_task_set_count: 63
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `20` open across `4` task sets (see Action Board above).
-- Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
-- Archived task sets: `63` (see Archived Task Sets above).
-- Archived task files: `296` — see `ARCHIVE-INDEX.md`.
+- Active: `19` open across `3` task sets (see Action Board above).
+- Throughput (7d): `18` tasks completed in the last 7 days (TASK-AR-627).
+- Archived task sets: `64` (see Archived Task Sets above).
+- Archived task files: `297` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.
