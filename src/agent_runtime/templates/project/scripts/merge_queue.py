@@ -1,7 +1,5 @@
 """Integrator merge queue: serial rebase-test-merge for worker branches.
 
-Not concurrent-safe: run at most one process invocation at a time.
-
 Parallel waves end with N worker branches waiting to join main. Unordered
 joins create rebase races and shared-SSoT regeneration contention
 (board/INDEX/BACKLOG). This script encodes the orchestrator's manually proven
@@ -18,6 +16,11 @@ failing entry is marked ``failed`` with a reason plus a worker feedback file
 with the next entry and never poisons the integration branch.
 
 Safety invariants:
+  - every mutating command holds one cross-process lock in the Git common
+    directory, so linked worktrees cannot race queue or integration state;
+  - queue JSON is flushed and atomically replaced while that lock is held;
+  - declared task dependencies are validated and topologically ordered before
+    any branch is rebased or merged;
   - never force-pushes; never deletes branches;
   - failed rebases/merges are aborted and the work tree is restored;
   - ``--pr-mode`` performs no remote merge: it pushes the rebased branch only
@@ -27,7 +30,7 @@ Safety invariants:
 
 Usage:
   python scripts/merge_queue.py enqueue --branch B --task-id T
-      [--claim-id C] [--verify CMD]...
+      [--claim-id C] [--depends-on-task T]... [--verify CMD]...
   python scripts/merge_queue.py list
   python scripts/merge_queue.py process [--once|--all] [--dry-run]
       [--base origin/main] [--integration-branch NAME] [--pr-mode]
@@ -41,14 +44,18 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import heapq
 import json
 import os
 import re
 import shlex
 import subprocess
 import sys
+import tempfile
+import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, BinaryIO, Iterator
 
 ROOT = Path(__file__).resolve().parent.parent
 QUEUE_REL = "agents/runtime/merge_queue/queue.json"
@@ -68,6 +75,10 @@ PREFIX = "[merge-queue]"
 # Every git/verify/regen subprocess is bounded so one hung command cannot
 # wedge the queue. Override via the MERGE_QUEUE_TIMEOUT_SECONDS env var.
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 600.0
+DEFAULT_LOCK_TIMEOUT_SECONDS = 10.0
+LOCK_POLL_SECONDS = 0.05
+LOCK_FILENAME = "agent-runtime-merge-queue.lock"
+DEPENDENCY_SUCCESS_STATUSES = {"merged", "pr-handoff"}
 
 
 class MergeQueueError(Exception):
@@ -131,9 +142,48 @@ def save_queue(root: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload["schema"] = SCHEMA
     payload["updated_at"] = _now_iso()
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    encoded = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode(
+        "utf-8"
     )
+    descriptor = -1
+    temporary_path: Path | None = None
+    try:
+        descriptor, raw_path = tempfile.mkstemp(
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=str(path.parent),
+        )
+        temporary_path = Path(raw_path)
+        with os.fdopen(descriptor, "wb") as handle:
+            descriptor = -1
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, path)
+        temporary_path = None
+        try:
+            directory_fd = os.open(path.parent, os.O_RDONLY)
+        except OSError:
+            directory_fd = -1
+        if directory_fd >= 0:
+            try:
+                try:
+                    os.fsync(directory_fd)
+                except OSError:
+                    # Some platforms do not support fsync on a directory.
+                    pass
+            finally:
+                os.close(directory_fd)
+    except OSError as exc:
+        raise MergeQueueError(f"queue file atomic write failed: {path} ({exc})") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def new_entry(
@@ -141,11 +191,13 @@ def new_entry(
     task_id: str,
     claim_id: str = "",
     verify_cmds: list[str] | None = None,
+    depends_on_task_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     return {
         "branch": branch,
         "task_id": task_id,
         "claim_id": claim_id,
+        "depends_on_task_ids": list(depends_on_task_ids or []),
         "narrow_verification_cmds": list(verify_cmds or []),
         "enqueued_at": _now_iso(),
         "status": "pending",
@@ -173,6 +225,137 @@ def _git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProc
         detail = (result.stderr or result.stdout or "").strip()
         raise MergeQueueError(f"git {' '.join(args)} failed: {detail}")
     return result
+
+
+def _lock_timeout_seconds() -> float:
+    raw = os.environ.get("MERGE_QUEUE_LOCK_TIMEOUT_SECONDS", "").strip()
+    if raw:
+        try:
+            value = float(raw)
+        except ValueError:
+            value = 0.0
+        if value > 0:
+            return value
+    return DEFAULT_LOCK_TIMEOUT_SECONDS
+
+
+def git_common_dir(root: Path) -> Path:
+    result = _git(root, "rev-parse", "--git-common-dir")
+    value = (result.stdout or "").strip()
+    if not value:
+        raise MergeQueueError(f"git common directory is unavailable: {root}")
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    try:
+        return path.resolve(strict=True)
+    except OSError as exc:
+        raise MergeQueueError(
+            f"git common directory is unavailable: {path} ({exc})"
+        ) from exc
+
+
+def queue_lock_path(root: Path) -> Path:
+    return git_common_dir(root) / LOCK_FILENAME
+
+
+def _prepare_lock_handle(path: Path) -> BinaryIO:
+    try:
+        handle = path.open("a+b")
+        if os.name == "nt":
+            handle.seek(0, os.SEEK_END)
+            if handle.tell() == 0:
+                handle.write(b"\n")
+                handle.flush()
+        return handle
+    except OSError as exc:
+        raise MergeQueueError(f"merge queue lock is unavailable: {path} ({exc})") from exc
+
+
+def _try_acquire_file_lock(handle: BinaryIO) -> bool:
+    if os.name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        try:
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        except OSError:
+            return False
+        return True
+
+    import fcntl
+
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return False
+    return True
+
+
+def _release_file_lock(handle: BinaryIO) -> None:
+    if os.name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        return
+
+    import fcntl
+
+    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def _lock_holder_text(handle: BinaryIO) -> str:
+    try:
+        handle.seek(0)
+        return handle.read(2048).decode("utf-8", errors="replace").strip()
+    except OSError:
+        return ""
+
+
+@contextmanager
+def exclusive_queue_lock(root: Path, command: str) -> Iterator[Path]:
+    path = queue_lock_path(root)
+    handle = _prepare_lock_handle(path)
+    timeout = _lock_timeout_seconds()
+    deadline = time.monotonic() + timeout
+    acquired = False
+    try:
+        while not acquired:
+            acquired = _try_acquire_file_lock(handle)
+            if acquired:
+                break
+            if time.monotonic() >= deadline:
+                holder = _lock_holder_text(handle)
+                detail = f"; last holder={holder}" if holder else ""
+                raise MergeQueueError(
+                    f"merge queue lock busy after {timeout:g}s: {path}{detail}; "
+                    "wait for the active enqueue/remove/process command to finish"
+                )
+            time.sleep(LOCK_POLL_SECONDS)
+
+        owner = json.dumps(
+            {
+                "pid": os.getpid(),
+                "command": command,
+                "acquired_at": _now_iso(),
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        handle.seek(0)
+        handle.truncate()
+        handle.write(owner)
+        handle.flush()
+        os.fsync(handle.fileno())
+        yield path
+    finally:
+        if acquired:
+            try:
+                _release_file_lock(handle)
+            except OSError:
+                pass
+        handle.close()
 
 
 def _git_ok(root: Path, *args: str) -> bool:
@@ -539,6 +722,138 @@ def _print_wave_hint(ctx: ProcessContext, merged_count: int) -> None:
     )
 
 
+def _depends_on_task_ids(entry: dict[str, Any]) -> list[str]:
+    raw = entry.get("depends_on_task_ids", [])
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise MergeQueueError(
+            f"dependency list must be an array for branch {entry.get('branch', '?')}"
+        )
+    result: list[str] = []
+    for item in raw:
+        value = str(item or "").strip()
+        if not value:
+            raise MergeQueueError(
+                f"dependency task id must not be empty for branch "
+                f"{entry.get('branch', '?')}"
+            )
+        if value not in result:
+            result.append(value)
+    return result
+
+
+def _dependency_matches(
+    queue: dict[str, Any], task_id: str
+) -> list[dict[str, Any]]:
+    return [
+        entry
+        for entry in queue["entries"]
+        if str(entry.get("task_id") or "").strip() == task_id
+    ]
+
+
+def dependency_order(queue: dict[str, Any]) -> list[dict[str, Any]]:
+    pending_rows = [
+        (index, entry)
+        for index, entry in enumerate(queue["entries"])
+        if entry.get("status") == "pending"
+    ]
+    if not pending_rows:
+        return []
+
+    pending_by_task: dict[str, list[int]] = {}
+    entries_by_index = {index: entry for index, entry in pending_rows}
+    for index, entry in pending_rows:
+        task_id = str(entry.get("task_id") or "").strip()
+        if not task_id:
+            raise MergeQueueError(
+                f"dependency preflight failed: branch "
+                f"{entry.get('branch', '?')} has no task id"
+            )
+        pending_by_task.setdefault(task_id, []).append(index)
+
+    incoming: dict[int, set[int]] = {index: set() for index, _ in pending_rows}
+    followers: dict[int, set[int]] = {index: set() for index, _ in pending_rows}
+    problems: list[str] = []
+
+    for index, entry in pending_rows:
+        current_task = str(entry.get("task_id") or "").strip()
+        for dependency in _depends_on_task_ids(entry):
+            matches = _dependency_matches(queue, dependency)
+            if not matches:
+                problems.append(
+                    f"unknown dependency {dependency} for {current_task}"
+                )
+                continue
+            if any(
+                str(match.get("status") or "") in DEPENDENCY_SUCCESS_STATUSES
+                for match in matches
+            ):
+                continue
+            predecessors = pending_by_task.get(dependency, [])
+            if not predecessors:
+                statuses = sorted(
+                    {str(match.get("status") or "?") for match in matches}
+                )
+                problems.append(
+                    f"unmet dependency {dependency} for {current_task} "
+                    f"(status={','.join(statuses)})"
+                )
+                continue
+            for predecessor in predecessors:
+                incoming[index].add(predecessor)
+                followers[predecessor].add(index)
+
+    if problems:
+        raise MergeQueueError(
+            "dependency preflight failed: " + "; ".join(sorted(set(problems)))
+        )
+
+    ready = [index for index, edges in incoming.items() if not edges]
+    heapq.heapify(ready)
+    ordered_indices: list[int] = []
+    while ready:
+        index = heapq.heappop(ready)
+        ordered_indices.append(index)
+        for follower in sorted(followers[index]):
+            incoming[follower].discard(index)
+            if not incoming[follower]:
+                heapq.heappush(ready, follower)
+
+    if len(ordered_indices) != len(pending_rows):
+        cycle_indices = sorted(set(incoming) - set(ordered_indices))
+        cycle = ", ".join(
+            f"{entries_by_index[index].get('task_id', '?')}"
+            f"[{entries_by_index[index].get('branch', '?')}]"
+            for index in cycle_indices
+        )
+        raise MergeQueueError(f"dependency preflight failed: cycle detected: {cycle}")
+
+    return [entries_by_index[index] for index in ordered_indices]
+
+
+def dependency_block_reason(
+    queue: dict[str, Any], entry: dict[str, Any]
+) -> str | None:
+    current_task = str(entry.get("task_id") or "").strip() or "?"
+    for dependency in _depends_on_task_ids(entry):
+        matches = _dependency_matches(queue, dependency)
+        if not matches:
+            return f"unknown dependency {dependency} for {current_task}"
+        if any(
+            str(match.get("status") or "") in DEPENDENCY_SUCCESS_STATUSES
+            for match in matches
+        ):
+            continue
+        statuses = sorted({str(match.get("status") or "?") for match in matches})
+        return (
+            f"unmet dependency {dependency} for {current_task} "
+            f"(status={','.join(statuses)})"
+        )
+    return None
+
+
 def cmd_enqueue(args: argparse.Namespace) -> int:
     root = args.root
     queue = load_queue(root)
@@ -546,6 +861,21 @@ def cmd_enqueue(args: argparse.Namespace) -> int:
     if not branch:
         _say("ERROR --branch must not be empty")
         return 1
+    task_id = args.task_id.strip()
+    if not task_id:
+        _say("ERROR --task-id must not be empty")
+        return 1
+    dependencies: list[str] = []
+    for raw in args.depends_on_task:
+        dependency = raw.strip()
+        if not dependency:
+            _say("ERROR --depends-on-task must not be empty")
+            return 1
+        if dependency == task_id:
+            _say(f"ERROR task {task_id} cannot depend on itself")
+            return 1
+        if dependency not in dependencies:
+            dependencies.append(dependency)
     for entry in queue["entries"]:
         if entry.get("branch") == branch and entry.get("status") in ENQUEUE_BLOCKING_STATUSES:
             _say(
@@ -553,11 +883,21 @@ def cmd_enqueue(args: argparse.Namespace) -> int:
                 f"{entry.get('status')}; remove it first to re-enqueue"
             )
             return 1
-    entry = new_entry(branch, args.task_id.strip(), args.claim_id.strip(), args.verify)
+    entry = new_entry(
+        branch,
+        task_id,
+        args.claim_id.strip(),
+        args.verify,
+        dependencies,
+    )
     queue["entries"].append(entry)
     save_queue(root, queue)
     verify_note = ", ".join(entry["narrow_verification_cmds"]) or f"default: {DEFAULT_VERIFY_CMD}"
-    _say(f"enqueued {branch} ({entry['task_id']}) verify=[{verify_note}]")
+    dependency_note = ", ".join(dependencies) or "none"
+    _say(
+        f"enqueued {branch} ({entry['task_id']}) "
+        f"depends_on=[{dependency_note}] verify=[{verify_note}]"
+    )
     return 0
 
 
@@ -578,10 +918,11 @@ def cmd_list(args: argparse.Namespace) -> int:
             extra = f" reason={entry['failure_reason']}"
         elif entry.get("processed_at"):
             extra = f" processed={entry['processed_at']}"
+        dependencies = ",".join(_depends_on_task_ids(entry)) or "-"
         print(
             f"  {index}. [{status:<8}] branch={entry.get('branch', '?')} "
             f"task={entry.get('task_id', '?')} enqueued={entry.get('enqueued_at', '?')}"
-            f"{extra}"
+            f" depends_on={dependencies}{extra}"
         )
     return 0
 
@@ -604,7 +945,7 @@ def cmd_remove(args: argparse.Namespace) -> int:
 def cmd_process(args: argparse.Namespace) -> int:
     root = args.root
     queue = load_queue(root)
-    pending = [entry for entry in queue["entries"] if entry.get("status") == "pending"]
+    pending = dependency_order(queue)
     if not pending:
         _say("no pending entries")
         return 0
@@ -634,6 +975,11 @@ def cmd_process(args: argparse.Namespace) -> int:
     failed = 0
     try:
         for entry in pending:
+            blocked = dependency_block_reason(queue, entry)
+            if blocked:
+                _say(f"ERROR dependency changed before merge: {blocked}")
+                failed += 1
+                break
             if process_entry(ctx, queue, entry):
                 merged += 1
             else:
@@ -672,6 +1018,15 @@ def build_parser() -> argparse.ArgumentParser:
     enqueue.add_argument("--branch", required=True)
     enqueue.add_argument("--task-id", required=True)
     enqueue.add_argument("--claim-id", default="")
+    enqueue.add_argument(
+        "--depends-on-task",
+        action="append",
+        default=[],
+        help=(
+            "queue-local predecessor task id (repeatable); predecessor entries "
+            "must remain in queue history until this entry is processed"
+        ),
+    )
     enqueue.add_argument(
         "--verify",
         action="append",
@@ -717,7 +1072,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     args.root = Path(args.root).resolve()
     try:
-        return int(args.func(args))
+        mutates = args.command in {"enqueue", "remove"} or (
+            args.command == "process" and not args.dry_run
+        )
+        if not mutates:
+            return int(args.func(args))
+        with exclusive_queue_lock(args.root, args.command):
+            return int(args.func(args))
     except MergeQueueError as exc:
         _say(f"ERROR {exc}")
         return 2

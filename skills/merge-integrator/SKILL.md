@@ -1,6 +1,6 @@
 ---
 name: merge-integrator
-version: 1.0.0
+version: 1.1.0
 description: Use when the user asks to integrate parallel worker branches, run the merge queue, serially rebase-test-merge branches into main, or hand off branches as PRs after a wave completes.
 triggers:
   - merge queue
@@ -19,8 +19,9 @@ template_path: src/agent_runtime/templates/project/skills/merge-integrator/SKILL
 Single-integrator serial queue that joins parallel worker branches into the
 integration base one at a time: `fetch -> rebase -> narrow verification ->
 merge (local) or print PR commands (--pr-mode) -> next -> regenerate the board
-once per batch`. Not concurrent-safe: run at most one process invocation at a
-time.
+once per batch`. Mutating commands enforce a repository-common cross-process
+lock and atomically replace queue state, so invocations from linked worktrees
+cannot silently overwrite one another.
 
 ## When To Use
 
@@ -31,13 +32,20 @@ time.
 
 ```powershell
 python scripts/merge_queue.py enqueue --branch <branch> --task-id TASK-AR-NNN `
-    [--claim-id <id>] [--verify "<cmd>"]...
+    [--claim-id <id>] [--depends-on-task TASK-AR-NNN]... [--verify "<cmd>"]...
 python scripts/merge_queue.py list
 ```
 
 Default narrow verification is `python scripts/owner_governance_gate.py`; add
 `--verify` (repeatable) to override. A branch already queued in an active or
 `pr-handoff` status must be `remove`d before re-enqueue.
+
+`--depends-on-task` is repeatable and queue-local. Keep predecessor entries in
+queue history until their dependents are processed. Before any git mutation,
+the queue fails closed on an unknown predecessor, a failed/in-flight unmet
+predecessor, or a cycle, and otherwise uses stable topological order rather
+than FIFO. In PR mode, `pr-handoff` satisfies queue ordering only; the
+orchestrator still confirms the remote merge before removing history.
 
 ## Process (serial)
 
@@ -60,6 +68,15 @@ integration branch. After a clean local batch, the board is regenerated once
 
 ## Safety Boundaries (hard invariants)
 
+- Every `enqueue`, `remove`, and non-dry-run `process` holds the same lock under
+  `git rev-parse --git-common-dir`; contention times out with an actionable
+  error (`MERGE_QUEUE_LOCK_TIMEOUT_SECONDS` controls the bounded wait).
+- `queue.json` is written to a same-directory temporary file, flushed, and
+  atomically replaced. `list` and `process --dry-run` create no lock or state
+  mutation and observe either the old or new complete JSON.
+- Dependency validation and ordering finish before fetch, checkout, rebase, or
+  merge. A predecessor that fails during the same batch leaves its dependents
+  pending and stops further dependent integration.
 - NEVER force-pushes and NEVER deletes branches.
 - Failed rebases/merges are aborted and the work tree is restored.
 - `--pr-mode` performs no remote merge: it pushes the rebased branch only when

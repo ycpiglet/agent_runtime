@@ -4,7 +4,12 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
+
+import pytest
+
+from scripts import merge_queue as merge_queue_module
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -33,9 +38,13 @@ def _git(cwd: Path, *args: str) -> str:
     return (result.stdout or "").strip()
 
 
+def _mq_argv(root: Path, *args: str) -> list[str]:
+    return [sys.executable, str(SCRIPT), *args, "--root", str(root)]
+
+
 def _run_mq(root: Path, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), *args, "--root", str(root)],
+        _mq_argv(root, *args),
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,
@@ -44,6 +53,43 @@ def _run_mq(root: Path, *args: str, env: dict[str, str] | None = None) -> subpro
         check=False,
         env={**os.environ, **env} if env else None,
     )
+
+
+def _start_lock_holder(
+    root: Path, ready_path: Path, hold_seconds: float
+) -> subprocess.Popen[str]:
+    code = "\n".join(
+        [
+            "import sys, time",
+            "from pathlib import Path",
+            f"sys.path.insert(0, {str(REPO_ROOT)!r})",
+            "from scripts.merge_queue import exclusive_queue_lock",
+            (
+                f"with exclusive_queue_lock(Path({str(root)!r}), "
+                f"{'test-holder'!r}):"
+            ),
+            f"    Path({str(ready_path)!r}).write_text('ready', encoding='utf-8')",
+            f"    time.sleep({hold_seconds!r})",
+        ]
+    )
+    return subprocess.Popen(
+        [sys.executable, "-c", code],
+        cwd=str(REPO_ROOT),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _wait_for_path(path: Path, timeout: float = 3.0) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if path.exists():
+            return
+        time.sleep(0.01)
+    raise AssertionError(f"timed out waiting for {path}")
 
 
 def _make_repos(tmp_path: Path) -> Path:
@@ -261,9 +307,11 @@ def test_pr_mode_marks_entry_pr_handoff_and_blocks_reenqueue(tmp_path: Path):
     assert _queue(work)["entries"] == []
 
 
-def test_module_documents_single_process_boundary_and_template_mirror():
+def test_module_enforces_cross_process_boundary_and_template_mirror():
     text = SCRIPT.read_text(encoding="utf-8")
-    assert "Not concurrent-safe: run at most one process invocation at a time." in text
+    assert "Not concurrent-safe" not in text
+    assert "exclusive_queue_lock" in text
+    assert "os.replace" in text
     assert text == TEMPLATE_SCRIPT.read_text(encoding="utf-8")
 
 
@@ -285,3 +333,313 @@ def test_enqueue_rejects_duplicate_active_branch_and_remove_clears_it(tmp_path: 
     assert _queue(work)["entries"] == []
     missing = _run_mq(work, "remove", "--branch", "feat/x")
     assert missing.returncode == 1
+
+
+def test_git_common_lock_path_is_shared_by_linked_worktrees(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    linked = tmp_path / "linked"
+    _git(work, "worktree", "add", "-b", "feat/linked", str(linked), "main")
+
+    assert merge_queue_module.queue_lock_path(work) == merge_queue_module.queue_lock_path(
+        linked
+    )
+
+
+def test_concurrent_enqueues_are_serialized_without_lost_updates(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    ready = tmp_path / "lock-ready"
+    holder = _start_lock_holder(work, ready, 0.35)
+    _wait_for_path(ready)
+    env = {**os.environ, "MERGE_QUEUE_LOCK_TIMEOUT_SECONDS": "2"}
+
+    processes = [
+        subprocess.Popen(
+            _mq_argv(
+                work,
+                "enqueue",
+                "--branch",
+                f"feat/concurrent-{index}",
+                "--task-id",
+                f"TASK-CONCURRENT-{index}",
+            ),
+            cwd=str(REPO_ROOT),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        for index in (1, 2)
+    ]
+    results = [process.communicate(timeout=5) for process in processes]
+    holder_output = holder.communicate(timeout=5)
+
+    assert holder.returncode == 0, "".join(holder_output)
+    for process, output in zip(processes, results, strict=True):
+        assert process.returncode == 0, "".join(output)
+    assert {
+        entry["branch"] for entry in _queue(work)["entries"]
+    } == {"feat/concurrent-1", "feat/concurrent-2"}
+
+
+def test_competing_mutator_times_out_with_actionable_lock_error(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    ready = tmp_path / "lock-ready"
+    holder = _start_lock_holder(work, ready, 0.6)
+    _wait_for_path(ready)
+
+    result = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/blocked",
+        "--task-id",
+        "TASK-BLOCKED",
+        env={"MERGE_QUEUE_LOCK_TIMEOUT_SECONDS": "0.1"},
+    )
+    holder_output = holder.communicate(timeout=5)
+
+    assert holder.returncode == 0, "".join(holder_output)
+    assert result.returncode == 2
+    assert "lock busy" in result.stdout
+    assert merge_queue_module.LOCK_FILENAME in result.stdout
+    assert "wait for the active" in result.stdout
+    assert not (work / QUEUE_REL).exists()
+
+
+def test_atomic_save_failure_preserves_last_valid_queue(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    work = _make_repos(tmp_path)
+    result = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/existing",
+        "--task-id",
+        "TASK-EXISTING",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    path = work / QUEUE_REL
+    before = path.read_bytes()
+    payload = _queue(work)
+    payload["entries"].append(
+        merge_queue_module.new_entry("feat/new", "TASK-NEW")
+    )
+
+    def fail_replace(_source: object, _destination: object) -> None:
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(merge_queue_module.os, "replace", fail_replace)
+    with pytest.raises(merge_queue_module.MergeQueueError, match="atomic write failed"):
+        merge_queue_module.save_queue(work, payload)
+
+    assert path.read_bytes() == before
+    assert json.loads(path.read_text(encoding="utf-8"))["entries"][0][
+        "branch"
+    ] == "feat/existing"
+    assert list(path.parent.glob(f".{path.name}.*.tmp")) == []
+
+
+def test_dry_run_creates_no_lock_and_mutates_no_queue_state(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    path = work / QUEUE_REL
+    path.parent.mkdir(parents=True)
+    payload = merge_queue_module._empty_queue()
+    payload["entries"].append(
+        merge_queue_module.new_entry("feat/dry", "TASK-DRY")
+    )
+    merge_queue_module.save_queue(work, payload)
+    before = path.read_bytes()
+    lock_path = merge_queue_module.queue_lock_path(work)
+    assert not lock_path.exists()
+
+    result = _run_mq(work, "process", "--all", "--dry-run")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert path.read_bytes() == before
+    assert not lock_path.exists()
+
+
+def test_dependencies_override_fifo_with_stable_topological_order(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/dependent", "dependent.txt")
+    _make_branch(work, "feat/predecessor", "predecessor.txt")
+    dependent = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/dependent",
+        "--task-id",
+        "TASK-DEPENDENT",
+        "--depends-on-task",
+        "TASK-PREDECESSOR",
+        "--verify",
+        PASS_VERIFY,
+    )
+    predecessor = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/predecessor",
+        "--task-id",
+        "TASK-PREDECESSOR",
+        "--verify",
+        PASS_VERIFY,
+    )
+    assert dependent.returncode == predecessor.returncode == 0
+
+    result = _run_mq(work, "process", "--all", "--regen-cmd", REGEN_CMD)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    merge_subjects = _git(work, "log", "--merges", "-2", "--format=%s").splitlines()
+    assert "TASK-DEPENDENT" in merge_subjects[0]
+    assert "TASK-PREDECESSOR" in merge_subjects[1]
+    assert (work / "predecessor.txt").exists()
+    assert (work / "dependent.txt").exists()
+
+
+def test_unknown_dependency_blocks_before_git_or_queue_mutation(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/dependent", "dependent.txt")
+    enqueued = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/dependent",
+        "--task-id",
+        "TASK-DEPENDENT",
+        "--depends-on-task",
+        "TASK-MISSING",
+        "--verify",
+        PASS_VERIFY,
+    )
+    assert enqueued.returncode == 0
+    queue_before = (work / QUEUE_REL).read_bytes()
+    main_before = _git(work, "rev-parse", "main")
+
+    result = _run_mq(work, "process", "--all", "--regen-cmd", REGEN_CMD)
+
+    assert result.returncode == 2
+    assert "unknown dependency TASK-MISSING" in result.stdout
+    assert (work / QUEUE_REL).read_bytes() == queue_before
+    assert _git(work, "rev-parse", "main") == main_before
+    assert _git(work, "rev-parse", "--abbrev-ref", "HEAD") == "main"
+    assert not (work / "dependent.txt").exists()
+
+
+def test_dependency_cycle_blocks_without_mutating_main(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/a", "a.txt")
+    _make_branch(work, "feat/b", "b.txt")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/a",
+        "--task-id",
+        "TASK-A",
+        "--depends-on-task",
+        "TASK-B",
+    )
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/b",
+        "--task-id",
+        "TASK-B",
+        "--depends-on-task",
+        "TASK-A",
+    )
+    queue_before = (work / QUEUE_REL).read_bytes()
+    main_before = _git(work, "rev-parse", "main")
+
+    result = _run_mq(work, "process", "--all")
+
+    assert result.returncode == 2
+    assert "cycle detected" in result.stdout
+    assert (work / QUEUE_REL).read_bytes() == queue_before
+    assert _git(work, "rev-parse", "main") == main_before
+    assert not (work / "a.txt").exists()
+    assert not (work / "b.txt").exists()
+
+
+def test_previously_failed_dependency_is_unmet_before_preflight(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/bad", "bad.txt")
+    _make_branch(work, "feat/dependent", "dependent.txt")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/bad",
+        "--task-id",
+        "TASK-BAD",
+        "--verify",
+        FAIL_VERIFY,
+    )
+    failed = _run_mq(work, "process", "--once", "--regen-cmd", REGEN_CMD)
+    assert failed.returncode == 1
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/dependent",
+        "--task-id",
+        "TASK-DEPENDENT",
+        "--depends-on-task",
+        "TASK-BAD",
+        "--verify",
+        PASS_VERIFY,
+    )
+    queue_before = (work / QUEUE_REL).read_bytes()
+    main_before = _git(work, "rev-parse", "main")
+
+    result = _run_mq(work, "process", "--all", "--regen-cmd", REGEN_CMD)
+
+    assert result.returncode == 2
+    assert "unmet dependency TASK-BAD" in result.stdout
+    assert "status=failed" in result.stdout
+    assert (work / QUEUE_REL).read_bytes() == queue_before
+    assert _git(work, "rev-parse", "main") == main_before
+    assert not (work / "dependent.txt").exists()
+
+
+def test_failed_predecessor_stops_dependent_and_leaves_it_pending(tmp_path: Path):
+    work = _make_repos(tmp_path)
+    _make_branch(work, "feat/dependent", "dependent.txt")
+    _make_branch(work, "feat/bad", "bad.txt")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/dependent",
+        "--task-id",
+        "TASK-DEPENDENT",
+        "--depends-on-task",
+        "TASK-BAD",
+        "--verify",
+        PASS_VERIFY,
+    )
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/bad",
+        "--task-id",
+        "TASK-BAD",
+        "--verify",
+        FAIL_VERIFY,
+    )
+
+    result = _run_mq(work, "process", "--all", "--regen-cmd", REGEN_CMD)
+
+    assert result.returncode == 1
+    assert "dependency changed before merge" in result.stdout
+    by_task = {entry["task_id"]: entry for entry in _queue(work)["entries"]}
+    assert by_task["TASK-BAD"]["status"] == "failed"
+    assert by_task["TASK-DEPENDENT"]["status"] == "pending"
+    assert not (work / "bad.txt").exists()
+    assert not (work / "dependent.txt").exists()
