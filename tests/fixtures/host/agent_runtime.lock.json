@@ -166,7 +166,7 @@
       "scripts/local_schedule_daemon.py": "sha256:548b5ce03b04f44ac1fd833b6347a7850665895f299f8aceeacfa4b7cf5d4f8d",
       "scripts/lock_merge_driver.py": "sha256:900fd9d1742c97aa73928e8e3c4c9508668ec749d2ae635f64bb436190aa4d34",
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
-      "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
+      "scripts/merge_queue.py": "sha256:6a5521a5a6a34be84f82875301c2a4764e3fefc2b2d8ab814780912cdd91e5c2",
       "scripts/message_queue.py": "sha256:3c6eb116d0c6db0229daad7eda983afd2d048bc43ed15f7348ba325b9ccb4c7a",
       "scripts/model_routing.py": "sha256:fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666",
       "scripts/now.py": "sha256:6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f",
@@ -245,7 +245,7 @@
       "scripts/work_schema_gate.py": "sha256:5c471d81c92f198b0ec3b5b9b495e574b0ffebb7b842095f84fd15ed5f8c3b41",
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
       "skills/independent-verification/SKILL.md": "sha256:13bc34701cd087a3cf04d852d00d9a3ca7ed057c2e8cd1d40df46769b07327b0",
-      "skills/merge-integrator/SKILL.md": "sha256:37d4425836b34090a1b654147dcc1d829e1ac827b0815e6644c98d77cc81698c",
+      "skills/merge-integrator/SKILL.md": "sha256:9580d9d12e4c35909dcb7598c77916e7d42f350e27aafe7d74b20244662df29a",
       "skills/release-conductor/SKILL.md": "sha256:f2ff7fd61deb717043c761c7aba49dad4492b116fa8cb64111050c5a8ac04575",
       "skills/scm-steward/SKILL.md": "sha256:eac36caaabb483fa72d04106311dd956d36c4f654116fd7cb800db33e9586c1c",
       "skills/session-closeout/SKILL.md": "sha256:547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570",
@@ -506,7 +506,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:637b23806a7221b398064f6f3315e6c980ec7524181d164bfd5dcede08e4a9ea",
+    "template_digest": "sha256:0ceca4176502507f12865651e321764248283dd0b297a76a6a4a454f4fd650d8",
     "template_files": 248
   },
   "profiles": [
