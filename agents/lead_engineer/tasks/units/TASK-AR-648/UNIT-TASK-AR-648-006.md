@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T23:02:11+09:00
-updated_at: 2026-07-29T23:07:08+09:00
+updated_at: 2026-07-29T23:08:58+09:00
+started_at: 2026-07-29T23:08:58+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md
 created_by: codex-root-v080-planner
 summary: Replay Bean Wiki adoption from the pinned original baseline and produce independently verified green evidence
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.json
 escalation_triggers:
   - data_integrity
   - repeated_failure

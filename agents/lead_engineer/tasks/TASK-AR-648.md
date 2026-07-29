@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T23:02:11+09:00
+updated_at: 2026-07-29T23:08:58+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -39,6 +39,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
   - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
   - agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.json
+  - agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -87,9 +88,10 @@ claim_refs:
   `154`, routing `49`, and full `2644 passed, 3 skipped`; fresh independent
   W4b R4 then approved the same product at `97/100` with focused `203`, the
   same full-suite result, and no P0/P1. UNIT-005 is completed and its claim is
-  released. UNIT-006 is registered worker-ready for a fresh Bean replay from
-  the original pinned baseline; Allimbot remains stopped until that replay
-  passes independent W4b.
+  released. UNIT-006 is claimed for a fresh Bean replay from the original
+  pinned baseline. Its default claim persisted in `working_tree` mode without
+  moving Runtime `HEAD`; Allimbot remains stopped until the replay passes
+  independent W4b.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 
