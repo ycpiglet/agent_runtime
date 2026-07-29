@@ -9,11 +9,12 @@ task_id: TASK-AR-647
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: in_progress
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:38:42+09:00
+updated_at: 2026-07-29T14:05:50+09:00
+started_at: 2026-07-29T08:54:44+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -25,6 +26,8 @@ escalation_triggers:
   - data_integrity
   - external_effect
   - cross_cutting
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
 risk_tier: high
 approval_required: false
 security_sensitive: true
@@ -72,6 +75,7 @@ target_files:
   - tests/test_owner_governance_chain_parity.py
   - tests/test_update_notify.py
   - tests/test_notify_routing.py
+  - tests/test_orchestrator_atomic_writes.py
   - tests/fixtures/host/agent_runtime.lock.json
 scope: Use the installed Allimbot ProjectEmitter as the sole durable enqueue implementation; enforce the exact Agent Runtime recipe and bounded value policy before optional delivery; migrate internal callers; remove direct delivery; and make security-service add a claim-time risk gate. Keep Allimbot optional, do not duplicate its spool, do not add a network sender, and do not mutate consumer repositories.
 acceptance:
@@ -91,6 +95,17 @@ verification:
   - python -m pytest -q
 handoff: Provide exact event/field/value compatibility, fail-closed versus fail-open results, clean profile dependency closure, security risk-to-required-metadata coverage, and an isolated real-Allimbot spool record with no delivery.
 stop_condition: Stop before reading or changing production credentials, flushing the spool, sending a live event, adding a direct network fallback, mutating Bean Wiki/Allimbot/Autofolio, weakening an Owner boundary, or performing version/tag/publish/release work.
+verified_at: 2026-07-29T14:05:50+09:00
+verified_by: le-20260729-kst-647001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729102332.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729111858.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729120428.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729124908.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729132409.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326.json
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550.json
 ---
 
 # UNIT-TASK-AR-647-001 - Add native events and security-service guardrails
@@ -154,6 +169,7 @@ must reuse that boundary rather than recreate it.
 - tests/test_owner_governance_chain_parity.py
 - tests/test_update_notify.py
 - tests/test_notify_routing.py
+- tests/test_orchestrator_atomic_writes.py
 - tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope

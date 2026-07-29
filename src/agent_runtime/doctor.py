@@ -13,7 +13,9 @@ from typing import Callable
 
 from . import config as _config
 from . import adoption as _adoption
+from . import allimbot as _allimbot_policy
 from . import lock as _lock
+from . import security_service as _security_service
 from . import state_projection as _state_projection
 from . import sync as _sync
 
@@ -34,6 +36,7 @@ class DoctorPlan:
     config_loaded: bool = False
     scribe: dict[str, object] | None = None
     routing: dict[str, object] | None = None
+    security_service: dict[str, object] | None = None
 
     @property
     def blocker_count(self) -> int:
@@ -113,6 +116,18 @@ CODEX_HOOK_REQUIREMENTS = (
     ("Stop", "stop-owner", "scripts/stop_hook_owner_governance.py"),
     ("Stop", "stop-closure", "scripts/stop_hook_closure_gate.py"),
 )
+ALLIMBOT_ENV_NAMES = (
+    "ALLIMBOT_ENDPOINT",
+    "ALLIMBOT_PROJECT_TOKEN",
+    "ALLIMBOT_SPOOL_PATH",
+)
+LEGACY_ALLIMBOT_ENV_NAMES = (
+    "ALLIMBOT_URL",
+    "ALLIMBOT_TOKEN",
+    "ALLIMBOT_NTFY_TOPIC",
+    "ALLIMBOT_PROVIDER",
+    "ALLIMBOT_CI_NOTIFY_ENABLED",
+)
 
 
 def _safe_unlink(path: Path) -> bool:
@@ -142,6 +157,137 @@ def _rel(root: Path, path: Path) -> str:
 
 def _findings_append(findings: list[DoctorFinding], severity: str, *, area: str, path: str, kind: str, detail: str) -> None:
     findings.append(DoctorFinding(severity=severity, area=area, path=path, kind=kind, detail=detail))
+
+
+def _json_matches(path: Path, expected: dict[str, object]) -> bool:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    return payload == expected
+
+
+def _security_service_report(
+    root: Path,
+    cfg: _config.AgentRuntimeConfig | None,
+    findings: list[DoctorFinding],
+) -> dict[str, object]:
+    """Inspect profile wiring without constructing an emitter or reading secrets."""
+
+    selected = cfg is not None and "security-service" in cfg.profiles
+    recipe = root / ".allimbot.json"
+    policy = root / "agents" / "project" / "SECURITY-SERVICE-POLICY.json"
+    gate = root / "scripts" / "security_service_gate.py"
+    recipe_present = recipe.is_file()
+    policy_present = policy.is_file()
+    gate_present = gate.is_file()
+    recipe_matches = (
+        _json_matches(recipe, _allimbot_policy.MANAGED_RECIPE)
+        if recipe_present
+        else False
+    )
+    policy_matches = (
+        _json_matches(policy, _security_service.MANAGED_POLICY)
+        if policy_present
+        else False
+    )
+
+    if selected:
+        for path, present, matches, kind in (
+            (".allimbot.json", recipe_present, recipe_matches, "recipe"),
+            (
+                "agents/project/SECURITY-SERVICE-POLICY.json",
+                policy_present,
+                policy_matches,
+                "policy",
+            ),
+        ):
+            if not present:
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="security-service",
+                    path=path,
+                    kind=f"missing-{kind}",
+                    detail=f"selected security-service profile is missing its managed {kind}",
+                )
+            elif not matches:
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="security-service",
+                    path=path,
+                    kind=f"{kind}-drift",
+                    detail=f"selected security-service profile {kind} differs from the managed contract",
+                )
+        if not gate_present:
+            _findings_append(
+                findings,
+                "blocker",
+                area="security-service",
+                path="scripts/security_service_gate.py",
+                kind="missing-gate",
+                detail="selected security-service profile is missing its claim gate",
+            )
+
+    legacy_warnings: list[str] = [
+        f"legacy-env:{name}"
+        for name in LEGACY_ALLIMBOT_ENV_NAMES
+        if bool(os.environ.get(name))
+    ]
+    if (root / "scripts" / "allimbot_stop_hook.cmd").exists():
+        legacy_warnings.append("legacy-file:scripts/allimbot_stop_hook.cmd")
+    workflow = root / ".github" / "workflows" / "test.yml"
+    try:
+        workflow_text = workflow.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        workflow_text = ""
+    if "ALLIMBOT_NTFY_TOPIC" in workflow_text or "ntfy.sh" in workflow_text:
+        legacy_warnings.append("legacy-workflow:direct-ntfy")
+    for warning in legacy_warnings:
+        _findings_append(
+            findings,
+            "warning",
+            area="security-service",
+            path=".",
+            kind="legacy-allimbot-wiring",
+            detail=warning,
+        )
+
+    try:
+        dependency_available = importlib.util.find_spec("allimbot") is not None
+    except (ImportError, AttributeError, ValueError):
+        dependency_available = False
+    risk_paths = tuple(cfg.risk_paths) if cfg is not None else ()
+    return {
+        "selected": selected,
+        "recipe": {
+            "present": recipe_present,
+            "matches_managed": recipe_matches,
+        },
+        "policy": {
+            "present": policy_present,
+            "matches_managed": policy_matches,
+        },
+        "gate": {"present": gate_present},
+        "optional_dependency": {
+            "available": dependency_available,
+            "status": "available" if dependency_available else "not_installed",
+        },
+        "configured_environment": {
+            name: bool(os.environ.get(name)) for name in ALLIMBOT_ENV_NAMES
+        },
+        "host_risk_paths": {
+            "count": len(risk_paths),
+            "covered_risk_class": "production_external_effect",
+        },
+        "policy_risk_classes": list(_security_service.RISK_CLASSES)
+        if policy_matches
+        else [],
+        "legacy_warnings": legacy_warnings,
+        "emitter_constructed": False,
+        "network_probe_performed": False,
+    }
 
 
 def _with_sys_path(path: Path, action: Callable[[None], object]) -> object:
@@ -890,6 +1036,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         )
 
     cfg_ok = True
+    cfg: _config.AgentRuntimeConfig | None = None
     scribe_report: dict[str, object] | None = None
     try:
         cfg = _config.load_config(root)
@@ -936,6 +1083,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
                 detail=str(exc),
             )
 
+    security_service_report = _security_service_report(root, cfg, findings)
     routing_report = _routing_matrix_plan(root, findings)
     _run_lock_check(root, findings, cfg_ok)
     _run_sync_check(root, findings)
@@ -1000,6 +1148,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         config_loaded=cfg_ok,
         scribe=scribe_report,
         routing=routing_report,
+        security_service=security_service_report,
     ), findings
 
 
@@ -1038,10 +1187,28 @@ def render(plan: DoctorPlan) -> str:
         f"blockers={plan.blocker_count}",
         f"warnings={plan.warning_count}",
         f"infos={plan.info_count}",
-        "",
+    ]
+    if plan.security_service is not None:
+        selected = bool(plan.security_service.get("selected"))
+        dependency = plan.security_service.get("optional_dependency", {})
+        dependency_status = (
+            dependency.get("status", "unknown")
+            if isinstance(dependency, dict)
+            else "unknown"
+        )
+        lines.extend(
+            [
+                f"security_service_selected={str(selected).lower()}",
+                f"allimbot_dependency={dependency_status}",
+            ]
+        )
+    lines.extend(
+        [
+            "",
         "| Severity | Area | Path | Kind | Detail |",
         "|---|---|---|---|---|",
-    ]
+        ]
+    )
     for finding in plan.findings:
         lines.append(
             f"| {finding.severity} | {finding.area} | {finding.path} | {finding.kind} | {finding.detail} |"
@@ -1133,6 +1300,8 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
         payload["scribe"] = plan.scribe
     if plan.routing is not None:
         payload["routing"] = plan.routing
+    if plan.security_service is not None:
+        payload["security_service"] = plan.security_service
     if actions is not None:
         payload["repair_actions"] = actions
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)

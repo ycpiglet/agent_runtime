@@ -1,0 +1,23 @@
+{
+  "spec": "allimbot.project/v1",
+  "project": "agent-runtime",
+  "source": "agent-runtime",
+  "events": {
+    "attention.required": {
+      "severity": "warning",
+      "data_allowlist": ["task_id", "attention_kind", "owner_role", "state"]
+    },
+    "task.state.changed": {
+      "severity": "info",
+      "data_allowlist": ["task_id", "from_state", "to_state", "owner_role"]
+    },
+    "release.gate.failed": {
+      "severity": "error",
+      "data_allowlist": ["gate", "release", "finding_count"]
+    },
+    "turn.completed": {
+      "severity": "info",
+      "data_allowlist": ["task_id", "result_state", "duration_seconds"]
+    }
+  }
+}

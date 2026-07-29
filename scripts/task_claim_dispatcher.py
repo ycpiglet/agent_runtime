@@ -26,9 +26,12 @@ not an opt-in per taskset.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
+import stat
+import subprocess
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -65,6 +68,25 @@ def _claim_autocommit_enabled() -> bool:
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
+SECURITY_SERVICE_GATE_SHA256 = (
+    "a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce"
+)
+SECURITY_SERVICE_GATE_MAX_BYTES = 64 * 1024
+SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES = 128 * 1024
+SECURITY_SERVICE_PROFILE_MARKERS = (
+    ".allimbot.json",
+    "agents/project/SECURITY-SERVICE-POLICY.json",
+    "docs/security-service.md",
+    "scripts/allimbot.py",
+)
+SECURITY_SERVICE_GATE_BOOTSTRAP = (
+    "import sys\n"
+    "_gate_path = sys.argv[1]\n"
+    "sys.argv = sys.argv[1:]\n"
+    "_source = sys.stdin.buffer.read()\n"
+    "exec(compile(_source, _gate_path, 'exec'), "
+    "{'__name__': '__main__', '__file__': _gate_path})\n"
+)
 ACTIVE_STATUSES = {
     "assigned",
     "claimed",
@@ -370,10 +392,9 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
 
 
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
-    declared = _normalize_target_files(tuple(args.target_file or ()))
-    if declared:
-        return declared
-    return _unit_spec_target_files(root, args.unit_spec)
+    explicit = _normalize_target_files(tuple(args.target_file or ()))
+    registered = _unit_spec_target_files(root, args.unit_spec)
+    return list(dict.fromkeys((*explicit, *registered)))
 
 
 def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
@@ -690,6 +711,373 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
     return True
 
 
+def _security_service_refusal(
+    root: Path,
+    task_id: str,
+    unit_id: str,
+    unit_spec: str,
+    target_files: list[str],
+) -> bool:
+    """Run the profile gate only when the security-service asset is installed."""
+
+    scripts = root / "scripts"
+    gate = scripts / "security_service_gate.py"
+    try:
+        scripts_before = scripts.lstat()
+    except FileNotFoundError:
+        return _missing_security_service_gate_refusal(root)
+    except OSError:
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; "
+            "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if stat.S_ISLNK(scripts_before.st_mode) or not stat.S_ISDIR(
+        scripts_before.st_mode
+    ):
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    try:
+        gate_before = gate.lstat()
+    except FileNotFoundError:
+        try:
+            scripts_after = scripts.lstat()
+        except OSError:
+            scripts_after = None
+        if (
+            scripts_after is not None
+            and (scripts_before.st_dev, scripts_before.st_ino, scripts_before.st_mode)
+            == (scripts_after.st_dev, scripts_after.st_ino, scripts_after.st_mode)
+        ):
+            return _missing_security_service_gate_refusal(root)
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    except OSError:
+        gate_before = None
+
+    gate_source: str | None = None
+    if (
+        gate_before is not None
+        and not stat.S_ISLNK(gate_before.st_mode)
+        and stat.S_ISREG(gate_before.st_mode)
+        and gate_before.st_size <= SECURITY_SERVICE_GATE_MAX_BYTES
+    ):
+        try:
+            with gate.open("rb") as handle:
+                opened_before = os.fstat(handle.fileno())
+                payload = handle.read(SECURITY_SERVICE_GATE_MAX_BYTES + 1)
+                opened_after = os.fstat(handle.fileno())
+            gate_after = gate.lstat()
+            scripts_after = scripts.lstat()
+            gate_signature = (
+                gate_before.st_dev,
+                gate_before.st_ino,
+                gate_before.st_mode,
+                gate_before.st_size,
+                gate_before.st_mtime_ns,
+            )
+            if (
+                len(payload) <= SECURITY_SERVICE_GATE_MAX_BYTES
+                and gate_signature
+                == (
+                    opened_before.st_dev,
+                    opened_before.st_ino,
+                    opened_before.st_mode,
+                    opened_before.st_size,
+                    opened_before.st_mtime_ns,
+                )
+                == (
+                    opened_after.st_dev,
+                    opened_after.st_ino,
+                    opened_after.st_mode,
+                    opened_after.st_size,
+                    opened_after.st_mtime_ns,
+                )
+                == (
+                    gate_after.st_dev,
+                    gate_after.st_ino,
+                    gate_after.st_mode,
+                    gate_after.st_size,
+                    gate_after.st_mtime_ns,
+                )
+                and (
+                    scripts_before.st_dev,
+                    scripts_before.st_ino,
+                    scripts_before.st_mode,
+                )
+                == (
+                    scripts_after.st_dev,
+                    scripts_after.st_ino,
+                    scripts_after.st_mode,
+                )
+                and hashlib.sha256(payload).hexdigest()
+                == SECURITY_SERVICE_GATE_SHA256
+            ):
+                gate_source = payload.decode("utf-8")
+        except (OSError, UnicodeError):
+            gate_source = None
+    if gate_source is None:
+        print(
+            "security-service claim gate is unavailable, drifted, or not a "
+            "regular managed file; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if (
+        not str(task_id or "").strip()
+        or not str(unit_id or "").strip()
+        or not str(unit_spec or "").strip()
+    ):
+        print(
+            "security-service profile requires registered task and unit identities "
+            "plus a canonical unit specification; "
+            "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    command = [
+        sys.executable,
+        "-c",
+        SECURITY_SERVICE_GATE_BOOTSTRAP,
+        str(gate),
+        "--root",
+        str(root),
+        "--task-id",
+        str(task_id),
+        "--unit-id",
+        str(unit_id),
+        "--unit-spec",
+        str(unit_spec),
+    ]
+    for path in target_files:
+        command.extend(["--target-file", path])
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            input=gate_source,
+            timeout=20,
+        )
+    except (OSError, subprocess.SubprocessError):
+        print(
+            "security-service claim gate unavailable; claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if result.returncode == 0:
+        return False
+    detail = (result.stderr or result.stdout).strip()
+    print("security-service claim gate refused claim creation", file=sys.stderr)
+    if detail:
+        print(detail, file=sys.stderr)
+    return True
+
+
+def _stable_profile_state_text(path: Path) -> str:
+    try:
+        before = path.lstat()
+        if (
+            stat.S_ISLNK(before.st_mode)
+            or not stat.S_ISREG(before.st_mode)
+            or before.st_size > SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES
+            or before.st_mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH) == 0
+        ):
+            raise ValueError("profile state is unavailable or malformed")
+        with path.open("rb") as handle:
+            opened_before = os.fstat(handle.fileno())
+            payload = handle.read(SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES + 1)
+            opened_after = os.fstat(handle.fileno())
+        after = path.lstat()
+    except OSError as exc:
+        raise ValueError("profile state is unavailable or malformed") from exc
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, opened_before, opened_after, after)
+    }
+    if len(payload) > SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES or len(signatures) != 1:
+        raise ValueError("profile state changed while it was read")
+    try:
+        return payload.decode("utf-8")
+    except UnicodeError as exc:
+        raise ValueError("profile state is unavailable or malformed") from exc
+
+
+def _profile_scalar(value: str) -> str:
+    value = value.strip()
+    if not value:
+        return ""
+    if value[0] in {"'", '"'}:
+        quote = value[0]
+        end = value.find(quote, 1)
+        if end < 0:
+            raise ValueError("profile scalar has an unterminated quote")
+        trailing = value[end + 1 :].strip()
+        if trailing and not trailing.startswith("#"):
+            raise ValueError("profile scalar has unsupported trailing content")
+        return value[1:end]
+    match = re.fullmatch(r"([^#]*?)(?:\s+#.*)?", value)
+    if match is None:
+        raise ValueError("profile scalar is malformed")
+    return match.group(1).strip()
+
+
+def _config_selects_security_service(root: Path) -> bool:
+    primary = root / "agent_runtime.yml"
+    legacy = root / "ralph.yml"
+    try:
+        primary.lstat()
+        config = primary
+    except FileNotFoundError:
+        try:
+            legacy.lstat()
+            config = legacy
+        except FileNotFoundError:
+            return False
+        except OSError as exc:
+            raise ValueError("profile configuration is unavailable") from exc
+    except OSError as exc:
+        raise ValueError("profile configuration is unavailable") from exc
+
+    text = _stable_profile_state_text(config)
+    schema: str | None = None
+    schema_seen = False
+    profiles_seen = False
+    in_profiles = False
+    profiles: list[str] = []
+    for raw_line in text.splitlines():
+        if "\t" in raw_line[: len(raw_line) - len(raw_line.lstrip())]:
+            raise ValueError("profile configuration uses tab indentation")
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indentation = len(raw_line) - len(raw_line.lstrip(" "))
+        if indentation == 0:
+            if ":" not in stripped:
+                raise ValueError("profile configuration has malformed top level")
+            key, raw_value = stripped.split(":", 1)
+            key = key.strip()
+            if key == "schema":
+                if schema_seen:
+                    raise ValueError("profile configuration repeats schema")
+                schema = _profile_scalar(raw_value)
+                schema_seen = True
+                in_profiles = False
+            elif key == "profiles":
+                if profiles_seen or _profile_scalar(raw_value):
+                    raise ValueError("profile configuration has malformed profiles")
+                profiles_seen = True
+                in_profiles = True
+            else:
+                in_profiles = False
+            continue
+        if in_profiles:
+            if indentation != 2 or not stripped.startswith("- "):
+                raise ValueError("profile configuration has malformed profiles")
+            profile = _profile_scalar(stripped[2:])
+            if profile not in {
+                "core",
+                "web-content",
+                "security-service",
+                "full-runtime",
+            }:
+                raise ValueError("profile configuration has an unknown profile")
+            profiles.append(profile)
+
+    if schema_seen and schema != "agent-runtime-config/v2":
+        raise ValueError("profile configuration has an unsupported schema")
+    if not schema_seen:
+        return True
+    unique_profiles = tuple(dict.fromkeys(profiles))
+    if "full-runtime" in unique_profiles:
+        if len(unique_profiles) != 1:
+            raise ValueError("full-runtime cannot be combined with another profile")
+        return True
+    return "security-service" in unique_profiles
+
+
+def _lock_selects_security_service(root: Path) -> bool:
+    lock = root / "agent_runtime.lock.json"
+    try:
+        lock.lstat()
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        raise ValueError("profile lock is unavailable") from exc
+    try:
+        payload = json.loads(_stable_profile_state_text(lock))
+    except json.JSONDecodeError as exc:
+        raise ValueError("profile lock is malformed") from exc
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema") != "agent-runtime-lock/v2"
+        or not isinstance(payload.get("profiles"), list)
+        or not all(isinstance(item, str) for item in payload["profiles"])
+    ):
+        raise ValueError("profile lock is malformed")
+    profiles = payload["profiles"]
+    if any(
+        profile not in {"core", "web-content", "security-service"}
+        for profile in profiles
+    ):
+        raise ValueError("profile lock contains an unknown profile")
+    return "security-service" in profiles
+
+
+def _security_service_expected(root: Path) -> bool:
+    for relative in SECURITY_SERVICE_PROFILE_MARKERS:
+        marker = root / relative
+        try:
+            marker.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ValueError("security-service marker is unavailable") from exc
+        return True
+    return _lock_selects_security_service(root) or _config_selects_security_service(
+        root
+    )
+
+
+def _missing_security_service_gate_refusal(root: Path) -> bool:
+    try:
+        expected = _security_service_expected(root)
+    except ValueError:
+        print(
+            "security-service profile state is unavailable or malformed; "
+            "claim creation refused",
+            file=sys.stderr,
+        )
+        return True
+    if not expected:
+        return False
+    print(
+        "security-service claim gate is missing from a selected or partially "
+        "installed profile; claim creation refused",
+        file=sys.stderr,
+    )
+    return True
+
+
 def cmd_create(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     errors = _validate_create_args(args)
@@ -714,6 +1102,15 @@ def cmd_create(args: argparse.Namespace) -> int:
     ):
         return 1
 
+    explicit_targets = _normalize_target_files(tuple(args.target_file or ()))
+    if _security_service_refusal(
+        root,
+        args.task_id,
+        args.unit_id,
+        args.unit_spec,
+        explicit_targets,
+    ):
+        return 1
     try:
         defect_signatures, knowledge_matches = _knowledge_lookup(root, args)
     except compound_record.CompoundRecordError as exc:
@@ -722,10 +1119,11 @@ def cmd_create(args: argparse.Namespace) -> int:
             print(f"- {finding}", file=sys.stderr)
         return 1
     escalation_triggers = _resolve_escalation_triggers(root, args)
+    target_files = _resolve_target_files(root, args)
     claim = _build_claim(
         args,
         records,
-        target_files=_resolve_target_files(root, args),
+        target_files=target_files,
         escalation_triggers=escalation_triggers,
         routing_decision=_resolve_claim_routing(root, args, escalation_triggers),
         defect_signatures=defect_signatures,

@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:38:42+09:00
+updated_at: 2026-07-29T14:08:29+09:00
+started_at: 2026-07-29T08:54:44+09:00
 title: Adopt native Allimbot events and security-service guardrails
-status: planned
+status: in_progress
 priority: P0
 difficulty: L
 est_hours: 10
@@ -33,10 +34,28 @@ reviewer_model_tier: reviewer_standard
 risk_tier: high
 approval_required: false
 security_sensitive: true
+verification:
+  - python -m pytest tests/test_allimbot.py tests/test_security_service.py tests/test_task_claim_dispatcher.py tests/test_doctor.py tests/test_session_continuity_hooks.py tests/test_inventory_sync_sanitize.py tests/test_runtime_asset_usage.py tests/test_owner_governance_consumer_host.py tests/test_owner_governance_chain_parity.py tests/test_update_notify.py tests/test_notify_routing.py -q
+  - python scripts/runtime_asset_usage.py --check
+  - python -m pytest -q
 tags:
   - work-cli-created
 review_refs:
   - reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
+verification_status: passed
+verified_at: 2026-07-29T14:08:29+09:00
+verified_by: le-20260729-kst-647001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729094525.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729102601.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729112131.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729120704.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729125149.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729132647.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729133558.json
+  - reviews/VERIFY-2026-07-29-task-ar-647-20260729140829.json
 ---
 
 # TASK-AR-647 - Adopt native Allimbot events and security-service guardrails

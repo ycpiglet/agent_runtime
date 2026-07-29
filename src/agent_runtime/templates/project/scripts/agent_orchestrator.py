@@ -34,7 +34,6 @@ from pathlib import Path
 # TASK-086 safety gate — import local module
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import orchestrator_safety_gate as safety_gate  # noqa: E402
-import allimbot  # noqa: E402
 import cycle_gate  # noqa: E402
 import subagent_dispatch  # noqa: E402
 
@@ -51,6 +50,19 @@ MESSAGES_ARCHIVE = REPO_ROOT / "agents" / "messages" / "archive"
 SESSIONS_DIR = REPO_ROOT / "agents" / "runtime" / "sessions"
 TASKS_DIR = REPO_ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_WORKER_PROVIDER = "codex-agent"
+
+
+def emit_allimbot_event(event_type: str, data: dict[str, object]) -> None:
+    """Lazy profile helper; clean core does not ship or import allimbot.py."""
+
+    if not (REPO_ROOT / "scripts" / "allimbot.py").is_file():
+        return
+    try:
+        import allimbot
+
+        allimbot.emit_event(event_type, data, root=REPO_ROOT)
+    except Exception:
+        pass
 
 # TASK-118 — /dispatch-next priority order (Critical first, Low last).
 PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
@@ -604,20 +616,32 @@ def cmd_kill(args: argparse.Namespace) -> Outcome:
     summary = f"kill agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
         write_session_json(p, record)
-        try:
-            task_id = str(record.get("task_id") or "none")
-            if task_id != "none" and outcome == "completed" and task_completion_is_authoritative(task_id):
-                allimbot.notify(
-                    f"{task_id} completed and verified",
-                    title="agent_runtime task completed",
-                )
-            elif task_id != "none" and outcome == "failed":
-                allimbot.notify(
-                    f"{task_id} worker session reported failed",
-                    title="agent_runtime worker failure",
-                )
-        except Exception:
-            pass
+        task_id = str(record.get("task_id") or "none")
+        owner_role = str(record.get("role") or "runtime")
+        if (
+            task_id != "none"
+            and outcome == "completed"
+            and task_completion_is_authoritative(task_id)
+        ):
+            emit_allimbot_event(
+                "task.state.changed",
+                {
+                    "task_id": task_id,
+                    "from_state": "review",
+                    "to_state": "completed",
+                    "owner_role": owner_role,
+                },
+            )
+        elif task_id != "none" and outcome == "failed":
+            emit_allimbot_event(
+                "task.state.changed",
+                {
+                    "task_id": task_id,
+                    "from_state": "working",
+                    "to_state": "failed",
+                    "owner_role": owner_role,
+                },
+            )
     return Outcome(0, summary, payload)
 
 

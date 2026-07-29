@@ -353,3 +353,17 @@ def test_console_notification_routing_css_uses_tokens_not_raw_color(tmp_path):
     for line in routing_lines:
         assert not hex_pattern.search(line), f"raw hex in routing CSS: {line.strip()}"
         assert not rgba_pattern.search(line), f"raw rgba in routing CSS: {line.strip()}"
+
+
+def test_notify_routing_remains_separate_from_native_allimbot_transport() -> None:
+    root = Path(__file__).resolve().parents[1]
+    routing_source = (
+        root / "src" / "agent_runtime" / "notify_routing.py"
+    ).read_text(encoding="utf-8")
+    allimbot_source = (
+        root / "src" / "agent_runtime" / "allimbot.py"
+    ).read_text(encoding="utf-8")
+
+    assert "notify_routing" not in allimbot_source
+    assert "ProjectEmitter" not in routing_source
+    assert "ALLIMBOT_PROJECT_TOKEN" not in routing_source

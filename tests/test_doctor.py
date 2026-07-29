@@ -200,6 +200,73 @@ def test_doctor_json_routing_section_does_not_expose_provider_secret(
     )
 
 
+def test_doctor_reports_security_profile_without_reading_secret_values(
+    monkeypatch,
+    tmp_path,
+):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    monkeypatch.setenv("ALLIMBOT_ENDPOINT", "https://events.example.invalid")
+    monkeypatch.setenv("ALLIMBOT_PROJECT_TOKEN", "must-not-appear")
+    monkeypatch.setenv("ALLIMBOT_SPOOL_PATH", "/tmp/private-spool-name")
+
+    def unexpected_emit(*_args, **_kwargs):
+        raise AssertionError("doctor must not construct or use an emitter")
+
+    monkeypatch.setattr(doctor._allimbot_policy, "emit_event", unexpected_emit)
+    payload_text = doctor.render_json(doctor.build_doctor_plan(root)[0])
+    payload = json.loads(payload_text)
+    security = payload["security_service"]
+
+    assert "must-not-appear" not in payload_text
+    assert "events.example.invalid" not in payload_text
+    assert "private-spool-name" not in payload_text
+    assert security["selected"] is True
+    assert security["recipe"] == {
+        "present": True,
+        "matches_managed": True,
+    }
+    assert security["policy"] == {
+        "present": True,
+        "matches_managed": True,
+    }
+    assert security["gate"]["present"] is True
+    assert security["configured_environment"] == {
+        "ALLIMBOT_ENDPOINT": True,
+        "ALLIMBOT_PROJECT_TOKEN": True,
+        "ALLIMBOT_SPOOL_PATH": True,
+    }
+    assert security["emitter_constructed"] is False
+    assert security["network_probe_performed"] is False
+
+
+def test_doctor_blocks_selected_security_profile_drift(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    (root / ".allimbot.json").write_text("{}\n", encoding="utf-8")
+    (root / "scripts" / "security_service_gate.py").unlink()
+
+    plan, _ = doctor.build_doctor_plan(root)
+    kinds = {
+        finding.kind
+        for finding in plan.findings
+        if finding.area == "security-service"
+    }
+    assert {"recipe-drift", "missing-gate"} <= kinds
+    assert plan.blocker_count >= 2
+
+
+def test_doctor_reports_legacy_allimbot_names_only(monkeypatch, tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    monkeypatch.setenv("ALLIMBOT_TOKEN", "legacy-secret-value")
+
+    payload_text = doctor.render_json(doctor.build_doctor_plan(root)[0])
+    payload = json.loads(payload_text)
+
+    assert "legacy-secret-value" not in payload_text
+    assert "legacy-env:ALLIMBOT_TOKEN" in payload["security_service"][
+        "legacy_warnings"
+    ]
+
+
 def test_doctor_reports_scribe_missing_overdue_and_fresh_without_writing(tmp_path):
     root = _prepare_host_root(tmp_path)
     (root / "agent_runtime.yml").write_text(

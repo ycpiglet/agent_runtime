@@ -9,8 +9,10 @@ prompt and stop gates preserve the child process decision and streams.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Sequence
 
@@ -40,6 +42,7 @@ CHILD_TIMEOUT_SECONDS: dict[str, int] = {
     "stop-dirty": 58,
     "posttool-owner-doc": 18,
 }
+_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 
 
 def root_for(cwd: str) -> Path:
@@ -103,6 +106,41 @@ def _advisory_failure(mode: str, detail: str) -> int:
     return 0
 
 
+def _emit_turn_completed(
+    mode: str,
+    root: Path,
+    event: dict[str, object],
+    *,
+    returncode: int,
+    duration_seconds: float,
+) -> None:
+    """Emit once from the selected stop mode and never affect hook semantics."""
+
+    if mode != "stop-closure" or not (root / ".allimbot.json").is_file():
+        return
+    raw_task_id = event.get("task_id")
+    task_id = (
+        raw_task_id
+        if isinstance(raw_task_id, str)
+        and _SAFE_IDENTIFIER.fullmatch(raw_task_id) is not None
+        else "unscoped"
+    )
+    try:
+        from .allimbot import emit_event
+
+        emit_event(
+            "turn.completed",
+            {
+                "task_id": task_id,
+                "result_state": "completed" if returncode == 0 else "blocked",
+                "duration_seconds": max(0.0, duration_seconds),
+            },
+            root=root,
+        )
+    except Exception:
+        pass
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) != 1 or args[0] not in SCRIPTS:
@@ -118,6 +156,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         event = {}
 
     root = root_for(str(event.get("cwd") or ""))
+    started = time.monotonic()
     try:
         result = subprocess.run(
             _child_command(mode, root),
@@ -134,6 +173,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _advisory_failure(mode, exc.__class__.__name__)
         print(f"agent-runtime {mode} failed: {exc}", file=sys.stderr)
         return 1
+
+    _emit_turn_completed(
+        mode,
+        root,
+        event,
+        returncode=result.returncode,
+        duration_seconds=time.monotonic() - started,
+    )
 
     if mode in ADVISORY_MODES:
         if result.returncode != 0:

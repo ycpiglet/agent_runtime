@@ -38,7 +38,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["ambiguity", "high_risk", "security", "cross_cutting", "external_effect", "repeated_failure"]
+        "enum": ["ambiguity", "high_risk", "security", "data_integrity", "cross_cutting", "external_effect", "repeated_failure"]
       }
     },
     "context": { "type": "string", "minLength": 1 },

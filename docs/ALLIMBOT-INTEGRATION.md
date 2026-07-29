@@ -1,76 +1,108 @@
-# Optional allimbot notifications
+# Native Allimbot project events
 
-Agent Runtime ships an optional, standard-library-only allimbot client for
-long-running work that benefits from a phone or dashboard alert. Notification
-delivery is never part of the success criteria for the host operation.
+Agent Runtime's `security-service` profile can enqueue a small, structured
+event vocabulary into an installed Allimbot spool. Event delivery is advisory
+and never changes the result of a host operation.
 
-## Delivery contract
+## Ownership boundary
 
-The client tries these routes in order:
+- Agent Runtime validates the managed recipe, event type, exact fields, and
+  bounded values. It renders the summary and always supplies an empty body.
+- Installed Allimbot owns the SQLite spool, leases, retry/dead-letter policy,
+  credentials, and network delivery.
+- Runtime calls `ProjectEmitter.emit()` only. It never calls `flush()`, sends
+  to `/trigger` or `/v1/events`, or falls back to ntfy.
 
-1. The local allimbot dashboard at `ALLIMBOT_URL/trigger` when
-   `ALLIMBOT_TOKEN` is set. The URL must resolve syntactically to loopback
-   (`127.0.0.1`, `::1`, or `localhost`); other hosts are ignored so the token
-   cannot be sent to a remote endpoint.
-2. The fixed `https://ntfy.sh` endpoint when `ALLIMBOT_NTFY_TOPIC` is set.
+The producer returns `spooled` with an event ID only after Allimbot confirms
+the local enqueue. A missing dependency, configuration failure, or unwritable
+spool returns a bounded `unavailable` reason and does not fail the host
+operation. An unknown event, unexpected field, unsafe value, or managed-recipe
+drift raises `EventPolicyError` before emitter construction.
 
-Missing configuration returns `False` without output or a network request.
-Network and serialization errors are swallowed, and each network attempt is
-capped at three seconds. A dashboard failure may therefore add at most one
-three-second attempt before the ntfy fallback. Notifications must not contain
-credentials, account data, private prompts, or other sensitive context.
+## Event contract
 
-## Configuration
+| Event | Exact data fields |
+| --- | --- |
+| `attention.required` | `task_id`, `attention_kind`, `owner_role`, `state` |
+| `task.state.changed` | `task_id`, `from_state`, `to_state`, `owner_role` |
+| `release.gate.failed` | `gate`, `release`, `finding_count` |
+| `turn.completed` | `task_id`, `result_state`, `duration_seconds` |
 
-Export the values into the process environment using the host's existing
-environment loader or service configuration. The zero-dependency client does
-not read `.env` files itself; `.env.example` is a blank reference only. Never
-commit real values.
+Callers cannot supply a summary or body. Prompts, arbitrary messages,
+exception text, tracebacks, credentials, environment values, endpoints,
+provider names, and destinations are outside the API.
+
+State, result-state, attention-kind, and gate fields use Runtime-owned
+allowlists. Non-system task IDs must name a regular canonical task file under
+`agents/lead_engineer/tasks/`, and non-system owner roles must be canonical
+IDs in `agents/project/ORG-MODEL.yml`. Release values are strict semantic
+release tags. Session and turn correlations are canonical UUIDs, dedupe keys
+are lowercase SHA-256 digests, and Allimbot must return a canonical UUID event
+ID. Arbitrary display-safe strings therefore cannot cross the producer
+boundary, even when they do not resemble a known credential or endpoint.
+
+## Profile and configuration
+
+Select `security-service` in `agent_runtime.yml`. Its managed projection adds:
+
+- `.allimbot.json`;
+- `scripts/allimbot.py`;
+- `agents/project/SECURITY-SERVICE-POLICY.json`;
+- `scripts/security_service_gate.py`; and
+- `docs/security-service.md`.
+
+The core profile excludes those assets and imports no optional Allimbot
+module. Install Allimbot separately in the host's isolated environment, then
+export configuration through the host's existing secret manager:
 
 ```dotenv
-ALLIMBOT_URL=http://127.0.0.1:8787
-ALLIMBOT_TOKEN=
-ALLIMBOT_NTFY_TOPIC=
-ALLIMBOT_PROVIDER=
+ALLIMBOT_ENDPOINT=
+ALLIMBOT_PROJECT_TOKEN=
+ALLIMBOT_SPOOL_PATH=
 ```
 
-- `ALLIMBOT_TOKEN` enables the local dashboard path and its guardrails/history.
-- `ALLIMBOT_NTFY_TOPIC` enables the direct fallback.
-- `ALLIMBOT_PROVIDER` optionally selects a dashboard provider.
-- `ALLIMBOT_URL` defaults to loopback, accepts loopback hosts only, and is only
-  read when a token is set.
+Do not commit values. `ALLIMBOT_SPOOL_PATH` must be an absolute path under the
+installed Allimbot contract. A separate, intentionally operated Allimbot
+worker performs delivery; Runtime does not start it.
 
-## Wired lifecycle events
-
-| Event | Surface | Message policy |
-| --- | --- | --- |
-| Verified task completion | template `agent_orchestrator.py` | explicit `/kill --outcome completed`, but only when the task record is closed and verification passed; task ID only |
-| Worker-session failure | template `agent_orchestrator.py` | explicit `/kill --outcome failed`; labeled as a worker report, never authoritative task completion |
-| Owner governance block | root and template governance gates | exit code only |
-| Session stop request | template Codex Stop hook | static message |
-| Upstream update notice | package `update_notify.py` | the public version notice |
-| CI failure | GitHub Actions test workflow | workflow, ref, and run URL |
-
-The CI path is disabled by default. A single follow-up job observes the
-aggregate test matrix result and runs only when it failed and repository
-variable `ALLIMBOT_CI_NOTIFY_ENABLED` equals `true`; the ntfy topic must be
-stored as an `ALLIMBOT_NTFY_TOPIC` Actions secret.
-
-## Direct use
+## Usage
 
 ```python
-from agent_runtime.allimbot import notify, notify_on_complete
+from agent_runtime.allimbot import emit_event
 
-notify("TASK-123 completed", title="agent_runtime")
-
-@notify_on_complete(title="nightly maintenance")
-def maintain() -> None:
-    ...
+result = emit_event(
+    "task.state.changed",
+    {
+        "task_id": "TASK-123",
+        "from_state": "review",
+        "to_state": "completed",
+        "owner_role": "lead-engineer",
+    },
+    root=repository_root,
+)
 ```
 
-Generated hosts can use `scripts/allimbot.py` with the same API. Its CLI is
-silent and exits zero by default even when delivery is disabled or fails;
-`--verbose` is available only for an explicit operator diagnostic.
+Generated security-service hosts may call the thin `scripts/allimbot.py`
+wrapper with the same structured event shape. The legacy
+`notify(message, title, provider)` function remains for one release, but
+ignores all supplied text and emits only a fixed compatibility signal.
 
-`notify_on_complete` reports an exception class on failure, never the exception
-message or traceback, to avoid leaking sensitive runtime details.
+## Wired lifecycle sites
+
+| Runtime surface | Event |
+| --- | --- |
+| Owner governance block | `attention.required` |
+| Available Runtime update | `attention.required` |
+| Authoritative task completion or worker failure | `task.state.changed` |
+| One portable stop boundary (`stop-closure`) | `turn.completed` |
+
+GitHub Actions has no direct notification job. `notify_routing.py` remains a
+separate dormant channel-recipe surface and is not an Allimbot transport.
+
+## Safe diagnostics
+
+`agent_runtime doctor --json` reports profile selection, recipe/policy/gate
+presence and match status, optional dependency availability, boolean
+configuration presence, risk-path counts, and stale legacy wiring. It does
+not instantiate an emitter, open a spool, read a credential/keyring value, or
+probe a network endpoint.

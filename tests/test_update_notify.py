@@ -78,19 +78,39 @@ def test_newer_tag_prints_notice_once(tmp_path, capsys, monkeypatch):
 
 def test_newer_tag_sends_optional_allimbot_notice(tmp_path, capsys, monkeypatch):
     _write_host_config(tmp_path, ref="v0.1.8")
+    recipe = (
+        Path(__file__).resolve().parents[1]
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / ".allimbot.json"
+    )
+    (tmp_path / ".allimbot.json").write_text(
+        recipe.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(update_notify.subprocess, "run", _FakeRun())
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, dict[str, object], Path]] = []
     monkeypatch.setattr(
         update_notify.allimbot,
-        "notify",
-        lambda message, title="agent_runtime", **_kwargs: calls.append((message, title)) or False,
+        "emit_event",
+        lambda event_type, data, *, root, **_kwargs: calls.append(
+            (event_type, dict(data), root)
+        ),
     )
 
     assert main(["update-notify", "--root", str(tmp_path)]) == 0
     assert calls == [
         (
-            NOTICE_LINE + "\n" + update_notify.HINT_LINE,
-            "agent_runtime update available",
+            "attention.required",
+            {
+                "task_id": "agent-runtime",
+                "attention_kind": "runtime-update",
+                "owner_role": "owner",
+                "state": "available",
+            },
+            tmp_path.resolve(),
         )
     ]
     assert capsys.readouterr().err == ""

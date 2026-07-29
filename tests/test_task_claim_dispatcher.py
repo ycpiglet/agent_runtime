@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from agent_runtime import knowledge_records
 
 
@@ -20,8 +22,21 @@ def _routing_off_env() -> dict[str, str]:
     """Pin the dormant-role routing flags OFF so these baseline claim-lifecycle
     tests assert the unchanged behavior deterministically, regardless of an
     ambient flag in the developer's shell (the live review-routing seam is
-    exercised in tests/test_role_routing_wiring.py)."""
+    exercised in tests/test_role_routing_wiring.py).
+
+    The dispatcher runs the installed security gate from the fixture host as a
+    nested subprocess. Pin the package under test with an absolute path so a
+    relative ambient ``PYTHONPATH=src`` cannot resolve against that temporary
+    host or an editable install from a different Git worktree.
+    """
     env = dict(os.environ)
+    source_root = str((REPO_ROOT / "src").resolve())
+    ambient_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        os.pathsep.join((source_root, ambient_pythonpath))
+        if ambient_pythonpath
+        else source_root
+    )
     for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
         env.pop(flag, None)
     return env
@@ -120,6 +135,43 @@ def _write_routing_work(
     lines.extend(["---", ""])
     unit_path.write_text("\n".join(lines), encoding="utf-8")
     return unit_rel
+
+
+def _install_real_security_gate(root: Path) -> None:
+    policy = root / "agents" / "project" / "SECURITY-SERVICE-POLICY.json"
+    policy.parent.mkdir(parents=True, exist_ok=True)
+    policy.write_text(
+        (
+            REPO_ROOT
+            / "agents"
+            / "project"
+            / "SECURITY-SERVICE-POLICY.json"
+        ).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    gate = root / "scripts" / "security_service_gate.py"
+    gate.parent.mkdir(parents=True, exist_ok=True)
+    gate.write_bytes(
+        (REPO_ROOT / "scripts" / "security_service_gate.py").read_bytes()
+    )
+
+
+def _write_runtime_config(root: Path, *profiles: str) -> None:
+    lines = [
+        "schema: agent-runtime-config/v2",
+        "project: dispatcher-test",
+        "profiles:",
+    ]
+    lines.extend(f"  - {profile}" for profile in profiles)
+    lines.extend(
+        [
+            "sync:",
+            "  mode: check-diff-apply",
+            "  allow_silent_overwrite: false",
+            "",
+        ]
+    )
+    (root / "agent_runtime.yml").write_text("\n".join(lines), encoding="utf-8")
 
 
 def test_create_claim_separates_system_identity_from_readable_display_name(tmp_path: Path):
@@ -524,6 +576,554 @@ def test_create_claim_visibly_escalates_data_integrity_signal(
     assert claim["routing_unknown_triggers"] == []
 
 
+def test_create_claim_runs_installed_security_service_gate_before_persistence(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-647"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    unit = tmp_path / unit_rel
+    unit.write_text(
+        unit.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - .env.production",
+        ),
+        encoding="utf-8",
+    )
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:03:00+09:00",
+        "--suffix",
+        "security-block",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert ".env.production" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_installed_security_profile_refuses_claim_without_unit_spec(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--target-file",
+        ".env.production",
+        "--now",
+        "2026-07-29T07:04:00+09:00",
+        "--suffix",
+        "security-no-unit",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "requires registered task and unit identities" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_non_regular_installed_security_gate_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    gate = tmp_path / "scripts" / "security_service_gate.py"
+    gate.mkdir(parents=True)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:30+09:00",
+        "--suffix",
+        "security-gate-dir",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "not a regular managed file" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_symlinked_security_gate_parent_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    external_scripts = tmp_path / "external-scripts"
+    external_scripts.mkdir()
+    (external_scripts / "security_service_gate.py").write_text(
+        "raise SystemExit(0)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "scripts").symlink_to(external_scripts, target_is_directory=True)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:40+09:00",
+        "--suffix",
+        "security-gate-parent-link",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "not a regular managed file" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_drifted_regular_security_gate_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    gate = tmp_path / "scripts" / "security_service_gate.py"
+    gate.parent.mkdir(parents=True)
+    gate.write_text("raise SystemExit(0)\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:50+09:00",
+        "--suffix",
+        "security-gate-drift",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "drifted" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+@pytest.mark.parametrize(
+    "profile_evidence",
+    ["config-only", "full-runtime", "partial-assets", "lock-only"],
+)
+def test_selected_security_profile_with_missing_gate_refuses_claim(
+    tmp_path: Path,
+    profile_evidence: str,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    unit = tmp_path / unit_rel
+    unit.write_text(
+        unit.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - .env.production",
+        ),
+        encoding="utf-8",
+    )
+    if profile_evidence == "config-only":
+        _write_runtime_config(tmp_path, "core", "security-service")
+    if profile_evidence == "full-runtime":
+        _write_runtime_config(tmp_path, "full-runtime")
+    if profile_evidence == "partial-assets":
+        _install_real_security_gate(tmp_path)
+        (tmp_path / ".allimbot.json").write_bytes(
+            (
+                REPO_ROOT
+                / "src"
+                / "agent_runtime"
+                / "templates"
+                / "project"
+                / ".allimbot.json"
+            ).read_bytes()
+        )
+        (tmp_path / "scripts" / "security_service_gate.py").unlink()
+    if profile_evidence == "lock-only":
+        (tmp_path / "agent_runtime.lock.json").write_text(
+            json.dumps(
+                {
+                    "schema": "agent-runtime-lock/v2",
+                    "profiles": ["core", "security-service"],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:55+09:00",
+        "--suffix",
+        f"security-gate-missing-{profile_evidence}",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "selected or partially installed profile" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_malformed_host_config_blocks_at_claim_dispatch_seam(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-649"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    _install_real_security_gate(tmp_path)
+    (tmp_path / "agent_runtime.yml").write_text(
+        "schema: agent-runtime-config/v2\n"
+        "project: broken\n"
+        "host:\n"
+        "  risk_paths: nope\n",
+        encoding="utf-8",
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:05:00+09:00",
+        "--suffix",
+        "security-bad-config",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "policy_error" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_unterminated_required_security_metadata_refuses_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-649"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(
+        tmp_path,
+        task_id,
+        triggers=["security"],
+    )
+    unit = tmp_path / unit_rel
+    unit_text = unit.read_text(encoding="utf-8")
+    unit_text = unit_text.replace(
+        "  - scripts/routing_target.py",
+        "  - .env.production",
+    ).replace(
+        "target_files:",
+        'risk_tier: "high\n'
+        'security_sensitive: "true\n'
+        'approval_required: "true\n'
+        "target_files:",
+    )
+    unit.write_text(
+        unit_text + "\n## Security Controls\n\nSynthetic test boundary.\n",
+        encoding="utf-8",
+    )
+    _write_runtime_config(tmp_path, "core", "security-service")
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:05:30+09:00",
+        "--suffix",
+        "unterminated-security-metadata",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "policy_error" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_html_block_heading_cannot_authorize_security_claim(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-652"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(
+        tmp_path,
+        task_id,
+        triggers=["security"],
+    )
+    unit = tmp_path / unit_rel
+    unit_text = unit.read_text(encoding="utf-8")
+    unit_text = unit_text.replace(
+        "  - scripts/routing_target.py",
+        "  - .env.production",
+    ).replace(
+        "target_files:",
+        "risk_tier: high\n"
+        "security_sensitive: true\n"
+        "approval_required: true\n"
+        "target_files:",
+    )
+    unit.write_text(
+        unit_text
+        + "\n<!--\n"
+        + "hidden comment\n"
+        + "-->## Security Controls\n",
+        encoding="utf-8",
+    )
+    _write_runtime_config(tmp_path, "core", "security-service")
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:05:45+09:00",
+        "--suffix",
+        "html-block-security-heading",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "section:Security Controls" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_safe_review_document_cannot_substitute_for_requested_unit(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-650"
+    _write_worktree(tmp_path, task_id)
+    canonical_unit = _write_routing_work(tmp_path, task_id)
+    canonical_path = tmp_path / canonical_unit
+    canonical_path.write_text(
+        canonical_path.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - .env.production",
+        ),
+        encoding="utf-8",
+    )
+    review = tmp_path / "reviews" / "safe-unit.md"
+    review.parent.mkdir(parents=True)
+    review.write_text(
+        "---\n"
+        f"unit_id: UNIT-{task_id}-001\n"
+        f"task_id: {task_id}\n"
+        "target_files:\n"
+        "  - README.md\n"
+        "---\n",
+        encoding="utf-8",
+    )
+    _install_real_security_gate(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        "reviews/safe-unit.md",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:06:00+09:00",
+        "--suffix",
+        "security-substitute",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "policy_error" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_non_regular_host_config_blocks_at_claim_dispatch_seam(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-651"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    _install_real_security_gate(tmp_path)
+    (tmp_path / "agent_runtime.yml").mkdir()
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:07:00+09:00",
+        "--suffix",
+        "security-config-dir",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "security-service claim gate refused claim creation" in result.stderr
+    assert "policy_error" in result.stderr
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not claim_dir.exists() or not list(claim_dir.glob("*.json"))
+
+
+def test_create_claim_has_zero_security_profile_burden_when_gate_absent(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-648"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+    _write_runtime_config(tmp_path, "core # core-only host")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T07:04:00+09:00",
+        "--suffix",
+        "core-no-gate",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
 def test_create_claim_keeps_unknown_routing_signal_visible(
     tmp_path: Path,
 ) -> None:
@@ -829,6 +1429,41 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
     assert result.returncode == 0, result.stderr or result.stdout
     claim = json.loads(result.stdout)["claim"]
     assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
+
+
+def test_explicit_target_files_are_unioned_with_registered_unit_footprint(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-504"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--target-file",
+        "README.md",
+        "--now",
+        "2026-07-29T07:06:00+09:00",
+        "--suffix",
+        "union-footprint",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["target_files"] == ["README.md", "scripts/routing_target.py"]
 
 
 def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(

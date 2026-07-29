@@ -1,0 +1,97 @@
+{
+  "schema": "agent-runtime-security-service-policy/v1",
+  "risk_classes": {
+    "secrets": {
+      "patterns": [
+        ".env",
+        ".env.*",
+        "**/.env",
+        "**/.env.*",
+        "**/secrets/**",
+        "**/credentials/**",
+        "**/vault/**",
+        "**/*.pem",
+        "**/*.key",
+        "**/credentials.json"
+      ],
+      "exclude": [
+        ".env.example",
+        "**/.env.example",
+        "**/*.example"
+      ],
+      "required": {
+        "risk_tier": ["high", "critical"],
+        "security_sensitive": true,
+        "approval_required": true,
+        "escalation_triggers": ["security"],
+        "sections": ["Security Controls"]
+      }
+    },
+    "auth": {
+      "patterns": [
+        "auth/**",
+        "**/auth/**",
+        "**/oauth/**",
+        "**/authentication/**",
+        "**/authorization/**",
+        "**/rbac/**",
+        "auth.py",
+        "**/auth.py",
+        "**/authentication.py",
+        "**/authorization.py",
+        "**/permissions.py"
+      ],
+      "exclude": [],
+      "required": {
+        "risk_tier": ["high", "critical"],
+        "security_sensitive": true,
+        "approval_required": false,
+        "escalation_triggers": ["security", "data_integrity"],
+        "sections": ["Security Controls"]
+      }
+    },
+    "migration": {
+      "patterns": [
+        "migrations/**",
+        "**/migrations/**",
+        "migration/**",
+        "**/migration/**",
+        "**/migration*.py",
+        "**/migrate*.py",
+        "db/migrate/**",
+        "**/db/migrate/**"
+      ],
+      "exclude": [],
+      "required": {
+        "risk_tier": ["high", "critical"],
+        "security_sensitive": false,
+        "approval_required": false,
+        "escalation_triggers": ["data_integrity", "external_effect"],
+        "sections": ["Rollback"]
+      }
+    },
+    "production_external_effect": {
+      "patterns": [
+        "deploy/**",
+        "**/deploy/**",
+        "deployment/**",
+        "**/deployment/**",
+        "infra/production/**",
+        "**/infra/production/**",
+        "ops/production/**",
+        "**/ops/production/**",
+        "scripts/deploy*.py",
+        ".github/workflows/deploy*.yml",
+        ".github/workflows/deploy*.yaml"
+      ],
+      "exclude": [],
+      "required": {
+        "risk_tier": ["high", "critical"],
+        "security_sensitive": false,
+        "approval_required": true,
+        "escalation_triggers": ["external_effect"],
+        "sections": ["External Effect Boundary"]
+      }
+    }
+  }
+}

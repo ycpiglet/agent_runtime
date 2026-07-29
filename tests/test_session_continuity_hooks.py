@@ -10,6 +10,9 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+from agent_runtime import allimbot as package_allimbot
+from agent_runtime import hook_runtime as package_dispatch
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -172,6 +175,58 @@ def test_dispatcher_mode_arguments_are_allowlisted(tmp_path: Path) -> None:
     assert captured[1][-4:] == ["--root", str(root), "--phase", "post-compact"]
     assert captured[2][-1].endswith("scripts/taskset_prompt_hook.py")
     assert captured[3][-2:] == ["--manifest", "owner-docs.yml"]
+
+
+def test_turn_event_uses_one_portable_stop_mode_and_bounded_fields(
+    tmp_path: Path, monkeypatch
+) -> None:
+    recipe = (
+        ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / ".allimbot.json"
+    )
+    (tmp_path / ".allimbot.json").write_text(
+        recipe.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    calls: list[tuple[str, dict[str, object], Path]] = []
+    monkeypatch.setattr(
+        package_allimbot,
+        "emit_event",
+        lambda event_type, data, *, root, **_kwargs: calls.append(
+            (event_type, dict(data), root)
+        ),
+    )
+
+    package_dispatch._emit_turn_completed(
+        "stop-owner",
+        tmp_path,
+        {"task_id": "TASK-1"},
+        returncode=0,
+        duration_seconds=1.5,
+    )
+    package_dispatch._emit_turn_completed(
+        "stop-closure",
+        tmp_path,
+        {"task_id": "unsafe\nprompt-secret"},
+        returncode=7,
+        duration_seconds=2.5,
+    )
+
+    assert calls == [
+        (
+            "turn.completed",
+            {
+                "task_id": "unscoped",
+                "result_state": "blocked",
+                "duration_seconds": 2.5,
+            },
+            tmp_path,
+        )
+    ]
 
 
 def test_hook_configs_cover_lifecycle_windows_and_root_only_extensions() -> None:

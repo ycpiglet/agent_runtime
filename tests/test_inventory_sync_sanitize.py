@@ -95,7 +95,16 @@ def test_packaged_profile_selection_is_deterministic_across_effective_combinatio
     names = lambda paths: {path.relative_to(root).as_posix() for path in paths}
     assert names(core) == names(web)
     assert "scripts/allimbot.py" not in names(core)
-    assert "scripts/allimbot.py" in names(security) <= names(full)
+    profile_only = {
+        ".allimbot.json",
+        "agents/project/SECURITY-SERVICE-POLICY.json",
+        "docs/security-service.md",
+        "scripts/allimbot.py",
+        "scripts/security_service_gate.py",
+    }
+    assert profile_only.isdisjoint(names(core))
+    assert profile_only <= names(security) <= names(full)
+    assert "scripts/allimbot_stop_hook.cmd" not in names(full)
     assert all(not path.startswith("scripts/test_") for path in names(full))
     assert all("__pycache__" not in path and not path.endswith((".pyc", ".pyo")) for path in names(full))
 
