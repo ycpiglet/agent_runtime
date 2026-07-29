@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T02:46:30+09:00
+updated_at: 2026-07-30T02:55:06+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -127,9 +127,15 @@ claim_refs:
   config and lock provenance plus digest-matched managed Runtime contracts,
   keeps source and pointer checks strict, and preserves host-owned project
   documents. Canonical verification and independent W4b both passed; W4b
-  scored 99/100 with no P0/P1. UNIT-010 is closed. The next action is a
-  separately registered attempt-4 replay from Bean baseline `357eee4`; the
-  first three attempts and Allimbot remain frozen until that replay passes.
+  scored 99/100 with no P0/P1. UNIT-010 is closed. UNIT-011 then ran all three
+  attempt-4 Bean traces to independent local approval, preserved the disposable
+  consumer and zero-effect boundary, and stopped at the final completion gate.
+  Independent W4b confirmed two P1s: the packaged
+  `taskset_work_gate.py` omitted root ISO-timestamp masking, and the pilot's
+  live-primary byte-identity oracle treated unrelated owner edits as a causal
+  failure. Attempt 4 is frozen, its Runtime Compound is recorded, and Allimbot
+  remains blocked. The next action is a separately registered Runtime-only
+  mirror-parity and pilot-isolation repair, followed by a fresh Bean replay.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
 

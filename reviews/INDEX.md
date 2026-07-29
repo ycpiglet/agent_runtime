@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T02:48:22+09:00
-record_count: 1080
+generated_at: 2026-07-30T03:33:12+09:00
+record_count: 1083
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1080` review and evidence records under `reviews/`.
+- Summary: indexed `1083` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1080` files |
+| Reviews covered | pass | `1083` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,6 +166,7 @@ record_count: 1080
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 4 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN.md` | `PILOT-BEAN-WIKI-v080-GREEN` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 3 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
@@ -954,6 +955,7 @@ record_count: 1080
 | `reviews/W4A-2026-07-30-unit-task-ar-648-008.md` | `W4A-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-009.md` | `W4A-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4a — UNIT-TASK-AR-648-009 |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-010.md` | `W4A-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-011.md` | `W4A-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4a — UNIT-TASK-AR-648-011 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1111,6 +1113,7 @@ record_count: 1080
 | `reviews/W4B-2026-07-30-unit-task-ar-648-008.md` | `W4B-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-009.md` | `W4B-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4b — UNIT-TASK-AR-648-009 Bean attempt 3 |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-010.md` | `W4B-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4b |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-011.md` | `W4B-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4b — UNIT-TASK-AR-648-011 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

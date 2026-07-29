@@ -1,56 +1,32 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T02:46:30+09:00
+updated_at: 2026-07-30T03:32:00+09:00
 updated_by: codex-root-task-ar-648-011
 current_state:
-  summary: "UNIT-011 is claimed after T3/readiness/selector approval; Bean attempt 4 remains uncreated pending immutable baseline capture."
+  summary: "UNIT-011 is independently blocked on two P1s; Runtime mirror-parity and pilot-isolation repair is next."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 1
+  step_index: 8
   step_total: 8
-  progress_pct: 5
-  status_text: "Default Runtime claim persisted in working-tree mode with unchanged HEAD; no consumer worktree exists yet."
+  progress_pct: 100
+  status_text: "Attempt 4 frozen after W4b; no active claim and Allimbot remains blocked."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260730-024630-task-ar-648-648011"
-      agent_role: "lead-engineer"
-      team_id: "evaluation-office"
-      agent_instance_id: "codex-root-task-ar-648-011"
-      display_name: "lead_engineer@orchestrator-01"
-      callsite_id: "codex:root:task-ar-648:unit-011"
-      pane_id: "codex:root:task-ar-648:unit-011"
-      task_id: "TASK-AR-648"
-      unit_id: "UNIT-TASK-AR-648-011"
-      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-      status: "claimed"
-      phase: "unit-claimed"
-      progress_pct: 5
-      step_index: 1
-      step_total: 8
-      status_text: "UNIT-011 claimed; Bean attempt 4 remains uncreated pending immutable baseline capture"
-      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
-      branch: "codex/unit-task-ar-648-002-implementation"
-      claim_path: "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.json"
-      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.handoff.md"
-      log_path: "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.log.md"
-      last_heartbeat: "2026-07-30T02:46:30+09:00"
+  current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Capture immutable Runtime, Bean primary, red-pilot, attempts 1-3, and Allimbot snapshots."
-    - "Create exact product and Bean attempt-4 worktrees only after snapshot verification."
-    - "Keep Allimbot frozen until Bean attempt 4 independently passes."
+    - "Register a Runtime-only template parity and pilot-isolation repair unit."
+    - "Keep Allimbot frozen until a later fresh Bean replay independently passes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.json"
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

@@ -24,6 +24,9 @@
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
+    "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c": [
+      "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
+    ],
     "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
     ],
@@ -74,9 +77,12 @@
     ],
     "UNIT-TASK-AR-648-010": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+    ],
+    "UNIT-TASK-AR-648-011": [
+      "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
     ]
   },
-  "record_count": 9,
+  "record_count": 10,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -214,8 +220,22 @@
         "TASK-AR-648",
         "UNIT-TASK-AR-648-010"
       ]
+    },
+    {
+      "created_at": "2026-07-30T03:31:00+09:00",
+      "defect_signatures": [
+        "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c"
+      ],
+      "id": "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25.json",
+      "recurrence_count": 2,
+      "status": "active",
+      "title": "Packaged runtime mirrors must preserve root wall-clock semantics",
+      "work_ids": [
+        "UNIT-TASK-AR-648-011"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:71999dfa13fbf1c441ed63d21f1b409073910a3350b8784b320ff186aad0bdf9"
+  "source_digest": "sha256:d29ee7d3d4561a6cf4ff6a7d866b89bbe734ccaae6579dfb1d7c66d6326e4c0d"
 }

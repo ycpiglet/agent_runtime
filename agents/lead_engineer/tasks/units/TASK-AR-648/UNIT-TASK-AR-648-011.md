@@ -9,11 +9,12 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T02:42:34+09:00
-updated_at: 2026-07-30T02:46:30+09:00
+updated_at: 2026-07-30T03:31:30+09:00
+blocked_at: 2026-07-30T03:31:30+09:00
 started_at: 2026-07-30T02:46:30+09:00
 origin_type: pilot_replay
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-010.md
@@ -23,6 +24,13 @@ horizon: unit
 model_tier: worker_standard
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-011.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-011.md
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25.json
+defect_signatures:
+  - defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c
 escalation_triggers:
   - data_integrity
   - repeated_failure

@@ -9,7 +9,7 @@
   "callsite_id": "codex:root:task-ar-648:unit-011",
   "pane_id": "codex:root:task-ar-648:unit-011",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -31,21 +31,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 1,
   "stop_condition": "Stop immediately on any P0 or P1, consumer commit, primary or attempts 1-3 mutation, host/content overwrite, missing or ambiguous Runtime/template provenance, continuity fail-open, host-document workaround, unverified claim, missing task trace, unrelated Compound retrieval, unsupported model/cost claim, dependency installation, external effect, Allimbot worktree creation, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.",
-  "phase": "unit-claimed",
-  "progress_pct": 5,
-  "step_index": 1,
+  "phase": "bean-attempt-4-blocked-review",
+  "progress_pct": 78,
+  "step_index": 7,
   "step_total": 8,
-  "status_text": "UNIT-011 claimed; Bean attempt 4 remains uncreated pending immutable baseline capture",
+  "status_text": "Attempt 4 frozen on packaged taskset freshness P1; independent UNIT-011 W4b pending and Allimbot remains blocked",
   "worktree_path": "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-30T02:46:30+09:00",
-  "last_heartbeat": "2026-07-30T02:46:30+09:00",
-  "updated_at": "2026-07-30T02:46:30+09:00",
-  "expires_at": "2026-07-30T03:16:30+09:00",
+  "last_heartbeat": "2026-07-30T03:32:00+09:00",
+  "updated_at": "2026-07-30T03:32:00+09:00",
+  "expires_at": "2026-07-30T05:28:00+09:00",
   "lease": {
     "claimed_at": "2026-07-30T02:46:30+09:00",
-    "heartbeat_at": "2026-07-30T02:46:30+09:00",
-    "expires_at": "2026-07-30T03:16:30+09:00"
+    "heartbeat_at": "2026-07-30T03:32:00+09:00",
+    "expires_at": "2026-07-30T05:28:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.log.md",
@@ -56,7 +56,8 @@
     "repeated_failure"
   ],
   "defect_signatures": [
-    "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab"
+    "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab",
+    "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c"
   ],
   "knowledge_lookup": {
     "status": "matched",
@@ -171,5 +172,9 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-30T03:32:00+09:00",
+  "verified_by": "codex-p0-integrated-review-unit011",
+  "verifier_role": "independent-verifier",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-648-011.md"
 }
