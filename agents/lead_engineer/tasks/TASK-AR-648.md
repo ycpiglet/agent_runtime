@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T20:28:29+09:00
+updated_at: 2026-07-29T20:34:38+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -38,6 +38,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-171404-task-ar-648-648002.json
   - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
   - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
+  - agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.json
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
