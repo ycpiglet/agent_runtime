@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T02:40:00+09:00
-updated_by: codex-root-task-ar-648-010
+updated_at: 2026-07-30T02:42:34+09:00
+updated_by: codex-root-v080-planner
 current_state:
-  summary: "UNIT-010 is closed after exact-product W4a/W4b; fresh Bean attempt-4 registration and T3 anchoring are next."
+  summary: "UNIT-011 registers a fresh Bean attempt-4 replay; T3 assumptions, readiness, and canonical selection must pass before claim or worktree creation."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 6
-  step_total: 6
-  progress_pct: 100
-  status_text: "Exact product dd279cd5 passed canonical verification, W4a, and independent W4b at 99/100 with no P0/P1; UNIT-010 is closed."
+  step_index: 0
+  step_total: 8
+  progress_pct: 0
+  status_text: "UNIT-011 and its registration/T3 contract exist; no attempt-4 worktree or claim exists yet."
 active_work:
   current_agents: []
   current_teams: []
@@ -18,8 +18,9 @@ resume:
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
   branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Register and T3-anchor a separate Bean Wiki attempt-4 unit before creating any consumer worktree."
-    - "Create attempt 4 only from Bean baseline 357eee4; keep primary and attempts 1-3 read-only."
+    - "Record and verify T3 assumptions, then require UNIT-011 readiness and canonical taskset selection."
+    - "Create a default Runtime working-tree claim without moving HEAD."
+    - "Only then create exact product and Bean attempt-4 worktrees; keep primary and attempts 1-3 read-only."
     - "Keep Allimbot frozen until Bean attempt 4 independently passes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."

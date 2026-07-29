@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T02:41:14+09:00",
-  "record_count": 528,
+  "generated_at": "2026-07-30T02:46:15+09:00",
+  "record_count": 529,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5746,6 +5746,17 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
       "parent_id": "TASK-AR-648",
       "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-011",
+      "level": "unit",
+      "number": "41.1.10.11",
+      "label": "Unit 41.1.10.11",
+      "id": "UNIT-TASK-AR-648-011",
+      "title": "UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",

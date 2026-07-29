@@ -920,68 +920,68 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md",
-          "value": "de18f57a0b5dc915c22493b092211b190767309c39471831f61a93aeaa612043"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-registration.md",
+          "value": "0e2e6fd82b018f23f329da2a6b94efd6926c3c5b605733be58189d5c0cc4f034"
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md",
-          "value": "5b90d3231f0819db8ab196935cba385db99dfdb6107c6faa5404beb90e29947c"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md",
+          "value": "2ce334af91a09f8f86245f0976bbe6254573083fba9bef529102ad39f34d1ef2"
         },
         {
           "kind": "sha256",
           "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
-          "value": "bdfed115932fa065df97c2852e073c34e848b0a130d4ba91fb71868dfc1a6f4a"
+          "value": "b9a15e39357c1700be2f0e3049051e90cb96c91087ea1a9a36aef1b0d44e7f7a"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-009.md",
-          "value": "3665450bbe1d8ee21803142614f704456fabcdb3a6c38254c5af8655ebde8f84"
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-010.md",
+          "value": "a80ccbb08fb67ca68c6149c319646bde26ea1b9ffd26ce3b90310e23891af327"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json",
+          "value": "50d037a49b29fb888aa91aa52ccfe1fc9d1828ffb357515f416f66fab7fc697d"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "4b53383f4baff2c75cad4aef45c292b027f89aead29847a309d1982093a4c2cf"
+          "value": "eee5b067232f7ef3bdf853bc0d87fd743b0af24e3560cf5703945de12b66bc07"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
-          "value": "4f24d70d4355feb0a2a822e3a45210c00615cbdd5c953bada637217a49e93e66"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md",
+          "value": "a44c71c49f8519977f14a2846e9c56c4403972ff62f7c8af2dc255a06b50d839"
         },
         {
           "kind": "sha256",
           "path": "scripts/continuity_contract_gate.py",
-          "value": "51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc"
+          "value": "ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/continuity_contract_gate.py",
-          "value": "51e96499cab2ade5e2ecfcaa2e2b8ce041b05df1464635fa6ca62c87e894febc"
+          "value": "ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/AGENT_RUNTIME.md",
-          "value": "e1fea0c100683f01b39d9038f970ffd17b6ccb2885f02251731e4aafb9e6fe78"
+          "value": "d62e1ac808d27fbd3b63555aa2aaff8de4bd5af1d92c8cd6ba606be71cb6bcf8"
         },
         {
           "kind": "sha256",
-          "path": "scripts/agent_runtime/config.py",
+          "path": "src/agent_runtime/config.py",
           "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_continuity_contract_gate.py",
-          "value": "aea8beda8979299ed4048ccae687d1438166cbf0f183c82e98fd8f41c756083a"
+          "path": "scripts/pilot_acceptance.py",
+          "value": "8fcec748486bc0697bee6da088c963626421beb6c6597f57446f27c4c62b4747"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_owner_governance_consumer_host.py",
-          "value": "4fba58bedbfd5ffe7d9a2c98183383c47729ce9ee77364c958bca03090c41330"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "b052dc5b0df4fba5fb63c5b11f33d113eb54bc07a22eb05d718ffb0fbf70ae0b"
+          "path": "tests/test_pilot_acceptance.py",
+          "value": "88255c04ec10b2a3737ad2daf290b0a5352008c472930161ae5d42633ee43b90"
         },
         {
           "kind": "sha256",
@@ -999,8 +999,8 @@
           "value": "79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md",
-      "recorded_at": "2026-07-30T02:00:26+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md",
+      "recorded_at": "2026-07-30T02:46:03+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1216,5 +1216,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T02:00:26+09:00"
+  "updated_at": "2026-07-30T02:46:03+09:00"
 }
