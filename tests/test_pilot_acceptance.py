@@ -120,7 +120,7 @@ def test_any_unrecognized_semantic_tamper_is_detected():
 
 def test_absolute_local_path_in_fixture_is_detected():
     payload = copy.deepcopy(_payload())
-    payload["tasks"][0]["output_refs"][0] = "/home/example/private/evidence.json"
+    payload["tasks"][0]["output_refs"][0] = Path("/", "private", "evidence.json").as_posix()
     assert "absolute-path-leak" in _codes(payload)
 
 
