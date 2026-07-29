@@ -31,6 +31,7 @@ into a form the proposal engine can use.
 | Asset-prune loop detect-only | `asset-prune-detect-only` | `REVIEW-2026-06-22-subsystem-verification-audit` | tooling | `asset_lifecycle.py` (shipped) closes detect→action via reversible keep→observe; deprecate/remove Owner-gated |
 | beta_tester role dormant | `beta-tester-dormant` | `REVIEW-2026-06-22-subsystem-verification-audit` | proposal | advisory beta_tester_due only; activate scheduled exploration rounds → BTC-* → QA bugs |
 | W4a green but cross-surface acceptance incomplete | `w4-green-cross-surface-gap` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | process+proposal | require independent W4b plus root/template/worker/overlay/taskset/pointer/read-model matrix for tuple changes |
+| Authorization parser differs from consumed semantics | `authorization-boundary-parser-differs-from-rendered-document-semantics` | `COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0`, TASK-AR-647 W4b r1-r8 | gate+fixture | bind exact typed canonical inputs and installed code; validate rendered semantics; adversarially probe adjacent states |
 | Mandatory W4b evidence cannot be consumed by closeout | `closeout-evidence-producer-consumer-gap` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 first-class task-linked review evidence; TASK-AR-651 no-manual-edit lifecycle smoke |
 | Released unit conflated with completed taskset | `released-unit-taskset-phase-conflation` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 split phase semantics; RC blocks if honest intermediate close still needs a waiver |
 
@@ -246,6 +247,23 @@ into a form the proposal engine can use.
 | `linked_regression_fixture` | pending cross-surface matrix under TASK-AR-643 or TASK-AR-651 |
 | `task_proposal` | Keep independent W4b mandatory for TASK-AR-640 through TASK-AR-647; add the matrix to clean-host release evidence. |
 | `prevention_status` | process+proposal |
+
+### CASE-AUTHORIZATION-BOUNDARY-SEMANTIC-PARSER-GAP
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-AUTHORIZATION-BOUNDARY-SEMANTIC-PARSER-GAP` |
+| `dedupe_key` | `authorization-boundary-parser-differs-from-rendered-document-semantics` |
+| `symptom` | A green security gate accepts caller-shaped values, substituted snapshots, malformed typed metadata, missing or shadowed gate code, or a required heading that the Markdown renderer does not render. |
+| `trigger` | A security or authorization decision is implemented with permissive normalization, local line matching, or an unbound caller-supplied representation instead of the canonical consumed grammar and snapshot. |
+| `owner_boundary` | local security boundary |
+| `affected_gate` | `src/agent_runtime/security_service.py`, `scripts/task_claim_dispatcher.py`, root/template claim-time security-service enforcement |
+| `recurrence_count` | 7 adjacent blocker rounds during TASK-AR-647 W4b |
+| `source_refs` | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md`, `reviews/W4B-2026-07-29-unit-task-ar-647-001-r7.md`, `agents/project/knowledge/compounds/records/COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0.json` |
+| `reproduction` | Present a risky unit through an adjacent representation: unsupported or quoted scalar metadata, identity/path substitution, symlink or unstable snapshot, missing/shadowed gate module, or an H2-looking line inside a non-rendered Markdown block. |
+| `linked_regression_fixture` | `tests/test_security_service.py`, `tests/test_task_claim_dispatcher.py` |
+| `task_proposal` | shipped in TASK-AR-647: exact typed metadata, canonical identity binding, bounded stable regular-file snapshot, registered-target union, exact-worktree import, required installed-gate proof, and Markdown block-state validation |
+| `prevention_status` | gate+fixture |
 
 ### CASE-CLOSEOUT-EVIDENCE-PRODUCER-CONSUMER-GAP
 

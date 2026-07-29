@@ -2,8 +2,8 @@
   "finding_codes": [
     "scribe-overdue"
   ],
-  "generated_at": "2026-07-29T08:16:09+09:00",
-  "hot_count": 763,
+  "generated_at": "2026-07-29T14:55:00+09:00",
+  "hot_count": 769,
   "projection_path": "agents/project/state/SCRIBE-PROJECTION.json",
   "schema": "agent-runtime-scribe-projection/v1",
   "selected_count": 10,
@@ -12,13 +12,43 @@
     {
       "adapter": "conventional",
       "cold_count": 0,
-      "digest": "114b740412f9961f5f6021c787ea765e0df04e40229686112bb82995bcedfd9f",
+      "digest": "f4eb64bb5a0377e1a49ea21440dad4a14b3ceca76d708def0173cac968561fa5",
       "finding_codes": [],
-      "hot_count": 763,
+      "hot_count": 769,
       "path": "STATUS.md",
       "present": true,
       "selected_count": 10,
       "selected_items": [
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Completed: `TASK-AR-647` replaced free-form/direct notification delivery with an exact four-event Allimbot producer boundary, preserved enqueue-only ownership, repaired clean-core dependency closure, and made `security-service` enforce typ…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Safety: policy violations fail closed while optional dependency/configuration/spool unavailability stays bounded and fail-open; pinned-Allimbot proof wrote one temporary local spool record with zero network, credential, flush, or worker ca…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Quality: exact product SHA `1154b337` passed 391 focused tests and 2,548 full-suite tests with 3 skipped and 4 pre-existing UI warnings; independent W4b approved 99/100. PR #381 and merged-main workflow `30425788283` passed Python 3.10/3.1…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Learning: seven adversarial W4b rounds showed that authorization boundaries must bind exact typed canonical inputs, stable snapshots, installed-code provenance, and rendered document semantics. The reusable rule is linked to TASK-AR-647/UN…"
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to the two registered consumer pilots."
+        },
+        {
+          "checklist": "none",
+          "heading": "2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next",
+          "item": "Next: execute `TASK-AR-648` in a clean Bean Wiki worktree with `core+web-content`, preserving every host-owned editorial agent and publishing gate. Run three non-publishing tasks plus compound-retrieval and restart-recovery evidence; do no…"
+        },
         {
           "checklist": "none",
           "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
@@ -38,42 +68,12 @@
           "checklist": "none",
           "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
           "item": "Learning: main workflow `30406516812` first reproduced the known `ci-flaky-temp-git` signature after six fixture retries and then passed unchanged on all supported Python versions. The recurrence is linked to TASK-AR-646/UNIT-001 by a cano…"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
-          "item": "Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to `TASK-AR-647`."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next",
-          "item": "Next: begin `TASK-AR-647` at W0/T2, revalidate current Allimbot `v1/events`, recipe allowlists, spool, redaction, and fail-open boundaries before claiming work. Do not send live notifications or alter Allimbot consumer state or production…"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "Completed: `TASK-AR-645` added immutable task-linked compound records, deterministic defect-signature lookup, linked closeout validation, generic Markdown/JSON Scribe adapters, and bounded digest-bound projections."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "[REDACTED]"
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "Quality: both units passed independent W4b; Unit 002 passed 2,408 tests with 3 skipped, clean-wheel/privacy/path/freshness checks, and PR #374's Python 3.10/3.11/3.12 matrix before merging at `b6b0bdb5`."
-        },
-        {
-          "checklist": "none",
-          "heading": "2026-07-29 - TASK-AR-645 complete; TASK-AR-646 next",
-          "item": "Learning: the failed source-layout verification remains preserved and was superseded by a passing run after declaring `PYTHONPATH=src`; failed-then-passed evidence handling and complete board/archive regeneration are carried into TASK-AR-6…"
         }
       ],
       "state": "overdue",
-      "total_count": 763
+      "total_count": 769
     }
   ],
   "state": "overdue",
-  "total_count": 763
+  "total_count": 769
 }

@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-29T08:57:45+09:00
+generated_at: 2026-07-29T14:51:48+09:00
 record_count: 519
 ---
 
@@ -548,8 +548,8 @@ record_count: 519
 | 41.1.7.2 | Unit 41.1.7.2 | unit | `UNIT-TASK-AR-645-002` | `TASK-AR-645` | completed | `agents/lead_engineer/tasks/units/TASK-AR-645/UNIT-TASK-AR-645-002.md` | UNIT-TASK-AR-645-002 - Add configurable scribe state adapters and generated projections |
 | 41.1.8 | Task 41.1.8 | task | `TASK-AR-646` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-646.md` | Use lower-cost native subagents by default where appropriate and prove when escalatio… |
 | 41.1.8.1 | Unit 41.1.8.1 | unit | `UNIT-TASK-AR-646-001` | `TASK-AR-646` | completed | `agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md` | UNIT-TASK-AR-646-001 - Add provider-aware routing and dispatch telemetry |
-| 41.1.9 | Task 41.1.9 | task | `TASK-AR-647` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-647.md` | Use Allimbot's current durable, allowlisted project-event boundary and make the `secu… |
-| 41.1.9.1 | Unit 41.1.9.1 | unit | `UNIT-TASK-AR-647-001` | `TASK-AR-647` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md` | UNIT-TASK-AR-647-001 - Add native events and security-service guardrails |
+| 41.1.9 | Task 41.1.9 | task | `TASK-AR-647` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-647.md` | Use Allimbot's current durable, allowlisted project-event boundary and make the `secu… |
+| 41.1.9.1 | Unit 41.1.9.1 | unit | `UNIT-TASK-AR-647-001` | `TASK-AR-647` | completed | `agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md` | UNIT-TASK-AR-647-001 - Add native events and security-service guardrails |
 | 41.1.10 | Task 41.1.10 | task | `TASK-AR-648` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-648.md` | Prove lightweight adoption preserves the existing editorial harness while adding task… |
 | 41.1.10.1 | Unit 41.1.10.1 | unit | `UNIT-TASK-AR-648-001` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md` | UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki |
 | 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |

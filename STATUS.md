@@ -1,5 +1,14 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next
+
+- Completed: `TASK-AR-647` replaced free-form/direct notification delivery with an exact four-event Allimbot producer boundary, preserved enqueue-only ownership, repaired clean-core dependency closure, and made `security-service` enforce typed claim-time risk metadata.
+- Safety: policy violations fail closed while optional dependency/configuration/spool unavailability stays bounded and fail-open; pinned-Allimbot proof wrote one temporary local spool record with zero network, credential, flush, or worker calls, and no consumer repository or production state was changed.
+- Quality: exact product SHA `1154b337` passed 391 focused tests and 2,548 full-suite tests with 3 skipped and 4 pre-existing UI warnings; independent W4b approved 99/100. PR #381 and merged-main workflow `30425788283` passed Python 3.10/3.11/3.12 at merge SHA `66219ba9`.
+- Learning: seven adversarial W4b rounds showed that authorization boundaries must bind exact typed canonical inputs, stable snapshots, installed-code provenance, and rendered document semantics. The reusable rule is linked to TASK-AR-647/UNIT-001 by a canonical compound record and casebook entry.
+- Taskset: `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` remains active and advances to the two registered consumer pilots.
+- Next: execute `TASK-AR-648` in a clean Bean Wiki worktree with `core+web-content`, preserving every host-owned editorial agent and publishing gate. Run three non-publishing tasks plus compound-retrieval and restart-recovery evidence; do not push, deploy, or publish content.
+
 ## 2026-07-29 - TASK-AR-646 complete; TASK-AR-647 next
 
 - Completed: `TASK-AR-646` added low-cost routine routing, explicit risk escalation, deterministic-first no-call completion, provider/native equivalence matrices, correlated dispatch/completion telemetry, and truthful token-versus-billed-cost evaluation.

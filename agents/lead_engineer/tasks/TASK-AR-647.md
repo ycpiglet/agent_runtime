@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T14:08:29+09:00
+updated_at: 2026-07-29T14:53:00+09:00
 started_at: 2026-07-29T08:54:44+09:00
 title: Adopt native Allimbot events and security-service guardrails
-status: in_progress
+status: completed
 priority: P0
 difficulty: L
 est_hours: 10
@@ -42,6 +42,8 @@ tags:
   - work-cli-created
 review_refs:
   - reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md
+  - reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md
+  - reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.json
 verification_status: passed
@@ -53,9 +55,16 @@ evidence_refs:
   - reviews/VERIFY-2026-07-29-task-ar-647-20260729112131.json
   - reviews/VERIFY-2026-07-29-task-ar-647-20260729120704.json
   - reviews/VERIFY-2026-07-29-task-ar-647-20260729125149.json
-  - reviews/VERIFY-2026-07-29-task-ar-647-20260729132647.json
   - reviews/VERIFY-2026-07-29-task-ar-647-20260729133558.json
   - reviews/VERIFY-2026-07-29-task-ar-647-20260729140829.json
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0.json
+defect_signatures:
+  - defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220
+resolution: done
+completed_at: 2026-07-29T14:53:00+09:00
+closed_by: codex-root-v080-orchestrator
+measurement_unavailable_reason: Exact task hours and token telemetry were not captured across implementation, lifecycle correction, and repeated independent W4b rounds; no live provider usage, delivery, or billable external action occurred.
 ---
 
 # TASK-AR-647 - Adopt native Allimbot events and security-service guardrails
@@ -102,3 +111,35 @@ evidence_refs:
 - isolated Allimbot `origin/main@5a51ed4b` enqueue/allowlist contract smoke with
   a temporary spool and no network
 - `python -m pytest -q`
+
+## Superseded Verification Attempts
+
+- `reviews/VERIFY-2026-07-29-task-ar-647-20260729132647.json` is preserved as
+  immutable failure-first evidence. It captured an import-path isolation
+  defect during W4b remediation and was superseded by the later passing task
+  verification; it is historical, not active closeout evidence.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-29T14:53:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Exact task hours and token telemetry were not captured across implementation, lifecycle correction, and repeated independent W4b rounds; no live provider usage, delivery, or billable external action occurred.
+- Closed by: `codex-root-v080-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729094525.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729102601.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729112131.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729120704.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729125149.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729133558.json`
+  - `reviews/VERIFY-2026-07-29-task-ar-647-20260729140829.json`
+- Reviews:
+  - `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md`
+  - `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md`
+  - `reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0.json`
+<!-- work-close:end -->

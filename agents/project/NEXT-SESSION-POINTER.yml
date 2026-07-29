@@ -1,22 +1,22 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T14:25:16+09:00
-updated_by: ia-20260729-kst-647008
+updated_at: 2026-07-29T14:55:00+09:00
+updated_by: codex-root-v080-orchestrator
 current_state:
-  summary: "UNIT-TASK-AR-647-001 passed independent W4b and is waiting for serial integration."
-  status: in_progress
+  summary: "TASK-AR-647 is closed on verified main; the clean Bean Wiki adoption pilot is next."
+  status: ready
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 7
-  step_total: 7
-  progress_pct: 95
-  status_text: "W4b APPROVE 99/100; the implementation claim is released and serial merge-queue integration is next."
+  step_index: 0
+  step_total: 1
+  progress_pct: 0
+  status_text: "TASK-AR-647 W6 complete; start TASK-AR-648 at W0/T2 in an isolated clean Bean Wiki worktree."
 active_work:
   current_agents: []
   current_teams: []
 resume:
-  active_task: TASK-AR-647
+  active_task: TASK-AR-648
   active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Integrate codex/unit-task-ar-647-001-wave serially, then run W5/W6; stop before reading or changing production credentials, flushing the spool, sending a live event, adding a direct network fallback, mutating Bean Wiki/Allimbot/Autofolio, weakening an Owner boundary, or performing version/tag/publish/release work."
+  branch_policy: "Use a new clean Bean Wiki pilot worktree; preserve the dirty checkout and all host-owned editorial/publishing assets. No push, deploy, live publication, version, tag, package publication, or product release."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -51,7 +51,10 @@ pointers:
       status: completed
     - task_id: TASK-AR-647
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: in_progress
+      status: completed
+    - task_id: TASK-AR-648
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed
