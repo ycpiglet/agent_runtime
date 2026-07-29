@@ -96,11 +96,25 @@ match.
 
 After the hooks return, the guard rechecks the complete private tree, every
 artifact's working blob, the private record, `HEAD`, and the symbolic branch.
-It creates the commit from the already sealed tree with `git commit-tree` and
-advances the branch only with `git update-ref <ref> <new> <old>`. A competing
-ref update therefore wins without admitting the claim commit. Marker, index,
-message, and lock files are removed on every exit; failure leaves the claim
-artifacts staged so the ordinary gate blocks them.
+It creates the commit from the already sealed tree with `git commit-tree`,
+then enters a short publication critical section. The guard creates a private
+mode-`0700` Git administrative context whose `HEAD` is detached at the
+starting commit and whose `commondir` points to the repository's real common
+Git directory. It exclusively acquires the actual worktree-specific
+`HEAD.lock`, repeats the tree/blob/record/ref checks under that lock, and
+advances the original branch with
+`git update-ref <ref> <new> <old>` from the private context. The real
+`HEAD.lock` prevents an equal-OID symbolic branch switch while Git's ref lock
+and old-OID check still make a competing direct ref update win safely.
+
+Repository-local `GIT_*` redirectors are removed before the transaction.
+Hooks and `commit-tree` always use the real worktree context; the detached
+private context is used only for the final ref compare-and-swap. Marker,
+index, message, private-context, and owned lock files are removed on every
+exit. A pre-existing `HEAD.lock` is never removed and makes the transaction
+fail closed. Failure leaves the claim artifacts staged so the ordinary gate
+blocks them. `post-commit` runs after publication and lock release; its
+failure is reported as a warning, matching Git's post-publication semantics.
 
 Git 2.36 or newer runs hooks through `git hook run`. Older POSIX Git executes
 the configured traditional executable hook directly; older Windows Git fails

@@ -26,6 +26,42 @@ CLAIMS_REL = "agents/runtime/task_claims"
 CLAIM_COMMIT_TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
 CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v2"
 OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
+REPOSITORY_LOCAL_GIT_ENV = frozenset(
+    {
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+        "GIT_COMMON_DIR",
+        "GIT_CONFIG",
+        "GIT_CONFIG_COUNT",
+        "GIT_CONFIG_PARAMETERS",
+        "GIT_DIR",
+        "GIT_GRAFT_FILE",
+        "GIT_IMPLICIT_WORK_TREE",
+        "GIT_INDEX_FILE",
+        "GIT_INTERNAL_SUPER_PREFIX",
+        "GIT_NAMESPACE",
+        "GIT_NO_REPLACE_OBJECTS",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_PREFIX",
+        "GIT_QUARANTINE_PATH",
+        "GIT_REPLACE_REF_BASE",
+        "GIT_SHALLOW_FILE",
+        "GIT_WORK_TREE",
+    }
+)
+
+
+def _repository_env(source: dict[str, str] | None = None) -> dict[str, str]:
+    """Return an environment that cannot redirect this transaction to another repo."""
+
+    env = dict(os.environ if source is None else source)
+    for key in list(env):
+        if (
+            key in REPOSITORY_LOCAL_GIT_ENV
+            or key.startswith("GIT_CONFIG_")
+        ):
+            env.pop(key, None)
+    env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
+    return env
 
 
 def _git(
@@ -46,7 +82,11 @@ def _git(
 
 
 def is_git_repo(root: Path) -> bool:
-    result = _git(Path(root), ["rev-parse", "--is-inside-work-tree"])
+    result = _git(
+        Path(root),
+        ["rev-parse", "--is-inside-work-tree"],
+        env=_repository_env(),
+    )
     return result["code"] == 0 and result["out"].strip() == "true"
 
 
@@ -90,14 +130,41 @@ def _transaction_artifact_path(rel: str) -> bool:
     )
 
 
-def _git_path(root: Path, relative: str) -> Path | None:
-    resolved = _git(root, ["rev-parse", "--git-path", relative])
+def _git_path(
+    root: Path,
+    relative: str,
+    *,
+    env: dict[str, str] | None = None,
+) -> Path | None:
+    resolved = _git(root, ["rev-parse", "--git-path", relative], env=env)
     if resolved["code"] != 0 or not resolved["out"].strip():
         return None
     path = Path(resolved["out"].strip())
     if not path.is_absolute():
         path = root / path
     return path.resolve()
+
+
+def _git_admin_dirs(
+    root: Path,
+    *,
+    env: dict[str, str],
+) -> tuple[Path, Path] | None:
+    git_dir = _git(root, ["rev-parse", "--absolute-git-dir"], env=env)
+    common_dir = _git(root, ["rev-parse", "--git-common-dir"], env=env)
+    if git_dir["code"] != 0 or common_dir["code"] != 0:
+        return None
+    git_path = Path(git_dir["out"].strip())
+    common_path = Path(common_dir["out"].strip())
+    if not git_path.is_absolute():
+        git_path = root / git_path
+    if not common_path.is_absolute():
+        common_path = root / common_path
+    git_path = git_path.resolve()
+    common_path = common_path.resolve()
+    if not git_path.is_dir() or not common_path.is_dir():
+        return None
+    return git_path, common_path
 
 
 def _private_index_artifacts(
@@ -122,8 +189,8 @@ def _private_index_artifacts(
     return artifacts
 
 
-def _working_blob(root: Path, rel: str) -> str:
-    result = _git(root, ["hash-object", f"--path={rel}", rel])
+def _working_blob(root: Path, rel: str, *, env: dict[str, str]) -> str:
+    result = _git(root, ["hash-object", f"--path={rel}", rel], env=env)
     if result["code"] != 0:
         return ""
     return result["out"].strip()
@@ -144,7 +211,7 @@ def _run_hook(
     shell dispatch.
     """
 
-    version = _git(root, ["version"])
+    version = _git(root, ["version"], env=env)
     match = re.search(r"(\d+)\.(\d+)", version["out"])
     supports_hook_run = bool(
         version["code"] == 0
@@ -157,7 +224,7 @@ def _run_hook(
             command.extend(["--", *args])
         return _git(root, command, env=env)
 
-    hook_path = _git_path(root, f"hooks/{name}")
+    hook_path = _git_path(root, f"hooks/{name}", env=env)
     if hook_path is None or not hook_path.exists():
         return {"code": 0, "out": "", "err": ""}
     if os.name == "nt":
@@ -194,6 +261,7 @@ def _start_commit_transaction(
     index_path: Path,
     tree_oid: str,
     nonce: str,
+    env: dict[str, str],
 ) -> tuple[str, Path] | None:
     if not claim_paths:
         return None
@@ -213,6 +281,7 @@ def _start_commit_transaction(
     record_path = _git_path(
         root,
         f"agent-runtime/claim-commit/{nonce}.json",
+        env=env,
     )
     if record_path is None:
         return None
@@ -245,6 +314,132 @@ def _cleanup_private_path(path: Path | None) -> None:
             pass
 
 
+def _write_private_file(path: Path, content: str) -> None:
+    descriptor = os.open(
+        path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+        0o600,
+    )
+    with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(content)
+    os.chmod(path, 0o600)
+
+
+def _cleanup_ref_context(path: Path | None) -> None:
+    """Remove only the files this transaction owns; never recurse into Git state."""
+
+    if path is None:
+        return
+    for name in ("HEAD", "commondir"):
+        _cleanup_private_path(path / name)
+    try:
+        path.rmdir()
+    except OSError:
+        pass
+
+
+def _create_ref_context(
+    git_dir: Path,
+    common_dir: Path,
+    *,
+    nonce: str,
+    start_head: str,
+) -> Path | None:
+    """Create a detached Git admin context used only for the final ref CAS."""
+
+    parent = git_dir / "agent-runtime" / "claim-commit"
+    context = parent / f"{nonce}.git"
+    try:
+        parent.mkdir(parents=True, exist_ok=True)
+        os.chmod(parent, 0o700)
+        os.mkdir(context, 0o700)
+        os.chmod(context, 0o700)
+        _write_private_file(context / "HEAD", f"{start_head}\n")
+        _write_private_file(context / "commondir", f"{common_dir}\n")
+    except OSError:
+        _cleanup_ref_context(context)
+        return None
+    return context
+
+
+def _acquire_owned_lock(path: Path) -> tuple[int, int] | None:
+    """Create a cooperative Git lock and return its device/inode ownership token."""
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags, 0o600)
+    except OSError:
+        return None
+    try:
+        try:
+            os.fchmod(descriptor, 0o600)
+        except (AttributeError, OSError):
+            pass
+        stat = os.fstat(descriptor)
+        return stat.st_dev, stat.st_ino
+    finally:
+        os.close(descriptor)
+
+
+def _release_owned_lock(path: Path | None, token: tuple[int, int] | None) -> None:
+    if path is None or token is None:
+        return
+    try:
+        stat = path.lstat()
+        if (stat.st_dev, stat.st_ino) == token:
+            path.unlink()
+    except OSError:
+        pass
+
+
+def _transaction_state_error(
+    root: Path,
+    *,
+    artifacts: list[dict[str, str]],
+    index_env: dict[str, str],
+    real_env: dict[str, str],
+    start_head: str,
+    symbolic_ref: str,
+    tree_oid: str,
+    transaction_path: Path,
+    transaction_raw: str,
+    message_path: Path,
+) -> str:
+    current_tree = _git(root, ["write-tree"], env=index_env)
+    if current_tree["code"] != 0 or current_tree["out"].strip() != tree_oid:
+        return "claim-commit-transaction-tree-changed"
+    for artifact in artifacts:
+        if (
+            _working_blob(root, artifact["path"], env=real_env)
+            != artifact["oid"]
+        ):
+            return "claim-commit-transaction-working-blob-changed"
+    current_head = _git(root, ["rev-parse", "HEAD"], env=real_env)
+    current_ref = _git(root, ["symbolic-ref", "-q", "HEAD"], env=real_env)
+    if (
+        current_head["code"] != 0
+        or current_head["out"].strip() != start_head
+        or current_ref["code"] != 0
+        or current_ref["out"].strip() != symbolic_ref
+    ):
+        return "claim-commit-ref-moved"
+    try:
+        persisted = transaction_path.read_text(encoding="utf-8")
+    except OSError:
+        persisted = ""
+    if persisted != transaction_raw + "\n":
+        return "claim-commit-transaction-record-changed"
+    try:
+        commit_message = message_path.read_text(encoding="utf-8")
+    except OSError:
+        commit_message = ""
+    if not commit_message.strip():
+        return "claim-commit-message-empty"
+    return ""
+
+
 def _claim_transaction_commit(
     root: Path,
     rels: list[str],
@@ -252,8 +447,9 @@ def _claim_transaction_commit(
     *,
     message: str,
 ) -> dict[str, Any]:
-    head = _git(root, ["rev-parse", "HEAD"])
-    ref = _git(root, ["symbolic-ref", "-q", "HEAD"])
+    real_env = _repository_env()
+    head = _git(root, ["rev-parse", "HEAD"], env=real_env)
+    ref = _git(root, ["symbolic-ref", "-q", "HEAD"], env=real_env)
     if (
         head["code"] != 0
         or not head["out"].strip()
@@ -268,9 +464,26 @@ def _claim_transaction_commit(
         }
     start_head = head["out"].strip()
     symbolic_ref = ref["out"].strip()
+    admin_dirs = _git_admin_dirs(root, env=real_env)
+    if admin_dirs is None:
+        return {
+            "ok": False,
+            "committed": False,
+            "reason": "claim-commit-git-admin-path-failed",
+            "paths": rels,
+        }
+    git_dir, common_dir = admin_dirs
     nonce = secrets.token_hex(16)
-    index_path = _git_path(root, f"agent-runtime/claim-commit/{nonce}.index")
-    message_path = _git_path(root, f"agent-runtime/claim-commit/{nonce}.message")
+    index_path = _git_path(
+        root,
+        f"agent-runtime/claim-commit/{nonce}.index",
+        env=real_env,
+    )
+    message_path = _git_path(
+        root,
+        f"agent-runtime/claim-commit/{nonce}.message",
+        env=real_env,
+    )
     if index_path is None or message_path is None:
         return {
             "ok": False,
@@ -279,10 +492,12 @@ def _claim_transaction_commit(
             "paths": rels,
         }
 
-    index_env = dict(os.environ)
-    index_env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
+    index_env = dict(real_env)
     index_env["GIT_INDEX_FILE"] = str(index_path)
     transaction_path: Path | None = None
+    ref_context: Path | None = None
+    head_lock_path: Path | None = None
+    head_lock_token: tuple[int, int] | None = None
     try:
         index_path.parent.mkdir(parents=True, exist_ok=True)
         os.chmod(index_path.parent, 0o700)
@@ -328,7 +543,11 @@ def _claim_transaction_commit(
                 "reason": f"claim-commit-write-tree-failed: {sealed['err'][:200]}",
                 "paths": rels,
             }
-        head_tree = _git(root, ["rev-parse", f"{start_head}^{{tree}}"])
+        head_tree = _git(
+            root,
+            ["rev-parse", f"{start_head}^{{tree}}"],
+            env=real_env,
+        )
         if head_tree["code"] == 0 and head_tree["out"].strip() == tree_oid:
             return {
                 "ok": True,
@@ -346,6 +565,7 @@ def _claim_transaction_commit(
             index_path=index_path,
             tree_oid=tree_oid,
             nonce=nonce,
+            env=real_env,
         )
         if transaction is None:
             return {
@@ -382,64 +602,33 @@ def _claim_transaction_commit(
                     "paths": rels,
                 }
 
-        current_tree = _git(root, ["write-tree"], env=index_env)
-        if current_tree["code"] != 0 or current_tree["out"].strip() != tree_oid:
+        state_error = _transaction_state_error(
+            root,
+            artifacts=artifacts,
+            index_env=index_env,
+            real_env=real_env,
+            start_head=start_head,
+            symbolic_ref=symbolic_ref,
+            tree_oid=tree_oid,
+            transaction_path=transaction_path,
+            transaction_raw=raw,
+            message_path=message_path,
+        )
+        if state_error:
             return {
                 "ok": False,
                 "committed": False,
-                "reason": "claim-commit-transaction-tree-changed",
-                "paths": rels,
-            }
-        for artifact in artifacts:
-            if _working_blob(root, artifact["path"]) != artifact["oid"]:
-                return {
-                    "ok": False,
-                    "committed": False,
-                    "reason": "claim-commit-transaction-working-blob-changed",
-                    "paths": rels,
-                }
-        current_head = _git(root, ["rev-parse", "HEAD"])
-        current_ref = _git(root, ["symbolic-ref", "-q", "HEAD"])
-        if (
-            current_head["code"] != 0
-            or current_head["out"].strip() != start_head
-            or current_ref["code"] != 0
-            or current_ref["out"].strip() != symbolic_ref
-        ):
-            return {
-                "ok": False,
-                "committed": False,
-                "reason": "claim-commit-ref-moved",
-                "paths": rels,
-            }
-        try:
-            persisted = transaction_path.read_text(encoding="utf-8")
-        except OSError:
-            persisted = ""
-        if persisted != raw + "\n":
-            return {
-                "ok": False,
-                "committed": False,
-                "reason": "claim-commit-transaction-record-changed",
-                "paths": rels,
-            }
-        try:
-            commit_message = message_path.read_text(encoding="utf-8")
-        except OSError:
-            commit_message = ""
-        if not commit_message.strip():
-            return {
-                "ok": False,
-                "committed": False,
-                "reason": "claim-commit-message-empty",
+                "reason": state_error,
                 "paths": rels,
             }
 
-        commit_env = dict(os.environ)
-        commit_env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
-        commit_env.pop("GIT_INDEX_FILE", None)
+        commit_env = dict(real_env)
         commit_args = ["commit-tree", tree_oid, "-p", start_head, "-F", str(message_path)]
-        signing = _git(root, ["config", "--bool", "commit.gpgSign"])
+        signing = _git(
+            root,
+            ["config", "--bool", "commit.gpgSign"],
+            env=commit_env,
+        )
         if signing["code"] == 0 and signing["out"].strip().lower() == "true":
             commit_args.insert(1, "-S")
         committed = _git(root, commit_args, env=commit_env)
@@ -451,25 +640,100 @@ def _claim_transaction_commit(
                 "reason": f"claim-commit-tree-failed: {(committed['err'] or committed['out'])[:200]}",
                 "paths": rels,
             }
-        update = _git(
-            root,
-            [
-                "update-ref",
-                "-m",
-                f"claim-guard: {message}",
-                symbolic_ref,
-                commit_oid,
-                start_head,
-            ],
-            env=commit_env,
+        ref_context = _create_ref_context(
+            git_dir,
+            common_dir,
+            nonce=nonce,
+            start_head=start_head,
         )
-        if update["code"] != 0:
+        if ref_context is None:
             return {
                 "ok": False,
                 "committed": False,
-                "reason": f"claim-commit-ref-update-failed: {update['err'][:200]}",
+                "reason": "claim-commit-ref-context-failed",
                 "paths": rels,
             }
+        ref_env = dict(real_env)
+        ref_env["GIT_DIR"] = str(ref_context)
+        ref_env["GIT_WORK_TREE"] = str(root)
+        head_lock_path = git_dir / "HEAD.lock"
+        head_lock_token = _acquire_owned_lock(head_lock_path)
+        if head_lock_token is None:
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": "claim-commit-head-lock-unavailable",
+                "paths": rels,
+            }
+        try:
+            state_error = _transaction_state_error(
+                root,
+                artifacts=artifacts,
+                index_env=index_env,
+                real_env=real_env,
+                start_head=start_head,
+                symbolic_ref=symbolic_ref,
+                tree_oid=tree_oid,
+                transaction_path=transaction_path,
+                transaction_raw=raw,
+                message_path=message_path,
+            )
+            if state_error:
+                return {
+                    "ok": False,
+                    "committed": False,
+                    "reason": state_error,
+                    "paths": rels,
+                }
+            update = _git(
+                root,
+                [
+                    "update-ref",
+                    "-m",
+                    f"claim-guard: {message}",
+                    symbolic_ref,
+                    commit_oid,
+                    start_head,
+                ],
+                env=ref_env,
+            )
+            if update["code"] != 0:
+                return {
+                    "ok": False,
+                    "committed": False,
+                    "reason": (
+                        "claim-commit-ref-update-failed: "
+                        f"{update['err'][:200]}"
+                    ),
+                    "paths": rels,
+                }
+            published_ref = _git(
+                root,
+                ["symbolic-ref", "-q", "HEAD"],
+                env=real_env,
+            )
+            published_head = _git(
+                root,
+                ["rev-parse", "HEAD"],
+                env=real_env,
+            )
+            if (
+                published_ref["code"] != 0
+                or published_ref["out"].strip() != symbolic_ref
+                or published_head["code"] != 0
+                or published_head["out"].strip() != commit_oid
+            ):
+                return {
+                    "ok": False,
+                    "committed": True,
+                    "reason": "claim-commit-publication-verification-failed",
+                    "paths": rels,
+                    "commit": commit_oid,
+                    "tree": tree_oid,
+                }
+        finally:
+            _release_owned_lock(head_lock_path, head_lock_token)
+            head_lock_token = None
 
         post = _run_hook(root, "post-commit", env=commit_env)
         result: dict[str, Any] = {
@@ -483,6 +747,8 @@ def _claim_transaction_commit(
             result["post_commit_warning"] = (post["err"] or post["out"])[:200]
         return result
     finally:
+        _release_owned_lock(head_lock_path, head_lock_token)
+        _cleanup_ref_context(ref_context)
         _cleanup_private_path(transaction_path)
         _cleanup_private_path(index_path)
         _cleanup_private_path(message_path)
@@ -491,6 +757,7 @@ def _claim_transaction_commit(
 def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool = True) -> dict[str, Any]:
     """Commit ONLY the given paths (other staged/untracked work is left untouched)."""
     root = Path(root)
+    real_env = _repository_env()
     rels = list(
         dict.fromkeys(_rel(root, Path(path)) for path in paths if Path(path).exists())
     )
@@ -509,7 +776,7 @@ def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool
             "reason": "claim-commit-non-artifact-path",
             "paths": rels,
         }
-    add = _git(root, ["add", "--", *rels])
+    add = _git(root, ["add", "--", *rels], env=real_env)
     if add["code"] != 0:
         return {"ok": False, "committed": False, "reason": f"git-add-failed: {add['err'][:200]}", "paths": rels}
 
@@ -521,8 +788,7 @@ def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool
             message=message,
         )
 
-    commit_env = dict(os.environ)
-    commit_env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
+    commit_env = dict(real_env)
     commit = _git(
         root,
         ["commit", "-m", message, "--", *rels],
@@ -558,7 +824,11 @@ def untracked_claim_files(root: Path) -> list[str]:
         return []
     # --untracked-files=all so an entirely-untracked claims dir is expanded into
     # individual files instead of collapsing to a single directory entry.
-    status = _git(root, ["status", "--porcelain", "--untracked-files=all", "--", CLAIMS_REL])
+    status = _git(
+        root,
+        ["status", "--porcelain", "--untracked-files=all", "--", CLAIMS_REL],
+        env=_repository_env(),
+    )
     if status["code"] != 0:
         return []
     found: list[str] = []

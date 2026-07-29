@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -605,6 +606,209 @@ def test_explicit_claim_transaction_keeps_symbolic_head_on_sealed_branch(
     assert _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
     assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == result["commit"]
     assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_explicit_claim_transaction_respects_external_head_lock(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    git_dir = Path(
+        _git(tmp_path, "rev-parse", "--absolute-git-dir").stdout.strip()
+    )
+    head_lock = git_dir / "HEAD.lock"
+    head_lock.write_text("external lock\n", encoding="utf-8")
+
+    try:
+        result = claim_guard.commit_claim_artifacts(
+            tmp_path,
+            claim,
+            extra_paths=(handoff, log),
+            claim_id="CLAIM-runtime-hook",
+        )
+
+        assert result["ok"] is False, result
+        assert result["committed"] is False
+        assert result["reason"] == "claim-commit-head-lock-unavailable"
+        assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+        assert head_lock.read_text(encoding="utf-8") == "external lock\n"
+        assert not list(_transaction_dir(tmp_path).glob("*"))
+    finally:
+        head_lock.unlink()
+
+
+def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "source"
+    linked = tmp_path / "linked"
+    source.mkdir()
+    _init_repo(source)
+    added = _git(
+        source,
+        "worktree",
+        "add",
+        "-q",
+        "-b",
+        "claim-linked",
+        str(linked),
+    )
+    assert added.returncode == 0, added.stderr
+    _install_runtime_gate_hook(linked)
+    assert (
+        _git(linked, "config", "extensions.worktreeConfig", "true").returncode
+        == 0
+    )
+    assert (
+        _git(linked, "config", "--local", "--unset-all", "core.hooksPath").returncode
+        == 0
+    )
+    assert (
+        _git(
+            linked,
+            "config",
+            "--worktree",
+            "core.hooksPath",
+            ".githooks",
+        ).returncode
+        == 0
+    )
+    assert _git(linked, "branch", "concurrent-branch").returncode == 0
+    start_head = _git(linked, "rev-parse", "HEAD").stdout.strip()
+    original_ref = _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    git_dir = Path(
+        _git(linked, "rev-parse", "--absolute-git-dir").stdout.strip()
+    ).resolve()
+    common_raw = Path(
+        _git(linked, "rev-parse", "--git-common-dir").stdout.strip()
+    )
+    common_dir = (
+        common_raw if common_raw.is_absolute() else linked / common_raw
+    ).resolve()
+    assert git_dir != common_dir
+    claim, handoff, log = _write_runtime_claim(linked)
+    original_git = claim_guard._git
+    observed: dict[str, object] = {}
+
+    def inspect_and_switch_git(
+        root: Path,
+        args: list[str],
+        *,
+        env: dict[str, str] | None = None,
+    ) -> dict[str, object]:
+        if args and args[0] == "update-ref" and not observed:
+            assert env is not None
+            context = Path(env["GIT_DIR"])
+            observed.update(
+                {
+                    "context": context,
+                    "head": (context / "HEAD").read_text(encoding="utf-8"),
+                    "commondir": (context / "commondir").read_text(
+                        encoding="utf-8"
+                    ),
+                    "dir_mode": stat.S_IMODE(context.stat().st_mode),
+                    "head_mode": stat.S_IMODE((context / "HEAD").stat().st_mode),
+                    "commondir_mode": stat.S_IMODE(
+                        (context / "commondir").stat().st_mode
+                    ),
+                    "index_env": env.get("GIT_INDEX_FILE"),
+                    "common_env": env.get("GIT_COMMON_DIR"),
+                    "namespace_env": env.get("GIT_NAMESPACE"),
+                }
+            )
+            switch_env = dict(os.environ)
+            for key in (
+                "GIT_DIR",
+                "GIT_COMMON_DIR",
+                "GIT_WORK_TREE",
+                "GIT_INDEX_FILE",
+                claim_guard.CLAIM_COMMIT_TRANSACTION_ENV,
+            ):
+                switch_env.pop(key, None)
+            switched = original_git(
+                root,
+                ["symbolic-ref", "HEAD", "refs/heads/concurrent-branch"],
+                env=switch_env,
+            )
+            observed["switch_code"] = switched["code"]
+        return original_git(root, args, env=env)
+
+    monkeypatch.setattr(claim_guard, "_git", inspect_and_switch_git)
+    result = claim_guard.commit_claim_artifacts(
+        linked,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    assert observed["switch_code"] != 0
+    assert observed["head"] == f"{start_head}\n"
+    assert observed["commondir"] == f"{common_dir}\n"
+    assert observed["dir_mode"] == 0o700
+    assert observed["head_mode"] == 0o600
+    assert observed["commondir_mode"] == 0o600
+    assert observed["index_env"] is None
+    assert observed["common_env"] is None
+    assert observed["namespace_env"] is None
+    assert not Path(observed["context"]).exists()
+    assert _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
+    assert _git(linked, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert (
+        _git(linked, "rev-parse", "concurrent-branch").stdout.strip()
+        == start_head
+    )
+    assert not list(_transaction_dir(linked).glob("*"))
+
+
+def test_claim_transaction_ignores_repository_redirecting_environment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "target"
+    foreign = tmp_path / "foreign"
+    target.mkdir()
+    foreign.mkdir()
+    _init_repo(target)
+    _init_repo(foreign)
+    _install_runtime_gate_hook(target)
+    claim, handoff, log = _write_runtime_claim(target)
+    target_before = _git(target, "rev-parse", "HEAD").stdout.strip()
+    foreign_before = _git(foreign, "rev-parse", "HEAD").stdout.strip()
+    poisoned = {
+        "GIT_DIR": str(foreign / ".git"),
+        "GIT_COMMON_DIR": str(foreign / ".git"),
+        "GIT_WORK_TREE": str(foreign),
+        "GIT_INDEX_FILE": str(foreign / ".git" / "index"),
+        "GIT_OBJECT_DIRECTORY": str(foreign / ".git" / "objects"),
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(target / ".git" / "objects"),
+        "GIT_NAMESPACE": "foreign-namespace",
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "core.hooksPath",
+        "GIT_CONFIG_VALUE_0": "/definitely/not/a/runtime/hook",
+    }
+    for key, value in poisoned.items():
+        monkeypatch.setenv(key, value)
+
+    result = claim_guard.commit_claim_artifacts(
+        target,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    for key in poisoned:
+        monkeypatch.delenv(key)
+    assert result["ok"] is True, result
+    assert _git(target, "rev-parse", "HEAD").stdout.strip() != target_before
+    assert _git(foreign, "rev-parse", "HEAD").stdout.strip() == foreign_before
+    rel = claim.relative_to(target).as_posix()
+    assert _git(target, "cat-file", "-e", f"HEAD:{rel}").returncode == 0
+    assert _git(foreign, "cat-file", "-e", f"HEAD:{rel}").returncode != 0
+    assert not list(_transaction_dir(target).glob("*"))
 
 
 def test_explicit_claim_transaction_rejects_detached_head(tmp_path: Path) -> None:
