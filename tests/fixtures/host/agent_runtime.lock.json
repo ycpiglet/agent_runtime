@@ -79,7 +79,7 @@
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
       "agents/uiux_designer/SKILL.md": "sha256:c0b980b2be22bd1e0350393599189dcff47c56a8303ab6df2e3f4f5914c571f6",
-      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:0b8959f8c181a842f1389daa42ffeb607039fb224c7236875f3ef2001688fbbf",
+      "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md": "sha256:ea1b7c64b9d39246f28de9ca6ea5db8664ac5d7c0d9504421e81dd6401826a8a",
       "docs/agent_bootstrap/README.md": "sha256:905fefa4ffb6c6beb051fbbcbc2b7b02ce5dfdf71ddb2b4308a3219a438f12dd",
       "docs/agent_bootstrap/claude.md": "sha256:63ee4a32a83cf1af5176b8287a0ad6bce019119713b17b3a3d204a9df2cc6b3e",
       "docs/agent_bootstrap/codex.md": "sha256:694d45acbecedf3d201ff6ba4b22e6b52b3efe4b0b9a0ca7346bb3f0a0a1cca0",
@@ -125,7 +125,7 @@
       "scripts/check_messages.py": "sha256:88d82bfb0a0786ad1b33391c294a152b93f1007309f75f94a328bc2ee511e3ab",
       "scripts/check_repo_structure.py": "sha256:57914d739308ab831191c8f7dd2c66a2b73e2cd5742d604a9cbe0f03f6bb2a6f",
       "scripts/check_skill_structure.py": "sha256:b7b2626a713a0689b0b94a3875c65dcf844f4d636710305b4d3ad4e325f09aea",
-      "scripts/claim_guard.py": "sha256:9419e5a89f211cf388c05137b925fa44ed8e373bbd5ab325cf2b390731a33aa3",
+      "scripts/claim_guard.py": "sha256:df6e9aa7e8fedef09ad227645dc53cd72671b2610f2b514f5addf39e6686cd9c",
       "scripts/claim_lease.py": "sha256:b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e",
       "scripts/claim_reaper.py": "sha256:a34c02461ae28bc121f0f6b68db013701a4084fa7b32968378b6c43081674f4e",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
@@ -176,7 +176,7 @@
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
       "scripts/owner_governance_gate.py": "sha256:4ddd219dadc2d8952cd7b2ec1e60c9db4c084ca3a53945323a9c99af422a56e9",
       "scripts/pane_event_log.py": "sha256:414fec8f0a4e3cb74a319c4e125e92af8ba406c8f8b26a99e278685ec52927a7",
-      "scripts/parallel_worktree_gate.py": "sha256:d727a62f9a16477709eb703dd1b8ddf4cc10d3a5c3e2a567dd528a831c924b28",
+      "scripts/parallel_worktree_gate.py": "sha256:52a5e0b544a5b4ee1a4f8d9468048e776dd683c5868c051f5e0951fe1219e38b",
       "scripts/pipeline.py": "sha256:4abd82e5f09c9d3cc80d30542df7569bc1d7a2509303c1de704f213a49c03d97",
       "scripts/plan_assumption_gate.py": "sha256:6fc083b0c3a724c252ac64e31d6232203b04aa4fd64db01c9243ed9553e7d06c",
       "scripts/precommit_check.py": "sha256:ca4134f95ed06cb84151dec02a2397b51ed670e31d4cf2d97d545b3469e251ce",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:35d5077bed62f6a4e1c29c31ec81dbead8b7b8996704cf624623b0909eb8daf3",
+    "template_digest": "sha256:7b5650672e16643804afcb4a55e201dcf463c28fddab470228cc5ffa6f80b7c1",
     "template_files": 251
   },
   "profiles": [

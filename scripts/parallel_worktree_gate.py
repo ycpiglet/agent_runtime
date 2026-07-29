@@ -89,8 +89,9 @@ CLAIM_LOSS_INCIDENT = (
     "(2026-06-12 incident: CLAIM-...-task-ar-500-25db lost, recreated as -66ed)"
 )
 CLAIM_COMMIT_TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
-CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v1"
+CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v2"
 CLAIM_COMMIT_TRANSACTION_NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
+CLAIM_COMMIT_TRANSACTION_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 
 
 @dataclass(frozen=True)
@@ -177,6 +178,10 @@ def _norm(path: Path) -> str:
     except OSError:
         resolved = path.absolute()
     return os.path.normcase(str(resolved))
+
+
+def _lexical_norm(path: Path) -> str:
+    return os.path.normcase(os.path.abspath(os.fspath(path)))
 
 
 def _claim_files(root: Path) -> list[Path]:
@@ -630,12 +635,62 @@ def _transaction_record_path(root: Path, nonce: str) -> Path | None:
     path = Path(out.strip())
     if not path.is_absolute():
         path = root / path
-    return path
+    return Path(os.path.abspath(os.fspath(path)))
+
+
+def _transaction_private_dir(root: Path) -> Path | None:
+    code, out = _git(
+        root,
+        "rev-parse",
+        "--git-path",
+        "agent-runtime/claim-commit",
+    )
+    if code != 0 or not out.strip():
+        return None
+    path = Path(out.strip())
+    if not path.is_absolute():
+        path = root / path
+    try:
+        return path.resolve()
+    except OSError:
+        return None
+
+
+def _valid_transaction_artifact_path(value: object) -> bool:
+    if not isinstance(value, str) or len(value) > 300:
+        return False
+    path = Path(value)
+    if (
+        path.is_absolute()
+        or ".." in path.parts
+        or len(path.parts) != 4
+        or path.parts[:3] != ("agents", "runtime", "task_claims")
+    ):
+        return False
+    name = path.name
+    if not name or not all(character.isalnum() or character in "._-" for character in name):
+        return False
+    return (
+        path.suffix == ".json"
+        or name.endswith(".handoff.md")
+        or name.endswith(".log.md")
+    )
+
+
+def _private_index_entry(root: Path, rel_path: str) -> tuple[str, str] | None:
+    code, staged = _git(root, "ls-files", "--stage", "--", rel_path)
+    lines = [line for line in staged.splitlines() if line.strip()]
+    if code != 0 or len(lines) != 1:
+        return None
+    fields = lines[0].split(None, 3)
+    if len(fields) != 4 or fields[2] != "0" or fields[3] != rel_path:
+        return None
+    return fields[0], fields[1]
 
 
 def _load_claim_commit_transaction(root: Path) -> dict[str, object] | None:
     raw = os.environ.get(CLAIM_COMMIT_TRANSACTION_ENV, "")
-    if not raw or len(raw) > 16_384:
+    if not raw or len(raw) > 65_536:
         return None
     try:
         payload = json.loads(raw)
@@ -645,9 +700,13 @@ def _load_claim_commit_transaction(root: Path) -> dict[str, object] | None:
         "schema",
         "root",
         "claim_paths",
+        "artifacts",
         "nonce",
         "owner_pid",
         "head",
+        "ref",
+        "index",
+        "tree",
     }
     if not isinstance(payload, dict) or set(payload) != required:
         return None
@@ -667,6 +726,18 @@ def _load_claim_commit_transaction(root: Path) -> dict[str, object] | None:
         return None
     if not _process_is_alive(owner_pid):
         return None
+    head_oid = payload.get("head")
+    tree_oid = payload.get("tree")
+    ref_name = payload.get("ref")
+    if (
+        not isinstance(head_oid, str)
+        or CLAIM_COMMIT_TRANSACTION_OID_RE.fullmatch(head_oid) is None
+        or not isinstance(tree_oid, str)
+        or CLAIM_COMMIT_TRANSACTION_OID_RE.fullmatch(tree_oid) is None
+        or not isinstance(ref_name, str)
+        or not ref_name.startswith("refs/heads/")
+    ):
+        return None
     claim_paths = payload.get("claim_paths")
     if (
         not isinstance(claim_paths, list)
@@ -676,40 +747,120 @@ def _load_claim_commit_transaction(root: Path) -> dict[str, object] | None:
     ):
         return None
     for value in claim_paths:
-        if not isinstance(value, str):
+        if not _valid_transaction_artifact_path(value) or Path(value).suffix != ".json":
             return None
-        path = Path(value)
+
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts or len(artifacts) > 48:
+        return None
+    artifact_map: dict[str, tuple[str, str]] = {}
+    for artifact in artifacts:
+        if not isinstance(artifact, dict) or set(artifact) != {"path", "mode", "oid"}:
+            return None
+        artifact_path = artifact.get("path")
+        mode = artifact.get("mode")
+        oid = artifact.get("oid")
         if (
-            path.is_absolute()
-            or ".." in path.parts
-            or len(path.parts) != 4
-            or path.parts[:3] != ("agents", "runtime", "task_claims")
-            or path.suffix != ".json"
+            not _valid_transaction_artifact_path(artifact_path)
+            or not isinstance(mode, str)
+            or mode != "100644"
+            or not isinstance(oid, str)
+            or CLAIM_COMMIT_TRANSACTION_OID_RE.fullmatch(oid) is None
+            or artifact_path in artifact_map
         ):
             return None
+        artifact_map[artifact_path] = (mode, oid)
+    artifact_claim_paths = sorted(
+        path for path in artifact_map if Path(path).suffix == ".json"
+    )
+    if sorted(claim_paths) != artifact_claim_paths:
+        return None
+
     code, head = _git(root, "rev-parse", "HEAD")
-    if code != 0 or head.strip() != str(payload.get("head") or ""):
+    if code != 0 or head.strip() != head_oid:
         return None
+    code, current_ref = _git(root, "symbolic-ref", "-q", "HEAD")
+    if code != 0 or current_ref.strip() != ref_name:
+        return None
+
+    private_dir = _transaction_private_dir(root)
+    raw_index = payload.get("index")
+    env_index = os.environ.get("GIT_INDEX_FILE", "")
+    if private_dir is None or not isinstance(raw_index, str) or not raw_index or not env_index:
+        return None
+    marker_index = Path(raw_index)
+    inherited_index = Path(env_index)
+    expected_index = private_dir / f"{nonce}.index"
+    if (
+        not marker_index.is_absolute()
+        or not inherited_index.is_absolute()
+        or _lexical_norm(marker_index) != _lexical_norm(expected_index)
+        or _lexical_norm(inherited_index) != _lexical_norm(expected_index)
+        or not marker_index.is_file()
+        or marker_index.is_symlink()
+    ):
+        return None
+    if os.name != "nt":
+        try:
+            if marker_index.stat().st_mode & 0o077:
+                return None
+        except OSError:
+            return None
+
+    code, current_tree = _git(root, "write-tree")
+    if code != 0 or current_tree.strip() != tree_oid:
+        return None
+    for artifact_path, expected_entry in artifact_map.items():
+        if _private_index_entry(root, artifact_path) != expected_entry:
+            return None
+
+    code, changed = _git(
+        root,
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "--no-renames",
+        "-r",
+        head_oid,
+        tree_oid,
+        "--",
+    )
+    changed_paths = {line for line in changed.splitlines() if line}
+    if code != 0 or not changed_paths or not changed_paths.issubset(artifact_map):
+        return None
+
     record_path = _transaction_record_path(root, nonce)
-    if record_path is None or not record_path.is_file() or record_path.is_symlink():
+    expected_record = private_dir / f"{nonce}.json"
+    if (
+        record_path is None
+        or _lexical_norm(record_path) != _lexical_norm(expected_record)
+        or not record_path.is_file()
+        or record_path.is_symlink()
+    ):
         return None
+    if os.name != "nt":
+        try:
+            if record_path.stat().st_mode & 0o077:
+                return None
+        except OSError:
+            return None
     try:
-        persisted = json.loads(record_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        persisted = record_path.read_text(encoding="utf-8")
+    except OSError:
         return None
-    if persisted != payload:
+    if persisted != raw + "\n":
         return None
     return payload
 
 
-def _claim_matches_index(root: Path, rel_path: str) -> bool:
-    code, indexed = _git(root, "rev-parse", f":{rel_path}")
-    if code != 0 or not indexed.strip():
+def _claim_matches_index(root: Path, rel_path: str, expected_oid: str) -> bool:
+    entry = _private_index_entry(root, rel_path)
+    if entry != ("100644", expected_oid):
         return False
     code, working = _git(root, "hash-object", f"--path={rel_path}", rel_path)
     if code != 0 or not working.strip():
         return False
-    return indexed.strip() == working.strip()
+    return working.strip() == expected_oid
 
 
 def _transaction_authorizes_claim(
@@ -729,7 +880,17 @@ def _transaction_authorizes_claim(
     claim_paths = transaction.get("claim_paths")
     if not isinstance(claim_paths, list) or rel_path not in claim_paths:
         return False
-    return _claim_matches_index(root, rel_path)
+    artifacts = transaction.get("artifacts")
+    if not isinstance(artifacts, list):
+        return False
+    expected_oid = ""
+    for artifact in artifacts:
+        if isinstance(artifact, dict) and artifact.get("path") == rel_path:
+            expected_oid = str(artifact.get("oid") or "")
+            break
+    if CLAIM_COMMIT_TRANSACTION_OID_RE.fullmatch(expected_oid) is None:
+        return False
+    return _claim_matches_index(root, rel_path, expected_oid)
 
 
 def _non_head_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Finding]:

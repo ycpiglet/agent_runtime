@@ -14,7 +14,7 @@ from scripts.parallel_worktree_gate import ClaimRecord, _continuity_findings
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
-TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v1"
+TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v2"
 
 
 def _run_gate(
@@ -357,23 +357,27 @@ def _transaction_env(
     claim_paths: list[str] | None = None,
     owner_pid: int | None = None,
     head: str | None = None,
+    marker_overrides: dict[str, object] | None = None,
+    artifact_paths: list[Path] | None = None,
 ) -> tuple[dict[str, str], Path]:
     nonce = "0123456789abcdef0123456789abcdef"
     rel = claim_path.relative_to(repo).as_posix()
-    marker = {
-        "schema": TRANSACTION_SCHEMA,
-        "root": root_value or str(repo.resolve()),
-        "claim_paths": claim_paths or [rel],
-        "nonce": nonce,
-        "owner_pid": owner_pid if owner_pid is not None else os.getpid(),
-        "head": head or subprocess.run(
-            ["git", "-C", str(repo), "rev-parse", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip(),
-    }
-    raw = json.dumps(marker, sort_keys=True, separators=(",", ":"))
+    artifact_rels = [
+        path.relative_to(repo).as_posix()
+        for path in (artifact_paths or [claim_path])
+    ]
+    current_head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    current_ref = subprocess.run(
+        ["git", "-C", str(repo), "symbolic-ref", "-q", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     git_path = subprocess.run(
         [
             "git",
@@ -381,21 +385,89 @@ def _transaction_env(
             str(repo),
             "rev-parse",
             "--git-path",
-            f"agent-runtime/claim-commit/{nonce}.json",
+            "agent-runtime/claim-commit",
         ],
         check=True,
         capture_output=True,
         text=True,
     ).stdout.strip()
-    record_path = Path(git_path)
-    if not record_path.is_absolute():
-        record_path = repo / record_path
-    if persist_record:
-        record_path.parent.mkdir(parents=True, exist_ok=True)
-        record_path.write_text(raw + "\n", encoding="utf-8")
+    private_dir = Path(git_path)
+    if not private_dir.is_absolute():
+        private_dir = repo / private_dir
+    private_dir = private_dir.resolve()
+    private_dir.mkdir(parents=True, exist_ok=True)
+    private_dir.chmod(0o700)
+    index_path = private_dir / f"{nonce}.index"
     env = dict(os.environ)
+    env["GIT_INDEX_FILE"] = str(index_path)
+    subprocess.run(
+        ["git", "-C", str(repo), "read-tree", current_head],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    index_path.chmod(0o600)
+    subprocess.run(
+        ["git", "-C", str(repo), "add", "--", *artifact_rels],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    artifacts: list[dict[str, str]] = []
+    for artifact_rel in artifact_rels:
+        staged = subprocess.run(
+            ["git", "-C", str(repo), "ls-files", "--stage", "--", artifact_rel],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        ).stdout.strip()
+        mode, oid, _stage, indexed_path = staged.split(None, 3)
+        assert indexed_path == artifact_rel
+        artifacts.append({"path": artifact_rel, "mode": mode, "oid": oid})
+    tree = subprocess.run(
+        ["git", "-C", str(repo), "write-tree"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    ).stdout.strip()
+    marker = {
+        "schema": TRANSACTION_SCHEMA,
+        "root": root_value or str(repo.resolve()),
+        "claim_paths": claim_paths or [rel],
+        "artifacts": artifacts,
+        "nonce": nonce,
+        "owner_pid": owner_pid if owner_pid is not None else os.getpid(),
+        "head": head or current_head,
+        "ref": current_ref,
+        "index": str(index_path),
+        "tree": tree,
+    }
+    if marker_overrides:
+        marker.update(marker_overrides)
+    raw = json.dumps(marker, sort_keys=True, separators=(",", ":"))
+    record_path = private_dir / f"{nonce}.json"
+    if persist_record:
+        record_path.write_text(raw + "\n", encoding="utf-8")
+        record_path.chmod(0o600)
     env[TRANSACTION_ENV] = raw
     return env, record_path
+
+
+def _rewrite_transaction_marker(
+    env: dict[str, str],
+    record_path: Path,
+    payload: dict[str, object],
+) -> dict[str, str]:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    record_path.write_text(raw + "\n", encoding="utf-8")
+    record_path.chmod(0o600)
+    updated = dict(env)
+    updated[TRANSACTION_ENV] = raw
+    return updated
 
 
 def _add_task_worktree(repo: Path, name: str = "TASK-AR-900", branch: str = "claude/task-ar-900-demo") -> Path:
@@ -637,7 +709,122 @@ def test_gate_rejects_mismatched_commit_transaction(
     assert "task-claim:authorized-commit-not-persisted" in result.stdout
 
 
-def test_gate_rejects_transaction_when_claim_is_unstaged_or_index_mismatched(
+@pytest.mark.parametrize(
+    "case",
+    ["wrong-index", "wrong-ref", "wrong-tree", "wrong-blob", "wrong-mode"],
+)
+def test_gate_rejects_transaction_identity_and_oid_mismatch(
+    tmp_path: Path,
+    case: str,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    env, record = _transaction_env(repo, claim_path)
+    payload = json.loads(env[TRANSACTION_ENV])
+    if case == "wrong-index":
+        payload["index"] = str(repo / ".git" / "index")
+    elif case == "wrong-ref":
+        payload["ref"] = "refs/heads/not-current"
+    elif case == "wrong-tree":
+        payload["tree"] = "0" * 40
+    elif case == "wrong-blob":
+        payload["artifacts"][0]["oid"] = "0" * 40
+    else:
+        payload["artifacts"][0]["mode"] = "100755"
+    env = _rewrite_transaction_marker(env, record, payload)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1, case
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
+@pytest.mark.parametrize("case", ["removed-claim", "extra-path"])
+def test_gate_rejects_private_index_tree_mutation(
+    tmp_path: Path,
+    case: str,
+):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    env, _record = _transaction_env(repo, claim_path)
+    if case == "removed-claim":
+        command = [
+            "git",
+            "-C",
+            str(repo),
+            "update-index",
+            "--force-remove",
+            "--",
+            claim_path.relative_to(repo).as_posix(),
+        ]
+    else:
+        (repo / "STATUS.md").write_text(
+            "## Handoff Checklist\n- changed outside the transaction\n",
+            encoding="utf-8",
+        )
+        command = ["git", "-C", str(repo), "add", "--", "STATUS.md"]
+    subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1, case
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
+def test_gate_rejects_marker_that_omits_changed_sidecar(tmp_path: Path):
+    repo = _init_git_repo(tmp_path)
+    claim_path = _write_claim(
+        repo,
+        "CLAIM-1",
+        persistence={
+            "mode": "scm_commit",
+            "scm_commit_authorized": True,
+        },
+    )
+    handoff = claim_path.with_name("CLAIM-1.handoff.md")
+    log = claim_path.with_name("CLAIM-1.log.md")
+    handoff.write_text("# Handoff\n", encoding="utf-8")
+    log.write_text("# Log\n", encoding="utf-8")
+    env, record = _transaction_env(
+        repo,
+        claim_path,
+        artifact_paths=[claim_path, handoff, log],
+    )
+    payload = json.loads(env[TRANSACTION_ENV])
+    payload["artifacts"] = [
+        artifact
+        for artifact in payload["artifacts"]
+        if artifact["path"] != log.relative_to(repo).as_posix()
+    ]
+    env = _rewrite_transaction_marker(env, record, payload)
+
+    result = _run_gate(repo, env=env)
+
+    assert result.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in result.stdout
+
+
+def test_gate_rejects_transaction_without_private_index_or_with_worktree_mismatch(
     tmp_path: Path,
 ):
     repo = _init_git_repo(tmp_path)
@@ -650,12 +837,13 @@ def test_gate_rejects_transaction_when_claim_is_unstaged_or_index_mismatched(
         },
     )
     env, _record = _transaction_env(repo, claim_path)
-    unstaged = _run_gate(repo, env=env)
-    assert unstaged.returncode == 1
+    missing_private_index_env = dict(env)
+    missing_private_index_env.pop("GIT_INDEX_FILE")
+    missing_private_index = _run_gate(repo, env=missing_private_index_env)
+    assert missing_private_index.returncode == 1
 
-    _git(repo, "add", claim_path.relative_to(repo).as_posix())
     payload = json.loads(claim_path.read_text(encoding="utf-8"))
-    payload["status_text"] = "changed after staging"
+    payload["status_text"] = "changed after private tree was sealed"
     claim_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -96,14 +96,33 @@ ID, allowed files, forbidden shared docs, verification commands, evidence
 outputs, and claim metadata.
 
 Claim creation leaves Git `HEAD` unchanged by default. When a control-repository
-workflow explicitly uses `--commit-claim-artifacts`, `claim_guard.py` creates a
-private, short-lived transaction record and passes its marker only to the
-`git commit` child. The pre-commit gate accepts only the exact authorized claim
-JSON when repository, starting `HEAD`, live owner process, private record,
-indexed blob, and working-tree blob all match. The record is removed when
-`git commit` exits. A missing, ambient, stale, malformed, wrong-root,
-wrong-path, unstaged, or mismatched marker never weakens the ordinary
-`HEAD`-persistence block.
+workflow explicitly uses `--commit-claim-artifacts`, `claim_guard.py` stages the
+claim artifacts in the real index for visible recovery, then builds a mode
+`0600` private index from the starting `HEAD`. Only the requested claim JSON,
+handoff, and log enter that index; unrelated staged, partially staged,
+unstaged, and untracked work stays outside the candidate tree.
+
+The v2 transaction marker binds the repository, live owner process, symbolic
+branch, starting `HEAD`, exact private-index path, sealed tree OID, and every
+artifact path, mode, and blob OID. Repository `pre-commit`,
+`prepare-commit-msg`, and `commit-msg` hooks run against the private index. The
+gate accepts the temporary out-of-`HEAD` claim only when the private record,
+marker, index, complete tree delta, indexed blobs, and working claim blob all
+match.
+
+After the hooks return, the guard rechecks the complete private tree, every
+artifact's working blob, the private record, `HEAD`, and the symbolic branch.
+It creates the commit from the already sealed tree with `git commit-tree` and
+advances the branch only with `git update-ref <ref> <new> <old>`. A competing
+ref update therefore wins without admitting the claim commit. Marker, index,
+message, and lock files are removed on every exit; failure leaves the claim
+artifacts staged so the ordinary gate blocks them.
+
+Git 2.36 or newer runs hooks through `git hook run`. Older POSIX Git executes
+the configured traditional executable hook directly; older Windows Git fails
+this optional SCM path closed. A missing, ambient, stale, malformed,
+dead-owner, wrong-root, wrong-path, wrong-`HEAD`, wrong-ref, wrong-index,
+wrong-tree, or wrong-blob marker never weakens ordinary claim persistence.
 
 ## Recovery Pattern
 

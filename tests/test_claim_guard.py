@@ -112,7 +112,10 @@ def _install_runtime_gate_hook(
     hook.write_text(
         "#!/bin/sh\n"
         "python3 scripts/parallel_worktree_gate.py --check || exit 1\n"
-        f"{mutate_after_gate}",
+        "if [ -n \"${AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION:-}\" ]; then\n"
+        ":\n"
+        f"{mutate_after_gate}"
+        "fi\n",
         encoding="utf-8",
     )
     hook.chmod(0o755)
@@ -145,6 +148,49 @@ def _post_gate_mutator(relative_path: str) -> str:
         f"git add -- {relative_path!r} || exit 1\n"
         "fi\n"
     )
+
+
+def _post_gate_omitter(relative_path: str) -> str:
+    return f"git rm --cached -- {relative_path!r} || exit 1\n"
+
+
+def _transaction_dir(root: Path) -> Path:
+    path = Path(
+        _git(root, "rev-parse", "--git-path", "agent-runtime/claim-commit").stdout.strip()
+    )
+    if not path.is_absolute():
+        path = root / path
+    return path
+
+
+def _seed_unrelated_files(root: Path) -> None:
+    for name in ("staged.txt", "partial.txt", "unstaged.txt"):
+        (root / name).write_text(f"{name}: base\n", encoding="utf-8")
+    _git(root, "add", "staged.txt", "partial.txt", "unstaged.txt")
+    assert _git(root, "commit", "-m", "seed unrelated state fixtures").returncode == 0
+
+
+def _prepare_unrelated_state(root: Path) -> None:
+    (root / "staged.txt").write_text("staged.txt: staged\n", encoding="utf-8")
+    _git(root, "add", "staged.txt")
+    (root / "partial.txt").write_text("partial.txt: staged\n", encoding="utf-8")
+    _git(root, "add", "partial.txt")
+    (root / "partial.txt").write_text("partial.txt: staged plus unstaged\n", encoding="utf-8")
+    (root / "unstaged.txt").write_text("unstaged.txt: unstaged\n", encoding="utf-8")
+    (root / "untracked.txt").write_text("untracked.txt: user data\n", encoding="utf-8")
+
+
+def _unrelated_state(root: Path) -> dict[str, object]:
+    tracked = ("staged.txt", "partial.txt", "unstaged.txt")
+    return {
+        "index": _git(root, "ls-files", "--stage", "--", *tracked).stdout,
+        "cached_diff": _git(root, "diff", "--binary", "--cached", "--", *tracked).stdout,
+        "working_diff": _git(root, "diff", "--binary", "--", *tracked).stdout,
+        "files": {
+            name: (root / name).read_bytes()
+            for name in (*tracked, "untracked.txt")
+        },
+    }
 
 
 def test_is_git_repo(tmp_path):
@@ -255,7 +301,86 @@ def test_runtime_precommit_allows_exact_explicit_claim_transaction(tmp_path):
     )
     if not transaction_dir.is_absolute():
         transaction_dir = tmp_path / transaction_dir
-    assert not list(transaction_dir.glob("*.json"))
+    assert not list(transaction_dir.glob("*"))
+
+
+def test_explicit_claim_commit_uses_exact_sealed_tree_and_preserves_real_index(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _seed_unrelated_files(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    _prepare_unrelated_state(tmp_path)
+    before_user_state = _unrelated_state(tmp_path)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    artifacts = (claim, handoff, log)
+    artifact_rels = {path.relative_to(tmp_path).as_posix() for path in artifacts}
+    artifact_oids = {
+        path.relative_to(tmp_path).as_posix(): _git(
+            tmp_path,
+            "hash-object",
+            f"--path={path.relative_to(tmp_path).as_posix()}",
+            path.relative_to(tmp_path).as_posix(),
+        ).stdout.strip()
+        for path in artifacts
+    }
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    assert result["committed"] is True
+    after = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    assert after != before
+    assert result["tree"] == _git(tmp_path, "rev-parse", f"{after}^{{tree}}").stdout.strip()
+    committed_paths = set(
+        _git(
+            tmp_path,
+            "diff-tree",
+            "--no-commit-id",
+            "--name-only",
+            "-r",
+            before,
+            after,
+        ).stdout.splitlines()
+    )
+    assert committed_paths == artifact_rels
+    for rel, expected_oid in artifact_oids.items():
+        assert _git(tmp_path, "rev-parse", f"{after}:{rel}").stdout.strip() == expected_oid
+        assert _git(tmp_path, "diff", "--quiet", "HEAD", "--", rel).returncode == 0
+    assert _unrelated_state(tmp_path) == before_user_state
+    gate = subprocess.run(
+        [sys.executable, "scripts/parallel_worktree_gate.py", "--check"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert gate.returncode == 0, gate.stdout
+    assert "block=0" in gate.stdout
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_explicit_claim_commit_artifacts_survive_reset_and_clean(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+    assert result["ok"] is True, result
+
+    assert _git(tmp_path, "reset", "--hard", "HEAD").returncode == 0
+    assert _git(tmp_path, "clean", "-fd").returncode == 0
+    assert all(path.exists() for path in (claim, handoff, log))
 
 
 @pytest.mark.parametrize(
@@ -273,10 +398,13 @@ def test_runtime_precommit_rejects_artifact_restage_after_successful_gate(
     """The hook-reviewed blob set, not merely its paths, must reach HEAD."""
 
     _init_repo(tmp_path)
+    _seed_unrelated_files(tmp_path)
     _install_runtime_gate_hook(
         tmp_path,
         mutate_after_gate=_post_gate_mutator(relative_path),
     )
+    _prepare_unrelated_state(tmp_path)
+    before_user_state = _unrelated_state(tmp_path)
     claim, handoff, log = _write_runtime_claim(tmp_path)
     before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
 
@@ -297,6 +425,7 @@ def test_runtime_precommit_rejects_artifact_restage_after_successful_gate(
         handoff.relative_to(tmp_path).as_posix(),
         log.relative_to(tmp_path).as_posix(),
     }.issubset(staged)
+    assert _unrelated_state(tmp_path) == before_user_state
     gate = subprocess.run(
         [sys.executable, "scripts/parallel_worktree_gate.py", "--check"],
         cwd=tmp_path,
@@ -311,6 +440,118 @@ def test_runtime_precommit_rejects_artifact_restage_after_successful_gate(
     if not transaction_dir.is_absolute():
         transaction_dir = tmp_path / transaction_dir
     assert not list(transaction_dir.glob("*"))
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "agents/runtime/task_claims/CLAIM-runtime-hook.handoff.md",
+        "agents/runtime/task_claims/CLAIM-runtime-hook.log.md",
+    ],
+)
+def test_explicit_claim_transaction_rejects_sidecar_omission(
+    tmp_path: Path,
+    relative_path: str,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(
+        tmp_path,
+        mutate_after_gate=_post_gate_omitter(relative_path),
+    )
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["reason"] == "claim-commit-transaction-tree-changed"
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_explicit_claim_transaction_cleans_private_files_on_hook_failure(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path, mutate_after_gate="exit 23\n")
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["reason"].startswith("git-pre-commit-failed:")
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    original_git = claim_guard._git
+    race: dict[str, str] = {}
+
+    def racing_git(
+        root: Path,
+        args: list[str],
+        *,
+        env: dict[str, str] | None = None,
+    ) -> dict[str, object]:
+        if args and args[0] == "update-ref" and not race:
+            ref_name = args[3]
+            old_oid = args[5]
+            tree_oid = original_git(root, ["rev-parse", f"{old_oid}^{{tree}}"], env=env)[
+                "out"
+            ].strip()
+            concurrent = original_git(
+                root,
+                [
+                    "commit-tree",
+                    tree_oid,
+                    "-p",
+                    old_oid,
+                    "-m",
+                    "simulated concurrent branch writer",
+                ],
+                env=env,
+            )["out"].strip()
+            moved = original_git(
+                root,
+                ["update-ref", ref_name, concurrent, old_oid],
+                env=env,
+            )
+            assert moved["code"] == 0
+            race["commit"] = concurrent
+        return original_git(root, args, env=env)
+
+    monkeypatch.setattr(claim_guard, "_git", racing_git)
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["reason"].startswith("claim-commit-ref-update-failed:")
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == race["commit"]
+    rel = claim.relative_to(tmp_path).as_posix()
+    assert _git(tmp_path, "cat-file", "-e", f"HEAD:{rel}").returncode != 0
+    assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
 def test_explicit_claim_transaction_rejects_detached_head(tmp_path: Path) -> None:
