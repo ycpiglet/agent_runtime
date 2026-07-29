@@ -211,6 +211,47 @@ def test_exception_path_must_be_safe_and_common(tmp_path: Path) -> None:
     assert "mirror:invalid-exception-path:../escape.py" in result.stdout
 
 
+def test_duplicate_exception_key_blocks(tmp_path: Path) -> None:
+    source, template = _write_pair(
+        tmp_path, "variant.py", "source\n", "template\n"
+    )
+    digest_source = _digest(source)
+    digest_template = _digest(template)
+    first = json.dumps(
+        {
+            "variant.py": {
+                "reason": "First duplicate entry must not be silently overwritten.",
+                "source_sha256": digest_source,
+                "template_sha256": digest_template,
+            }
+        }
+    )
+    second = json.dumps(
+        {
+            "variant.py": {
+                "reason": "Second duplicate entry must be rejected before validation.",
+                "source_sha256": digest_source,
+                "template_sha256": digest_template,
+            }
+        }
+    )
+    contract = (
+        '{"schema":"agent-runtime-template-mirror-contract/v1",'
+        f'"intentional_divergences":{first},'
+        f'"intentional_divergences":{second}}}'
+    )
+    contract_path = (
+        tmp_path / "agents" / "project" / "TEMPLATE-MIRROR-CONTRACT.json"
+    )
+    contract_path.parent.mkdir(parents=True, exist_ok=True)
+    contract_path.write_text(contract + "\n", encoding="utf-8")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:duplicate-contract-key:intentional_divergences" in result.stdout
+
+
 def test_source_owner_chain_runs_mirror_gate_and_template_documents_omission() -> None:
     root_gate = (ROOT_SCRIPTS / "owner_governance_gate.py").read_text(
         encoding="utf-8"

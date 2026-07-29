@@ -26,6 +26,23 @@ MIN_REASON_LENGTH = 20
 MAX_REASON_LENGTH = 500
 
 
+class DuplicateContractKey(ValueError):
+    """Raised when JSON object syntax repeats a key."""
+
+    def __init__(self, key: str) -> None:
+        super().__init__(key)
+        self.key = key
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise DuplicateContractKey(key)
+        payload[key] = value
+    return payload
+
+
 def _digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -61,7 +78,13 @@ def _load_contract(path: Path, findings: list[str]) -> dict[str, Any]:
         findings.append(f"mirror:missing-contract:{CONTRACT_REL.as_posix()}")
         return {}
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_unique_object,
+        )
+    except DuplicateContractKey as exc:
+        findings.append(f"mirror:duplicate-contract-key:{exc.key}")
+        return {}
     except (OSError, json.JSONDecodeError) as exc:
         findings.append(f"mirror:invalid-contract-json:{CONTRACT_REL.as_posix()}:{exc}")
         return {}
