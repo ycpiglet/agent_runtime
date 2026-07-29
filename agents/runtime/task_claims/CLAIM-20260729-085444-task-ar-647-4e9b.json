@@ -41,12 +41,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-647",
   "branch": "codex/unit-task-ar-647-001-wave",
   "claimed_at": "2026-07-29T08:54:44+09:00",
-  "last_heartbeat": "2026-07-29T08:54:44+09:00",
-  "updated_at": "2026-07-29T08:54:44+09:00",
+  "last_heartbeat": "2026-07-29T09:42:43+09:00",
+  "updated_at": "2026-07-29T09:42:43+09:00",
   "expires_at": "2026-07-29T14:54:44+09:00",
   "lease": {
     "claimed_at": "2026-07-29T08:54:44+09:00",
-    "heartbeat_at": "2026-07-29T08:54:44+09:00",
+    "heartbeat_at": "2026-07-29T09:42:43+09:00",
     "expires_at": "2026-07-29T14:54:44+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260729-085444-task-ar-647-4e9b.handoff.md",
@@ -107,6 +107,7 @@
     "tests/test_owner_governance_chain_parity.py",
     "tests/test_update_notify.py",
     "tests/test_notify_routing.py",
+    "tests/test_orchestrator_atomic_writes.py",
     "tests/fixtures/host/agent_runtime.lock.json"
   ]
 }
