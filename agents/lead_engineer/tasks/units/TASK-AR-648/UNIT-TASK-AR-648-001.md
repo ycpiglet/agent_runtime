@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T15:12:29+09:00
+updated_at: 2026-07-29T15:36:41+09:00
+started_at: 2026-07-29T15:36:41+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md
 created_by: codex-root-v080-planner
 summary: Run a reversible, evidence-first core plus web-content adoption pilot in Bean Wiki
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-153641-task-ar-648-648001.json
 context: Bean Wiki has strong host-owned editorial agents and publishing gates but no common task/claim/Compound/Scribe/model-routing harness. The pinned core plus web-content projection is 243 files and web-content contributes no profile-specific file, so adoption weight and overlay execution must be measured rather than assumed.
 inputs:
   - bean-wiki@357eee4fd8c29c33a949adbe3a0ffa80c874bf42:AGENTS.md

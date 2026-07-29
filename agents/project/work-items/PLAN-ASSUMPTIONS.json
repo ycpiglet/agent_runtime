@@ -931,12 +931,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "016e0962be402439cd1b61d0829d1e1dc9b24f0c51841f9af1aa3f672e2d756a"
+          "value": "6983e02c941e107add0dcc4b72030fd3973d71d93bb1bca0da1eeafbc4fc0f31"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md",
-          "value": "b709fa018f734d069fdd8f66becd824f177ba3005cc3b9ca9d3fe0850c36485b"
+          "value": "e9f75f4705ad03411b4adeffb82a3035e95a323f88059510ee0bdd22d06222e1"
         },
         {
           "kind": "sha256",
@@ -1085,7 +1085,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md",
-      "recorded_at": "2026-07-29T15:20:04+09:00",
+      "recorded_at": "2026-07-29T15:39:28+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1301,5 +1301,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T15:20:04+09:00"
+  "updated_at": "2026-07-29T15:39:28+09:00"
 }
