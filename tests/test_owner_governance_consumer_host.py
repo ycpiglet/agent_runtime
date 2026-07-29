@@ -10,7 +10,9 @@ source repo.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -89,3 +91,112 @@ def test_source_repo_never_skips_any_chain_entry() -> None:
     assert chain, "failed to parse the check chain"
     for script in chain:
         assert module.skip_reason([script, "--check"]) == "", script
+
+
+def test_consumer_owner_gate_runs_ownership_aware_continuity_check(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    gate = _load_gate_from(tmp_path)
+    template_root = REPO_ROOT / "src" / "agent_runtime" / "templates" / "project"
+    shutil.copyfile(
+        template_root / "scripts" / "continuity_contract_gate.py",
+        tmp_path / "scripts" / "continuity_contract_gate.py",
+    )
+    shutil.copytree(
+        template_root / "scripts" / "agent_runtime",
+        tmp_path / "scripts" / "agent_runtime",
+    )
+    shutil.copyfile(template_root / "AGENT_RUNTIME.md", tmp_path / "AGENT_RUNTIME.md")
+    (tmp_path / "README.md").write_text("# Consumer product\n", encoding="utf-8")
+    (tmp_path / "AGENTS.md").write_text("# Host agent rules\n", encoding="utf-8")
+    (tmp_path / "CLAUDE.md").write_text("# Host Claude rules\n", encoding="utf-8")
+    pointer = tmp_path / "agents" / "project" / "NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(
+        "\n".join(
+            [
+                "schema: agent-runtime-next-session-pointer/v1",
+                "updated_at: 2026-07-30T00:00:00+09:00",
+                "current_state:",
+                "  task_set_id: TASKSET-CONSUMER",
+                "  step_index: 1",
+                "  step_total: 1",
+                "  status_text: ready",
+                "active_work:",
+                "  current_agents: []",
+                "resume:",
+                "  active_task: TASK-CONSUMER",
+                "roles:",
+                "  owner: Owner",
+                "pointers:",
+                "  active_claims: []",
+                "rules:",
+                "  fail_closed: true",
+                "verification:",
+                "  required: []",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "agent_runtime.yml").write_text(
+        "\n".join(
+            [
+                "schema: agent-runtime-config/v2",
+                "project: consumer-host",
+                "upstream:",
+                "  package: agent_runtime",
+                "  remote_url: https://github.com/ycpiglet/agent_runtime.git",
+                "  ref: exact-product",
+                "sync:",
+                "  mode: check-diff-apply",
+                "  allow_silent_overwrite: false",
+                "profiles:",
+                "  - core",
+                "ownership:",
+                "  host_owned:",
+                "    - AGENTS.md",
+                "    - CLAUDE.md",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    def digest(rel: str) -> str:
+        return f"sha256:{hashlib.sha256((tmp_path / rel).read_bytes()).hexdigest()}"
+
+    lock = {
+        "schema": "agent-runtime-lock/v2",
+        "project": "consumer-host",
+        "upstream": {
+            "package": "agent_runtime",
+            "remote_url": "https://github.com/ycpiglet/agent_runtime.git",
+            "ref": "exact-product",
+        },
+        "installed": {
+            "ownership": {
+                "AGENTS.md": "host_owned",
+                "AGENT_RUNTIME.md": "managed",
+                "CLAUDE.md": "host_owned",
+                "agents/project/NEXT-SESSION-POINTER.yml": "seed_once",
+                "scripts/continuity_contract_gate.py": "managed",
+            },
+            "managed_files": {
+                "AGENT_RUNTIME.md": digest("AGENT_RUNTIME.md"),
+                "scripts/continuity_contract_gate.py": digest(
+                    "scripts/continuity_contract_gate.py"
+                ),
+            },
+            "seeded": ["agents/project/NEXT-SESSION-POINTER.yml"],
+        },
+    }
+    (tmp_path / "agent_runtime.lock.json").write_text(
+        json.dumps(lock, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    assert gate.skip_reason(["scripts/continuity_contract_gate.py", "--check"]) == ""
+    assert gate.run(["scripts/continuity_contract_gate.py", "--check"]) == 0
+    assert "continuity-contract-gate: pass" in capsys.readouterr().out
