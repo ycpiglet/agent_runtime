@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T22:50:26+09:00
-record_count: 1053
+generated_at: 2026-07-29T22:57:48+09:00
+record_count: 1054
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1053` review and evidence records under `reviews/`.
+- Summary: indexed `1054` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1053` files |
+| Reviews covered | pass | `1054` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1083,6 +1083,7 @@ record_count: 1053
 | `reviews/W4B-2026-07-29-unit-task-ar-648-003-r2.md` | `W4B-2026-07-29-unit-task-ar-648-003-r2` | md | passed | pass | TASK-AR-648 UNIT-003 Independent W4b R2 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-003.md` | `W4B-2026-07-29-unit-task-ar-648-003` | md | blocked | fail | TASK-AR-648 UNIT-003 독립 W4b 재검증 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-004.md` | `W4B-2026-07-29-unit-task-ar-648-004` | md | failed | block | TASK-AR-648 UNIT-004 Independent W4b |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md` | `W4B-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Independent W4b R4 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |

@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T22:47:05+09:00
+updated_at: 2026-07-29T22:57:32+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -40,6 +40,7 @@ inputs:
   - reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md
   - reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md
   - reviews/W4A-2026-07-29-unit-task-ar-648-005-r4.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md
   - agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json
@@ -109,9 +110,12 @@ defect_signatures:
   - defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89
 evidence_refs:
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json
-  - reviews/W4B-2026-07-29-unit-task-ar-648-005.md
   - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310.json
+review_refs:
+  - reviews/W4A-2026-07-29-unit-task-ar-648-005-r3.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-005.md
   - reviews/W4A-2026-07-29-unit-task-ar-648-005-r4.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md
 verified_at: 2026-07-29T22:43:10+09:00
 verified_by: codex-root-task-ar-648-005
 ---
