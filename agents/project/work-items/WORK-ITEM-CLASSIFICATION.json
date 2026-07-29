@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T06:31:13+09:00",
+  "generated_at": "2026-07-30T07:20:23+09:00",
   "record_count": 534,
   "finding_count": 0,
   "findings": [],
@@ -5635,7 +5635,7 @@
       "title": "Determine, with replayable evidence, whether reversible Agent Runtime adoption preser…",
       "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-648-001",
@@ -5811,7 +5811,7 @@
       "title": "UNIT-TASK-AR-648-016 - Bean Wiki Green Replay Attempt 6",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
       "parent_id": "TASK-AR-648",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-649",

@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-task-ar-648-20260730072800",
+  "work_id": "TASK-AR-648",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-648.md",
+  "kind": "task",
+  "task_id": "TASK-AR-648",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T07:28:00+09:00",
+  "verified_by": "codex-root-v080-planner",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_work_item_classifier.py tests/test_state_sync_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:19:28+09:00",
+      "finished_at": "2026-07-30T07:19:39+09:00",
+      "stdout": "........................................................................ [ 34%]\n........................................................................ [ 68%]\n..................................................................       [100%]\n210 passed in 11.26s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:19:39+09:00",
+      "finished_at": "2026-07-30T07:19:41+09:00",
+      "stdout": "........................................................................ [ 42%]\n........................................................................ [ 84%]\n...........................                                              [100%]\n171 passed in 1.75s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/pilot_acceptance.py --host bean-wiki --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:19:41+09:00",
+      "finished_at": "2026-07-30T07:19:41+09:00",
+      "stdout": "pilot-acceptance: pass\nhost=bean-wiki\nfixture=tests/fixtures/pilots/bean-wiki/evidence.json\nfindings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_pilot_acceptance.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:19:41+09:00",
+      "finished_at": "2026-07-30T07:19:42+09:00",
+      "stdout": ".........................                                                [100%]\n25 passed in 0.20s\n",
+      "stderr": ""
+    }
+  ]
+}

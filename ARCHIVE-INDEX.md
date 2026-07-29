@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-07-30
-archived_count: 296
+archived_count: 297
 ---
 
 # Archived Task Files
 
-- `296` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `297` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -294,6 +294,7 @@ archived_count: 296
 | `TASK-AR-590` | `ac39be71-7ce…` | `TASKSET-AR-VISUAL-ASSET-ADOPTION` | done | 2026-06-20T01:04:15+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | 2026-06-23T00:00:00+09:00 | Add recolorable empty/error/loading illustrations, accessible data-viz palette tokens… |
 | `TASK-AR-591` | `a5da8af2-1b7…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T08:12:15+09:00 | 2026-06-20T08:25:00+09:00 | 2026-06-20T08:25:00+09:00 | Ensure the AR-587..590 visual components actually appear in the relevant live console… |
 | `TASK-AR-592` | `57b81740-6ec…` | `TASKSET-AR-VISUAL-SYSTEM-INTEGRATION` | completed | 2026-06-20T05:18:36+09:00 | 2026-06-20T07:13:38+09:00 | 2026-06-20T07:40:00+09:00 | 2026-06-20T07:40:00+09:00 | Ensure the new visual components meet WCAG AA (contrast, roles, labels, keyboard, red… |
+| `TASK-AR-648` | `a6d807f7-f61…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-29T15:36:41+09:00 | 2026-07-30T07:30:00+09:00 | 2026-07-30T07:30:00+09:00 | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
 | `TASK-AR-639` | `5affd6b2-dab…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T17:55:15+09:00 | 2026-07-28T19:18:44+09:00 | 2026-07-28T19:18:44+09:00 | Make registered work executable and make implemented-but-unclaimed work visible witho… |
 | `TASK-AR-640` | `cefa88c8-fab…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T19:48:21+09:00 | 2026-07-28T20:45:30+09:00 | 2026-07-28T20:45:30+09:00 | Represent shared capabilities and host ownership without requiring a project-specific… |
 | `TASK-AR-643` | `34e50cc4-74b…` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | 2026-07-28T16:36:01+09:00 | 2026-07-28T23:42:28+09:00 | 2026-07-29T00:56:59+09:00 | 2026-07-29T00:56:59+09:00 | Guarantee that every capability advertised to a clean host has all executable depende… |

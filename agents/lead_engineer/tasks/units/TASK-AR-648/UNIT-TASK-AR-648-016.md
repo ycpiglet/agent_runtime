@@ -9,11 +9,11 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T06:26:06+09:00
-updated_at: 2026-07-30T06:29:54+09:00
+updated_at: 2026-07-30T07:25:00+09:00
 started_at: 2026-07-30T06:29:54+09:00
 origin_type: pilot_replay
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-015.md
@@ -95,6 +95,18 @@ verification:
   - PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check
 handoff: Report exact Runtime product/lifecycle and Bean baselines, product/template/scripts trees, target/control/live-observation identities and immutable snapshots, raw and sanitized isolation decisions and digests, selection and ownership counts, every preserved digest, continuity and managed-contract proof, delayed taskset proof, three trace/routing records, exact Compound retrieval, restart process identities, Scribe projection, editorial outcome separated from Runtime outcome, Bean validation, Git HEAD invariants, integer-zero external effects, contract identity and semantic digest, W4a, and independent W4b.
 stop_condition: Stop immediately on any P0 or P1, Runtime product drift, consumer commit, frozen-control mutation, observed write outside attempt 6, unsupported causality attribution, host/content overwrite, missing or ambiguous Runtime/template provenance, continuity fail-open, host-document workaround, unverified claim, missing or extra task trace, more than one editorial specialist, unrelated Compound retrieval, unsupported model/cost claim, raw validation failure, sanitized-path leak, contract ambiguity, dependency installation, provider-live call, external effect, Allimbot worktree creation, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T07:20:00+09:00
+verified_by: codex-root-v080-planner
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000.json
+review_refs:
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md
+  - reviews/W4A-2026-07-30-unit-task-ar-648-016.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-016.md
+resolution: done
+completed_at: 2026-07-30T07:25:00+09:00
+closed_by: codex-root-v080-planner
+measurement_unavailable_reason: The offline pilot did not capture reliable wall-clock effort or provider token/cost telemetry; unknown values must not be coerced to zero.
 ---
 
 # UNIT-TASK-AR-648-016 - Bean Wiki Green Replay Attempt 6
@@ -178,6 +190,19 @@ verdict, Compound/restart/Scribe evidence, raw and sanitized evidence digests,
 exact contract and semantic digest, zero-effect counters, W4a, and fresh
 independent W4b.
 
+## Outcome
+
+- Canonical Unit verification passed all 10 declared commands.
+- W4a and fresh independent W4b both approve with P0 0, P1 0, and P2 3.
+- Bean remains at `357eee4fd8c29c33a949adbe3a0ffa80c874bf42`
+  with no tracked consumer diff or commit.
+- Attempt-6 raw and portable isolation pass with zero findings, and all three
+  exact Bean acceptance contracts retain zero-finding behavior.
+- Bean Wiki is independently green for Runtime adoption. The bounded article
+  review remains separately `REVISE` and grants no publication authority.
+- Allimbot may begin only as a newly registered pilot after normal closeout and
+  claim release. Versioning and every external release surface remain blocked.
+
 ## Promotion Rule
 
 Bean becomes independently green only if both review stages approve with no
@@ -192,3 +217,20 @@ approval.
 - No provider-live execution or unsupported model/cost/savings observation.
 - No consumer commit and no release, version, tag, package, remote, publish,
   or deployment action.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T07:25:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The offline pilot did not capture reliable wall-clock effort or provider token/cost telemetry; unknown values must not be coerced to zero.
+- Closed by: `codex-root-v080-planner`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000.json`
+- Reviews:
+  - `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md`
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-016.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-016.md`
+<!-- work-close:end -->

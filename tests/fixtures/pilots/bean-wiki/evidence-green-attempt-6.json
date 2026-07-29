@@ -1,0 +1,335 @@
+{
+  "schema": "agent-runtime-pilot-evidence/v1",
+  "host": "bean-wiki",
+  "pilot_id": "bean-wiki-v080-green-attempt-6",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+    "runtime_commit": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+    "runtime_product_tree": "b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f",
+    "runtime_template_tree": "e45e7aaeeb0639c24f5e9e80c18d5e203b98ba8f",
+    "runtime_template_scripts_tree": "62311b7847f66206a2a33e4bd497750bf074384f"
+  },
+  "bootstrap": {
+    "upstream_claim_id": "CLAIM-20260730-062954-task-ar-648-ar648016",
+    "runtime_lifecycle_commit": "57c7ba45ad5d7c56fed2d7bf5cebb4aee60e58ae",
+    "runtime_registration_boundary": "2025bc75a1c044e69e23bf975ee1243298db7b2c",
+    "runtime_claim_boundary": "1134b3ac2ae337ff3f054270b3d9d4881f74ab41",
+    "unmapped_diff_count": 0,
+    "consumer_commit_count": 0,
+    "consumer_push_count": 0
+  },
+  "adoption": {
+    "profiles": [
+      "core",
+      "web-content"
+    ],
+    "selected_template_files": 246,
+    "web_content_incremental_files": 0,
+    "ownership": {
+      "managed": 239,
+      "seed_once": 5,
+      "host_owned_excluded": 2
+    },
+    "initial_reconcile": {
+      "safe_updates": 244,
+      "preserved": 0,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "apply_safe": {
+      "applied": 244,
+      "remaining_conflicts": 0
+    },
+    "immediate_post_apply_reconcile": {
+      "safe_updates": 0,
+      "preserved": 244,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "post_work_registration_reconcile": {
+      "safe_updates": 0,
+      "preserved": 244,
+      "excluded": 2,
+      "conflicts": 0,
+      "conflict_paths": []
+    },
+    "final_reconcile": {
+      "safe_updates": 0,
+      "preserved": 244,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "lock_schema": "agent-runtime-lock/v2",
+    "package_version": "0.7.0",
+    "template_digest": "sha256:236d6f1cabf57cc87da1346df8c55a5f96615406c2ecbd5833e2dd47ccf09c01"
+  },
+  "preservation": {
+    "aggregate_algorithm": "find declared relative paths -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum",
+    "host_asset_count": 16,
+    "host_asset_manifest_sha256": "d09b7a36a2e329a1ca47110f53dbcb8ae6303de6b72bdfe8e278cd09aea94107",
+    "unexpected_overwrite_count": 0,
+    "host_assets": [
+      {
+        "path": ".claude/agents/media-curator.md",
+        "before": "c3126d325cbda56ce5ff4dc91f0bc0070d41d6937d4e326931da8d072789cbfa",
+        "after": "c3126d325cbda56ce5ff4dc91f0bc0070d41d6937d4e326931da8d072789cbfa"
+      },
+      {
+        "path": ".claude/agents/persona-barista.md",
+        "before": "4f2854b55b9486092482a51566a240a530a7e51f5014fd648740357a77a3ed99",
+        "after": "4f2854b55b9486092482a51566a240a530a7e51f5014fd648740357a77a3ed99"
+      },
+      {
+        "path": ".claude/agents/persona-farmer.md",
+        "before": "f4ee57730940e95847587be252f37cf30cb0dc604ae313bc351fde75cb77ecb1",
+        "after": "f4ee57730940e95847587be252f37cf30cb0dc604ae313bc351fde75cb77ecb1"
+      },
+      {
+        "path": ".claude/agents/persona-interviewer.md",
+        "before": "7c19bfc77c48a36063ddb162080d79c7a7990a3cb09a5345d3da804af39582f0",
+        "after": "7c19bfc77c48a36063ddb162080d79c7a7990a3cb09a5345d3da804af39582f0"
+      },
+      {
+        "path": ".claude/agents/persona-q-grader.md",
+        "before": "3e0634ea790fe40e0fdf3c1aa38dac754376780642fcf2810be1962b3baa6ee7",
+        "after": "3e0634ea790fe40e0fdf3c1aa38dac754376780642fcf2810be1962b3baa6ee7"
+      },
+      {
+        "path": ".claude/agents/persona-roaster.md",
+        "before": "09072bb9d7c8075a90618b8245c270bd7185ffdcebdb8ece3abc4d9d2ee1972a",
+        "after": "09072bb9d7c8075a90618b8245c270bd7185ffdcebdb8ece3abc4d9d2ee1972a"
+      },
+      {
+        "path": ".claude/agents/persona-writer.md",
+        "before": "632e152a8bb5b34b65e4e21e085788af991d33144bdb4235fcc2e8cfc2cdb4ea",
+        "after": "632e152a8bb5b34b65e4e21e085788af991d33144bdb4235fcc2e8cfc2cdb4ea"
+      },
+      {
+        "path": ".claude/agents/research-librarian.md",
+        "before": "45adfbf9ead20c5c3a15ad2a93fe11a0350945e2b9b19db63d0bb4e57cbda28b",
+        "after": "45adfbf9ead20c5c3a15ad2a93fe11a0350945e2b9b19db63d0bb4e57cbda28b"
+      },
+      {
+        "path": ".claude/skills/enrich-article/SKILL.md",
+        "before": "c0d256df34e6df723e7cd2568b93f477ed2a9fee51188a6ff6008ffb26a956d9",
+        "after": "c0d256df34e6df723e7cd2568b93f477ed2a9fee51188a6ff6008ffb26a956d9"
+      },
+      {
+        "path": ".claude/skills/review-article/SKILL.md",
+        "before": "78d209052f68f4d2826ee0eefbcc2ede68e7c1e72bd6c2ee6d8bce04ffc72dc0",
+        "after": "78d209052f68f4d2826ee0eefbcc2ede68e7c1e72bd6c2ee6d8bce04ffc72dc0"
+      },
+      {
+        "path": ".claude/skills/write-article/SKILL.md",
+        "before": "4249b22af58f299a14c26be5c68ff10f06e9fbef467595cc1685fcf99a2488bc",
+        "after": "4249b22af58f299a14c26be5c68ff10f06e9fbef467595cc1685fcf99a2488bc"
+      },
+      {
+        "path": "AGENTS.md",
+        "before": "e3447d84251880fb34cfae09131cb4c57471529bbfe60976a3245793cf621627",
+        "after": "e3447d84251880fb34cfae09131cb4c57471529bbfe60976a3245793cf621627"
+      },
+      {
+        "path": "BACKLOG.md",
+        "before": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591",
+        "after": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591"
+      },
+      {
+        "path": "CLAUDE.md",
+        "before": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+        "after": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+      },
+      {
+        "path": "docs/AGENT-EDITORIAL-OPS.md",
+        "before": "127196d34be808966baf4d03101288f2f00389c76561d62525d216f54387c859",
+        "after": "127196d34be808966baf4d03101288f2f00389c76561d62525d216f54387c859"
+      },
+      {
+        "path": "docs/EDITORIAL.md",
+        "before": "1b49396acb2156dcbd71e9916b33fcbaf6c768eb7f326d0709caabdc284a547f",
+        "after": "1b49396acb2156dcbd71e9916b33fcbaf6c768eb7f326d0709caabdc284a547f"
+      }
+    ],
+    "content": {
+      "file_count": 125,
+      "before": "650644e5398b955d87b36d3f78bde97921f297b8df707b0d19d84074d8f98c71",
+      "after": "650644e5398b955d87b36d3f78bde97921f297b8df707b0d19d84074d8f98c71"
+    },
+    "readme_sha256": "2cb43bd3e0fae3f835adf32d5f58784fb55ffc91ad0f81847f539d5a22f648a1",
+    "article_sha256": "a4c431e1ad5eb77d260c37e19b2ceb3637b43f2c606a2b87b81e99857354f4d6",
+    "article_index_sha256": "0f635c697d019744a8a9abfbc357723261537a088308d05692ea87a0edc476b0"
+  },
+  "expected_task_count": 3,
+  "tasks": [
+    {
+      "task_id": "TASK-AR-201",
+      "unit_id": "UNIT-TASK-AR-201-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-063823-task-ar-201-green6201",
+        "task_id": "TASK-AR-201",
+        "unit_id": "UNIT-TASK-AR-201-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_process",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/adoption-verification-green-6.json",
+        "agents/host/pilot/reviews/W4A-TASK-AR-201.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-201.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-202",
+      "unit_id": "UNIT-TASK-AR-202-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-064520-task-ar-202-green6202",
+        "task_id": "TASK-AR-202",
+        "unit_id": "UNIT-TASK-AR-202-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "worker_standard",
+        "resolved_provider_tier": "sonnet",
+        "execution_surface": "codex_subagent_specialist_review",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/reviews/coffee-flavor-wheel-green-6.md",
+        "agents/host/pilot/reviews/W4A-TASK-AR-202.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-202.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-203",
+      "unit_id": "UNIT-TASK-AR-203-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-065520-task-ar-203-green6203",
+        "task_id": "TASK-AR-203",
+        "unit_id": "UNIT-TASK-AR-203-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_processes",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/restart-recovery-green-6.json",
+        "agents/host/pilot/reviews/W4A-TASK-AR-203.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-203.md"
+      ]
+    }
+  ],
+  "editorial": {
+    "runtime_trace_status": "passed",
+    "article_verdict": "REVISE",
+    "publication_authorized": false,
+    "finding_counts": {
+      "P0": 2,
+      "P1": 2,
+      "P2": 1
+    },
+    "specialist_invocation_count": 1,
+    "specialist_artifact_sha256": "91edb49228a7fe4e369e944c5ed8d51ad220c002a243f5a0dd15450b134bd7c7"
+  },
+  "compound": {
+    "negative_fixture_matched": true,
+    "signature": "defect:restart-checkpoint-missing-before-pre-compact-pe:e547dfe8f09a382b",
+    "record_id": "COMPOUND-20260730-065600-restart-continuity-requires-a-persisted-pre-comp-c32dc434e47c",
+    "retrieval_match_count": 1,
+    "unrelated_match_count": 0,
+    "first_match_score": 180
+  },
+  "restart": {
+    "writer_pid": 1356811,
+    "reader_pid": 1357293,
+    "distinct_processes": true,
+    "same_task": true,
+    "same_claim": true,
+    "checkpoint_sha256": "98e9d286e8d8ac4069d8dfc34d9cf7b0f58a8f5055941f37b362c649481283d2",
+    "resume_check_clean": true
+  },
+  "scribe": {
+    "projection_status": "fresh",
+    "readiness": "ready",
+    "closure_blocking": false,
+    "source_state": "overdue",
+    "hot_count": 74,
+    "backlog_before": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591",
+    "backlog_after": "c8c323352fcaf1b477094afb86f789728b2f85cc7f23429a9462af1c1dfad591",
+    "projection_sha256": "45e58ac59b7dde48e639f97a06d7d59845d0bff0742f37aea78dfbfda4a8a6e9"
+  },
+  "isolation": {
+    "raw_evidence_sha256": "1365fd1b1bf6f96e1f273b773fdf8ab7ef30a79a98e4bbd1396490a1c757fa2b",
+    "portable_artifact": "tests/fixtures/pilots/bean-wiki/isolation-green-attempt-6.json",
+    "observed_write_checkout_ids": [
+      "bean-attempt-6"
+    ],
+    "raw_status": "pass",
+    "raw_block_count": 0,
+    "raw_watch_count": 0,
+    "portable_block_count": 0
+  },
+  "verification": {
+    "lock_findings": 0,
+    "final_reconcile_conflicts": 0,
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "check_content_returncode": 0,
+    "check_editorial_returncode": 0,
+    "build_content": {
+      "status": "not_run",
+      "reason": "command writes src/content/articles/index.ts and the pilot stop boundary allows content reads only"
+    },
+    "state_sync_blockers": 0,
+    "work_item_classifier_findings": 0,
+    "taskset_gate_findings": 0,
+    "isolation_blockers": 0,
+    "isolation_watches": 0
+  },
+  "findings": [],
+  "external_effects": {
+    "publish": 0,
+    "deploy": 0,
+    "origin_push": 0,
+    "host_commit": 0,
+    "credential_read": 0,
+    "network_delivery": 0,
+    "package_install": 0,
+    "provider_live_call": 0,
+    "content_mutation": 0
+  }
+}

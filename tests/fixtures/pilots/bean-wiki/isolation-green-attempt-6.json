@@ -1,0 +1,123 @@
+{
+  "checkouts": [
+    {
+      "after": {
+        "head": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none",
+      "id": "runtime-product",
+      "role": "live_observation"
+    },
+    {
+      "after": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "b4c82859a0ee4304abab515d643d5f950ee257802e6ac0b5e4948ed6f64c21aa",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "authorized_target",
+      "id": "bean-attempt-6",
+      "role": "disposable_target"
+    },
+    {
+      "after": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none",
+      "id": "bean-control-6",
+      "role": "frozen_control"
+    },
+    {
+      "after": {
+        "head": "808309a7b41b80b901e79a1fa6ad546871187ab9",
+        "status_sha256": "a4590744fedfc3dd9fbd91b87f30ee40f878d8a51c92651a2e05713d41575c15",
+        "tracked_diff_sha256": "b2199aefc8965e1c6f8041eb53c7bb23530924581f9c79d5bec4cc1cf63c56a4"
+      },
+      "before": {
+        "head": "808309a7b41b80b901e79a1fa6ad546871187ab9",
+        "status_sha256": "a4590744fedfc3dd9fbd91b87f30ee40f878d8a51c92651a2e05713d41575c15",
+        "tracked_diff_sha256": "b2199aefc8965e1c6f8041eb53c7bb23530924581f9c79d5bec4cc1cf63c56a4"
+      },
+      "change_attribution": "none",
+      "id": "bean-primary",
+      "role": "live_observation"
+    },
+    {
+      "after": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "fda3bb54bfd21e27c4de46e4fc4213fff5cd9a3c86015337b3086203c79d87a5",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+        "status_sha256": "fda3bb54bfd21e27c4de46e4fc4213fff5cd9a3c86015337b3086203c79d87a5",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none",
+      "id": "bean-attempt-5",
+      "role": "live_observation"
+    },
+    {
+      "after": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "d8eb922e732b0fb02ad797e80c59fca88b615ca6bea69de82c02690b7c49152e",
+        "tracked_diff_sha256": "57e2da29974718282aaa57c53ba32d31b308be0af2685ed59c33df61c69e496b"
+      },
+      "before": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "d8eb922e732b0fb02ad797e80c59fca88b615ca6bea69de82c02690b7c49152e",
+        "tracked_diff_sha256": "57e2da29974718282aaa57c53ba32d31b308be0af2685ed59c33df61c69e496b"
+      },
+      "change_attribution": "none",
+      "id": "autofolio-primary",
+      "role": "live_observation"
+    },
+    {
+      "after": {
+        "head": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+        "status_sha256": "0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b",
+        "tracked_diff_sha256": "c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69"
+      },
+      "before": {
+        "head": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+        "status_sha256": "0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b",
+        "tracked_diff_sha256": "c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69"
+      },
+      "change_attribution": "none",
+      "id": "allimbot-primary",
+      "role": "live_observation"
+    }
+  ],
+  "evidence_mode": "sanitized_projection",
+  "observed_write_checkout_ids": [
+    "bean-attempt-6"
+  ],
+  "pilot_id": "bean-wiki-v080-green-attempt-6",
+  "raw_proof": {
+    "block_count": 0,
+    "evidence_sha256": "1365fd1b1bf6f96e1f273b773fdf8ab7ef30a79a98e4bbd1396490a1c757fa2b",
+    "finding_codes": [],
+    "schema": "agent-runtime-pilot-isolation-raw-proof/v1",
+    "status": "pass",
+    "watch_count": 0
+  },
+  "schema": "agent-runtime-pilot-isolation/v2"
+}

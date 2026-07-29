@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T06:29:54+09:00
+updated_at: 2026-07-30T07:30:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
-status: in_progress
+status: completed
 priority: P0
 difficulty: M
 est_hours: 8
@@ -50,6 +50,19 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
   - agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
   - agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json
+verification_status: passed
+verified_at: 2026-07-30T07:28:00+09:00
+verified_by: codex-root-v080-planner
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json
+review_refs:
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md
+  - reviews/W4A-2026-07-30-unit-task-ar-648-016.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-016.md
+resolution: done
+completed_at: 2026-07-30T07:30:00+09:00
+closed_by: codex-root-v080-planner
+measurement_unavailable_reason: The multi-unit offline pilot did not capture reliable aggregate effort or provider token/cost telemetry; unknown values must not be coerced to zero.
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -202,6 +215,14 @@ claim_refs:
   `worker_standard`; orchestration policy selected `planner_high` for the
   declared cross-cutting, data-integrity, and repeated-failure risks. Claim
   creation left Runtime HEAD at `2025bc75a1c044e69e23bf975ee1243298db7b2c`.
+  UNIT-016 has now passed canonical verification plus W4a and fresh independent
+  W4b with P0 0/P1 0/P2 3. Bean HEAD and tracked content remain unchanged,
+  attempt-6 raw and sanitized isolation both pass, and the exact attempt-6,
+  attempt-5, and historical-red contracts all return zero findings. Bean Wiki
+  is independently green for Runtime adoption; its separate article verdict
+  remains `REVISE`. The next action is normal UNIT-016 closeout and claim
+  release, followed by a separately registered Allimbot pilot. No release
+  surface is authorized.
 
 ## Goal
 
@@ -277,3 +298,20 @@ claim_refs:
 - `python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q`
 - `python scripts/pilot_acceptance.py --host bean-wiki --check`
 - `python -m pytest tests/test_pilot_acceptance.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T07:30:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The multi-unit offline pilot did not capture reliable aggregate effort or provider token/cost telemetry; unknown values must not be coerced to zero.
+- Closed by: `codex-root-v080-planner`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json`
+- Reviews:
+  - `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md`
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-016.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-016.md`
+<!-- work-close:end -->
