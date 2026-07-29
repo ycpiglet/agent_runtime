@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T11:25:38+09:00
-record_count: 999
+generated_at: 2026-07-29T11:42:55+09:00
+record_count: 1000
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `999` review and evidence records under `reviews/`.
+- Summary: indexed `1000` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `999` files |
+| Reviews covered | pass | `1000` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1029,6 +1029,7 @@ record_count: 999
 | `reviews/W4B-2026-07-29-unit-task-ar-645-002.md` | `W4B-2026-07-29-unit-task-ar-645-002` | md | approved | pass | TASK-AR-645 UNIT-002 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-646-001.md` | `W4B-2026-07-29-unit-task-ar-646-001` | md | approved | pass | TASK-AR-646 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r2.md` | `W4B-2026-07-29-unit-task-ar-647-001-r2` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Remediation Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-647-001-r3.md` | `W4B-2026-07-29-unit-task-ar-647-001-r3` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Structural Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
