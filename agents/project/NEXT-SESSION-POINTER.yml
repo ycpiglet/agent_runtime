@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T20:37:04+09:00
+updated_at: 2026-07-29T21:08:00+09:00
 updated_by: codex-root-task-ar-648-005
 current_state:
-  summary: "TASK-AR-648 UNIT-005 is claimed to seal explicit claim commits to an immutable private-index tree before any consumer replay."
+  summary: "TASK-AR-648 UNIT-005 W4a passed at e8d25d08; independent W4b remains before any consumer replay."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 2
+  step_index: 5
   step_total: 7
-  progress_pct: 20
-  status_text: "Red fixed at 4 failed, 10 passed; implement the private-index immutable-tree transaction."
+  progress_pct: 75
+  status_text: "W4a passed (2629 passed, 3 skipped); obtain fresh independent W4b for exact product SHA e8d25d08."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260729-203438-task-ar-648-648005

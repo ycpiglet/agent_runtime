@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-29T20:28:29+09:00
-updated_at: 2026-07-29T20:37:04+09:00
+updated_at: 2026-07-29T21:03:30+09:00
 started_at: 2026-07-29T20:34:38+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md
@@ -73,6 +73,10 @@ handoff: Report the independent red reproducer, sealed marker/tree schema, exact
 stop_condition: Stop on a path-only authorization, normal git-commit TOCTOU, post-hoc rollback as the primary integrity control, mutation of unrelated real-index state, hook bypass, detached-HEAD ref write, non-CAS branch update, marker/private-index leak, weakened ordinary claim gate, evidence rewrite, new P0, consumer worktree creation, publish, deploy, push, credential access, or network delivery.
 defect_signatures:
   - defect:claim-commit-final-tree-toctou:f39b32eb331a6963
+verified_at: 2026-07-29T21:03:30+09:00
+verified_by: codex-root-task-ar-648-005
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330.json
 ---
 
 # UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees
