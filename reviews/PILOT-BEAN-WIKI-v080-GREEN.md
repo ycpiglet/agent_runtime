@@ -4,10 +4,10 @@ date: 2026-07-30
 task_id: TASK-AR-648
 unit_id: UNIT-TASK-AR-648-009
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-status: in_progress
-signal: watch
-score: 0
-priority: P0
+status: blocked
+signal: block
+score: 38
+priority: P1
 tags: [pilot, bean-wiki, green-replay, attempt-3, adoption, evidence]
 ---
 
@@ -15,15 +15,17 @@ tags: [pilot, bean-wiki, green-replay, attempt-3, adoption, evidence]
 
 ## Bottom Line
 
-Attempt 3 is not yet classified green. The Runtime prerequisite is approved,
-registered, selected, and claimed; the immutable pre-creation snapshot below
-was captured while the attempt-3 path and branch were both absent.
+Attempt 3 is blocked. Safe adoption, lock, doctor repair, no-STATUS standby and
+active pointer continuity, state sync, Scribe freshness, and RBAC all passed,
+but the installed Owner governance chain exposed a new P1: the source-repo
+continuity documentation contract is imposed on Bean Wiki's host-owned files.
+The consumer stayed at its exact baseline with zero content or external-effect
+mutation and is frozen as failure evidence.
 
 ## Signal
 
-Pending. No consumer result is claimed before the complete adoption,
-continuity, editorial, Compound, restart, Scribe, routing, preservation, and
-zero-external-effect evidence passes independent review.
+`BLOCK / P1`; P0 none. Independent W4b confirmed that editing Bean
+`README.md`, `AGENTS.md`, or `CLAUDE.md` would be an invalid workaround.
 
 ## Runtime Baseline
 
@@ -61,30 +63,63 @@ order. The first untracked-manifest invocation used the wrong working
 directory and emitted missing-file diagnostics; the values in this table are
 from the corrected repository-qualified invocation.
 
-The attempt-3 path
+At snapshot time the attempt-3 path
 `/home/keti-itp-01/ycpiglet/.pilot-worktrees/bean-wiki-task-ar-648-green-3`
 and branch `codex/task-ar-648-agent-runtime-green-pilot-3` were both absent.
 
+## Attempt 3 Observed Result
+
+| Field | Observed value |
+| --- | --- |
+| Bean start/current HEAD | `357eee4fd8c29c33a949adbe3a0ffa80c874bf42` |
+| Selected profile/files | `core+web-content`; 246 |
+| Safe apply | 244 applied; 0 conflict |
+| Immediate reconcile | 0 safe update; 244 preserved; 2 excluded |
+| Lock | `agent-runtime-lock/v2`; 246 files; check passed |
+| Doctor | 1 initial empty-runtime blocker; safe repair -> 0 blocker |
+| STATUS candidates | both absent |
+| Standby/active continuity | both passed |
+| State sync / Scribe / RBAC | passed / fresh / passed |
+| Host assets | 16/16 byte-identical |
+| Content | 125/125 byte-identical; tracked diff empty |
+| Consumer commit/push | 0 / 0 |
+| External effects | all integer zero |
+| Owner governance | blocked by 13 continuity documentation findings |
+| Independent verdict | `BLOCK / P1`; P0 none |
+
+Consumer evidence:
+
+- `agents/host/pilot/evidence/adoption-verification-green-3.json`
+- `agents/host/pilot/reviews/W4A-TASK-AR-201.md`
+- `agents/host/pilot/reviews/W4B-TASK-AR-201.md`
+
+The installed classifier also reported stale immediately after lifecycle writes;
+its canonical regeneration and focused check passed. The remaining blocker is
+therefore isolated to the ownership-insensitive continuity documentation gate.
+
 ## Action
 
-Create exactly that new Bean worktree from
-`357eee4fd8c29c33a949adbe3a0ffa80c874bf42`, capture its clean host/content
-digests, and apply only the exact approved `core+web-content` projection.
+Create a separate Runtime repair unit. Keep README/protocol documentation checks
+strict in the Runtime source repository, but make the installed consumer
+contract ownership-aware without weakening pointer schema, claim matching,
+sidecar, state-sync, RBAC, or parallel-worktree checks.
 
 ## Decision
 
-Use a fresh worktree and keep the primary, original red pilot, two frozen
-attempts, and Allimbot read-only. The Bean editorial specialist may write only
-one review artifact under the host pilot evidence area.
+Freeze attempt 3. Do not edit Bean host documents to satisfy Runtime wording.
+Do not start its editorial or restart tasks, and do not create an Allimbot
+worktree. Replay only from a fourth fresh Bean worktree after the Runtime repair
+passes canonical W4a and independent W4b.
 
 ## Risk
 
-The pilot remains release-blocking until exact template provenance, strict
-pointer/claim/sidecar continuity, host and content preservation, truthful
-routing fields, local editorial validation, and integer-zero external effects
-all pass. Any P0/P1 freezes this attempt.
+An over-broad consumer skip would turn the repair into a continuity fail-open.
+The pointer contract must remain mandatory even when project documents are
+host-owned. A missing or malformed ownership configuration must retain strict
+behavior.
 
 ## Next
 
-Create the worktree, run the adoption plan and safe apply, then register the
-three bounded local tasks before creating any Bean claim.
+Register, claim, implement, and independently verify the Runtime-only repair.
+Then create a fresh pinned product worktree and Bean attempt 4; keep every
+earlier attempt and Allimbot read-only.

@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T01:35:26+09:00
+generated_at: 2026-07-30T01:56:18+09:00
 task_count: 315
 open_count: 19
 completed_count: 296
@@ -77,7 +77,7 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `9/13` done; `4` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md | in_progress | Action | P0 | Critical | Medium | 8h/16000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |

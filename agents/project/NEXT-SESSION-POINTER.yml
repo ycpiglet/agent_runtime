@@ -1,55 +1,33 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T01:35:00+09:00
+updated_at: 2026-07-30T01:55:41+09:00
 updated_by: codex-root-task-ar-648-009
 current_state:
-  summary: "TASK-AR-648 UNIT-009 is claimed in default working-tree mode; immutable Bean baseline capture precedes attempt-3 creation."
-  status: in_progress
+  summary: "UNIT-009 and Bean attempt 3 are blocked on a fresh P1 consumer documentation ownership conflict; no consumer workaround is permitted."
+  status: blocked
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 2
+  step_index: 5
   step_total: 8
-  progress_pct: 15
-  status_text: "T3, readiness, UNIT-009 selection, and no-commit Runtime claim passed; Bean attempt 3 does not yet exist."
+  progress_pct: 45
+  status_text: "Bean attempt 3 passed portable pointer continuity but failed the ownership-insensitive continuity documentation gate; independent W4b confirmed BLOCK/P1."
 active_work:
-  current_agents:
-    - claim_id: "CLAIM-20260730-013340-task-ar-648-648009"
-      agent_role: "lead-engineer"
-      team_id: "evaluation-office"
-      agent_instance_id: "codex-root-task-ar-648-009"
-      display_name: "lead_engineer@codex-root"
-      callsite_id: "codex:root:task-ar-648:unit-009"
-      pane_id: "codex:root:task-ar-648:unit-009"
-      task_id: "TASK-AR-648"
-      unit_id: "UNIT-TASK-AR-648-009"
-      task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-      status: "claimed"
-      phase: "unit-claimed"
-      progress_pct: 5
-      step_index: 1
-      step_total: 8
-      status_text: "UNIT-009 claimed; Bean attempt 3 remains uncreated pending immutable baseline capture"
-      worktree_path: "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
-      branch: "codex/unit-task-ar-648-002-implementation"
-      claim_path: "agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.json"
-      handoff_path: "agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.handoff.md"
-      log_path: "agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.log.md"
-      last_heartbeat: "2026-07-30T01:33:40+09:00"
+  current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Never mutate Bean primary, frozen attempts 1 or 2, or Allimbot. Repair portable continuity in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 3 from 357eee4."
+  branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
   next_actions:
-    - "Snapshot Runtime, Bean primary, original pilot, and frozen attempts 1 and 2 before any consumer creation."
-    - "Create attempt 3 only from Bean baseline 357eee4; keep primary and both frozen attempts read-only."
+    - "Register a separate Runtime repair unit for the P1 consumer documentation ownership conflict."
+    - "Keep pointer schema, active-claim, sidecar, state-sync, RBAC, and parallel checks fail-closed."
+    - "Replay from Bean baseline 357eee4 only after canonical W4a and fresh independent W4b pass."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - "agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.json"
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
