@@ -182,7 +182,7 @@
       "scripts/prompt_clarity_hook.py": "sha256:de94f297224a49b815a1cd5d6253780ada3320096eb7014f23790e6d1b004e66",
       "scripts/providers/__init__.py": "sha256:91e9a97a6060a33630f3d18d402a945bd69d66fe061deb6730ac2e1533b531d6",
       "scripts/providers/_loop_guard.py": "sha256:7a7118af3fc3a45c9cb65d87cbfac81535dc73f1e237c0bfa9f053e56b59d5ac",
-      "scripts/providers/agent_tools.py": "sha256:67a482109e1092ff6531feede7e63cf132369659972b8d4775cb456674982b58",
+      "scripts/providers/agent_tools.py": "sha256:832835211ed2ea11f3d435d5abb7d19c280b3436dd7365e1d7e35dd41abfc077",
       "scripts/providers/base.py": "sha256:996ae8c88a2684088290e8dfa914fd219e16043f59a46d3df546a8f93213e38c",
       "scripts/providers/claude.py": "sha256:92633b431f45becb476ebb27fb8b2cded7674b15370883b63d902ff9b6abdf27",
       "scripts/providers/claude_agent.py": "sha256:8c144f640a1d7edfbb9629c33328502991968979ea94aae077abfb742ce740f5",
@@ -506,7 +506,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:8a6699c86093666cdca6ad9dd53e211ee7137eef9906654071e798f3c7fcc830",
+    "template_digest": "sha256:637b23806a7221b398064f6f3315e6c980ec7524181d164bfd5dcede08e4a9ea",
     "template_files": 248
   },
   "profiles": [
