@@ -183,6 +183,14 @@ claim_refs:
   tier is `worker_standard`; policy escalated orchestration to `planner_high`
   for the three declared risk signals. Claim creation left Runtime HEAD at
   `598c960bb4431209013e71fea1fa2d0fd0d0bf56`.
+  UNIT-015 completed at exact Runtime product
+  `4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2`, tree
+  `b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f`. Exact red/green contract
+  selection, digest-bound path-free v2 isolation evidence, focused `41`, and
+  full `2739 passed, 3 skipped` verification passed. W4a and fresh independent
+  W4b both approve with P0 0/P1 0/P2 1. The claim is ready for normal release.
+  The next action is a separately registered, fresh Bean attempt 6 pinned to
+  this exact product; Allimbot and every release surface remain blocked.
 
 ## Goal
 

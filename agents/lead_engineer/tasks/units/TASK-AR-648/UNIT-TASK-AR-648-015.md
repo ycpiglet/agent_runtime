@@ -9,12 +9,13 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T05:37:59+09:00
-updated_at: 2026-07-30T05:45:22+09:00
+updated_at: 2026-07-30T06:21:13+09:00
 started_at: 2026-07-30T05:45:22+09:00
+completed_at: 2026-07-30T06:21:13+09:00
 origin_type: defect_remediation
 origin_ref: reviews/W4B-2026-07-30-unit-task-ar-648-014.md
 created_by: codex-root-v080-planner
@@ -96,6 +97,17 @@ verification:
   - python -m pytest -q
 handoff: Report exact pre/post product commits and trees, both contract identities and semantic digests, unchanged historical red bytes, green acceptance output, raw and sanitized isolation digests and proof scopes, every fail-closed adversarial result, sanitizer/mirror/asset/Owner results, focused and full test totals, W4a, fresh independent W4b, zero consumer/external actions, and the exact next-product boundary for a new Bean attempt 6.
 stop_condition: Stop immediately on any P0 or P1, weakened shared invariant, red evidence drift, green evidence falsification, ambiguous contract selection, fail-open registry or projection behavior, local path leakage, raw/projection binding loss, fixture mutation outside the declared conversion, consumer repository write, dependency installation, provider-live call, external effect, Allimbot worktree creation, release, version bump, tag, package, push, publish, deploy, credential access, or network delivery.
+verified_at: 2026-07-30T06:21:13+09:00
+verified_by: codex-root-task-ar-648-015
+evidence_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-015.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-015.md
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-648-015.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-015.md
+resolution: done
+closed_by: codex-root-task-ar-648-015
+measurement_unavailable_reason: UNIT-015 execution occurred inside the broader TASK-AR-648 remediation session without reliable per-unit wall-clock or provider token/cost metering; actual provider usage remained unverified and no savings claim was made.
 ---
 
 # UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts
@@ -186,3 +198,14 @@ green evidence are accepted only by their own immutable contracts, while raw
 local isolation data is replaced by a sanitized, digest-bound public
 projection. A later unit must use that exact approved product for a completely
 fresh Bean attempt 6.
+
+## Outcome
+
+Completed at exact Runtime product
+`4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2`, tree
+`b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f`. Historical red and truthful
+attempt-5 evidence each pass only their exact immutable contract. The public
+v2 isolation projection contains no local root and is bound to the validated
+raw v1 byte digest. Focused `41` and full `2739 passed, 3 skipped` verification,
+W4a, and fresh independent W4b all report no P0/P1. Bean attempt 6 must be
+registered separately; Allimbot and release remain blocked.
