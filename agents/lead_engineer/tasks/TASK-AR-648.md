@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T17:15:55+09:00
+updated_at: 2026-07-29T18:34:22+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,12 +22,12 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
 created_by: codex-root-v080-planner
-summary: Repair the five release-blocking defects observed by the reversible Bean Wiki pilot, then replay the adoption from a fresh pinned worktree without weakening host ownership or evidence truth.
+summary: Repair the release-blocking defects observed by two reversible Bean Wiki attempts, then replay adoption from a fresh pinned worktree without weakening host ownership, SCM, packaging, or evidence truth.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -46,8 +46,13 @@ claim_refs:
   five P0 defects. Its evidence is integrated at Agent Runtime
   `main@ec08a3d8c2a6613f508f1d9fd3f2f67693b4a92b`.
 - `UNIT-TASK-AR-648-002` repairs only those five P0 defects and reruns the
-  adoption from a fresh Bean Wiki worktree. P1 profile, overlay-execution, and
-  provider-observability work remains separately queued.
+  adoption from a fresh Bean Wiki worktree. Its integrated code repair passed,
+  but the first green replay independently found two additional P0s and is
+  therefore blocked.
+- `UNIT-TASK-AR-648-003` makes claim SCM mutation explicitly opt-in, packages
+  the state-projection dependency for standalone installed-host scripts, and
+  repeats the replay in a second fresh Bean Wiki worktree. P1 profile,
+  overlay-execution, and provider-observability work remains separately queued.
 
 ## Goal
 
@@ -107,9 +112,15 @@ claim_refs:
 - Register-then-dispatch, linked-worktree self-claim, installed-example
   classification, configured state projection, and post-registration
   reconcile all have focused regressions and pass in a fresh Bean replay.
+- Default claim creation in an adopted consumer repository leaves Git `HEAD`
+  unchanged; crash-safety commits remain available only through an explicit,
+  tested opt-in.
+- Installed Scribe/state-sync scripts run from a clean consumer process with
+  no source checkout, editable install, or ambient `PYTHONPATH`.
 - The green replay has zero P0 findings, zero reconcile conflicts, zero
-  unexpected host/content mutations, and zero external effects. The original
-  red evidence remains immutable and distinguishable from the replay.
+  unexpected host/content mutations, zero host commits, and zero external
+  effects. The original red evidence and the blocked first green attempt
+  remain immutable and distinguishable from the successful replay.
 
 ## Verification
 

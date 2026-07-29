@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T18:13:25+09:00
-record_count: 1026
+generated_at: 2026-07-29T18:38:09+09:00
+record_count: 1029
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1026` review and evidence records under `reviews/`.
+- Summary: indexed `1029` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1026` files |
+| Reviews covered | pass | `1029` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -165,6 +165,7 @@ record_count: 1026
 | `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json` | `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final` | json | record | n/a | OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final |
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
@@ -603,6 +604,7 @@ record_count: 1026
 | `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -1057,6 +1059,7 @@ record_count: 1026
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-002.md` | `W4B-2026-07-29-unit-task-ar-648-002` | md | blocked | fail | TASK-AR-648 UNIT-002 Independent W4b Verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
