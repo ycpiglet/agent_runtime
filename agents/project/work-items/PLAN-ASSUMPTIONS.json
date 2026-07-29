@@ -1016,7 +1016,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "34baf95042f725489e7ab2928783bee016c89e05cb312ce23047c736f6517918"
+          "value": "dce5515e8f887ac8eedafbbdc63c8edefd74be640d5cfd55b148a64c2250ecb4"
         },
         {
           "kind": "sha256",
@@ -1106,7 +1106,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "34baf95042f725489e7ab2928783bee016c89e05cb312ce23047c736f6517918"
+          "value": "dce5515e8f887ac8eedafbbdc63c8edefd74be640d5cfd55b148a64c2250ecb4"
         },
         {
           "kind": "sha256",
@@ -1121,12 +1121,12 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/work_item_classifier.py",
-          "value": "9304034af97387a02e1bc5bd39ecbd04c67de9b7ba5741817b7057ec8dbfd6ac"
+          "value": "03237128665f2756847845528bf910a7a8143c1892220402088354f5eb96b926"
         },
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "b85beb7e16d311d1a43798618e3c48bf375db82da1d65b6c2fa19b00f9397283"
+          "value": "c8cf544ac36a6a084b65e90e9b9b467f9fb9b64a4e0318d030b445b8331ca17b"
         },
         {
           "kind": "sha256",
@@ -1186,7 +1186,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "0dcf72bd7aeb3bb66cee2f654cd803087534909a5e38a53b4ad549293ce8f8af"
+          "value": "dd0387b4c51003426bd6982a209dc64b330140d3a6c45184770fd5bb57f72102"
         },
         {
           "kind": "sha256",
@@ -1201,7 +1201,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_work_item_classifier.py",
-          "value": "6097844f3895fe17d7196ef459f6978c95e2cfc4399a6bbe430fa3c34f067235"
+          "value": "c334cb588dc9ca63b42aa737c098bef0d81d5a2b9f47df03501a1dff4ced62f3"
         },
         {
           "kind": "sha256",
@@ -1210,7 +1210,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md",
-      "recorded_at": "2026-07-29T17:53:21+09:00",
+      "recorded_at": "2026-07-29T18:02:32+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1426,5 +1426,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-29T17:53:21+09:00"
+  "updated_at": "2026-07-29T18:02:32+09:00"
 }

@@ -123,6 +123,56 @@ def test_work_item_classifier_writes_hierarchy_numbers(tmp_path: Path) -> None:
     assert numbers["UNIT-TASK-AR-901-001"] == "1.1.1.1"
 
 
+def test_installed_classifier_reads_registry_only_taskset_metadata(tmp_path: Path) -> None:
+    _seed(tmp_path)
+    static_taskset_id = "TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE"
+    registry_taskset_id = "TASKSET-INSTALLED-REGISTRY-ONLY"
+    for path in (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md",
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-902.md",
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-901"
+        / "UNIT-TASK-AR-901-001.md",
+    ):
+        path.write_text(
+            path.read_text(encoding="utf-8").replace(static_taskset_id, registry_taskset_id),
+            encoding="utf-8",
+        )
+    _write(
+        tmp_path / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-taskset-definitions/v1",
+                "tasksets": [
+                    {
+                        "task_set_id": registry_taskset_id,
+                        "display_name": "Registry Only Lane",
+                        "summary": "Available only from the installed host registry.",
+                        "order": 7,
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+
+    for script in (SCRIPT, TEMPLATE_SCRIPT):
+        result = _run(tmp_path, "--write", script=script)
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        taskset = next(
+            row
+            for row in _payload(tmp_path)["records"]
+            if row["level"] == "taskset" and row["id"] == registry_taskset_id
+        )
+        assert taskset["title"] == "Registry Only Lane"
+
+
 def test_work_item_classifier_filters_mixed_initiative_directory_by_kind(tmp_path: Path) -> None:
     _seed(tmp_path)
     _write(

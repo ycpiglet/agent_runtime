@@ -191,14 +191,14 @@ def collect(root: Path) -> dict[str, Any]:
     for initiative_id, task_set_ids in tasksets_by_initiative.items():
         task_set_ids.sort(
             key=lambda task_set_id: (
-                backlog_board.task_set_info(task_set_id).order,
+                backlog_board.task_set_info(task_set_id, root).order,
                 task_set_id,
             )
         )
         for index, task_set_id in enumerate(task_set_ids, start=1):
             number = f"{initiative_numbers[initiative_id]}.{index}"
             taskset_numbers[task_set_id] = number
-            info = backlog_board.task_set_info(task_set_id)
+            info = backlog_board.task_set_info(task_set_id, root)
             records.append(
                 _record(
                     level="taskset",

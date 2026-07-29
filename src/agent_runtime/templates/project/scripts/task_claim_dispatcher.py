@@ -327,9 +327,19 @@ def _claim_creation_errors(
                         errors.append(
                             f"task worktree is not ready: {worktree_value} belongs to a different git repository"
                         )
+                    elif root_context[2]:
+                        errors.append(
+                            "task worktree is not ready: runtime root must be a registered linked "
+                            "worktree, not the primary checkout"
+                        )
                     elif worktree_context[2]:
                         errors.append(
                             "task worktree is not ready: worker claims must not point at the primary checkout"
+                        )
+                    elif worktree.resolve() != root.resolve():
+                        errors.append(
+                            "task worktree is not ready: worker claims must target the invoking "
+                            "linked worktree itself"
                         )
                 elif _is_git_repository(root):
                     errors.append(

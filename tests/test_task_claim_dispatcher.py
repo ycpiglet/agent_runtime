@@ -186,6 +186,48 @@ def test_create_claim_refuses_registered_worktree_from_other_repository(tmp_path
     assert "different git repository" in result.stderr
 
 
+def test_create_claim_refuses_primary_root_targeting_same_repo_linked_worktree(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "runtime")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(linked),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "primary checkout" in result.stderr
+
+
+def test_create_claim_refuses_linked_root_targeting_sibling_worktree(tmp_path: Path) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "runtime")
+    sibling = tmp_path / "runtime-sibling"
+    _run_git(primary, "worktree", "add", "-b", "runtime-sibling-worker", str(sibling))
+    (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(sibling),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "invoking linked worktree itself" in result.stderr
+
+
 def _write_routing_work(
     root: Path,
     task_id: str,
