@@ -9,17 +9,20 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-29T16:57:16+09:00
-updated_at: 2026-07-29T16:57:16+09:00
+updated_at: 2026-07-29T17:15:55+09:00
+started_at: 2026-07-29T17:14:04+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
 created_by: codex-root-v080-planner
 summary: Repair the five Bean Wiki pilot P0 defects and prove a fresh green adoption replay
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-171404-task-ar-648-648002.json
 escalation_triggers:
   - ambiguity
   - data_integrity
