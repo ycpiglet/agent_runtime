@@ -1,25 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T03:32:00+09:00
-updated_by: codex-root-task-ar-648-011
+updated_at: 2026-07-30T03:38:47+09:00
+updated_by: codex-root-task-ar-648-012-planner
 current_state:
-  summary: "UNIT-011 is independently blocked on two P1s; Runtime mirror-parity and pilot-isolation repair is next."
+  summary: "UNIT-012 is registered to repair packaged mirror parity and causal pilot isolation before another Bean replay."
   status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 8
-  step_total: 8
-  progress_pct: 100
-  status_text: "Attempt 4 frozen after W4b; no active claim and Allimbot remains blocked."
+  step_index: 1
+  step_total: 6
+  progress_pct: 10
+  status_text: "UNIT-012 registered; T3/readiness/claim are next. Bean attempt 4 remains frozen and Allimbot remains blocked."
 active_work:
   current_agents: []
   current_teams: []
 resume:
   active_task: "TASK-AR-648"
   active_task_set: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  branch_policy: "Never mutate Bean primary or frozen attempts 1, 2, or 3, and do not touch Allimbot. Repair the consumer ownership-aware continuity contract in Runtime, obtain exact-product W4a/W4b, then create only a fresh Bean attempt 4 from 357eee4."
+  branch_policy: "Work only in Runtime for UNIT-012. Never mutate Bean primary or frozen attempts 1-4, Autofolio, or Allimbot. Obtain exact-product W4a/W4b before creating a fresh Bean attempt 5 from 357eee4."
   next_actions:
-    - "Register a Runtime-only template parity and pilot-isolation repair unit."
-    - "Keep Allimbot frozen until a later fresh Bean replay independently passes."
+    - "T3-anchor, readiness-check, select, and claim UNIT-TASK-AR-648-012 without moving Runtime HEAD."
+    - "Implement and verify digest-pinned template mirror parity plus causal pilot isolation."
+    - "Keep Bean attempt 5 and Allimbot frozen until the Runtime repair independently passes."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

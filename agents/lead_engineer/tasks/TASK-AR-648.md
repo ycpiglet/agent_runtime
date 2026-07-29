@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T02:55:06+09:00
+updated_at: 2026-07-30T03:38:47+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
 status: in_progress
@@ -22,7 +22,7 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
@@ -138,6 +138,13 @@ claim_refs:
   mirror-parity and pilot-isolation repair, followed by a fresh Bean replay.
   P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
+  UNIT-012 is now the Runtime-only repair for the two attempt-4 P1s. It
+  synchronizes five stale portable template scripts, establishes a
+  digest-pinned whole-intersection mirror contract for the three intentional
+  source/consumer variants, and replaces the live-primary immutability oracle
+  with a causal pilot-isolation decision matrix. Bean attempt 5, Allimbot, and
+  all release actions remain blocked until UNIT-012 passes exact-product W4a
+  and fresh independent W4b.
 
 ## Goal
 

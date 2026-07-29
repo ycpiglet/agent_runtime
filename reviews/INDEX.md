@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T03:33:12+09:00
-record_count: 1083
+generated_at: 2026-07-30T03:41:11+09:00
+record_count: 1085
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1083` review and evidence records under `reviews/`.
+- Summary: indexed `1085` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1083` files |
+| Reviews covered | pass | `1085` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -626,6 +626,8 @@ record_count: 1083
 | `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration` | md | active | pass | Consumer Continuity Ownership Repair Registration |
 | `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan` | md | approved | pass | Consumer Continuity Ownership T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration` | md | active | pass | TASK-AR-648 Template Mirror and Pilot Isolation Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan` | md | approved | pass | TASK-AR-648 Template Mirror and Pilot Isolation T3 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

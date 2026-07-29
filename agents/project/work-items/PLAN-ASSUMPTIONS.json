@@ -920,73 +920,143 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-registration.md",
-          "value": "0e2e6fd82b018f23f329da2a6b94efd6926c3c5b605733be58189d5c0cc4f034"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration.md",
+          "value": "18bbf8749f299d9b2dae17e27851bd3814464936e5d93e16364eba9aeda1a8ae"
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md",
-          "value": "2ce334af91a09f8f86245f0976bbe6254573083fba9bef529102ad39f34d1ef2"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md",
+          "value": "c6fdf4d62a33d67bf2e63fbeb54f9af3e65bb51c72e7a41a3ddafa67956c2682"
         },
         {
           "kind": "sha256",
-          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN.md",
-          "value": "b9a15e39357c1700be2f0e3049051e90cb96c91087ea1a9a36aef1b0d44e7f7a"
+          "path": "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md",
+          "value": "c5749497193f9160d7d50cbf09d00a5d9d0570c6b14a20fd441880d2665c2d47"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-010.md",
-          "value": "a80ccbb08fb67ca68c6149c319646bde26ea1b9ffd26ce3b90310e23891af327"
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-648-011.md",
+          "value": "f229e13438d097382c1da382e3179f4f7203203d9e6ade990499ad574f3b8bd7"
         },
         {
           "kind": "sha256",
-          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json",
-          "value": "50d037a49b29fb888aa91aa52ccfe1fc9d1828ffb357515f416f66fab7fc697d"
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-648-011.md",
+          "value": "2d831cb50f347346e5a92d8100bfee6e85f8f51f187f903588f9961650f7e860"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25.json",
+          "value": "d717fd5e917ed9463cbda5e9bdd1264ca44a5e4f6c0c82723bff81d6dc1fe3d7"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
-          "value": "eee5b067232f7ef3bdf853bc0d87fd743b0af24e3560cf5703945de12b66bc07"
+          "value": "1fdfadf04d307306f652983ca683f2dd5b6489890535b60b5f545247502f6aae"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md",
-          "value": "a44c71c49f8519977f14a2846e9c56c4403972ff62f7c8af2dc255a06b50d839"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md",
+          "value": "faacbd3f0e9ddc6b222d375bf24dd3fcb011d3bf667e30eb86ad827274405479"
         },
         {
           "kind": "sha256",
-          "path": "scripts/continuity_contract_gate.py",
-          "value": "ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030"
+          "path": "scripts/collaboration_concurrency_gate.py",
+          "value": "a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/continuity_contract_gate.py",
-          "value": "ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030"
+          "path": "src/agent_runtime/templates/project/scripts/collaboration_concurrency_gate.py",
+          "value": "54b78b4da96f971698aa751f63ae6c26fdc07565ffe2947b63b72e6d55479ce7"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/AGENT_RUNTIME.md",
-          "value": "d62e1ac808d27fbd3b63555aa2aaff8de4bd5af1d92c8cd6ba606be71cb6bcf8"
+          "path": "scripts/collaboration_governance_gate.py",
+          "value": "287252596cc55c14e61a1a774eec165f565ee1cc6c9fb928d1ca57e04ba062cc"
         },
         {
           "kind": "sha256",
-          "path": "src/agent_runtime/config.py",
-          "value": "ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c"
+          "path": "src/agent_runtime/templates/project/scripts/collaboration_governance_gate.py",
+          "value": "e290b3f222a0a6761f8be61658facdfdffd7be920de024d7c943dff0a58636e5"
         },
         {
           "kind": "sha256",
-          "path": "scripts/pilot_acceptance.py",
-          "value": "8fcec748486bc0697bee6da088c963626421beb6c6597f57446f27c4c62b4747"
+          "path": "scripts/footprint_conflict_gate.py",
+          "value": "c2a87e2ee0c96ba08d0f1babfc82f4f7ea4d3e1e8d4d9c8364fed1ff130ecc8b"
         },
         {
           "kind": "sha256",
-          "path": "tests/test_pilot_acceptance.py",
-          "value": "88255c04ec10b2a3737ad2daf290b0a5352008c472930161ae5d42633ee43b90"
+          "path": "src/agent_runtime/templates/project/scripts/footprint_conflict_gate.py",
+          "value": "c160239cccb24ccfb1d4f3f3711068b1a60e1b08eb3e113ea74d25ca79a7be41"
         },
         {
           "kind": "sha256",
-          "path": "scripts/taskset_dispatcher.py",
-          "value": "32b1b3f9745ef7c21c0f18412a8fc7053e20f3fd387dada9448e1da6b3666dfc"
+          "path": "scripts/now.py",
+          "value": "eeee3a63a66373bb39af16cc5b22a6a6b1044bc778ed069eed6e297c6b641ad0"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/now.py",
+          "value": "6d6d6fcc9f1a4599a6735a15013fd263c887ae9910388e741134870abf446c9f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_work_gate.py",
+          "value": "3a7589270b576a97f90e3121891ad08f510f6ed4bf352438bf0754a90143c22e"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/taskset_work_gate.py",
+          "value": "fe840225c2fe9e6a11769d370f3f9920f532bd95fcc20a59a75449ff226652e6"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/compound_record.py",
+          "value": "050b123b6608763a3e7ba1abf8bb733e43df21764decd55a4c4415907ff8b10e"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/compound_record.py",
+          "value": "82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "40f35f5ca3743d72ca40a26149839d8bd499b1eefe3315ab1513ec1b1ea314fb"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+          "value": "ca9709a1323800d113d51963e902a8ce5d48d9f6ae07b5e0be74e0c49c2b32b8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/stop_hook_owner_governance.py",
+          "value": "d3fecffb618700cb1898fbc99cc893c918e44666f471e9d6e41f234d7f43ce4e"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/stop_hook_owner_governance.py",
+          "value": "1263152acb9a4f18a51e77a7895ae03ae0c4027b28a6e873083dab84f0919b2f"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_owner_governance_chain_parity.py",
+          "value": "a7815b9ac4c592c98f0b8e57b6d47da964c5e9b6f504f5de93e14a906c3c162b"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_taskset_work_gate.py",
+          "value": "b0c183d68a90eff347fb28257fe97ccf76a15d634ad8488159ba28ea7802f4e3"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_template_smoke.py",
+          "value": "6c3121fb0fcb49defdd3993935cb8be245b70939ad803f2b2672328a4ccead1d"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
         },
         {
           "kind": "sha256",
@@ -995,12 +1065,17 @@
         },
         {
           "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "32b1b3f9745ef7c21c0f18412a8fc7053e20f3fd387dada9448e1da6b3666dfc"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/task_unit_readiness_gate.py",
           "value": "79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md",
-      "recorded_at": "2026-07-30T02:46:03+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md",
+      "recorded_at": "2026-07-30T03:41:30+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1216,5 +1291,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T02:46:03+09:00"
+  "updated_at": "2026-07-30T03:41:30+09:00"
 }

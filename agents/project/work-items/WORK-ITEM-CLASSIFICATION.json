@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T03:33:11+09:00",
-  "record_count": 529,
+  "generated_at": "2026-07-30T03:41:11+09:00",
+  "record_count": 530,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5757,6 +5757,17 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md",
       "parent_id": "TASK-AR-648",
       "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-012",
+      "level": "unit",
+      "number": "41.1.10.12",
+      "label": "Unit 41.1.10.12",
+      "id": "UNIT-TASK-AR-648-012",
+      "title": "UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md",
+      "parent_id": "TASK-AR-648",
+      "status": "worker_ready"
     },
     {
       "key": "task:TASK-AR-649",
