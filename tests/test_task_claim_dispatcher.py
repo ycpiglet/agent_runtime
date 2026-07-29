@@ -261,6 +261,67 @@ def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
     assert not list(transaction_dir.glob("*.json"))
 
 
+def test_published_unverified_claim_is_terminal_and_never_reported_as_success(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "published-unverified")
+    original_ref = _git_stdout(linked, "symbolic-ref", "-q", "HEAD")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    _run_git(linked, "branch", "roundtrip-branch")
+    marker = linked / ".reference-roundtrip-active"
+    hook = primary / ".git" / "hooks" / "reference-transaction"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "if test \"$1\" = committed && "
+        f"! test -e {str(marker)!r}; then\n"
+        f"  : > {str(marker)!r}\n"
+        "  git symbolic-ref HEAD refs/heads/roundtrip-branch || exit 1\n"
+        f"  git symbolic-ref HEAD {original_ref!r} || exit 1\n"
+        f"  rm -f {str(marker)!r}\n"
+        "fi\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-published-unverified",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "created_published_unverified"
+    persistence = payload["persistence_result"]
+    assert persistence["ok"] is False
+    assert persistence["committed"] is True
+    assert persistence["publication_state"] == "published_unverified"
+    assert persistence["reason"] == "claim-commit-sealed-head-identity-changed"
+    assert "DO NOT RETRY" in result.stderr
+    assert _git_stdout(linked, "symbolic-ref", "-q", "HEAD") == original_ref
+    after = _git_stdout(linked, "rev-parse", "HEAD")
+    assert after == persistence["commit"]
+    assert _git_stdout(linked, "rev-list", "--count", f"{before}..{after}") == "1"
+    claim_id = payload["claim"]["claim_id"]
+    changed = set(
+        _git_stdout(
+            linked,
+            "diff-tree",
+            "--no-commit-id",
+            "--name-only",
+            "-r",
+            after,
+        ).splitlines()
+    )
+    assert changed == {
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+    assert not marker.exists()
+
+
 @pytest.mark.parametrize("setting", ["0", "false", "off", "not-a-policy"])
 def test_false_or_malformed_compatibility_setting_never_commits(
     tmp_path: Path,

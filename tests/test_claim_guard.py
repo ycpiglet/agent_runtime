@@ -502,6 +502,57 @@ def test_explicit_claim_transaction_cleans_private_files_on_hook_failure(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
+def test_explicit_claim_transaction_rejects_symlinked_symbolic_head(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    git_dir = tmp_path / ".git"
+    symbolic_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    (git_dir / "HEAD").unlink()
+    (git_dir / "HEAD").symlink_to(symbolic_ref)
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert result["reason"] == "claim-commit-symbolic-head-seal-failed"
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_explicit_claim_transaction_fails_closed_without_nofollow(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    monkeypatch.delattr(claim_guard.os, "O_NOFOLLOW")
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert result["reason"] == "claim-commit-symbolic-head-seal-unsupported"
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
 def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -509,6 +560,7 @@ def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
     _init_repo(tmp_path)
     _install_runtime_gate_hook(tmp_path)
     claim, handoff, log = _write_runtime_claim(tmp_path)
+    original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
     original_git = claim_guard._git
     race: dict[str, str] = {}
 
@@ -519,8 +571,7 @@ def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
         env: dict[str, str] | None = None,
     ) -> dict[str, object]:
         if args and args[0] == "update-ref" and not race:
-            ref_name = args[3]
-            old_oid = args[5]
+            old_oid = args[-1]
             tree_oid = original_git(root, ["rev-parse", f"{old_oid}^{{tree}}"], env=env)[
                 "out"
             ].strip()
@@ -538,8 +589,8 @@ def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
             )["out"].strip()
             moved = original_git(
                 root,
-                ["update-ref", ref_name, concurrent, old_oid],
-                env=env,
+                ["update-ref", original_ref, concurrent, old_oid],
+                env=claim_guard._repository_env(),
             )
             assert moved["code"] == 0
             race["commit"] = concurrent
@@ -561,15 +612,16 @@ def test_explicit_claim_transaction_loses_compare_and_swap_ref_race(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
-def test_explicit_claim_transaction_keeps_symbolic_head_on_sealed_branch(
+def test_explicit_claim_transaction_rejects_equal_oid_symbolic_head_switch(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """The ref CAS must not succeed after HEAD switches to an equal-OID branch."""
+    """Git's prepared transaction must reject a switched equal-OID branch."""
 
     _init_repo(tmp_path)
     _install_runtime_gate_hook(tmp_path)
     assert _git(tmp_path, "branch", "concurrent-branch").returncode == 0
+    start_head = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
     original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
     claim, handoff, log = _write_runtime_claim(tmp_path)
     original_git = claim_guard._git
@@ -607,10 +659,27 @@ def test_explicit_claim_transaction_keeps_symbolic_head_on_sealed_branch(
         claim_id="CLAIM-runtime-hook",
     )
 
-    assert switch["code"] != 0
-    assert result["ok"] is True, result
-    assert _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
-    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert switch["code"] == 0
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert result["reason"].startswith("claim-commit-ref-update-failed:")
+    assert (
+        _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+        == "refs/heads/concurrent-branch"
+    )
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == start_head
+    assert _git(tmp_path, "rev-parse", original_ref).stdout.strip() == start_head
+    rel = claim.relative_to(tmp_path).as_posix()
+    assert _git(tmp_path, "cat-file", "-e", f"{original_ref}:{rel}").returncode != 0
+    assert (
+        _git(
+            tmp_path,
+            "cat-file",
+            "-e",
+            f"refs/heads/concurrent-branch:{rel}",
+        ).returncode
+        != 0
+    )
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
@@ -644,6 +713,148 @@ def test_post_commit_hook_cannot_switch_symbolic_head_after_publication(
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
+def test_reference_transaction_hook_can_reject_claim_publication(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    reference_hook = tmp_path / ".githooks" / "reference-transaction"
+    reference_hook.write_text(
+        "#!/bin/sh\n"
+        "printf '%s\\n' \"$1\" >> reference-transaction.log\n"
+        "test \"$1\" != prepared\n",
+        encoding="utf-8",
+    )
+    reference_hook.chmod(0o755)
+    before = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    symbolic_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    head_reflog_before = _reflog_rows(tmp_path, "HEAD")
+    branch_reflog_before = _reflog_rows(tmp_path, symbolic_ref)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is False, result
+    assert result["committed"] is False
+    assert result["reason"].startswith("claim-commit-ref-update-failed:")
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+    assert _reflog_rows(tmp_path, "HEAD") == head_reflog_before
+    assert _reflog_rows(tmp_path, symbolic_ref) == branch_reflog_before
+    assert (tmp_path / "reference-transaction.log").read_text(
+        encoding="utf-8"
+    ).splitlines() == ["prepared", "aborted"]
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_post_publication_symbolic_switch_cannot_return_success(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    assert _git(tmp_path, "branch", "concurrent-branch").returncode == 0
+    original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    start_head = _git(tmp_path, "rev-parse", "HEAD").stdout.strip()
+    post_hook = tmp_path / ".githooks" / "post-commit"
+    post_hook.write_text(
+        "#!/bin/sh\n"
+        "printf 'ran\\n' > post-commit-ran.log\n",
+        encoding="utf-8",
+    )
+    post_hook.chmod(0o755)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    original_acquire = claim_guard._acquire_owned_lock
+    race: dict[str, object] = {}
+
+    def switch_then_lock(path: Path) -> tuple[int, int] | None:
+        if not race:
+            switched = claim_guard._git(
+                tmp_path,
+                ["symbolic-ref", "HEAD", "refs/heads/concurrent-branch"],
+                env=claim_guard._repository_env(),
+            )
+            race.update(switched)
+        return original_acquire(path)
+
+    monkeypatch.setattr(claim_guard, "_acquire_owned_lock", switch_then_lock)
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert race["code"] == 0
+    assert result["ok"] is False, result
+    assert result["committed"] is True
+    assert result["reason"] == "claim-commit-sealed-head-identity-changed"
+    assert result["publication_state"] == "published_unverified"
+    assert (
+        _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+        == "refs/heads/concurrent-branch"
+    )
+    assert _git(tmp_path, "rev-parse", original_ref).stdout.strip() == result["commit"]
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == start_head
+    assert not (tmp_path / "post-commit-ran.log").exists()
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
+def test_post_publication_symbolic_roundtrip_cannot_return_success(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A final-state-preserving A→B→A switch must still break the HEAD seal."""
+
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    assert _git(tmp_path, "branch", "concurrent-branch").returncode == 0
+    original_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    post_hook = tmp_path / ".githooks" / "post-commit"
+    post_hook.write_text(
+        "#!/bin/sh\n"
+        "printf 'ran\\n' > post-commit-ran.log\n",
+        encoding="utf-8",
+    )
+    post_hook.chmod(0o755)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+    original_acquire = claim_guard._acquire_owned_lock
+    switches: list[int] = []
+
+    def roundtrip_then_lock(path: Path) -> tuple[int, int] | None:
+        if not switches:
+            for target in ("refs/heads/concurrent-branch", original_ref):
+                switched = claim_guard._git(
+                    tmp_path,
+                    ["symbolic-ref", "HEAD", target],
+                    env=claim_guard._repository_env(),
+                )
+                switches.append(int(switched["code"]))
+        return original_acquire(path)
+
+    monkeypatch.setattr(claim_guard, "_acquire_owned_lock", roundtrip_then_lock)
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert switches == [0, 0]
+    assert result["ok"] is False, result
+    assert result["committed"] is True
+    assert result["publication_state"] == "published_unverified"
+    assert result["reason"] == "claim-commit-sealed-head-identity-changed"
+    assert _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
+    assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert not (tmp_path / "post-commit-ran.log").exists()
+    assert not list(_transaction_dir(tmp_path).glob("*"))
+
+
 def test_explicit_claim_transaction_updates_actual_head_and_branch_reflogs(
     tmp_path: Path,
 ) -> None:
@@ -673,6 +884,41 @@ def test_explicit_claim_transaction_updates_actual_head_and_branch_reflogs(
     branch_after = _reflog_rows(tmp_path, symbolic_ref)
     assert head_after == [expected, *head_before]
     assert branch_after == [expected, *branch_before]
+
+
+def test_explicit_claim_transaction_creates_reflogs_when_logging_is_disabled(
+    tmp_path: Path,
+) -> None:
+    _init_repo(tmp_path)
+    _install_runtime_gate_hook(tmp_path)
+    symbolic_ref = _git(tmp_path, "symbolic-ref", "-q", "HEAD").stdout.strip()
+    assert _git(tmp_path, "config", "core.logAllRefUpdates", "false").returncode == 0
+    for ref in ("HEAD", symbolic_ref):
+        path = claim_guard._git_path(
+            tmp_path,
+            f"logs/{ref}",
+            env=claim_guard._repository_env(),
+        )
+        assert path is not None
+        path.unlink(missing_ok=True)
+    claim, handoff, log = _write_runtime_claim(tmp_path)
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(handoff, log),
+        claim_id="CLAIM-runtime-hook",
+    )
+
+    assert result["ok"] is True, result
+    assert result["publication_state"] == "verified"
+    expected = (
+        f"{result['commit']}\x00"
+        "claim-guard: chore(claim): persist CLAIM-runtime-hook "
+        "(crash-safety guard)"
+    )
+    assert _reflog_rows(tmp_path, "HEAD") == [expected]
+    assert _reflog_rows(tmp_path, symbolic_ref) == [expected]
 
 
 def test_explicit_claim_transaction_respects_external_head_lock(
@@ -744,6 +990,22 @@ def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
         == 0
     )
     assert _git(linked, "branch", "concurrent-branch").returncode == 0
+    reference_hook = linked / ".githooks" / "reference-transaction"
+    reference_hook.write_text(
+        "#!/bin/sh\n"
+        "if test \"$1\" = prepared; then\n"
+        "  if git symbolic-ref HEAD refs/heads/concurrent-branch; then\n"
+        "    printf 'prepared:switched\\n' >> reference-transaction.log\n"
+        "  else\n"
+        "    printf 'prepared:blocked\\n' >> reference-transaction.log\n"
+        "  fi\n"
+        "else\n"
+        "  printf '%s\\n' \"$1\" >> reference-transaction.log\n"
+        "fi\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    reference_hook.chmod(0o755)
     start_head = _git(linked, "rev-parse", "HEAD").stdout.strip()
     original_ref = _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip()
     git_dir = Path(
@@ -768,39 +1030,40 @@ def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
     ) -> dict[str, object]:
         if args and args[0] == "update-ref" and not observed:
             assert env is not None
-            context = Path(env["GIT_DIR"])
+            context = Path(env["GIT_CONFIG_VALUE_0"])
             observed.update(
                 {
                     "context": context,
-                    "head": (context / "HEAD").read_text(encoding="utf-8"),
-                    "commondir": (context / "commondir").read_text(
-                        encoding="utf-8"
-                    ),
                     "dir_mode": stat.S_IMODE(context.stat().st_mode),
-                    "head_mode": stat.S_IMODE((context / "HEAD").stat().st_mode),
-                    "commondir_mode": stat.S_IMODE(
-                        (context / "commondir").stat().st_mode
+                    "hook_mode": stat.S_IMODE(
+                        (context / "reference-transaction").stat().st_mode
                     ),
+                    "hook_shebang": (
+                        context / "reference-transaction"
+                    ).read_text(encoding="utf-8").splitlines()[0],
                     "index_env": env.get("GIT_INDEX_FILE"),
+                    "git_dir_env": env.get("GIT_DIR"),
                     "common_env": env.get("GIT_COMMON_DIR"),
                     "namespace_env": env.get("GIT_NAMESPACE"),
+                    "expected_ref": env.get(claim_guard.CLAIM_REF_EXPECTED_ENV),
+                    "expected_old": env.get(claim_guard.CLAIM_REF_OLD_ENV),
+                    "expected_lock": env.get(
+                        claim_guard.CLAIM_REF_HEAD_LOCK_ENV
+                    ),
+                    "expected_head_path": env.get(
+                        claim_guard.CLAIM_REF_HEAD_PATH_ENV
+                    ),
+                    "expected_head_device": env.get(
+                        claim_guard.CLAIM_REF_HEAD_DEVICE_ENV
+                    ),
+                    "expected_head_inode": env.get(
+                        claim_guard.CLAIM_REF_HEAD_INODE_ENV
+                    ),
+                    "original_hook": env.get(
+                        claim_guard.CLAIM_REF_ORIGINAL_HOOK_ENV
+                    ),
                 }
             )
-            switch_env = dict(os.environ)
-            for key in (
-                "GIT_DIR",
-                "GIT_COMMON_DIR",
-                "GIT_WORK_TREE",
-                "GIT_INDEX_FILE",
-                claim_guard.CLAIM_COMMIT_TRANSACTION_ENV,
-            ):
-                switch_env.pop(key, None)
-            switched = original_git(
-                root,
-                ["symbolic-ref", "HEAD", "refs/heads/concurrent-branch"],
-                env=switch_env,
-            )
-            observed["switch_code"] = switched["code"]
         return original_git(root, args, env=env)
 
     monkeypatch.setattr(claim_guard, "_git", inspect_and_switch_git)
@@ -812,18 +1075,26 @@ def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
     )
 
     assert result["ok"] is True, result
-    assert observed["switch_code"] != 0
-    assert observed["head"] == f"{start_head}\n"
-    assert observed["commondir"] == f"{common_dir}\n"
     assert observed["dir_mode"] == 0o700
-    assert observed["head_mode"] == 0o600
-    assert observed["commondir_mode"] == 0o600
+    assert observed["hook_mode"] == 0o700
+    assert observed["hook_shebang"] == f"#!{Path(sys.executable).resolve()}"
     assert observed["index_env"] is None
+    assert observed["git_dir_env"] is None
     assert observed["common_env"] is None
     assert observed["namespace_env"] is None
+    assert observed["expected_ref"] == original_ref
+    assert observed["expected_old"] == start_head
+    assert observed["expected_lock"] == str((git_dir / "HEAD.lock").resolve())
+    assert observed["expected_head_path"] == str((git_dir / "HEAD").absolute())
+    assert int(observed["expected_head_device"]) > 0
+    assert int(observed["expected_head_inode"]) > 0
+    assert observed["original_hook"] == str(reference_hook.resolve())
     assert not Path(observed["context"]).exists()
     assert _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
     assert _git(linked, "rev-parse", "HEAD").stdout.strip() == result["commit"]
+    assert (linked / "reference-transaction.log").read_text(
+        encoding="utf-8"
+    ).splitlines() == ["prepared:blocked", "committed"]
     assert (
         _git(linked, "rev-parse", "concurrent-branch").stdout.strip()
         == start_head
@@ -902,6 +1173,15 @@ def test_claim_transaction_ignores_repository_redirecting_environment(
         "GIT_CONFIG_COUNT": "1",
         "GIT_CONFIG_KEY_0": "core.hooksPath",
         "GIT_CONFIG_VALUE_0": "/definitely/not/a/runtime/hook",
+        claim_guard.CLAIM_REF_ROOT_ENV: str(foreign),
+        claim_guard.CLAIM_REF_EXPECTED_ENV: "refs/heads/foreign",
+        claim_guard.CLAIM_REF_OLD_ENV: foreign_before,
+        claim_guard.CLAIM_REF_NEW_ENV: foreign_before,
+        claim_guard.CLAIM_REF_HEAD_LOCK_ENV: str(foreign / ".git" / "HEAD.lock"),
+        claim_guard.CLAIM_REF_HEAD_PATH_ENV: str(foreign / ".git" / "HEAD"),
+        claim_guard.CLAIM_REF_HEAD_DEVICE_ENV: "1",
+        claim_guard.CLAIM_REF_HEAD_INODE_ENV: "1",
+        claim_guard.CLAIM_REF_ORIGINAL_HOOK_ENV: "/definitely/not/a/runtime/hook",
     }
     for key, value in poisoned.items():
         monkeypatch.setenv(key, value)
@@ -942,3 +1222,23 @@ def test_explicit_claim_transaction_rejects_detached_head(tmp_path: Path) -> Non
     assert result["committed"] is False
     assert result["reason"] == "claim-commit-detached-head"
     assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
+
+
+def test_cli_returns_nonzero_for_published_unverified_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    partial = {
+        "ok": False,
+        "committed": True,
+        "publication_state": "published_unverified",
+        "reason": "claim-commit-post-publication-head-lock-unavailable",
+        "paths": ["agents/runtime/task_claims/CLAIM-partial.json"],
+    }
+    monkeypatch.setattr(claim_guard, "sweep", lambda *_args, **_kwargs: partial)
+
+    code = claim_guard.main(["--root", str(tmp_path), "--apply", "--json"])
+
+    assert code == 1
+    assert json.loads(capsys.readouterr().out) == partial

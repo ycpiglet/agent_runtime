@@ -1385,21 +1385,49 @@ def cmd_create(args: argparse.Namespace) -> int:
     # Crash-safety guard: commit the claim immediately so a sibling session's
     # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
     # (incident 2026-06-12). Best-effort — never fails claim creation.
+    persistence_result: dict[str, Any] | None = None
     if claim_commit_authorized:
-        guard = claim_guard.commit_claim_artifacts(
+        persistence_result = claim_guard.commit_claim_artifacts(
             root,
             claim_path,
             extra_paths=[root / str(claim["handoff_path"]), root / str(claim["log_path"])],
             claim_id=str(claim["claim_id"]),
         )
-        if not guard.get("ok") and guard.get("reason") != "not-a-git-repo":
-            print(
-                f"warning: claim {claim['claim_id']} was not committed "
-                f"({guard.get('reason')}); an untracked claim can be lost by a "
-                "concurrent 'git reset --hard'/'git clean -fd'",
-                file=sys.stderr,
-            )
-    _emit({"status": "created", "path": _rel(root, claim_path), "claim": claim}, as_json=args.json)
+        if (
+            not persistence_result.get("ok")
+            and persistence_result.get("reason") != "not-a-git-repo"
+        ):
+            if persistence_result.get("committed"):
+                print(
+                    f"error: claim {claim['claim_id']} was published but could "
+                    "not be verified "
+                    f"({persistence_result.get('reason')}); DO NOT RETRY this "
+                    "claim commit and stop for operator recovery",
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    f"warning: claim {claim['claim_id']} was not committed "
+                    f"({persistence_result.get('reason')}); an untracked claim "
+                    "can be lost by a concurrent 'git reset --hard'/'git clean -fd'",
+                    file=sys.stderr,
+                )
+    response = {
+        "status": "created",
+        "path": _rel(root, claim_path),
+        "claim": claim,
+    }
+    if persistence_result is not None:
+        response["persistence_result"] = persistence_result
+    if (
+        persistence_result is not None
+        and not persistence_result.get("ok")
+        and persistence_result.get("committed")
+    ):
+        response["status"] = "created_published_unverified"
+        _emit(response, as_json=args.json)
+        return 1
+    _emit(response, as_json=args.json)
     return 0
 
 

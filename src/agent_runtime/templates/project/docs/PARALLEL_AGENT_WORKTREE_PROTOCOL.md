@@ -97,31 +97,58 @@ match.
 After the hooks return, the guard rechecks the complete private tree, every
 artifact's working blob, the private record, `HEAD`, and the symbolic branch.
 It creates the commit from the already sealed tree with `git commit-tree`,
-then enters a short publication critical section. The guard creates a private
-mode-`0700` Git administrative context whose `HEAD` is detached at the
-starting commit and whose `commondir` points to the repository's real common
-Git directory. It exclusively acquires the actual worktree-specific
-`HEAD.lock`, repeats the tree/blob/record/ref checks under that lock, and
-advances the original branch with
-`git update-ref <ref> <new> <old>` from the private context. The real
-`HEAD.lock` prevents an equal-OID symbolic branch switch while Git's ref lock
-and old-OID check still make a competing direct ref update win safely.
+then opens the actual symbolic `HEAD` file without following a symlink and
+keeps that regular-file descriptor open through publication. Its device,
+inode, link count, and exact `ref: <authorized-branch>` bytes form the
+cross-process `HEAD` identity seal. The guard installs a mode-`0700` private
+`reference-transaction` hook context and asks Git to run
+`update-ref --create-reflog HEAD <new> <old>` in the actual worktree context.
+While Git owns the actual worktree-specific `HEAD.lock`, the private prepared
+hook requires the `HEAD` path to retain the opened identity, requires the real
+symbolic `HEAD` to name the originally authorized branch, and requires the
+transaction to contain exactly the sealed `HEAD` and branch old/new
+transitions. It repeats those checks after delegating the repository's
+configured `reference-transaction` hook and aborts on any mismatch. Git's own
+ref transaction therefore performs the old-OID compare-and-swap and records
+both the shared branch reflog and the normal or linked worktree's actual
+`logs/HEAD` transition.
 
 Repository-local `GIT_*` redirectors are removed before the transaction.
-Hooks and `commit-tree` always use the real worktree context; the detached
-private context is used only for the final ref compare-and-swap. Marker,
-index, message, private-context, and owned lock files are removed on every
-exit. A pre-existing `HEAD.lock` is never removed and makes the transaction
-fail closed. Failure leaves the claim artifacts staged so the ordinary gate
-blocks them. After publication, `post-commit` runs while the owned
-`HEAD.lock` is still held, so Runtime-invoked hook work cannot switch symbolic
-`HEAD` before the guard returns. Its failure is reported as a warning because
-the sealed commit is already published; the lock is then released
-immediately.
+Hooks and `commit-tree` always use the real worktree context; the private
+context supplies only the guarded reference hook. Marker, index, message,
+private-hook, and owned lock files are removed on every exit. A pre-existing
+`HEAD.lock` is never removed and makes the transaction fail closed. Failure
+leaves the claim artifacts staged so the ordinary gate blocks them.
+
+After Git publishes and releases its locks, Runtime immediately acquires its
+own actual worktree `HEAD.lock`. Under that new lock it requires the path's
+current device and inode to equal the still-open pre-publication descriptor,
+then verifies the symbolic ref, published commit, branch reflog, and
+worktree-local `HEAD` reflog before running `post-commit`. A Git lockfile
+rewrite, including an equal-OID `A -> B -> A` symbolic round trip, replaces or
+unlinks the held inode and therefore cannot masquerade as an unchanged
+`HEAD`. Lock contention or any identity/state mismatch returns
+`ok=false`, `committed=true`, and
+`publication_state=published_unverified`, skips `post-commit`, and never
+auto-retries. The Runtime-invoked hook runs while the owned lock is held, so
+it cannot switch symbolic `HEAD`. Its failure is reported as a warning
+because the sealed commit and both reflogs are already published; the lock
+and held descriptor are then released immediately.
 
 Git 2.36 or newer runs hooks through `git hook run`. Older POSIX Git executes
-the configured traditional executable hook directly; older Windows Git fails
-this optional SCM path closed. A missing, ambient, stale, malformed,
+the configured traditional executable hook directly. The private hook uses
+the same absolute Python interpreter that started Runtime. Explicit claim SCM
+is enabled only on POSIX platforms that provide `O_NOFOLLOW`; Windows and
+other unsupported identity primitives fail before ref publication. Default
+working-tree claim persistence remains cross-platform and does not enter this
+transaction.
+
+The identity seal protects normal Git ref operations, which use lockfile
+replacement. Repository hooks execute with the user's authority and are
+trusted code: they may observe or veto the reference transaction, but must not
+rewrite `HEAD` or refs. A same-privilege process that edits Git administrative
+files in place instead of using Git's lockfile protocol is outside this
+cooperative-concurrency boundary. A missing, ambient, stale, malformed,
 dead-owner, wrong-root, wrong-path, wrong-`HEAD`, wrong-ref, wrong-index,
 wrong-tree, or wrong-blob marker never weakens ordinary claim persistence.
 

@@ -17,6 +17,7 @@ import json
 import os
 import re
 import secrets
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +26,16 @@ from typing import Any, Iterable
 CLAIMS_REL = "agents/runtime/task_claims"
 CLAIM_COMMIT_TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
 CLAIM_COMMIT_TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v2"
+CLAIM_REF_ENV_PREFIX = "AGENT_RUNTIME_CLAIM_REF_"
+CLAIM_REF_ROOT_ENV = f"{CLAIM_REF_ENV_PREFIX}ROOT"
+CLAIM_REF_EXPECTED_ENV = f"{CLAIM_REF_ENV_PREFIX}EXPECTED"
+CLAIM_REF_OLD_ENV = f"{CLAIM_REF_ENV_PREFIX}OLD"
+CLAIM_REF_NEW_ENV = f"{CLAIM_REF_ENV_PREFIX}NEW"
+CLAIM_REF_HEAD_LOCK_ENV = f"{CLAIM_REF_ENV_PREFIX}HEAD_LOCK"
+CLAIM_REF_HEAD_PATH_ENV = f"{CLAIM_REF_ENV_PREFIX}HEAD_PATH"
+CLAIM_REF_HEAD_DEVICE_ENV = f"{CLAIM_REF_ENV_PREFIX}HEAD_DEVICE"
+CLAIM_REF_HEAD_INODE_ENV = f"{CLAIM_REF_ENV_PREFIX}HEAD_INODE"
+CLAIM_REF_ORIGINAL_HOOK_ENV = f"{CLAIM_REF_ENV_PREFIX}ORIGINAL_HOOK"
 OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 REPOSITORY_LOCAL_GIT_ENV = frozenset(
     {
@@ -49,6 +60,250 @@ REPOSITORY_LOCAL_GIT_ENV = frozenset(
     }
 )
 
+REFERENCE_TRANSACTION_HOOK = r"""#!/usr/bin/env python3
+from __future__ import annotations
+
+import os
+import re
+import stat
+import subprocess
+import sys
+from pathlib import Path
+
+PREFIX = "AGENT_RUNTIME_CLAIM_REF_"
+
+
+def _run(command, *, root, env, stdin=b""):
+    try:
+        return subprocess.run(
+            command,
+            cwd=root,
+            env=env,
+            input=stdin,
+            capture_output=True,
+            timeout=30,
+        )
+    except (FileNotFoundError, OSError, subprocess.TimeoutExpired) as exc:
+        return subprocess.CompletedProcess(command, 127, b"", repr(exc).encode())
+
+
+def _forward(proc):
+    if proc.stdout:
+        sys.stdout.buffer.write(proc.stdout)
+    if proc.stderr:
+        sys.stderr.buffer.write(proc.stderr)
+    return proc.returncode
+
+
+def _prepared_error(raw, *, env, root, expected_ref, old_oid, new_oid, expected_lock):
+    if os.name != "posix" or not hasattr(os, "O_NOFOLLOW"):
+        return "symbolic HEAD identity seal unsupported"
+    head_path_text = env.get(f"{PREFIX}HEAD_PATH", "")
+    expected_device = env.get(f"{PREFIX}HEAD_DEVICE", "")
+    expected_inode = env.get(f"{PREFIX}HEAD_INODE", "")
+    if not head_path_text or not expected_device or not expected_inode:
+        return "missing sealed HEAD identity"
+    try:
+        expected_token = (int(expected_device), int(expected_inode))
+    except ValueError:
+        return "invalid sealed HEAD identity"
+
+    symbolic = _run(
+        ["git", "symbolic-ref", "-q", "HEAD"],
+        root=root,
+        env=env,
+    )
+    head = _run(["git", "rev-parse", "HEAD"], root=root, env=env)
+    lock = _run(
+        ["git", "rev-parse", "--git-path", "HEAD.lock"],
+        root=root,
+        env=env,
+    )
+    lock_text = lock.stdout.decode("utf-8", "replace").strip()
+    lock_path = Path(lock_text)
+    if not lock_path.is_absolute():
+        lock_path = Path(root) / lock_path
+    expected_lock_path = Path(expected_lock)
+    head_path = Path(head_path_text)
+    flags = os.O_RDONLY | os.O_NOFOLLOW
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    if hasattr(os, "O_BINARY"):
+        flags |= os.O_BINARY
+    try:
+        descriptor = os.open(head_path, flags)
+        try:
+            head_stat = os.fstat(descriptor)
+            head_content = os.read(descriptor, 4096)
+        finally:
+            os.close(descriptor)
+        lock_stat = os.lstat(lock_path)
+    except OSError:
+        return "sealed HEAD or Git-owned lock unavailable"
+
+    lines = raw.decode("utf-8", "replace").splitlines()
+    expected_lines = {
+        f"{old_oid} {new_oid} HEAD",
+        f"{old_oid} {new_oid} {expected_ref}",
+    }
+    if (
+        symbolic.returncode != 0
+        or symbolic.stdout.decode("utf-8", "replace").strip() != expected_ref
+        or head.returncode != 0
+        or head.stdout.decode("utf-8", "replace").strip() != old_oid
+        or lock.returncode != 0
+        or os.path.normcase(os.path.abspath(lock_path))
+        != os.path.normcase(os.path.abspath(expected_lock_path))
+        or not stat.S_ISREG(lock_stat.st_mode)
+        or not stat.S_ISREG(head_stat.st_mode)
+        or head_stat.st_nlink != 1
+        or (head_stat.st_dev, head_stat.st_ino) != expected_token
+        or head_content != f"ref: {expected_ref}\n".encode()
+        or len(lines) != 2
+        or set(lines) != expected_lines
+    ):
+        return "sealed HEAD/ref mismatch"
+    return ""
+
+
+def main():
+    if len(sys.argv) != 2 or sys.argv[1] not in {"prepared", "committed", "aborted"}:
+        print("claim-guard reference transaction: invalid state", file=sys.stderr)
+        return 2
+    state = sys.argv[1]
+    raw = sys.stdin.buffer.read()
+    env = dict(os.environ)
+    root = env.get(f"{PREFIX}ROOT", "")
+    expected_ref = env.get(f"{PREFIX}EXPECTED", "")
+    old_oid = env.get(f"{PREFIX}OLD", "")
+    new_oid = env.get(f"{PREFIX}NEW", "")
+    expected_lock = env.get(f"{PREFIX}HEAD_LOCK", "")
+    if not root or not expected_ref or not old_oid or not new_oid or not expected_lock:
+        print("claim-guard reference transaction: missing sealed environment", file=sys.stderr)
+        return 1
+
+    if state == "prepared":
+        error = _prepared_error(
+            raw,
+            env=env,
+            root=root,
+            expected_ref=expected_ref,
+            old_oid=old_oid,
+            new_oid=new_oid,
+            expected_lock=expected_lock,
+        )
+        if error:
+            print(f"claim-guard reference transaction: {error}", file=sys.stderr)
+            return 1
+
+    original = env.get(f"{PREFIX}ORIGINAL_HOOK", "")
+    hook = Path(original) if original else None
+    if hook is not None and hook.is_file():
+        try:
+            if hook.resolve() == Path(__file__).resolve():
+                print(
+                    "claim-guard reference transaction: recursive hook alias",
+                    file=sys.stderr,
+                )
+                return 1
+        except OSError:
+            print(
+                "claim-guard reference transaction: hook identity unavailable",
+                file=sys.stderr,
+            )
+            return 1
+
+        delegated_env = dict(env)
+        for key in list(delegated_env):
+            if key.startswith("GIT_CONFIG_") or key.startswith(PREFIX):
+                delegated_env.pop(key, None)
+        discovered = _run(
+            ["git", "rev-parse", "--git-path", "hooks/reference-transaction"],
+            root=root,
+            env=delegated_env,
+        )
+        discovered_path = Path(
+            discovered.stdout.decode("utf-8", "replace").strip()
+        )
+        if not discovered_path.is_absolute():
+            discovered_path = Path(root) / discovered_path
+        try:
+            same_hook = (
+                discovered.returncode == 0
+                and discovered_path.resolve() == hook.resolve()
+            )
+        except OSError:
+            same_hook = False
+        if not same_hook:
+            print(
+                "claim-guard reference transaction: configured hook changed",
+                file=sys.stderr,
+            )
+            return 1
+
+        version = _run(["git", "version"], root=root, env=delegated_env)
+        match = re.search(rb"(\d+)\.(\d+)", version.stdout)
+        hook_run = bool(
+            version.returncode == 0
+            and match
+            and (int(match.group(1)), int(match.group(2))) >= (2, 36)
+        )
+        if hook_run:
+            proc = _run(
+                [
+                    "git",
+                    "hook",
+                    "run",
+                    "--ignore-missing",
+                    "reference-transaction",
+                    "--",
+                    state,
+                ],
+                root=root,
+                env=delegated_env,
+                stdin=raw,
+            )
+        elif os.name == "nt":
+            print(
+                "claim-guard reference transaction: Git >=2.36 required "
+                "for configured hooks on Windows",
+                file=sys.stderr,
+            )
+            return 127
+        elif not os.access(hook, os.X_OK):
+            proc = subprocess.CompletedProcess([], 0, b"", b"")
+        else:
+            proc = _run(
+                [str(hook), state],
+                root=root,
+                env=delegated_env,
+                stdin=raw,
+            )
+        if _forward(proc) != 0:
+            return proc.returncode
+
+    if state == "prepared":
+        error = _prepared_error(
+            raw,
+            env=env,
+            root=root,
+            expected_ref=expected_ref,
+            old_oid=old_oid,
+            new_oid=new_oid,
+            expected_lock=expected_lock,
+        )
+        if error:
+            print(
+                f"claim-guard reference transaction: post-delegation {error}",
+                file=sys.stderr,
+            )
+            return 1
+    return 0
+
+
+raise SystemExit(main())
+"""
+
 
 def _repository_env(source: dict[str, str] | None = None) -> dict[str, str]:
     """Return an environment that cannot redirect this transaction to another repo."""
@@ -58,6 +313,7 @@ def _repository_env(source: dict[str, str] | None = None) -> dict[str, str]:
         if (
             key in REPOSITORY_LOCAL_GIT_ENV
             or key.startswith("GIT_CONFIG_")
+            or key.startswith(CLAIM_REF_ENV_PREFIX)
         ):
             env.pop(key, None)
     env.pop(CLAIM_COMMIT_TRANSACTION_ENV, None)
@@ -330,7 +586,7 @@ def _cleanup_ref_context(path: Path | None) -> None:
 
     if path is None:
         return
-    for name in ("HEAD", "commondir"):
+    for name in ("reference-transaction",):
         _cleanup_private_path(path / name)
     try:
         path.rmdir()
@@ -340,26 +596,112 @@ def _cleanup_ref_context(path: Path | None) -> None:
 
 def _create_ref_context(
     git_dir: Path,
-    common_dir: Path,
     *,
     nonce: str,
-    start_head: str,
 ) -> Path | None:
-    """Create a detached Git admin context used only for the final ref CAS."""
+    """Create a private hook context for Git's actual-HEAD ref transaction."""
 
     parent = git_dir / "agent-runtime" / "claim-commit"
-    context = parent / f"{nonce}.git"
+    context = parent / f"{nonce}.hooks"
+    interpreter = str(Path(sys.executable).resolve())
+    if (
+        not interpreter
+        or len(interpreter.encode("utf-8")) > 120
+        or any(character.isspace() for character in interpreter)
+    ):
+        return None
+    hook_source = REFERENCE_TRANSACTION_HOOK.replace(
+        "#!/usr/bin/env python3",
+        f"#!{interpreter}",
+        1,
+    )
     try:
         parent.mkdir(parents=True, exist_ok=True)
         os.chmod(parent, 0o700)
         os.mkdir(context, 0o700)
         os.chmod(context, 0o700)
-        _write_private_file(context / "HEAD", f"{start_head}\n")
-        _write_private_file(context / "commondir", f"{common_dir}\n")
+        hook_path = context / "reference-transaction"
+        _write_private_file(hook_path, hook_source)
+        os.chmod(hook_path, 0o700)
     except OSError:
         _cleanup_ref_context(context)
         return None
     return context
+
+
+def _read_descriptor(descriptor: int, *, limit: int = 4096) -> bytes:
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    return os.read(descriptor, limit)
+
+
+def _open_sealed_head(
+    path: Path,
+    *,
+    symbolic_ref: str,
+) -> tuple[int, tuple[int, int]] | None:
+    """Hold the authorized symbolic-HEAD inode across Git's lock handoff."""
+
+    if os.name != "posix" or not hasattr(os, "O_NOFOLLOW"):
+        return None
+    flags = os.O_RDONLY | os.O_NOFOLLOW
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    if hasattr(os, "O_BINARY"):
+        flags |= os.O_BINARY
+    try:
+        descriptor = os.open(path, flags)
+    except OSError:
+        return None
+    try:
+        metadata = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+            or _read_descriptor(descriptor)
+            != f"ref: {symbolic_ref}\n".encode("utf-8")
+        ):
+            os.close(descriptor)
+            return None
+        return descriptor, (metadata.st_dev, metadata.st_ino)
+    except OSError:
+        os.close(descriptor)
+        return None
+
+
+def _sealed_head_identity_error(
+    path: Path,
+    descriptor: int,
+    *,
+    symbolic_ref: str,
+) -> str:
+    """Verify that no Git lockfile rewrite replaced symbolic HEAD."""
+
+    try:
+        held = os.fstat(descriptor)
+        current = os.lstat(path)
+        content = _read_descriptor(descriptor)
+    except OSError:
+        return "claim-commit-sealed-head-unavailable"
+    if (
+        not stat.S_ISREG(held.st_mode)
+        or not stat.S_ISREG(current.st_mode)
+        or held.st_nlink != 1
+        or current.st_nlink != 1
+        or (held.st_dev, held.st_ino) != (current.st_dev, current.st_ino)
+        or content != f"ref: {symbolic_ref}\n".encode("utf-8")
+    ):
+        return "claim-commit-sealed-head-identity-changed"
+    return ""
+
+
+def _path_entry_exists(path: Path) -> bool:
+    try:
+        os.lstat(path)
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return True
+    return True
 
 
 def _acquire_owned_lock(path: Path) -> tuple[int, int] | None:
@@ -440,6 +782,70 @@ def _transaction_state_error(
     return ""
 
 
+def _reflog_transition_error(
+    root: Path,
+    ref: str,
+    *,
+    old_oid: str,
+    new_oid: str,
+    action: str,
+    env: dict[str, str],
+) -> str:
+    path = _git_path(root, f"logs/{ref}", env=env)
+    if path is None:
+        return "claim-commit-reflog-missing"
+    try:
+        lines = path.read_bytes().splitlines()
+    except OSError:
+        return "claim-commit-reflog-unreadable"
+    if not lines:
+        return "claim-commit-reflog-empty"
+    line = lines[-1].decode("utf-8", "replace")
+    prefix, separator, recorded_action = line.partition("\t")
+    fields = prefix.split()
+    if (
+        not separator
+        or len(fields) < 2
+        or fields[0] != old_oid
+        or fields[1] != new_oid
+        or recorded_action != action
+    ):
+        return "claim-commit-reflog-transition-mismatch"
+    return ""
+
+
+def _publication_state_error(
+    root: Path,
+    *,
+    real_env: dict[str, str],
+    symbolic_ref: str,
+    start_head: str,
+    commit_oid: str,
+    reflog_action: str,
+) -> str:
+    published_ref = _git(root, ["symbolic-ref", "-q", "HEAD"], env=real_env)
+    published_head = _git(root, ["rev-parse", "HEAD"], env=real_env)
+    if (
+        published_ref["code"] != 0
+        or published_ref["out"].strip() != symbolic_ref
+        or published_head["code"] != 0
+        or published_head["out"].strip() != commit_oid
+    ):
+        return "claim-commit-publication-verification-failed"
+    for ref in ("HEAD", symbolic_ref):
+        error = _reflog_transition_error(
+            root,
+            ref,
+            old_oid=start_head,
+            new_oid=commit_oid,
+            action=reflog_action,
+            env=real_env,
+        )
+        if error:
+            return error
+    return ""
+
+
 def _claim_transaction_commit(
     root: Path,
     rels: list[str],
@@ -472,7 +878,14 @@ def _claim_transaction_commit(
             "reason": "claim-commit-git-admin-path-failed",
             "paths": rels,
         }
-    git_dir, common_dir = admin_dirs
+    if os.name != "posix" or not hasattr(os, "O_NOFOLLOW"):
+        return {
+            "ok": False,
+            "committed": False,
+            "reason": "claim-commit-symbolic-head-seal-unsupported",
+            "paths": rels,
+        }
+    git_dir, _common_dir = admin_dirs
     nonce = secrets.token_hex(16)
     index_path = _git_path(
         root,
@@ -496,6 +909,7 @@ def _claim_transaction_commit(
     index_env["GIT_INDEX_FILE"] = str(index_path)
     transaction_path: Path | None = None
     ref_context: Path | None = None
+    sealed_head_descriptor: int | None = None
     head_lock_path: Path | None = None
     head_lock_token: tuple[int, int] | None = None
     try:
@@ -640,12 +1054,20 @@ def _claim_transaction_commit(
                 "reason": f"claim-commit-tree-failed: {(committed['err'] or committed['out'])[:200]}",
                 "paths": rels,
             }
-        ref_context = _create_ref_context(
-            git_dir,
-            common_dir,
-            nonce=nonce,
-            start_head=start_head,
+        head_path = git_dir / "HEAD"
+        sealed_head = _open_sealed_head(
+            head_path,
+            symbolic_ref=symbolic_ref,
         )
+        if sealed_head is None:
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": "claim-commit-symbolic-head-seal-failed",
+                "paths": rels,
+            }
+        sealed_head_descriptor, sealed_head_token = sealed_head
+        ref_context = _create_ref_context(git_dir, nonce=nonce)
         if ref_context is None:
             return {
                 "ok": False,
@@ -653,86 +1075,141 @@ def _claim_transaction_commit(
                 "reason": "claim-commit-ref-context-failed",
                 "paths": rels,
             }
+        original_reference_hook = _git_path(
+            root,
+            "hooks/reference-transaction",
+            env=real_env,
+        )
         ref_env = dict(real_env)
-        ref_env["GIT_DIR"] = str(ref_context)
-        ref_env["GIT_WORK_TREE"] = str(root)
+        ref_env["GIT_CONFIG_COUNT"] = "1"
+        ref_env["GIT_CONFIG_KEY_0"] = "core.hooksPath"
+        ref_env["GIT_CONFIG_VALUE_0"] = str(ref_context)
+        ref_env[CLAIM_REF_ROOT_ENV] = str(root.resolve())
+        ref_env[CLAIM_REF_EXPECTED_ENV] = symbolic_ref
+        ref_env[CLAIM_REF_OLD_ENV] = start_head
+        ref_env[CLAIM_REF_NEW_ENV] = commit_oid
         head_lock_path = git_dir / "HEAD.lock"
-        head_lock_token = _acquire_owned_lock(head_lock_path)
-        if head_lock_token is None:
+        ref_env[CLAIM_REF_HEAD_LOCK_ENV] = str(head_lock_path.resolve())
+        ref_env[CLAIM_REF_HEAD_PATH_ENV] = str(head_path.absolute())
+        ref_env[CLAIM_REF_HEAD_DEVICE_ENV] = str(sealed_head_token[0])
+        ref_env[CLAIM_REF_HEAD_INODE_ENV] = str(sealed_head_token[1])
+        ref_env[CLAIM_REF_ORIGINAL_HOOK_ENV] = (
+            str(original_reference_hook)
+            if original_reference_hook is not None
+            else ""
+        )
+        if _path_entry_exists(head_lock_path):
             return {
                 "ok": False,
                 "committed": False,
                 "reason": "claim-commit-head-lock-unavailable",
                 "paths": rels,
             }
+        reflog_action = f"claim-guard: {' '.join(message.splitlines()).strip()}"
         post: dict[str, Any] = {"code": 0, "out": "", "err": ""}
+        state_error = _transaction_state_error(
+            root,
+            artifacts=artifacts,
+            index_env=index_env,
+            real_env=real_env,
+            start_head=start_head,
+            symbolic_ref=symbolic_ref,
+            tree_oid=tree_oid,
+            transaction_path=transaction_path,
+            transaction_raw=raw,
+            message_path=message_path,
+        )
+        if state_error:
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": state_error,
+                "paths": rels,
+            }
+        update = _git(
+            root,
+            [
+                "update-ref",
+                "--create-reflog",
+                "-m",
+                reflog_action,
+                "HEAD",
+                commit_oid,
+                start_head,
+            ],
+            env=ref_env,
+        )
+        if update["code"] != 0:
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": (
+                    "claim-commit-ref-update-failed: "
+                    f"{update['err'][:200]}"
+                ),
+                "paths": rels,
+            }
+        head_lock_token = _acquire_owned_lock(head_lock_path)
+        if head_lock_token is None:
+            return {
+                "ok": False,
+                "committed": True,
+                "reason": "claim-commit-post-publication-head-lock-unavailable",
+                "publication_state": "published_unverified",
+                "paths": rels,
+                "commit": commit_oid,
+                "tree": tree_oid,
+            }
         try:
-            state_error = _transaction_state_error(
-                root,
-                artifacts=artifacts,
-                index_env=index_env,
-                real_env=real_env,
-                start_head=start_head,
+            state_error = _sealed_head_identity_error(
+                head_path,
+                sealed_head_descriptor,
                 symbolic_ref=symbolic_ref,
-                tree_oid=tree_oid,
-                transaction_path=transaction_path,
-                transaction_raw=raw,
-                message_path=message_path,
             )
+            if not state_error:
+                state_error = _publication_state_error(
+                    root,
+                    real_env=real_env,
+                    symbolic_ref=symbolic_ref,
+                    start_head=start_head,
+                    commit_oid=commit_oid,
+                    reflog_action=reflog_action,
+                )
             if state_error:
                 return {
                     "ok": False,
-                    "committed": False,
-                    "reason": state_error,
-                    "paths": rels,
-                }
-            update = _git(
-                root,
-                [
-                    "update-ref",
-                    "-m",
-                    f"claim-guard: {message}",
-                    symbolic_ref,
-                    commit_oid,
-                    start_head,
-                ],
-                env=ref_env,
-            )
-            if update["code"] != 0:
-                return {
-                    "ok": False,
-                    "committed": False,
-                    "reason": (
-                        "claim-commit-ref-update-failed: "
-                        f"{update['err'][:200]}"
-                    ),
-                    "paths": rels,
-                }
-            published_ref = _git(
-                root,
-                ["symbolic-ref", "-q", "HEAD"],
-                env=real_env,
-            )
-            published_head = _git(
-                root,
-                ["rev-parse", "HEAD"],
-                env=real_env,
-            )
-            if (
-                published_ref["code"] != 0
-                or published_ref["out"].strip() != symbolic_ref
-                or published_head["code"] != 0
-                or published_head["out"].strip() != commit_oid
-            ):
-                return {
-                    "ok": False,
                     "committed": True,
-                    "reason": "claim-commit-publication-verification-failed",
+                    "reason": state_error,
+                    "publication_state": "published_unverified",
                     "paths": rels,
                     "commit": commit_oid,
                     "tree": tree_oid,
                 }
             post = _run_hook(root, "post-commit", env=commit_env)
+            state_error = _sealed_head_identity_error(
+                head_path,
+                sealed_head_descriptor,
+                symbolic_ref=symbolic_ref,
+            )
+            if not state_error:
+                state_error = _publication_state_error(
+                    root,
+                    real_env=real_env,
+                    symbolic_ref=symbolic_ref,
+                    start_head=start_head,
+                    commit_oid=commit_oid,
+                    reflog_action=reflog_action,
+                )
+            if state_error:
+                return {
+                    "ok": False,
+                    "committed": True,
+                    "reason": state_error,
+                    "publication_state": "published_unverified",
+                    "paths": rels,
+                    "commit": commit_oid,
+                    "tree": tree_oid,
+                }
         finally:
             _release_owned_lock(head_lock_path, head_lock_token)
             head_lock_token = None
@@ -740,6 +1217,7 @@ def _claim_transaction_commit(
         result: dict[str, Any] = {
             "ok": True,
             "committed": True,
+            "publication_state": "verified",
             "paths": rels,
             "commit": commit_oid,
             "tree": tree_oid,
@@ -749,6 +1227,11 @@ def _claim_transaction_commit(
         return result
     finally:
         _release_owned_lock(head_lock_path, head_lock_token)
+        if sealed_head_descriptor is not None:
+            try:
+                os.close(sealed_head_descriptor)
+            except OSError:
+                pass
         _cleanup_ref_context(ref_context)
         _cleanup_private_path(transaction_path)
         _cleanup_private_path(index_path)
@@ -871,11 +1354,16 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, ensure_ascii=False))
     else:
         if result.get("paths"):
-            verb = "committed" if result.get("committed") else "would commit"
+            if not result.get("ok") and result.get("committed"):
+                verb = "published but unverified; DO NOT RETRY"
+            elif not result.get("ok"):
+                verb = "failed to commit"
+            else:
+                verb = "committed" if result.get("committed") else "would commit"
             print(f"{verb} {len(result['paths'])} untracked claim file(s): {', '.join(result['paths'])}")
         else:
             print("no untracked claim files")
-    return 0
+    return 0 if result.get("ok") else 1
 
 
 if __name__ == "__main__":
