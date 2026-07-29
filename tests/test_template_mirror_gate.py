@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "template_mirror_gate.py"
@@ -61,20 +63,34 @@ def _run(root: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _write_contract(root: Path, divergences: dict[str, dict[str, str]]) -> None:
+def _write_contract_payload(root: Path, payload: object) -> None:
     path = root / "agents" / "project" / "TEMPLATE-MIRROR-CONTRACT.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(
-            {
-                "schema": "agent-runtime-template-mirror-contract/v1",
-                "intentional_divergences": divergences,
-            },
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+    )
+
+
+def _write_contract(
+    root: Path,
+    divergences: dict[str, dict[str, str]],
+    *,
+    expected_common: list[str] | None = None,
+) -> None:
+    if expected_common is None:
+        source = _eligible(root / "scripts")
+        template = _eligible(
+            root / "src" / "agent_runtime" / "templates" / "project" / "scripts"
+        )
+        expected_common = sorted(source.keys() & template.keys())
+    _write_contract_payload(
+        root,
+        {
+            "schema": "agent-runtime-template-mirror-contract/v2",
+            "expected_common": expected_common,
+            "intentional_divergences": divergences,
+        },
     )
 
 
@@ -110,14 +126,167 @@ def test_product_common_script_census_has_only_three_pinned_variants() -> None:
     assert divergent == INTENTIONAL
     assert PORTABLE_REPAIRS.isdisjoint(divergent)
     assert CONTRACT.is_file()
+    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    assert contract["schema"] == "agent-runtime-template-mirror-contract/v2"
+    assert contract["expected_common"] == common
 
     result = _run(REPO_ROOT)
     assert result.returncode == 0, result.stdout or result.stderr
     payload = json.loads(result.stdout)
+    assert payload["expected_common"] == 84
+    assert payload["current_common"] == 84
     assert payload["eligible_common"] == 84
     assert payload["identical"] == 81
     assert payload["intentional"] == 3
     assert payload["findings"] == []
+
+
+def test_expected_source_side_missing_blocks(tmp_path: Path) -> None:
+    template = (
+        tmp_path
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "portable.py"
+    )
+    template.parent.mkdir(parents=True, exist_ok=True)
+    template.write_text("portable\n", encoding="utf-8")
+    (tmp_path / "scripts").mkdir(parents=True)
+    _write_contract(tmp_path, {}, expected_common=["portable.py"])
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:expected-source-missing:portable.py" in result.stdout
+
+
+def test_expected_template_side_missing_blocks(tmp_path: Path) -> None:
+    source = tmp_path / "scripts" / "portable.py"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("portable\n", encoding="utf-8")
+    (
+        tmp_path
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+    ).mkdir(parents=True)
+    _write_contract(tmp_path, {}, expected_common=["portable.py"])
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:expected-template-missing:portable.py" in result.stdout
+
+
+def test_deleting_one_side_of_formerly_common_path_blocks(tmp_path: Path) -> None:
+    _, template = _write_pair(tmp_path, "portable.py", "same\n", "same\n")
+    _write_contract(tmp_path, {})
+    template.unlink()
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:expected-template-missing:portable.py" in result.stdout
+
+
+def test_unreviewed_new_common_path_blocks(tmp_path: Path) -> None:
+    _write_pair(tmp_path, "expected.py", "same\n", "same\n")
+    _write_contract(tmp_path, {}, expected_common=["expected.py"])
+    _write_pair(tmp_path, "new_portable.py", "new\n", "new\n")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:unexpected-common:new_portable.py" in result.stdout
+
+
+def test_legitimate_one_sided_assets_outside_inventory_are_allowed(
+    tmp_path: Path,
+) -> None:
+    _write_pair(tmp_path, "portable.py", "same\n", "same\n")
+    source_only = tmp_path / "scripts" / "source_only.py"
+    source_only.write_text("source\n", encoding="utf-8")
+    template_only = (
+        tmp_path
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "template_only.py"
+    )
+    template_only.write_text("template\n", encoding="utf-8")
+    _write_contract(tmp_path, {}, expected_common=["portable.py"])
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 0, result.stdout or result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["expected_common"] == 1
+    assert payload["current_common"] == 1
+    assert payload["findings"] == []
+
+
+@pytest.mark.parametrize(
+    ("expected_common", "finding"),
+    [
+        ("portable.py", "mirror:invalid-expected-common-list"),
+        (["portable.py", "portable.py"], "mirror:duplicate-expected-path:portable.py"),
+        (["../escape.py"], "mirror:invalid-expected-path:../escape.py"),
+        (["z.py", "a.py"], "mirror:unsorted-expected-common"),
+        ([7], "mirror:invalid-expected-path:7"),
+    ],
+)
+def test_invalid_expected_inventory_blocks(
+    tmp_path: Path,
+    expected_common: object,
+    finding: str,
+) -> None:
+    _write_pair(tmp_path, "portable.py", "same\n", "same\n")
+    _write_pair(tmp_path, "a.py", "same\n", "same\n")
+    _write_pair(tmp_path, "z.py", "same\n", "same\n")
+    _write_contract_payload(
+        tmp_path,
+        {
+            "schema": "agent-runtime-template-mirror-contract/v2",
+            "expected_common": expected_common,
+            "intentional_divergences": {},
+        },
+    )
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert finding in result.stdout
+
+
+def test_intentional_divergence_must_belong_to_expected_inventory(
+    tmp_path: Path,
+) -> None:
+    _write_pair(tmp_path, "expected.py", "same\n", "same\n")
+    source, template = _write_pair(
+        tmp_path, "variant.py", "source\n", "template\n"
+    )
+    _write_contract(
+        tmp_path,
+        {
+            "variant.py": {
+                "reason": "This variant is pinned but omitted from the reviewed expected inventory.",
+                "source_sha256": _digest(source),
+                "template_sha256": _digest(template),
+            }
+        },
+        expected_common=["expected.py"],
+    )
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:exception-not-expected:variant.py" in result.stdout
 
 
 def test_unlisted_drift_blocks(tmp_path: Path) -> None:
@@ -236,7 +405,8 @@ def test_duplicate_exception_key_blocks(tmp_path: Path) -> None:
         }
     )
     contract = (
-        '{"schema":"agent-runtime-template-mirror-contract/v1",'
+        '{"schema":"agent-runtime-template-mirror-contract/v2",'
+        '"expected_common":["variant.py"],'
         f'"intentional_divergences":{first},'
         f'"intentional_divergences":{second}}}'
     )
