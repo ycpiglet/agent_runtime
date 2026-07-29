@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-29T08:42:56+09:00
-record_count: 988
+generated_at: 2026-07-29T09:40:25+09:00
+record_count: 989
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `988` review and evidence records under `reviews/`.
+- Summary: indexed `989` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `988` files |
+| Reviews covered | pass | `989` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -876,6 +876,7 @@ record_count: 988
 | `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357.json` | `VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-002-20260729054357 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503.json` | `VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-645-002-20260729054503 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848.json` | `VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-646-001-20260729072848 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

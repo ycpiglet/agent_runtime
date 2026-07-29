@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T08:54:44+09:00
+updated_at: 2026-07-29T09:38:04+09:00
 started_at: 2026-07-29T08:54:44+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
@@ -94,6 +94,10 @@ verification:
   - python -m pytest -q
 handoff: Provide exact event/field/value compatibility, fail-closed versus fail-open results, clean profile dependency closure, security risk-to-required-metadata coverage, and an isolated real-Allimbot spool record with no delivery.
 stop_condition: Stop before reading or changing production credentials, flushing the spool, sending a live event, adding a direct network fallback, mutating Bean Wiki/Allimbot/Autofolio, weakening an Owner boundary, or performing version/tag/publish/release work.
+verified_at: 2026-07-29T09:38:04+09:00
+verified_by: le-20260729-kst-647001
+evidence_refs:
+  - reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729093804.json
 ---
 
 # UNIT-TASK-AR-647-001 - Add native events and security-service guardrails
