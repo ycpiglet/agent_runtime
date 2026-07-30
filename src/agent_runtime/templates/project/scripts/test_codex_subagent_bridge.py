@@ -15,6 +15,13 @@ import subagent_council as sc  # noqa: E402
 import subagent_dispatch as sd  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def isolate_execution_receipts(tmp_path, monkeypatch):
+    receipt_log = tmp_path / "execution-receipts.jsonl"
+    monkeypatch.setattr(bridge.eval_harness, "EVAL_LOG", receipt_log)
+    return receipt_log
+
+
 def test_dispatch_packet_writes_packet_call_and_event(tmp_path, monkeypatch):
     monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
     monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
@@ -74,6 +81,10 @@ def test_record_reply_writes_reply_and_marks_call_answered(tmp_path, monkeypatch
     assert result["completion_observation"]["model_observation_status"] == "unverified"
     assert result["completion_observation"]["token_usage_status"] == "unavailable"
     assert result["completion_observation"]["billed_cost_status"] == "unavailable"
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 1
+    assert receipts[0]["source"] == "native_codex_reply"
+    assert result["execution_receipt"]["receipt_id"] == receipts[0]["receipt_id"]
 
 
 def test_implementer_packet_defaults_to_terra_low(tmp_path, monkeypatch):
@@ -167,6 +178,10 @@ def test_record_reply_records_only_explicit_completion_observations(
         (bridge.BRIDGE_DIR / f"{packet['id']}.json").read_text(encoding="utf-8")
     )
     assert saved["completion_observation"]["billed_cost"] == 0.012
+    receipt = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)[0]
+    assert receipt["observed_reasoning_effort"] == "low"
+    assert receipt["tokens"] == 150
+    assert receipt["billed_cost"] == 0.012
 
 
 def test_record_reply_rejects_cost_without_currency(tmp_path, monkeypatch):
@@ -217,6 +232,7 @@ def test_council_packet_and_record(tmp_path, monkeypatch):
             "reviewer": {
                 "provider": "codex",
                 "model": "gpt-5.6-sol",
+                "reasoning_effort": "high",
                 "tokens_in": 10,
                 "tokens_out": 5,
                 "latency_ms": 100,
@@ -237,6 +253,10 @@ def test_council_packet_and_record(tmp_path, monkeypatch):
         result["member_routing_completion"]["reviewer"]["application_status"]
         == "applied"
     )
+    assert set(result["execution_receipts"]) == {"reviewer", "skeptic"}
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 2
+    assert {receipt["role"] for receipt in receipts} == {"reviewer", "skeptic"}
     verdict_event = json.loads(
         next((tmp_path / "events").glob("*.jsonl")).read_text(
             encoding="utf-8"
@@ -251,6 +271,60 @@ def test_council_packet_and_record(tmp_path, monkeypatch):
     meta, err = cm.load_frontmatter(consensus)
     assert err == "" and meta is not None
     assert meta["type"] == "consensus"
+
+
+def test_dispatch_budget_block_emits_no_spawn_packet_and_records_receipt(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-BUDGET",
+        intent="implement bounded change",
+        dispatch_ceiling=10,
+        task_token_budget=0,
+    )
+
+    assert packet["status"] == "budget_blocked_no_spawn"
+    assert packet["execution"] is None
+    assert packet["budget_preflight"]["reason"] == "task_budget_insufficient"
+    assert not (tmp_path / "packets").exists()
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 1
+    assert receipts[0]["status"] == "skipped"
+    assert receipts[0]["source"] == "budget_preflight"
+
+
+def test_record_reply_rejects_duplicate_before_second_reply(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-ONCE",
+        intent="implement once",
+        emit_call=True,
+    )
+    bridge.record_reply(
+        bridge_id=packet["id"],
+        verdict="APPROVED",
+        summary="done",
+    )
+    reply_count = len(list((tmp_path / "inbox").glob("*.md")))
+
+    with pytest.raises(bridge.eval_harness.ReceiptConflictError):
+        bridge.record_reply(
+            bridge_id=packet["id"],
+            verdict="APPROVED",
+            summary="duplicate",
+        )
+
+    assert len(list((tmp_path / "inbox").glob("*.md"))) == reply_count
+    assert len(bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)) == 1
 
 
 def test_cli_dispatch_dry_run_json(capsys, tmp_path, monkeypatch):

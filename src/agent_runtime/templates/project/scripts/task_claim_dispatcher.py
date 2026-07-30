@@ -578,6 +578,38 @@ def _resolve_claim_routing(
     return decision
 
 
+def _resolve_token_budgets(
+    root: Path,
+    args: argparse.Namespace,
+) -> dict[str, int | None]:
+    """Resolve explicit -> unit -> task durable token budgets."""
+    task_meta = _task_meta(root, args.task_id)
+    unit_meta = _unit_meta(root, args.unit_spec)
+
+    def _one(key: str) -> int | None:
+        raw = (
+            getattr(args, key, None)
+            if getattr(args, key, None) not in (None, "")
+            else unit_meta.get(key)
+            if unit_meta.get(key) not in (None, "")
+            else task_meta.get(key)
+        )
+        if raw in (None, ""):
+            return None
+        try:
+            value = int(raw)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{key} must be a non-negative integer") from exc
+        if value < 0:
+            raise ValueError(f"{key} must be a non-negative integer")
+        return value
+
+    return {
+        "task_token_budget": _one("task_token_budget"),
+        "claim_token_budget": _one("claim_token_budget"),
+    }
+
+
 def _is_footprint_active(payload: dict[str, Any]) -> bool:
     return str(payload.get("status") or "").strip().lower() in FOOTPRINT_ACTIVE_STATUSES
 
@@ -660,6 +692,7 @@ def _build_claim(
     target_files: list[str],
     escalation_triggers: list[str],
     routing_decision: dict[str, Any],
+    token_budgets: dict[str, int | None],
     defect_signatures: list[str],
     knowledge_matches: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -708,8 +741,21 @@ def _build_claim(
         "provider_tier": routing_decision["provider_tier"],
         "routing_status": routing_decision["routing_status"],
         "routing_reason": routing_decision["reason"],
+        "routing_policy_id": routing_decision["routing_policy_id"],
+        "routing_policy_reason": routing_decision["routing_policy_reason"],
+        "routing_high_tier_authorized": routing_decision[
+            "high_tier_authorized"
+        ],
+        "routing_escalation_reason": routing_decision[
+            "registered_escalation_reason"
+        ],
+        "routing_registered_triggers": list(
+            routing_decision["registered_escalation_triggers"]
+        ),
         "routing_signals": list(routing_decision["escalation_triggers"]),
         "routing_unknown_triggers": list(routing_decision["unknown_triggers"]),
+        "task_token_budget": token_budgets["task_token_budget"],
+        "claim_token_budget": token_budgets["claim_token_budget"],
         "actual_model": None,
         "actual_model_status": "unverified",
         "wip_slot": args.wip_slot,
@@ -1572,12 +1618,18 @@ def cmd_create(args: argparse.Namespace) -> int:
     )
     escalation_triggers = _resolve_escalation_triggers(root, args)
     target_files = _resolve_target_files(root, args)
+    try:
+        token_budgets = _resolve_token_budgets(root, args)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     claim = _build_claim(
         args,
         records,
         target_files=target_files,
         escalation_triggers=escalation_triggers,
         routing_decision=_resolve_claim_routing(root, args, escalation_triggers),
+        token_budgets=token_budgets,
         defect_signatures=defect_signatures,
         knowledge_matches=knowledge_matches,
     )
@@ -1790,6 +1842,12 @@ def cmd_projection(args: argparse.Namespace) -> int:
             "status_text",
             "worktree_path",
             "branch",
+            "requested_model_tier",
+            "selected_model_tier",
+            "routing_policy_id",
+            "routing_escalation_reason",
+            "task_token_budget",
+            "claim_token_budget",
         )
     }
     agent.update(
@@ -2065,6 +2123,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--model-tier",
         default="",
         help="Requested PM tier; derives from unit/task metadata when omitted",
+    )
+    create.add_argument(
+        "--task-token-budget",
+        default="",
+        help="Durable cumulative task token budget (explicit -> unit -> task)",
+    )
+    create.add_argument(
+        "--claim-token-budget",
+        default="",
+        help="Durable cumulative claim token budget (explicit -> unit -> task)",
     )
     create.add_argument("--wip-slot", type=int, default=0)
     create.add_argument("--stop-condition", default="")

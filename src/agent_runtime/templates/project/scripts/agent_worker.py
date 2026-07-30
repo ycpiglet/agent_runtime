@@ -316,6 +316,25 @@ def _baseline_model(meta: dict) -> str | None:
     return None
 
 
+def _baseline_reasoning_effort(meta: dict) -> str | None:
+    for key in ("eval_baseline_reasoning_effort", "baseline_reasoning_effort"):
+        value = str(meta.get(key) or "").strip()
+        if value:
+            return value
+    return None
+
+
+def _baseline_observation_status(meta: dict) -> str:
+    for key in (
+        "eval_baseline_observation_status",
+        "baseline_observation_status",
+    ):
+        value = str(meta.get(key) or "").strip()
+        if value:
+            return value
+    return "configured" if _baseline_model(meta) else "unavailable"
+
+
 def _baseline_billed_cost(meta: dict) -> tuple[float | None, str | None]:
     cost = _nonnegative_observed_float(
         meta.get("eval_baseline_billed_cost")
@@ -338,6 +357,7 @@ def _apply_routing_to_provider(
     decision: dict | None,
     *,
     baseline_model: str | None = None,
+    baseline_reasoning_effort: str | None = None,
 ) -> dict | None:
     """Apply configured request routing and return its provider-aware plan.
 
@@ -351,6 +371,7 @@ def _apply_routing_to_provider(
         decision["selected_tier"],
         requested_tier=decision.get("policy_tier"),
         baseline_model=baseline_model,
+        baseline_reasoning_effort=baseline_reasoning_effort,
     )
     for name, value in dict(route.get("provider_env") or {}).items():
         os.environ[name] = value
@@ -419,6 +440,23 @@ def _completion_observation(result, latency_ms: float) -> dict:
     }
 
 
+def _not_dispatched_observation() -> dict:
+    return {
+        "observed_provider": None,
+        "observed_model": None,
+        "observed_reasoning_effort": None,
+        "model_observation_status": "unverified",
+        "token_usage_status": "not_dispatched",
+        "tokens_in": None,
+        "tokens_out": None,
+        "latency_status": "unavailable",
+        "latency_ms": None,
+        "billed_cost_status": "unavailable",
+        "billed_cost": None,
+        "currency": None,
+    }
+
+
 def _provider_routing_event_fields(
     decision: dict | None,
     route: dict | None,
@@ -437,6 +475,9 @@ def _provider_routing_event_fields(
         "resolved_model": route.get("resolved_model") if route else None,
         "model_source": route.get("model_source") if route else "unavailable",
         "reasoning_effort": route.get("reasoning_effort") if route else None,
+        "reasoning_source": (
+            route.get("reasoning_source") if route else "unavailable"
+        ),
         "route_status": route.get("route_status") if route else "unverified",
         "equivalence_status": (
             route.get("equivalence_status") if route else "unverified"
@@ -445,6 +486,7 @@ def _provider_routing_event_fields(
             route.get("application_status") if route else "configured_unverified"
         ),
         "model_changed": route.get("model_changed") if route else None,
+        "route_changed": route.get("route_changed") if route else None,
         "economic_claim_status": (
             route.get("economic_claim_status") if route else "unverified"
         ),
@@ -461,6 +503,7 @@ def _route_with_observation(
     decision: dict | None,
     *,
     baseline_model: str | None,
+    baseline_reasoning_effort: str | None = None,
     observation: dict,
 ) -> dict | None:
     if not decision:
@@ -470,6 +513,7 @@ def _route_with_observation(
         decision["selected_tier"],
         requested_tier=decision.get("policy_tier"),
         baseline_model=baseline_model,
+        baseline_reasoning_effort=baseline_reasoning_effort,
         observed_model=observation.get("observed_model"),
         observed_reasoning_effort=observation.get("observed_reasoning_effort"),
     )
@@ -480,6 +524,28 @@ def _baseline_tokens(meta: dict) -> int | None:
         value = meta.get(key)
         if value in (None, ""):
             continue
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            continue
+        if parsed > 0:
+            return parsed
+    return None
+
+
+def _metadata_claim_id(meta: dict) -> str | None:
+    value = str(meta.get("claim_id") or "").strip()
+    return value or None
+
+
+def _metadata_budget(meta: dict, key: str) -> int | str | None:
+    value = meta.get(key)
+    return None if value in (None, "") else value
+
+
+def _provider_dispatch_ceiling(provider: Provider) -> int | None:
+    for attr in ("per_dispatch_cap", "tokens_per_call"):
+        value = getattr(provider, attr, None)
         try:
             parsed = int(value)
         except (TypeError, ValueError):
@@ -503,6 +569,7 @@ def _routing_eval_skip_reason(
     *,
     baseline_tokens: int | None,
     baseline_model: str | None,
+    baseline_observation_status: str,
 ) -> str | None:
     if not routing_decision or not route:
         return "routing_not_resolved"
@@ -512,69 +579,123 @@ def _routing_eval_skip_reason(
         return "routing_not_applied"
     if not baseline_model:
         return "baseline_model_unavailable"
-    if route.get("model_changed") is not True:
+    if baseline_observation_status != "observed":
+        return "baseline_observation_unavailable"
+    if route.get("route_changed") is not True:
         return "route_not_effective"
-    if observation.get("token_usage_status") == "unavailable":
+    if observation.get("token_usage_status") != "observed":
         return "token_usage_unavailable"
     if baseline_tokens is None:
         return "baseline_usage_unavailable"
     return None
 
 
-def _record_eval_outcome(
+def _record_execution_receipt(
     cfg: WorkerConfig,
     meta: dict,
     routing_decision: dict | None,
     route: dict | None,
     observation: dict,
     *,
+    dispatch_id: str,
+    status: str,
+    source: str,
     finish_reason: str | None = None,
     error=None,
+    budget_preflight_result: dict | None = None,
 ) -> tuple[bool, str | None]:
-    if not routing_decision:
-        return False, None
     baseline = _baseline_tokens(meta)
     comparison_model = _baseline_model(meta)
+    comparison_reasoning = _baseline_reasoning_effort(meta)
+    baseline_observation = _baseline_observation_status(meta)
     skip_reason = _routing_eval_skip_reason(
         routing_decision,
         route,
         observation,
         baseline_tokens=baseline,
         baseline_model=comparison_model,
-    )
-    if skip_reason:
-        return False, skip_reason
-    tokens = int(observation.get("tokens_in") or 0) + int(
-        observation.get("tokens_out") or 0
+        baseline_observation_status=baseline_observation,
     )
     baseline_cost, baseline_currency = _baseline_billed_cost(meta)
-    eval_harness.record_outcome(
-        _metadata_task_id(meta),
-        routing_decision["grade"],
-        str(observation["observed_model"]),
-        tokens,
-        finish_reason=str(finish_reason or "stop"),
-        outcome="ok" if not error else "gate-error",
-        path=cfg.eval_log_path or eval_harness.EVAL_LOG,
-        policy_model=routing_decision["policy_tier"],
-        selected_model=routing_decision["selected_tier"],
-        routing_signals=list(routing_decision.get("signals") or []),
-        baseline_tokens=baseline,
-        actual_tokens_known=True,
-        provider=cfg.provider_name,
-        requested_tier=route.get("requested_tier"),
-        resolved_model=route.get("resolved_model"),
-        observed_model=observation.get("observed_model"),
-        model_changed=route.get("model_changed"),
-        route_status=route.get("route_status"),
-        application_status=route.get("application_status"),
-        baseline_model=comparison_model,
-        billed_cost=observation.get("billed_cost"),
-        currency=observation.get("currency"),
-        baseline_billed_cost=baseline_cost,
-        baseline_currency=baseline_currency,
-    )
-    return True, None
+    try:
+        eval_harness.record_execution_receipt(
+            dispatch_id=dispatch_id,
+            task_id=_metadata_task_id(meta),
+            claim_id=_metadata_claim_id(meta),
+            role=cfg.role,
+            provider=cfg.provider_name,
+            execution_surface=(
+                route.get("execution_surface") if route else "provider_worker"
+            ),
+            requested_tier=route.get("requested_tier") if route else None,
+            selected_tier=route.get("selected_tier") if route else None,
+            resolved_model=route.get("resolved_model") if route else None,
+            resolved_reasoning_effort=(
+                route.get("reasoning_effort") if route else None
+            ),
+            resolved_model_source=(
+                route.get("model_source") if route else "unavailable"
+            ),
+            resolved_reasoning_source=(
+                route.get("reasoning_source") if route else "unavailable"
+            ),
+            observed_provider=observation.get("observed_provider"),
+            observed_model=observation.get("observed_model"),
+            observed_reasoning_effort=observation.get(
+                "observed_reasoning_effort"
+            ),
+            token_usage_status=observation.get("token_usage_status"),
+            tokens_in=observation.get("tokens_in"),
+            tokens_out=observation.get("tokens_out"),
+            billed_cost_status=observation.get("billed_cost_status"),
+            billed_cost=observation.get("billed_cost"),
+            currency=observation.get("currency"),
+            source=source,
+            status=status,
+            finish_reason=str(finish_reason or "stop"),
+            error=str(error or "").strip() or None,
+            route_status=route.get("route_status") if route else None,
+            application_status=(
+                route.get("application_status") if route else None
+            ),
+            model_changed=route.get("model_changed") if route else None,
+            route_changed=route.get("route_changed") if route else None,
+            baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
+            baseline_observation_status=baseline_observation,
+            baseline_tokens=baseline,
+            baseline_billed_cost=baseline_cost,
+            baseline_currency=baseline_currency,
+            grade=routing_decision.get("grade") if routing_decision else "?",
+            policy_model=(
+                routing_decision.get("policy_tier")
+                if routing_decision
+                else None
+            ),
+            selected_model=(
+                routing_decision.get("selected_tier")
+                if routing_decision
+                else None
+            ),
+            routing_signals=(
+                list(routing_decision.get("signals") or [])
+                if routing_decision
+                else []
+            ),
+            budget_preflight_result=budget_preflight_result,
+            path=cfg.eval_log_path or eval_harness.EVAL_LOG,
+        )
+    except eval_harness.ReceiptConflictError:
+        return False, "duplicate_dispatch_id"
+    except eval_harness.ReceiptIntegrityError:
+        return False, "receipt_ledger_untrusted"
+    return True, skip_reason
+
+
+class BudgetPreflightBlocked(RuntimeError):
+    def __init__(self, result: dict):
+        self.result = dict(result)
+        super().__init__(str(result.get("reason") or "budget_preflight_blocked"))
 
 
 def normalize_role(raw: str) -> str:
@@ -694,13 +815,33 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     instruction = body if body.strip() else str(meta.get("intent", ""))
     routing_decision = _message_routing_decision(cfg, meta, instruction)
     comparison_model = _baseline_model(meta)
+    comparison_reasoning = _baseline_reasoning_effort(meta)
     planned_route = _apply_routing_to_provider(
         provider,
         cfg.provider_name,
         routing_decision,
         baseline_model=comparison_model,
+        baseline_reasoning_effort=comparison_reasoning,
     )
     dispatch_id = str(meta.get("dispatch_id") or msg_id)
+    receipt_path = Path(cfg.eval_log_path or eval_harness.EVAL_LOG)
+    try:
+        budget_preflight = eval_harness.budget_preflight(
+            path=receipt_path,
+            task_id=_metadata_task_id(meta),
+            claim_id=_metadata_claim_id(meta),
+            dispatch_id=dispatch_id,
+            dispatch_ceiling=_provider_dispatch_ceiling(provider),
+            task_token_budget=_metadata_budget(meta, "task_token_budget"),
+            claim_token_budget=_metadata_budget(meta, "claim_token_budget"),
+        )
+    except eval_harness.ReceiptIntegrityError as exc:
+        budget_preflight = {
+            "allowed": False,
+            "reason": "receipt_ledger_untrusted",
+            "dispatch_id": dispatch_id,
+            "error": str(exc),
+        }
     context = {
         "original_msg_id": msg_id,
         "task_id": _metadata_task_id(meta),
@@ -713,15 +854,64 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
         "routing": routing_decision,
         "provider_route": planned_route,
         "dispatch_id": dispatch_id,
+        "budget_preflight": budget_preflight,
     }
-    log(cfg, f"provider={provider.name} run()")
+    if budget_preflight["allowed"]:
+        log(cfg, f"provider={provider.name} run()")
+    else:
+        log(
+            cfg,
+            "provider call blocked before dispatch "
+            f"({budget_preflight['reason']})",
+        )
     # TASK-101: provider.run returns ProviderResult (was plain str).
     # TASK-102: a ProviderError must not kill the worker — record it and reply
     # with the error so the loop keeps serving other messages.
     result = None
     call_started = time.monotonic()
     try:
+        if not budget_preflight["allowed"]:
+            raise BudgetPreflightBlocked(budget_preflight)
         result = provider.run(cfg.role, instruction, context)
+    except BudgetPreflightBlocked as exc:
+        observation = _not_dispatched_observation()
+        completion_route = planned_route
+        receipt_recorded, eval_skip_reason = _record_execution_receipt(
+            cfg,
+            meta,
+            routing_decision,
+            completion_route,
+            observation,
+            dispatch_id=dispatch_id,
+            status="skipped",
+            source="budget_preflight",
+            finish_reason="skipped",
+            error=str(exc),
+            budget_preflight_result=exc.result,
+        )
+        event_fields = {
+            "provider": provider.name,
+            "message_id": msg_id,
+            "dispatch_status": "skipped",
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+            "budget_preflight": exc.result,
+            "eval_recorded": receipt_recorded,
+            "receipt_recorded": receipt_recorded,
+            **_provider_routing_event_fields(
+                routing_decision,
+                completion_route,
+                observation,
+                dispatch_id=dispatch_id,
+            ),
+        }
+        if eval_skip_reason:
+            event_fields["eval_skip_reason"] = eval_skip_reason
+        append_event(EVENTS_DIR, cfg.role, "provider_skipped", **event_fields)
+        reply_text = (
+            f"[{cfg.role}/{provider.name}] dispatch skipped before provider call: "
+            f"{exc}"
+        )
     except NotImplementedError as exc:
         observation = _completion_observation(
             None, (time.monotonic() - call_started) * 1000
@@ -730,17 +920,22 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             cfg.provider_name,
             routing_decision,
             baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
             observation=observation,
         )
         log(cfg, f"provider unsupported ({type(exc).__name__}): {exc}")
-        eval_recorded, eval_skip_reason = _record_eval_outcome(
+        eval_recorded, eval_skip_reason = _record_execution_receipt(
             cfg,
             meta,
             routing_decision,
             completion_route,
             observation,
+            dispatch_id=dispatch_id,
+            status="error",
+            source="provider_unsupported",
             finish_reason="error",
             error=str(exc),
+            budget_preflight_result=budget_preflight,
         )
         event_fields = {
             "provider": provider.name,
@@ -749,6 +944,8 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             "error_type": type(exc).__name__,
             "error": str(exc),
             "eval_recorded": eval_recorded,
+            "receipt_recorded": eval_recorded,
+            "budget_preflight": budget_preflight,
             **_provider_routing_event_fields(
                 routing_decision,
                 completion_route,
@@ -768,17 +965,22 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             cfg.provider_name,
             routing_decision,
             baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
             observation=observation,
         )
         log(cfg, f"provider error ({type(exc).__name__}): {exc}")
-        eval_recorded, eval_skip_reason = _record_eval_outcome(
+        eval_recorded, eval_skip_reason = _record_execution_receipt(
             cfg,
             meta,
             routing_decision,
             completion_route,
             observation,
+            dispatch_id=dispatch_id,
+            status="error",
+            source="provider_error",
             finish_reason="error",
             error=str(exc),
+            budget_preflight_result=budget_preflight,
         )
         event_fields = {
             "provider": provider.name,
@@ -787,6 +989,8 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             "error_type": type(exc).__name__,
             "error": str(exc),
             "eval_recorded": eval_recorded,
+            "receipt_recorded": eval_recorded,
+            "budget_preflight": budget_preflight,
             **_provider_routing_event_fields(
                 routing_decision,
                 completion_route,
@@ -806,17 +1010,22 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             cfg.provider_name,
             routing_decision,
             baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
             observation=observation,
         )
         log(cfg, f"provider error ({type(exc).__name__}): {exc}")
-        eval_recorded, eval_skip_reason = _record_eval_outcome(
+        eval_recorded, eval_skip_reason = _record_execution_receipt(
             cfg,
             meta,
             routing_decision,
             completion_route,
             observation,
+            dispatch_id=dispatch_id,
+            status="error",
+            source="provider_exception",
             finish_reason="error",
             error=str(exc),
+            budget_preflight_result=budget_preflight,
         )
         event_fields = {
             "provider": provider.name,
@@ -825,6 +1034,8 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             "error_type": type(exc).__name__,
             "error": str(exc),
             "eval_recorded": eval_recorded,
+            "receipt_recorded": eval_recorded,
+            "budget_preflight": budget_preflight,
             **_provider_routing_event_fields(
                 routing_decision,
                 completion_route,
@@ -844,17 +1055,22 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             cfg.provider_name,
             routing_decision,
             baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
             observation=observation,
         )
         reply_text = result.text
-        eval_recorded, eval_skip_reason = _record_eval_outcome(
+        eval_recorded, eval_skip_reason = _record_execution_receipt(
             cfg,
             meta,
             routing_decision,
             completion_route,
             observation,
+            dispatch_id=dispatch_id,
+            status="completed" if not result.error else "error",
+            source="provider_completion",
             finish_reason=str(result.finish_reason or "stop"),
             error=result.error,
+            budget_preflight_result=budget_preflight,
         )
         event_fields = {
             "provider": provider.name,
@@ -862,6 +1078,8 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             "dispatch_status": "completed" if not result.error else "error",
             "model": observation.get("observed_model"),
             "eval_recorded": eval_recorded,
+            "receipt_recorded": eval_recorded,
+            "budget_preflight": budget_preflight,
             "reply_chars": len(reply_text),
             "finish_reason": result.finish_reason,
             **_provider_routing_event_fields(

@@ -97,9 +97,19 @@ def routing_event_fields(
         "resolved_model": route.get("resolved_model"),
         "model_source": route.get("model_source") or "unverified",
         "reasoning_effort": route.get("reasoning_effort"),
+        "reasoning_source": route.get("reasoning_source") or "unverified",
         "route_status": route.get("route_status") or "unverified",
         "equivalence_status": route.get("equivalence_status") or "unverified",
         "application_status": route.get("application_status") or "unverified",
+        "model_changed": route.get("model_changed"),
+        "route_changed": route.get("route_changed"),
+        "role_policy_id": route.get("role_policy_id"),
+        "role_policy_status": route.get("role_policy_status"),
+        "role_policy_reason": route.get("role_policy_reason"),
+        "high_tier_authorized": route.get("high_tier_authorized"),
+        "registered_escalation_reason": route.get(
+            "registered_escalation_reason"
+        ),
         "model_observation_status": "unverified",
         "token_usage_status": "unavailable",
         "tokens_in": None,
@@ -553,6 +563,27 @@ def emit_call_message(
         front.append(
             f"routing_status: {route.get('route_status') or 'unverified'}"
         )
+        front.append(
+            f"reasoning_effort: {route.get('reasoning_effort') or 'unverified'}"
+        )
+        front.append(
+            f"reasoning_source: {route.get('reasoning_source') or 'unverified'}"
+        )
+        front.append(
+            f"role_policy_id: {tier.get('role_policy_id') or 'unverified'}"
+        )
+        front.append(
+            "role_policy_status: "
+            f"{tier.get('role_policy_status') or 'unverified'}"
+        )
+        front.append(
+            "high_tier_authorized: "
+            f"{str(tier.get('high_tier_authorized')).lower()}"
+        )
+        front.append(
+            "registered_escalation_reason: "
+            f"{tier.get('registered_escalation_reason') or 'none'}"
+        )
         triggers = ", ".join(
             str(item) for item in (tier.get("escalation_triggers") or [])
         )
@@ -780,7 +811,7 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
                     routing_decision,
                     dispatch_id=msg_path.stem,
                     provider=args.provider,
-                    route=provider_route,
+                    route={**role_route, **dict(provider_route or {})},
                     preflight=preflight,
                 ),
             },

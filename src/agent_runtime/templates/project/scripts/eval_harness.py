@@ -16,9 +16,13 @@ architect subagent(collab-2026-06-05.jsonl): 측정은 peer 아닌 선행 의존
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import os
 import sys
+import time
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -33,6 +37,9 @@ ESCALATION_OUTCOME = {"rejected", "needs-changes", "gate-error", "recurrence", "
 NEUTRAL_OUTCOME = {"ok", "completed", ""}
 MODEL_TIER = {"haiku": 1, "sonnet": 2, "opus": 3}       # 싼→비싼 (TASK-239 over-route 판정용)
 
+EXECUTION_RECEIPT_SCHEMA = "agent-runtime-execution-receipt/v1"
+RECEIPT_LOCK_TIMEOUT_SECONDS = 5.0
+
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
@@ -40,6 +47,412 @@ except Exception:
 
 
 # ---------- logger ----------
+
+
+class ReceiptConflictError(ValueError):
+    """A dispatch already has an immutable receipt."""
+
+
+class ReceiptIntegrityError(RuntimeError):
+    """The append-only receipt ledger cannot be trusted."""
+
+
+@contextmanager
+def _exclusive_log_lock(path: Path):
+    """Cross-platform exclusive lock for one append-only JSONL ledger."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_name(path.name + ".lock")
+    deadline = time.monotonic() + RECEIPT_LOCK_TIMEOUT_SECONDS
+    fd: int | None = None
+    while fd is None:
+        try:
+            fd = os.open(
+                lock_path,
+                os.O_CREAT | os.O_EXCL | os.O_WRONLY,
+                0o600,
+            )
+        except FileExistsError:
+            if time.monotonic() >= deadline:
+                raise ReceiptIntegrityError(
+                    f"receipt ledger lock timed out: {lock_path}"
+                )
+            time.sleep(0.01)
+    try:
+        os.write(fd, str(os.getpid()).encode("ascii", errors="strict"))
+        yield
+    finally:
+        os.close(fd)
+        try:
+            lock_path.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _strict_records(path: Path) -> list[dict]:
+    path = Path(path)
+    if not path.exists():
+        return []
+    records: list[dict] = []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as exc:
+        raise ReceiptIntegrityError(f"receipt ledger unreadable: {path}") from exc
+    for index, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ReceiptIntegrityError(
+                f"receipt ledger has invalid JSON at line {index}: {path}"
+            ) from exc
+        if not isinstance(value, dict):
+            raise ReceiptIntegrityError(
+                f"receipt ledger line {index} is not an object: {path}"
+            )
+        records.append(value)
+    return records
+
+
+def _append_record(
+    path: Path,
+    record: dict,
+    *,
+    unique_dispatch_id: str | None = None,
+) -> dict:
+    path = Path(path)
+    with _exclusive_log_lock(path):
+        records = _strict_records(path)
+        if unique_dispatch_id and any(
+            str(item.get("dispatch_id") or "") == unique_dispatch_id
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                f"immutable receipt already exists for dispatch_id={unique_dispatch_id}"
+            )
+        with path.open("a", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+    return record
+
+
+def _optional_nonnegative_int(value: int | str | None) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed >= 0 else None
+
+
+def _optional_positive_int(value: int | str | None) -> int | None:
+    parsed = _optional_nonnegative_int(value)
+    return parsed if parsed is not None and parsed > 0 else None
+
+
+def cumulative_usage(
+    *,
+    path: Path = EVAL_LOG,
+    task_id: str,
+    claim_id: str | None = None,
+) -> dict:
+    """Read durable observed usage for one task and optional claim."""
+    records = _strict_records(Path(path))
+    task_records = [
+        item
+        for item in records
+        if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        and str(item.get("task_id") or "") == str(task_id)
+    ]
+    claim_records = (
+        [
+            item
+            for item in task_records
+            if str(item.get("claim_id") or "") == str(claim_id)
+        ]
+        if claim_id
+        else []
+    )
+
+    def _usage(rows: list[dict]) -> dict:
+        costs: dict[str, float] = {}
+        tokens = 0
+        for item in rows:
+            tokens += max(0, int(item.get("tokens", 0) or 0))
+            if (
+                item.get("billed_cost_status") == "observed"
+                and item.get("billed_cost") is not None
+                and str(item.get("currency") or "").strip()
+            ):
+                currency = str(item["currency"]).upper()
+                costs[currency] = costs.get(currency, 0.0) + float(
+                    item["billed_cost"]
+                )
+        return {
+            "receipts": len(rows),
+            "tokens": tokens,
+            "billed_cost_by_currency": {
+                key: round(value, 9) for key, value in sorted(costs.items())
+            },
+        }
+
+    return {
+        "task_id": str(task_id),
+        "claim_id": str(claim_id or "") or None,
+        "task": _usage(task_records),
+        "claim": _usage(claim_records),
+    }
+
+
+def budget_preflight(
+    *,
+    path: Path = EVAL_LOG,
+    task_id: str,
+    claim_id: str | None,
+    dispatch_id: str,
+    dispatch_ceiling: int | None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+) -> dict:
+    """Fail closed before a provider call using durable cumulative receipts."""
+    records = _strict_records(Path(path))
+    if any(
+        str(item.get("dispatch_id") or "") == str(dispatch_id)
+        for item in records
+    ):
+        return {
+            "allowed": False,
+            "reason": "duplicate_dispatch_id",
+            "dispatch_id": str(dispatch_id),
+        }
+    task_configured = task_token_budget not in (None, "")
+    claim_configured = claim_token_budget not in (None, "")
+    task_limit = _optional_nonnegative_int(task_token_budget)
+    claim_limit = _optional_nonnegative_int(claim_token_budget)
+    if task_configured and task_limit is None:
+        return {
+            "allowed": False,
+            "reason": "invalid_task_token_budget",
+            "dispatch_id": str(dispatch_id),
+        }
+    if claim_configured and claim_limit is None:
+        return {
+            "allowed": False,
+            "reason": "invalid_claim_token_budget",
+            "dispatch_id": str(dispatch_id),
+        }
+    ceiling = _optional_positive_int(dispatch_ceiling)
+    configured = task_configured or claim_configured
+    if configured and ceiling is None:
+        return {
+            "allowed": False,
+            "reason": "dispatch_ceiling_unavailable",
+            "dispatch_id": str(dispatch_id),
+            "task_token_budget": task_limit,
+            "claim_token_budget": claim_limit,
+        }
+    usage = cumulative_usage(
+        path=Path(path),
+        task_id=str(task_id),
+        claim_id=str(claim_id or "") or None,
+    )
+    task_used = int(usage["task"]["tokens"])
+    claim_used = int(usage["claim"]["tokens"])
+    if task_limit is not None and task_used + int(ceiling or 0) > task_limit:
+        reason = "task_budget_insufficient"
+        allowed = False
+    elif claim_limit is not None and claim_used + int(ceiling or 0) > claim_limit:
+        reason = "claim_budget_insufficient"
+        allowed = False
+    else:
+        reason = "within_budget"
+        allowed = True
+    return {
+        "allowed": allowed,
+        "reason": reason,
+        "dispatch_id": str(dispatch_id),
+        "dispatch_ceiling": ceiling,
+        "task_token_budget": task_limit,
+        "task_tokens_used": task_used,
+        "task_tokens_remaining": (
+            max(0, task_limit - task_used) if task_limit is not None else None
+        ),
+        "claim_token_budget": claim_limit,
+        "claim_tokens_used": claim_used,
+        "claim_tokens_remaining": (
+            max(0, claim_limit - claim_used) if claim_limit is not None else None
+        ),
+    }
+
+
+def record_execution_receipt(
+    *,
+    dispatch_id: str,
+    task_id: str,
+    source: str,
+    status: str,
+    claim_id: str | None = None,
+    role: str | None = None,
+    provider: str | None = None,
+    execution_surface: str | None = None,
+    requested_tier: str | None = None,
+    selected_tier: str | None = None,
+    resolved_model: str | None = None,
+    resolved_reasoning_effort: str | None = None,
+    resolved_model_source: str | None = None,
+    resolved_reasoning_source: str | None = None,
+    observed_provider: str | None = None,
+    observed_model: str | None = None,
+    observed_reasoning_effort: str | None = None,
+    token_usage_status: str | None = None,
+    tokens_in: int | str | None = None,
+    tokens_out: int | str | None = None,
+    billed_cost_status: str | None = None,
+    billed_cost: float | None = None,
+    currency: str | None = None,
+    finish_reason: str = "stop",
+    error: str | None = None,
+    route_status: str | None = None,
+    application_status: str | None = None,
+    model_changed: bool | None = None,
+    route_changed: bool | None = None,
+    baseline_model: str | None = None,
+    baseline_reasoning_effort: str | None = None,
+    baseline_observation_status: str | None = None,
+    baseline_tokens: int | None = None,
+    baseline_billed_cost: float | None = None,
+    baseline_currency: str | None = None,
+    grade: str | None = None,
+    policy_model: str | None = None,
+    selected_model: str | None = None,
+    routing_signals: list[str] | None = None,
+    budget_preflight_result: dict | None = None,
+    path: Path = EVAL_LOG,
+    timestamp: str | None = None,
+) -> dict:
+    """Append exactly one immutable execution receipt for a dispatch."""
+    dispatch = str(dispatch_id or "").strip()
+    if not dispatch:
+        raise ValueError("dispatch_id is required")
+    task = str(task_id or "").strip()
+    if not task:
+        raise ValueError("task_id is required")
+    receipt_id = "receipt-" + hashlib.sha256(
+        dispatch.encode("utf-8")
+    ).hexdigest()[:24]
+    in_tokens = _optional_nonnegative_int(tokens_in)
+    out_tokens = _optional_nonnegative_int(tokens_out)
+    derived_token_status = (
+        "observed"
+        if in_tokens is not None and out_tokens is not None
+        else "partial"
+        if in_tokens is not None or out_tokens is not None
+        else "unavailable"
+    )
+    actual_currency = str(currency or "").strip().upper() or None
+    actual_cost = None
+    if billed_cost is not None:
+        actual_cost = float(billed_cost)
+        if not math.isfinite(actual_cost) or actual_cost < 0:
+            raise ValueError("billed_cost must be non-negative")
+        if actual_currency is None:
+            raise ValueError("currency is required when billed_cost is supplied")
+    cost_status = str(billed_cost_status or "").strip() or (
+        "observed" if actual_cost is not None else "unavailable"
+    )
+    baseline_currency_value = (
+        str(baseline_currency or "").strip().upper() or None
+    )
+    baseline_cost = None
+    if baseline_billed_cost is not None:
+        baseline_cost = float(baseline_billed_cost)
+        if not math.isfinite(baseline_cost) or baseline_cost < 0:
+            raise ValueError("baseline_billed_cost must be non-negative")
+        if baseline_currency_value is None:
+            raise ValueError(
+                "baseline_currency is required when baseline_billed_cost is supplied"
+            )
+    token_status = str(token_usage_status or derived_token_status)
+    tokens = int(in_tokens or 0) + int(out_tokens or 0)
+    rec = {
+        "schema": EXECUTION_RECEIPT_SCHEMA,
+        "immutable": True,
+        "receipt_id": receipt_id,
+        "ts": timestamp
+        or datetime.now().astimezone().isoformat(timespec="seconds"),
+        "dispatch_id": dispatch,
+        "task_id": task,
+        "claim_id": str(claim_id or "").strip() or None,
+        "role": str(role or "").strip() or None,
+        "provider": str(provider or "").strip() or None,
+        "execution_surface": str(execution_surface or "").strip() or None,
+        "requested_tier": str(requested_tier or "").strip() or None,
+        "selected_tier": str(selected_tier or "").strip() or None,
+        "resolved_model": str(resolved_model or "").strip() or None,
+        "resolved_reasoning_effort": (
+            str(resolved_reasoning_effort or "").strip() or None
+        ),
+        "resolved_model_source": (
+            str(resolved_model_source or "").strip() or "unavailable"
+        ),
+        "resolved_reasoning_source": (
+            str(resolved_reasoning_source or "").strip() or "unavailable"
+        ),
+        "observed_provider": str(observed_provider or "").strip() or None,
+        "observed_model": str(observed_model or "").strip() or None,
+        "observed_reasoning_effort": (
+            str(observed_reasoning_effort or "").strip() or None
+        ),
+        "model_observation_status": (
+            "observed" if str(observed_model or "").strip() else "unverified"
+        ),
+        "token_usage_status": token_status,
+        "tokens_in": in_tokens,
+        "tokens_out": out_tokens,
+        "tokens": tokens,
+        "actual_tokens_known": token_status == "observed",
+        "billed_cost_status": cost_status,
+        "billed_cost": actual_cost,
+        "currency": actual_currency,
+        "source": str(source or "").strip() or "unavailable",
+        "status": str(status or "").strip() or "unknown",
+        "finish_reason": str(finish_reason or "stop"),
+        "outcome": "ok" if not error else "gate-error",
+        "error": str(error or "").strip() or None,
+        "route_status": route_status,
+        "application_status": application_status,
+        "model_changed": model_changed,
+        "route_changed": route_changed,
+        "baseline_model": str(baseline_model or "").strip() or None,
+        "baseline_reasoning_effort": (
+            str(baseline_reasoning_effort or "").strip() or None
+        ),
+        "baseline_observation_status": (
+            str(baseline_observation_status or "").strip() or "unavailable"
+        ),
+        "baseline_tokens": _optional_nonnegative_int(baseline_tokens),
+        "baseline_billed_cost": baseline_cost,
+        "baseline_currency": baseline_currency_value,
+        "grade": str(grade or "?"),
+        "model": (
+            str(observed_model or "").strip()
+            or str(resolved_model or "").strip()
+            or "unverified"
+        ),
+        "policy_model": policy_model,
+        "selected_model": selected_model,
+        "routing_signals": list(routing_signals or []),
+        "budget_preflight": dict(budget_preflight_result or {}),
+    }
+    return _append_record(
+        Path(path),
+        rec,
+        unique_dispatch_id=dispatch,
+    )
+
 
 def record_outcome(task_id: str, grade: str, model: str, tokens: int,
                    finish_reason: str = "stop", outcome: str | None = None,
@@ -116,9 +529,7 @@ def record_outcome(task_id: str, grade: str, model: str, tokens: int,
             raise ValueError("baseline_billed_cost must be non-negative")
         rec["baseline_billed_cost"] = baseline_cost
         rec["baseline_currency"] = baseline_cost_currency
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    return rec
+    return _append_record(Path(path), rec)
 
 
 def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
@@ -162,12 +573,22 @@ def _routing_evidence_exclusion_reason(rec: dict) -> str | None:
         return "observed_model_unavailable"
     if not str(rec.get("baseline_model") or "").strip():
         return "baseline_model_unavailable"
+    if (
+        rec.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        and rec.get("baseline_observation_status") != "observed"
+    ):
+        return "baseline_observation_unavailable"
     if rec.get("application_status") != "applied":
         return "route_not_applied"
-    if rec.get("model_changed") is not True:
+    changed = (
+        rec.get("route_changed")
+        if rec.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        else rec.get("model_changed")
+    )
+    if changed is not True:
         if rec.get("route_status") == "ineffective_equivalent":
             return "route_ineffective_equivalent"
-        return "model_change_unverified"
+        return "route_change_unverified"
     if rec.get("route_status") != "effective":
         return "route_not_effective"
     return None

@@ -128,6 +128,123 @@ def test_record_and_read(tmp_path):
     assert recs[0]["baseline_tokens"] == 60000
 
 
+def test_execution_receipt_persists_request_resolution_observation_and_source(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    rec = eh.record_execution_receipt(
+        dispatch_id="dispatch-1",
+        task_id="TASK-X",
+        claim_id="CLAIM-X",
+        role="scribe",
+        provider="native-codex",
+        execution_surface="native_subagent_spawn",
+        requested_tier="worker_low",
+        selected_tier="worker_low",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:model",
+        resolved_reasoning_source="adapter_default:reasoning",
+        observed_provider="openai",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=120,
+        tokens_out=30,
+        billed_cost=0.01,
+        currency="usd",
+        source="native_codex_reply",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        route_changed=True,
+        baseline_model="gpt-5.6-terra",
+        baseline_reasoning_effort="medium",
+        baseline_observation_status="observed",
+        baseline_tokens=300,
+        path=path,
+    )
+
+    assert rec["schema"] == eh.EXECUTION_RECEIPT_SCHEMA
+    assert rec["immutable"] is True
+    assert rec["requested_tier"] == "worker_low"
+    assert rec["resolved_reasoning_effort"] == "low"
+    assert rec["observed_reasoning_effort"] == "low"
+    assert rec["tokens"] == 150
+    assert rec["currency"] == "USD"
+    assert rec["source"] == "native_codex_reply"
+    assert eh.read_outcomes(path) == [rec]
+
+
+def test_execution_receipt_rejects_duplicate_dispatch_id(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    kwargs = {
+        "dispatch_id": "dispatch-duplicate",
+        "task_id": "TASK-X",
+        "source": "provider_completion",
+        "status": "completed",
+        "path": path,
+    }
+    eh.record_execution_receipt(**kwargs)
+
+    with pytest.raises(eh.ReceiptConflictError, match="immutable receipt"):
+        eh.record_execution_receipt(**kwargs)
+
+    assert len(eh.read_outcomes(path)) == 1
+
+
+def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    eh.record_execution_receipt(
+        dispatch_id="dispatch-first",
+        task_id="TASK-X",
+        claim_id="CLAIM-X",
+        tokens_in=30,
+        tokens_out=10,
+        source="provider_completion",
+        status="completed",
+        path=path,
+    )
+
+    allowed = eh.budget_preflight(
+        path=path,
+        task_id="TASK-X",
+        claim_id="CLAIM-X",
+        dispatch_id="dispatch-second",
+        dispatch_ceiling=40,
+        task_token_budget=100,
+        claim_token_budget=90,
+    )
+    blocked = eh.budget_preflight(
+        path=path,
+        task_id="TASK-X",
+        claim_id="CLAIM-X",
+        dispatch_id="dispatch-third",
+        dispatch_ceiling=61,
+        task_token_budget=100,
+        claim_token_budget=90,
+    )
+
+    assert allowed["allowed"] is True
+    assert allowed["task_tokens_used"] == 40
+    assert allowed["claim_tokens_used"] == 40
+    assert blocked["allowed"] is False
+    assert blocked["reason"] == "task_budget_insufficient"
+
+
+def test_configured_budget_fails_closed_without_provider_ceiling(tmp_path):
+    result = eh.budget_preflight(
+        path=tmp_path / "receipts.jsonl",
+        task_id="TASK-X",
+        claim_id="CLAIM-X",
+        dispatch_id="dispatch-no-ceiling",
+        dispatch_ceiling=None,
+        task_token_budget=100,
+    )
+
+    assert result["allowed"] is False
+    assert result["reason"] == "dispatch_ceiling_unavailable"
+
+
 def test_cli_record_writes_routing_metadata(tmp_path, capsys):
     p = tmp_path / "eval_log.jsonl"
     rc = eh.main([
@@ -222,6 +339,25 @@ def test_equivalent_route_cannot_contribute_to_token_delta():
     assert delta["eligible_records"] == 0
     assert delta["saved_tokens"] == 0
     assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
+
+
+def test_receipt_savings_require_observed_comparable_baseline():
+    receipt = {
+        **_effective_delta_record(),
+        "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+        "route_changed": True,
+        "baseline_observation_status": "configured",
+    }
+    unavailable = eh.report([receipt])["token_delta"]
+    receipt["baseline_observation_status"] = "observed"
+    observed = eh.report([receipt])["token_delta"]
+
+    assert unavailable["eligible_records"] == 0
+    assert (
+        unavailable["exclusion_reasons"]["baseline_observation_unavailable"]
+        == 1
+    )
+    assert observed["eligible_records"] == 1
 
 
 def test_monetary_delta_requires_comparable_same_currency_billed_cost():

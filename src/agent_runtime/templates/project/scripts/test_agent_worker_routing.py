@@ -106,15 +106,19 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
         "task_id": "TASK-646",
         "eval_baseline_tokens": "40",
         "eval_baseline_model": "claude-opus-4-8",
+        "eval_baseline_observation_status": "observed",
         "eval_baseline_billed_cost": "0.08",
         "eval_baseline_currency": "USD",
     }
-    recorded, reason = worker._record_eval_outcome(
+    recorded, reason = worker._record_execution_receipt(
         cfg,
         meta,
         decision,
         completed,
         observation,
+        dispatch_id="MSG-2",
+        status="completed",
+        source="provider_completion",
         finish_reason="stop",
         error=None,
     )
@@ -131,7 +135,7 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
     ] == 0.06
 
 
-def test_wrong_or_missing_observed_model_cannot_record_eval(tmp_path):
+def test_wrong_observed_model_records_receipt_but_not_savings_evidence(tmp_path):
     decision = _low_decision()
     cfg = worker.WorkerConfig(
         role="qa",
@@ -142,6 +146,7 @@ def test_wrong_or_missing_observed_model_cannot_record_eval(tmp_path):
         "id": "MSG-3",
         "eval_baseline_tokens": "40",
         "eval_baseline_model": "claude-opus-4-8",
+        "eval_baseline_observation_status": "observed",
     }
     observation = worker._completion_observation(
         SimpleNamespace(
@@ -157,15 +162,86 @@ def test_wrong_or_missing_observed_model_cannot_record_eval(tmp_path):
         baseline_model="claude-opus-4-8",
         observation=observation,
     )
-    recorded, reason = worker._record_eval_outcome(
+    recorded, reason = worker._record_execution_receipt(
         cfg,
         meta,
         decision,
         route,
         observation,
+        dispatch_id="MSG-3",
+        status="completed",
+        source="provider_completion",
         finish_reason="stop",
         error=None,
     )
-    assert recorded is False
+    assert recorded is True
     assert reason == "routing_not_applied"
-    assert not cfg.eval_log_path.exists()
+    records = eval_harness.read_outcomes(cfg.eval_log_path)
+    assert len(records) == 1
+    assert records[0]["application_status"] == "not_applied"
+    assert eval_harness.report(records)["token_delta"]["eligible_records"] == 0
+
+
+def test_worker_budget_preflight_skips_provider_and_closes_claim(
+    tmp_path,
+    monkeypatch,
+):
+    import message_queue
+
+    repo_root = tmp_path / "repo"
+    inbox = repo_root / "agents" / "messages" / "inbox"
+    events = repo_root / "agents" / "runtime" / "events"
+    claims = repo_root / "agents" / "runtime" / "claims"
+    inbox.mkdir(parents=True)
+    message = inbox / "MSG-20260730-000000-budget.md"
+    message.write_text(
+        "---\n"
+        "id: MSG-20260730-000000-budget\n"
+        "from: backend\n"
+        "to: qa\n"
+        "task_id: TASK-BUDGET\n"
+        "task_token_budget: 0\n"
+        "type: question\n"
+        "status: open\n"
+        "ts: 2026-07-30T00:00:00+09:00\n"
+        "---\n"
+        "must not reach provider\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(worker, "REPO_ROOT", repo_root)
+    monkeypatch.setattr(worker, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(worker, "EVENTS_DIR", events)
+    monkeypatch.setattr(message_queue, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(message_queue, "CLAIMS_DIR", claims)
+
+    class _NeverCalledProvider:
+        name = "never-called"
+        tokens_per_call = 10
+
+        def __init__(self):
+            self.calls = []
+
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            raise AssertionError("provider must not be called")
+
+    provider = _NeverCalledProvider()
+    receipt_log = tmp_path / "receipts.jsonl"
+    cfg = worker.WorkerConfig(
+        role="qa",
+        provider_name="dummy",
+        eval_log_path=receipt_log,
+        verbose=False,
+    )
+
+    assert worker.process_one(cfg, provider) is True
+    assert provider.calls == []
+    updated_meta, _ = worker.parse_frontmatter(
+        message.read_text(encoding="utf-8")
+    )
+    assert updated_meta["status"] == "answered"
+    records = eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["status"] == "skipped"
+    assert records[0]["source"] == "budget_preflight"
+    assert records[0]["budget_preflight"]["reason"] == "task_budget_insufficient"

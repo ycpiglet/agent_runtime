@@ -70,6 +70,41 @@ def test_subagent_roles_default_low_for_exploration_and_stronger_for_review():
     assert escalated["selected_tier"] == "reviewer_high"
 
 
+def test_scribe_research_implementation_review_and_audit_use_explicit_policy():
+    expected = {
+        "scribe": ("scribe", "worker_low"),
+        "researcher": ("exploration", "worker_low"),
+        "implementer": ("implementation", "worker_low"),
+        "qa-reviewer": ("review", "reviewer_standard"),
+        "independent-auditor": ("audit", "reviewer_high"),
+    }
+
+    for role, (policy_id, tier) in expected.items():
+        decision = mr.resolve_subagent_tier(role)
+        assert decision["role_policy_status"] == "explicit"
+        assert decision["role_policy_id"] == policy_id
+        assert decision["selected_tier"] == tier
+
+
+def test_unregistered_high_request_is_denied_without_escalation_reason():
+    denied = mr.resolve_subagent_tier(
+        "scribe",
+        requested_tier="planner_high",
+    )
+    allowed = mr.resolve_subagent_tier(
+        "scribe",
+        requested_tier="planner_high",
+        escalation_triggers=["cross_cutting"],
+    )
+
+    assert denied["routing_status"] == "high_tier_denied"
+    assert denied["selected_tier"] == "worker_low"
+    assert denied["registered_escalation_reason"] is None
+    assert allowed["selected_tier"] == "planner_high"
+    assert allowed["high_tier_authorized"] is True
+    assert allowed["registered_escalation_reason"] == "trigger:cross_cutting"
+
+
 def test_lookup_only_dispatch_requires_deterministic_preflight_evidence():
     unresolved = mr.deterministic_preflight("find and list routing files")
     insufficient = mr.deterministic_preflight(
@@ -147,7 +182,49 @@ def test_native_codex_matrix_is_configured_but_unverified(monkeypatch):
     assert rows["worker_standard"]["reasoning_effort"] == "medium"
     assert rows["planner_high"]["resolved_model"] == "gpt-5.6-sol"
     assert rows["planner_high"]["reasoning_effort"] == "high"
-    assert rows["worker_low"]["equivalence_status"] == "equivalent"
+    assert rows["worker_low"]["equivalence_status"] == "distinct"
+    assert rows["worker_standard"]["equivalence_status"] == "distinct"
+    assert rows["planner_high"]["equivalence_status"] == "equivalent"
+    assert set(rows["planner_high"]["equivalent_tiers"]) == {
+        "planner_high",
+        "reviewer_standard",
+    }
+
+
+def test_native_route_change_compares_model_and_reasoning(monkeypatch):
+    for name in (
+        "CODEX_NATIVE_WORKER_LOW_MODEL",
+        "CODEX_NATIVE_WORKER_STANDARD_MODEL",
+        "CODEX_NATIVE_WORKER_LOW_REASONING",
+        "CODEX_NATIVE_WORKER_STANDARD_REASONING",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    planned = mr.resolve_provider_route(
+        "native-codex",
+        "worker_low",
+        baseline_tier="worker_standard",
+    )
+    partial = mr.resolve_provider_route(
+        "native-codex",
+        "worker_low",
+        baseline_tier="worker_standard",
+        observed_model="gpt-5.6-terra",
+    )
+    observed = mr.resolve_provider_route(
+        "native-codex",
+        "worker_low",
+        baseline_tier="worker_standard",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+    )
+
+    assert planned["model_changed"] is False
+    assert planned["route_changed"] is True
+    assert planned["route_status"] == "effective"
+    assert partial["application_status"] == "configured_unverified"
+    assert partial["route_observation_status"] == "partial"
+    assert observed["application_status"] == "applied"
 
 
 def test_provider_env_accepts_pm_tier(monkeypatch):

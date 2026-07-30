@@ -144,6 +144,46 @@ def test_emit_call_message_writes_valid_frontmatter(tmp_path, monkeypatch):
     assert "check frontmatter" in meta["next"]
 
 
+def test_provider_aware_dispatch_records_role_policy_and_reasoning(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    tier = sd.model_routing.resolve_subagent_tier("explorer")
+    route = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    path = sd.emit_call_message(
+        role_id="explorer",
+        task_id="TASK-652",
+        intent="inspect bounded files",
+        tier_route=tier,
+        provider_route=route,
+    )
+
+    meta, err = cm.load_frontmatter(path)
+    assert err == "" and meta is not None
+    assert meta["role_policy_id"] == "exploration"
+    assert meta["role_policy_status"] == "explicit"
+    assert meta["high_tier_authorized"] == "true"
+    assert meta["reasoning_effort"] == "low"
+    assert meta["reasoning_source"].startswith("adapter_default:")
+
+    fields = sd.routing_event_fields(
+        None,
+        dispatch_id=path.stem,
+        provider="native-codex",
+        route={**tier, **route},
+    )
+    assert fields["role_policy_id"] == "exploration"
+    assert fields["role_policy_status"] == "explicit"
+    assert fields["reasoning_effort"] == "low"
+    assert fields["reasoning_source"].startswith("adapter_default:")
+    assert fields["route_changed"] is None
+
+
 def test_emit_reply_message_links_to_parent(tmp_path, monkeypatch):
     monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
     parent = sd.emit_call_message(

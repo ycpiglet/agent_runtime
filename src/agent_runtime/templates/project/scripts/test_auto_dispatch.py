@@ -48,6 +48,7 @@ class _FakeProvider:
     def __init__(
         self,
         tokens_per_call=10,
+        tokens_out_per_call=0,
         raise_on=None,
         model=None,
         *,
@@ -56,6 +57,7 @@ class _FakeProvider:
         currency=None,
     ):
         self.tokens_per_call = tokens_per_call
+        self.tokens_out_per_call = tokens_out_per_call
         self.raise_on = raise_on  # index that should raise
         self.model = model
         self.observed_model = observed_model
@@ -70,7 +72,7 @@ class _FakeProvider:
             raise RuntimeError("boom")
         return _FakeResult(
             tokens_in=self.tokens_per_call,
-            tokens_out=0,
+            tokens_out=self.tokens_out_per_call,
             model=self.observed_model,
             billed_cost=self.billed_cost,
             currency=self.currency,
@@ -102,6 +104,8 @@ def isolate_dispatch_events(monkeypatch, tmp_path_factory):
         "CLAIMS_DIR",
         tmp_path_factory.mktemp("auto-dispatch-claims"),
     )
+    receipt_log = tmp_path_factory.mktemp("auto-dispatch-receipts") / "receipts.jsonl"
+    monkeypatch.setattr(auto_dispatch.eval_harness, "EVAL_LOG", receipt_log)
     return events_dir
 
 
@@ -369,7 +373,8 @@ def test_dispatch_records_routing_result(patch_provider):
 def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, patch_provider):
     p = patch_provider(
         _FakeProvider(
-            tokens_per_call=12,
+            tokens_per_call=11,
+            tokens_out_per_call=1,
             model="request-default",
             observed_model="claude-haiku-4-5",
         )
@@ -382,6 +387,7 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         "routing_grade": "Low",
         "eval_baseline_tokens": 3000,
         "eval_baseline_model": "claude-opus-4-8",
+        "eval_baseline_observation_status": "observed",
     }]
     summary = _run(
         items,
@@ -404,6 +410,9 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
     assert rec["observed_model"] == "claude-haiku-4-5"
     assert rec["baseline_model"] == "claude-opus-4-8"
     assert rec["model_changed"] is True
+    assert rec["route_changed"] is True
+    assert rec["baseline_observation_status"] == "observed"
+    assert rec["schema"] == auto_dispatch.eval_harness.EXECUTION_RECEIPT_SCHEMA
 
 
 def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_path, patch_provider):
@@ -417,9 +426,13 @@ def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_pat
         "eval_baseline_tokens": 3000,
     }]
     summary = _run(items, p, session_budget=1000, max_dispatches=10, eval_log_path=tmp_path / "eval.jsonl")
-    assert summary["results"][0]["eval_recorded"] is False
+    assert summary["results"][0]["eval_recorded"] is True
+    assert summary["results"][0]["receipt_recorded"] is True
     assert summary["results"][0]["eval_skip_reason"] == "model_observation_unavailable"
-    assert not (tmp_path / "eval.jsonl").exists()
+    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
+    assert len(recs) == 1
+    assert recs[0]["status"] == "error"
+    assert recs[0]["source"] == "provider_error"
 
 
 def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
@@ -438,6 +451,7 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
         "routing_grade": "Low",
         "eval_baseline_tokens": 3000,
         "eval_baseline_model": "gpt-5.2-codex",
+        "eval_baseline_observation_status": "observed",
     }]
     summary = run_bounded_dispatch(
         items,
@@ -449,11 +463,176 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
     )
     result = summary["results"][0]
     assert result["selected_model"] == "haiku"
-    assert result["eval_recorded"] is False
+    assert result["eval_recorded"] is True
+    assert result["receipt_recorded"] is True
     assert result["route_status"] == "ineffective_equivalent"
     assert result["model_changed"] is False
     assert result["eval_skip_reason"] == "route_not_effective"
-    assert not (tmp_path / "eval.jsonl").exists()
+    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
+    assert len(recs) == 1
+    assert recs[0]["route_changed"] is False
+
+
+def test_every_completion_records_one_receipt_without_routing(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=7))
+    receipt_log = tmp_path / "receipts.jsonl"
+    summary = _run(
+        [{
+            "dispatch_id": "dispatch-generic-1",
+            "role": "worker",
+            "instruction": "bounded work",
+            "context": {"task_id": "TASK-GENERIC"},
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert len(p.calls) == 1
+    assert summary["results"][0]["receipt_recorded"] is True
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "dispatch-generic-1"
+    assert records[0]["task_id"] == "TASK-GENERIC"
+    assert records[0]["source"] == "provider_completion"
+
+
+def test_durable_task_budget_survives_runner_restart(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=10))
+    receipt_log = tmp_path / "receipts.jsonl"
+    first = {
+        "dispatch_id": "dispatch-budget-1",
+        "role": "worker",
+        "instruction": "first",
+        "task_id": "TASK-BUDGET",
+        "task_token_budget": 15,
+    }
+    second = {
+        "dispatch_id": "dispatch-budget-2",
+        "role": "worker",
+        "instruction": "second",
+        "task_id": "TASK-BUDGET",
+        "task_token_budget": 15,
+    }
+
+    first_summary = _run(
+        [first],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    second_summary = _run(
+        [second],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert first_summary["results"][0]["finish_reason"] == "stop"
+    assert len(p.calls) == 1
+    blocked = second_summary["results"][0]
+    assert blocked["finish_reason"] == "skipped"
+    assert blocked["error"] == "task_budget_insufficient"
+    assert blocked["budget_preflight"]["task_tokens_used"] == 10
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert [record["status"] for record in records] == ["completed", "skipped"]
+
+
+def test_configured_budget_blocks_unknown_dispatch_ceiling(tmp_path, patch_provider):
+    class _UnknownCeilingProvider:
+        name = "unknown-ceiling"
+
+        def __init__(self):
+            self.calls = []
+
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            return _FakeResult(tokens_in=1)
+
+    p = patch_provider(_UnknownCeilingProvider())
+    receipt_log = tmp_path / "receipts.jsonl"
+    summary = _run(
+        [{
+            "dispatch_id": "dispatch-unknown-ceiling",
+            "role": "worker",
+            "instruction": "do not call",
+            "task_id": "TASK-BUDGET",
+            "task_token_budget": 100,
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["error"] == "dispatch_ceiling_unavailable"
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["source"] == "budget_preflight"
+
+
+@pytest.mark.parametrize(
+    ("configured_budget", "reason"),
+    [(0, "task_budget_insufficient"), ("not-an-int", "invalid_task_token_budget")],
+)
+def test_zero_and_invalid_budget_fail_closed(
+    tmp_path,
+    patch_provider,
+    configured_budget,
+    reason,
+):
+    p = patch_provider(_FakeProvider(tokens_per_call=10))
+    summary = _run(
+        [{
+            "dispatch_id": f"dispatch-{reason}",
+            "role": "worker",
+            "instruction": "do not call",
+            "task_id": "TASK-BUDGET",
+            "task_token_budget": configured_budget,
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=tmp_path / "receipts.jsonl",
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["error"] == reason
+
+
+def test_duplicate_dispatch_id_is_not_called_or_rewritten(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+    item = {
+        "dispatch_id": "dispatch-once",
+        "role": "worker",
+        "instruction": "exactly once",
+        "task_id": "TASK-ONCE",
+    }
+
+    _run(
+        [item],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    duplicate = _run(
+        [item],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert len(p.calls) == 1
+    assert duplicate["results"][0]["error"] == "duplicate_dispatch_id"
+    assert duplicate["results"][0]["receipt_recorded"] is False
+    assert len(auto_dispatch.eval_harness.read_outcomes(receipt_log)) == 1
 
 
 def test_dispatch_telemetry_does_not_infer_observed_model(
