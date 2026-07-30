@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T09:29:29+09:00
+generated_at: 2026-07-30T10:14:35+09:00
 task_count: 317
 open_count: 20
 completed_count: 297
@@ -170,7 +170,7 @@ completed_task_set_count: 64
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `20` open across `4` task sets (see Action Board above).
-- Throughput (7d): `18` tasks completed in the last 7 days (TASK-AR-627).
+- Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `64` (see Archived Task Sets above).
 - Archived task files: `297` — see `ARCHIVE-INDEX.md`.
 

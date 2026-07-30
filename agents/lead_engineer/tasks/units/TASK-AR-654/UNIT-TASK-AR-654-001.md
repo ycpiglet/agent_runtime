@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T09:20:00+09:00
-updated_at: 2026-07-30T10:10:15+09:00
+updated_at: 2026-07-30T10:13:00+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-design-gate-enforcement
 created_by: codex-root
@@ -58,6 +58,9 @@ target_files:
   - owner-docs.yml
   - reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md
   - reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.json
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.handoff.md
+  - agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.log.md
 scope: Implement optional agents/host/MERGE-GATES.json loading, canonical digest binding, base-owned revalidation, path selection, safe placeholder substitution, required execution, feedback, dry-run visibility, focused tests, and exact template/skill parity. Do not touch src/agent_runtime/config.py, adoption/sync/doctor/CLI files, TASK-AR-648 pilot files, or GitHub workflow/release surfaces.
 acceptance:
   - Absent policy produces the existing queue schema and behavior.
@@ -129,6 +132,9 @@ work.py verify executes task-authored commands, but W5 merge_queue only runs opt
 - owner-docs.yml
 - reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md
 - reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.json
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.handoff.md
+- agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.log.md
 
 ## Scope
 

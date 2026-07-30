@@ -1,0 +1,31 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-654-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-654-independent-auditor",
+  "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "active_scope": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-654-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive independent-auditor review pass for TASK-AR-654 (closeout)",
+  "claimed_at": "2026-07-30T10:12:31+09:00",
+  "last_heartbeat": "2026-07-30T10:14:27+09:00",
+  "updated_at": "2026-07-30T10:14:27+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-654",
+  "parent_task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-independent-auditor-closeout.log.md",
+  "released_at": "2026-07-30T10:14:27+09:00",
+  "verified_by": "qa-20260730-094300-task-ar-654-w4b",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-654-001-approved.md"
+}

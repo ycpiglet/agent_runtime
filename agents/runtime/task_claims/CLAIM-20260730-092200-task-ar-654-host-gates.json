@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-654:tab-01",
   "pane_id": "terminal:wt-task-ar-654:tab-01",
   "mode": "work",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
   "active_scope": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
   "scope_transition_approved": true,
@@ -38,12 +38,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-654",
   "branch": "codex/unit-task-ar-654-001-host-required-gates",
   "claimed_at": "2026-07-30T09:22:00+09:00",
-  "last_heartbeat": "2026-07-30T09:22:00+09:00",
-  "updated_at": "2026-07-30T09:22:00+09:00",
+  "last_heartbeat": "2026-07-30T10:12:31+09:00",
+  "updated_at": "2026-07-30T10:12:31+09:00",
   "expires_at": "2026-07-30T09:52:00+09:00",
   "lease": {
     "claimed_at": "2026-07-30T09:22:00+09:00",
-    "heartbeat_at": "2026-07-30T09:22:00+09:00",
+    "heartbeat_at": "2026-07-30T10:12:31+09:00",
     "expires_at": "2026-07-30T09:52:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.handoff.md",
@@ -89,6 +89,13 @@
     "docs/superpowers/plans/2026-07-30-host-required-merge-gates.md",
     "owner-docs.yml",
     "reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md",
-    "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md"
-  ]
+    "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.json",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.handoff.md",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.log.md"
+  ],
+  "released_at": "2026-07-30T10:12:31+09:00",
+  "verified_by": "qa-20260730-094300-task-ar-654-w4b",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-654-001-approved.md"
 }
