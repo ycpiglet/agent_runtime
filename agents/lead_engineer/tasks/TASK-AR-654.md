@@ -45,6 +45,7 @@ verification:
   - python -m pytest tests/test_merge_queue.py -q
   - cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py
   - cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
+  - python scripts/regen_host_lock_if_needed.py --check
 ---
 
 # TASK-AR-654 - Enforce host-owned required gates in the merge queue
@@ -73,3 +74,4 @@ verification:
 - `python -m pytest tests/test_merge_queue.py -q`
 - `cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py`
 - `cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md`
+- `python scripts/regen_host_lock_if_needed.py --check`

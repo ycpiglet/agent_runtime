@@ -34,6 +34,7 @@ target_files:
   - skills/merge-integrator/SKILL.md
   - src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
   - reviews/PLAN-2026-07-30-host-required-merge-gates.md
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Implement optional agents/host/MERGE-GATES.json loading, canonical digest binding, base-owned revalidation, path selection, safe placeholder substitution, required execution, feedback, dry-run visibility, focused tests, and exact template/skill parity. Do not touch src/agent_runtime/config.py, adoption/sync/doctor/CLI files, TASK-AR-648 pilot files, or GitHub workflow/release surfaces.
 acceptance:
   - Absent policy produces the existing queue schema and behavior.
@@ -46,6 +47,7 @@ verification:
   - python -m pytest tests/test_merge_queue.py -q
   - cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py
   - cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
+  - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report task/unit IDs, policy schema, compatibility behavior, failure-first tests, exact implementation commit, independent verification, and how Bean Wiki CI mirrors the same required commands.
 stop_condition: Stop if implementation must modify TASK-AR-648 target files, make policy mandatory for legacy hosts, execute commands through a shell, trust policy content from the worker branch, or weaken existing queue safety.
 ---
@@ -71,6 +73,7 @@ work.py verify executes task-authored commands, but W5 merge_queue only runs opt
 - skills/merge-integrator/SKILL.md
 - src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
 - reviews/PLAN-2026-07-30-host-required-merge-gates.md
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
@@ -98,6 +101,7 @@ Implement optional agents/host/MERGE-GATES.json loading, canonical digest bindin
 - `python -m pytest tests/test_merge_queue.py -q`
 - `cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py`
 - `cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md`
+- `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff
 

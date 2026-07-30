@@ -383,8 +383,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
-          "value": "381c151fe636b01da64622f206c6a9963af1814d35713f683e89a0d083dea2b2"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md",
+          "value": "1db39e1ad611ba6b2a643f93041c11bd825aeedb82ae4c87a1a171873cd5ebc2"
         },
         {
           "kind": "sha256",
@@ -400,10 +400,15 @@
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "c44cb1f963fecd890c04889a856207afdbf12e0f0df9edd579e4dff0caac997e"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
-      "recorded_at": "2026-07-30T09:29:30+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md",
+      "recorded_at": "2026-07-30T09:40:16+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES"
     },
@@ -1462,5 +1467,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T09:29:30+09:00"
+  "updated_at": "2026-07-30T09:40:16+09:00"
 }

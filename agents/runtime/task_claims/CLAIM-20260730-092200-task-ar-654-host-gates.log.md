@@ -14,3 +14,4 @@
 - wip_slot: 0
 - stop_condition: 
 - status_text: Claimed host-required merge-gate enforcement
+- 2026-07-30T09:45:00+09:00 footprint amendment: declare the deterministic host lock after the template drift check required its regeneration; T3 assumptions re-recorded before the generated edit.

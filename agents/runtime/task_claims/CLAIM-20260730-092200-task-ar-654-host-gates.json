@@ -65,6 +65,7 @@
     "tests/test_merge_queue.py",
     "skills/merge-integrator/SKILL.md",
     "src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md",
-    "reviews/PLAN-2026-07-30-host-required-merge-gates.md"
+    "reviews/PLAN-2026-07-30-host-required-merge-gates.md",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ]
 }
