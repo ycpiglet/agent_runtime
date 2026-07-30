@@ -501,6 +501,76 @@ def test_optional_no_source_remains_advisory(tmp_path: Path) -> None:
     assert "configured-source-integrity" not in result["closure_reasons"]
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - ../outside.md\n"
+        ),
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - state/current.md\n"
+            "host:\n"
+            "  state_adapters:\n"
+            "    escaped: ../outside.md\n"
+        ),
+        (
+            "  project: invalid-fixture\n"
+            "  sync:\n"
+            "    mode: check-diff-apply\n"
+            "    allow_silent_overwrite: false\n"
+        ),
+        (
+            "schema: agent-runtime-config/v1\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+        ),
+    ],
+    ids=[
+        "unsafe-ownership",
+        "unsafe-adapter",
+        "malformed",
+        "schema-invalid",
+    ],
+)
+def test_invalid_present_runtime_config_blocks_source_integrity(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    (tmp_path / "agent_runtime.yml").write_text(raw, encoding="utf-8")
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["source_count"] == 0
+    assert result["state"] == "unavailable"
+    assert result["readiness"] == "blocked"
+    assert result["closure_blocking"] is True
+    assert result["source_debt"]["unavailable_sources"] == [
+        "agent_runtime.yml"
+    ]
+    assert "configured-source-integrity" in result["closure_reasons"]
+    assert "config-invalid" in {
+        finding["code"] for finding in result["findings"]
+    }
+    with pytest.raises(state_projection.StateProjectionError):
+        state_projection.write_projection(tmp_path)
+
+
 def test_all_configured_sources_are_evaluated_with_one_global_selection_budget(
     tmp_path: Path,
 ) -> None:

@@ -2769,19 +2769,24 @@ def evaluate_state(
         for source in sources
         if source.get("present") is True and source.get("state") == "overdue"
     ]
-    unavailable_sources = sorted(
-        {
-            str(source["path"])
-            for source in sources
-            if source.get("configured") is True
-            and _CONFIGURED_SOURCE_INTEGRITY_CODES.intersection(
-                {
-                    str(code)
-                    for code in source.get("finding_codes", [])
-                }
-            )
-        }
+    unavailable_source_paths = {
+        str(source["path"])
+        for source in sources
+        if source.get("configured") is True
+        and _CONFIGURED_SOURCE_INTEGRITY_CODES.intersection(
+            {
+                str(code)
+                for code in source.get("finding_codes", [])
+            }
+        )
+    }
+    config_invalid = any(
+        finding.get("code") == "config-invalid"
+        for finding in settings.findings
     )
+    if config_invalid:
+        unavailable_source_paths.add(_config.CONFIG_FILE)
+    unavailable_sources = sorted(unavailable_source_paths)
     source_debt = {
         "status": state,
         "hot_count": hot_count,
@@ -2792,7 +2797,7 @@ def evaluate_state(
         findings.append(
             _finding(
                 "configured-source-integrity",
-                path=".",
+                path=_config.CONFIG_FILE if config_invalid else ".",
                 detail=(
                     "configured canonical source integrity is unavailable for: "
                     + ", ".join(unavailable_sources)

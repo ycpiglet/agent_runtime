@@ -271,6 +271,84 @@ def test_substantial_closeout_blocks_for_configured_source_integrity(
     assert "repair" in result["message"].lower()
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - ../outside.md\n"
+        ),
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - state/current.md\n"
+            "host:\n"
+            "  state_adapters:\n"
+            "    escaped: ../outside.md\n"
+        ),
+        (
+            "  project: invalid-fixture\n"
+            "  sync:\n"
+            "    mode: check-diff-apply\n"
+            "    allow_silent_overwrite: false\n"
+        ),
+        (
+            "schema: agent-runtime-config/v1\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+        ),
+    ],
+    ids=[
+        "unsafe-ownership",
+        "unsafe-adapter",
+        "malformed",
+        "schema-invalid",
+    ],
+)
+def test_substantial_closeout_blocks_for_invalid_runtime_config_integrity(
+    tmp_path,
+    monkeypatch,
+    raw,
+):
+    (tmp_path / "agent_runtime.yml").write_text(raw, encoding="utf-8")
+    monkeypatch.setattr(
+        closure_gate,
+        "count_substantial_lines",
+        lambda *args, **kwargs: 200,
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "has_closure_record",
+        lambda *args, **kwargs: {
+            "compound": False,
+            "review": True,
+            "retro": False,
+        },
+    )
+
+    result = closure_gate.assess(tmp_path, threshold=80, disabled=False)
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-source-integrity"
+    assert result["missing"] == ["scribe_source_integrity"]
+    assert result["scribe"]["unavailable_sources"] == ["agent_runtime.yml"]
+    assert "agent_runtime.yml" in result["message"]
+    assert "repair" in result["message"].lower()
+
+
 # --- closure record detection ---
 
 def test_has_closure_record_detects_today(tmp_path):
