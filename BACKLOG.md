@@ -1,5 +1,12 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-07-30 v0.8 Operability Hardening active (`TASKSET-AR-V080-OPERABILITY-HARDENING`)
+
+- Migration gate: `TASK-AR-650` is independently closed; its task-scope P0/P1/P2 count is 0/0/0 while the next-RC backlog remains P1 6 and P2 1.
+- P1 sequence: `TASK-AR-652` execution/economic receipts -> parallel `653` Scribe debt and `655` claim renewal -> parallel `654` repeated-failure Compound and `656` composable hooks -> `657` consumer operating skills.
+- P2 follow-up: `TASK-AR-658` exposes the same facts through a read-only Runtime health UI and does not unblock release.
+- Release boundary: `TASK-AR-651` remains blocked on `TASK-AR-652` through `TASK-AR-657`; no version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-07-28 v0.8 Adoption and Enforcement active (`TASKSET-AR-V080-ADOPTION-ENFORCEMENT`)
 
 - Integration first: `TASK-AR-631` in `TASKSET-AR-CONSOLE-OVERHAUL-P1` passed exact-commit independent W4b; integrate its lifecycle recovery and then complete W6 closeout.

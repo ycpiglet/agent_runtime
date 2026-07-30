@@ -9,7 +9,7 @@
   "callsite_id": "codex-root-task-ar-650",
   "pane_id": "root",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
   "scope_transition_approved": true,
@@ -40,12 +40,12 @@
   "worktree_path": "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl",
   "branch": "codex/unit-task-ar-648-002-implementation",
   "claimed_at": "2026-07-30T08:36:49+09:00",
-  "last_heartbeat": "2026-07-30T08:36:49+09:00",
-  "updated_at": "2026-07-30T08:36:49+09:00",
+  "last_heartbeat": "2026-07-30T12:11:54+09:00",
+  "updated_at": "2026-07-30T12:11:54+09:00",
   "expires_at": "2026-07-30T09:06:49+09:00",
   "lease": {
     "claimed_at": "2026-07-30T08:36:49+09:00",
-    "heartbeat_at": "2026-07-30T08:36:49+09:00",
+    "heartbeat_at": "2026-07-30T12:11:54+09:00",
     "expires_at": "2026-07-30T09:06:49+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.handoff.md",
@@ -91,5 +91,9 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-30T12:11:54+09:00",
+  "verified_by": "codex-independent-runtime-task-ar-650-w4b",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-650-001.md"
 }

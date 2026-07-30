@@ -926,12 +926,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
-          "value": "f313b8f0ddba755956c2060b6d759de09a899d596eca28e7bc568c29ef667875"
+          "value": "7b2a26398ac26e6aa43a0b3292956fbbc107cf85ac2fe1c8ff36a5f7c919e6e0"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
-          "value": "d7e87ae865eeff848833f0032c59d466e04712a3dbb0e1c6a901a918f949a65f"
+          "value": "0333209b5e14ebda546d5ec915ae985c5c5d0b397328ba5d63e2b18f3a6106ea"
         },
         {
           "kind": "sha256",
@@ -985,7 +985,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md",
-      "recorded_at": "2026-07-30T12:09:17+09:00",
+      "recorded_at": "2026-07-30T12:17:17+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1229,5 +1229,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T12:09:17+09:00"
+  "updated_at": "2026-07-30T12:17:17+09:00"
 }

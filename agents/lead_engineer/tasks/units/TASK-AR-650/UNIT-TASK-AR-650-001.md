@@ -9,11 +9,13 @@ task_id: TASK-AR-650
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
-verification_status: pending
+status: completed
+verification_status: passed
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.json
 evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113.json
+review_refs:
   - reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
   - reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md
@@ -21,7 +23,7 @@ evidence_refs:
   - reviews/W4B-2026-07-30-unit-task-ar-650-001.md
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T12:10:00+09:00
+updated_at: 2026-07-30T12:16:23+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -121,6 +123,12 @@ verification:
   - PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check
 handoff: Attach exact Runtime/Autofolio provenance, taskset-order failing-before/passing-after proof, primary/target/control snapshots, all-20 seam ledger, migration/config/lock diff, ownership and safe-apply counts, idempotence proof, protected-product preservation, host tests, raw/portable isolation digests, exact acceptance identity, integer-zero effects, rollback, W4a, and independent W4b.
 stop_condition: Stop on any plan drift, wrong task selection, primary/control/product write, unclassified seam, silent overwrite, conflict, protected product mutation, consumer commit, install, credential read/change, KIS/broker/order call, database migration, network/provider call, notification, deploy, release, version, tag, package, push, or publication action.
+verified_at: 2026-07-30T12:11:13+09:00
+verified_by: codex-root-task-ar-650-001
+resolution: done
+completed_at: 2026-07-30T12:16:23+09:00
+closed_by: codex-root-task-ar-650-001
+measurement_unavailable_reason: No authoritative per-task hour, model, token, or cost receipt existed before TASK-AR-652; values remain unknown rather than zero.
 ---
 
 # UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal
@@ -210,3 +218,22 @@ Stop before any primary/control/product mutation, unclassified seam, silent
 overwrite, consumer commit, credential access, KIS/broker/order call, database
 migration, install, network/provider/notification action, deploy, release,
 version, tag, package, push, or publication.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T12:16:23+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: No authoritative per-task hour, model, token, or cost receipt existed before TASK-AR-652; values remain unknown rather than zero.
+- Closed by: `codex-root-task-ar-650-001`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113.json`
+- Reviews:
+  - `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md`
+  - `reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md`
+  - `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md`
+  - `reviews/W4A-2026-07-30-unit-task-ar-650-001.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-650-001.md`
+<!-- work-close:end -->

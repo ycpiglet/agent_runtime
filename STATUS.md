@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-07-30 - Autofolio migration closed; operability hardening next
+
+- Completed: `TASK-AR-650` passed the exact Autofolio attempt-3 isolation and acceptance contracts, 207 migration/work tests, 182 adoption/config/template tests, independent W4b, and additive independent-auditor plus skeptic closeout.
+- Boundary: this closes only the migration rehearsal. The pinned model/reasoning equivalence and Scribe source/active-work gaps remain P1, and the duplicate legacy hook remains P2.
+- Taskset: `TASKSET-AR-V080-OPERABILITY-HARDENING` is the next gated scope. Its P1 tasks `TASK-AR-652` through `TASK-AR-657` remain mandatory dependencies of `TASK-AR-651`; `TASK-AR-658` is the non-blocking P2 health UI.
+- Next: complete local W5 fast-forward integration, then claim `TASK-AR-652` from a clean worktree. No version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next
 
 - Completed: `TASK-AR-647` replaced free-form/direct notification delivery with an exact four-event Allimbot producer boundary, preserved enqueue-only ownership, repaired clean-core dependency closure, and made `security-service` enforce typed claim-time risk metadata.
