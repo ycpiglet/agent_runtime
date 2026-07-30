@@ -66,6 +66,16 @@
     "skills/merge-integrator/SKILL.md",
     "src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md",
     "reviews/PLAN-2026-07-30-host-required-merge-gates.md",
-    "tests/fixtures/host/agent_runtime.lock.json"
+    "tests/fixtures/host/agent_runtime.lock.json",
+    "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
+    "agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.json",
+    "agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.handoff.md",
+    "agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.log.md",
+    "agents/runtime/pane_events/pane-events.jsonl",
+    "agents/runtime/a2a/messages.jsonl",
+    "reviews/INDEX.md",
+    "reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json",
+    "reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md",
+    "reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md"
   ]
 }

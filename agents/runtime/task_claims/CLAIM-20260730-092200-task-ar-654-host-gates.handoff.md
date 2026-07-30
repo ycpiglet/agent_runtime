@@ -13,7 +13,7 @@
 - model_tier: planner_high
 - routing_status: escalated
 - wip_slot: 0
-- stop_condition: 
+- stop_condition:
 - phase: implementation
 - step: 1/6
 - progress_pct: 5

@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T09:20:00+09:00
-updated_at: 2026-07-30T10:01:28+09:00
+updated_at: 2026-07-30T10:06:00+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-design-gate-enforcement
 created_by: codex-root
@@ -35,6 +35,16 @@ target_files:
   - src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
   - reviews/PLAN-2026-07-30-host-required-merge-gates.md
   - tests/fixtures/host/agent_runtime.lock.json
+  - agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md
+  - agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.json
+  - agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.handoff.md
+  - agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.log.md
+  - agents/runtime/pane_events/pane-events.jsonl
+  - agents/runtime/a2a/messages.jsonl
+  - reviews/INDEX.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json
+  - reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md
+  - reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md
 scope: Implement optional agents/host/MERGE-GATES.json loading, canonical digest binding, base-owned revalidation, path selection, safe placeholder substitution, required execution, feedback, dry-run visibility, focused tests, and exact template/skill parity. Do not touch src/agent_runtime/config.py, adoption/sync/doctor/CLI files, TASK-AR-648 pilot files, or GitHub workflow/release surfaces.
 acceptance:
   - Absent policy produces the existing queue schema and behavior.
@@ -80,6 +90,16 @@ work.py verify executes task-authored commands, but W5 merge_queue only runs opt
 - src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md
 - reviews/PLAN-2026-07-30-host-required-merge-gates.md
 - tests/fixtures/host/agent_runtime.lock.json
+- agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md
+- agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.json
+- agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.handoff.md
+- agents/runtime/task_claims/CLAIM-20260730-092200-task-ar-654-host-gates.log.md
+- agents/runtime/pane_events/pane-events.jsonl
+- agents/runtime/a2a/messages.jsonl
+- reviews/INDEX.md
+- reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json
+- reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md
+- reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md
 
 ## Scope
 

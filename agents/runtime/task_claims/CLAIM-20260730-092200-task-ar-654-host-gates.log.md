@@ -12,6 +12,7 @@
 - model_tier: planner_high
 - routing_status: escalated
 - wip_slot: 0
-- stop_condition: 
+- stop_condition:
 - status_text: Claimed host-required merge-gate enforcement
 - 2026-07-30T09:45:00+09:00 footprint amendment: declare the deterministic host lock after the template drift check required its regeneration; T3 assumptions re-recorded before the generated edit.
+- 2026-07-30T10:06:00+09:00 evidence footprint amendment: declare W4 verification, independent review, claim release, and deterministic runtime event projections before closeout.
