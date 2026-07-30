@@ -1,0 +1,847 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md",
+  "created_by": "codex-root-session-isolation-planner",
+  "initiative": {
+    "id": "INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY",
+    "title": "Autonomous Execution Integrity",
+    "summary": "Make goal scope, session ownership, automation retries, and integration provenance hard runtime invariants so parallel agents cannot absorb, repeat, or silently expand each other's work.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY",
+    "display_name": "Autonomous Execution Integrity",
+    "summary": "Freeze goal-run membership, isolate every writer session, move live coordination out of source history, make effects idempotent, and prove serialized integration under concurrency and failure.",
+    "order": 655,
+    "plan_slug": "2026-07-30-autonomous-execution-integrity",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_high"
+  },
+  "tasks": [
+    {
+      "display_id": "TASK-AR-655",
+      "title": "Freeze goal-run scope and require attested transitions",
+      "goal": "Turn a conversational goal into an immutable execution contract whose exact taskset, task, and unit membership cannot grow during the run.",
+      "scope": "Add the GoalRun and ScopeChangeRequest model on the canonical runtime-state store, deterministic membership hashing, and planner-facing start/status/amend/close commands. Preserve existing work records and provide an explicit compatibility path for raw goal text.",
+      "priority": "P0",
+      "difficulty": "L",
+      "est_hours": 16,
+      "est_tokens": 34000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Starting a goal seals exact taskset, task, and unit IDs plus relevant hashes and base SHA.",
+        "Work registered after sealing is reported as discovered-after-scope and is never executable in the current run.",
+        "Scope amendment requires an approval reference, records old and new digests, and increments a monotonic revision.",
+        "The completion predicate is evaluated only against frozen membership.",
+        "The registration path can express dependencies between locally created tasks without guessing future task IDs.",
+        "A newly registered dynamic taskset is immediately resolvable by taskset and wave dispatch."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_execution_scope.py tests/test_work_registration.py tests/test_taskset_dispatcher.py",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python scripts/work_schema_gate.py --items --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-655-001",
+          "depends_on": [
+            "UNIT-TASK-AR-657-001"
+          ],
+          "title": "Implement immutable GoalRun storage and membership hashing",
+          "context": "The current loop stores only raw goal text while wave dispatch resolves the live taskset on every invocation. A run needs a durable identity and sealed membership before any writer claim is created.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md",
+            "new:scripts/runtime_state_store.py",
+            "scripts/agent_loop.py",
+            "scripts/wave_dispatcher.py",
+            "agents/project/WORK-SCHEMA.yml"
+          ],
+          "target_files": [
+            "new:scripts/execution_scope.py",
+            "new:tests/test_execution_scope.py",
+            "agents/project/WORK-SCHEMA.yml",
+            "src/agent_runtime/templates/project/agents/project/WORK-SCHEMA.yml",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Define GoalRun, immutable membership snapshots, deterministic digests, base SHA, budgets, completion predicates, and atomic local persistence. Do not wire dispatch or session leases in this unit.",
+          "steps": [
+            "Write failure-first tests for task and unit additions after scope sealing.",
+            "Define versioned GoalRun and ScopeChangeRequest schemas.",
+            "Resolve exact membership and hash normalized work-item identity and unit-spec inputs.",
+            "Persist start, status, and close transitions through the canonical runtime-state adapter.",
+            "Document compatibility behavior for a raw goal that has no sealed run."
+          ],
+          "acceptance": [
+            "The same inputs produce the same membership digest.",
+            "A live registry addition does not change an existing run record.",
+            "Corrupt or partially written state fails closed.",
+            "Run identity is independent from human-readable goal text."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_execution_scope.py",
+            "python scripts/regen_host_lock_if_needed.py --check"
+          ],
+          "handoff": "Provide the GoalRun schema, persistence location, digest fixtures, and before/after proof that a newly added unit is excluded.",
+          "stop_condition": "Stop before changing dispatch, claim acquisition, or Git behavior."
+        },
+        {
+          "unit_id": "UNIT-TASK-AR-655-002",
+          "depends_on": [
+            "UNIT-TASK-AR-655-001"
+          ],
+          "title": "Add explicit scope amendment and registration dependency aliases",
+          "context": "Conversation follow-ups must remain flexible without silently becoming execution authority. The current registration path also cannot reference another task created in the same input without guessing its future numeric ID.",
+          "inputs": [
+            "new:scripts/execution_scope.py",
+            "scripts/work.py",
+            "scripts/taskset_dispatcher.py",
+            "tests/test_work_registration.py",
+            "agents/planning/outbox"
+          ],
+          "target_files": [
+            "scripts/work.py",
+            "scripts/taskset_dispatcher.py",
+            "new:tests/test_execution_scope_cli.py",
+            "tests/test_work_registration.py",
+            "tests/test_taskset_dispatcher.py",
+            "new:docs/goal-scope-contract.md",
+            "src/agent_runtime/templates/project/scripts/work.py",
+            "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py"
+          ],
+          "scope": "Add start/status/amend/close command surfaces, proposal-only discovery intake, approval attestations, and registration-local dependency aliases. Do not authorize automatic scope growth.",
+          "steps": [
+            "Classify follow-ups as context, constraint, scope expansion, replacement, or separate goal.",
+            "Write a pending ScopeChangeRequest for membership changes.",
+            "Require an owner approval reference before creating the next revision.",
+            "Resolve registration-local task aliases after numeric IDs are reserved.",
+            "Make a work.py-registered taskset immediately resolvable through the dynamic taskset registry.",
+            "Add CLI and template parity tests."
+          ],
+          "acceptance": [
+            "A newly discovered task becomes a planning proposal, not runnable work.",
+            "A boolean approval flag without attestation cannot amend scope.",
+            "Old scope revisions remain immutable and auditable.",
+            "A single registration file can declare an internal unit dependency DAG without preselected task IDs.",
+            "wave_dispatcher --taskset resolves a newly registered dynamic taskset without a static code entry."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_execution_scope_cli.py tests/test_work_registration.py tests/test_taskset_dispatcher.py",
+            "python scripts/regen_host_lock_if_needed.py --check",
+            "python -m pytest -q tests/test_template_smoke.py"
+          ],
+          "handoff": "Demonstrate rejected implicit expansion, approved revision creation, and stable dependency alias resolution.",
+          "stop_condition": "Stop before modifying wave dispatch or claim validation."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-656",
+      "title": "Bind dispatch, loops, and supervision to a frozen run",
+      "goal": "Ensure every selection, claim, restart, and completion decision uses one exact goal run and scope revision rather than live backlog or raw goal text.",
+      "scope": "Make wave dispatch consume sealed membership, make claims validate the same digest, and make agent_loop and goal_supervisor resume only an exact run. Do not implement the session lease store in this task.",
+      "priority": "P0",
+      "difficulty": "L",
+      "est_hours": 16,
+      "est_tokens": 34000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Wave planning for a goal selects only IDs sealed in its active scope revision.",
+        "A claim outside the sealed scope fails before persistence.",
+        "Agent loops consume only run-bound work and never drain an unrelated role inbox.",
+        "Supervisor restarts identify an exact run and reject a mismatched scope digest.",
+        "Frozen completion stops even when new backlog exists."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_wave_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_agent_loop.py tests/test_goal_supervisor.py tests/test_taskset_boundary_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-656-001",
+          "depends_on": [
+            "UNIT-TASK-AR-655-002",
+            "UNIT-TASK-AR-657-002"
+          ],
+          "title": "Select and claim only frozen goal-run members",
+          "context": "wave_dispatcher currently re-enumerates every current unit in a taskset. The taskset boundary gate is repository-global and only activates after completion.",
+          "inputs": [
+            "new:scripts/execution_scope.py",
+            "scripts/wave_dispatcher.py",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/taskset_boundary_gate.py"
+          ],
+          "target_files": [
+            "scripts/wave_dispatcher.py",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/taskset_boundary_gate.py",
+            "tests/test_wave_dispatcher.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_taskset_boundary_gate.py",
+            "src/agent_runtime/templates/project/scripts/wave_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/taskset_boundary_gate.py"
+          ],
+          "scope": "Add run and scope-revision inputs, select manifest IDs instead of live taskset membership, and validate scope digest before claim creation. Do not add session fencing yet.",
+          "steps": [
+            "Reproduce a unit added after scope sealing entering the next wave.",
+            "Plan from the sealed unit list and classify later units as discovered-after-scope.",
+            "Require run ID, revision, and digest on mutating claims.",
+            "Key boundary decisions by run and session rather than every repository claim.",
+            "Add template parity coverage."
+          ],
+          "acceptance": [
+            "Later work never enters the frozen wave.",
+            "Unrelated goal runs cannot block each other's boundary checks.",
+            "A stale or mismatched digest fails closed before a claim file or event exists."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_wave_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_taskset_boundary_gate.py"
+          ],
+          "handoff": "Attach the late-unit and cross-goal regressions plus the manifest-based wave plan.",
+          "stop_condition": "Stop before moving runtime state storage or changing Git operations."
+        },
+        {
+          "unit_id": "UNIT-TASK-AR-656-002",
+          "depends_on": [
+            "UNIT-TASK-AR-656-001"
+          ],
+          "title": "Resume the exact run and stop on frozen completion",
+          "context": "agent_loop carries a raw string and goal_supervisor finds the latest goal in a shared daily log. Concurrent sessions can therefore resume the wrong work or continue into generic inbox messages.",
+          "inputs": [
+            "new:scripts/execution_scope.py",
+            "scripts/agent_loop.py",
+            "scripts/goal_supervisor.py",
+            "scripts/stop_events.py"
+          ],
+          "target_files": [
+            "scripts/agent_loop.py",
+            "scripts/goal_supervisor.py",
+            "scripts/stop_events.py",
+            "new:tests/test_agent_loop.py",
+            "tests/test_goal_supervisor.py",
+            "tests/test_stop_events.py",
+            "src/agent_runtime/templates/project/scripts/agent_loop.py"
+          ],
+          "scope": "Bind loop start, dispatch, stop events, restart counts, and completion to run ID and scope revision. Preserve a read-only compatibility report for legacy raw-goal events.",
+          "steps": [
+            "Write two-session fixtures with identical goal text and different run IDs.",
+            "Pass exact run identity through loop events and dispatch.",
+            "Remove generic inbox consumption from run-bound execution.",
+            "Resume only if run identity, revision, digest, and lease status still match.",
+            "Stop at frozen completion and report later discoveries separately."
+          ],
+          "acceptance": [
+            "Identical goal text cannot cross-resume another run.",
+            "Restart counters are per run rather than per text.",
+            "New backlog after completion does not re-arm the completed run."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_agent_loop.py tests/test_goal_supervisor.py tests/test_stop_events.py"
+          ],
+          "handoff": "Show two same-text runs remaining isolated across stop and restart.",
+          "stop_condition": "Stop before implementing durable effect idempotency or session SCM enforcement."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-657",
+      "title": "Make session and claim ownership atomic and durable",
+      "goal": "Give each writer one exclusive session, worktree, branch, and fenced claim lease without advancing a source branch.",
+      "scope": "Build a canonical local control-plane store under the Git common directory, issue monotonic fencing tokens, make claim acquisition transactional, remove live-state autocommit, and preserve read-only projections for operators.",
+      "priority": "P0",
+      "difficulty": "XL",
+      "est_hours": 22,
+      "est_tokens": 46000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Two simultaneous acquisitions for one task, worktree, branch, or semantic domain produce exactly one winner.",
+        "Every writer lease includes session, run, worktree realpath, branch, base SHA, generation, fencing token, and expiry.",
+        "Claim creation and heartbeats do not change Git HEAD or status.",
+        "A stale token cannot mutate or release a newer lease.",
+        "Existing tracked claim history can be read and migrated without fabricating ownership."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_runtime_state_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_parallel_worktree_gate.py tests/test_multi_host_claim_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-657-001",
+          "title": "Build the canonical control-plane store and fenced lease primitive",
+          "context": "Claim conflict checks and persistence are separate operations, and tracked worktrees hold divergent snapshots of active claims. A local canonical store must serialize acquisition across linked worktrees.",
+          "inputs": [
+            "new:scripts/runtime_state_store.py",
+            "scripts/claim_lease.py",
+            "scripts/parallel_worktree_gate.py",
+            "scripts/multi_host_claim_gate.py"
+          ],
+          "target_files": [
+            "new:scripts/runtime_state_store.py",
+            "scripts/claim_lease.py",
+            "scripts/multi_host_claim_gate.py",
+            "new:tests/test_runtime_state_store.py",
+            "tests/test_claim_lease.py",
+            "tests/test_multi_host_claim_gate.py",
+            "new:docs/runtime-control-plane.md"
+          ],
+          "scope": "Implement a Git-common-dir SQLite WAL or equivalently locked transactional adapter with unique live-owner constraints and fencing generation. Define an adapter contract for a future multi-host CAS backend.",
+          "steps": [
+            "Write concurrent-process acquisition and crash fixtures.",
+            "Define versioned session, goal, claim, heartbeat, and projection tables.",
+            "Enforce unique active ownership for task, worktree realpath, branch, and declared semantic domain.",
+            "Increment fencing generation on every reacquisition.",
+            "Expose read-only status and recovery diagnostics."
+          ],
+          "acceptance": [
+            "Concurrent acquisition has one committed winner.",
+            "Expired ownership can be recovered only with a higher fencing token.",
+            "Partial writes and process death preserve a consistent store.",
+            "The store is shared by linked worktrees but absent from product Git history."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_runtime_state_store.py tests/test_claim_lease.py tests/test_multi_host_claim_gate.py"
+          ],
+          "handoff": "Provide transaction traces for simultaneous acquisition, stale-token rejection, and crash recovery.",
+          "stop_condition": "Stop before changing worker Git command authorization."
+        },
+        {
+          "unit_id": "UNIT-TASK-AR-657-002",
+          "depends_on": [
+            "UNIT-TASK-AR-657-001",
+            "UNIT-TASK-AR-655-001"
+          ],
+          "title": "Move live claims out of source history and project compatibility views",
+          "context": "Claim autocommit protects against reset/clean by creating the cross-session source commits that later sessions treat as unknown work.",
+          "inputs": [
+            "new:scripts/runtime_state_store.py",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/claim_guard.py",
+            "scripts/agent_instance_registry.py",
+            "scripts/parallel_worktree_gate.py"
+          ],
+          "target_files": [
+            "scripts/task_claim_dispatcher.py",
+            "scripts/claim_guard.py",
+            "scripts/agent_instance_registry.py",
+            "scripts/parallel_worktree_gate.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_claim_guard.py",
+            "new:tests/test_agent_instance_registry.py",
+            "tests/test_parallel_worktree_gate.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py"
+          ],
+          "scope": "Persist live coordination in the control-plane store, disable source-branch claim autocommits, and generate compatibility summaries only through a serialized projection owner. Preserve immutable released evidence where policy requires it.",
+          "steps": [
+            "Assert that create, heartbeat, and release leave HEAD and status unchanged.",
+            "Persist claim lifecycle with session/run identity and fencing.",
+            "Replace tracked live claim reads with canonical store reads.",
+            "Provide explicit migration for legacy tracked claims.",
+            "Make one projection actor responsible for optional tracked summaries."
+          ],
+          "acceptance": [
+            "A worker claim cannot create a source commit.",
+            "All linked worktrees read the same active ownership state.",
+            "Legacy evidence remains available without being treated as a live lease.",
+            "Worker branches contain product/work-item changes only."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_task_claim_dispatcher.py tests/test_claim_guard.py tests/test_agent_instance_registry.py tests/test_parallel_worktree_gate.py"
+          ],
+          "handoff": "Show unchanged HEAD/status around a complete claim lifecycle and consistent status from two linked worktrees.",
+          "stop_condition": "Stop before deleting historical claim records or broad repository cleanup."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-658",
+      "title": "Enforce session-owned SCM and quarantine foreign state",
+      "goal": "Prevent a writer from staging, committing, pulling, merging, pushing, reverting, or closing over work owned by another session.",
+      "scope": "Add a session SCM guard, exact-path staging, commit provenance, branch/ref ownership, foreign-state classification, and session-local dirty/closure behavior. Integration authority remains a separate role.",
+      "priority": "P0",
+      "difficulty": "XL",
+      "est_hours": 24,
+      "est_tokens": 50000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "One mutating session owns exactly one worktree and branch.",
+        "Worker Git operations are restricted to owned paths, commits, and the claimed remote ref.",
+        "Broad staging and worker pull/merge/rebase/cherry-pick are blocked.",
+        "Sibling worktree or branch progress is classified as foreign observation and does not block closeout.",
+        "Unexpected changes inside the owned worktree fail with attributable ownership evidence."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_session_scm_guard.py tests/test_agent_loop.py tests/test_stop_hook_session_scope.py tests/test_session_baseline.py tests/test_dirty_intake.py tests/test_closure_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-658-001",
+          "depends_on": [
+            "UNIT-TASK-AR-656-002",
+            "UNIT-TASK-AR-657-002",
+            "UNIT-TASK-AR-659-001"
+          ],
+          "title": "Guard every worker mutation and remove broad staging",
+          "context": "agent_loop checkpoint uses git add -A, and current claim metadata cannot prove that a commit or push belongs to one session.",
+          "inputs": [
+            "new:scripts/runtime_state_store.py",
+            "scripts/agent_loop.py",
+            "scripts/claim_guard.py",
+            "scripts/safe_ref_op.py",
+            ".codex/hooks.json"
+          ],
+          "target_files": [
+            "new:scripts/session_scm_guard.py",
+            "scripts/agent_loop.py",
+            "scripts/claim_guard.py",
+            "scripts/safe_ref_op.py",
+            ".codex/hooks.json",
+            "new:tests/test_session_scm_guard.py",
+            "new:tests/test_agent_loop.py",
+            "tests/test_claim_guard.py",
+            "tests/test_safe_ref_op.py",
+            "src/agent_runtime/templates/project/scripts/agent_loop.py"
+          ],
+          "scope": "Validate cwd, real worktree, exact branch, lease token, staged paths, commit trailers, and push ref before every worker mutation. Do not implement merge-queue integration in this unit.",
+          "steps": [
+            "Create negative fixtures for git add -A, commit -a, pull, merge, rebase, cherry-pick, and foreign ref push.",
+            "Replace checkpoint broad staging with the session-owned actual delta.",
+            "Require session, run, claim, and unit provenance trailers.",
+            "Allow only HEAD to the exact claimed remote branch with expected-old-SHA protection.",
+            "Revalidate the fencing token in hooks, pre-commit, and pre-push."
+          ],
+          "acceptance": [
+            "No broad staging command remains in worker recovery paths.",
+            "A worker cannot mutate a sibling or protected branch.",
+            "Stale lease generation fails at every mutation boundary.",
+            "A valid owned commit and push still work."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_session_scm_guard.py tests/test_agent_loop.py tests/test_claim_guard.py tests/test_safe_ref_op.py"
+          ],
+          "handoff": "Provide the allowed/blocked Git command matrix and exact-path checkpoint evidence.",
+          "stop_condition": "Stop before granting worker access to merge or integrate sibling commits."
+        },
+        {
+          "unit_id": "UNIT-TASK-AR-658-002",
+          "depends_on": [
+            "UNIT-TASK-AR-658-001"
+          ],
+          "title": "Make dirty, stop, and closeout decisions session-local",
+          "context": "The current Stop helper infers touched paths from transcripts and repo-wide gates see every claim, branch, and worktree. This turns valid sibling work into a recurring unknown-change bottleneck.",
+          "inputs": [
+            "new:scripts/session_scm_guard.py",
+            "scripts/session_baseline.py",
+            "scripts/stop_hook_session_scope.py",
+            "scripts/dirty_intake.py",
+            "scripts/closure_gate.py",
+            "scripts/parallel_worktree_gate.py"
+          ],
+          "target_files": [
+            "scripts/session_baseline.py",
+            "scripts/stop_hook_session_scope.py",
+            "scripts/dirty_intake.py",
+            "scripts/closure_gate.py",
+            "scripts/parallel_worktree_gate.py",
+            "tests/test_session_baseline.py",
+            "tests/test_stop_hook_session_scope.py",
+            "tests/test_dirty_intake.py",
+            "tests/test_closure_gate.py",
+            "tests/test_parallel_worktree_gate.py"
+          ],
+          "scope": "Compute owned change from manifest plus base-to-HEAD and worktree delta, classify foreign state, and restrict closeout obligations to the current session. Do not hide unattributed edits in the owned worktree.",
+          "steps": [
+            "Record session, run, claim, worktree, branch, base, and initial HEAD in the baseline.",
+            "Classify owned, expected-generated, foreign-observed, overlap, external-base-progress, and unattributed changes.",
+            "Make sibling state informational unless it overlaps an owned path or semantic domain.",
+            "Route attributable foreign findings to the owner session instead of halting the observer.",
+            "Keep unattributed owned-worktree edits blocking."
+          ],
+          "acceptance": [
+            "Two dirty sibling worktrees can close independently.",
+            "origin/main advancement is external base progress, not an unknown local edit.",
+            "A sibling-only commit never enters this session's closeout set.",
+            "A true same-worktree intrusion still blocks with owner/claim detail."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_session_baseline.py tests/test_stop_hook_session_scope.py tests/test_dirty_intake.py tests/test_closure_gate.py tests/test_parallel_worktree_gate.py"
+          ],
+          "handoff": "Show the classification matrix and a two-session closeout regression with no reciprocal blocking.",
+          "stop_condition": "Stop if the implementation would downgrade unattributed edits in the current owned worktree."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-659",
+      "title": "Make footprints, semantic domains, and dependencies mandatory",
+      "goal": "Prevent duplicate or incompatible parallel work before dispatch, including overlaps that do not share exact file paths.",
+      "scope": "Fail closed on empty and escaped actual footprints, acquire semantic-domain ownership atomically, enforce dependencies globally, and keep generated/shared surfaces under a single projection owner.",
+      "priority": "P0",
+      "difficulty": "L",
+      "est_hours": 16,
+      "est_tokens": 33000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Mutating claims without target files and semantic domains cannot start.",
+        "Actual diff outside the claimed footprint blocks release and integration.",
+        "Two claims for the same semantic domain cannot coexist even when target paths differ.",
+        "Dependencies are checked across all active and completed work, not only one taskset view.",
+        "Generated shared views are modified only by their designated projection owner."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_footprint_conflict_gate.py tests/test_task_claim_dispatcher.py tests/test_task_unit_readiness_gate.py tests/test_wave_dispatcher.py tests/test_state_sync_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-659-001",
+          "depends_on": [
+            "UNIT-TASK-AR-656-001",
+            "UNIT-TASK-AR-657-002"
+          ],
+          "title": "Enforce planned and actual ownership across files and domains",
+          "context": "Empty target_files currently warn, file footprints miss semantic conflicts, and isolated taskset views can overlook global dependency state.",
+          "inputs": [
+            "scripts/footprint_conflict_gate.py",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/task_unit_readiness_gate.py",
+            "scripts/wave_dispatcher.py",
+            "scripts/state_sync_gate.py"
+          ],
+          "target_files": [
+            "scripts/footprint_conflict_gate.py",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/task_unit_readiness_gate.py",
+            "scripts/wave_dispatcher.py",
+            "scripts/state_sync_gate.py",
+            "tests/test_footprint_conflict_gate.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_task_unit_readiness_gate.py",
+            "tests/test_wave_dispatcher.py",
+            "tests/test_state_sync_gate.py"
+          ],
+          "scope": "Require explicit file and semantic footprints, validate actual diffs at release/integration, and resolve dependencies against canonical global state. Preserve read-only/research exemptions with explicit claim mode.",
+          "steps": [
+            "Turn footprint-less mutating claims from warning to blocking.",
+            "Add normalized semantic-domain declarations and atomic acquisition.",
+            "Compute actual base-to-HEAD and dirty footprints and reject escape.",
+            "Resolve dependency completion from canonical work and claim state.",
+            "Reserve generated shared surfaces for the projection owner."
+          ],
+          "acceptance": [
+            "Read-only work can run without a write footprint only when explicitly classified read-only.",
+            "A semantic collision is detected before either worker writes.",
+            "Release cannot pass when actual files exceed the lease.",
+            "A dependency completed in another taskset is recognized without importing its branch."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_footprint_conflict_gate.py tests/test_task_claim_dispatcher.py tests/test_task_unit_readiness_gate.py tests/test_wave_dispatcher.py tests/test_state_sync_gate.py"
+          ],
+          "handoff": "Provide path, domain, generated-surface, and global-dependency conflict fixtures.",
+          "stop_condition": "Stop before changing protected remote branch policy."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-660",
+      "title": "Make automation loops durable and idempotent",
+      "goal": "Prevent process restarts, retries, and duplicate dispatch from repeating steps or externally visible effects.",
+      "scope": "Add a durable run-step-attempt ledger, idempotency keys, effect receipts, global retry budgets, progress checks, cancellation propagation, and compensation pointers. Keep provider-specific effects behind adapters.",
+      "priority": "P1",
+      "difficulty": "XL",
+      "est_hours": 22,
+      "est_tokens": 46000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "A run step has a stable idempotency key across restart.",
+        "A completed effect with a receipt is reconciled rather than repeated.",
+        "Retry limits apply across process restarts with backoff, jitter, and circuit breaking.",
+        "No-progress repetition halts with a classified reason.",
+        "Cancelling a goal run prevents child dispatch and queued effects from continuing."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_run_step_ledger.py tests/test_agent_loop.py tests/test_goal_supervisor.py tests/test_stop_events.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-660-001",
+          "depends_on": [
+            "UNIT-TASK-AR-656-002",
+            "UNIT-TASK-AR-657-001",
+            "UNIT-TASK-AR-658-001"
+          ],
+          "title": "Persist run steps, effect receipts, retries, and cancellation",
+          "context": "Current iteration and failure caps are per process. Supervisor restart can repeat a logical step because there is no durable cursor or effect receipt.",
+          "inputs": [
+            "new:scripts/runtime_state_store.py",
+            "scripts/agent_loop.py",
+            "scripts/goal_supervisor.py",
+            "scripts/stop_events.py",
+            "src/agent_runtime/templates/project/scripts/auto_dispatch.py"
+          ],
+          "target_files": [
+            "new:scripts/run_step_ledger.py",
+            "scripts/agent_loop.py",
+            "scripts/goal_supervisor.py",
+            "scripts/stop_events.py",
+            "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
+            "new:tests/test_run_step_ledger.py",
+            "new:tests/test_agent_loop.py",
+            "tests/test_goal_supervisor.py",
+            "tests/test_stop_events.py",
+            "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
+            "new:docs/durable-automation-contract.md"
+          ],
+          "scope": "Persist intent, lease, attempt, receipt, result, retry, cancellation, and compensation metadata for logical steps. Do not directly implement provider-specific irreversible actions.",
+          "steps": [
+            "Define idempotency as run ID, scope revision, and logical step ID.",
+            "Write intent before an effect and reconcile a receipt before retry.",
+            "Track attempt, time, cost, and token budgets across processes.",
+            "Add exponential backoff with jitter and no-progress detection.",
+            "Cascade cancellation to children and queued effects."
+          ],
+          "acceptance": [
+            "Crash-after-effect-before-result does not repeat the effect when a receipt exists.",
+            "Concurrent duplicate dispatch elects one step lease owner.",
+            "Retry exhaustion is durable and cannot reset with a new process.",
+            "Non-reversible effects carry an explicit recovery or compensation pointer."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_run_step_ledger.py tests/test_agent_loop.py tests/test_goal_supervisor.py tests/test_stop_events.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py"
+          ],
+          "handoff": "Attach crash-window, duplicate-dispatch, retry-budget, no-progress, and cancellation traces.",
+          "stop_condition": "Stop before enabling any new external side effect by default."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-661",
+      "title": "Seal integration with SHA-bound remote attestation",
+      "goal": "Make the serialized integration authority the only path that can absorb worker commits into the protected branch.",
+      "scope": "Verify commit provenance, revalidate against the current base, bind gate results to exact SHAs and gate versions, and enforce required remote checks and protected gate policy.",
+      "priority": "P1",
+      "difficulty": "XL",
+      "est_hours": 22,
+      "est_tokens": 47000,
+      "owner": "lead-engineer",
+      "team": "release-integrity",
+      "acceptance": [
+        "Only the integration role may merge, rebase, cherry-pick, or advance the protected branch.",
+        "Every candidate commit belongs to one released session/claim and valid scope revision.",
+        "Gate evidence is bound to repository, base SHA, candidate SHA, task, run, and gate bundle.",
+        "Remote required checks cannot be satisfied by evidence for a different SHA.",
+        "Candidate changes to gate policy are evaluated under protected-base policy and elevated review."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_merge_queue.py tests/test_merge_queue_policy.py tests/test_session_scm_guard.py tests/test_remote_gate_attestation.py tests/test_gate_governance.py",
+        "python scripts/merge_queue_policy.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-661-001",
+          "depends_on": [
+            "UNIT-TASK-AR-658-001",
+            "UNIT-TASK-AR-659-001",
+            "UNIT-TASK-AR-660-001"
+          ],
+          "title": "Require provenance and exact-SHA attestation in the merge queue",
+          "context": "A strong local queue remains bypassable when remote branch policy is permissive or when an attestation is not cryptographically tied to the exact candidate and base.",
+          "inputs": [
+            "scripts/merge_queue.py",
+            "new:scripts/merge_queue_policy.py",
+            "new:scripts/session_scm_guard.py",
+            ".github/workflows",
+            "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md"
+          ],
+          "target_files": [
+            "scripts/merge_queue.py",
+            "new:scripts/merge_queue_policy.py",
+            "new:scripts/remote_gate_attestation.py",
+            "new:scripts/gate_governance.py",
+            "new:.github/workflows/merge-queue.yml",
+            "tests/test_merge_queue.py",
+            "new:tests/test_merge_queue_policy.py",
+            "new:tests/test_remote_gate_attestation.py",
+            "new:tests/test_gate_governance.py",
+            "new:docs/integration-authority.md"
+          ],
+          "scope": "Add integration-role authorization, commit-chain provenance, latest-base revalidation, exact-SHA attestation, and protected gate governance. Do not weaken existing local checks.",
+          "steps": [
+            "Reject candidates with foreign, unattributed, or stale-fence commits.",
+            "Revalidate dependency, scope, lease release, and actual footprint at queue time.",
+            "Seal gate input and output to base SHA, candidate SHA, run, task, and gate bundle version.",
+            "Configure required remote check consumption and expected-old-SHA protected update.",
+            "Use protected-base policy when the candidate modifies a gate or baseline."
+          ],
+          "acceptance": [
+            "A passing attestation cannot be replayed for another commit.",
+            "A candidate whose HEAD changes during verification is rejected.",
+            "Direct worker integration is denied.",
+            "Gate self-weakening cannot authorize itself."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_merge_queue.py tests/test_merge_queue_policy.py tests/test_remote_gate_attestation.py tests/test_gate_governance.py",
+            "python scripts/merge_queue_policy.py --check"
+          ],
+          "handoff": "Provide attestation schema, replay/tamper fixtures, branch-policy evidence, and a protected update trace.",
+          "stop_condition": "Stop before modifying a live remote policy without explicit owner authorization."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-662",
+      "title": "Strengthen semantic verification and baseline governance",
+      "goal": "Prevent mechanically green integration from restoring old designs, mixing incompatible implementations, or laundering regressions into new baselines.",
+      "scope": "Add contract, journey, responsive, accessibility, visual, and verifier-attestation requirements plus independent ownership for baseline and gate changes.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 18,
+      "est_tokens": 37000,
+      "owner": "lead-engineer",
+      "team": "evaluation-office",
+      "acceptance": [
+        "Critical user journeys have semantic assertions independent of snapshots.",
+        "Design-system ownership and shared component contracts are checked across parallel branches.",
+        "Baseline updates require separate justification, before/after evidence, and non-author independence.",
+        "Verifier identity and tool evidence are bound to the candidate SHA.",
+        "A green unit suite cannot override a failed journey, accessibility, or protected design contract."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_semantic_integration_gate.py tests/test_baseline_governance.py tests/test_verifier_attestation.py",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-662-001",
+          "depends_on": [
+            "UNIT-TASK-AR-661-001"
+          ],
+          "title": "Add semantic integration and independent baseline controls",
+          "context": "Bean Wiki demonstrated that ordinary CI can remain green while navigation, design, or responsive behavior regresses after parallel integration.",
+          "inputs": [
+            "scripts/owner_governance_gate.py",
+            "new:scripts/review_claim_gate.py",
+            "new:scripts/verification_decision_gate.py",
+            "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md"
+          ],
+          "target_files": [
+            "new:scripts/semantic_integration_gate.py",
+            "new:scripts/baseline_governance.py",
+            "scripts/owner_governance_gate.py",
+            "new:scripts/review_claim_gate.py",
+            "new:scripts/verification_decision_gate.py",
+            "new:tests/test_semantic_integration_gate.py",
+            "new:tests/test_baseline_governance.py",
+            "new:tests/test_verifier_attestation.py",
+            "new:docs/semantic-integration-contract.md"
+          ],
+          "scope": "Define repository-configurable critical journeys, design contracts, responsive/accessibility evidence, verifier provenance, and protected baseline approval. Do not encode one product's UI into core defaults.",
+          "steps": [
+            "Define semantic assertions that cannot be replaced by snapshots.",
+            "Bind journey and verifier evidence to the candidate SHA.",
+            "Require independent approval and rationale for baseline updates.",
+            "Detect incompatible ownership of shared design contracts.",
+            "Integrate blocking results into the merge attestation."
+          ],
+          "acceptance": [
+            "Known green-but-wrong fixtures fail.",
+            "Baseline changes cannot self-approve.",
+            "Non-UI repositories can configure equivalent domain contracts without visual tooling.",
+            "Verifier evidence names actor, tools, inputs, and exact commit."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_semantic_integration_gate.py tests/test_baseline_governance.py tests/test_verifier_attestation.py"
+          ],
+          "handoff": "Provide a green-unit/red-journey fixture, baseline-approval matrix, and exact-SHA verifier evidence.",
+          "stop_condition": "Stop before globally requiring a product-specific browser or screenshot stack."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-663",
+      "title": "Prove concurrent-session safety and roll out enforcement",
+      "goal": "Demonstrate that the current reciprocal-blocking and duplicate-work chain cannot recur across crashes, races, retries, and incompatible parallel changes.",
+      "scope": "Build end-to-end concurrency and failure-injection scenarios, migrate existing state, run shadow mode, define observability and rollback, then enable hard enforcement by measured stages.",
+      "priority": "P1",
+      "difficulty": "XL",
+      "est_hours": 24,
+      "est_tokens": 50000,
+      "owner": "lead-engineer",
+      "team": "evaluation-office",
+      "acceptance": [
+        "The pre-fix unknown-change chain is reproduced deterministically and fails after remediation.",
+        "Race, crash, stale token, retry, cancellation, late task, foreign state, and semantic conflict scenarios pass.",
+        "Legacy tracked live state migrates without losing audit evidence or creating active ownership.",
+        "Shadow-mode metrics quantify false positives and bypasses before blocking rollout.",
+        "Rollback preserves source history, run state, and ownership integrity."
+      ],
+      "verification": [
+        "python -m pytest -q tests/test_parallel_session_isolation.py tests/test_bounded_goal_scope.py tests/test_runtime_chaos.py tests/test_control_plane_migration.py tests/test_enforcement_rollout.py",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python -m pytest -q tests/test_template_smoke.py",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-663-001",
+          "depends_on": [
+            "UNIT-TASK-AR-658-002",
+            "UNIT-TASK-AR-660-001",
+            "UNIT-TASK-AR-661-001",
+            "UNIT-TASK-AR-662-001"
+          ],
+          "title": "Run chaos scenarios, migrate state, and stage enforcement",
+          "context": "The safety model spans scope, leases, Git, loops, integration, and verification. Unit tests alone cannot prove the absence of reciprocal blocking or duplicated effects.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md",
+            "new:scripts/runtime_state_store.py",
+            "new:scripts/execution_scope.py",
+            "new:scripts/session_scm_guard.py",
+            "new:scripts/run_step_ledger.py"
+          ],
+          "target_files": [
+            "new:tests/test_parallel_session_isolation.py",
+            "new:tests/test_bounded_goal_scope.py",
+            "new:tests/test_runtime_chaos.py",
+            "new:tests/test_control_plane_migration.py",
+            "new:tests/test_enforcement_rollout.py",
+            "new:scripts/control_plane_migration.py",
+            "new:scripts/enforcement_rollout.py",
+            "scripts/owner_governance_gate.py",
+            "new:docs/autonomous-execution-rollout.md",
+            "new:docs/runbooks/session-isolation-recovery.md"
+          ],
+          "scope": "Exercise real concurrent processes and temporary linked worktrees, migrate legacy coordination state, and define shadow-to-block rollout with telemetry and rollback. Do not enable blocking in consumer repositories until exit criteria pass.",
+          "steps": [
+            "Reproduce reciprocal unknown-change blocking and duplicate claim/effect races.",
+            "Inject process death at lease, effect, verification, and protected-update boundaries.",
+            "Test late registration, sibling dirt, base advancement, stale fencing, and incompatible design domains.",
+            "Migrate legacy tracked state as historical evidence rather than active ownership.",
+            "Run observe, warn, block-new, and block-all stages with explicit exit and rollback criteria."
+          ],
+          "acceptance": [
+            "A clean session closes while an unrelated sibling worktree is dirty.",
+            "Only one simultaneous same-scope claimant or step executor succeeds.",
+            "A late task never enters a sealed run.",
+            "Crash recovery neither duplicates effects nor accepts stale writes.",
+            "Rollout metrics and recovery runbook are sufficient for an operator to reverse enforcement safely."
+          ],
+          "verification": [
+            "python -m pytest -q tests/test_parallel_session_isolation.py tests/test_bounded_goal_scope.py tests/test_runtime_chaos.py tests/test_control_plane_migration.py tests/test_enforcement_rollout.py",
+            "python scripts/regen_host_lock_if_needed.py --check",
+            "python -m pytest -q tests/test_template_smoke.py",
+            "python scripts/owner_governance_gate.py"
+          ],
+          "handoff": "Attach the chaos matrix, pre/post failure traces, migration report, shadow metrics, and staged rollout decision.",
+          "stop_condition": "Stop before broad hard enforcement if any P0 race, false-positive ownership block, or rollback data-loss case remains."
+        }
+      ]
+    }
+  ]
+}

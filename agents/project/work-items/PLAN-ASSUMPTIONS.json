@@ -67,6 +67,199 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md",
+          "value": "ec45a3c8c865d104e41a04e93a56aa8f26da92e8e8e0425d76c575f1b01aa9e0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/agent_instance_registry.py",
+          "value": "e6b1f15f14aef14816e8110cc7775eea8d7f591dffb00de7a74c70ea85383c54"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/agent_loop.py",
+          "value": "a4b7b9a17f1a719cb429e2f5377586d078712b711a8940ec1ded9d906999cb6c"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/baseline_governance.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_guard.py",
+          "value": "0847f45c722e94cf356cc99355bacea03fedab1c79cd6cc7abb77a60dbca4232"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_lease.py",
+          "value": "b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/closure_gate.py",
+          "value": "90fe2e42a1de60ab504fb0dd8b111b8c528121f1a03aa054892ebd71e1faabbb"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/control_plane_migration.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/dirty_intake.py",
+          "value": "ab1553b5a658d211ee8581a3726406f1423cc6edea88ffeaffdb6af5dae601c1"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/enforcement_rollout.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/execution_scope.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/footprint_conflict_gate.py",
+          "value": "c2a87e2ee0c96ba08d0f1babfc82f4f7ea4d3e1e8d4d9c8364fed1ff130ecc8b"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/gate_governance.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/goal_supervisor.py",
+          "value": "818a734d008563aeeb4b3bee02a15b80c754d1229e03cad0111ca39f1846f181"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/merge_queue.py",
+          "value": "04755f1f050d03d637a5faf156599d63a60d15279961d4862ccbebe036de5587"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/merge_queue_policy.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/multi_host_claim_gate.py",
+          "value": "8937ed8d9b77f620d4dd26721e495b611ff544a917cfb548ceb67faf5fb82116"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_governance_gate.py",
+          "value": "40f35f5ca3743d72ca40a26149839d8bd499b1eefe3315ab1513ec1b1ea314fb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/parallel_worktree_gate.py",
+          "value": "ff7e226bf63c7c89606143cf6619854a8bcc429aeec306774f1550512fc4f278"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/remote_gate_attestation.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/review_claim_gate.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/run_step_ledger.py",
+          "value": ""
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/runtime_state_store.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/safe_ref_op.py",
+          "value": "01d4ae01d91a2de5c9e275c97bad2cb61bfbd4e95993c230164b33b59061304c"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/semantic_integration_gate.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/session_baseline.py",
+          "value": "adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/session_scm_guard.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/state_sync_gate.py",
+          "value": "b85e89fc9de4916376c2784acd47328923fcc596f485b6cc0b35185be13431dd"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/stop_events.py",
+          "value": "280cd7b51fa565efe99df26d7f9a9477cb0bc2c74a3d0290a1c455c7f6b8435f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/stop_hook_session_scope.py",
+          "value": "75cc7332461618d985ec716044ae993ced1d391ec87a57ef903db63a2aaf1cf5"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "6db9d6c1af921a488ed0e52cfdd2aaa8896b7d60c6b77895437405095f6427df"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_unit_readiness_gate.py",
+          "value": "79ae880aa3edca4df6724d15aa6220ffadc8280010f347a2ec84892fe1a55372"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_boundary_gate.py",
+          "value": "0cc438aeec1f24540ddc6838837d24cf1c4444799781ee6ca8f175be392a86f0"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "0d0947d2cd88b3f53ddef384f1520bb3e1ec3ca2a2bbf66f48f4a22b60d5bfe5"
+        },
+        {
+          "kind": "absent",
+          "path": "scripts/verification_decision_gate.py",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/wave_dispatcher.py",
+          "value": "5be689e2f709dcdf1763dbf8570888fb201ff117e3e72d1f030998cef2a348c3"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+        }
+      ],
+      "design_record": "reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md",
+      "recorded_at": "2026-07-30T11:30:57+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-22-taskset-ar-backlog-taskset-test-recovery-registration.md",
           "value": "36142b1e2cd2df19484c4ccecfdf1abb707b42dfdceff04b2817f6335091bff5"
         },
@@ -1467,5 +1660,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T09:40:16+09:00"
+  "updated_at": "2026-07-30T11:30:57+09:00"
 }

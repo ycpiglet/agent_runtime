@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T09:29:29+09:00
-record_count: 528
+generated_at: 2026-07-30T11:35:26+09:00
+record_count: 552
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `528` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `552` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `44` records |
-| Tasksets | pass | `68` records |
-| Tasks | pass | `317` records |
-| Units | pass | `99` records |
+| Initiatives | pass | `45` records |
+| Tasksets | pass | `69` records |
+| Tasks | pass | `326` records |
+| Units | pass | `112` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -567,6 +567,30 @@ record_count: 528
 | 43.1 | Taskset 43.1 | taskset | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | `INIT-AR-PROJECT-MERGE-GOVERNANCE` | active | `BACKLOG-BOARD.md` | Host Required Merge Gates |
 | 43.1.1 | Task 43.1.1 | task | `TASK-AR-654` | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | planned | `agents/lead_engineer/tasks/TASK-AR-654.md` | Prevent worker branches from bypassing project contract, ownership, and visual gates… |
 | 43.1.1.1 | Unit 43.1.1.1 | unit | `UNIT-TASK-AR-654-001` | `TASK-AR-654` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md` | UNIT-TASK-AR-654-001 - Bind and execute host-required merge gates |
+| 44 | Initiative 44 | initiative | `INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY.md` | Autonomous Execution Integrity |
+| 44.1 | Taskset 44.1 | taskset | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | `INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | active | `BACKLOG-BOARD.md` | Autonomous Execution Integrity |
+| 44.1.1 | Task 44.1.1 | task | `TASK-AR-655` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-655.md` | Turn a conversational goal into an immutable execution contract whose exact taskset,… |
+| 44.1.1.1 | Unit 44.1.1.1 | unit | `UNIT-TASK-AR-655-001` | `TASK-AR-655` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md` | UNIT-TASK-AR-655-001 - Implement immutable GoalRun storage and membership hashing |
+| 44.1.1.2 | Unit 44.1.1.2 | unit | `UNIT-TASK-AR-655-002` | `TASK-AR-655` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-002.md` | UNIT-TASK-AR-655-002 - Add explicit scope amendment and registration dependency aliases |
+| 44.1.2 | Task 44.1.2 | task | `TASK-AR-656` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-656.md` | Ensure every selection, claim, restart, and completion decision uses one exact goal r… |
+| 44.1.2.1 | Unit 44.1.2.1 | unit | `UNIT-TASK-AR-656-001` | `TASK-AR-656` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md` | UNIT-TASK-AR-656-001 - Select and claim only frozen goal-run members |
+| 44.1.2.2 | Unit 44.1.2.2 | unit | `UNIT-TASK-AR-656-002` | `TASK-AR-656` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-002.md` | UNIT-TASK-AR-656-002 - Resume the exact run and stop on frozen completion |
+| 44.1.3 | Task 44.1.3 | task | `TASK-AR-657` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-657.md` | Give each writer one exclusive session, worktree, branch, and fenced claim lease with… |
+| 44.1.3.1 | Unit 44.1.3.1 | unit | `UNIT-TASK-AR-657-001` | `TASK-AR-657` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md` | UNIT-TASK-AR-657-001 - Build the canonical control-plane store and fenced lease primitive |
+| 44.1.3.2 | Unit 44.1.3.2 | unit | `UNIT-TASK-AR-657-002` | `TASK-AR-657` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-002.md` | UNIT-TASK-AR-657-002 - Move live claims out of source history and project compatibility views |
+| 44.1.4 | Task 44.1.4 | task | `TASK-AR-658` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-658.md` | Prevent a writer from staging, committing, pulling, merging, pushing, reverting, or c… |
+| 44.1.4.1 | Unit 44.1.4.1 | unit | `UNIT-TASK-AR-658-001` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md` | UNIT-TASK-AR-658-001 - Guard every worker mutation and remove broad staging |
+| 44.1.4.2 | Unit 44.1.4.2 | unit | `UNIT-TASK-AR-658-002` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-002.md` | UNIT-TASK-AR-658-002 - Make dirty, stop, and closeout decisions session-local |
+| 44.1.5 | Task 44.1.5 | task | `TASK-AR-659` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-659.md` | Prevent duplicate or incompatible parallel work before dispatch, including overlaps t… |
+| 44.1.5.1 | Unit 44.1.5.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Enforce planned and actual ownership across files and domains |
+| 44.1.6 | Task 44.1.6 | task | `TASK-AR-660` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-660.md` | Prevent process restarts, retries, and duplicate dispatch from repeating steps or ext… |
+| 44.1.6.1 | Unit 44.1.6.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Persist run steps, effect receipts, retries, and cancellation |
+| 44.1.7 | Task 44.1.7 | task | `TASK-AR-661` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-661.md` | Make the serialized integration authority the only path that can absorb worker commit… |
+| 44.1.7.1 | Unit 44.1.7.1 | unit | `UNIT-TASK-AR-661-001` | `TASK-AR-661` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md` | UNIT-TASK-AR-661-001 - Require provenance and exact-SHA attestation in the merge queue |
+| 44.1.8 | Task 44.1.8 | task | `TASK-AR-662` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-662.md` | Prevent mechanically green integration from restoring old designs, mixing incompatibl… |
+| 44.1.8.1 | Unit 44.1.8.1 | unit | `UNIT-TASK-AR-662-001` | `TASK-AR-662` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-662/UNIT-TASK-AR-662-001.md` | UNIT-TASK-AR-662-001 - Add semantic integration and independent baseline controls |
+| 44.1.9 | Task 44.1.9 | task | `TASK-AR-663` | `TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY` | planned | `agents/lead_engineer/tasks/TASK-AR-663.md` | Demonstrate that the current reciprocal-blocking and duplicate-work chain cannot recu… |
+| 44.1.9.1 | Unit 44.1.9.1 | unit | `UNIT-TASK-AR-663-001` | `TASK-AR-663` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-663/UNIT-TASK-AR-663-001.md` | UNIT-TASK-AR-663-001 - Run chaos scenarios, migrate state, and stage enforcement |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

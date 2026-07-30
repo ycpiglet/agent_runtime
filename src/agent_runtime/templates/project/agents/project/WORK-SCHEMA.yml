@@ -21,7 +21,7 @@
 #   measurement   est_*/actual_* tokens|hours|cost, budget_cap, rework_count,
 #                 gate_failure_count, xp_value
 #                 -> budget gates, estimate-vs-actual variance, quality scoring
-#   relations     blocks, blocked_by, relates_to, evidence_refs, review_refs,
+#   relations     blocks, blocked_by, depends_on, relates_to, evidence_refs, review_refs,
 #                 commit_refs, pr_refs, a2a_context_id, claim_refs
 #                 -> dependency graphs, critical path, evidence and audit chains
 #   governance    risk_tier, approval_required, security_sensitive, stakeholders,
@@ -37,7 +37,7 @@
 # frontmatter is a gate failure. See computed_only_fields.
 schema_version: agent-runtime-work-schema/v1
 schema_owner: planning-office
-updated_at: 2026-06-13T02:05:00+09:00
+updated_at: 2026-07-30T11:25:17+09:00
 unknown_field_policy: watch
 derived_field_policy: computed_only
 custom_property_policy: register_here_first
@@ -679,6 +679,13 @@ fields:
     source: human
     consumed_by: [dependency_graph, board]
     query_use: Explain why work cannot start or close.
+  depends_on:
+    type: list
+    required_for: []
+    populated_by: planner
+    source: human
+    consumed_by: [wave_dispatcher, task_unit_readiness_gate, dependency_graph]
+    query_use: Order exact task and unit prerequisites in the executable dispatch DAG.
   relates_to:
     type: list
     required_for: []

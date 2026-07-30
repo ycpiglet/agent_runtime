@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T10:14:35+09:00
-task_count: 317
-open_count: 20
+generated_at: 2026-07-30T11:35:26+09:00
+task_count: 326
+open_count: 29
 completed_count: 297
-task_set_count: 4
+task_set_count: 5
 completed_task_set_count: 64
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `297` completed tasks are archived from this live board.
+- Summary: `29` open or active tasks; `297` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `297`.
-- Task Sets: `4` active workflows; `64` completed workflows are hidden from the live action board.
+- Status: Action `15` / Ask `5` / Review `0` / Later `9` / Done `297`.
+- Task Sets: `5` active workflows; `64` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -93,6 +93,23 @@ completed_task_set_count: 64
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-654` | INIT-AR-PROJECT-MERGE-GOVERNANCE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md | planned | Ask | P1 | High | Medium | 3h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Prevent worker branches from bypassing project contract, ownership, and visual gates… |
+
+### Autonomous Execution Integrity (`TASKSET-AR-AUTONOMOUS-EXECUTION-INTEGRITY`)
+
+- Flow: Freeze goal-run membership, isolate every writer session, move live coordination out of source history, make effects idempotent, and prove serialized integration under concurrency and failure.
+- Progress: `0/9` done; `9` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-655` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md | planned | Later | P0 | Critical | High | 16h/34000tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Turn a conversational goal into an immutable execution contract whose exact taskset,… |
+| `TASK-AR-656` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md | planned | Later | P0 | Critical | High | 16h/34000tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Ensure every selection, claim, restart, and completion decision uses one exact goal r… |
+| `TASK-AR-659` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md | planned | Later | P0 | Critical | High | 16h/33000tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Prevent duplicate or incompatible parallel work before dispatch, including overlaps t… |
+| `TASK-AR-657` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md | planned | Later | P0 | Critical | Critical | 22h/46000tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Give each writer one exclusive session, worktree, branch, and fenced claim lease with… |
+| `TASK-AR-658` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md | planned | Later | P0 | Critical | Critical | 24h/50000tok | Low | 7 | agent-runtime-core | lead-engineer | Wait for dependency | Prevent a writer from staging, committing, pulling, merging, pushing, reverting, or c… |
+| `TASK-AR-662` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-662/UNIT-TASK-AR-662-001.md | planned | Later | P1 | High | High | 18h/37000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Prevent mechanically green integration from restoring old designs, mixing incompatibl… |
+| `TASK-AR-660` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md | planned | Later | P1 | High | Critical | 22h/46000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Prevent process restarts, retries, and duplicate dispatch from repeating steps or ext… |
+| `TASK-AR-661` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md | planned | Later | P1 | High | Critical | 22h/47000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Make the serialized integration authority the only path that can absorb worker commit… |
+| `TASK-AR-663` | INIT-AR-AUTONOMOUS-EXECUTION-INTEGRITY | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-663/UNIT-TASK-AR-663-001.md | planned | Later | P1 | High | Critical | 24h/50000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Demonstrate that the current reciprocal-blocking and duplicate-work chain cannot recu… |
 
 ## Archived Task Sets
 
@@ -169,7 +186,7 @@ completed_task_set_count: 64
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `20` open across `4` task sets (see Action Board above).
+- Active: `29` open across `5` task sets (see Action Board above).
 - Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `64` (see Archived Task Sets above).
 - Archived task files: `297` — see `ARCHIVE-INDEX.md`.

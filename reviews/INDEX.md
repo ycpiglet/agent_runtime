@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T10:12:24+09:00
-record_count: 1043
+generated_at: 2026-07-30T11:35:26+09:00
+record_count: 1045
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1043` review and evidence records under `reviews/`.
+- Summary: indexed `1045` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1043` files |
+| Reviews covered | pass | `1045` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -216,6 +216,7 @@ record_count: 1043
 | `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RESEARCH-2026-06-24-oss-sprite-generators.md` | `RESEARCH-2026-06-24-oss-sprite-generators` | md | synthesized (license + animation facts fetched from primary sources this run; integration sketch is design, not yet spiked) | n/a | RESEARCH — OSS Sprite Generators for Cute, Role-Distinct, Animated Office-Map Characters |
 | `reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md` | `RESEARCH-2026-07-28-v080-adoption-enforcement-scope` | md | record | watch | Agent Runtime v0.8 Adoption and Enforcement Scope |
+| `reviews/RESEARCH-2026-07-30-parallel-goal-session-failure-audit.md` | `RESEARCH-2026-07-30-parallel-goal-session-failure-audit` | md | record | fail | Parallel Goal and Session Failure Audit |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -606,6 +607,7 @@ record_count: 1043
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment` | planning | record | pass | TASK-AR-654 host lock scope amendment |
 | `reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md` | `REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment` | md | record | n/a | TASK-AR-654 W4 evidence footprint amendment |
+| `reviews/REVIEW-2026-07-30-taskset-ar-autonomous-execution-integrity-registration.md` | `REVIEW-2026-07-30-taskset-ar-autonomous-execution-integrity-registration` | md | record | pass | Autonomous Execution Integrity Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md` | `REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration` | md | record | pass | Host Required Merge Gates Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md` | `REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration` | md | record | pass | Merge Queue Safety Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |

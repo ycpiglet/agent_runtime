@@ -66,7 +66,7 @@
       "agents/project/STATE-MACHINES.yml": "sha256:fa5e02b56f3f9e0b1070a76a7e21820b926aff6d5cca366272a30a571aa8edf3",
       "agents/project/TEAMS.md": "sha256:516867f53afb41180ee844c051f7f496108439761327b10924a19c758ecc46e2",
       "agents/project/WORK-LANE-PLAYBOOKS.md": "sha256:2af0a42d8512f0839cb3c1aecd7e576a7a4153ca161fcbecc77a2e679a37614a",
-      "agents/project/WORK-SCHEMA.yml": "sha256:986bc6997dc47c6faa0930dc1efc0e238cfa7744859a47bee89f43e3c5e4896c",
+      "agents/project/WORK-SCHEMA.yml": "sha256:797e3498c39c343ab5b19d8e9fb0b98a39a8bf4340e316a540c9f2a0d0e37fc2",
       "agents/project/teams/.gitkeep": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
       "agents/qa/SKILL.md": "sha256:4bb9495507a0ef045f59bfe5f200d7072792b06e1a74264b1465ad6e0698d6e0",
       "agents/qa/TEST-STRATEGY.md": "sha256:6749798428424c36e25bfd77e5b4ada88b5f604eb834ffd9b07ef496f023639b",
@@ -506,7 +506,7 @@
     },
     "package_version": "0.7.0",
     "seeded": [],
-    "template_digest": "sha256:71aa2aebf8e4138c3471d8328344e449d409cd555bfce5aa05a756b299f20d00",
+    "template_digest": "sha256:e37d2afd96f3cf2d694e19c2609af394f6681541ddcee3b40c20216154781556",
     "template_files": 248
   },
   "profiles": [
