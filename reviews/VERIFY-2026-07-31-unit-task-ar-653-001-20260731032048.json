@@ -1,0 +1,34 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048",
+  "work_id": "UNIT-TASK-AR-653-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-653",
+  "unit_id": "UNIT-TASK-AR-653-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-31T03:20:48+09:00",
+  "verified_by": "le-20260730-234934-kst-ar653004",
+  "command_count": 2,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-31T03:20:48+09:00",
+      "finished_at": "2026-07-31T03:21:40+09:00",
+      "stdout": "........................................................................ [ 34%]\n........................................................................ [ 69%]\n..............................................................           [100%]\n206 passed in 49.30s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-31T03:21:40+09:00",
+      "finished_at": "2026-07-31T03:21:40+09:00",
+      "stdout": "template-mirror: expected=84 common=84 identical=81 intentional=3 findings=0\n",
+      "stderr": ""
+    }
+  ]
+}
