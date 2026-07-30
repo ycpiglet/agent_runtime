@@ -1,0 +1,21 @@
+# Handoff: lead_engineer@work-01
+
+- claim_id: CLAIM-20260730-092200-task-ar-654-host-gates
+- task_id: TASK-AR-654
+- worktree_path: /home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-654
+- branch: codex/unit-task-ar-654-001-host-required-gates
+- task_set_id: TASKSET-AR-HOST-REQUIRED-MERGE-GATES
+- project_id: PROJECT-AGENT-RUNTIME
+- unit_id: UNIT-TASK-AR-654-001
+- unit_spec: agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md
+- requested_model_tier: worker_standard
+- selected_model_tier: planner_high
+- model_tier: planner_high
+- routing_status: escalated
+- wip_slot: 0
+- stop_condition:
+- phase: implementation
+- step: 1/6
+- progress_pct: 5
+- status_text: Claimed host-required merge-gate enforcement
+- status: claimed

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T08:50:40+09:00
-record_count: 1030
+generated_at: 2026-07-30T10:12:24+09:00
+record_count: 1043
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1030` review and evidence records under `reviews/`.
+- Summary: indexed `1043` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1030` files |
+| Reviews covered | pass | `1043` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,6 +166,7 @@ record_count: 1030
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
+| `reviews/PLAN-2026-07-30-host-required-merge-gates.md` | `PLAN-2026-07-30-host-required-merge-gates` | md | record | n/a | TASK-AR-654 — Host-required merge gates |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
@@ -603,6 +604,9 @@ record_count: 1030
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment` | planning | record | pass | TASK-AR-654 host lock scope amendment |
+| `reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md` | `REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment` | md | record | n/a | TASK-AR-654 W4 evidence footprint amendment |
+| `reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md` | `REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration` | md | record | pass | Host Required Merge Gates Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md` | `REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration` | md | record | pass | Merge Queue Safety Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -903,6 +907,12 @@ record_count: 1030
 | `reviews/VERIFY-2026-07-30-task-ar-653-independent.md` | `VERIFY-2026-07-30-task-ar-653-independent` | md | record | n/a | TASK-AR-653 Independent Verification |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1061,6 +1071,9 @@ record_count: 1030
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-30-unit-task-ar-654-001-approved.md` | `W4B-2026-07-30-unit-task-ar-654-001-approved` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review — Approved |
+| `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework2.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework2` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review — Round 2 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

@@ -1709,8 +1709,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-654",
+      "expires_at": "2026-07-31T09:20:00+09:00",
+      "fulfilled_at": "2026-07-30T09:20:00+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-654.md",
+      "fulfilled_task_id": "TASK-AR-654",
+      "fulfilled_task_uid": "6472cbce-31a6-46a9-aad7-f374b7ddf1f3",
+      "initiative_id": "INIT-AR-PROJECT-MERGE-GOVERNANCE",
+      "kind": "task",
+      "owner_id": "codex-root",
+      "reason": "work registration TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "reservation_group_id": "RES-20260730-092000-14f7e099",
+      "reservation_id": "RES-20260730-092000-14f7e099-01",
+      "reserved_at": "2026-07-30T09:20:00+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-30T07:45:00+09:00"
+  "updated_at": "2026-07-30T09:20:00+09:00"
 }

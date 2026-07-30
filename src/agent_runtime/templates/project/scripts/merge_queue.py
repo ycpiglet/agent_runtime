@@ -6,8 +6,9 @@ joins create rebase races and shared-SSoT regeneration contention
 flow (PRs #45-#53) as a single-integrator serial queue:
 
   enqueue -> [per entry] fetch -> rebase onto the integration base -> narrow
-  verification -> merge (local mode) or print PR commands (--pr-mode) -> next
-  entry -> regenerate the board once per processed batch.
+  verification -> base-owned required gates -> merge (local mode) or print PR
+  commands (--pr-mode) -> next entry -> regenerate the board once per
+  processed batch.
 
 Queue state lives in the primary checkout at
 ``agents/runtime/merge_queue/queue.json`` (schema
@@ -23,12 +24,16 @@ Safety invariants:
   - queue JSON is flushed and atomically replaced while that lock is held;
   - declared task dependencies are validated and topologically ordered before
     any branch is rebased or merged;
+  - optional ``agents/host/MERGE-GATES.json`` policy is bound at enqueue,
+    revalidated from the integration base, and cannot be weakened by a worker
+    branch or an enqueue-time ``--verify`` override;
   - never force-pushes; never deletes branches;
   - failed rebases/merges are aborted and the work tree is restored;
   - ``--pr-mode`` performs no remote merge: it pushes the rebased branch only
     when the push is a plain fast-forward/new ref and PRINTS the ``gh``
     commands for the orchestrator instead of executing them;
-  - ``--dry-run`` mutates nothing (no git commands, no queue writes).
+  - ``--dry-run`` mutates nothing (read-only git inspection and no queue
+    writes).
 
 Usage:
   python scripts/merge_queue.py enqueue --branch B --task-id T
@@ -46,6 +51,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fnmatch
+import hashlib
 import heapq
 import json
 import math
@@ -63,7 +70,9 @@ from typing import Any, BinaryIO, Iterator
 ROOT = Path(__file__).resolve().parent.parent
 QUEUE_REL = "agents/runtime/merge_queue/queue.json"
 FEEDBACK_DIR_REL = "agents/runtime/merge_queue"
+MERGE_GATES_REL = "agents/host/MERGE-GATES.json"
 SCHEMA = "agent-runtime-merge-queue/v1"
+MERGE_GATES_SCHEMA = "agent-runtime-merge-gates/v1"
 DEFAULT_BASE = "origin/main"
 DEFAULT_VERIFY_CMD = "python scripts/owner_governance_gate.py"
 DEFAULT_REGEN_CMD = "python scripts/backlog_board.py --write"
@@ -82,6 +91,9 @@ DEFAULT_LOCK_TIMEOUT_SECONDS = 10.0
 LOCK_POLL_SECONDS = 0.05
 LOCK_FILENAME = "agent-runtime-merge-queue.lock"
 DEPENDENCY_SUCCESS_STATUSES = {"merged"}
+GATE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+GATE_PLACEHOLDER_RE = re.compile(r"\{([^{}]+)\}")
+ALLOWED_GATE_PLACEHOLDERS = {"task_id", "branch", "base"}
 
 
 class MergeQueueError(Exception):
@@ -90,6 +102,10 @@ class MergeQueueError(Exception):
 
 class CommandTimedOut(MergeQueueError):
     """A bounded subprocess exceeded the configured timeout."""
+
+
+class CommandLaunchFailed(MergeQueueError):
+    """A configured subprocess could not be started."""
 
 
 def _command_timeout_seconds() -> float:
@@ -195,8 +211,9 @@ def new_entry(
     claim_id: str = "",
     verify_cmds: list[str] | None = None,
     depends_on_task_ids: list[str] | None = None,
+    required_gate_policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    entry = {
         "branch": branch,
         "task_id": task_id,
         "claim_id": claim_id,
@@ -207,6 +224,11 @@ def new_entry(
         "failure_reason": "",
         "processed_at": "",
     }
+    policy = required_gate_policy or _empty_merge_gate_policy()
+    if policy["gates"]:
+        entry["required_gate_policy_digest"] = merge_gate_policy_digest(policy)
+        entry["required_gate_ids"] = [gate["id"] for gate in policy["gates"]]
+    return entry
 
 
 def _git(root: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -282,6 +304,239 @@ def shared_state_root(root: Path) -> Path:
         break
     raise MergeQueueError(
         f"primary worktree is unavailable for shared merge queue state: {root}"
+    )
+
+
+def _empty_merge_gate_policy() -> dict[str, Any]:
+    return {
+        "schema": MERGE_GATES_SCHEMA,
+        "protected_paths": [],
+        "gates": [],
+    }
+
+
+def _validate_gate_patterns(gate_id: str, field: str, raw: Any) -> list[str]:
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise MergeQueueError(
+            f"{MERGE_GATES_REL}: gate {gate_id!r} {field} must be a list"
+        )
+    patterns: list[str] = []
+    for value in raw:
+        if not isinstance(value, str) or not value.strip():
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} {field} entries "
+                "must be non-empty strings"
+            )
+        pattern = value.strip()
+        path = Path(pattern)
+        if path.is_absolute() or ".." in path.parts or "\\" in pattern:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} has unsafe {field} "
+                f"pattern {pattern!r}"
+            )
+        if pattern not in patterns:
+            patterns.append(pattern)
+    return patterns
+
+
+def normalize_merge_gate_policy(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise MergeQueueError(f"{MERGE_GATES_REL}: policy must be a JSON object")
+    if str(payload.get("schema") or "") != MERGE_GATES_SCHEMA:
+        raise MergeQueueError(
+            f"{MERGE_GATES_REL}: unexpected schema "
+            f"(want {MERGE_GATES_SCHEMA})"
+        )
+    raw_gates = payload.get("gates")
+    if not isinstance(raw_gates, list):
+        raise MergeQueueError(f"{MERGE_GATES_REL}: gates must be a list")
+    protected_paths: list[str] = []
+    if raw_gates:
+        protected_paths = _validate_gate_patterns(
+            "policy", "protected_paths", payload.get("protected_paths")
+        )
+        if not protected_paths:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: protected_paths must be a non-empty list "
+                "when gates are configured"
+            )
+        if MERGE_GATES_REL not in protected_paths:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: protected_paths must include "
+                f"{MERGE_GATES_REL!r}"
+            )
+
+    gates: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for index, raw_gate in enumerate(raw_gates, start=1):
+        if not isinstance(raw_gate, dict):
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate #{index} must be a JSON object"
+            )
+        gate_id = str(raw_gate.get("id") or "").strip()
+        if not GATE_ID_RE.fullmatch(gate_id):
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate #{index} has invalid id {gate_id!r}"
+            )
+        if gate_id in seen_ids:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: duplicate gate id {gate_id!r}"
+            )
+        seen_ids.add(gate_id)
+
+        command = raw_gate.get("command")
+        if not isinstance(command, str) or not command.strip():
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} command must be "
+                "a non-empty string"
+            )
+        command = command.strip()
+        try:
+            argv = _split_command(command)
+        except ValueError as exc:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} command cannot be "
+                f"parsed: {exc}"
+            ) from exc
+        if not argv:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} command is empty"
+            )
+        placeholders = set(GATE_PLACEHOLDER_RE.findall(command))
+        unknown = sorted(placeholders - ALLOWED_GATE_PLACEHOLDERS)
+        if unknown:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: gate {gate_id!r} uses unknown "
+                f"placeholder(s): {', '.join(unknown)}"
+            )
+
+        gates.append(
+            {
+                "id": gate_id,
+                "command": command,
+                "include_paths": _validate_gate_patterns(
+                    gate_id, "include_paths", raw_gate.get("include_paths")
+                ),
+                "exclude_paths": _validate_gate_patterns(
+                    gate_id, "exclude_paths", raw_gate.get("exclude_paths")
+                ),
+            }
+        )
+    return {
+        "schema": MERGE_GATES_SCHEMA,
+        "protected_paths": protected_paths,
+        "gates": gates,
+    }
+
+
+def _parse_merge_gate_policy(text: str) -> dict[str, Any]:
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise MergeQueueError(
+            f"{MERGE_GATES_REL}: invalid JSON ({exc})"
+        ) from exc
+    return normalize_merge_gate_policy(payload)
+
+
+def load_merge_gate_policy(root: Path) -> dict[str, Any]:
+    path = shared_state_root(root) / MERGE_GATES_REL
+    if not path.exists():
+        return _empty_merge_gate_policy()
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise MergeQueueError(f"{MERGE_GATES_REL}: unreadable ({exc})") from exc
+    return _parse_merge_gate_policy(text)
+
+
+def load_merge_gate_policy_from_ref(root: Path, ref: str) -> dict[str, Any]:
+    if not _git_ok(root, "rev-parse", "--verify", "--quiet", ref):
+        raise MergeQueueError(
+            f"required-gate policy base ref does not resolve: {ref}"
+        )
+    object_ref = f"{ref}:{MERGE_GATES_REL}"
+    if not _git_ok(root, "cat-file", "-e", object_ref):
+        return _empty_merge_gate_policy()
+    result = _git(root, "show", object_ref, check=False)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise MergeQueueError(
+            f"required-gate policy cannot be read from {ref}: {detail}"
+        )
+    return _parse_merge_gate_policy(result.stdout or "")
+
+
+def merge_gate_policy_digest(policy: dict[str, Any]) -> str:
+    normalized = normalize_merge_gate_policy(policy)
+    encoded = json.dumps(
+        normalized,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_entry_gate_policy(
+    entry: dict[str, Any], policy: dict[str, Any]
+) -> None:
+    gates = policy["gates"]
+    expected_digest = merge_gate_policy_digest(policy) if gates else ""
+    expected_ids = [gate["id"] for gate in gates]
+    bound_digest = str(entry.get("required_gate_policy_digest") or "")
+    bound_ids = entry.get("required_gate_ids")
+
+    if not gates and not bound_digest and bound_ids in (None, []):
+        return
+    task_id = str(entry.get("task_id") or "?")
+    if gates and (not bound_digest or not isinstance(bound_ids, list)):
+        raise MergeQueueError(
+            f"required-gate policy is not bound to {task_id}; remove and "
+            "re-enqueue the branch"
+        )
+    if bound_digest != expected_digest or bound_ids != expected_ids:
+        raise MergeQueueError(
+            f"required-gate policy drift for {task_id}; remove and re-enqueue "
+            "the branch against the current integration policy"
+        )
+
+
+def _path_matches(path: str, pattern: str) -> bool:
+    return fnmatch.fnmatchcase(path, pattern)
+
+
+def gate_applies(gate: dict[str, Any], changed_paths: list[str]) -> bool:
+    remaining = [
+        path
+        for path in changed_paths
+        if not any(
+            _path_matches(path, pattern)
+            for pattern in gate.get("exclude_paths", [])
+        )
+    ]
+    if not remaining:
+        return False
+    includes = gate.get("include_paths", [])
+    if not includes:
+        return True
+    return any(
+        _path_matches(path, pattern)
+        for path in remaining
+        for pattern in includes
+    )
+
+
+def protected_path_changes(
+    policy: dict[str, Any], changed_paths: list[str]
+) -> list[str]:
+    patterns = policy.get("protected_paths", [])
+    return sorted(
+        path
+        for path in changed_paths
+        if any(_path_matches(path, pattern) for pattern in patterns)
     )
 
 
@@ -395,10 +650,11 @@ def _split_command(command: str) -> list[str]:
     return argv
 
 
-def _run_command(root: Path, command: str) -> subprocess.CompletedProcess[str]:
-    argv = _split_command(command)
+def _run_argv(
+    root: Path, argv: list[str], display_command: str
+) -> subprocess.CompletedProcess[str]:
     if not argv:
-        raise MergeQueueError(f"empty command: {command!r}")
+        raise MergeQueueError(f"empty command: {display_command!r}")
     timeout = _command_timeout_seconds()
     try:
         return subprocess.run(
@@ -412,7 +668,60 @@ def _run_command(root: Path, command: str) -> subprocess.CompletedProcess[str]:
             timeout=timeout,
         )
     except subprocess.TimeoutExpired as exc:
-        raise CommandTimedOut(f"{command} exceeded {timeout}s") from exc
+        raise CommandTimedOut(f"{display_command} exceeded {timeout}s") from exc
+    except OSError as exc:
+        raise CommandLaunchFailed(
+            f"{display_command} could not start: {exc}"
+        ) from exc
+
+
+def _run_command(root: Path, command: str) -> subprocess.CompletedProcess[str]:
+    return _run_argv(root, _split_command(command), command)
+
+
+def _required_gate_argv(
+    gate: dict[str, Any],
+    *,
+    task_id: str,
+    branch: str,
+    base: str,
+) -> list[str]:
+    values = {
+        "task_id": task_id,
+        "branch": branch,
+        "base": base,
+    }
+    rendered: list[str] = []
+    for argument in _split_command(str(gate["command"])):
+        for placeholder, value in values.items():
+            argument = argument.replace(f"{{{placeholder}}}", value)
+        rendered.append(argument)
+    return rendered
+
+
+def changed_paths(root: Path, base: str, head: str = "HEAD") -> list[str]:
+    result = _git(
+        root,
+        "diff",
+        "--name-only",
+        "-z",
+        "--no-renames",
+        "--diff-filter=ACDMRTUXB",
+        f"{base}...{head}",
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise MergeQueueError(
+            f"required-gate diff cannot be computed for {base}...{head}: {detail}"
+        )
+    return sorted(
+        {
+            path
+            for path in (result.stdout or "").split("\0")
+            if path
+        }
+    )
 
 
 def _output_tail(result: subprocess.CompletedProcess[str]) -> str:
@@ -442,6 +751,7 @@ def write_feedback(
     reason: str,
     output_tail: str,
     base_ref: str,
+    required_gates: list[dict[str, Any]] | None = None,
 ) -> Path:
     path = feedback_path(root, str(entry["branch"]))
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -470,6 +780,11 @@ def write_feedback(
         "2. Re-run the narrow verification until it passes:",
     ]
     lines.extend(f"   {cmd}" for cmd in verify_cmds)
+    if required_gates:
+        lines.append("   Required host gates (cannot be overridden at enqueue):")
+        lines.extend(
+            f"   [{gate['id']}] {gate['command']}" for gate in required_gates
+        )
     lines.extend(
         [
             "3. Re-enqueue the fixed branch:",
@@ -540,6 +855,7 @@ class ProcessContext:
         # merges happen remotely, so the remote base ref is the target.
         self.rebase_target = base if pr_mode else self.integration_branch
         self.start_branch = ""
+        self.required_gate_policy = _empty_merge_gate_policy()
 
     def preflight(self) -> None:
         if not _git_ok(self.root, "rev-parse", "--is-inside-work-tree"):
@@ -596,6 +912,26 @@ class ProcessContext:
                 )
 
 
+def dry_run_policy_ref(root: Path, ctx: ProcessContext) -> str:
+    """Resolve the ref that local preflight would use, without mutating git."""
+
+    if ctx.pr_mode:
+        return ctx.rebase_target
+    branch = ctx.integration_branch
+    if not _branch_exists(root, branch):
+        return ctx.base
+    if not ctx.remote:
+        return branch
+    if _git_ok(root, "merge-base", "--is-ancestor", branch, ctx.base):
+        return ctx.base
+    if _git_ok(root, "merge-base", "--is-ancestor", ctx.base, branch):
+        return branch
+    raise MergeQueueError(
+        f"integration branch {branch!r} diverged from {ctx.base!r}; "
+        "resolve manually before processing the queue"
+    )
+
+
 def _fail_entry(
     ctx: ProcessContext,
     root: Path,
@@ -609,7 +945,15 @@ def _fail_entry(
     entry["failure_reason"] = reason
     entry["processed_at"] = _now_iso()
     save_queue(root, queue)
-    path = write_feedback(root, entry, stage, reason, output_tail, ctx.rebase_target)
+    path = write_feedback(
+        root,
+        entry,
+        stage,
+        reason,
+        output_tail,
+        ctx.rebase_target,
+        ctx.required_gate_policy["gates"],
+    )
     _say(f"FAILED {entry['branch']} at {stage}: {reason}")
     _say(f"feedback written: {path}")
 
@@ -693,6 +1037,21 @@ def _process_entry(
         _fail_entry(ctx, root, queue, entry, "rebase", reason, _output_tail(rebase))
         return False
 
+    diff_paths = changed_paths(root, ctx.rebase_target)
+    protected_changes = protected_path_changes(
+        ctx.required_gate_policy, diff_paths
+    )
+    if protected_changes:
+        _restore_worktree(root, ctx.start_branch)
+        reason = (
+            "required-gate-protected-path-modified: gate control files are "
+            "owned by the integration base; update them through an "
+            "owner-controlled policy change, then re-enqueue: "
+            + ", ".join(protected_changes)
+        )
+        _fail_entry(ctx, root, queue, entry, "required-gate-integrity", reason)
+        return False
+
     entry["status"] = "testing"
     save_queue(root, queue)
     verify_cmds = entry.get("narrow_verification_cmds") or [DEFAULT_VERIFY_CMD]
@@ -703,6 +1062,48 @@ def _process_entry(
             _restore_worktree(root, ctx.start_branch)
             reason = f"verification-failed: {command} (exit {result.returncode})"
             _fail_entry(ctx, root, queue, entry, "verify", reason, _output_tail(result))
+            return False
+
+    for gate in ctx.required_gate_policy["gates"]:
+        gate_id = str(gate["id"])
+        if not gate_applies(gate, diff_paths):
+            _say(f"  required gate: {gate_id} (skipped: path filters)")
+            continue
+        command = str(gate["command"])
+        argv = _required_gate_argv(
+            gate,
+            task_id=str(entry.get("task_id") or ""),
+            branch=branch,
+            base=ctx.rebase_target,
+        )
+        _say(f"  required gate: {gate_id}: {command}")
+        try:
+            result = _run_argv(root, argv, command)
+        except CommandTimedOut as exc:
+            _restore_worktree(root, ctx.start_branch)
+            reason = f"required-gate-timed-out:{gate_id}: {exc}"
+            _fail_entry(ctx, root, queue, entry, "required-gate", reason)
+            return False
+        except CommandLaunchFailed as exc:
+            _restore_worktree(root, ctx.start_branch)
+            reason = f"required-gate-launch-failed:{gate_id}: {exc}"
+            _fail_entry(ctx, root, queue, entry, "required-gate", reason)
+            return False
+        if result.returncode != 0:
+            _restore_worktree(root, ctx.start_branch)
+            reason = (
+                f"required-gate-failed:{gate_id}: {command} "
+                f"(exit {result.returncode})"
+            )
+            _fail_entry(
+                ctx,
+                root,
+                queue,
+                entry,
+                "required-gate",
+                reason,
+                _output_tail(result),
+            )
             return False
 
     entry["status"] = "merging"
@@ -888,6 +1289,7 @@ def dependency_block_reason(
 def cmd_enqueue(args: argparse.Namespace) -> int:
     root = args.root
     queue = load_queue(root)
+    required_policy = load_merge_gate_policy(root)
     branch = args.branch.strip()
     if not branch:
         _say("ERROR --branch must not be empty")
@@ -920,14 +1322,17 @@ def cmd_enqueue(args: argparse.Namespace) -> int:
         args.claim_id.strip(),
         args.verify,
         dependencies,
+        required_policy,
     )
     queue["entries"].append(entry)
     save_queue(root, queue)
     verify_note = ", ".join(entry["narrow_verification_cmds"]) or f"default: {DEFAULT_VERIFY_CMD}"
     dependency_note = ", ".join(dependencies) or "none"
+    required_note = ", ".join(entry.get("required_gate_ids", [])) or "none"
     _say(
         f"enqueued {branch} ({entry['task_id']}) "
-        f"depends_on=[{dependency_note}] verify=[{verify_note}]"
+        f"depends_on=[{dependency_note}] verify=[{verify_note}] "
+        f"required_gates=[{required_note}]"
     )
     return 0
 
@@ -950,10 +1355,11 @@ def cmd_list(args: argparse.Namespace) -> int:
         elif entry.get("processed_at"):
             extra = f" processed={entry['processed_at']}"
         dependencies = ",".join(_depends_on_task_ids(entry)) or "-"
+        required_gates = ",".join(entry.get("required_gate_ids", [])) or "-"
         print(
             f"  {index}. [{status:<8}] branch={entry.get('branch', '?')} "
             f"task={entry.get('task_id', '?')} enqueued={entry.get('enqueued_at', '?')}"
-            f" depends_on={dependencies}{extra}"
+            f" depends_on={dependencies} required_gates={required_gates}{extra}"
         )
     return 0
 
@@ -999,6 +1405,17 @@ def cmd_process(args: argparse.Namespace) -> int:
             )
 
     if args.dry_run:
+        dry_ctx = ProcessContext(
+            root,
+            args.base,
+            args.integration_branch,
+            args.pr_mode,
+            args.regen_cmd,
+        )
+        policy_ref = dry_run_policy_ref(root, dry_ctx)
+        required_policy = load_merge_gate_policy_from_ref(root, policy_ref)
+        for entry in pending:
+            validate_entry_gate_policy(entry, required_policy)
         mode = "pr" if args.pr_mode else "local"
         _say(
             f"dry-run: would process {len(pending)} entr"
@@ -1007,9 +1424,26 @@ def cmd_process(args: argparse.Namespace) -> int:
         )
         for index, entry in enumerate(pending, start=1):
             cmds = entry.get("narrow_verification_cmds") or [DEFAULT_VERIFY_CMD]
+            diff_paths = (
+                changed_paths(root, policy_ref, str(entry.get("branch") or ""))
+                if required_policy["gates"]
+                else []
+            )
+            applied = [
+                gate["id"]
+                for gate in required_policy["gates"]
+                if gate_applies(gate, diff_paths)
+            ]
+            skipped = [
+                gate["id"]
+                for gate in required_policy["gates"]
+                if gate["id"] not in applied
+            ]
             _say(
                 f"  {index}. {entry.get('branch')} ({entry.get('task_id')}) "
-                f"verify=[{', '.join(cmds)}]"
+                f"verify=[{', '.join(cmds)}] "
+                f"required=[{', '.join(applied) or '-'}] "
+                f"skipped=[{', '.join(skipped) or '-'}]"
             )
         _say(f"  then board regen once: {args.regen_cmd}")
         return 0
@@ -1020,6 +1454,11 @@ def cmd_process(args: argparse.Namespace) -> int:
     merged = 0
     failed = 0
     try:
+        ctx.required_gate_policy = load_merge_gate_policy_from_ref(
+            root, ctx.rebase_target
+        )
+        for entry in pending:
+            validate_entry_gate_policy(entry, ctx.required_gate_policy)
         for entry in pending:
             blocked = dependency_block_reason(queue, entry)
             if blocked:

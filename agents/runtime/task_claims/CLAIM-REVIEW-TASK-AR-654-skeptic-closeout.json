@@ -1,0 +1,33 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-654-skeptic-closeout",
+  "task_id": "REVIEW-TASK-AR-654-skeptic",
+  "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "active_scope": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "agent_role": "skeptic",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "skeptic-CLAIM-REVIEW-TASK-AR-654-skeptic-closeout",
+  "display_name": "skeptic@review",
+  "mode": "review",
+  "status": "released",
+  "status_text": "Additive skeptic adversarial review pass for TASK-AR-654 (closeout; high-risk: cross_cutting)",
+  "claimed_at": "2026-07-30T10:12:31+09:00",
+  "last_heartbeat": "2026-07-30T10:14:27+09:00",
+  "updated_at": "2026-07-30T10:14:27+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "high-risk",
+    "review-trigger:closeout",
+    "cross_cutting"
+  ],
+  "overlay": true,
+  "parent_task_id": "TASK-AR-654",
+  "parent_task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-skeptic-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-skeptic-closeout.log.md",
+  "released_at": "2026-07-30T10:14:27+09:00",
+  "verified_by": "qa-20260730-094300-task-ar-654-w4b",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-654-001-approved.md"
+}
