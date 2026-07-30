@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 import shutil
 import subprocess
 import sys
-import json
 import time
 from pathlib import Path
 
@@ -41,6 +42,17 @@ def _host_from_fixture(tmp_path: Path) -> Path:
     host = tmp_path / "host"
     shutil.copytree(REPO_ROOT / "tests" / "fixtures" / "host", host)
     return host
+
+
+def _canonical_digest(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
 
 
 def _write_plan_snapshot(host: Path, taskset_id: str) -> None:
@@ -552,7 +564,28 @@ def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
     )
     authorization = host / "agents/lead_engineer/tasks/TASK-SCRIBE.md"
     authorization.parent.mkdir(parents=True, exist_ok=True)
-    authorization.write_text("# Authorized cleanup\n", encoding="utf-8")
+    authorization_template = (
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-SCRIBE\n"
+        "work_id: TASK-SCRIBE\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "scribe_authorization: cleanup\n"
+        "scribe_authorized_by: lead-engineer-fixture\n"
+        "scribe_authorized_role: lead-engineer\n"
+        "scribe_source_binding_digest: {source_digest}\n"
+        "scribe_cleanup_plan_digest: {plan_digest}\n"
+        "---\n\n"
+        "# Authorized Scribe cleanup\n"
+    )
+    authorization.write_text(
+        authorization_template.format(
+            source_digest="0" * 64,
+            plan_digest="0" * 64,
+        ),
+        encoding="utf-8",
+    )
     _run(
         [
             PYTHON,
@@ -566,6 +599,25 @@ def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
         ],
         cwd=host,
         env=env,
+    )
+    projection_path = host / "agents/project/state/SCRIBE-PROJECTION.json"
+    baseline = json.loads(projection_path.read_text(encoding="utf-8"))
+    before_sources = [
+        {
+            "adapter": item["adapter"],
+            "path": item["path"],
+            "present": item["present"],
+            "digest": item["digest"],
+            "hot_count": item["hot_count"],
+        }
+        for item in baseline["sources"]
+    ]
+    authorization.write_text(
+        authorization_template.format(
+            source_digest=_canonical_digest(before_sources),
+            plan_digest=baseline["cleanup_plan"]["plan_digest"],
+        ),
+        encoding="utf-8",
     )
     source.write_text(
         "# State\n" + "".join(f"- active {index}\n" for index in range(5, 16)),
@@ -590,9 +642,7 @@ def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
     )
     payload = json.loads(recorded.stdout)
     projection = json.loads(
-        (host / "agents/project/state/SCRIBE-PROJECTION.json").read_text(
-            encoding="utf-8"
-        )
+        projection_path.read_text(encoding="utf-8")
     )
 
     assert payload["cleanup_outcome"]["status"] == "verified_reduction"

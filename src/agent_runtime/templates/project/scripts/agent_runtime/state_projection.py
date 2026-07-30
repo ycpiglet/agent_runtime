@@ -23,6 +23,7 @@ PROJECTION_SCHEMA = "agent-runtime-scribe-projection/v1"
 EVALUATION_SCHEMA = "agent-runtime-scribe-evaluation/v1"
 CLEANUP_PLAN_SCHEMA = "agent-runtime-scribe-cleanup-plan/v1"
 CLEANUP_RECEIPT_SCHEMA = "agent-runtime-scribe-cleanup-receipt/v1"
+OWNER_DECISION_SCHEMA = "agent-runtime-scribe-owner-decision/v1"
 DEFAULT_PROJECTION_PATH = _config.DEFAULT_STATE_PROJECTION
 CONVENTIONAL_SOURCE_PATHS = (
     "agents/lead_engineer/STATUS.md",
@@ -109,6 +110,31 @@ _ACTIVE_WORK_STATUSES = {
     "verification",
     "waiting_review",
     "working",
+}
+_CLEANUP_AUTHORIZED_ROLES = {"lead-engineer", "doc-steward", "owner"}
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_TASK_AUTHORIZATION_FIELDS = {
+    "schema_version",
+    "id",
+    "work_id",
+    "kind",
+    "status",
+    "scribe_authorization",
+    "scribe_authorized_by",
+    "scribe_authorized_role",
+    "scribe_source_binding_digest",
+    "scribe_cleanup_plan_digest",
+}
+_OWNER_DECISION_FIELDS = {
+    "schema",
+    "decision",
+    "work_id",
+    "authorization_ref",
+    "source_binding_digest",
+    "cleanup_plan_digest",
+    "approved_by",
+    "approver_role",
+    "decided_at",
 }
 
 
@@ -1042,6 +1068,245 @@ def _receipt_sources(sources: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _validated_receipt_sources(
+    value: object,
+    *,
+    label: str,
+) -> tuple[list[dict[str, Any]], int]:
+    if not isinstance(value, list) or not value or len(value) > MAX_SOURCES:
+        raise StateProjectionError(
+            f"{label} must contain 1 to {MAX_SOURCES} source bindings"
+        )
+    rows: list[dict[str, Any]] = []
+    identities: set[tuple[str, str]] = set()
+    hot_count = 0
+    for index, source in enumerate(value):
+        if not isinstance(source, dict):
+            raise StateProjectionError(f"{label}[{index}] must be an object")
+        adapter = source.get("adapter")
+        path = source.get("path")
+        present = source.get("present")
+        digest = source.get("digest")
+        source_hot = source.get("hot_count")
+        if (
+            not isinstance(adapter, str)
+            or not adapter.strip()
+            or len(adapter) > 80
+        ):
+            raise StateProjectionError(f"{label}[{index}] adapter is invalid")
+        if (
+            not isinstance(path, str)
+            or not path
+            or len(path) > 512
+            or "\\" in path
+            or Path(path).is_absolute()
+            or any(part in {"", ".", ".."} for part in Path(path).parts)
+        ):
+            raise StateProjectionError(f"{label}[{index}] path is invalid")
+        if not isinstance(present, bool):
+            raise StateProjectionError(f"{label}[{index}] presence is invalid")
+        identity = (adapter, path)
+        if identity in identities:
+            raise StateProjectionError(f"{label}[{index}] identity is duplicated")
+        identities.add(identity)
+        if present:
+            if not isinstance(digest, str) or _SHA256_RE.fullmatch(digest) is None:
+                raise StateProjectionError(f"{label}[{index}] digest is invalid")
+            if (
+                isinstance(source_hot, bool)
+                or not isinstance(source_hot, int)
+                or source_hot < 0
+            ):
+                raise StateProjectionError(f"{label}[{index}] hot count is invalid")
+            hot_count += source_hot
+        elif digest is not None or source_hot is not None:
+            raise StateProjectionError(
+                f"{label}[{index}] absent source carries digest or hot count"
+            )
+        rows.append(
+            {
+                "adapter": adapter,
+                "path": path,
+                "present": present,
+                "digest": digest,
+                "hot_count": source_hot,
+            }
+        )
+    return rows, hot_count
+
+
+def _source_binding_digest(sources: list[dict[str, Any]]) -> str:
+    return _canonical_digest(sources)
+
+
+def _validated_cleanup_plan(
+    value: object,
+    *,
+    sources: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise StateProjectionError("baseline cleanup plan must be an object")
+    core_fields = {
+        "schema",
+        "active_work_digest",
+        "source_fingerprints",
+        "candidates",
+        "excluded_reason_counts",
+    }
+    expected_fields = {
+        *core_fields,
+        "status",
+        "candidate_count",
+        "excluded_count",
+        "plan_digest",
+    }
+    if set(value) != expected_fields:
+        raise StateProjectionError("baseline cleanup plan fields are invalid")
+    if value.get("schema") != CLEANUP_PLAN_SCHEMA:
+        raise StateProjectionError("baseline cleanup plan schema is invalid")
+    active_digest = value.get("active_work_digest")
+    if not isinstance(active_digest, str) or _SHA256_RE.fullmatch(active_digest) is None:
+        raise StateProjectionError(
+            "baseline cleanup plan active-work digest is invalid"
+        )
+    expected_fingerprints = [
+        {
+            "adapter": source["adapter"],
+            "path": source["path"],
+            "present": source["present"],
+            "digest": source["digest"],
+        }
+        for source in sources
+    ]
+    if value.get("source_fingerprints") != expected_fingerprints:
+        raise StateProjectionError(
+            "baseline cleanup plan source fingerprints do not match its sources"
+        )
+    candidates = value.get("candidates")
+    if not isinstance(candidates, list) or len(candidates) > MAX_CLEANUP_CANDIDATES:
+        raise StateProjectionError("baseline cleanup plan candidates are invalid")
+    candidate_fields = {
+        "adapter",
+        "path",
+        "heading",
+        "item",
+        "checklist",
+        "source_order",
+        "reason",
+        "cold_history",
+    }
+    source_identities = {
+        (source["adapter"], source["path"]) for source in sources
+    }
+    for index, candidate in enumerate(candidates):
+        if not isinstance(candidate, dict) or set(candidate) != candidate_fields:
+            raise StateProjectionError(
+                f"baseline cleanup plan candidate {index} is invalid"
+            )
+        if (
+            (candidate.get("adapter"), candidate.get("path"))
+            not in source_identities
+            or not isinstance(candidate.get("heading"), str)
+            or len(candidate["heading"]) > MAX_HEADING_CHARS
+            or not isinstance(candidate.get("item"), str)
+            or len(candidate["item"]) > MAX_ITEM_CHARS
+            or candidate.get("checklist") not in {
+                "none",
+                "unchecked",
+                "checked",
+                "heading",
+            }
+            or isinstance(candidate.get("source_order"), bool)
+            or not isinstance(candidate.get("source_order"), int)
+            or candidate["source_order"] < 0
+            or candidate.get("reason") not in {
+                "completed-record",
+                "outside-hot-window",
+            }
+            or candidate.get("cold_history") is not True
+        ):
+            raise StateProjectionError(
+                f"baseline cleanup plan candidate {index} is invalid"
+            )
+    excluded = value.get("excluded_reason_counts")
+    if (
+        not isinstance(excluded, dict)
+        or any(
+            not isinstance(key, str)
+            or not key
+            or isinstance(count, bool)
+            or not isinstance(count, int)
+            or count < 0
+            for key, count in excluded.items()
+        )
+    ):
+        raise StateProjectionError(
+            "baseline cleanup plan exclusion counts are invalid"
+        )
+    if value.get("candidate_count") != len(candidates):
+        raise StateProjectionError(
+            "baseline cleanup plan candidate count is inconsistent"
+        )
+    if value.get("excluded_count") != sum(excluded.values()):
+        raise StateProjectionError(
+            "baseline cleanup plan excluded count is inconsistent"
+        )
+    status = value.get("status")
+    if status not in {"available", "empty", "blocked_active_overflow"}:
+        raise StateProjectionError("baseline cleanup plan status is invalid")
+    if (status == "available") != bool(candidates):
+        raise StateProjectionError(
+            "baseline cleanup plan status and candidates are inconsistent"
+        )
+    core = {field: value[field] for field in core_fields}
+    if value.get("plan_digest") != _canonical_digest(core):
+        raise StateProjectionError("baseline cleanup plan digest is invalid")
+    return json.loads(json.dumps(value, ensure_ascii=False))
+
+
+def _validated_projection_baseline(
+    payload: dict[str, Any],
+) -> tuple[list[dict[str, Any]], int, dict[str, Any], str]:
+    try:
+        sources, hot_count = _validated_receipt_sources(
+            payload.get("sources"),
+            label="baseline sources",
+        )
+        if payload.get("hot_count") != hot_count:
+            raise StateProjectionError(
+                "baseline top-level hot count does not match source counts"
+            )
+        if payload.get("source_count") != len(sources):
+            raise StateProjectionError(
+                "baseline source count does not match source bindings"
+            )
+        source_debt = payload.get("source_debt")
+        if (
+            not isinstance(source_debt, dict)
+            or source_debt.get("hot_count") != hot_count
+        ):
+            raise StateProjectionError(
+                "baseline source-debt hot count is inconsistent"
+            )
+        plan = _validated_cleanup_plan(
+            payload.get("cleanup_plan"),
+            sources=sources,
+        )
+        active_work = payload.get("active_work")
+        if (
+            not isinstance(active_work, dict)
+            or active_work.get("digest") != plan.get("active_work_digest")
+        ):
+            raise StateProjectionError(
+                "baseline active-work and cleanup-plan bindings disagree"
+            )
+    except StateProjectionError as exc:
+        if str(exc).startswith("baseline"):
+            raise
+        raise StateProjectionError(f"baseline is invalid: {exc}") from exc
+    return sources, hot_count, plan, _source_binding_digest(sources)
+
+
 def _safe_existing_ref(
     root: Path,
     relative: object,
@@ -1060,24 +1325,194 @@ def _safe_existing_ref(
     relative_path = Path(value)
     parts = relative_path.parts
     is_task = (
-        len(parts) >= 4
+        len(parts) == 4
         and parts[:3] == ("agents", "lead_engineer", "tasks")
         and relative_path.suffix.lower() == ".md"
-        and relative_path.name.startswith(("TASK-", "UNIT-TASK-"))
+        and relative_path.name.startswith("TASK-")
+    )
+    is_unit = (
+        len(parts) == 6
+        and parts[:4] == ("agents", "lead_engineer", "tasks", "units")
+        and parts[4].startswith("TASK-")
+        and relative_path.suffix.lower() == ".md"
+        and relative_path.name.startswith("UNIT-TASK-")
     )
     is_owner_record = (
-        len(parts) >= 2
+        len(parts) == 2
         and parts[0] == "reviews"
-        and relative_path.suffix.lower() in {".md", ".json"}
-        and relative_path.name.startswith(
-            ("REVIEW-", "AUDIT-", "RETRO-", "DECISION-")
-        )
+        and relative_path.suffix.lower() == ".json"
+        and relative_path.name.startswith(("DECISION-", "OWNER-DECISION-"))
     )
-    if record_kind == "task_authorization" and not is_task:
+    if record_kind == "task_authorization" and not (is_task or is_unit):
         return ""
-    if record_kind == "owner_decision" and not (is_task or is_owner_record):
+    if record_kind == "owner_decision" and not is_owner_record:
         return ""
     return relative_path.as_posix()
+
+
+def _authority_identity(value: object) -> bool:
+    text = str(value or "").strip()
+    return (
+        bool(text)
+        and len(text) <= 160
+        and redact_text(text, limit=160) == text
+        and not any(character in text for character in "\r\n")
+    )
+
+
+def _authorization_frontmatter(text: str) -> dict[str, str]:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        raise StateProjectionError("TASK authorization frontmatter is missing")
+    values: dict[str, str] = {}
+    closed = False
+    for line in lines[1:]:
+        if line.strip() == "---":
+            closed = True
+            break
+        match = re.match(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)\s*$", line)
+        if not match or match.group(1) not in _TASK_AUTHORIZATION_FIELDS:
+            continue
+        field = match.group(1)
+        if field in values:
+            raise StateProjectionError(
+                f"TASK authorization repeats field {field}"
+            )
+        value = match.group(2).strip()
+        if (
+            len(value) >= 2
+            and value[0] == value[-1]
+            and value[0] in {"'", '"'}
+        ):
+            value = value[1:-1]
+        values[field] = value.strip()
+    if not closed:
+        raise StateProjectionError("TASK authorization frontmatter is unterminated")
+    return values
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise StateProjectionError(f"owner decision repeats field {key}")
+        payload[key] = value
+    return payload
+
+
+def _validate_task_authorization(
+    root: Path,
+    relative: object,
+    *,
+    source_binding_digest: str,
+    cleanup_plan_digest: str,
+) -> tuple[str, str]:
+    ref = _safe_existing_ref(
+        root,
+        relative,
+        record_kind="task_authorization",
+    )
+    if not ref:
+        raise StateProjectionError(
+            "cleanup receipt requires an existing bound TASK authorization"
+        )
+    try:
+        text = _read_bounded_text(
+            _safe_target(root, ref),
+            MAX_ACTIVE_RECORD_BYTES,
+        )
+    except (OSError, UnicodeError, StateProjectionError) as exc:
+        raise StateProjectionError(
+            "cleanup receipt requires an existing bound TASK authorization"
+        ) from exc
+    path = Path(ref)
+    try:
+        fields = _authorization_frontmatter(text)
+    except StateProjectionError as exc:
+        raise StateProjectionError(
+            "cleanup receipt requires an existing bound TASK authorization"
+        ) from exc
+    work_id = fields.get("work_id") or fields.get("id") or ""
+    kind = fields.get("kind", "")
+    expected_kind = "unit" if path.name.startswith("UNIT-TASK-") else "task"
+    if (
+        fields.get("schema_version") != "agent-runtime-work-item/v1"
+        or work_id != path.stem
+        or kind != expected_kind
+        or not _active_status(fields.get("status"))
+        or fields.get("scribe_authorization") != "cleanup"
+        or fields.get("scribe_source_binding_digest")
+        != source_binding_digest
+        or fields.get("scribe_cleanup_plan_digest") != cleanup_plan_digest
+        or fields.get("scribe_authorized_role")
+        not in _CLEANUP_AUTHORIZED_ROLES
+        or not _authority_identity(fields.get("scribe_authorized_by"))
+    ):
+        raise StateProjectionError(
+            "cleanup receipt requires an existing bound TASK authorization"
+        )
+    return ref, work_id
+
+
+def _valid_decided_at(value: object) -> bool:
+    text = str(value or "").strip()
+    try:
+        parsed = datetime.fromisoformat(
+            text[:-1] + "+00:00" if text.endswith("Z") else text
+        )
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
+
+
+def _validate_owner_decision(
+    root: Path,
+    relative: object,
+    *,
+    authorization_ref: str,
+    authorization_work_id: str,
+    source_binding_digest: str,
+    cleanup_plan_digest: str,
+) -> str:
+    ref = _safe_existing_ref(root, relative, record_kind="owner_decision")
+    if not ref:
+        raise StateProjectionError(
+            "cleanup receipt requires a bound owner no-touch decision"
+        )
+    try:
+        payload = json.loads(
+            _read_bounded_text(
+                _safe_target(root, ref),
+                MAX_ACTIVE_RECORD_BYTES,
+            ),
+            object_pairs_hook=_unique_json_object,
+        )
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        StateProjectionError,
+    ) as exc:
+        raise StateProjectionError(
+            "cleanup receipt requires a bound owner no-touch decision"
+        ) from exc
+    if (
+        not isinstance(payload, dict)
+        or set(payload) != _OWNER_DECISION_FIELDS
+        or payload.get("schema") != OWNER_DECISION_SCHEMA
+        or payload.get("decision") != "no_touch"
+        or payload.get("work_id") != authorization_work_id
+        or payload.get("authorization_ref") != authorization_ref
+        or payload.get("source_binding_digest") != source_binding_digest
+        or payload.get("cleanup_plan_digest") != cleanup_plan_digest
+        or payload.get("approver_role") != "owner"
+        or not _authority_identity(payload.get("approved_by"))
+        or not _valid_decided_at(payload.get("decided_at"))
+    ):
+        raise StateProjectionError(
+            "cleanup receipt requires a bound owner no-touch decision"
+        )
+    return ref
 
 
 def _cleanup_outcome(
@@ -1123,30 +1558,96 @@ def _cleanup_outcome(
         errors.append("receipt after-source bindings do not match current sources")
     if receipt.get("resulting_hot_count") != hot_count:
         errors.append("receipt resulting hot count does not match current sources")
-    if receipt.get("active_work_digest") != active_work.get("digest"):
-        errors.append("receipt active-work binding is stale")
-    if not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get("cleanup_plan_digest") or "")):
-        errors.append("receipt cleanup-plan digest is invalid")
-    if not _safe_existing_ref(
-        root,
-        receipt.get("authorization_ref"),
-        record_kind="task_authorization",
+    before_sources: list[dict[str, Any]] = []
+    before_hot = -1
+    source_binding_digest = ""
+    try:
+        before_sources, before_hot = _validated_receipt_sources(
+            receipt.get("before_sources"),
+            label="receipt before sources",
+        )
+        source_binding_digest = _source_binding_digest(before_sources)
+    except StateProjectionError as exc:
+        errors.append(str(exc))
+    if receipt.get("before_hot_count") != before_hot:
+        errors.append("receipt before hot count does not match before sources")
+    if receipt.get("before_source_binding_digest") != source_binding_digest:
+        errors.append("receipt before-source binding digest is invalid")
+
+    before_plan: dict[str, Any] = {}
+    try:
+        before_plan = _validated_cleanup_plan(
+            receipt.get("before_cleanup_plan"),
+            sources=before_sources,
+        )
+    except StateProjectionError as exc:
+        errors.append(str(exc))
+    cleanup_plan_digest = str(receipt.get("cleanup_plan_digest") or "")
+    if (
+        not before_plan
+        or cleanup_plan_digest != before_plan.get("plan_digest")
     ):
-        errors.append("receipt authorization ref is missing or unsafe")
+        errors.append("receipt cleanup-plan digest is invalid")
+    active_digest = active_work.get("digest")
+    if (
+        receipt.get("active_work_digest") != active_digest
+        or before_plan.get("active_work_digest") != active_digest
+    ):
+        errors.append("receipt active-work binding is stale")
+
+    before_identity = [
+        (source["adapter"], source["path"], source["present"])
+        for source in before_sources
+    ]
+    after_identity = [
+        (
+            source.get("adapter"),
+            source.get("path"),
+            source.get("present"),
+        )
+        for source in sources
+    ]
+    if before_identity != after_identity:
+        errors.append("receipt source identities changed across cleanup")
+
+    authorization = ""
+    authorization_work_id = ""
+    try:
+        authorization, authorization_work_id = _validate_task_authorization(
+            root,
+            receipt.get("authorization_ref"),
+            source_binding_digest=source_binding_digest,
+            cleanup_plan_digest=cleanup_plan_digest,
+        )
+    except StateProjectionError as exc:
+        errors.append(str(exc))
+    if receipt.get("authorization_ref") != authorization:
+        errors.append("receipt authorization ref is invalid")
+    if receipt.get("authorization_work_id") != authorization_work_id:
+        errors.append("receipt authorization work identity is invalid")
 
     outcome = str(receipt.get("outcome") or "")
-    before_hot = receipt.get("before_hot_count")
     if outcome == "reduction":
-        if not isinstance(before_hot, int) or before_hot <= hot_count:
+        if before_hot <= hot_count:
             errors.append("reduction receipt did not reduce hot count")
+        if receipt.get("owner_decision_ref") not in {None, ""}:
+            errors.append("reduction receipt must not cite an owner decision")
         status = "verified_reduction"
     elif outcome == "owner_decision":
-        if not _safe_existing_ref(
-            root,
-            receipt.get("owner_decision_ref"),
-            record_kind="owner_decision",
-        ):
-            errors.append("owner decision ref is missing or unsafe")
+        try:
+            owner_decision = _validate_owner_decision(
+                root,
+                receipt.get("owner_decision_ref"),
+                authorization_ref=authorization,
+                authorization_work_id=authorization_work_id,
+                source_binding_digest=source_binding_digest,
+                cleanup_plan_digest=cleanup_plan_digest,
+            )
+        except StateProjectionError as exc:
+            errors.append(str(exc))
+            owner_decision = ""
+        if receipt.get("owner_decision_ref") != owner_decision:
+            errors.append("receipt owner decision ref is invalid")
         status = "owner_decision"
     else:
         errors.append("receipt outcome is unsupported")
@@ -1584,17 +2085,19 @@ def record_cleanup(
         raise StateProjectionError(
             "cleanup receipt requires an existing structurally valid projection"
         )
-    before_sources_raw = before_payload.get("sources")
-    if not isinstance(before_sources_raw, list):
-        raise StateProjectionError("cleanup receipt baseline sources are invalid")
+    (
+        before_sources,
+        before_hot,
+        prior_plan,
+        source_binding_digest,
+    ) = _validated_projection_baseline(before_payload)
     before_identity = [
         (
-            str(source.get("adapter") or ""),
-            str(source.get("path") or ""),
-            source.get("present") is True,
+            source["adapter"],
+            source["path"],
+            source["present"],
         )
-        for source in before_sources_raw
-        if isinstance(source, dict)
+        for source in before_sources
     ]
     after_identity = [
         (
@@ -1609,44 +2112,38 @@ def record_cleanup(
             "cleanup receipt source adapters or paths changed since the baseline"
         )
 
-    authorization = _safe_existing_ref(
+    prior_plan_digest = str(prior_plan["plan_digest"])
+    if (
+        evaluation["active_coverage"]["status"] != "complete"
+        or prior_plan.get("active_work_digest")
+        != evaluation["active_work"].get("digest")
+    ):
+        raise StateProjectionError(
+            "cleanup receipt baseline active-work coverage is incomplete or stale"
+        )
+    authorization, authorization_work_id = _validate_task_authorization(
         root,
         authorization_ref,
-        record_kind="task_authorization",
+        source_binding_digest=source_binding_digest,
+        cleanup_plan_digest=prior_plan_digest,
     )
-    if not authorization:
-        raise StateProjectionError(
-            "cleanup receipt requires an existing safe TASK authorization ref"
-        )
     owner_decision = ""
     if owner_decision_ref:
-        owner_decision = _safe_existing_ref(
+        owner_decision = _validate_owner_decision(
             root,
             owner_decision_ref,
-            record_kind="owner_decision",
+            authorization_ref=authorization,
+            authorization_work_id=authorization_work_id,
+            source_binding_digest=source_binding_digest,
+            cleanup_plan_digest=prior_plan_digest,
         )
-        if not owner_decision:
-            raise StateProjectionError(
-                "cleanup receipt owner decision ref is missing or unsafe"
-            )
 
-    before_hot = before_payload.get("hot_count")
     after_hot = evaluation.get("hot_count")
-    if not isinstance(before_hot, int) or not isinstance(after_hot, int):
+    if not isinstance(after_hot, int):
         raise StateProjectionError("cleanup receipt requires integer hot counts")
     if after_hot >= before_hot and not owner_decision:
         raise StateProjectionError(
             "cleanup must reduce hot count or cite an explicit owner decision"
-        )
-    prior_plan = before_payload.get("cleanup_plan")
-    prior_plan_digest = (
-        str(prior_plan.get("plan_digest") or "")
-        if isinstance(prior_plan, dict)
-        else ""
-    )
-    if not re.fullmatch(r"[0-9a-f]{64}", prior_plan_digest):
-        raise StateProjectionError(
-            "cleanup receipt requires a valid baseline cleanup plan digest"
         )
 
     receipt_core: dict[str, Any] = {
@@ -1654,12 +2151,15 @@ def record_cleanup(
         "recorded_at": _now_text(now),
         "outcome": "owner_decision" if owner_decision else "reduction",
         "authorization_ref": authorization,
+        "authorization_work_id": authorization_work_id,
         "owner_decision_ref": owner_decision or None,
-        "before_sources": _receipt_sources(before_sources_raw),
+        "before_sources": before_sources,
+        "before_source_binding_digest": source_binding_digest,
         "after_sources": _receipt_sources(evaluation["sources"]),
         "before_hot_count": before_hot,
         "resulting_hot_count": after_hot,
         "active_work_digest": evaluation["active_work"]["digest"],
+        "before_cleanup_plan": prior_plan,
         "cleanup_plan_digest": prior_plan_digest,
     }
     receipt = {

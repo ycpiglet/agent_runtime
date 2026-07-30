@@ -75,6 +75,27 @@ receipt를 남긴다. hot count가 줄지 않았다면
 `--owner-decision-ref <repo-relative-owner-record>`가 추가로 필요하다.
 어느 CLI 모드도 canonical host state를 자동 수정하지 않는다.
 
+authorization은 파일명만 TASK처럼 보이는 문서가 아니다. projection을
+생성할 때부터 활성 canonical TASK/UNIT-TASK여야 하며, frontmatter에 아래
+flat fields를 포함한다. source binding digest는 projection `sources`의
+`adapter/path/present/digest/hot_count` 배열에 대한 canonical JSON
+SHA-256이고 plan digest는 projection이 생성한 값을 그대로 사용한다.
+
+```yaml
+scribe_authorization: cleanup
+scribe_authorized_by: <non-secret approver identity>
+scribe_authorized_role: lead-engineer # 또는 doc-steward / owner
+scribe_source_binding_digest: <64 lowercase hex>
+scribe_cleanup_plan_digest: <64 lowercase hex>
+```
+
+no-touch 예외는 TASK authorization으로 대신할 수 없다. `reviews/` 바로
+아래의 `DECISION-*.json` 또는 `OWNER-DECISION-*.json`이 정확히
+`agent-runtime-scribe-owner-decision/v1` schema, `decision: no_touch`,
+authorization의 `work_id`/ref, 같은 source/plan digest, `approved_by`,
+`approver_role: owner`, timezone이 있는 `decided_at`을 모두 결합해야 한다.
+관련 없는 REVIEW/AUDIT/RETRO 파일이나 내용 없는 문서는 권한이 아니다.
+
 ### 2. cadence backstop
 
 - 매 **RETRO/거버넌스 사이클**에 Scribe 단계를 1회 평가한다(이미 워크플로에 존재).

@@ -70,14 +70,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--authorization-ref",
         default="",
-        help="repo-relative existing task or record authorizing --record-cleanup",
+        help=(
+            "repo-relative active TASK/UNIT-TASK whose Scribe authorization "
+            "frontmatter binds the baseline source and cleanup-plan digests"
+        ),
     )
     parser.add_argument(
         "--owner-decision-ref",
         default="",
         help=(
-            "repo-relative existing owner decision permitting no reduction; "
-            "valid only with --record-cleanup"
+            "repo-relative DECISION JSON with explicit owner no-touch schema "
+            "and matching authorization/source/plan bindings; valid only with "
+            "--record-cleanup"
         ),
     )
     parser.add_argument("--now", help="deterministic ISO-8601 projection timestamp")
@@ -133,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
             "  → Refresh the bounded view with "
             "`python scripts/scribe_due.py --write-projection`; "
             "this never cleans canonical source debt. Execute cleanup only "
-            "under an explicit task, then record its outcome with "
+            "under a digest-bound active TASK/UNIT-TASK, then record its outcome with "
             "`--record-cleanup --authorization-ref <repo-relative-path>`."
         )
     return 0
