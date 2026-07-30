@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T03:37:22+09:00
-record_count: 1216
+generated_at: 2026-07-31T03:46:55+09:00
+record_count: 1217
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1216` review and evidence records under `reviews/`.
+- Summary: indexed `1217` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1216` files |
+| Reviews covered | pass | `1217` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1244,6 +1244,7 @@ record_count: 1216
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final` | md | blocked | block | TASK-AR-653 Blank Structure and Unique JSON Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final` | md | blocked | block | TASK-AR-653 Configured Source Integrity Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | blocked | block | TASK-AR-653 Scribe Git Audit Anchor Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final` | md | approved | approve | TASK-AR-653 Invalid Runtime Config Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | blocked | block | TASK-AR-653 Receipt and Authority Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final` | md | blocked | block | TASK-AR-653 Semantic Delta and Exact Identity Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001.md` | `W4B-2026-07-31-unit-task-ar-653-001` | md | blocked | block | TASK-AR-653 Final Independent Implementation W4b |
