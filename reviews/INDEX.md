@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T17:06:01+09:00
-record_count: 1153
+generated_at: 2026-07-30T17:24:13+09:00
+record_count: 1154
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1153` review and evidence records under `reviews/`.
+- Summary: indexed `1154` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1153` files |
+| Reviews covered | pass | `1154` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1182,6 +1182,7 @@ record_count: 1153
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-candidate` | md | blocked | block | W4b Final Candidate - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md` | `W4B-2026-07-30-unit-task-ar-652-001-provider-identity` | md | blocked | block | W4b Provider Identity - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
