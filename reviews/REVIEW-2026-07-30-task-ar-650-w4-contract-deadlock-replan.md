@@ -73,4 +73,3 @@ TASK-AR-650의 마지막 acceptance는 다음 의미로 좁힌다.
 3. fresh independent W4b가 재계획 후보를 검증한다.
 4. 승인된 경우 TASK-AR-650 claim을 정상 release하고 W5/W6를 끝낸다.
 5. 새 operability taskset에서 TASK-AR-652부터 별도 claim과 W4b로 실행한다.
-
