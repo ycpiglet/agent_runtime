@@ -75,7 +75,12 @@ def test_scribe_research_implementation_review_and_audit_use_explicit_policy():
         "scribe": ("scribe", "worker_low"),
         "researcher": ("exploration", "worker_low"),
         "implementer": ("implementation", "worker_low"),
+        "backend": ("implementation", "worker_low"),
+        "uiux": ("implementation", "worker_low"),
+        "ci-cd": ("implementation", "worker_low"),
+        "timeline": ("exploration", "worker_low"),
         "qa-reviewer": ("review", "reviewer_standard"),
+        "beta-tester": ("review", "reviewer_standard"),
         "independent-auditor": ("audit", "reviewer_high"),
     }
 

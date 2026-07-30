@@ -27,6 +27,26 @@ def _low_decision():
     )
 
 
+def test_worker_role_policy_is_mandatory_and_denies_untriggered_high_tier():
+    cfg = worker.WorkerConfig(
+        role="scribe",
+        provider_name="dummy",
+    )
+    implicit = worker._message_routing_decision(cfg, {}, "archive bounded state")
+    assert implicit["role_policy_id"] == "scribe"
+    assert implicit["selected_tier"] == "worker_low"
+
+    explicit_high = worker._message_routing_decision(
+        cfg,
+        {"routing_model": "opus"},
+        "archive bounded state",
+    )
+    assert explicit_high["selected_tier"] == "worker_low"
+    assert explicit_high["routing_status"] == "high_tier_denied"
+    assert explicit_high["high_tier_authorized"] is True
+    assert explicit_high["denied_requested_tier"] == "planner_high"
+
+
 def test_request_configuration_is_not_completion_observation():
     provider = _Provider()
     decision = _low_decision()
@@ -101,14 +121,26 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
         provider_name="claude-agent",
         eval_log_path=tmp_path / "eval.jsonl",
     )
+    baseline = eval_harness.record_execution_receipt(
+        dispatch_id="MSG-2-baseline",
+        task_id="TASK-646",
+        workload_id="WORKLOAD-2",
+        observed_provider="claude",
+        observed_model="claude-opus-4-8",
+        tokens_in=30,
+        tokens_out=10,
+        billed_cost=0.08,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        path=cfg.eval_log_path,
+    )
     meta = {
         "id": "MSG-2",
         "task_id": "TASK-646",
-        "eval_baseline_tokens": "40",
         "eval_baseline_model": "claude-opus-4-8",
-        "eval_baseline_observation_status": "observed",
-        "eval_baseline_billed_cost": "0.08",
-        "eval_baseline_currency": "USD",
+        "eval_baseline_receipt_id": baseline["receipt_id"],
+        "eval_workload_id": "WORKLOAD-2",
     }
     recorded, reason = worker._record_execution_receipt(
         cfg,
@@ -125,10 +157,12 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
     assert recorded is True
     assert reason is None
 
-    rec = eval_harness.read_outcomes(cfg.eval_log_path)[0]
+    records = eval_harness.read_outcomes(cfg.eval_log_path)
+    rec = records[-1]
     assert rec["observed_model"] == "claude-haiku-4-5"
     assert rec["baseline_model"] == "claude-opus-4-8"
-    report = eval_harness.report([rec])
+    assert rec["baseline_reference_status"] == "verified"
+    report = eval_harness.report(records)
     assert report["token_delta"]["saved_tokens"] == 24
     assert report["monetary_delta"]["by_currency"]["USD"][
         "saved_billed_cost"

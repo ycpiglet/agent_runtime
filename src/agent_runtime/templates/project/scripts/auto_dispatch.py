@@ -87,21 +87,17 @@ DEFAULT_MAX_DISPATCHES = 10
 def _routing_decision_for_item(item: dict, instruction: str) -> dict | None:
     context = dict(item.get("context", {}) or {})
     model = item.get("routing_model") or context.get("routing_model") or context.get("model")
-    if not model:
-        return None
-    changed = item.get("routing_changed_files") or context.get("routing_changed_files") or []
-    if changed and not isinstance(changed, list):
-        changed = [str(changed)]
-    try:
-        diff_lines = int(item.get("routing_diff_lines") or context.get("routing_diff_lines") or 0)
-    except (TypeError, ValueError):
-        diff_lines = 0
-    return model_routing.resolve_model(
-        str(model),
-        grade=str(item.get("routing_grade") or context.get("routing_grade") or "Medium"),
-        prompt=str(instruction or ""),
-        changed_files=changed,
-        diff_lines=diff_lines,
+    triggers = (
+        item.get("escalation_triggers")
+        or context.get("escalation_triggers")
+        or item.get("routing_escalation_triggers")
+        or context.get("routing_escalation_triggers")
+        or []
+    )
+    return model_routing.resolve_subagent_tier(
+        str(item.get("role") or context.get("role") or "worker"),
+        requested_tier=str(model or "auto"),
+        escalation_triggers=triggers,
     )
 
 
@@ -118,7 +114,9 @@ def _apply_routing_to_provider(
     route = model_routing.resolve_provider_route(
         provider_name,
         decision["selected_tier"],
-        requested_tier=decision.get("policy_tier"),
+        requested_tier=(
+            decision.get("requested_tier") or decision.get("policy_tier")
+        ),
         baseline_model=baseline_model,
         baseline_reasoning_effort=baseline_reasoning_effort,
     )
@@ -218,6 +216,20 @@ def _claim_id(item: dict) -> str | None:
     return str(value or "").strip() or None
 
 
+def _baseline_receipt_id(item: dict) -> str | None:
+    value = _item_context_value(
+        item,
+        "eval_baseline_receipt_id",
+        "baseline_receipt_id",
+    )
+    return str(value or "").strip() or None
+
+
+def _workload_id(item: dict) -> str | None:
+    value = _item_context_value(item, "eval_workload_id", "workload_id")
+    return str(value or "").strip() or None
+
+
 def _item_task_id(item: dict, dispatch_id: str) -> str:
     value = _item_context_value(item, "task_id")
     task_id = str(value or "").strip()
@@ -302,12 +314,12 @@ def _routing_eval_skip_reason(
         return "model_observation_unavailable"
     if route.get("application_status") != "applied":
         return "routing_not_applied"
+    if route.get("route_changed") is not True:
+        return "route_not_effective"
     if not baseline_model:
         return "baseline_model_unavailable"
     if baseline_observation_status != "observed":
         return "baseline_observation_unavailable"
-    if route.get("route_changed") is not True:
-        return "route_not_effective"
     if observation.get("token_usage_status") != "observed":
         return "token_usage_unavailable"
     if baseline_tokens is None:
@@ -335,23 +347,16 @@ def _record_execution_receipt(
     baseline_model = _eval_baseline_model(item)
     baseline_reasoning = _eval_baseline_reasoning(item)
     baseline_observation = _eval_baseline_observation_status(item)
-    skip_reason = _routing_eval_skip_reason(
-        routing_decision,
-        route,
-        observation,
-        baseline_tokens=baseline,
-        baseline_model=baseline_model,
-        baseline_observation_status=baseline_observation,
-    )
     context = dict(item.get("context", {}) or {})
     baseline_cost, baseline_currency = _eval_baseline_cost(item)
     task_id = _item_task_id(item, dispatch_id)
     try:
-        eval_harness.record_execution_receipt(
+        receipt = eval_harness.record_execution_receipt(
             dispatch_id=dispatch_id,
             task_id=task_id,
             claim_id=_claim_id(item),
             role=role,
+            workload_id=_workload_id(item),
             provider=provider_name,
             execution_surface=(
                 route.get("execution_surface") if route else "provider_worker"
@@ -388,6 +393,7 @@ def _record_execution_receipt(
             ),
             model_changed=route.get("model_changed") if route else None,
             route_changed=route.get("route_changed") if route else None,
+            baseline_receipt_id=_baseline_receipt_id(item),
             baseline_model=baseline_model,
             baseline_reasoning_effort=baseline_reasoning,
             baseline_observation_status=baseline_observation,
@@ -420,6 +426,18 @@ def _record_execution_receipt(
         return False, "duplicate_dispatch_id"
     except eval_harness.ReceiptIntegrityError:
         return False, "receipt_ledger_untrusted"
+    skip_reason = _routing_eval_skip_reason(
+        routing_decision,
+        route,
+        observation,
+        baseline_tokens=receipt.get("baseline_tokens"),
+        baseline_model=receipt.get("baseline_model"),
+        baseline_observation_status=(
+            "observed"
+            if receipt.get("baseline_reference_status") == "verified"
+            else str(receipt.get("baseline_reference_reason") or "unavailable")
+        ),
+    )
     return True, skip_reason
 
 
@@ -612,14 +630,16 @@ def run_bounded_dispatch(
         receipt_path = Path(eval_log_path or eval_harness.EVAL_LOG)
         task_id = _item_task_id(item, dispatch_id)
         try:
-            persistent_preflight = eval_harness.budget_preflight(
+            persistent_preflight = eval_harness.reserve_dispatch_budget(
                 path=receipt_path,
+                root=REPO_ROOT,
                 task_id=task_id,
                 claim_id=_claim_id(item),
                 dispatch_id=dispatch_id,
                 dispatch_ceiling=dispatch_ceiling,
                 task_token_budget=_budget_value(item, "task_token_budget"),
                 claim_token_budget=_budget_value(item, "claim_token_budget"),
+                source="auto_dispatch",
             )
         except eval_harness.ReceiptIntegrityError as exc:
             persistent_preflight = {

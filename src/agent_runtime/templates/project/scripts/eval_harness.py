@@ -20,6 +20,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sys
 import time
 from contextlib import contextmanager
@@ -38,7 +39,16 @@ NEUTRAL_OUTCOME = {"ok", "completed", ""}
 MODEL_TIER = {"haiku": 1, "sonnet": 2, "opus": 3}       # 싼→비싼 (TASK-239 over-route 판정용)
 
 EXECUTION_RECEIPT_SCHEMA = "agent-runtime-execution-receipt/v1"
+BUDGET_RESERVATION_SCHEMA = "agent-runtime-budget-reservation/v1"
 RECEIPT_LOCK_TIMEOUT_SECONDS = 5.0
+ACTIVE_CLAIM_STATUSES = {
+    "assigned",
+    "claimed",
+    "in_progress",
+    "review",
+    "waiting_review",
+    "working",
+}
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -89,6 +99,101 @@ def _exclusive_log_lock(path: Path):
             pass
 
 
+def _validate_ledger_records(records: list[dict], path: Path) -> None:
+    receipt_ids: dict[str, int] = {}
+    reservation_ids: dict[str, int] = {}
+    dispatch_kinds: dict[str, dict[str, int]] = {}
+    reservations: dict[str, dict] = {}
+    receipts: dict[str, dict] = {}
+
+    for index, item in enumerate(records, start=1):
+        schema = str(item.get("schema") or "")
+        dispatch_id = str(item.get("dispatch_id") or "").strip()
+        if schema in {EXECUTION_RECEIPT_SCHEMA, BUDGET_RESERVATION_SCHEMA}:
+            if item.get("immutable") is not True:
+                raise ReceiptIntegrityError(
+                    f"ledger line {index} is not immutable: {path}"
+                )
+            if not dispatch_id or not str(item.get("task_id") or "").strip():
+                raise ReceiptIntegrityError(
+                    f"ledger line {index} lacks dispatch_id/task_id: {path}"
+                )
+
+        if schema == EXECUTION_RECEIPT_SCHEMA:
+            receipt_id = str(item.get("receipt_id") or "").strip()
+            if not receipt_id:
+                raise ReceiptIntegrityError(
+                    f"execution receipt line {index} lacks receipt_id: {path}"
+                )
+            if receipt_id in receipt_ids:
+                raise ReceiptIntegrityError(
+                    f"duplicate receipt_id={receipt_id} at lines "
+                    f"{receipt_ids[receipt_id]} and {index}: {path}"
+                )
+            receipt_ids[receipt_id] = index
+            receipts[dispatch_id] = item
+            kind = "receipt"
+        elif schema == BUDGET_RESERVATION_SCHEMA:
+            reservation_id = str(item.get("reservation_id") or "").strip()
+            if not reservation_id:
+                raise ReceiptIntegrityError(
+                    f"budget reservation line {index} lacks reservation_id: {path}"
+                )
+            if reservation_id in reservation_ids:
+                raise ReceiptIntegrityError(
+                    f"duplicate reservation_id={reservation_id} at lines "
+                    f"{reservation_ids[reservation_id]} and {index}: {path}"
+                )
+            reservation_ids[reservation_id] = index
+            try:
+                reserved_tokens = int(item.get("reserved_tokens"))
+            except (TypeError, ValueError) as exc:
+                raise ReceiptIntegrityError(
+                    f"reservation line {index} has invalid reserved_tokens: {path}"
+                ) from exc
+            if reserved_tokens < 0:
+                raise ReceiptIntegrityError(
+                    f"reservation line {index} has negative reserved_tokens: {path}"
+                )
+            reservations[dispatch_id] = item
+            kind = "reservation"
+        else:
+            kind = "legacy"
+
+        if dispatch_id:
+            kinds = dispatch_kinds.setdefault(dispatch_id, {})
+            if kind in kinds:
+                raise ReceiptIntegrityError(
+                    f"duplicate dispatch_id={dispatch_id} {kind} at lines "
+                    f"{kinds[kind]} and {index}: {path}"
+                )
+            if kind == "legacy" and kinds:
+                raise ReceiptIntegrityError(
+                    f"duplicate dispatch_id={dispatch_id} at line {index}: {path}"
+                )
+            if kind != "legacy" and "legacy" in kinds:
+                raise ReceiptIntegrityError(
+                    f"duplicate dispatch_id={dispatch_id} at line {index}: {path}"
+                )
+            kinds[kind] = index
+
+    for dispatch_id in sorted(set(reservations) & set(receipts)):
+        reservation = reservations[dispatch_id]
+        receipt = receipts[dispatch_id]
+        if str(reservation.get("task_id")) != str(receipt.get("task_id")):
+            raise ReceiptIntegrityError(
+                f"reservation/receipt task mismatch for dispatch_id={dispatch_id}: "
+                f"{path}"
+            )
+        if str(reservation.get("claim_id") or "") != str(
+            receipt.get("claim_id") or ""
+        ):
+            raise ReceiptIntegrityError(
+                f"reservation/receipt claim mismatch for dispatch_id={dispatch_id}: "
+                f"{path}"
+            )
+
+
 def _strict_records(path: Path) -> list[dict]:
     path = Path(path)
     if not path.exists():
@@ -112,7 +217,22 @@ def _strict_records(path: Path) -> list[dict]:
                 f"receipt ledger line {index} is not an object: {path}"
             )
         records.append(value)
+    _validate_ledger_records(records, path)
     return records
+
+
+def _append_records_locked(path: Path, records: list[dict]) -> None:
+    if not records:
+        return
+    with path.open("a", encoding="utf-8", newline="\n") as fh:
+        fh.write(
+            "".join(
+                json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
+                for record in records
+            )
+        )
+        fh.flush()
+        os.fsync(fh.fileno())
 
 
 def _append_record(
@@ -125,16 +245,15 @@ def _append_record(
     with _exclusive_log_lock(path):
         records = _strict_records(path)
         if unique_dispatch_id and any(
-            str(item.get("dispatch_id") or "") == unique_dispatch_id
+            item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+            and str(item.get("dispatch_id") or "") == unique_dispatch_id
             for item in records
         ):
             raise ReceiptConflictError(
                 f"immutable receipt already exists for dispatch_id={unique_dispatch_id}"
             )
-        with path.open("a", encoding="utf-8", newline="\n") as fh:
-            fh.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-            fh.flush()
-            os.fsync(fh.fileno())
+        _validate_ledger_records([*records, record], path)
+        _append_records_locked(path, [record])
     return record
 
 
@@ -153,31 +272,238 @@ def _optional_positive_int(value: int | str | None) -> int | None:
     return parsed if parsed is not None and parsed > 0 else None
 
 
-def cumulative_usage(
+def _safe_record_id(value: str, label: str) -> str:
+    normalized = str(value or "").strip()
+    if not normalized or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", normalized):
+        raise ReceiptIntegrityError(f"invalid {label}: {value!r}")
+    return normalized
+
+
+def _parse_frontmatter_scalar(path: Path, key: str) -> str | None:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise ReceiptIntegrityError(f"budget authority unreadable: {path}") from exc
+    if not text.startswith("---"):
+        return None
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        raise ReceiptIntegrityError(f"budget authority has malformed frontmatter: {path}")
+    pattern = re.compile(rf"^{re.escape(key)}:\s*(.*?)\s*$")
+    for line in parts[1].splitlines():
+        match = pattern.match(line)
+        if match:
+            value = match.group(1).strip()
+            return value if value else None
+    return None
+
+
+def _parse_budget_value(value, key: str) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ReceiptIntegrityError(f"{key} must be a non-negative integer") from exc
+    if parsed < 0:
+        raise ReceiptIntegrityError(f"{key} must be a non-negative integer")
+    return parsed
+
+
+def _budget_authority(
     *,
-    path: Path = EVAL_LOG,
+    root: Path,
     task_id: str,
-    claim_id: str | None = None,
+    claim_id: str | None,
+    task_token_budget,
+    claim_token_budget,
 ) -> dict:
-    """Read durable observed usage for one task and optional claim."""
-    records = _strict_records(Path(path))
-    task_records = [
+    explicit_task = _parse_budget_value(task_token_budget, "task_token_budget")
+    explicit_claim = _parse_budget_value(claim_token_budget, "claim_token_budget")
+    task = str(task_id or "").strip()
+    claim = str(claim_id or "").strip() or None
+    canonical_task = None
+    canonical_claim = None
+    source = "unconfigured"
+    authority_ref = None
+    authority_fingerprint = None
+
+    if claim:
+        safe_claim = _safe_record_id(claim, "claim_id")
+        claim_path = (
+            Path(root)
+            / "agents"
+            / "runtime"
+            / "task_claims"
+            / f"{safe_claim}.json"
+        )
+        if claim_path.is_file():
+            try:
+                payload = json.loads(claim_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                raise ReceiptIntegrityError(
+                    f"claim budget authority unreadable: {claim_path}"
+                ) from exc
+            if not isinstance(payload, dict):
+                raise ReceiptIntegrityError(
+                    f"claim budget authority is not an object: {claim_path}"
+                )
+            if payload.get("schema") != "agent-runtime-task-claim/v1":
+                raise ReceiptIntegrityError(
+                    f"claim budget authority schema mismatch: {claim_path}"
+                )
+            if str(payload.get("claim_id") or "") != safe_claim:
+                raise ReceiptIntegrityError(
+                    f"claim budget authority identity mismatch: {claim_path}"
+                )
+            if str(payload.get("task_id") or "") != task:
+                raise ReceiptIntegrityError(
+                    f"claim budget authority task mismatch: {claim_path}"
+                )
+            claim_status = str(payload.get("status") or "").strip().lower()
+            if claim_status not in ACTIVE_CLAIM_STATUSES:
+                raise ReceiptIntegrityError(
+                    "claim budget authority is not active "
+                    f"(status={claim_status or 'missing'}): {claim_path}"
+                )
+            canonical_task = _parse_budget_value(
+                payload.get("task_token_budget"),
+                "task_token_budget",
+            )
+            canonical_claim = _parse_budget_value(
+                payload.get("claim_token_budget"),
+                "claim_token_budget",
+            )
+            source = "claim_record"
+            authority_ref = str(claim_path.relative_to(root)).replace("\\", "/")
+            authority_fingerprint = hashlib.sha256(
+                json.dumps(
+                    {
+                        "schema": payload.get("schema"),
+                        "claim_id": safe_claim,
+                        "task_id": task,
+                        "status": claim_status,
+                        "task_token_budget": canonical_task,
+                        "claim_token_budget": canonical_claim,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+        else:
+            raise ReceiptIntegrityError(
+                f"claim budget authority missing: {claim_path}"
+            )
+
+    if not claim:
+        task_paths = sorted(
+            (
+                Path(root) / "agents"
+            ).glob(f"*/tasks/{_safe_record_id(task, 'task_id')}.md")
+        )
+        if len(task_paths) > 1:
+            raise ReceiptIntegrityError(
+                f"multiple task budget authorities for task_id={task}"
+            )
+        if task_paths:
+            canonical_task = _parse_budget_value(
+                _parse_frontmatter_scalar(task_paths[0], "task_token_budget"),
+                "task_token_budget",
+            )
+            source = "task_record"
+            authority_ref = str(task_paths[0].relative_to(root)).replace("\\", "/")
+            authority_fingerprint = hashlib.sha256(
+                json.dumps(
+                    {
+                        "task_id": task,
+                        "task_token_budget": canonical_task,
+                        "authority_ref": authority_ref,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+
+    def _effective(canonical: int | None, explicit: int | None) -> int | None:
+        if canonical is None:
+            return explicit
+        if explicit is None:
+            return canonical
+        return min(canonical, explicit)
+
+    effective_task = _effective(canonical_task, explicit_task)
+    effective_claim = _effective(canonical_claim, explicit_claim)
+    if source == "unconfigured" and (
+        explicit_task is not None or explicit_claim is not None
+    ):
+        source = "explicit"
+    return {
+        "source": source,
+        "authority_ref": authority_ref,
+        "authority_fingerprint": authority_fingerprint,
+        "task_id": task,
+        "claim_id": claim,
+        "task_token_budget": effective_task,
+        "claim_token_budget": effective_claim,
+        "canonical_task_token_budget": canonical_task,
+        "canonical_claim_token_budget": canonical_claim,
+        "explicit_task_token_budget": explicit_task,
+        "explicit_claim_token_budget": explicit_claim,
+        "explicit_broadening_denied": (
+            canonical_task is not None
+            and explicit_task is not None
+            and explicit_task > canonical_task
+        )
+        or (
+            canonical_claim is not None
+            and explicit_claim is not None
+            and explicit_claim > canonical_claim
+        ),
+    }
+
+
+def _usage_from_records(
+    records: list[dict],
+    *,
+    task_id: str,
+    claim_id: str | None,
+) -> dict:
+    task_receipts = [
         item
         for item in records
         if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
         and str(item.get("task_id") or "") == str(task_id)
     ]
-    claim_records = (
+    terminal_dispatches = {
+        str(item.get("dispatch_id") or "") for item in task_receipts
+    }
+    task_reservations = [
+        item
+        for item in records
+        if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+        and str(item.get("task_id") or "") == str(task_id)
+        and str(item.get("dispatch_id") or "") not in terminal_dispatches
+    ]
+    claim_receipts = (
         [
             item
-            for item in task_records
+            for item in task_receipts
+            if str(item.get("claim_id") or "") == str(claim_id)
+        ]
+        if claim_id
+        else []
+    )
+    claim_reservations = (
+        [
+            item
+            for item in task_reservations
             if str(item.get("claim_id") or "") == str(claim_id)
         ]
         if claim_id
         else []
     )
 
-    def _usage(rows: list[dict]) -> dict:
+    def _usage(rows: list[dict], reservations: list[dict]) -> dict:
         costs: dict[str, float] = {}
         tokens = 0
         for item in rows:
@@ -191,9 +517,16 @@ def cumulative_usage(
                 costs[currency] = costs.get(currency, 0.0) + float(
                     item["billed_cost"]
                 )
+        reserved_tokens = sum(
+            max(0, int(item.get("reserved_tokens", 0) or 0))
+            for item in reservations
+        )
         return {
             "receipts": len(rows),
             "tokens": tokens,
+            "pending_reservations": len(reservations),
+            "reserved_tokens": reserved_tokens,
+            "committed_tokens": tokens + reserved_tokens,
             "billed_cost_by_currency": {
                 key: round(value, 9) for key, value in sorted(costs.items())
             },
@@ -202,23 +535,40 @@ def cumulative_usage(
     return {
         "task_id": str(task_id),
         "claim_id": str(claim_id or "") or None,
-        "task": _usage(task_records),
-        "claim": _usage(claim_records),
+        "task": _usage(task_receipts, task_reservations),
+        "claim": _usage(claim_receipts, claim_reservations),
     }
 
 
-def budget_preflight(
+def cumulative_usage(
     *,
     path: Path = EVAL_LOG,
+    task_id: str,
+    claim_id: str | None = None,
+) -> dict:
+    """Read durable observed usage for one task and optional claim."""
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+    return _usage_from_records(
+        records,
+        task_id=str(task_id),
+        claim_id=str(claim_id or "") or None,
+    )
+
+
+def _budget_preflight_from_records(
+    records: list[dict],
+    *,
+    path: Path,
+    root: Path,
     task_id: str,
     claim_id: str | None,
     dispatch_id: str,
     dispatch_ceiling: int | None,
-    task_token_budget: int | str | None = None,
-    claim_token_budget: int | str | None = None,
+    task_token_budget,
+    claim_token_budget,
 ) -> dict:
-    """Fail closed before a provider call using durable cumulative receipts."""
-    records = _strict_records(Path(path))
     if any(
         str(item.get("dispatch_id") or "") == str(dispatch_id)
         for item in records
@@ -228,24 +578,37 @@ def budget_preflight(
             "reason": "duplicate_dispatch_id",
             "dispatch_id": str(dispatch_id),
         }
-    task_configured = task_token_budget not in (None, "")
-    claim_configured = claim_token_budget not in (None, "")
-    task_limit = _optional_nonnegative_int(task_token_budget)
-    claim_limit = _optional_nonnegative_int(claim_token_budget)
-    if task_configured and task_limit is None:
-        return {
-            "allowed": False,
-            "reason": "invalid_task_token_budget",
-            "dispatch_id": str(dispatch_id),
-        }
-    if claim_configured and claim_limit is None:
-        return {
-            "allowed": False,
-            "reason": "invalid_claim_token_budget",
-            "dispatch_id": str(dispatch_id),
-        }
+    for field, value in (
+        ("task_token_budget", task_token_budget),
+        ("claim_token_budget", claim_token_budget),
+    ):
+        if value in (None, ""):
+            continue
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            return {
+                "allowed": False,
+                "reason": f"invalid_{field}",
+                "dispatch_id": str(dispatch_id),
+            }
+        if parsed < 0:
+            return {
+                "allowed": False,
+                "reason": f"invalid_{field}",
+                "dispatch_id": str(dispatch_id),
+            }
+    authority = _budget_authority(
+        root=Path(root),
+        task_id=str(task_id),
+        claim_id=str(claim_id or "").strip() or None,
+        task_token_budget=task_token_budget,
+        claim_token_budget=claim_token_budget,
+    )
+    task_limit = authority["task_token_budget"]
+    claim_limit = authority["claim_token_budget"]
     ceiling = _optional_positive_int(dispatch_ceiling)
-    configured = task_configured or claim_configured
+    configured = task_limit is not None or claim_limit is not None
     if configured and ceiling is None:
         return {
             "allowed": False,
@@ -253,18 +616,24 @@ def budget_preflight(
             "dispatch_id": str(dispatch_id),
             "task_token_budget": task_limit,
             "claim_token_budget": claim_limit,
+            "budget_authority": authority,
         }
-    usage = cumulative_usage(
-        path=Path(path),
+    usage = _usage_from_records(
+        records,
         task_id=str(task_id),
-        claim_id=str(claim_id or "") or None,
+        claim_id=str(claim_id or "").strip() or None,
     )
     task_used = int(usage["task"]["tokens"])
+    task_reserved = int(usage["task"]["reserved_tokens"])
+    task_committed = int(usage["task"]["committed_tokens"])
     claim_used = int(usage["claim"]["tokens"])
-    if task_limit is not None and task_used + int(ceiling or 0) > task_limit:
+    claim_reserved = int(usage["claim"]["reserved_tokens"])
+    claim_committed = int(usage["claim"]["committed_tokens"])
+    requested = int(ceiling or 0)
+    if task_limit is not None and task_committed + requested > task_limit:
         reason = "task_budget_insufficient"
         allowed = False
-    elif claim_limit is not None and claim_used + int(ceiling or 0) > claim_limit:
+    elif claim_limit is not None and claim_committed + requested > claim_limit:
         reason = "claim_budget_insufficient"
         allowed = False
     else:
@@ -277,15 +646,260 @@ def budget_preflight(
         "dispatch_ceiling": ceiling,
         "task_token_budget": task_limit,
         "task_tokens_used": task_used,
+        "task_tokens_reserved": task_reserved,
+        "task_tokens_committed": task_committed,
         "task_tokens_remaining": (
-            max(0, task_limit - task_used) if task_limit is not None else None
+            max(0, task_limit - task_committed)
+            if task_limit is not None
+            else None
         ),
         "claim_token_budget": claim_limit,
         "claim_tokens_used": claim_used,
+        "claim_tokens_reserved": claim_reserved,
+        "claim_tokens_committed": claim_committed,
         "claim_tokens_remaining": (
-            max(0, claim_limit - claim_used) if claim_limit is not None else None
+            max(0, claim_limit - claim_committed)
+            if claim_limit is not None
+            else None
         ),
+        "budget_authority": authority,
     }
+
+
+def budget_preflight(
+    *,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+    task_id: str,
+    claim_id: str | None,
+    dispatch_id: str,
+    dispatch_ceiling: int | None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+) -> dict:
+    """Read-only budget decision. Execution surfaces must reserve atomically."""
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        return _budget_preflight_from_records(
+            records,
+            path=ledger_path,
+            root=Path(root),
+            task_id=str(task_id),
+            claim_id=str(claim_id or "").strip() or None,
+            dispatch_id=str(dispatch_id),
+            dispatch_ceiling=dispatch_ceiling,
+            task_token_budget=task_token_budget,
+            claim_token_budget=claim_token_budget,
+        )
+
+
+def reserve_dispatch_budgets(
+    requests: list[dict],
+    *,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+    source: str = "execution_preflight",
+    _commit: bool = True,
+) -> dict:
+    """Atomically reserve a batch of dispatch ceilings or reserve none."""
+    if not requests:
+        raise ValueError("at least one dispatch reservation is required")
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        working = list(records)
+        results: list[dict] = []
+        reservations: list[dict] = []
+        for request in requests:
+            dispatch_id = str(request.get("dispatch_id") or "").strip()
+            task_id = str(request.get("task_id") or "").strip()
+            if not dispatch_id or not task_id:
+                raise ValueError("dispatch_id and task_id are required")
+            result = _budget_preflight_from_records(
+                working,
+                path=ledger_path,
+                root=Path(request.get("root") or root),
+                task_id=task_id,
+                claim_id=str(request.get("claim_id") or "").strip() or None,
+                dispatch_id=dispatch_id,
+                dispatch_ceiling=request.get("dispatch_ceiling"),
+                task_token_budget=request.get("task_token_budget"),
+                claim_token_budget=request.get("claim_token_budget"),
+            )
+            results.append(result)
+            if result["allowed"]:
+                reservation_id = "reservation-" + hashlib.sha256(
+                    dispatch_id.encode("utf-8")
+                ).hexdigest()[:24]
+                reservation = {
+                    "schema": BUDGET_RESERVATION_SCHEMA,
+                    "immutable": True,
+                    "reservation_id": reservation_id,
+                    "ts": datetime.now().astimezone().isoformat(
+                        timespec="seconds"
+                    ),
+                    "dispatch_id": dispatch_id,
+                    "task_id": task_id,
+                    "claim_id": str(request.get("claim_id") or "").strip()
+                    or None,
+                    "reserved_tokens": int(result.get("dispatch_ceiling") or 0),
+                    "source": str(source or "execution_preflight"),
+                    "task_token_budget": result.get("task_token_budget"),
+                    "claim_token_budget": result.get("claim_token_budget"),
+                    "budget_authority": dict(
+                        result.get("budget_authority") or {}
+                    ),
+                }
+                result["reservation_id"] = reservation_id
+                result["reservation_status"] = (
+                    "pending" if _commit else "planned"
+                )
+                reservations.append(reservation)
+                working.append(reservation)
+
+        allowed = all(result["allowed"] for result in results)
+        if allowed:
+            if _commit:
+                _validate_ledger_records(working, ledger_path)
+                _append_records_locked(ledger_path, reservations)
+        else:
+            for result in results:
+                result["batch_allowed"] = False
+                if result["allowed"]:
+                    result["batch_reason"] = "batch_budget_denied"
+                result.pop("reservation_id", None)
+                result["reservation_status"] = "not_reserved"
+        return {
+            "allowed": allowed,
+            "results": results,
+            "reservations": reservations if allowed else [],
+        }
+
+
+def plan_dispatch_budgets(
+    requests: list[dict],
+    *,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+    source: str = "execution_preflight_dry_run",
+) -> dict:
+    """Evaluate a batch with reservation semantics without mutating the ledger."""
+    return reserve_dispatch_budgets(
+        requests,
+        path=path,
+        root=root,
+        source=source,
+        _commit=False,
+    )
+
+
+def reserve_dispatch_budget(
+    *,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+    task_id: str,
+    claim_id: str | None,
+    dispatch_id: str,
+    dispatch_ceiling: int | None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+    source: str = "execution_preflight",
+) -> dict:
+    batch = reserve_dispatch_budgets(
+        [
+            {
+                "task_id": task_id,
+                "claim_id": claim_id,
+                "dispatch_id": dispatch_id,
+                "dispatch_ceiling": dispatch_ceiling,
+                "task_token_budget": task_token_budget,
+                "claim_token_budget": claim_token_budget,
+            }
+        ],
+        path=path,
+        root=root,
+        source=source,
+    )
+    return batch["results"][0]
+
+
+def validate_dispatch_reservation(
+    *,
+    dispatch_id: str,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+) -> dict:
+    """Revalidate a pending reservation and its canonical authority pre-spawn."""
+    ledger_path = Path(path)
+    dispatch = str(dispatch_id or "").strip()
+    if not dispatch:
+        raise ValueError("dispatch_id is required")
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        receipt = next(
+            (
+                item
+                for item in records
+                if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+                and str(item.get("dispatch_id") or "") == dispatch
+            ),
+            None,
+        )
+        if receipt is not None:
+            return {
+                "authorized": False,
+                "reason": "dispatch_already_terminal",
+                "dispatch_id": dispatch,
+                "receipt_id": receipt.get("receipt_id"),
+            }
+        reservation = next(
+            (
+                item
+                for item in records
+                if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+                and str(item.get("dispatch_id") or "") == dispatch
+            ),
+            None,
+        )
+        if reservation is None:
+            return {
+                "authorized": False,
+                "reason": "reservation_missing",
+                "dispatch_id": dispatch,
+            }
+        authority = _budget_authority(
+            root=Path(root),
+            task_id=str(reservation.get("task_id") or ""),
+            claim_id=str(reservation.get("claim_id") or "").strip() or None,
+            task_token_budget=reservation.get("task_token_budget"),
+            claim_token_budget=reservation.get("claim_token_budget"),
+        )
+        reserved_authority = dict(reservation.get("budget_authority") or {})
+        if authority.get("authority_fingerprint") != reserved_authority.get(
+            "authority_fingerprint"
+        ):
+            return {
+                "authorized": False,
+                "reason": "budget_authority_changed",
+                "dispatch_id": dispatch,
+                "reservation_id": reservation.get("reservation_id"),
+                "reserved_authority_fingerprint": reserved_authority.get(
+                    "authority_fingerprint"
+                ),
+                "current_authority_fingerprint": authority.get(
+                    "authority_fingerprint"
+                ),
+            }
+        return {
+            "authorized": True,
+            "reason": "pending_reservation_authorized",
+            "dispatch_id": dispatch,
+            "reservation_id": reservation.get("reservation_id"),
+            "task_id": reservation.get("task_id"),
+            "claim_id": reservation.get("claim_id"),
+            "budget_authority": authority,
+        }
 
 
 def record_execution_receipt(
@@ -296,6 +910,7 @@ def record_execution_receipt(
     status: str,
     claim_id: str | None = None,
     role: str | None = None,
+    workload_id: str | None = None,
     provider: str | None = None,
     execution_surface: str | None = None,
     requested_tier: str | None = None,
@@ -319,6 +934,7 @@ def record_execution_receipt(
     application_status: str | None = None,
     model_changed: bool | None = None,
     route_changed: bool | None = None,
+    baseline_receipt_id: str | None = None,
     baseline_model: str | None = None,
     baseline_reasoning_effort: str | None = None,
     baseline_observation_status: str | None = None,
@@ -332,6 +948,7 @@ def record_execution_receipt(
     budget_preflight_result: dict | None = None,
     path: Path = EVAL_LOG,
     timestamp: str | None = None,
+    _existing_records: list[dict] | None = None,
 ) -> dict:
     """Append exactly one immutable execution receipt for a dispatch."""
     dispatch = str(dispatch_id or "").strip()
@@ -387,6 +1004,7 @@ def record_execution_receipt(
         "task_id": task,
         "claim_id": str(claim_id or "").strip() or None,
         "role": str(role or "").strip() or None,
+        "workload_id": str(workload_id or "").strip() or None,
         "provider": str(provider or "").strip() or None,
         "execution_surface": str(execution_surface or "").strip() or None,
         "requested_tier": str(requested_tier or "").strip() or None,
@@ -426,6 +1044,9 @@ def record_execution_receipt(
         "application_status": application_status,
         "model_changed": model_changed,
         "route_changed": route_changed,
+        "baseline_receipt_id": (
+            str(baseline_receipt_id or "").strip() or None
+        ),
         "baseline_model": str(baseline_model or "").strip() or None,
         "baseline_reasoning_effort": (
             str(baseline_reasoning_effort or "").strip() or None
@@ -447,11 +1068,136 @@ def record_execution_receipt(
         "routing_signals": list(routing_signals or []),
         "budget_preflight": dict(budget_preflight_result or {}),
     }
-    return _append_record(
-        Path(path),
-        rec,
-        unique_dispatch_id=dispatch,
+    ledger_path = Path(path)
+    if _existing_records is not None:
+        return _finalize_execution_receipt(
+            rec,
+            list(_existing_records),
+            ledger_path,
+        )
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        rec = _finalize_execution_receipt(rec, records, ledger_path)
+        _validate_ledger_records([*records, rec], ledger_path)
+        _append_records_locked(ledger_path, [rec])
+    return rec
+
+
+def _finalize_execution_receipt(
+    rec: dict,
+    records: list[dict],
+    ledger_path: Path,
+) -> dict:
+    dispatch = str(rec.get("dispatch_id") or "")
+    if any(
+        item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        and str(item.get("dispatch_id") or "") == dispatch
+        for item in records
+    ):
+        raise ReceiptConflictError(
+            f"immutable receipt already exists for dispatch_id={dispatch}"
+        )
+
+    baseline_id = str(rec.get("baseline_receipt_id") or "").strip() or None
+    baseline = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+            and str(item.get("receipt_id") or "") == str(baseline_id or "")
+        ),
+        None,
     )
+    def _clear_unverified_baseline() -> None:
+        rec["baseline_model"] = None
+        rec["baseline_reasoning_effort"] = None
+        rec["baseline_observation_status"] = "unavailable"
+        rec["baseline_tokens"] = None
+        rec["baseline_billed_cost"] = None
+        rec["baseline_currency"] = None
+
+    if baseline_id is None:
+        rec["baseline_reference_status"] = "unavailable"
+        rec["baseline_reference_reason"] = "baseline_receipt_id_missing"
+        _clear_unverified_baseline()
+    elif baseline is None:
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = "baseline_receipt_unavailable"
+        _clear_unverified_baseline()
+    elif (
+        not rec["workload_id"]
+        or str(baseline.get("workload_id") or "") != rec["workload_id"]
+    ):
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = "workload_identity_mismatch"
+        _clear_unverified_baseline()
+    elif (
+        baseline.get("status") != "completed"
+        or not str(baseline.get("observed_model") or "").strip()
+        or baseline.get("actual_tokens_known") is not True
+    ):
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = "baseline_not_observed"
+        _clear_unverified_baseline()
+    else:
+        rec["baseline_reference_status"] = "verified"
+        rec["baseline_reference_reason"] = None
+        rec["baseline_model"] = baseline.get("observed_model")
+        rec["baseline_reasoning_effort"] = baseline.get(
+            "observed_reasoning_effort"
+        )
+        rec["baseline_observation_status"] = "observed"
+        rec["baseline_tokens"] = int(baseline.get("tokens", 0) or 0)
+        rec["baseline_billed_cost"] = baseline.get("billed_cost")
+        rec["baseline_currency"] = baseline.get("currency")
+
+    reservation = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+        ),
+        None,
+    )
+    rec["budget_reservation_id"] = (
+        reservation.get("reservation_id") if reservation else None
+    )
+    rec["budget_reservation_status"] = (
+        "settled" if reservation else "not_required_or_unreserved"
+    )
+    return rec
+
+
+def record_execution_receipts(
+    receipts: list[dict],
+    *,
+    path: Path = EVAL_LOG,
+) -> list[dict]:
+    """Atomically append a batch of terminal receipts, or append none."""
+    if not receipts:
+        raise ValueError("at least one execution receipt is required")
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        working = list(records)
+        prepared: list[dict] = []
+        for raw in receipts:
+            values = dict(raw)
+            if "path" in values or "_existing_records" in values:
+                raise ValueError(
+                    "batch receipt entries may not override path/internal state"
+                )
+            rec = record_execution_receipt(
+                **values,
+                path=ledger_path,
+                _existing_records=working,
+            )
+            prepared.append(rec)
+            working.append(rec)
+        _validate_ledger_records(working, ledger_path)
+        _append_records_locked(ledger_path, prepared)
+    return prepared
 
 
 def record_outcome(task_id: str, grade: str, model: str, tokens: int,
@@ -533,17 +1279,14 @@ def record_outcome(task_id: str, grade: str, model: str, tokens: int,
 
 
 def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
-    if not path.exists():
-        return []
-    out = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line:
-            try:
-                out.append(json.loads(line))
-            except Exception:
-                continue
-    return out
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+    return [
+        item
+        for item in records
+        if item.get("schema") != BUDGET_RESERVATION_SCHEMA
+    ]
 
 
 # ---------- objective judge ----------
@@ -568,23 +1311,49 @@ def judge_outcome(rec: dict) -> str:
 
 # ---------- report (scoreboard) ----------
 
-def _routing_evidence_exclusion_reason(rec: dict) -> str | None:
+def _verified_baseline_receipt(
+    rec: dict,
+    receipt_index: dict[str, dict],
+) -> tuple[dict | None, str | None]:
+    if rec.get("schema") != EXECUTION_RECEIPT_SCHEMA:
+        return None, "immutable_execution_receipt_required"
+    baseline_id = str(rec.get("baseline_receipt_id") or "").strip()
+    if not baseline_id:
+        return None, "baseline_receipt_unavailable"
+    baseline = receipt_index.get(baseline_id)
+    if baseline is None or baseline is rec:
+        return None, "baseline_receipt_unavailable"
+    workload_id = str(rec.get("workload_id") or "").strip()
+    if (
+        not workload_id
+        or str(baseline.get("workload_id") or "").strip() != workload_id
+    ):
+        return None, "workload_identity_mismatch"
+    if (
+        baseline.get("status") != "completed"
+        or not str(baseline.get("observed_model") or "").strip()
+        or baseline.get("actual_tokens_known") is not True
+    ):
+        return None, "baseline_observation_unavailable"
+    if rec.get("baseline_reference_status") != "verified":
+        return None, "baseline_reference_unverified"
+    return baseline, None
+
+
+def _routing_evidence_exclusion_reason(
+    rec: dict,
+    receipt_index: dict[str, dict],
+) -> str | None:
+    _, baseline_reason = _verified_baseline_receipt(rec, receipt_index)
+    if baseline_reason:
+        return baseline_reason
     if not str(rec.get("observed_model") or "").strip():
         return "observed_model_unavailable"
     if not str(rec.get("baseline_model") or "").strip():
         return "baseline_model_unavailable"
-    if (
-        rec.get("schema") == EXECUTION_RECEIPT_SCHEMA
-        and rec.get("baseline_observation_status") != "observed"
-    ):
-        return "baseline_observation_unavailable"
     if rec.get("application_status") != "applied":
         return "route_not_applied"
-    changed = (
-        rec.get("route_changed")
-        if rec.get("schema") == EXECUTION_RECEIPT_SCHEMA
-        else rec.get("model_changed")
-    )
+    changed = rec.get("route_changed")
     if changed is not True:
         if rec.get("route_status") == "ineffective_equivalent":
             return "route_ineffective_equivalent"
@@ -594,31 +1363,41 @@ def _routing_evidence_exclusion_reason(rec: dict) -> str | None:
     return None
 
 
-def _token_delta_exclusion_reason(rec: dict) -> str | None:
-    routing_reason = _routing_evidence_exclusion_reason(rec)
+def _token_delta_exclusion_reason(
+    rec: dict,
+    receipt_index: dict[str, dict],
+) -> str | None:
+    routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
     if routing_reason:
         return routing_reason
     if rec.get("actual_tokens_known") is not True:
         return "actual_token_usage_unavailable"
     if int(rec.get("tokens", 0) or 0) <= 0:
         return "actual_token_usage_not_positive"
-    if int(rec.get("baseline_tokens", 0) or 0) <= 0:
+    baseline, _ = _verified_baseline_receipt(rec, receipt_index)
+    if baseline is None or int(baseline.get("tokens", 0) or 0) <= 0:
         return "baseline_token_usage_unavailable"
     return None
 
 
-def _monetary_delta_exclusion_reason(rec: dict) -> str | None:
-    routing_reason = _routing_evidence_exclusion_reason(rec)
+def _monetary_delta_exclusion_reason(
+    rec: dict,
+    receipt_index: dict[str, dict],
+) -> str | None:
+    routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
     if routing_reason:
         return routing_reason
     if rec.get("billed_cost") is None or not str(rec.get("currency") or "").strip():
         return "actual_billed_cost_unavailable"
+    baseline, _ = _verified_baseline_receipt(rec, receipt_index)
+    if baseline is None:
+        return "baseline_billed_cost_unavailable"
     if (
-        rec.get("baseline_billed_cost") is None
-        or not str(rec.get("baseline_currency") or "").strip()
+        baseline.get("billed_cost") is None
+        or not str(baseline.get("currency") or "").strip()
     ):
         return "baseline_billed_cost_unavailable"
-    if str(rec["currency"]).upper() != str(rec["baseline_currency"]).upper():
+    if str(rec["currency"]).upper() != str(baseline["currency"]).upper():
         return "currency_mismatch"
     return None
 
@@ -632,8 +1411,45 @@ def _exclusion_counts(records: list[dict], reason_fn) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
+def _economic_claim_candidates(records: list[dict]) -> list[dict]:
+    """Return rows that purport to compare an actual route with a baseline.
+
+    A standalone baseline execution is evidence, not itself a failed savings
+    claim, so it is intentionally absent from the exclusion denominator.
+    """
+    candidates: list[dict] = []
+    for record in records:
+        if record.get("schema") == EXECUTION_RECEIPT_SCHEMA:
+            if (
+                record.get("baseline_receipt_id")
+                or record.get("route_changed") is not None
+                or record.get("application_status") is not None
+            ):
+                candidates.append(record)
+            continue
+        if any(
+            record.get(key) is not None
+            for key in (
+                "baseline_tokens",
+                "baseline_model",
+                "baseline_billed_cost",
+                "model_changed",
+                "route_status",
+                "application_status",
+            )
+        ):
+            candidates.append(record)
+    return candidates
+
+
 def report(records: list[dict] | None = None) -> dict:
     records = read_outcomes() if records is None else records
+    receipt_index = {
+        str(record.get("receipt_id")): record
+        for record in records
+        if record.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        and str(record.get("receipt_id") or "").strip()
+    }
     by_grade: dict[str, dict] = {}
     by_model: dict[str, dict] = {}
     for r in records:
@@ -659,16 +1475,32 @@ def report(records: list[dict] | None = None) -> dict:
         g["opus_share"] = round(g["opus"] / g["total"], 3) if g["total"] else 0.0
     total = len(records)
     opus = sum(1 for r in records if "opus" in str(r.get("model", "")).lower())
-    delta_records = [r for r in records if _token_delta_exclusion_reason(r) is None]
+    token_reason = lambda record: _token_delta_exclusion_reason(  # noqa: E731
+        record,
+        receipt_index,
+    )
+    economic_candidates = _economic_claim_candidates(records)
+    delta_records = [
+        r for r in economic_candidates if token_reason(r) is None
+    ]
     actual_tokens = sum(int(r.get("tokens", 0) or 0) for r in delta_records)
-    baseline_tokens = sum(int(r.get("baseline_tokens", 0) or 0) for r in delta_records)
+    baseline_tokens = sum(
+        int(
+            receipt_index[str(r["baseline_receipt_id"])].get("tokens", 0)
+            or 0
+        )
+        for r in delta_records
+    )
     saved_tokens = baseline_tokens - actual_tokens
     token_delta = {
         "evidence_type": "token_usage",
         "monetary_claim": False,
         "eligible_records": len(delta_records),
-        "excluded_records": len(records) - len(delta_records),
-        "exclusion_reasons": _exclusion_counts(records, _token_delta_exclusion_reason),
+        "excluded_records": len(economic_candidates) - len(delta_records),
+        "exclusion_reasons": _exclusion_counts(
+            economic_candidates,
+            token_reason,
+        ),
         "actual_tokens": actual_tokens,
         "baseline_tokens": baseline_tokens,
         "saved_tokens": saved_tokens,
@@ -681,8 +1513,12 @@ def report(records: list[dict] | None = None) -> dict:
         "deprecated_alias": True,
         "label": "token delta (not monetary cost)",
     }
+    monetary_reason = lambda record: _monetary_delta_exclusion_reason(  # noqa: E731
+        record,
+        receipt_index,
+    )
     monetary_records = [
-        r for r in records if _monetary_delta_exclusion_reason(r) is None
+        r for r in economic_candidates if monetary_reason(r) is None
     ]
     monetary_by_currency: dict[str, dict] = {}
     for rec in monetary_records:
@@ -697,7 +1533,8 @@ def report(records: list[dict] | None = None) -> dict:
         )
         bucket["records"] += 1
         bucket["actual_billed_cost"] += float(rec["billed_cost"])
-        bucket["baseline_billed_cost"] += float(rec["baseline_billed_cost"])
+        baseline = receipt_index[str(rec["baseline_receipt_id"])]
+        bucket["baseline_billed_cost"] += float(baseline["billed_cost"])
     for bucket in monetary_by_currency.values():
         bucket["saved_billed_cost"] = round(
             bucket["baseline_billed_cost"] - bucket["actual_billed_cost"],
@@ -717,9 +1554,9 @@ def report(records: list[dict] | None = None) -> dict:
         "evidence_type": "provider_billed_cost",
         "verified": bool(monetary_records),
         "eligible_records": len(monetary_records),
-        "excluded_records": len(records) - len(monetary_records),
+        "excluded_records": len(economic_candidates) - len(monetary_records),
         "exclusion_reasons": _exclusion_counts(
-            records, _monetary_delta_exclusion_reason
+            economic_candidates, monetary_reason
         ),
         "by_currency": dict(sorted(monetary_by_currency.items())),
     }

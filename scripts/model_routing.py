@@ -135,6 +135,8 @@ ROLE_TIER_POLICIES = {
             "research",
             "researcher",
             "scout",
+            "timeline",
+            "timeline-agent",
             "progress-scout",
             "progress_scout",
         ),
@@ -145,6 +147,11 @@ ROLE_TIER_POLICIES = {
         "aliases": (
             "implementer",
             "implementation",
+            "backend",
+            "ci-cd",
+            "cicd",
+            "frontend",
+            "uiux",
         ),
         "reason": "bounded implementation unit policy",
     },
@@ -156,6 +163,7 @@ ROLE_TIER_POLICIES = {
             "qa",
             "qa-reviewer",
             "qa_reviewer",
+            "beta-tester",
         ),
         "reason": "independent review policy",
     },
@@ -435,7 +443,19 @@ def resolve_subagent_tier(
         },
     )
     default = str(policy["tier"])
-    requested = normalize_pm_tier(requested_tier, default=default)
+    raw_requested = str(requested_tier or "").strip().lower()
+    if raw_requested in {"", "auto"}:
+        requested = default
+    else:
+        compatible = _tier_from_compatibility(raw_requested)
+        if compatible is None:
+            raise ValueError(
+                "role-bound dispatch requires a PM tier or "
+                "haiku/sonnet/opus compatibility tier"
+            )
+        if compatible == "planner_high" and default.startswith("reviewer_"):
+            compatible = "reviewer_high"
+        requested = normalize_pm_tier(compatible, default=default)
     triggers = sorted(set(_as_list(escalation_triggers)))
     unknown = [trigger for trigger in triggers if trigger not in ESCALATION_TRIGGERS]
     matched = sorted(set(triggers) & HIGH_TIER_TRIGGERS)
@@ -476,6 +496,9 @@ def resolve_subagent_tier(
             "explicit" if role in ROLE_POLICY_BY_ALIAS else "generic_fallback"
         ),
         "role_policy_reason": policy["reason"],
+        "grade": "RolePolicy",
+        "policy_tier": default,
+        "signals": triggers,
         "default_tier": default,
         "requested_tier": requested,
         "selected_tier": selected,

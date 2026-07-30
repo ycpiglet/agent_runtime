@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Subagent dispatch helper (TASK-116).
 
-Standardizes session-layer Agent tool invocation for 6 subagent roles.
+Standardizes session-layer Agent tool invocation for 7 subagent roles.
 TASK-109/113 used ad-hoc subagent calls; this module formalizes the
 pattern: pick a role, render a deterministic prompt, optionally emit a
 `subagent_call` message and an event log line. The actual provider/native
@@ -9,7 +9,8 @@ subagent invocation stays in the parent session — this helper produces the
 standardized prompt + audit trail so different execution surfaces produce
 the same observable dispatch contract.
 
-6 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+7 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+  - scribe       — low-cost bounded archival and state projection
   - explorer     — read-only repository inspection and bounded evidence lookup
   - implementer  — write the code/files for the task spec
   - reviewer     — check implementation vs spec, surface issues
@@ -183,6 +184,21 @@ class SubagentRole:
 
 
 SUBAGENT_ROLES: dict[str, SubagentRole] = {
+    "scribe": SubagentRole(
+        role_id="scribe",
+        description="Low-cost bounded archival and runtime-state projection.",
+        system_prompt=(
+            "You are the SCRIBE subagent. Preserve bounded, already-established "
+            "facts in the project record. Read only the evidence named by the "
+            "parent, update only the requested archival or status artifacts when "
+            "edits are authorized, and never invent decisions, completion, or "
+            "verification. Do not expand into implementation or architecture."
+        ),
+        output_contract=(
+            "Produce: facts archived, exact evidence references, files changed "
+            "(if any), and unresolved items explicitly left open."
+        ),
+    ),
     "explorer": SubagentRole(
         role_id="explorer",
         description="Read-only repository inspection and bounded evidence lookup.",

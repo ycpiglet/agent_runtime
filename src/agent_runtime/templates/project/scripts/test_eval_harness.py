@@ -1,6 +1,9 @@
 """TASK-238 — agentic 측정 substrate 테스트."""
 import importlib.util
+import json
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -17,6 +20,31 @@ def _load():
 
 
 eh = _load()
+
+
+def _write_claim_authority(
+    root: Path,
+    *,
+    claim_id: str,
+    task_id: str,
+    task_token_budget: int | None,
+    claim_token_budget: int | None,
+) -> None:
+    claim_dir = root / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True, exist_ok=True)
+    (claim_dir / f"{claim_id}.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": claim_id,
+                "task_id": task_id,
+                "status": "claimed",
+                "task_token_budget": task_token_budget,
+                "claim_token_budget": claim_token_budget,
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _effective_delta_record(**overrides):
@@ -36,6 +64,75 @@ def _effective_delta_record(**overrides):
     }
     rec.update(overrides)
     return rec
+
+
+def _verified_delta_records(
+    prefix: str,
+    *,
+    actual_tokens: int = 100,
+    baseline_tokens: int = 400,
+    actual_tokens_known: bool = True,
+    actual_model: str = "claude-haiku-4-5",
+    baseline_model: str = "claude-opus-4-8",
+    route_status: str = "effective",
+    route_changed: bool = True,
+    actual_billed_cost: float | None = None,
+    actual_currency: str | None = None,
+    baseline_billed_cost: float | None = None,
+    baseline_currency: str | None = None,
+) -> list[dict]:
+    workload_id = f"workload-{prefix}"
+    baseline_receipt_id = f"receipt-baseline-{prefix}"
+    baseline = {
+        "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+        "immutable": True,
+        "receipt_id": baseline_receipt_id,
+        "dispatch_id": f"baseline-{prefix}",
+        "task_id": "TASK-SAVE",
+        "workload_id": workload_id,
+        "status": "completed",
+        "observed_model": baseline_model,
+        "observed_reasoning_effort": "high",
+        "actual_tokens_known": True,
+        "token_usage_status": "observed",
+        "tokens": baseline_tokens,
+        "billed_cost": baseline_billed_cost,
+        "currency": baseline_currency,
+        "grade": "Low",
+        "model": baseline_model,
+        "finish_reason": "stop",
+        "outcome": "ok",
+    }
+    actual = {
+        "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+        "immutable": True,
+        "receipt_id": f"receipt-actual-{prefix}",
+        "dispatch_id": f"actual-{prefix}",
+        "task_id": "TASK-SAVE",
+        "workload_id": workload_id,
+        "status": "completed",
+        "observed_model": actual_model,
+        "observed_reasoning_effort": "low",
+        "actual_tokens_known": actual_tokens_known,
+        "token_usage_status": (
+            "observed" if actual_tokens_known else "unavailable"
+        ),
+        "tokens": actual_tokens,
+        "billed_cost": actual_billed_cost,
+        "currency": actual_currency,
+        "baseline_receipt_id": baseline_receipt_id,
+        "baseline_reference_status": "verified",
+        "baseline_model": baseline_model,
+        "application_status": "applied",
+        "route_status": route_status,
+        "route_changed": route_changed,
+        "model_changed": route_changed,
+        "grade": "Low",
+        "model": actual_model,
+        "finish_reason": "stop",
+        "outcome": "ok",
+    }
+    return [baseline, actual]
 
 
 def _golden_records():
@@ -194,6 +291,13 @@ def test_execution_receipt_rejects_duplicate_dispatch_id(tmp_path):
 
 def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
     path = tmp_path / "receipts.jsonl"
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-X",
+        task_id="TASK-X",
+        task_token_budget=100,
+        claim_token_budget=90,
+    )
     eh.record_execution_receipt(
         dispatch_id="dispatch-first",
         task_id="TASK-X",
@@ -207,6 +311,7 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
 
     allowed = eh.budget_preflight(
         path=path,
+        root=tmp_path,
         task_id="TASK-X",
         claim_id="CLAIM-X",
         dispatch_id="dispatch-second",
@@ -216,6 +321,7 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
     )
     blocked = eh.budget_preflight(
         path=path,
+        root=tmp_path,
         task_id="TASK-X",
         claim_id="CLAIM-X",
         dispatch_id="dispatch-third",
@@ -235,7 +341,7 @@ def test_configured_budget_fails_closed_without_provider_ceiling(tmp_path):
     result = eh.budget_preflight(
         path=tmp_path / "receipts.jsonl",
         task_id="TASK-X",
-        claim_id="CLAIM-X",
+        claim_id=None,
         dispatch_id="dispatch-no-ceiling",
         dispatch_ceiling=None,
         task_token_budget=100,
@@ -243,6 +349,260 @@ def test_configured_budget_fails_closed_without_provider_ceiling(tmp_path):
 
     assert result["allowed"] is False
     assert result["reason"] == "dispatch_ceiling_unavailable"
+
+
+def test_atomic_reservation_prevents_concurrent_budget_and_duplicate_side_effects(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-RACE",
+        task_id="TASK-RACE",
+        task_token_budget=100,
+        claim_token_budget=None,
+    )
+    barrier = threading.Barrier(2)
+
+    def reserve(dispatch_id):
+        barrier.wait()
+        return eh.reserve_dispatch_budget(
+            path=path,
+            root=tmp_path,
+            task_id="TASK-RACE",
+            claim_id="CLAIM-RACE",
+            dispatch_id=dispatch_id,
+            dispatch_ceiling=60,
+            task_token_budget=100,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(reserve, ("race-1", "race-2")))
+
+    assert sum(result["allowed"] is True for result in results) == 1
+    assert sum(result["reason"] == "task_budget_insufficient" for result in results) == 1
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-RACE",
+        claim_id="CLAIM-RACE",
+    )
+    assert usage["task"]["tokens"] == 0
+    assert usage["task"]["reserved_tokens"] == 60
+    assert usage["task"]["committed_tokens"] == 60
+
+    duplicate_barrier = threading.Barrier(2)
+
+    def duplicate():
+        duplicate_barrier.wait()
+        return eh.reserve_dispatch_budget(
+            path=path,
+            task_id="TASK-DUP",
+            claim_id=None,
+            dispatch_id="same-dispatch",
+            dispatch_ceiling=10,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        duplicate_results = list(pool.map(lambda _: duplicate(), range(2)))
+
+    assert sum(result["allowed"] is True for result in duplicate_results) == 1
+    assert sum(
+        result["reason"] == "duplicate_dispatch_id"
+        for result in duplicate_results
+    ) == 1
+
+
+def test_batch_reservation_is_all_or_none_and_dry_run_stays_read_only(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-BATCH-BUDGET",
+        task_id="TASK-BATCH-BUDGET",
+        task_token_budget=15,
+        claim_token_budget=None,
+    )
+    requests = [
+        {
+            "task_id": "TASK-BATCH-BUDGET",
+            "claim_id": "CLAIM-BATCH-BUDGET",
+            "dispatch_id": dispatch_id,
+            "dispatch_ceiling": 10,
+        }
+        for dispatch_id in ("batch-budget-1", "batch-budget-2")
+    ]
+
+    planned = eh.plan_dispatch_budgets(
+        requests[:1],
+        path=path,
+        root=tmp_path,
+    )
+    denied = eh.reserve_dispatch_budgets(
+        requests,
+        path=path,
+        root=tmp_path,
+    )
+
+    assert planned["allowed"] is True
+    assert planned["results"][0]["reservation_status"] == "planned"
+    assert eh.read_outcomes(path) == []
+    assert denied["allowed"] is False
+    assert denied["reservations"] == []
+    assert denied["results"][0]["batch_reason"] == "batch_budget_denied"
+    assert denied["results"][0]["reservation_status"] == "not_reserved"
+    assert denied["results"][1]["reason"] == "task_budget_insufficient"
+    assert eh.read_outcomes(path) == []
+
+    subsequent = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-BATCH-BUDGET",
+        claim_id="CLAIM-BATCH-BUDGET",
+        dispatch_id="batch-budget-subsequent",
+        dispatch_ceiling=15,
+    )
+    assert subsequent["allowed"] is True
+
+
+def test_claim_record_is_authoritative_budget_source(tmp_path):
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-AUTH.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-AUTH",
+                "task_id": "TASK-AUTH",
+                "status": "claimed",
+                "task_token_budget": 0,
+                "claim_token_budget": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = eh.reserve_dispatch_budget(
+        root=tmp_path,
+        path=tmp_path / "receipts.jsonl",
+        task_id="TASK-AUTH",
+        claim_id="CLAIM-AUTH",
+        dispatch_id="dispatch-authoritative",
+        dispatch_ceiling=1,
+    )
+
+    assert result["allowed"] is False
+    assert result["reason"] == "task_budget_insufficient"
+    assert result["task_token_budget"] == 0
+    assert result["claim_token_budget"] == 0
+    assert result["budget_authority"]["claim_id"] == "CLAIM-AUTH"
+    assert result["budget_authority"]["source"] == "claim_record"
+
+
+def test_duplicate_or_mismatched_ledger_identity_fails_closed(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    rows = [
+        {
+            "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+            "immutable": True,
+            "receipt_id": "receipt-one",
+            "dispatch_id": "duplicate-dispatch",
+            "task_id": "TASK-X",
+        },
+        {
+            "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+            "immutable": True,
+            "receipt_id": "receipt-two",
+            "dispatch_id": "duplicate-dispatch",
+            "task_id": "TASK-X",
+        },
+    ]
+    path.write_text(
+        "".join(json.dumps(row) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(eh.ReceiptIntegrityError, match="duplicate dispatch_id"):
+        eh.budget_preflight(
+            path=path,
+            task_id="TASK-OTHER",
+            claim_id=None,
+            dispatch_id="new-dispatch",
+            dispatch_ceiling=1,
+        )
+
+
+def test_missing_or_inactive_claim_authority_fails_closed(tmp_path):
+    with pytest.raises(eh.ReceiptIntegrityError, match="authority missing"):
+        eh.reserve_dispatch_budget(
+            root=tmp_path,
+            path=tmp_path / "receipts.jsonl",
+            task_id="TASK-CLAIM",
+            claim_id="CLAIM-MISSING",
+            dispatch_id="dispatch-missing",
+            dispatch_ceiling=1,
+        )
+
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-INACTIVE",
+        task_id="TASK-CLAIM",
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+    claim_path = (
+        tmp_path
+        / "agents"
+        / "runtime"
+        / "task_claims"
+        / "CLAIM-INACTIVE.json"
+    )
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status"] = "released"
+    claim_path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(eh.ReceiptIntegrityError, match="not active"):
+        eh.reserve_dispatch_budget(
+            root=tmp_path,
+            path=tmp_path / "receipts.jsonl",
+            task_id="TASK-CLAIM",
+            claim_id="CLAIM-INACTIVE",
+            dispatch_id="dispatch-inactive",
+            dispatch_ceiling=1,
+        )
+
+
+def test_batch_terminal_receipts_append_all_or_none(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    eh.record_execution_receipt(
+        dispatch_id="batch-existing",
+        task_id="TASK-BATCH",
+        source="provider_completion",
+        status="completed",
+        path=path,
+    )
+
+    with pytest.raises(eh.ReceiptConflictError):
+        eh.record_execution_receipts(
+            [
+                {
+                    "dispatch_id": "batch-new",
+                    "task_id": "TASK-BATCH",
+                    "source": "provider_completion",
+                    "status": "completed",
+                },
+                {
+                    "dispatch_id": "batch-existing",
+                    "task_id": "TASK-BATCH",
+                    "source": "provider_completion",
+                    "status": "completed",
+                },
+            ],
+            path=path,
+        )
+
+    assert [
+        receipt["dispatch_id"] for receipt in eh.read_outcomes(path)
+    ] == ["batch-existing"]
 
 
 def test_cli_record_writes_routing_metadata(tmp_path, capsys):
@@ -289,16 +649,15 @@ def test_report_opus_share():
 
 
 def test_report_includes_token_delta_only_with_effective_model_evidence():
-    recs = [
-        _effective_delta_record(),
-        _effective_delta_record(
-            grade="High",
-            model="claude-sonnet-4-6",
-            observed_model="claude-sonnet-4-6",
-            tokens=250,
+    recs = (
+        _verified_delta_records("low")
+        + _verified_delta_records(
+            "high",
+            actual_tokens=250,
             baseline_tokens=500,
-        ),
-    ]
+            actual_model="claude-sonnet-4-6",
+        )
+    )
     report = eh.report(recs)
     delta = report["token_delta"]
     assert delta["actual_tokens"] == 350
@@ -310,15 +669,18 @@ def test_report_includes_token_delta_only_with_effective_model_evidence():
 
 
 def test_token_delta_excludes_unknown_zero_actual_tokens():
-    recs = [
-        _effective_delta_record(
-            tokens=0,
+    recs = (
+        _verified_delta_records(
+            "unknown",
+            actual_tokens=0,
             actual_tokens_known=False,
-            finish_reason="error",
-            outcome="gate-error",
-        ),
-        _effective_delta_record(tokens=250, baseline_tokens=500),
-    ]
+        )
+        + _verified_delta_records(
+            "known",
+            actual_tokens=250,
+            baseline_tokens=500,
+        )
+    )
     delta = eh.report(recs)["token_delta"]
     assert delta["actual_tokens"] == 250
     assert delta["baseline_tokens"] == 500
@@ -328,23 +690,25 @@ def test_token_delta_excludes_unknown_zero_actual_tokens():
 
 
 def test_equivalent_route_cannot_contribute_to_token_delta():
-    rec = _effective_delta_record(
-        model="gpt-5.2-codex",
-        observed_model="gpt-5.2-codex",
+    recs = _verified_delta_records(
+        "equivalent",
+        actual_model="gpt-5.2-codex",
         baseline_model="gpt-5.2-codex",
-        model_changed=False,
+        route_changed=False,
         route_status="ineffective_equivalent",
     )
-    delta = eh.report([rec])["token_delta"]
+    delta = eh.report(recs)["token_delta"]
     assert delta["eligible_records"] == 0
     assert delta["saved_tokens"] == 0
     assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
 
 
-def test_receipt_savings_require_observed_comparable_baseline():
+def test_caller_claimed_baseline_metadata_cannot_create_savings():
     receipt = {
         **_effective_delta_record(),
         "schema": eh.EXECUTION_RECEIPT_SCHEMA,
+        "receipt_id": "receipt-unreferenced",
+        "dispatch_id": "dispatch-unreferenced",
         "route_changed": True,
         "baseline_observation_status": "configured",
     }
@@ -353,27 +717,117 @@ def test_receipt_savings_require_observed_comparable_baseline():
     observed = eh.report([receipt])["token_delta"]
 
     assert unavailable["eligible_records"] == 0
+    assert unavailable["exclusion_reasons"]["baseline_receipt_unavailable"] == 1
+    assert observed["eligible_records"] == 0
+    assert observed["exclusion_reasons"]["baseline_receipt_unavailable"] == 1
+
+
+def test_savings_require_referenced_baseline_receipt_and_workload_identity(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-dispatch",
+        task_id="TASK-SAVE",
+        workload_id="workload-same",
+        observed_provider="provider",
+        observed_model="expensive-model",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-dispatch",
+        task_id="TASK-SAVE",
+        workload_id="workload-same",
+        observed_provider="provider",
+        observed_model="cheap-model",
+        observed_reasoning_effort="low",
+        tokens_in=15,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        route_changed=True,
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    report = eh.report(eh.read_outcomes(path))
+    assert actual["baseline_reference_status"] == "verified"
+    assert report["token_delta"]["eligible_records"] == 1
+    assert report["token_delta"]["saved_tokens"] == 80
+    assert report["monetary_delta"]["eligible_records"] == 1
+    assert report["monetary_delta"]["by_currency"]["USD"][
+        "saved_billed_cost"
+    ] == 0.08
+
+    forged = eh.record_execution_receipt(
+        dispatch_id="forged-dispatch",
+        task_id="TASK-SAVE",
+        workload_id="workload-same",
+        observed_provider="provider",
+        observed_model="cheap-model",
+        tokens_in=15,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        route_changed=True,
+        baseline_receipt_id="missing-receipt",
+        baseline_model="caller-forged-model",
+        baseline_observation_status="observed",
+        baseline_tokens=1000,
+        baseline_billed_cost=1.0,
+        baseline_currency="USD",
+        path=path,
+    )
+    assert forged["baseline_reference_status"] == "invalid"
+    assert forged["baseline_model"] is None
+    assert forged["baseline_observation_status"] == "unavailable"
+    assert forged["baseline_tokens"] is None
+    assert forged["baseline_billed_cost"] is None
+    assert forged["baseline_currency"] is None
+    forged_report = eh.report([baseline, forged])
+    assert forged_report["token_delta"]["eligible_records"] == 0
+    assert forged_report["monetary_delta"]["eligible_records"] == 0
     assert (
-        unavailable["exclusion_reasons"]["baseline_observation_unavailable"]
+        forged_report["token_delta"]["exclusion_reasons"][
+            "baseline_receipt_unavailable"
+        ]
         == 1
     )
-    assert observed["eligible_records"] == 1
 
 
 def test_monetary_delta_requires_comparable_same_currency_billed_cost():
-    verified = _effective_delta_record(
-        billed_cost=0.2,
-        currency="USD",
-        baseline_billed_cost=0.5,
-        baseline_currency="usd",
+    recs = (
+        _verified_delta_records(
+            "money-verified",
+            actual_billed_cost=0.2,
+            actual_currency="USD",
+            baseline_billed_cost=0.5,
+            baseline_currency="USD",
+        )
+        + _verified_delta_records(
+            "money-mismatch",
+            actual_billed_cost=0.2,
+            actual_currency="USD",
+            baseline_billed_cost=0.5,
+            baseline_currency="EUR",
+        )
     )
-    mismatch = _effective_delta_record(
-        billed_cost=0.2,
-        currency="USD",
-        baseline_billed_cost=0.5,
-        baseline_currency="EUR",
-    )
-    delta = eh.report([verified, mismatch])["monetary_delta"]
+    delta = eh.report(recs)["monetary_delta"]
     assert delta["verified"] is True
     assert delta["eligible_records"] == 1
     assert delta["by_currency"]["USD"]["saved_billed_cost"] == 0.3

@@ -319,6 +319,23 @@ def test_inbox_work_items_carries_eval_baseline_and_task_id(tmp_path):
     assert items[0]["eval_baseline_tokens"] == "3000"
 
 
+def test_auto_dispatch_role_policy_is_mandatory_and_denies_scribe_opus():
+    implicit = auto_dispatch._routing_decision_for_item(
+        {"role": "scribe"},
+        "archive bounded state",
+    )
+    assert implicit["role_policy_id"] == "scribe"
+    assert implicit["selected_tier"] == "worker_low"
+
+    denied = auto_dispatch._routing_decision_for_item(
+        {"role": "scribe", "routing_model": "opus"},
+        "archive bounded state",
+    )
+    assert denied["selected_tier"] == "worker_low"
+    assert denied["routing_status"] == "high_tier_denied"
+    assert denied["denied_requested_tier"] == "planner_high"
+
+
 def test_inbox_work_items_filters_by_role(tmp_path):
     _write_msg(tmp_path, "MSG-20260603-070000-aaaaaa.md", to="qa", status="open")
     _write_msg(tmp_path, "MSG-20260603-070001-bbbbbb.md", to="backend", status="open")
@@ -365,12 +382,25 @@ def test_dispatch_records_routing_result(patch_provider):
     }]
     summary = _run(items, p, session_budget=1000, max_dispatches=10)
     result = summary["results"][0]
-    assert result["routing_grade"] == "Low"
-    assert result["policy_model"] == "haiku"
-    assert result["selected_model"] == "haiku"
+    assert result["routing_grade"] == "RolePolicy"
+    assert result["policy_model"] == "reviewer_standard"
+    assert result["selected_model"] == "reviewer_standard"
 
 
 def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, patch_provider):
+    receipt_log = tmp_path / "eval.jsonl"
+    baseline = auto_dispatch.eval_harness.record_execution_receipt(
+        dispatch_id="TASK-239-baseline",
+        task_id="TASK-239",
+        workload_id="WORKLOAD-239",
+        observed_provider="claude",
+        observed_model="claude-opus-4-8",
+        tokens_in=2500,
+        tokens_out=500,
+        source="provider_completion",
+        status="completed",
+        path=receipt_log,
+    )
     p = patch_provider(
         _FakeProvider(
             tokens_per_call=11,
@@ -380,14 +410,14 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         )
     )
     items = [{
-        "role": "qa",
+        "role": "scribe",
         "instruction": "find and list files",
         "context": {"task_id": "TASK-239"},
         "routing_model": "auto",
         "routing_grade": "Low",
-        "eval_baseline_tokens": 3000,
         "eval_baseline_model": "claude-opus-4-8",
-        "eval_baseline_observation_status": "observed",
+        "eval_baseline_receipt_id": baseline["receipt_id"],
+        "eval_workload_id": "WORKLOAD-239",
     }]
     summary = _run(
         items,
@@ -395,23 +425,24 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         provider_name="claude-agent",
         session_budget=1000,
         max_dispatches=10,
-        eval_log_path=tmp_path / "eval.jsonl",
+        eval_log_path=receipt_log,
     )
     assert summary["results"][0]["eval_recorded"] is True
-    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
-    assert len(recs) == 1
-    rec = recs[0]
+    recs = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(recs) == 2
+    rec = recs[-1]
     assert rec["task_id"] == "TASK-239"
-    assert rec["grade"] == "Low"
+    assert rec["grade"] == "RolePolicy"
     assert rec["tokens"] == 12
-    assert rec["policy_model"] == "haiku"
-    assert rec["selected_model"] == "haiku"
+    assert rec["policy_model"] == "worker_low"
+    assert rec["selected_model"] == "worker_low"
     assert rec["baseline_tokens"] == 3000
     assert rec["observed_model"] == "claude-haiku-4-5"
     assert rec["baseline_model"] == "claude-opus-4-8"
     assert rec["model_changed"] is True
     assert rec["route_changed"] is True
     assert rec["baseline_observation_status"] == "observed"
+    assert rec["baseline_reference_status"] == "verified"
     assert rec["schema"] == auto_dispatch.eval_harness.EXECUTION_RECEIPT_SCHEMA
 
 
@@ -462,7 +493,7 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
         out=io.StringIO(),
     )
     result = summary["results"][0]
-    assert result["selected_model"] == "haiku"
+    assert result["selected_model"] == "reviewer_standard"
     assert result["eval_recorded"] is True
     assert result["receipt_recorded"] is True
     assert result["route_status"] == "ineffective_equivalent"

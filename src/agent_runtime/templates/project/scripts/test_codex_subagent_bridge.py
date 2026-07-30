@@ -38,6 +38,8 @@ def test_dispatch_packet_writes_packet_call_and_event(tmp_path, monkeypatch):
     assert packet["runtime"] == "codex-session"
     assert packet["execution"]["capability"] == "native_subagent_spawn"
     assert packet["execution"]["tool_hint"] == "collaboration.spawn_agent"
+    assert packet["execution"]["pre_spawn_guard"]["required"] is True
+    assert bridge.authorize_dispatch(bridge_id=packet["id"])["authorized"] is True
     assert packet["execution"]["spawn_args"]["model"] == "gpt-5.6-sol"
     assert packet["execution"]["spawn_args"]["reasoning_effort"] == "high"
     assert packet["execution"]["spawn_args"]["message"] == packet["prompt"]
@@ -104,6 +106,24 @@ def test_implementer_packet_defaults_to_terra_low(tmp_path, monkeypatch):
     assert "Agent tool model: sonnet" not in packet["prompt"]
 
 
+def test_scribe_packet_uses_registered_low_cost_role_policy(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    packet = bridge.create_dispatch_packet(
+        role_id="scribe",
+        task_id="TASK-SCRIBE",
+        intent="archive bounded state",
+        requested_tier="reviewer_high",
+        dry_run=True,
+    )
+    assert packet["routing"]["role_policy_id"] == "scribe"
+    assert packet["routing"]["selected_tier"] == "worker_low"
+    assert packet["routing"]["routing_status"] == "high_tier_denied"
+    assert packet["execution"]["spawn_args"]["model"] == "gpt-5.6-terra"
+
+
 def test_lookup_dispatch_requires_preflight_and_completed_lookup_emits_no_spawn(
     tmp_path, monkeypatch
 ):
@@ -124,6 +144,13 @@ def test_lookup_dispatch_requires_preflight_and_completed_lookup_emits_no_spawn(
     assert packet["status"] == "deterministic_complete_no_spawn"
     assert packet["execution"] is None
     assert not (tmp_path / "packets").exists()
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 2
+    assert {receipt["source"] for receipt in receipts} == {
+        "deterministic_preflight_blocked",
+        "deterministic_preflight_complete",
+    }
+    assert all(receipt["status"] == "skipped" for receipt in receipts)
 
 
 def test_record_reply_records_only_explicit_completion_observations(
@@ -184,6 +211,30 @@ def test_record_reply_records_only_explicit_completion_observations(
     assert receipt["billed_cost"] == 0.012
 
 
+def test_record_reply_without_bus_call_still_settles_receipt(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-NO-BUS",
+        intent="implement bounded change",
+    )
+
+    result = bridge.record_reply(
+        bridge_id=packet["id"],
+        verdict="APPROVED",
+        summary="done",
+    )
+
+    assert result["reply_message"] is None
+    assert result["reply_event"] is None
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 1
+    assert receipts[0]["dispatch_id"] == packet["id"]
+
+
 def test_record_reply_rejects_cost_without_currency(tmp_path, monkeypatch):
     monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
     monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
@@ -220,6 +271,14 @@ def test_council_packet_and_record(tmp_path, monkeypatch):
         packet["member_execution"]["reviewer"]["spawn_args"]["model"]
         == "gpt-5.6-sol"
     )
+    assert (
+        packet["execution"]["pre_spawn_guard_by_member"]["reviewer"]["required"]
+        is True
+    )
+    assert bridge.authorize_dispatch(
+        bridge_id=packet["id"],
+        role_id="reviewer",
+    )["authorized"] is True
     result = bridge.record_council(
         bridge_id=packet["id"],
         task_id=None,
@@ -296,6 +355,130 @@ def test_dispatch_budget_block_emits_no_spawn_packet_and_records_receipt(
     assert receipts[0]["source"] == "budget_preflight"
 
 
+def test_council_reserves_each_member_and_zero_budget_emits_no_spawn(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-COUNCIL.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-COUNCIL",
+                "task_id": "TASK-COUNCIL-BUDGET",
+                "status": "claimed",
+                "task_token_budget": 0,
+                "claim_token_budget": None,
+            }
+        ),
+        encoding="utf-8",
+    )
+    packet = bridge.create_council_packet(
+        task_id="TASK-COUNCIL-BUDGET",
+        members=["reviewer", "skeptic"],
+        intent="review budget boundary",
+        claim_id="CLAIM-COUNCIL",
+        dispatch_ceiling=10,
+        task_token_budget=0,
+    )
+
+    assert packet["status"] == "budget_blocked_no_spawn"
+    assert packet["execution"] is None
+    assert set(packet["member_budget_preflights"]) == {"reviewer", "skeptic"}
+    assert all(
+        result["reason"] == "task_budget_insufficient"
+        for result in packet["member_budget_preflights"].values()
+    )
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(receipts) == 2
+    assert {receipt["role"] for receipt in receipts} == {
+        "reviewer",
+        "skeptic",
+    }
+    assert all(receipt["status"] == "skipped" for receipt in receipts)
+
+
+def test_council_aggregate_budget_denial_leaves_no_partial_reservation(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-COUNCIL-AGGREGATE.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-COUNCIL-AGGREGATE",
+                "task_id": "TASK-COUNCIL-AGGREGATE",
+                "status": "claimed",
+                "task_token_budget": 15,
+                "claim_token_budget": None,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    packet = bridge.create_council_packet(
+        task_id="TASK-COUNCIL-AGGREGATE",
+        members=["reviewer", "skeptic"],
+        intent="review aggregate budget boundary",
+        claim_id="CLAIM-COUNCIL-AGGREGATE",
+        dispatch_ceiling=10,
+    )
+
+    assert packet["status"] == "budget_blocked_no_spawn"
+    assert packet["execution"] is None
+    preflights = packet["member_budget_preflights"]
+    assert preflights["reviewer"]["batch_reason"] == "batch_budget_denied"
+    assert preflights["skeptic"]["reason"] == "task_budget_insufficient"
+    records = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert len(records) == 2
+    assert all(
+        record["schema"] != bridge.eval_harness.BUDGET_RESERVATION_SCHEMA
+        for record in records
+    )
+    assert all(record["status"] == "skipped" for record in records)
+
+
+def test_council_all_member_errors_close_receipts_without_verdicts(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    monkeypatch.setattr(sc, "MESSAGES_INBOX", tmp_path / "inbox")
+    packet = bridge.create_council_packet(
+        task_id="TASK-COUNCIL-ERROR",
+        members=["reviewer", "skeptic"],
+        intent="review bounded failure",
+    )
+
+    result = bridge.record_council(
+        bridge_id=packet["id"],
+        task_id=None,
+        method=None,
+        verdicts=[],
+        observations={
+            "reviewer": {"status": "error", "error": "spawn failed"},
+            "skeptic": {"status": "error", "error": "spawn failed"},
+        },
+    )
+
+    assert result["final"] == "incomplete"
+    receipts = bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)
+    assert {receipt["status"] for receipt in receipts} == {"error"}
+    assert {receipt["role"] for receipt in receipts} == {
+        "reviewer",
+        "skeptic",
+    }
+    assert "--observation" in packet["execution"]["after_completion"]
+
+
 def test_record_reply_rejects_duplicate_before_second_reply(
     tmp_path,
     monkeypatch,
@@ -325,6 +508,41 @@ def test_record_reply_rejects_duplicate_before_second_reply(
 
     assert len(list((tmp_path / "inbox").glob("*.md"))) == reply_count
     assert len(bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)) == 1
+
+
+def test_pre_spawn_authorization_blocks_released_claim(tmp_path, monkeypatch):
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    claim_path = claim_dir / "CLAIM-AUTHORIZE.json"
+    claim = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-AUTHORIZE",
+        "task_id": "TASK-AUTHORIZE",
+        "status": "claimed",
+        "task_token_budget": 100,
+        "claim_token_budget": 100,
+    }
+    claim_path.write_text(json.dumps(claim), encoding="utf-8")
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-AUTHORIZE",
+        intent="implement bounded change",
+        claim_id="CLAIM-AUTHORIZE",
+        dispatch_ceiling=10,
+    )
+    assert bridge.authorize_dispatch(
+        bridge_id=packet["id"]
+    )["authorized"] is True
+
+    claim["status"] = "released"
+    claim_path.write_text(json.dumps(claim), encoding="utf-8")
+    with pytest.raises(
+        bridge.eval_harness.ReceiptIntegrityError,
+        match="not active",
+    ):
+        bridge.authorize_dispatch(bridge_id=packet["id"])
 
 
 def test_cli_dispatch_dry_run_json(capsys, tmp_path, monkeypatch):

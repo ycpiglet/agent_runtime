@@ -237,6 +237,7 @@ class WorkerConfig:
 def apply_model_routing_env(
     provider_name: str,
     *,
+    role: str = "worker",
     model: str | None = None,
     grade: str | None = None,
     prompt: str = "",
@@ -244,18 +245,13 @@ def apply_model_routing_env(
     diff_lines: int = 0,
 ) -> dict | None:
     """Set provider env vars for a routed worker model and return the decision."""
-    if not model:
-        return None
-    if str(model).strip().lower() == "auto":
+    if str(model or "").strip().lower() in {"", "auto"}:
         # Long-running workers must route per message; a startup auto decision
-        # would pin the first grade/prompt across later inbox items.
+        # would pin the first request across later inbox items.
         return None
-    decision = model_routing.resolve_model(
-        model,
-        grade=grade,
-        prompt=prompt,
-        changed_files=changed_files,
-        diff_lines=diff_lines,
+    decision = model_routing.resolve_subagent_tier(
+        role,
+        requested_tier=model,
     )
     for name, value in model_routing.provider_env(provider_name, decision["selected_tier"]).items():
         os.environ[name] = value
@@ -279,32 +275,32 @@ def _as_list(value) -> list[str]:
         return []
     if isinstance(value, list):
         return [str(item) for item in value]
-    return [str(value)]
-
-
-def _int_or_zero(value) -> int:
-    try:
-        return int(value or 0)
-    except (TypeError, ValueError):
-        return 0
+    return [
+        part.strip()
+        for part in str(value).split(",")
+        if part.strip()
+    ]
 
 
 def _message_routing_decision(cfg: WorkerConfig, meta: dict, instruction: str) -> dict | None:
-    if cfg.routing_decision and str(cfg.routing_model or "").strip().lower() != "auto":
+    requested = meta.get("routing_model") or meta.get("model") or cfg.routing_model
+    triggers = _as_list(
+        meta.get("escalation_triggers")
+        or meta.get("routing_escalation_triggers")
+        or meta.get("escalation_trigger")
+    )
+    if (
+        cfg.routing_decision
+        and str(cfg.routing_model or "").strip().lower() not in {"", "auto"}
+        and not meta.get("routing_model")
+        and not meta.get("model")
+        and not triggers
+    ):
         return cfg.routing_decision
-    model = meta.get("routing_model") or meta.get("model") or cfg.routing_model
-    if not model:
-        return None
-    grade = meta.get("routing_grade") or meta.get("grade") or cfg.routing_grade
-    changed_files = _as_list(meta.get("routing_changed_files")) or (cfg.routing_changed_files or [])
-    diff_lines = _int_or_zero(meta.get("routing_diff_lines")) or cfg.routing_diff_lines
-    prompt = str(meta.get("intent") or cfg.routing_prompt or instruction)
-    return model_routing.resolve_model(
-        str(model),
-        grade=str(grade or "Medium"),
-        prompt=prompt,
-        changed_files=changed_files,
-        diff_lines=diff_lines,
+    return model_routing.resolve_subagent_tier(
+        cfg.role,
+        requested_tier=str(requested or "auto"),
+        escalation_triggers=triggers,
     )
 
 
@@ -351,6 +347,24 @@ def _baseline_billed_cost(meta: dict) -> tuple[float | None, str | None]:
     return cost, currency
 
 
+def _baseline_receipt_id(meta: dict) -> str | None:
+    value = str(
+        meta.get("eval_baseline_receipt_id")
+        or meta.get("baseline_receipt_id")
+        or ""
+    ).strip()
+    return value or None
+
+
+def _workload_id(meta: dict) -> str | None:
+    value = str(
+        meta.get("eval_workload_id")
+        or meta.get("workload_id")
+        or ""
+    ).strip()
+    return value or None
+
+
 def _apply_routing_to_provider(
     provider: Provider,
     provider_name: str,
@@ -369,7 +383,9 @@ def _apply_routing_to_provider(
     route = model_routing.resolve_provider_route(
         provider_name,
         decision["selected_tier"],
-        requested_tier=decision.get("policy_tier"),
+        requested_tier=(
+            decision.get("requested_tier") or decision.get("policy_tier")
+        ),
         baseline_model=baseline_model,
         baseline_reasoning_effort=baseline_reasoning_effort,
     )
@@ -511,7 +527,9 @@ def _route_with_observation(
     return model_routing.resolve_provider_route(
         provider_name,
         decision["selected_tier"],
-        requested_tier=decision.get("policy_tier"),
+        requested_tier=(
+            decision.get("requested_tier") or decision.get("policy_tier")
+        ),
         baseline_model=baseline_model,
         baseline_reasoning_effort=baseline_reasoning_effort,
         observed_model=observation.get("observed_model"),
@@ -577,12 +595,12 @@ def _routing_eval_skip_reason(
         return "model_observation_unavailable"
     if route.get("application_status") != "applied":
         return "routing_not_applied"
+    if route.get("route_changed") is not True:
+        return "route_not_effective"
     if not baseline_model:
         return "baseline_model_unavailable"
     if baseline_observation_status != "observed":
         return "baseline_observation_unavailable"
-    if route.get("route_changed") is not True:
-        return "route_not_effective"
     if observation.get("token_usage_status") != "observed":
         return "token_usage_unavailable"
     if baseline_tokens is None:
@@ -608,21 +626,14 @@ def _record_execution_receipt(
     comparison_model = _baseline_model(meta)
     comparison_reasoning = _baseline_reasoning_effort(meta)
     baseline_observation = _baseline_observation_status(meta)
-    skip_reason = _routing_eval_skip_reason(
-        routing_decision,
-        route,
-        observation,
-        baseline_tokens=baseline,
-        baseline_model=comparison_model,
-        baseline_observation_status=baseline_observation,
-    )
     baseline_cost, baseline_currency = _baseline_billed_cost(meta)
     try:
-        eval_harness.record_execution_receipt(
+        receipt = eval_harness.record_execution_receipt(
             dispatch_id=dispatch_id,
             task_id=_metadata_task_id(meta),
             claim_id=_metadata_claim_id(meta),
             role=cfg.role,
+            workload_id=_workload_id(meta),
             provider=cfg.provider_name,
             execution_surface=(
                 route.get("execution_surface") if route else "provider_worker"
@@ -660,6 +671,7 @@ def _record_execution_receipt(
             ),
             model_changed=route.get("model_changed") if route else None,
             route_changed=route.get("route_changed") if route else None,
+            baseline_receipt_id=_baseline_receipt_id(meta),
             baseline_model=comparison_model,
             baseline_reasoning_effort=comparison_reasoning,
             baseline_observation_status=baseline_observation,
@@ -689,6 +701,18 @@ def _record_execution_receipt(
         return False, "duplicate_dispatch_id"
     except eval_harness.ReceiptIntegrityError:
         return False, "receipt_ledger_untrusted"
+    skip_reason = _routing_eval_skip_reason(
+        routing_decision,
+        route,
+        observation,
+        baseline_tokens=receipt.get("baseline_tokens"),
+        baseline_model=receipt.get("baseline_model"),
+        baseline_observation_status=(
+            "observed"
+            if receipt.get("baseline_reference_status") == "verified"
+            else str(receipt.get("baseline_reference_reason") or "unavailable")
+        ),
+    )
     return True, skip_reason
 
 
@@ -807,11 +831,6 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     append_event(EVENTS_DIR, cfg.role, "message_claimed",
                  message_id=msg_id, path=str(path.relative_to(REPO_ROOT)))
 
-    if not has_active_claim(path, role=cfg.role, worker_identity=claim_identity):
-        log(cfg, f"WARN lost claim before processing {path.name}")
-        append_event(EVENTS_DIR, cfg.role, "claim_lost", message_id=msg_id, phase="pre_process")
-        return True
-
     instruction = body if body.strip() else str(meta.get("intent", ""))
     routing_decision = _message_routing_decision(cfg, meta, instruction)
     comparison_model = _baseline_model(meta)
@@ -825,15 +844,34 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     )
     dispatch_id = str(meta.get("dispatch_id") or msg_id)
     receipt_path = Path(cfg.eval_log_path or eval_harness.EVAL_LOG)
+    if not has_active_claim(path, role=cfg.role, worker_identity=claim_identity):
+        log(cfg, f"WARN lost claim before processing {path.name}")
+        append_event(EVENTS_DIR, cfg.role, "claim_lost", message_id=msg_id, phase="pre_process")
+        _record_execution_receipt(
+            cfg,
+            meta,
+            routing_decision,
+            planned_route,
+            _not_dispatched_observation(),
+            dispatch_id=dispatch_id,
+            status="skipped",
+            source="claim_preflight",
+            finish_reason="skipped",
+            error="claim_lost",
+        )
+        return True
+
     try:
-        budget_preflight = eval_harness.budget_preflight(
+        budget_preflight = eval_harness.reserve_dispatch_budget(
             path=receipt_path,
+            root=REPO_ROOT,
             task_id=_metadata_task_id(meta),
             claim_id=_metadata_claim_id(meta),
             dispatch_id=dispatch_id,
             dispatch_ceiling=_provider_dispatch_ceiling(provider),
             task_token_budget=_metadata_budget(meta, "task_token_budget"),
             claim_token_budget=_metadata_budget(meta, "claim_token_budget"),
+            source="agent_worker",
         )
     except eval_harness.ReceiptIntegrityError as exc:
         budget_preflight = {
@@ -1237,8 +1275,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--watch-fs", action="store_true",
                         help="TASK-105: 인박스 변경을 watchdog 이벤트로 감지해 즉시 반응 "
                              "(opt-in, watchdog 필요). 미설치/미지정 시 폴링 fallback")
-    parser.add_argument("--model",
-                        help="provider model tier: auto, haiku, sonnet, opus, or provider model name")
+    parser.add_argument(
+        "--model",
+        choices=sorted(
+            {"auto", "haiku", "sonnet", "opus"}
+            | set(model_routing.ALLOWED_PM_TIERS)
+        ),
+        help="role-bound PM tier (or haiku/sonnet/opus compatibility tier)",
+    )
     parser.add_argument("--routing-grade", default="Medium",
                         help="task grade used when --model=auto (default Medium)")
     parser.add_argument("--routing-prompt", default="",
@@ -1257,6 +1301,7 @@ def main(argv: list[str] | None = None) -> int:
     role = normalize_role(args.role)
     routing_decision = apply_model_routing_env(
         args.provider,
+        role=role,
         model=args.model,
         grade=args.routing_grade,
         prompt=args.routing_prompt or args.role,

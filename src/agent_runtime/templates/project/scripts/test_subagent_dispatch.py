@@ -23,8 +23,9 @@ import subagent_dispatch as sd  # noqa: E402
 import check_messages as cm  # noqa: E402
 
 
-def test_six_roles_registered():
+def test_seven_roles_registered():
     assert set(sd.list_roles()) == {
+        "scribe",
         "explorer",
         "implementer",
         "reviewer",

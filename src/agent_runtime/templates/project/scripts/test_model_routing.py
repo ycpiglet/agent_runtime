@@ -92,7 +92,12 @@ def test_runtime_role_families_have_explicit_economic_policy():
         "scribe": ("scribe", "worker_low"),
         "research": ("exploration", "worker_low"),
         "implementation": ("implementation", "worker_low"),
+        "backend": ("implementation", "worker_low"),
+        "uiux": ("implementation", "worker_low"),
+        "ci-cd": ("implementation", "worker_low"),
+        "timeline": ("exploration", "worker_low"),
         "reviewer": ("review", "reviewer_standard"),
+        "beta-tester": ("review", "reviewer_standard"),
         "auditor": ("audit", "reviewer_high"),
     }
     for role, (policy_id, tier) in expected.items():
