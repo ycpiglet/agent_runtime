@@ -1004,7 +1004,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "21f2762e85d1d97a890aac24c34936d02780cb9e59f9593895a49c8bbe28f53d"
+          "value": "b27ee406055d4f2ecb50fdad8ea710a1681a50396700e5faa64e94a765547973"
         },
         {
           "kind": "sha256",
@@ -1088,7 +1088,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md",
-      "recorded_at": "2026-07-30T15:52:01+09:00",
+      "recorded_at": "2026-07-30T15:54:31+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1304,5 +1304,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T15:52:01+09:00"
+  "updated_at": "2026-07-30T15:54:31+09:00"
 }
