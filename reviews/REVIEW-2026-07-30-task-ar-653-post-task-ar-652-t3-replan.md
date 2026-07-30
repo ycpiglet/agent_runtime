@@ -48,6 +48,24 @@ or worktree was created by the refused dispatch. This is a planning
 clarification only; it does not authorize writes outside the Runtime
 repository.
 
+## Preimplementation Claim Supersession
+
+The first successful claim was independently audited before any implementation
+change. The worker worktree was clean, had zero unique commits, and matched
+main `4fd24097dcce0fbeb79471ccfdc192c70d46ac80`. The audit found that the
+claim omitted the two byte-identical portable copies required whenever
+`src/agent_runtime/state_projection.py` changes:
+
+- `scripts/agent_runtime/state_projection.py`
+- `src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py`
+
+The claim was released using
+`reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md`
+as administrative supersession evidence, then its zero-divergence
+worktree/branch were removed. That report is explicitly not implementation
+acceptance. The replacement unit footprint includes both mirrors and still
+requires a fresh W4a plus distinct implementation W4b.
+
 ## Implementation Order
 
 1. Add failure-first tests for projection-only readiness, missing active

@@ -994,7 +994,12 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-          "value": "a774f9f115dccf297beba61c7eb3195f1dbffa219db5926ab699d4a64258e5ce"
+          "value": "11c1bb6c5b170c059b52da591d34f1a87377f5d9e73bad19cf72eae3b48a2897"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md",
+          "value": "ab4860de4439f7597b13950a36c1e1d26b83e35aae41392ae60077b07f5a8236"
         },
         {
           "kind": "sha256",
@@ -1009,16 +1014,26 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
-          "value": "4b8442b737589de8aed6287525f48e3a7b0428f9bf9b53e1f21e81f73430a512"
+          "value": "cee58725f4b748a99301fd3e0e30facd0f05b74effa20655171df83f83c0898c"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
-          "value": "64ccb0803963bf5dbca8d20966c906a14e47f245bd6b4b5906fd71bf76179da8"
+          "value": "fc4f3c7ea8bc0a2efab50d6fceb1d21e330b0c857141a9dbb6e3f8c4a9a94110"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/state_projection.py",
+          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/agent_runtime/state_projection.py",
+          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py",
           "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
         },
         {
@@ -1109,7 +1124,7 @@
         {
           "kind": "sha256",
           "path": "BACKLOG-BOARD.md",
-          "value": "544cc5d824758b1afb43196deda60292ff1ed81f45c4ceff30cc16fd2828c984"
+          "value": "8b7bb6985dc6160f2dc8a6e2152680aba4a3517c5881f75406b77dd2fb8d47ed"
         },
         {
           "kind": "sha256",
@@ -1123,7 +1138,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-      "recorded_at": "2026-07-30T22:49:05+09:00",
+      "recorded_at": "2026-07-30T23:12:52+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1339,5 +1354,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T22:49:05+09:00"
+  "updated_at": "2026-07-30T23:12:52+09:00"
 }

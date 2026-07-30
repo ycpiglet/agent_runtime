@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T22:48:39+09:00
+updated_at: 2026-07-30T22:59:16+09:00
 title: Close the Scribe source-debt and active-work loop
 status: planned
 priority: P1

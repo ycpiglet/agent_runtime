@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T22:48:39+09:00
+updated_at: 2026-07-30T22:59:16+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -24,11 +24,14 @@ escalation_triggers:
 context: Runtime currently has 769 hot items and Autofolio had 272, yet both become ready after writing a ten-item projection. The Scribe skill promises mandatory archive work above 15 items, so implementation and policy disagree.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md
   - src/agent_runtime/state_projection.py
   - src/agent_runtime/templates/project/agents/scribe/SKILL.md
   - src/agent_runtime/templates/project/scripts/closure_gate.py
 target_files:
   - src/agent_runtime/state_projection.py
+  - scripts/agent_runtime/state_projection.py
+  - src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py
   - src/agent_runtime/doctor.py
   - scripts/scribe_due.py
   - src/agent_runtime/templates/project/scripts/scribe_due.py
@@ -64,6 +67,7 @@ Runtime currently has 769 hot items and Autofolio had 272, yet both become ready
 ## Inputs
 
 - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+- reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md
 - src/agent_runtime/state_projection.py
 - src/agent_runtime/templates/project/agents/scribe/SKILL.md
 - src/agent_runtime/templates/project/scripts/closure_gate.py
@@ -71,6 +75,8 @@ Runtime currently has 769 hot items and Autofolio had 272, yet both become ready
 ## Target Files
 
 - src/agent_runtime/state_projection.py
+- scripts/agent_runtime/state_projection.py
+- src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py
 - src/agent_runtime/doctor.py
 - scripts/scribe_due.py
 - src/agent_runtime/templates/project/scripts/scribe_due.py
@@ -111,7 +117,7 @@ Add deterministic planning and verification. Do not autonomously rewrite host-ow
 
 ## Handoff
 
-Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture, no-touch proof, template parity, and independent W4b.
+Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture, no-touch proof, three-way portable state parity, template parity, and a fresh independent implementation W4b. The administrative supersession report is not implementation acceptance.
 
 ## Stop Boundary
 

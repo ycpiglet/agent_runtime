@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T22:39:54+09:00
-record_count: 1188
+generated_at: 2026-07-30T23:11:59+09:00
+record_count: 1190
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1188` review and evidence records under `reviews/`.
+- Summary: indexed `1190` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1188` files |
+| Reviews covered | pass | `1190` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1194,6 +1194,7 @@ record_count: 1188
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md` | `W4B-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Independent W4b R4 |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md` | `W4B-2026-07-29-unit-task-ar-648-006-continuity-block` | md | failed | block | Bean Wiki Attempt-2 Portable Continuity Independent Review |
+| `reviews/W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession.md` | `W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession` | md | supersede | block | TASK-AR-653 Overlay Claim Lifecycle Administrative Supersession |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-007.md` | `W4B-2026-07-30-unit-task-ar-648-007` | md | passed | pass | TASK-AR-648 UNIT-007 Blocked Unit Redispatch Guard W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-008.md` | `W4B-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-009.md` | `W4B-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4b — UNIT-TASK-AR-648-009 Bean attempt 3 |
@@ -1219,6 +1220,7 @@ record_count: 1188
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final` | md | blocked | block | W4b SDK Telemetry Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md` | `W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession` | md | supersede | block | W4b Administrative Preimplementation Supersession |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
