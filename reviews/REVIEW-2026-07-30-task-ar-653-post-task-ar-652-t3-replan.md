@@ -32,18 +32,20 @@ TASK-AR-653 must make those states truthful without autonomously rewriting
 
 ## Executable Target Clarification
 
-Pre-dispatch validation confirmed that `tests/test_session_start_hook.py` is a
-new failure-first test target, not an existing test to substitute with the
-template-local test of the same feature. Directly running
+The first W2 preflight refused the claim before mutation because
+`tests/test_session_start_hook.py` does not exist and claim footprints require
+existing paths. Directly running
 `src/agent_runtime/templates/project/scripts/test_session_start_hook.py` from
 the Runtime checkout fails because that fixture expects a rendered host root.
 Rendered-host behavior remains covered by `tests/test_template_smoke.py`.
 
 The unit footprint is expanded before claim creation to include the root
 mirrors for Scribe and closure, both session-start hook copies,
-`src/agent_runtime/doctor.py`, and the template smoke suite. The planned new
-root hook test remains the executable unit verification target. This is a
-planning clarification only; it does not authorize writes outside the Runtime
+`src/agent_runtime/doctor.py`, and the template smoke suite. The existing
+`tests/test_session_continuity_hooks.py` is the executable root integration
+suite for session-start behavior and replaces the impossible target. No claim
+or worktree was created by the refused dispatch. This is a planning
+clarification only; it does not authorize writes outside the Runtime
 repository.
 
 ## Implementation Order

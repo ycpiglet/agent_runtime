@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T22:45:39+09:00
+updated_at: 2026-07-30T22:48:39+09:00
 title: Close the Scribe source-debt and active-work loop
 status: planned
 priority: P1
@@ -39,7 +39,7 @@ acceptance:
   - A cleanup receipt binds source before/after digests and the resulting hot count.
   - Scribe can be selectively routed through the low-cost role policy without gaining canonical decision authority.
 verification:
-  - python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py tests/test_template_smoke.py -q
+  - python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q
   - python scripts/scribe_due.py --root . --json
   - python scripts/template_mirror_gate.py --check
 ---
@@ -64,6 +64,6 @@ verification:
 
 ## Verification
 
-- `python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py tests/test_template_smoke.py -q`
+- `python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q`
 - `python scripts/scribe_due.py --root . --json`
 - `python scripts/template_mirror_gate.py --check`

@@ -994,7 +994,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-          "value": "d983c2c0f32b27c6a5c37b58d41c0cd4b03654761174b5614484061fbaa3a902"
+          "value": "a774f9f115dccf297beba61c7eb3195f1dbffa219db5926ab699d4a64258e5ce"
         },
         {
           "kind": "sha256",
@@ -1009,12 +1009,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
-          "value": "c8a6ac038929625dcbe240dd53f9c6c13a5b5f8d95096b5aa9d0a2d6d945c55b"
+          "value": "4b8442b737589de8aed6287525f48e3a7b0428f9bf9b53e1f21e81f73430a512"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
-          "value": "1d2f5595a4f9ece2bed46dce3cc120d8f019a55e4e0466f540804fc2c85b706c"
+          "value": "64ccb0803963bf5dbca8d20966c906a14e47f245bd6b4b5906fd71bf76179da8"
         },
         {
           "kind": "sha256",
@@ -1072,9 +1072,9 @@
           "value": "8d6df488dff7ad640f7292e3f38983baa498659d0b9399b0b687a43be7daf278"
         },
         {
-          "kind": "absent",
-          "path": "tests/test_session_start_hook.py",
-          "value": ""
+          "kind": "sha256",
+          "path": "tests/test_session_continuity_hooks.py",
+          "value": "459389de5f592d196b5b07803884b2bdae909f1ad39285fc64b5fd20d2655cbe"
         },
         {
           "kind": "sha256",
@@ -1123,7 +1123,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-      "recorded_at": "2026-07-30T22:46:00+09:00",
+      "recorded_at": "2026-07-30T22:49:05+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1339,5 +1339,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T22:46:00+09:00"
+  "updated_at": "2026-07-30T22:49:05+09:00"
 }
