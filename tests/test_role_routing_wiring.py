@@ -115,6 +115,32 @@ def _init_git_repo(root: Path) -> None:
     assert _git(root, "commit", "-q", "-m", "init").returncode == 0
 
 
+def _write_plan_snapshot(root: Path, taskset_id: str) -> None:
+    path = root / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-plan-assumptions/v1",
+                "assumption_sets": [
+                    {
+                        "taskset_id": taskset_id,
+                        "anchors": [
+                            {
+                                "path": "reviews/role-routing-plan.md",
+                                "kind": "absent",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _claims(root: Path) -> list[dict]:
     base = root / "agents" / "runtime" / "task_claims"
     if not base.is_dir():
@@ -608,6 +634,7 @@ def test_wave_dispatch_with_scout_council_off_creates_no_overlay_claim(tmp_path:
     _init_git_repo(tmp_path)
     _write_task(tmp_path, "TASK-AR-901")
     u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
+    _write_plan_snapshot(tmp_path, TASKSET)
 
     result = _run_wave(
         tmp_path, "--taskset", TASKSET, "--dispatch", "--mode", "cascade",
@@ -629,6 +656,7 @@ def test_wave_dispatch_with_scout_council_on_creates_scout_overlay(tmp_path: Pat
     _init_git_repo(tmp_path)
     _write_task(tmp_path, "TASK-AR-901")
     u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
+    _write_plan_snapshot(tmp_path, TASKSET)
 
     result = _run_wave(
         tmp_path, "--taskset", TASKSET, "--dispatch", "--mode", "cascade",

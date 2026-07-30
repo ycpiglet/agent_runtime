@@ -78,6 +78,32 @@ def _init_git_repo(root: Path) -> None:
     assert _git(root, "commit", "-q", "-m", "init").returncode == 0
 
 
+def _write_plan_snapshot(root: Path, taskset_id: str) -> None:
+    path = root / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-plan-assumptions/v1",
+                "assumption_sets": [
+                    {
+                        "taskset_id": taskset_id,
+                        "anchors": [
+                            {
+                                "path": "reviews/wave-dispatch-plan.md",
+                                "kind": "absent",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _write_canonical_taskset(root: Path) -> None:
     path = root / "agents" / "project" / "initiatives" / f"{TASKSET}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -318,6 +344,7 @@ def test_dispatch_parallel_batch_creates_claims_and_worktrees(tmp_path: Path) ->
     u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
     u2 = _write_unit(tmp_path, "TASK-AR-902", 1, target_files=["scripts/b.py"])
     _write_unit(tmp_path, "TASK-AR-903", 1, target_files=["docs/c.md"])
+    _write_plan_snapshot(tmp_path, TASKSET)
 
     result = _run(
         tmp_path,
@@ -366,6 +393,7 @@ def test_dispatch_cascade_issues_exactly_one_unit(tmp_path: Path) -> None:
     _write_task(tmp_path, "TASK-AR-902")
     u1 = _write_unit(tmp_path, "TASK-AR-901", 1, target_files=["scripts/a.py"])
     _write_unit(tmp_path, "TASK-AR-902", 1, target_files=["scripts/b.py"])
+    _write_plan_snapshot(tmp_path, TASKSET)
 
     result = _run(
         tmp_path,
@@ -835,6 +863,7 @@ def test_dispatch_preserves_cascade_and_parallel_contracts(
     for task in ("TASK-901", "TASK-902"):
         _host_write_task(tmp_path, task)
         _host_write_unit(tmp_path, task, targets=[f"{task}.py"])
+    _write_plan_snapshot(tmp_path, HOST_TASKSET)
     result = _host_run(
         tmp_path, "--taskset", HOST_TASKSET, "--dispatch", "--mode", mode,
         "--max-panes", panes, "--now", "2026-07-14T21:00:00+09:00",

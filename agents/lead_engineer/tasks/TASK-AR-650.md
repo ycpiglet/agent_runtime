@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T08:36:49+09:00
+updated_at: 2026-07-30T10:20:00+09:00
 title: Rehearse Autofolio v0.6 to v0.8 migration
 status: in_progress
 started_at: 2026-07-30T08:36:49+09:00
@@ -57,8 +57,10 @@ risk_tier: high
 
 - Preserve registered taskset order before RC dispatch, then run an
   exact-product, exact-host, causally isolated migration and safe-apply
-  rehearsal. Classify every legacy seam and verify protected product bytes and
-  host tests without product feature changes.
+  rehearsal. Preserve attempts 1 and 2 as immutable RED evidence, use a newly
+  committed direct-claim repair for attempt 3, classify every legacy seam, and
+  verify protected product bytes and host tests without product feature
+  changes.
 
 ## Acceptance Criteria
 

@@ -24,6 +24,9 @@
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
+    "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
+      "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
+    ],
     "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
@@ -66,6 +69,9 @@
       "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
+    "TASK-AR-650": [
+      "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -100,7 +106,7 @@
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ]
   },
-  "record_count": 13,
+  "record_count": 14,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -296,8 +302,22 @@
         "TASK-AR-648",
         "UNIT-TASK-AR-648-014"
       ]
+    },
+    {
+      "created_at": "2026-07-30T10:05:00+09:00",
+      "defect_signatures": [
+        "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4"
+      ],
+      "id": "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Keep claim readiness identical across direct, taskset, and wave entry points",
+      "work_ids": [
+        "TASK-AR-650"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:929e2061183d85c4aae5cf7705bc9c527b14295050937a88cbc032af0bcf7a70"
+  "source_digest": "sha256:9abf2c081721d9128bb64f6db51adf23989bae26540b2f1d75f5626bc6d18202"
 }

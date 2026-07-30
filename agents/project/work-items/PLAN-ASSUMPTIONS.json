@@ -920,13 +920,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md",
-          "value": "4e2bc8cd10232c3effe8400f7852f62ace03b89e67795f05f4987ba02a1812de"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md",
+          "value": "4e195a901108452cad8960aab3788ab93d0f9566dd1c549e3c0fe82ca1928f11"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
+          "value": "22d9a814b59c2d6e365d723654edb769dbed82679794823d648f9ae0c2c4c481"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
-          "value": "802fb436e0808bfc1d22b6379745f847b2a07928ffd3e735494020eb5f518b93"
+          "value": "9b2900655ffb6a71b4ded5f200880ac4d80c8f67a0a197dfad378077b2ba1722"
         },
         {
           "kind": "sha256",
@@ -951,12 +956,22 @@
         {
           "kind": "sha256",
           "path": "scripts/taskset_dispatcher.py",
-          "value": "881d315f735380bb33817038ee5c3faa2c5a34353de6a1e81235dc0205237b3e"
+          "value": "2aa1256d42a3140ae5282b74e18c2cc27d720aeca85119a0de44e3a8dceaa41f"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "89c5d2751781623a126bb93424fcb944b3272c4ae8a3f2b00de0d9d5b5acf2e1"
+          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/host_contracts/test_autofolio_task_claim_dispatcher.py",
+          "value": "9738b5a7396cf2fb18bf4c06816b1681222a952574a3f984adc32d7353e203b3"
         },
         {
           "kind": "sha256",
@@ -969,8 +984,8 @@
           "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md",
-      "recorded_at": "2026-07-30T08:41:30+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md",
+      "recorded_at": "2026-07-30T10:27:02+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1186,5 +1201,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T08:41:30+09:00"
+  "updated_at": "2026-07-30T10:27:02+09:00"
 }

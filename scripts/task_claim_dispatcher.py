@@ -15,12 +15,14 @@ by default (--allow-missing-evidence is a loud transitional escape). Claims that
 were already released before this gate existed are exempt; only new release
 invocations enforce it.
 
-Create runs the deferred plan revalidation check (T2, TASK-AR-506) by default:
-when the claim's task_set_id has a recorded assumption set in
-agents/project/work-items/PLAN-ASSUMPTIONS.json, drifted anchors refuse claim
-creation until a replan review re-records them (--skip-plan-check is a loud
-transitional escape). This makes the W0~W6 lifecycle the default for all work,
-not an opt-in per taskset.
+Create runs the deferred plan revalidation check (T2, TASK-AR-506) by default.
+Claims bound to a canonical taskset or complete unit require a valid T0 entry
+in agents/project/work-items/PLAN-ASSUMPTIONS.json, while legacy identity-only
+claims retain their migration-compatible no-snapshot path. Drifted anchors
+refuse claim creation until a replan review re-records them
+(--skip-plan-check is a loud transitional escape for drift only). Direct,
+taskset, and wave claim entry points share the same readiness-before-mutation
+contract.
 """
 
 from __future__ import annotations
@@ -774,12 +776,52 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
         print(f"display_name={claim.get('display_name')}")
 
 
-def _plan_assumption_findings(root: Path, task_set_id: str) -> list[str] | None:
-    """Return T2 drift findings for the taskset's recorded assumption set.
+def _structured_claim_preflight_expected(root: Path, task_id: str) -> bool:
+    """Return whether the host has adopted canonical task or unit records.
 
-    ``None`` means no snapshot is recorded for this taskset (T0 never ran);
-    an empty list means the snapshot exists and every anchor still holds.
+    Legacy lightweight callers can still create identity-only claims without
+    first materializing the full work graph. Once the selected task is bound
+    to a canonical taskset or a complete unit record, however, a direct claim
+    must honor the same T0 and readiness gates used by taskset and wave
+    dispatch.
     """
+
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    for task in tasks:
+        if task.task_id != task_id:
+            continue
+        task_set_id = str(task.task_set_id or "").strip()
+        if (
+            task_set_id
+            and task_set_id != "TASKSET-AR-UNCLASSIFIED"
+            and _canonical_taskset_statuses(root, task_set_id)
+        ):
+            return True
+
+    for _path, meta, _body in task_unit_readiness_gate.load_unit_specs(root):
+        if str(meta.get("task_id") or "").strip() != task_id:
+            continue
+        if (
+            str(meta.get("unit_id") or "").strip()
+            and str(meta.get("task_set_id") or "").strip()
+            and str(meta.get("status") or "").strip()
+        ):
+            return True
+    return False
+
+
+def _plan_assumption_findings(
+    root: Path, task_set_id: str
+) -> list[str] | None:
+    """Return legacy-compatible T2 findings for orchestration callers.
+
+    ``None`` means no snapshot is recorded. Taskset and wave dispatchers retain
+    that migration boundary; direct claims that have adopted structured work
+    use ``_strict_plan_assumption_findings`` instead.
+    """
+
     registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
     entry = next(
         (
@@ -799,15 +841,84 @@ def _plan_assumption_findings(root: Path, task_set_id: str) -> list[str] | None:
     return findings
 
 
-def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) -> bool:
+def _strict_plan_assumption_findings(root: Path, task_set_id: str) -> list[str]:
+    """Return typed T0 registry and T2 drift findings for one taskset."""
+    registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
+    if not isinstance(registry, dict):
+        return ["registry:invalid-root"]
+    if registry.get("schema") != plan_assumption_gate.SCHEMA:
+        return [f"registry:invalid-schema:{registry.get('schema') or 'missing'}"]
+    sets = registry.get("assumption_sets")
+    if not isinstance(sets, list):
+        return ["registry:invalid-assumption-sets"]
+    matches = [
+        item
+        for item in sets
+        if isinstance(item, dict)
+        and str(item.get("taskset_id") or "").strip() == task_set_id
+    ]
+    if not matches:
+        return [f"registry:missing-taskset:{task_set_id}"]
+    if len(matches) > 1:
+        return [f"registry:duplicate-taskset:{task_set_id}"]
+    entry = matches[0]
+    anchors = entry.get("anchors")
+    if not isinstance(anchors, list):
+        return [f"registry:invalid-anchors:{task_set_id}"]
+    if not anchors:
+        return [f"registry:empty-anchors:{task_set_id}"]
+
+    findings: list[str] = []
+    for index, anchor in enumerate(anchors):
+        if not isinstance(anchor, dict):
+            findings.append(f"registry:invalid-anchor:{task_set_id}:{index}")
+            continue
+        raw_path = anchor.get("path")
+        raw_kind = anchor.get("kind")
+        path = raw_path.strip() if isinstance(raw_path, str) else ""
+        kind = raw_kind.strip() if isinstance(raw_kind, str) else ""
+        path_value = Path(path) if path else None
+        invalid_path = (
+            path_value is None
+            or path_value.is_absolute()
+            or ".." in path_value.parts
+        )
+        digest = anchor.get("value")
+        invalid_digest = (
+            kind == "sha256"
+            and (
+                not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            )
+        )
+        if invalid_path or kind not in {"sha256", "absent"} or invalid_digest:
+            findings.append(f"registry:invalid-anchor:{task_set_id}:{index}")
+            continue
+        finding = plan_assumption_gate._check_anchor(root, anchor)  # noqa: SLF001
+        if finding is not None:
+            findings.append(f"{task_set_id}: {finding}")
+    return findings
+
+
+def _plan_check_refusal(
+    root: Path,
+    task_set_id: str,
+    *,
+    skip_plan_check: bool,
+    require_snapshot: bool = False,
+) -> bool:
     """T2 dispatch gate: verify the taskset's recorded plan assumptions.
 
     Returns True when claim creation must be refused. All output goes to
     stderr so --json stdout stays machine-readable.
     """
     try:
-        findings = _plan_assumption_findings(root, task_set_id)
-    except (OSError, ValueError) as exc:
+        findings = (
+            _strict_plan_assumption_findings(root, task_set_id)
+            if require_snapshot
+            else _plan_assumption_findings(root, task_set_id)
+        )
+    except (KeyError, OSError, TypeError, ValueError) as exc:
         findings = [f"registry-unreadable:{plan_assumption_gate.REGISTRY_REL}:{exc}"]
     if findings is None:
         print(
@@ -821,7 +932,12 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
     if not findings:
         print(f"plan-assumption-gate: pass ({task_set_id})", file=sys.stderr)
         return False
-    if skip_plan_check:
+    hard_registry_findings = [
+        finding
+        for finding in findings
+        if finding.startswith(("registry:", "registry-unreadable:"))
+    ]
+    if skip_plan_check and not hard_registry_findings:
         print(
             "WARNING: --skip-plan-check used: creating claim for "
             f"{task_set_id} DESPITE drifted plan assumptions (T2 dispatch gate bypassed):",
@@ -835,13 +951,20 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
             file=sys.stderr,
         )
         return False
-    print(
-        f"plan assumption drift detected for {task_set_id}: "
-        "claim creation refused (T2 dispatch gate)",
-        file=sys.stderr,
-    )
+    if hard_registry_findings:
+        print(
+            f"claim preflight refused for {task_set_id}: missing or malformed "
+            "plan assumptions (T0/T2 dispatch gate)",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"plan assumption drift detected for {task_set_id}: "
+            "claim creation refused (T2 dispatch gate)",
+            file=sys.stderr,
+        )
     for finding in findings:
-        print(f"- {finding}", file=sys.stderr)
+        print(f"claim-preflight:t0:{finding}", file=sys.stderr)
     print(
         "action=drifted plan assumptions; run a replan review for the affected "
         "taskset, then re-record anchors (python scripts/plan_assumption_gate.py "
@@ -896,14 +1019,7 @@ def _claim_readiness_findings(
     unit_id: str,
     unit_spec: str,
 ) -> list[str]:
-    """Return pre-persistence readiness findings for orchestrated claims.
-
-    This Python entry point lets taskset and wave dispatchers complete their
-    entire preflight before spawning the claim subprocess. The claim CLI keeps
-    its existing compatibility boundary; callers that already selected a unit
-    can use this function to guarantee that no claim, git, or worktree mutation
-    begins after readiness has become invalid.
-    """
+    """Return pre-persistence readiness findings for every claim entry point."""
     findings: list[str] = []
     tasks = backlog_board.load_tasks(
         root / "agents" / "lead_engineer" / "tasks"
@@ -940,38 +1056,54 @@ def _claim_readiness_findings(
     ]
     if not unit_id and not unit_spec and not task_units:
         return list(dict.fromkeys(findings))
+    if not task_set_id:
+        findings.append("unit:missing-taskset-id")
 
-    selected_id = str(unit_id or "").strip()
-    if not selected_id and unit_spec:
+    spec_matches: list[tuple[Path, dict[str, Any], str]] = []
+    if unit_spec:
         spec_path = Path(unit_spec)
         if not spec_path.is_absolute():
             spec_path = root / spec_path
-        matches = [
-            unit for unit in units if unit[0].resolve() == spec_path.resolve()
+        resolved_spec = spec_path.resolve()
+        spec_matches = [
+            unit for unit in units if unit[0].resolve() == resolved_spec
         ]
-        if len(matches) == 1:
-            selected_id = str(matches[0][1].get("unit_id") or "").strip()
-        elif not matches:
+        if not spec_matches:
             findings.append(f"unit:spec-not-registered:{unit_spec}")
-        else:
+        elif len(spec_matches) > 1:
             findings.append(f"unit:duplicate-spec:{unit_spec}")
+        else:
+            spec_meta = spec_matches[0][1]
+            spec_task = str(spec_meta.get("task_id") or "").strip()
+            spec_unit = str(spec_meta.get("unit_id") or "").strip()
+            if spec_task != task_id:
+                findings.append(
+                    f"unit-spec-task-mismatch:{spec_task or 'missing'}:{task_id}"
+                )
+            if unit_id and spec_unit != unit_id:
+                findings.append(
+                    f"unit-spec-id-mismatch:{spec_unit or 'missing'}:{unit_id}"
+                )
 
+    readiness_unit_id = unit_id
+    if not readiness_unit_id and len(spec_matches) == 1:
+        readiness_unit_id = str(spec_matches[0][1].get("unit_id") or "").strip()
     gate_findings = task_unit_readiness_gate.check_root(
         root,
         task_id=task_id,
-        unit_id=selected_id,
+        unit_id=readiness_unit_id,
         require_ready=True,
     )
-    selected_units = task_units
-    if selected_id:
-        selected_units = [
+    selected_for_readiness = task_units
+    if readiness_unit_id:
+        selected_for_readiness = [
             unit
             for unit in task_units
-            if str(unit[1].get("unit_id") or "").strip() == selected_id
+            if str(unit[1].get("unit_id") or "").strip() == readiness_unit_id
         ]
     localized_ready_statuses = {
         str(meta.get("status") or "").strip()
-        for _path, meta, _body in selected_units
+        for _path, meta, _body in selected_for_readiness
         if status_alias.normalize_status(meta.get("status"))
         in task_unit_readiness_gate.READY_STATUSES
     }
@@ -982,6 +1114,22 @@ def _claim_readiness_findings(
         ):
             continue
         findings.append(finding)
+
+    selected = [
+        meta
+        for _path, meta, _body in units
+        if (
+            not readiness_unit_id
+            or str(meta.get("unit_id") or "").strip() == readiness_unit_id
+        )
+        and str(meta.get("task_id") or "").strip() == task_id
+    ]
+    for meta in selected:
+        unit_taskset = str(meta.get("task_set_id") or "").strip()
+        if task_set_id and unit_taskset != task_set_id:
+            findings.append(
+                f"unit-taskset-mismatch:{unit_taskset}:{task_set_id}"
+            )
     return list(dict.fromkeys(findings))
 
 
@@ -1370,11 +1518,38 @@ def cmd_create(args: argparse.Namespace) -> int:
             )
             return 1
 
-    task_set_id = str(args.task_set_id or "").strip()
+    task_set_id, binding_findings = _effective_taskset_id(
+        root,
+        task_id=args.task_id,
+        requested_taskset_id=str(args.task_set_id or "").strip(),
+    )
+    if binding_findings:
+        for finding in binding_findings:
+            print(f"claim-preflight:readiness:{finding}", file=sys.stderr)
+        return 1
+    args.task_set_id = task_set_id
+    strict_claim_preflight = _structured_claim_preflight_expected(
+        root, args.task_id
+    )
     if task_set_id and _plan_check_refusal(
-        root, task_set_id, skip_plan_check=args.skip_plan_check
+        root,
+        task_set_id,
+        skip_plan_check=args.skip_plan_check,
+        require_snapshot=strict_claim_preflight,
     ):
         return 1
+    if strict_claim_preflight:
+        readiness_findings = _claim_readiness_findings(
+            root,
+            task_id=args.task_id,
+            task_set_id=task_set_id,
+            unit_id=str(args.unit_id or "").strip(),
+            unit_spec=str(args.unit_spec or "").strip(),
+        )
+        if readiness_findings:
+            for finding in readiness_findings:
+                print(f"claim-preflight:readiness:{finding}", file=sys.stderr)
+            return 1
 
     explicit_targets = _normalize_target_files(tuple(args.target_file or ()))
     if _security_service_refusal(

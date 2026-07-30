@@ -43,6 +43,32 @@ def _host_from_fixture(tmp_path: Path) -> Path:
     return host
 
 
+def _write_plan_snapshot(host: Path, taskset_id: str) -> None:
+    path = host / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-plan-assumptions/v1",
+                "assumption_sets": [
+                    {
+                        "taskset_id": taskset_id,
+                        "anchors": [
+                            {
+                                "path": "reviews/portable-core-plan.md",
+                                "kind": "absent",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _parse_frontmatter(path: Path) -> dict[str, str]:
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---"):
@@ -271,6 +297,7 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
         f"task_id: {task_id}\n"
         f"parent_id: {task_id}\n"
         f"task_set_id: {task_set_id}\n"
+        "project_id: PROJECT-PORTABLE-CORE\n"
         "kind: unit\n"
         "status: in_progress\n"
         "verification_status: pending\n"
@@ -281,9 +308,39 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
         "origin_ref: tests/test_template_smoke.py\n"
         "created_by: test\n"
         "model_tier: worker_standard\n"
+        "context: Exercise the portable core claim journey.\n"
+        "inputs:\n"
+        f"  - agents/lead_engineer/tasks/{task_id}.md\n"
         "target_files:\n"
         "  - portable_probe.py\n"
-        "---\n\n# Portable continuity unit\n",
+        "scope: Only the synthetic portable core fixture.\n"
+        "acceptance:\n"
+        "  - The claim journey completes without STATUS.md.\n"
+        "verification:\n"
+        "  - python -m pytest tests/test_template_smoke.py -q\n"
+        "handoff: Report the portable continuity result.\n"
+        f"stop_condition: stop_after:{unit_id}:portable_core\n"
+        "---\n\n"
+        "# Portable continuity unit\n\n"
+        "## Context\n\n"
+        "Exercise the portable core claim journey.\n\n"
+        "## Inputs\n\n"
+        f"- agents/lead_engineer/tasks/{task_id}.md\n\n"
+        "## Target Files\n\n"
+        "- portable_probe.py\n\n"
+        "## Scope\n\n"
+        "Only the synthetic portable core fixture.\n\n"
+        "## Steps\n\n"
+        "1. Create and project the claim.\n"
+        "2. Run governance checks.\n\n"
+        "## Acceptance Criteria\n\n"
+        "- The claim journey completes without STATUS.md.\n\n"
+        "## Verification\n\n"
+        "- python -m pytest tests/test_template_smoke.py -q\n\n"
+        "## Handoff\n\n"
+        "Report the portable continuity result.\n\n"
+        "## Stop Boundary\n\n"
+        "Stop after this portable core unit.\n",
         encoding="utf-8",
     )
     (host / "BACKLOG-BOARD.md").write_text(
@@ -294,6 +351,7 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
         f"# Backlog\n\n{task_set_id}\n{task_id}\n",
         encoding="utf-8",
     )
+    _write_plan_snapshot(host, task_set_id)
     _run(["git", "init", "-q", "-b", "main"], cwd=host)
     _run(["git", "config", "user.email", "test@example.com"], cwd=host)
     _run(["git", "config", "user.name", "Test"], cwd=host)

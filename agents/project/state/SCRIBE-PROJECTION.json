@@ -2,7 +2,7 @@
   "finding_codes": [
     "scribe-overdue"
   ],
-  "generated_at": "2026-07-29T14:55:00+09:00",
+  "generated_at": "2026-07-30T10:20:00+09:00",
   "hot_count": 769,
   "projection_path": "agents/project/state/SCRIBE-PROJECTION.json",
   "schema": "agent-runtime-scribe-projection/v1",

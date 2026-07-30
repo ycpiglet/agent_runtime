@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T09:31:37+09:00
-record_count: 1117
+generated_at: 2026-07-30T10:21:11+09:00
+record_count: 1119
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1117` review and evidence records under `reviews/`.
+- Summary: indexed `1119` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1117` files |
+| Reviews covered | pass | `1119` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -167,6 +167,7 @@ record_count: 1117
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1.md` | `PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1` | md | record | pass | Allimbot Agent Runtime v0.8 Green Pilot — Attempt 1 |
 | `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 1 |
+| `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 2 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 4 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 5 |
@@ -642,6 +643,7 @@ record_count: 1117
 | `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan` | md | approved | pass | TASK-AR-648 Template Mirror and Pilot Isolation T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md` | `REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan` | md | approved | pass | TASK-AR-649 Allimbot Pilot T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T4 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
