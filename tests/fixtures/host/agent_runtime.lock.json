@@ -136,7 +136,7 @@
       "scripts/collaboration_concurrency_gate.py": "sha256:a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4",
       "scripts/collaboration_governance_gate.py": "sha256:287252596cc55c14e61a1a774eec165f565ee1cc6c9fb928d1ca57e04ba062cc",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
-      "scripts/compound_record.py": "sha256:1e240dfc5c58c88aa8b412c7652a0bb862f0a282b1bff4a192a60211f24feefa",
+      "scripts/compound_record.py": "sha256:5ec29ae67b7ae1855d50ffbe6167b35360ecf11cb889a73b06aa874301a74c0c",
       "scripts/continuity_contract_gate.py": "sha256:ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030",
       "scripts/conversation_work_audit.py": "sha256:371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
@@ -515,7 +515,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:39cff145ea70946179e53cf6182a9874aaff53d2a4c64f18a64fa906c4fd589c",
+    "template_digest": "sha256:42eed4da423f6466df0e9e59beb2b4676ce4ffe57a12a3faa4c2ff1a3d3f2ad0",
     "template_files": 252
   },
   "profiles": [

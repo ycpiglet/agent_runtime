@@ -132,6 +132,74 @@ def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+_DUPLICATE_WATCH_FIELDS = (
+    "decision",
+    "status",
+    "reviewed_by",
+    "work_id",
+)
+
+_DUPLICATE_WATCH_CASES = [
+    pytest.param(
+        watch_format,
+        field,
+        order,
+        id=f"{watch_format}-{field}-{order}",
+    )
+    for watch_format in ("markdown", "json")
+    for field in _DUPLICATE_WATCH_FIELDS
+    for order in ("invalid-then-valid", "valid-then-invalid")
+]
+
+
+def _duplicate_accepted_watch_document(
+    *,
+    watch_format: str,
+    field: str,
+    order: str,
+    current_work_id: str,
+) -> str:
+    valid = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    invalid: dict[str, object] = {
+        "status": "rejected",
+        "decision": "rejected",
+        "reviewed_by": None,
+        "work_id": "UNIT-TASK-AR-999-001",
+    }
+    duplicate_values = (
+        (invalid[field], valid[field])
+        if order == "invalid-then-valid"
+        else (valid[field], invalid[field])
+    )
+    pairs: list[tuple[str, object]] = []
+    for key in ("status", "decision", "reviewed_by", "work_id"):
+        if key == field:
+            pairs.extend((key, value) for value in duplicate_values)
+        else:
+            pairs.append((key, valid[key]))
+
+    if watch_format == "json":
+        rows = [
+            f"  {json.dumps(key)}: {json.dumps(value)}"
+            for key, value in pairs
+        ]
+        return "{\n" + ",\n".join(rows) + "\n}\n"
+
+    def frontmatter_scalar(value: object) -> str:
+        return "null" if value is None else str(value)
+
+    rows = [
+        f"{key}: {frontmatter_scalar(value)}\n"
+        for key, value in pairs
+    ]
+    return "---\n" + "".join(rows) + "---\n\n# Duplicate watch authority\n"
+
+
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
     first = records.normalize_signature(" Closure   same-day evidence ")
     second = records.normalize_signature("closure same-day evidence")
@@ -717,6 +785,62 @@ def test_work_close_rejects_invalid_accepted_watch_metadata(
 
     assert result.returncode == 1
     assert expected_finding in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("watch_format", "field", "order"),
+    _DUPLICATE_WATCH_CASES,
+)
+def test_work_close_rejects_duplicate_accepted_watch_authority(
+    tmp_path: Path,
+    watch_format: str,
+    field: str,
+    order: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "duplicate accepted watch authority"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-duplicate-watch.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _duplicate_accepted_watch_document(
+            watch_format=watch_format,
+            field=field,
+            order=order,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject duplicate accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
 
 

@@ -90,6 +90,74 @@ def _scribe_evaluation(
     }
 
 
+_DUPLICATE_WATCH_FIELDS = (
+    "decision",
+    "status",
+    "reviewed_by",
+    "work_id",
+)
+
+_DUPLICATE_WATCH_CASES = [
+    pytest.param(
+        watch_format,
+        field,
+        order,
+        id=f"{watch_format}-{field}-{order}",
+    )
+    for watch_format in ("markdown", "json")
+    for field in _DUPLICATE_WATCH_FIELDS
+    for order in ("invalid-then-valid", "valid-then-invalid")
+]
+
+
+def _duplicate_accepted_watch_document(
+    *,
+    watch_format,
+    field,
+    order,
+    current_work_id,
+):
+    valid = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    invalid = {
+        "status": "rejected",
+        "decision": "rejected",
+        "reviewed_by": None,
+        "work_id": "UNIT-TASK-AR-999-001",
+    }
+    duplicate_values = (
+        (invalid[field], valid[field])
+        if order == "invalid-then-valid"
+        else (valid[field], invalid[field])
+    )
+    pairs = []
+    for key in ("status", "decision", "reviewed_by", "work_id"):
+        if key == field:
+            pairs.extend((key, value) for value in duplicate_values)
+        else:
+            pairs.append((key, valid[key]))
+
+    if watch_format == "json":
+        rows = [
+            f"  {json.dumps(key)}: {json.dumps(value)}"
+            for key, value in pairs
+        ]
+        return "{\n" + ",\n".join(rows) + "\n}\n"
+
+    def frontmatter_scalar(value):
+        return "null" if value is None else str(value)
+
+    rows = [
+        f"{key}: {frontmatter_scalar(value)}\n"
+        for key, value in pairs
+    ]
+    return "---\n" + "".join(rows) + "---\n\n# Duplicate watch authority\n"
+
+
 def test_substantial_closeout_blocks_for_overdue_missing_projection():
     base = closure_gate.decide(
         200,
@@ -678,6 +746,77 @@ def test_stop_gate_rejects_invalid_accepted_watch_metadata(
     assert result["repeat_failure"]["satisfied"] is False
     assert any(
         expected_finding in finding
+        for finding in result["repeat_failure"]["findings"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("watch_format", "field", "order"),
+    _DUPLICATE_WATCH_CASES,
+)
+def test_stop_gate_rejects_duplicate_accepted_watch_authority(
+    tmp_path,
+    monkeypatch,
+    watch_format,
+    field,
+    order,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "duplicate accepted watch authority"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-{TODAY}-duplicate-watch.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _duplicate_accepted_watch_document(
+            watch_format=watch_format,
+            field=field,
+            order=order,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject duplicate accepted watch authority",
+        summary="An accepted watch must carry one authoritative value per field.",
+        cause="Duplicate keys allowed parser-order authority overrides.",
+        prevention="Reject duplicate accepted-watch authority keys.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:44:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
         for finding in result["repeat_failure"]["findings"]
     )
 

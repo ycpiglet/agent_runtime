@@ -185,8 +185,19 @@ def normalize_ref(value: object) -> str:
     return "/".join(parts)
 
 
+def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise CompoundRecordError(
+                f"compound:prevention-watch-duplicate-field:{key}"
+            )
+        payload[key] = value
+    return payload
+
+
 def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
-    """Read only the scalar/list metadata needed by accepted-watch refs."""
+    """Read unambiguous scalar/list metadata needed by accepted-watch refs."""
 
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
@@ -202,6 +213,7 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
         return {}
 
     payload: dict[str, Any] = {}
+    seen: set[str] = set()
     active_list = ""
     for raw in lines[1:end]:
         if raw.startswith((" ", "\t")):
@@ -220,6 +232,11 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
         if not key:
             active_list = ""
             continue
+        if key in seen:
+            raise CompoundRecordError(
+                f"compound:prevention-watch-duplicate-field:{key}"
+            )
+        seen.add(key)
         if value:
             payload[key] = value
             active_list = ""
@@ -231,7 +248,10 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
 
 def _watch_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_unique_watch_object,
+        )
         if not isinstance(payload, dict):
             raise CompoundRecordError("compound:prevention-watch-invalid-root")
         return payload
