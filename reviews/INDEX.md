@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T03:23:23+09:00
-record_count: 1213
+generated_at: 2026-07-31T03:28:38+09:00
+record_count: 1214
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1213` review and evidence records under `reviews/`.
+- Summary: indexed `1214` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1213` files |
+| Reviews covered | pass | `1214` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1240,6 +1240,7 @@ record_count: 1213
 | `reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md` | `W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession` | md | supersede | block | W4b Administrative Preimplementation Supersession |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | blocked | block | TASK-AR-653 Audit View and Plan Delta Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final` | md | blocked | block | TASK-AR-653 Blank Structure and Unique JSON Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final` | md | blocked | block | TASK-AR-653 Configured Source Integrity Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | blocked | block | TASK-AR-653 Scribe Git Audit Anchor Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | blocked | block | TASK-AR-653 Receipt and Authority Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final` | md | blocked | block | TASK-AR-653 Semantic Delta and Exact Identity Final Independent W4b |
