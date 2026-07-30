@@ -224,6 +224,53 @@ def test_missing_active_coverage_has_its_own_closure_obligation():
     assert result["missing"] == ["scribe_active_coverage"]
 
 
+def test_substantial_closeout_blocks_for_configured_source_integrity(
+    tmp_path,
+    monkeypatch,
+):
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True)
+    source.write_text('{"items":[],"items":[]}\n', encoding="utf-8")
+    (tmp_path / "agent_runtime.yml").write_text(
+        "schema: agent-runtime-config/v2\n"
+        "project: closure-fixture\n"
+        "sync:\n"
+        "  mode: check-diff-apply\n"
+        "  allow_silent_overwrite: false\n"
+        "profiles:\n"
+        "  - core\n"
+        "ownership:\n"
+        "  host_owned:\n"
+        "    - state/current.json\n"
+        "host:\n"
+        "  state_adapters:\n"
+        "    state: state/current.json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "count_substantial_lines",
+        lambda *args, **kwargs: 200,
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "has_closure_record",
+        lambda *args, **kwargs: {
+            "compound": False,
+            "review": True,
+            "retro": False,
+        },
+    )
+
+    result = closure_gate.assess(tmp_path, threshold=80, disabled=False)
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-source-integrity"
+    assert result["missing"] == ["scribe_source_integrity"]
+    assert "state/current.json" in result["message"]
+    assert "repair" in result["message"].lower()
+
+
 # --- closure record detection ---
 
 def test_has_closure_record_detects_today(tmp_path):

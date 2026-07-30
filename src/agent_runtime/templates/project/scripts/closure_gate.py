@@ -422,13 +422,15 @@ def apply_scribe_obligation(
 ) -> dict[str, Any]:
     """Add independent Scribe obligations without weakening closure evidence."""
 
+    source_debt = evaluation.get("source_debt")
+    if not isinstance(source_debt, dict):
+        source_debt = {"status": evaluation.get("state", "unavailable")}
+    unavailable_sources = _list_value(source_debt.get("unavailable_sources"))
     summary = {
         "state": evaluation.get("state", "unavailable"),
         "readiness": evaluation.get("readiness", "advisory"),
-        "source_debt": evaluation.get(
-            "source_debt",
-            {"status": evaluation.get("state", "unavailable")},
-        ),
+        "source_debt": source_debt,
+        "unavailable_sources": unavailable_sources,
         "projection": evaluation.get(
             "projection", {"path": "", "status": "missing"}
         ),
@@ -451,6 +453,36 @@ def apply_scribe_obligation(
         or substantial_lines < threshold
         or not summary["closure_blocking"]
     ):
+        return result
+
+    if "configured-source-integrity" in summary["closure_reasons"]:
+        paths = (
+            ", ".join(unavailable_sources)
+            or "(configured source path unavailable)"
+        )
+        missing_name = "scribe_source_integrity"
+        message = (
+            f"Configured canonical Scribe source integrity failed for: {paths}. "
+            "Repair the configured canonical source before closure; refreshing "
+            "or writing the bounded projection cannot clear this obligation."
+        )
+        if result["decision"] == "approve":
+            result.update(
+                {
+                    "decision": "block",
+                    "reason": "scribe-source-integrity",
+                    "missing": [missing_name],
+                    "message": message,
+                }
+            )
+        else:
+            existing_missing = list(result.get("missing", []))
+            if missing_name not in existing_missing:
+                existing_missing.append(missing_name)
+            result["missing"] = existing_missing
+            result["message"] = (
+                str(result.get("message") or "") + " " + message
+            ).strip()
         return result
 
     reason_contract = {

@@ -113,6 +113,12 @@ _ACTIVE_WORK_STATUSES = {
     "working",
 }
 _CLEANUP_AUTHORIZED_ROLES = {"lead-engineer", "doc-steward", "owner"}
+_CONFIGURED_SOURCE_INTEGRITY_CODES = {
+    "source-unsafe",
+    "source-missing",
+    "source-too-large",
+    "source-parse-error",
+}
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _GIT_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 _AUTHORITY_IDENTITY_RE = re.compile(
@@ -2763,11 +2769,36 @@ def evaluate_state(
         for source in sources
         if source.get("present") is True and source.get("state") == "overdue"
     ]
+    unavailable_sources = sorted(
+        {
+            str(source["path"])
+            for source in sources
+            if source.get("configured") is True
+            and _CONFIGURED_SOURCE_INTEGRITY_CODES.intersection(
+                {
+                    str(code)
+                    for code in source.get("finding_codes", [])
+                }
+            )
+        }
+    )
     source_debt = {
         "status": state,
         "hot_count": hot_count,
         "overdue_sources": overdue_sources,
     }
+    if unavailable_sources:
+        source_debt["unavailable_sources"] = unavailable_sources
+        findings.append(
+            _finding(
+                "configured-source-integrity",
+                path=".",
+                detail=(
+                    "configured canonical source integrity is unavailable for: "
+                    + ", ".join(unavailable_sources)
+                ),
+            )
+        )
     if overdue_sources:
         findings.append(
             _finding(
@@ -2837,6 +2868,8 @@ def evaluate_state(
         and cleanup_outcome.get("status") == "owner_decision"
     )
     closure_reasons: list[str] = []
+    if unavailable_sources:
+        closure_reasons.append("configured-source-integrity")
     if overdue_sources and not owner_decision:
         closure_reasons.append("source-debt-overdue")
     if overdue_sources and projection_status != "fresh":

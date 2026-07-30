@@ -400,9 +400,105 @@ def test_configured_missing_source_is_unknown_not_false_ok(tmp_path: Path) -> No
 
     assert result["state"] == "unavailable"
     assert result["sources"][0]["hot_count"] is None
+    assert result["closure_blocking"] is True
+    assert "configured-source-integrity" in result["closure_reasons"]
     assert "source-missing" in {
         finding["code"] for finding in result["findings"]
     }
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"items":[],"items":[]}\n',
+        '{"items":[{"id":"hidden","id":"visible","status":"open"}]}\n',
+        (
+            '{"items":[{"kind":"scribe_cleanup_summary",'
+            '"candidate_count":999,"candidate_count":1,'
+            '"cleanup_plan_digest":"'
+            + ("0" * 64)
+            + '","status":"completed"}]}\n'
+        ),
+        '{"items":[\n',
+    ],
+)
+def test_configured_present_json_integrity_failure_blocks_closure(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(raw, encoding="utf-8")
+    _config(tmp_path, {"state": "state/current.json"})
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["state"] == "unavailable"
+    assert result["readiness"] == "blocked"
+    assert result["closure_blocking"] is True
+    assert "configured-source-integrity" in result["closure_reasons"]
+    assert result["source_debt"]["unavailable_sources"] == [
+        "state/current.json"
+    ]
+    assert "source-parse-error" in result["sources"][0]["finding_codes"]
+
+
+@pytest.mark.parametrize("failure", ["decode", "too-large"])
+def test_configured_unreadable_or_oversized_source_blocks_closure(
+    tmp_path: Path,
+    failure: str,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    if failure == "decode":
+        source.write_bytes(b"\xff")
+    else:
+        source.write_bytes(b" " * (state_projection.MAX_SOURCE_BYTES + 1))
+    _config(tmp_path, {"state": "state/current.json"})
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["closure_blocking"] is True
+    assert "configured-source-integrity" in result["closure_reasons"]
+    assert result["source_debt"]["unavailable_sources"] == [
+        "state/current.json"
+    ]
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"items":[],"items":[]}\n',
+        '{"items":[\n',
+    ],
+)
+def test_projection_write_cannot_clear_configured_source_integrity_failure(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(raw, encoding="utf-8")
+    _config(tmp_path, {"state": "state/current.json"})
+
+    result = state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T00:00:00+09:00",
+    )
+
+    assert result["projection"]["status"] == "fresh"
+    assert result["readiness"] == "blocked"
+    assert result["closure_blocking"] is True
+    assert "configured-source-integrity" in result["closure_reasons"]
+
+
+def test_optional_no_source_remains_advisory(tmp_path: Path) -> None:
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["state"] == "unavailable"
+    assert result["readiness"] == "advisory"
+    assert result["closure_blocking"] is False
+    assert "configured-source-integrity" not in result["closure_reasons"]
 
 
 def test_all_configured_sources_are_evaluated_with_one_global_selection_budget(

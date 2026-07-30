@@ -103,7 +103,7 @@
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
       "scripts/agent_runtime/config.py": "sha256:ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c",
-      "scripts/agent_runtime/state_projection.py": "sha256:a870b54ffdc52bfc3dd8228dfeb041d11a629a35fc8f68d09d7e4b4e8d7974c7",
+      "scripts/agent_runtime/state_projection.py": "sha256:c3e24cd20a0ae12030eb76337a3ee801db45093fc8807492c95b354760f52b2a",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
       "scripts/agent_seminar.py": "sha256:836b9706a0531e701591ec1d827c6a64385e557accf1dcaa826ae32461db94e1",
       "scripts/agent_terminal.py": "sha256:8f0f140c3ee42d543f57173069926b6683788fa2e67bb1cdae8e0d535440609c",
@@ -130,7 +130,7 @@
       "scripts/claim_reaper.py": "sha256:a34c02461ae28bc121f0f6b68db013701a4084fa7b32968378b6c43081674f4e",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
-      "scripts/closure_gate.py": "sha256:e1900d75967e219be0665aa0508d0664966e31c3a5c37db28e7c46e3fae28945",
+      "scripts/closure_gate.py": "sha256:9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2",
       "scripts/codex_subagent_bridge.py": "sha256:d500bc9caa6cd8a01ccb09b3162538928cfc52077d0c4a1641308e574504283e",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:ea8179762f59073005b10402cf9ebae0369ab81057168d30500a836bef4039bb",
+    "template_digest": "sha256:28ad219fb33dda139e3169391bda305ffbd8fc68e5c5b1310eaa8f6844163917",
     "template_files": 251
   },
   "profiles": [
