@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T21:46:54+09:00
-record_count: 1181
+generated_at: 2026-07-30T22:06:02+09:00
+record_count: 1182
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1181` review and evidence records under `reviews/`.
+- Summary: indexed `1182` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1181` files |
+| Reviews covered | pass | `1182` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1200,6 +1200,7 @@ record_count: 1181
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval` | md | approved | pass | W4b Attested-Container Sealing Approval |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final` | md | blocked | block | W4b Call Provenance Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval` | md | blocked | block | W4b Economic Provenance Approval Review |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |

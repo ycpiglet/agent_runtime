@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "a694f206748122b2759c6864918d94963c98f48a411166a3a56c5f38058771e7"
+          "value": "d0342dbb40a1819a633b36909319787b9ddd3444db1c6723dc40d87fc9591133"
         },
         {
           "kind": "sha256",
@@ -1340,10 +1340,15 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md",
           "value": "8244048ef41b9d37d63a1fa76262ab67ab70ed440c8bc1f662ccea2db3d1199a"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md",
+          "value": "730f051ebb9403d09519bb0dd3b8fc631f2d1b7363fed638a8d39bb235962bc1"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md",
-      "recorded_at": "2026-07-30T21:46:55+09:00",
+      "recorded_at": "2026-07-30T22:06:03+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1559,5 +1564,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T21:46:55+09:00"
+  "updated_at": "2026-07-30T22:06:03+09:00"
 }

@@ -62,6 +62,7 @@ inputs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -155,6 +156,7 @@ review_refs:
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
