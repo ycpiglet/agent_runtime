@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T11:37:13+09:00
+generated_at: 2026-07-30T11:41:15+09:00
 task_count: 322
 open_count: 24
 completed_count: 298
@@ -77,7 +77,7 @@ completed_task_set_count: 63
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
 - Progress: `11/13` done; `2` open or active.
-- WIP: active `1/3`; oldest `3.0h`; stale `0`.
+- WIP: active `1/3`; oldest `3.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | in_progress | Ask | P0 | Critical | High | 10h/20000tok | Medium | 8 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
@@ -173,7 +173,7 @@ completed_task_set_count: 63
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `24` open across `4` task sets (see Action Board above).
-- Throughput (7d): `18` tasks completed in the last 7 days (TASK-AR-627).
+- Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `298` — see `ARCHIVE-INDEX.md`.
 

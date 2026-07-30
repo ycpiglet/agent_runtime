@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T11:37:14+09:00
-record_count: 1124
+generated_at: 2026-07-30T11:41:15+09:00
+record_count: 1126
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1124` review and evidence records under `reviews/`.
+- Summary: indexed `1126` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1124` files |
+| Reviews covered | pass | `1126` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -991,6 +991,7 @@ record_count: 1124
 | `reviews/W4A-2026-07-30-unit-task-ar-648-015.md` | `W4A-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4a — UNIT-TASK-AR-648-015 |
 | `reviews/W4A-2026-07-30-unit-task-ar-648-016.md` | `W4A-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4a — UNIT-TASK-AR-648-016 |
 | `reviews/W4A-2026-07-30-unit-task-ar-649-001.md` | `W4A-2026-07-30-unit-task-ar-649-001` | md | passed | n/a | W4a — UNIT-TASK-AR-649-001 |
+| `reviews/W4A-2026-07-30-unit-task-ar-650-001.md` | `W4A-2026-07-30-unit-task-ar-650-001` | md | revise | n/a | W4a - UNIT-TASK-AR-650-001 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1155,6 +1156,7 @@ record_count: 1124
 | `reviews/W4B-2026-07-30-unit-task-ar-648-015.md` | `W4B-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4b — UNIT-TASK-AR-648-015 |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | blocked | block | W4b - UNIT-TASK-AR-650-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

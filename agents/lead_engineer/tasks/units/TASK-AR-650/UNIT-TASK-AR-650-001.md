@@ -13,9 +13,14 @@ status: in_progress
 verification_status: pending
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.json
+evidence_refs:
+  - reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md
+  - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/W4A-2026-07-30-unit-task-ar-650-001.md
+  - reviews/W4B-2026-07-30-unit-task-ar-650-001.md
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T12:00:00+09:00
+updated_at: 2026-07-30T12:10:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
