@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only Scribe state advisory with an explicit projection write mode."""
+"""Read-only Scribe advisory with explicit projection and receipt write modes."""
 
 from __future__ import annotations
 
@@ -42,24 +42,66 @@ def status_path(root: Path = ROOT) -> Path | None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Evaluate configured state sources and Scribe projection freshness"
+        description=(
+            "Evaluate Scribe source debt, projection coverage, cleanup plans, "
+            "and authorized cleanup outcomes"
+        )
     )
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument(
+    writes = parser.add_mutually_exclusive_group()
+    writes.add_argument(
         "--write-projection",
         action="store_true",
-        help="atomically write only the configured generated projection",
+        help=(
+            "atomically refresh only the configured generated view; this does "
+            "not clean canonical source state"
+        ),
+    )
+    writes.add_argument(
+        "--record-cleanup",
+        action="store_true",
+        help=(
+            "record an authorized cleanup outcome in the generated projection; "
+            "canonical source edits must already be complete"
+        ),
+    )
+    parser.add_argument(
+        "--authorization-ref",
+        default="",
+        help="repo-relative existing task or record authorizing --record-cleanup",
+    )
+    parser.add_argument(
+        "--owner-decision-ref",
+        default="",
+        help=(
+            "repo-relative existing owner decision permitting no reduction; "
+            "valid only with --record-cleanup"
+        ),
     )
     parser.add_argument("--now", help="deterministic ISO-8601 projection timestamp")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.record_cleanup and not args.authorization_ref:
+        parser.error("--record-cleanup requires --authorization-ref")
+    if args.owner_decision_ref and not args.record_cleanup:
+        parser.error("--owner-decision-ref requires --record-cleanup")
+    if args.authorization_ref and not args.record_cleanup:
+        parser.error("--authorization-ref requires --record-cleanup")
     try:
-        if args.write_projection:
+        if args.record_cleanup:
+            result = state_projection.record_cleanup(
+                args.root,
+                authorization_ref=args.authorization_ref,
+                owner_decision_ref=args.owner_decision_ref,
+                now=args.now,
+            )
+        elif args.write_projection:
             result = state_projection.write_projection(args.root, now=args.now)
         else:
             result = state_projection.evaluate_state(args.root)
@@ -88,9 +130,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[scribe_due] {state_projection.compact_summary(result)}")
     if not args.quiet and result["readiness"] != "ready":
         print(
-            "  → Generate a bounded projection with "
+            "  → Refresh the bounded view with "
             "`python scripts/scribe_due.py --write-projection`; "
-            "canonical host state is never edited."
+            "this never cleans canonical source debt. Execute cleanup only "
+            "under an explicit task, then record its outcome with "
+            "`--record-cleanup --authorization-ref <repo-relative-path>`."
         )
     return 0
 

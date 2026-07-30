@@ -529,9 +529,78 @@ def test_synced_host_scribe_projection_is_explicit_and_bounded(tmp_path):
         cwd=host,
         env=env,
     )
-    assert json.loads(written.stdout)["projection"]["status"] == "fresh"
+    written_payload = json.loads(written.stdout)
+    assert written_payload["projection"]["status"] == "fresh"
+    assert written_payload["source_debt"]["status"] == "overdue"
+    assert written_payload["closure_blocking"] is True
     assert projection.stat().st_size <= 32 * 1024
     assert source.stat().st_mtime_ns == source_mtime
+
+
+def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
+    host = _host_from_fixture(tmp_path)
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+    source = host / "STATUS.md"
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    authorization = host / "agents/lead_engineer/tasks/TASK-SCRIBE.md"
+    authorization.parent.mkdir(parents=True, exist_ok=True)
+    authorization.write_text("# Authorized cleanup\n", encoding="utf-8")
+    _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--write-projection",
+            "--now",
+            "2026-07-29T00:00:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=env,
+    )
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    recorded = _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--record-cleanup",
+            "--authorization-ref",
+            "agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            "--now",
+            "2026-07-29T00:10:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=env,
+    )
+    payload = json.loads(recorded.stdout)
+    projection = json.loads(
+        (host / "agents/project/state/SCRIBE-PROJECTION.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert payload["cleanup_outcome"]["status"] == "verified_reduction"
+    assert payload["closure_blocking"] is False
+    assert projection["cleanup_receipt"]["schema"] == (
+        "agent-runtime-scribe-cleanup-receipt/v1"
+    )
+    assert projection["cleanup_receipt"]["resulting_hot_count"] == 11
 
 
 def test_synced_host_state_scripts_run_without_source_package_or_pythonpath(

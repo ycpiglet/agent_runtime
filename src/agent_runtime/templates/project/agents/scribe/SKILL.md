@@ -16,6 +16,9 @@ dispatcher.
 - Archive or summarize old document-heavy sections when Lead Engineer or Doc
   Steward has already identified them as safe to compress.
 - Keep source links and audit/TASK/MEETING references intact.
+- Produce a deterministic, bounded cleanup proposal before any cleanup task.
+- Record the outcome only after an explicitly authorized cleanup or owner
+  no-touch decision; bind it to before/after source digests and counts.
 - Produce a short cleanup note describing what was compressed and what was left
   unchanged.
 
@@ -31,6 +34,11 @@ dispatcher.
   latest `CYCLE-*.md`, latest `REVIEW-*.md`, active TASK files, or unresolved
   AUDIT entries unless explicitly assigned.
 - Do not edit product code.
+- Do not treat a generated projection as cleanup evidence. Projection refresh,
+  canonical cleanup, and cleanup receipt are three distinct operations.
+- Do not edit host-owned state merely because Doctor, SessionStart, or a closure
+  gate reports overdue debt. Stop until a task or owner record authorizes the
+  exact cleanup scope.
 
 ## Invocation Triggers
 
@@ -53,10 +61,19 @@ heading) **핫 항목 수**가:
   **최신 10개는 hot 으로 유지**.
 
 판정은 `python scripts/scribe_due.py --root .` 로 자동화한다. 기본 호출,
-Doctor, SessionStart는 읽기 전용이며 source of truth가 아니다. 압축이
-필요하면 먼저 `--write-projection`으로 최대 10개 derived item만 담은
-generated projection을 원자적으로 갱신한다. source state 자체는 이
-명령으로 수정하지 않는다.
+Doctor, SessionStart는 읽기 전용이며 source of truth가 아니다.
+`--write-projection`은 최대 10개 derived item, 활성 TASK/비-overlay claim
+identity, bounded cleanup proposal만 담은 generated view를 원자적으로
+갱신한다. **projection freshness만으로 overdue source debt를 해소한 것으로
+보지 않는다.**
+
+실제 압축은 Lead Engineer/Doc Steward가 범위와 no-touch 경계를 명시한
+별도 작업에서 수행한다. 작업 후에는
+`--record-cleanup --authorization-ref <repo-relative-record>`로
+before/after digest·hot count·active-work digest·cleanup-plan digest를 묶은
+receipt를 남긴다. hot count가 줄지 않았다면
+`--owner-decision-ref <repo-relative-owner-record>`가 추가로 필요하다.
+어느 CLI 모드도 canonical host state를 자동 수정하지 않는다.
 
 ### 2. cadence backstop
 
@@ -77,12 +94,20 @@ generated projection을 원자적으로 갱신한다. source state 자체는 이
 활성 TASK, 미해소 AUDIT. 정본(CYCLE/REVIEW/AUDIT/retros/seminars/meetings)은 **이동·요약하지 않고
 링크로 보존**한다.
 
+활성 범위 판정에는 canonical active TASK와 active non-overlay claim을 모두
+포함한다. review/scout 등 overlay claim은 cleanup coverage 의무에서
+제외한다. 활성 identity가 projection 생성 뒤 추가되면 projection이
+fresh여도 coverage는 incomplete이며, cleanup 전에 다시 projection을
+갱신한다.
+
 ## Standard Inputs
 
 1. Clear cleanup scope from Lead Engineer or Doc Steward.
 2. Target document paths.
 3. Canonical source references that must be preserved.
 4. Any compression level or no-touch sections.
+5. Explicit authorization record. Reduction이 불가능하면 owner no-touch
+   decision record도 필요하다.
 
 ## Output Contract
 
@@ -94,6 +119,9 @@ Preserved references:
 Changed sections:
 Not changed:
 Verification:
+Authorization ref:
+Before/after hot count:
+Cleanup receipt:
 ```
 
 ## Compression Policy
@@ -103,6 +131,10 @@ Verification:
 - `archive`: move or summarize cold historical material only when an existing
   archive location and canonical references are clear.
 
+Generated cleanup proposal은 실행 명령이 아니다. 후보는 오래되어 hot
+selection에서 밀린 항목과 명시적으로 완료된 항목으로 제한하며, active
+identity와 canonical/no-touch record reference는 항상 제외한다.
+
 ## Operating Rules
 
 - Preserve IDs exactly: `TASK-NNN`, `MEETING-YYYY-MM-DD-NNN`,
@@ -111,3 +143,6 @@ Verification:
   an explicit typo.
 - Prefer small diffs. If cleanup requires deciding meaning, stop and hand back
   to Lead Engineer or Doc Steward.
+- 완료 판정은 네 축을 각각 확인한다: source debt, projection freshness,
+  active coverage, cleanup outcome. Fresh projection 하나로 나머지 축을
+  대체하지 않는다.

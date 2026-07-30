@@ -57,6 +57,52 @@ def _copy_fixture(root: Path, fixture: str, relative: str) -> Path:
     return target
 
 
+def _active_task(root: Path, task_id: str) -> None:
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {task_id}",
+                f"work_id: {task_id}",
+                "kind: task",
+                "status: in_progress",
+                "---",
+                "",
+                f"# {task_id}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _active_claim(
+    root: Path,
+    claim_id: str,
+    task_id: str,
+    *,
+    overlay: bool = False,
+) -> None:
+    path = root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": claim_id,
+                "task_id": task_id,
+                "status": "claimed",
+                "overlay": overlay,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 @pytest.mark.parametrize(
     ("fixture", "relative", "expected_state", "expected_hot"),
     [
@@ -231,6 +277,254 @@ def test_source_digest_change_makes_projection_stale(tmp_path: Path) -> None:
 
     assert result["projection"]["status"] == "stale"
     assert result["closure_blocking"] is False  # 14 hot is due, not overdue.
+
+
+def test_fresh_projection_does_not_clear_overdue_source_debt(
+    tmp_path: Path,
+) -> None:
+    _copy_fixture(tmp_path, "agent-runtime-status.md", "STATUS.md")
+    _config(tmp_path, {"status": "STATUS.md"})
+
+    result = state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+
+    assert result["projection"]["status"] == "fresh"
+    assert result["source_debt"] == {
+        "status": "overdue",
+        "hot_count": 17,
+        "overdue_sources": ["STATUS.md"],
+    }
+    assert result["closure_blocking"] is True
+    assert result["readiness"] == "blocked"
+    assert "source-debt-overdue" in result["closure_reasons"]
+
+
+def test_active_work_added_after_projection_is_reported_as_missing_coverage(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text("# Status\n- one item\n", encoding="utf-8")
+    _config(tmp_path, {"status": "STATUS.md"})
+    state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+    _active_task(tmp_path, "TASK-ACTIVE")
+    _active_claim(tmp_path, "CLAIM-ACTIVE", "TASK-ACTIVE")
+    _active_claim(
+        tmp_path,
+        "CLAIM-OVERLAY",
+        "TASK-OVERLAY",
+        overlay=True,
+    )
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["projection"]["status"] == "fresh"
+    assert result["active_coverage"]["status"] == "incomplete"
+    assert result["active_coverage"]["missing_task_ids"] == ["TASK-ACTIVE"]
+    assert result["active_coverage"]["missing_claim_ids"] == ["CLAIM-ACTIVE"]
+    assert "CLAIM-OVERLAY" not in json.dumps(result["active_coverage"])
+    assert result["readiness"] == "blocked"
+    assert result["closure_blocking"] is True
+
+    refreshed = state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:05:00+09:00"
+    )
+    assert refreshed["active_coverage"]["status"] == "complete"
+    assert refreshed["closure_blocking"] is False
+
+
+def test_cleanup_plan_selects_cold_history_and_excludes_no_touch_records(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "\n".join(
+            [
+                "# Status",
+                "- old narrative one",
+                "- TASK-ACTIVE keep active",
+                "- REVIEW-2026-01-01 keep canonical",
+                "- old narrative two",
+                "## TASK-ACTIVE",
+                "- heading-scoped active detail",
+                "## Current",
+                *[f"- recent item {index}" for index in range(10)],
+                "- [x] completed plain note",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _active_task(tmp_path, "TASK-ACTIVE")
+    _active_claim(tmp_path, "CLAIM-ACTIVE", "TASK-ACTIVE")
+
+    result = state_projection.evaluate_state(tmp_path)
+    plan = result["cleanup_plan"]
+    rendered = json.dumps(plan, ensure_ascii=False)
+
+    assert plan["schema"] == state_projection.CLEANUP_PLAN_SCHEMA
+    assert plan["status"] == "available"
+    assert "old narrative one" in rendered
+    assert "old narrative two" in rendered
+    assert "completed plain note" in rendered
+    assert "TASK-ACTIVE keep active" not in rendered
+    assert "heading-scoped active detail" not in rendered
+    assert "REVIEW-2026-01-01 keep canonical" not in rendered
+    assert plan["excluded_reason_counts"]["active-reference"] == 2
+    assert plan["excluded_reason_counts"]["canonical-reference"] == 1
+    assert all(item["cold_history"] is True for item in plan["candidates"])
+    assert len(plan["plan_digest"]) == 64
+
+
+def test_cleanup_receipt_binds_before_after_and_resulting_hot_count(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    authorization = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-SCRIBE.md"
+    authorization.parent.mkdir(parents=True, exist_ok=True)
+    authorization.write_text("# Authorized cleanup\n", encoding="utf-8")
+    _config(tmp_path, {"status": "STATUS.md"})
+    state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+    before_digest = state_projection.evaluate_state(tmp_path)["sources"][0]["digest"]
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    result = state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+    projection = json.loads(
+        (tmp_path / state_projection.DEFAULT_PROJECTION_PATH).read_text(
+            encoding="utf-8"
+        )
+    )
+    receipt = projection["cleanup_receipt"]
+
+    assert result["cleanup_outcome"]["status"] == "verified_reduction"
+    assert result["source_debt"]["status"] == "ok"
+    assert result["closure_blocking"] is False
+    assert receipt["schema"] == state_projection.CLEANUP_RECEIPT_SCHEMA
+    assert receipt["before_hot_count"] == 16
+    assert receipt["resulting_hot_count"] == 11
+    assert receipt["before_sources"][0]["digest"] == before_digest
+    assert receipt["after_sources"][0]["digest"] == result["sources"][0]["digest"]
+    assert receipt["authorization_ref"] == (
+        "agents/lead_engineer/tasks/TASK-SCRIBE.md"
+    )
+    assert len(receipt["active_work_digest"]) == 64
+    assert len(receipt["cleanup_plan_digest"]) == 64
+    assert len(receipt["receipt_digest"]) == 64
+
+
+def test_cleanup_without_reduction_requires_explicit_owner_decision(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    authorization = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-SCRIBE.md"
+    authorization.parent.mkdir(parents=True, exist_ok=True)
+    authorization.write_text("# Authorized cleanup\n", encoding="utf-8")
+    decision = tmp_path / "reviews" / "REVIEW-NO-TOUCH.md"
+    decision.parent.mkdir(parents=True, exist_ok=True)
+    decision.write_text("# Owner no-touch decision\n", encoding="utf-8")
+    _config(tmp_path, {"status": "STATUS.md"})
+    state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="reduce hot count|owner decision",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+    result = state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        owner_decision_ref="reviews/REVIEW-NO-TOUCH.md",
+        now="2026-07-29T00:15:00+09:00",
+    )
+
+    assert result["source_debt"]["status"] == "overdue"
+    assert result["cleanup_outcome"]["status"] == "owner_decision"
+    assert result["readiness"] == "ready_with_owner_decision"
+    assert result["closure_blocking"] is False
+
+
+def test_cleanup_receipt_rejects_an_arbitrary_existing_authorization_file(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    (tmp_path / "README.md").write_text("# Not an authorization\n", encoding="utf-8")
+    _config(tmp_path, {"status": "STATUS.md"})
+    state_projection.write_projection(
+        tmp_path, now="2026-07-29T00:00:00+09:00"
+    )
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="TASK authorization",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="README.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_active_work_discovery_does_not_follow_record_symlink_escape(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text("# Status\n- current\n", encoding="utf-8")
+    _config(tmp_path, {"status": "STATUS.md"})
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-task.md"
+    outside.write_text(
+        "---\nid: TASK-PRIVATE-OUTSIDE\nstatus: in_progress\n---\n",
+        encoding="utf-8",
+    )
+    task_link = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-LINKED-OUTSIDE.md"
+    )
+    task_link.parent.mkdir(parents=True, exist_ok=True)
+    task_link.symlink_to(outside)
+
+    result = state_projection.evaluate_state(tmp_path)
+    rendered = json.dumps(result, ensure_ascii=False)
+
+    assert "TASK-PRIVATE-OUTSIDE" not in rendered
+    assert "active-task-unreadable" in rendered
 
 
 def test_default_evaluation_is_read_only_and_explicit_cli_write_is_only_mutation(

@@ -420,16 +420,30 @@ def apply_scribe_obligation(
     threshold: int,
     disabled: bool,
 ) -> dict[str, Any]:
-    """Add the projection obligation without weakening linked closure evidence."""
+    """Add independent Scribe obligations without weakening closure evidence."""
 
     summary = {
         "state": evaluation.get("state", "unavailable"),
         "readiness": evaluation.get("readiness", "advisory"),
+        "source_debt": evaluation.get(
+            "source_debt",
+            {"status": evaluation.get("state", "unavailable")},
+        ),
         "projection": evaluation.get(
             "projection", {"path": "", "status": "missing"}
         ),
+        "active_coverage": evaluation.get(
+            "active_coverage", {"status": "incomplete"}
+        ),
+        "cleanup_plan": evaluation.get(
+            "cleanup_plan", {"status": "unavailable", "candidate_count": 0}
+        ),
+        "cleanup_outcome": evaluation.get(
+            "cleanup_outcome", {"status": "none", "valid": True}
+        ),
         "overdue_sources": list(evaluation.get("overdue_sources", [])),
         "closure_blocking": bool(evaluation.get("closure_blocking")),
+        "closure_reasons": list(evaluation.get("closure_reasons", [])),
     }
     result["scribe"] = summary
     if (
@@ -439,28 +453,65 @@ def apply_scribe_obligation(
     ):
         return result
 
+    reason_contract = {
+        "source-debt-overdue": (
+            "scribe_source_debt",
+            "Canonical source debt is still overdue. Complete an explicitly "
+            "authorized cleanup, or cite an explicit owner no-touch decision.",
+        ),
+        "projection-not-fresh": (
+            "scribe_projection",
+            "Refresh the bounded view with "
+            "`python scripts/scribe_due.py --write-projection`.",
+        ),
+        "active-coverage-incomplete": (
+            "scribe_active_coverage",
+            "Refresh the bounded view so every current task and non-overlay "
+            "claim identity is represented.",
+        ),
+        "cleanup-outcome-invalid": (
+            "scribe_cleanup_outcome",
+            "The cleanup receipt is invalid. Re-record the completed cleanup "
+            "with a valid authorization and bound before/after evidence.",
+        ),
+    }
+    obligations = [
+        (reason, *reason_contract[reason])
+        for reason in summary["closure_reasons"]
+        if reason in reason_contract
+    ]
+    if not obligations:
+        obligations = [
+            (
+                "state-obligation",
+                "scribe_state",
+                "Resolve the blocking Scribe state before closure.",
+            )
+        ]
+    missing = [missing_name for _reason, missing_name, _detail in obligations]
+    detail = " ".join(message for _reason, _missing, message in obligations)
     projection = summary["projection"]
     message = (
-        "A present state source is overdue and its bounded Scribe projection is "
-        f"{projection.get('status', 'missing')}. Generate only "
-        f"{projection.get('path', state_projection.DEFAULT_PROJECTION_PATH)} with "
-        "`python scripts/scribe_due.py --write-projection`; do not edit canonical "
-        "host state as part of this gate."
+        f"{detail} The projection is only a bounded view, not proof that "
+        "canonical cleanup occurred. "
+        f"Projection path: {projection.get('path', state_projection.DEFAULT_PROJECTION_PATH)} "
+        f"(status={projection.get('status', 'missing')})."
     )
     if result["decision"] == "approve":
         result.update(
             {
                 "decision": "block",
-                "reason": "scribe-projection-overdue",
-                "missing": ["scribe_projection"],
+                "reason": f"scribe-{obligations[0][0]}",
+                "missing": missing,
                 "message": message,
             }
         )
     else:
-        missing = list(result.get("missing", []))
-        if "scribe_projection" not in missing:
-            missing.append("scribe_projection")
-        result["missing"] = missing
+        existing_missing = list(result.get("missing", []))
+        for missing_name in missing:
+            if missing_name not in existing_missing:
+                existing_missing.append(missing_name)
+        result["missing"] = existing_missing
         result["message"] = (str(result.get("message") or "") + " " + message).strip()
     return result
 

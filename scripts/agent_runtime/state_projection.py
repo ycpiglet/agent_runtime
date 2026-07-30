@@ -21,6 +21,8 @@ from . import config as _config
 
 PROJECTION_SCHEMA = "agent-runtime-scribe-projection/v1"
 EVALUATION_SCHEMA = "agent-runtime-scribe-evaluation/v1"
+CLEANUP_PLAN_SCHEMA = "agent-runtime-scribe-cleanup-plan/v1"
+CLEANUP_RECEIPT_SCHEMA = "agent-runtime-scribe-cleanup-receipt/v1"
 DEFAULT_PROJECTION_PATH = _config.DEFAULT_STATE_PROJECTION
 CONVENTIONAL_SOURCE_PATHS = (
     "agents/lead_engineer/STATUS.md",
@@ -37,6 +39,11 @@ MAX_HEADING_CHARS = 160
 MAX_ITEM_CHARS = 240
 MAX_PROJECTION_BYTES = 32 * 1024
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
+MAX_ACTIVE_RECORD_BYTES = 256 * 1024
+MAX_ACTIVE_TASK_FILES = 512
+MAX_ACTIVE_CLAIM_FILES = 512
+MAX_ACTIVE_IDENTITIES = 64
+MAX_CLEANUP_CANDIDATES = 10
 DUE_AT = 13
 OVERDUE_AT = 16
 
@@ -62,6 +69,25 @@ _CREDENTIAL_PATTERNS = (
     re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b"),
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}\b", re.IGNORECASE),
 )
+_RECORD_ID_RE = re.compile(
+    r"\b(?:TASK|UNIT|CLAIM|CYCLE|REVIEW|AUDIT|RETRO|MEETING|SEMINAR|"
+    r"COUNCIL|BUG|BTC)-[A-Za-z0-9][A-Za-z0-9._-]*\b",
+    re.IGNORECASE,
+)
+_PROTECTED_RECORD_PREFIXES = (
+    "TASK-",
+    "UNIT-",
+    "CLAIM-",
+    "CYCLE-",
+    "REVIEW-",
+    "AUDIT-",
+    "RETRO-",
+    "MEETING-",
+    "SEMINAR-",
+    "COUNCIL-",
+    "BUG-",
+    "BTC-",
+)
 _JSON_LIST_KEYS = ("items", "entries", "tasks", "work", "backlog")
 _JSON_VALUE_KEYS = ("id", "name", "title", "summary", "status")
 _COLD_JSON_STATUSES = {
@@ -72,6 +98,17 @@ _COLD_JSON_STATUSES = {
     "completed",
     "done",
     "resolved",
+}
+_ACTIVE_WORK_STATUSES = {
+    "active",
+    "blocked",
+    "claimed",
+    "in_progress",
+    "in-progress",
+    "review",
+    "verification",
+    "waiting_review",
+    "working",
 }
 
 
@@ -152,6 +189,7 @@ def parse_markdown(text: str) -> dict[str, Any]:
 
     headings: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
+    cold_candidates: list[dict[str, Any]] = []
     total_count = 0
     hot_count = 0
     cold_count = 0
@@ -186,6 +224,15 @@ def parse_markdown(text: str) -> dict[str, Any]:
             item = redact_text(checkbox_match.group(2), limit=MAX_ITEM_CHARS)
             if checked:
                 cold_count += 1
+                cold_candidates.append(
+                    {
+                        "heading": nearest_heading,
+                        "item": item or "[REDACTED]",
+                        "checklist": "checked",
+                        "source_order": index,
+                        "_priority": 0,
+                    }
+                )
                 continue
             hot_count += 1
             candidates.append(
@@ -225,12 +272,17 @@ def parse_markdown(text: str) -> dict[str, Any]:
             for heading in headings
         ]
 
-    candidates.sort(key=lambda item: (item["_priority"], item["source_order"]))
+    # The bounded hot view keeps the newest records within each priority class.
+    # Older unselected records can then be proposed as cold history without
+    # pretending that a projection itself archived anything.
+    candidates.sort(key=lambda item: (item["_priority"], -item["source_order"]))
+    cold_candidates.sort(key=lambda item: item["source_order"])
     return {
         "total_count": total_count,
         "hot_count": hot_count,
         "cold_count": cold_count,
         "candidates": candidates,
+        "cold_candidates": cold_candidates,
     }
 
 
@@ -283,6 +335,7 @@ def parse_json(text: str) -> dict[str, Any]:
         )
 
     candidates: list[dict[str, Any]] = []
+    cold_candidates: list[dict[str, Any]] = []
     hot_count = 0
     cold_count = 0
     for index, entry in enumerate(entries):
@@ -290,6 +343,16 @@ def parse_json(text: str) -> dict[str, Any]:
         cold = status.strip().lower() in _COLD_JSON_STATUSES
         if cold:
             cold_count += 1
+            if item:
+                cold_candidates.append(
+                    {
+                        "heading": "",
+                        "item": item,
+                        "checklist": "closed-status",
+                        "source_order": index,
+                        "_priority": 0,
+                    }
+                )
             continue
         hot_count += 1
         if not item:
@@ -303,11 +366,13 @@ def parse_json(text: str) -> dict[str, Any]:
                 "_priority": 1,
             }
         )
+    candidates.sort(key=lambda item: (item["_priority"], -item["source_order"]))
     return {
         "total_count": len(entries),
         "hot_count": hot_count,
         "cold_count": cold_count,
         "candidates": candidates,
+        "cold_candidates": cold_candidates,
     }
 
 
@@ -430,7 +495,291 @@ def _source_file_digest(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], list[dict[str, str]], list[dict[str, Any]]]:
+def _canonical_digest(payload: object) -> str:
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _frontmatter_scalar(text: str, field: str) -> str:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return ""
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        match = re.match(rf"^\s*{re.escape(field)}\s*:\s*(.*?)\s*$", line)
+        if not match:
+            continue
+        value = match.group(1).strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1]
+        return value.strip()
+    return ""
+
+
+def _active_status(value: object) -> bool:
+    normalized = re.sub(r"\s+", "_", str(value or "").strip().lower())
+    return normalized in _ACTIVE_WORK_STATUSES or normalized in {
+        "진행_중",
+        "검토_중",
+        "차단",
+    }
+
+
+def _overlay_marker(value: object) -> bool:
+    if value is True:
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return False
+
+
+def _read_bounded_text(path: Path, limit: int) -> str:
+    if path.stat().st_size > limit:
+        raise StateProjectionError(f"record exceeds the {limit}-byte read limit")
+    return path.read_text(encoding="utf-8")
+
+
+def _safe_discovered_record(root: Path, path: Path) -> Path:
+    try:
+        relative = path.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise StateProjectionError("discovered record is outside host root") from exc
+    target = _safe_target(root, relative)
+    symlink = _symlink_ancestor(root, target)
+    if symlink is not None:
+        raise StateProjectionError(
+            f"discovered record or ancestor must not be a symlink: {relative}"
+        )
+    return target
+
+
+def _discover_active_work(
+    root: Path,
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Return bounded canonical active task and non-overlay claim identities."""
+
+    findings: list[dict[str, str]] = []
+    task_ids: set[str] = set()
+    claim_ids: set[str] = set()
+    task_paths = sorted(
+        (root / "agents" / "lead_engineer" / "tasks").glob("TASK-*.md")
+    )[:MAX_ACTIVE_TASK_FILES]
+    for path in task_paths:
+        try:
+            target = _safe_discovered_record(root, path)
+            text = _read_bounded_text(target, MAX_ACTIVE_RECORD_BYTES)
+        except (OSError, UnicodeError, StateProjectionError) as exc:
+            findings.append(
+                _finding(
+                    "active-task-unreadable",
+                    path=path.relative_to(root).as_posix(),
+                    detail=str(exc),
+                )
+            )
+            continue
+        if not _active_status(_frontmatter_scalar(text, "status")):
+            continue
+        task_id = (
+            _frontmatter_scalar(text, "id")
+            or _frontmatter_scalar(text, "work_id")
+            or path.stem
+        )
+        if task_id:
+            task_ids.add(_bounded(task_id, 160))
+
+    claim_paths = sorted(
+        (root / "agents" / "runtime" / "task_claims").glob("*.json")
+    )[:MAX_ACTIVE_CLAIM_FILES]
+    for path in claim_paths:
+        try:
+            target = _safe_discovered_record(root, path)
+            payload = json.loads(
+                _read_bounded_text(target, MAX_ACTIVE_RECORD_BYTES)
+            )
+        except (
+            OSError,
+            UnicodeError,
+            json.JSONDecodeError,
+            StateProjectionError,
+        ) as exc:
+            findings.append(
+                _finding(
+                    "active-claim-unreadable",
+                    path=path.relative_to(root).as_posix(),
+                    detail=str(exc),
+                )
+            )
+            continue
+        if (
+            not isinstance(payload, dict)
+            or not _active_status(payload.get("status"))
+            or _overlay_marker(payload.get("overlay"))
+        ):
+            continue
+        claim_id = _bounded(payload.get("claim_id") or path.stem, 180)
+        task_id = _bounded(payload.get("task_id"), 160)
+        if claim_id:
+            claim_ids.add(claim_id)
+        if task_id:
+            task_ids.add(task_id)
+
+    all_tasks = sorted(task_ids)
+    all_claims = sorted(claim_ids)
+    overflow = (
+        len(all_tasks) > MAX_ACTIVE_IDENTITIES
+        or len(all_claims) > MAX_ACTIVE_IDENTITIES
+        or len(task_paths) >= MAX_ACTIVE_TASK_FILES
+        or len(claim_paths) >= MAX_ACTIVE_CLAIM_FILES
+    )
+    visible_tasks = all_tasks[:MAX_ACTIVE_IDENTITIES]
+    visible_claims = all_claims[:MAX_ACTIVE_IDENTITIES]
+    digest_payload = {
+        "task_ids": visible_tasks,
+        "claim_ids": visible_claims,
+        "task_count": len(all_tasks),
+        "claim_count": len(all_claims),
+        "overflow": overflow,
+    }
+    if overflow:
+        findings.append(
+            _finding(
+                "active-work-overflow",
+                path="agents/runtime/task_claims",
+                detail=(
+                    "active identity discovery exceeded its bounded view; "
+                    "coverage cannot be declared complete"
+                ),
+            )
+        )
+    return {
+        "schema": "agent-runtime-scribe-active-work/v1",
+        **digest_payload,
+        "digest": _canonical_digest(digest_payload),
+    }, findings
+
+
+def _record_ids(value: object) -> list[str]:
+    return sorted(
+        {
+            match.group(0).upper()
+            for match in _RECORD_ID_RE.finditer(str(value or ""))
+        }
+    )
+
+
+def _cleanup_plan(
+    *,
+    sources: list[dict[str, Any]],
+    hot_candidates: list[list[dict[str, Any]]],
+    cold_candidates: list[list[dict[str, Any]]],
+    selected_orders: list[set[int]],
+    active_work: dict[str, Any],
+) -> dict[str, Any]:
+    active_ids = {
+        *[str(value).upper() for value in active_work.get("task_ids", [])],
+        *[str(value).upper() for value in active_work.get("claim_ids", [])],
+    }
+    proposed: list[dict[str, Any]] = []
+    excluded: dict[str, int] = {}
+
+    if not active_work.get("overflow"):
+        for source, hot, cold, kept in zip(
+            sources,
+            hot_candidates,
+            cold_candidates,
+            selected_orders,
+        ):
+            source_candidates: list[tuple[dict[str, Any], str]] = [
+                (candidate, "completed-record") for candidate in cold
+            ]
+            source_candidates.extend(
+                (candidate, "outside-hot-window")
+                for candidate in hot
+                if int(candidate.get("source_order", -1)) not in kept
+            )
+            source_candidates.sort(
+                key=lambda pair: int(pair[0].get("source_order", 0))
+            )
+            for candidate, reason in source_candidates:
+                item = str(candidate.get("item") or "")
+                heading = str(candidate.get("heading") or "")
+                ids = _record_ids(f"{heading} {item}")
+                exclusion = ""
+                if item == "[REDACTED]":
+                    exclusion = "redacted"
+                elif active_ids.intersection(ids):
+                    exclusion = "active-reference"
+                elif any(
+                    record_id.startswith(_PROTECTED_RECORD_PREFIXES)
+                    for record_id in ids
+                ):
+                    exclusion = "canonical-reference"
+                if exclusion:
+                    excluded[exclusion] = excluded.get(exclusion, 0) + 1
+                    continue
+                if len(proposed) >= MAX_CLEANUP_CANDIDATES:
+                    excluded["candidate-budget"] = (
+                        excluded.get("candidate-budget", 0) + 1
+                    )
+                    continue
+                proposed.append(
+                    {
+                        "adapter": source["adapter"],
+                        "path": source["path"],
+                        "heading": heading,
+                        "item": item,
+                        "checklist": candidate.get("checklist", "none"),
+                        "source_order": int(candidate.get("source_order", 0)),
+                        "reason": reason,
+                        "cold_history": True,
+                    }
+                )
+
+    core = {
+        "schema": CLEANUP_PLAN_SCHEMA,
+        "active_work_digest": active_work.get("digest"),
+        "source_fingerprints": [
+            {
+                "adapter": source.get("adapter"),
+                "path": source.get("path"),
+                "present": source.get("present"),
+                "digest": source.get("digest"),
+            }
+            for source in sources
+        ],
+        "candidates": proposed,
+        "excluded_reason_counts": dict(sorted(excluded.items())),
+    }
+    if active_work.get("overflow"):
+        status = "blocked_active_overflow"
+    elif proposed:
+        status = "available"
+    else:
+        status = "empty"
+    return {
+        **core,
+        "status": status,
+        "candidate_count": len(proposed),
+        "excluded_count": sum(excluded.values()),
+        "plan_digest": _canonical_digest(core),
+    }
+
+
+def _evaluate_source(
+    root: Path,
+    source: StateSource,
+) -> tuple[
+    dict[str, Any],
+    list[dict[str, str]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     findings: list[dict[str, str]] = []
     base = {
         "adapter": source.adapter,
@@ -452,7 +801,7 @@ def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], l
         finding = _finding("source-unsafe", path=source.path, detail=str(exc))
         findings.append(finding)
         base["finding_codes"] = [finding["code"]]
-        return base, findings, []
+        return base, findings, [], []
     if not path.is_file():
         code = "source-missing" if source.configured else "source-unavailable"
         finding = _finding(
@@ -464,7 +813,7 @@ def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], l
         )
         findings.append(finding)
         base["finding_codes"] = [finding["code"]]
-        return base, findings, []
+        return base, findings, [], []
     try:
         if path.stat().st_size > MAX_SOURCE_BYTES:
             base.update(present=True, digest=_source_file_digest(path))
@@ -475,7 +824,7 @@ def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], l
             )
             findings.append(finding)
             base["finding_codes"] = [finding["code"]]
-            return base, findings, []
+            return base, findings, [], []
         raw = path.read_bytes()
         text = raw.decode("utf-8")
         parsed = parse_json(text) if path.suffix.lower() == ".json" else parse_markdown(text)
@@ -488,7 +837,7 @@ def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], l
         except OSError:
             pass
         base["finding_codes"] = [finding["code"]]
-        return base, findings, []
+        return base, findings, [], []
 
     base.update(
         present=True,
@@ -498,7 +847,12 @@ def _evaluate_source(root: Path, source: StateSource) -> tuple[dict[str, Any], l
         cold_count=parsed["cold_count"],
         state=classify_hot_count(parsed["hot_count"]),
     )
-    return base, findings, list(parsed["candidates"])
+    return (
+        base,
+        findings,
+        list(parsed["candidates"]),
+        list(parsed["cold_candidates"]),
+    )
 
 
 def _fingerprints(sources: Iterable[dict[str, Any]]) -> list[tuple[str, str, bool, str | None]]:
@@ -556,8 +910,6 @@ def _projection_status(
         projected_sources = payload.get("sources")
         if not isinstance(projected_sources, list):
             raise StateProjectionError("projection sources must be a list")
-        if _fingerprints(projected_sources) != _fingerprints(sources):
-            raise StateProjectionError("projection source paths or digests are stale")
     except (OSError, UnicodeError, json.JSONDecodeError, StateProjectionError) as exc:
         findings.append(
             _finding(
@@ -568,6 +920,18 @@ def _projection_status(
         )
         return "stale", findings, None
 
+    if _fingerprints(projected_sources) != _fingerprints(sources):
+        findings.append(
+            _finding(
+                "projection-stale",
+                path=projection_path,
+                detail="projection source paths or digests are stale",
+            )
+        )
+        # A structurally valid stale payload is still required as the bounded
+        # "before" side of an explicitly authorized cleanup receipt.
+        return "stale", findings, payload
+
     findings.append(
         _finding(
             "projection-fresh",
@@ -577,6 +941,205 @@ def _projection_status(
         )
     )
     return "fresh", findings, payload
+
+
+def _active_coverage(
+    current: dict[str, Any],
+    projected_payload: dict[str, Any] | None,
+) -> dict[str, Any]:
+    projected = (
+        projected_payload.get("active_work")
+        if isinstance(projected_payload, dict)
+        else None
+    )
+    if not isinstance(projected, dict):
+        projected = {}
+    current_tasks = {str(value) for value in current.get("task_ids", [])}
+    current_claims = {str(value) for value in current.get("claim_ids", [])}
+    projected_tasks = {str(value) for value in projected.get("task_ids", [])}
+    projected_claims = {str(value) for value in projected.get("claim_ids", [])}
+    missing_tasks = sorted(current_tasks - projected_tasks)
+    missing_claims = sorted(current_claims - projected_claims)
+    stale_tasks = sorted(projected_tasks - current_tasks)
+    stale_claims = sorted(projected_claims - current_claims)
+    complete = not (
+        current.get("overflow")
+        or projected.get("overflow")
+        or missing_tasks
+        or missing_claims
+        or stale_tasks
+        or stale_claims
+    )
+    return {
+        "status": "complete" if complete else "incomplete",
+        "current_task_ids": sorted(current_tasks),
+        "current_claim_ids": sorted(current_claims),
+        "projected_task_ids": sorted(projected_tasks),
+        "projected_claim_ids": sorted(projected_claims),
+        "missing_task_ids": missing_tasks,
+        "missing_claim_ids": missing_claims,
+        "stale_task_ids": stale_tasks,
+        "stale_claim_ids": stale_claims,
+        "overflow": bool(current.get("overflow") or projected.get("overflow")),
+        "active_work_digest": current.get("digest"),
+    }
+
+
+def _receipt_sources(sources: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "adapter": source.get("adapter"),
+            "path": source.get("path"),
+            "present": source.get("present"),
+            "digest": source.get("digest"),
+            "hot_count": source.get("hot_count"),
+        }
+        for source in sources
+    ]
+
+
+def _safe_existing_ref(
+    root: Path,
+    relative: object,
+    *,
+    record_kind: str,
+) -> str:
+    value = str(relative or "").strip()
+    if not value or Path(value).is_absolute():
+        return ""
+    try:
+        target = _safe_target(root, value)
+    except StateProjectionError:
+        return ""
+    if _symlink_ancestor(root, target) is not None or not target.is_file():
+        return ""
+    relative_path = Path(value)
+    parts = relative_path.parts
+    is_task = (
+        len(parts) >= 4
+        and parts[:3] == ("agents", "lead_engineer", "tasks")
+        and relative_path.suffix.lower() == ".md"
+        and relative_path.name.startswith(("TASK-", "UNIT-TASK-"))
+    )
+    is_owner_record = (
+        len(parts) >= 2
+        and parts[0] == "reviews"
+        and relative_path.suffix.lower() in {".md", ".json"}
+        and relative_path.name.startswith(
+            ("REVIEW-", "AUDIT-", "RETRO-", "DECISION-")
+        )
+    )
+    if record_kind == "task_authorization" and not is_task:
+        return ""
+    if record_kind == "owner_decision" and not (is_task or is_owner_record):
+        return ""
+    return relative_path.as_posix()
+
+
+def _cleanup_outcome(
+    root: Path,
+    *,
+    projection_status: str,
+    projected_payload: dict[str, Any] | None,
+    sources: list[dict[str, Any]],
+    active_work: dict[str, Any],
+    hot_count: int,
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    receipt = (
+        projected_payload.get("cleanup_receipt")
+        if isinstance(projected_payload, dict)
+        else None
+    )
+    if receipt is None:
+        return {"status": "none", "valid": False}, []
+    if not isinstance(receipt, dict):
+        return (
+            {"status": "invalid", "valid": False},
+            [
+                _finding(
+                    "cleanup-outcome-invalid",
+                    path=".",
+                    detail="cleanup receipt must be an object",
+                )
+            ],
+        )
+    errors: list[str] = []
+    if projection_status != "fresh":
+        errors.append("projection is not fresh")
+    if receipt.get("schema") != CLEANUP_RECEIPT_SCHEMA:
+        errors.append("receipt schema is invalid")
+    receipt_core = {
+        key: value
+        for key, value in receipt.items()
+        if key != "receipt_digest"
+    }
+    if receipt.get("receipt_digest") != _canonical_digest(receipt_core):
+        errors.append("receipt digest does not match its payload")
+    if receipt.get("after_sources") != _receipt_sources(sources):
+        errors.append("receipt after-source bindings do not match current sources")
+    if receipt.get("resulting_hot_count") != hot_count:
+        errors.append("receipt resulting hot count does not match current sources")
+    if receipt.get("active_work_digest") != active_work.get("digest"):
+        errors.append("receipt active-work binding is stale")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get("cleanup_plan_digest") or "")):
+        errors.append("receipt cleanup-plan digest is invalid")
+    if not _safe_existing_ref(
+        root,
+        receipt.get("authorization_ref"),
+        record_kind="task_authorization",
+    ):
+        errors.append("receipt authorization ref is missing or unsafe")
+
+    outcome = str(receipt.get("outcome") or "")
+    before_hot = receipt.get("before_hot_count")
+    if outcome == "reduction":
+        if not isinstance(before_hot, int) or before_hot <= hot_count:
+            errors.append("reduction receipt did not reduce hot count")
+        status = "verified_reduction"
+    elif outcome == "owner_decision":
+        if not _safe_existing_ref(
+            root,
+            receipt.get("owner_decision_ref"),
+            record_kind="owner_decision",
+        ):
+            errors.append("owner decision ref is missing or unsafe")
+        status = "owner_decision"
+    else:
+        errors.append("receipt outcome is unsupported")
+        status = "invalid"
+
+    if errors:
+        return (
+            {
+                "status": "invalid",
+                "valid": False,
+                "errors": errors,
+            },
+            [
+                _finding(
+                    "cleanup-outcome-invalid",
+                    path=".",
+                    detail="; ".join(errors),
+                )
+            ],
+        )
+    return (
+        {
+            "status": status,
+            "valid": True,
+            "authorization_ref": receipt.get("authorization_ref"),
+            "owner_decision_ref": receipt.get("owner_decision_ref"),
+            "receipt_digest": receipt.get("receipt_digest"),
+        },
+        [
+            _finding(
+                "cleanup-outcome-verified",
+                path=".",
+                detail=f"cleanup outcome is {status}",
+                severity="info",
+            )
+        ],
+    )
 
 
 def _overall_state(sources: list[dict[str, Any]]) -> str:
@@ -602,22 +1165,31 @@ def evaluate_state(
     findings = list(settings.findings)
     sources: list[dict[str, Any]] = []
     source_candidates: list[list[dict[str, Any]]] = []
+    source_cold_candidates: list[list[dict[str, Any]]] = []
     for source in settings.sources:
-        evaluated, source_findings, candidates = _evaluate_source(root, source)
+        evaluated, source_findings, candidates, cold_candidates = _evaluate_source(
+            root, source
+        )
         sources.append(evaluated)
         source_candidates.append(candidates)
+        source_cold_candidates.append(cold_candidates)
         findings.extend(source_findings)
 
+    active_work, active_findings = _discover_active_work(root)
+    findings.extend(active_findings)
     remaining = MAX_SELECTED_ITEMS
     selected_items: list[dict[str, Any]] = []
+    selected_orders: list[set[int]] = []
     for source, candidates in zip(sources, source_candidates):
         selected: list[dict[str, Any]] = []
+        kept_orders: set[int] = set()
         for candidate in candidates[:remaining]:
             clean = {
                 "heading": candidate["heading"],
                 "item": candidate["item"],
                 "checklist": candidate["checklist"],
             }
+            kept_orders.add(int(candidate.get("source_order", 0)))
             selected.append(clean)
             selected_items.append(
                 {
@@ -628,11 +1200,24 @@ def evaluate_state(
             )
         source["selected_items"] = selected
         source["selected_count"] = len(selected)
+        selected_orders.append(kept_orders)
         remaining -= len(selected)
         if remaining <= 0:
             remaining = 0
 
+    cleanup_plan = _cleanup_plan(
+        sources=sources,
+        hot_candidates=source_candidates,
+        cold_candidates=source_cold_candidates,
+        selected_orders=selected_orders,
+        active_work=active_work,
+    )
     state = _overall_state(sources)
+    hot_count = sum(
+        int(source["hot_count"])
+        for source in sources
+        if isinstance(source.get("hot_count"), int)
+    )
     if state == "overdue":
         findings.append(
             _finding(
@@ -659,7 +1244,7 @@ def evaluate_state(
             )
         )
 
-    projection_status, projection_findings, _payload = _projection_status(
+    projection_status, projection_findings, projected_payload = _projection_status(
         root,
         settings.projection_path,
         sources,
@@ -670,9 +1255,93 @@ def evaluate_state(
         for source in sources
         if source.get("present") is True and source.get("state") == "overdue"
     ]
-    closure_blocking = bool(overdue_sources) and projection_status != "fresh"
+    source_debt = {
+        "status": state,
+        "hot_count": hot_count,
+        "overdue_sources": overdue_sources,
+    }
+    if overdue_sources:
+        findings.append(
+            _finding(
+                "source-debt-overdue",
+                path=".",
+                detail=(
+                    "overdue canonical source debt remains; a fresh projection "
+                    "does not clear it"
+                ),
+            )
+        )
+
+    active_coverage = _active_coverage(active_work, projected_payload)
+    if active_coverage["status"] == "complete":
+        findings.append(
+            _finding(
+                "active-coverage-complete",
+                path="agents/runtime/task_claims",
+                detail="current task and non-overlay claim identities are represented",
+                severity="info",
+            )
+        )
+    else:
+        findings.append(
+            _finding(
+                "active-coverage-incomplete",
+                path="agents/runtime/task_claims",
+                detail=(
+                    "projection is missing or retaining active task/claim "
+                    "identities; refresh the bounded projection"
+                ),
+            )
+        )
+
+    if cleanup_plan["status"] == "available":
+        findings.append(
+            _finding(
+                "cleanup-plan-available",
+                path=".",
+                detail=(
+                    f"{cleanup_plan['candidate_count']} bounded cold-history "
+                    "candidate(s) require an explicit Scribe task"
+                ),
+                severity="info",
+            )
+        )
+    elif cleanup_plan["status"] == "blocked_active_overflow":
+        findings.append(
+            _finding(
+                "cleanup-plan-blocked",
+                path=".",
+                detail="active-work overflow prevents a safe cleanup proposal",
+            )
+        )
+
+    cleanup_outcome, cleanup_findings = _cleanup_outcome(
+        root,
+        projection_status=projection_status,
+        projected_payload=projected_payload,
+        sources=sources,
+        active_work=active_work,
+        hot_count=hot_count,
+    )
+    findings.extend(cleanup_findings)
+    owner_decision = (
+        cleanup_outcome.get("valid") is True
+        and cleanup_outcome.get("status") == "owner_decision"
+    )
+    closure_reasons: list[str] = []
+    if overdue_sources and not owner_decision:
+        closure_reasons.append("source-debt-overdue")
+    if overdue_sources and projection_status != "fresh":
+        closure_reasons.append("projection-not-fresh")
+    if active_coverage["status"] != "complete":
+        closure_reasons.append("active-coverage-incomplete")
+    if cleanup_outcome.get("status") == "invalid":
+        closure_reasons.append("cleanup-outcome-invalid")
+    closure_blocking = bool(closure_reasons)
     if closure_blocking:
         readiness = "blocked"
+    elif owner_decision and overdue_sources:
+        readiness = "ready_with_owner_decision"
     elif state in {"due", "unavailable"}:
         readiness = "advisory"
     else:
@@ -681,11 +1350,7 @@ def evaluate_state(
         "schema": EVALUATION_SCHEMA,
         "state": state,
         "readiness": readiness,
-        "hot_count": sum(
-            int(source["hot_count"])
-            for source in sources
-            if isinstance(source.get("hot_count"), int)
-        ),
+        "hot_count": hot_count,
         "total_count": sum(
             int(source["total_count"])
             for source in sources
@@ -699,8 +1364,14 @@ def evaluate_state(
             "path": settings.projection_path,
             "status": projection_status,
         },
+        "source_debt": source_debt,
+        "active_work": active_work,
+        "active_coverage": active_coverage,
+        "cleanup_plan": cleanup_plan,
+        "cleanup_outcome": cleanup_outcome,
         "overdue_sources": overdue_sources,
         "closure_blocking": closure_blocking,
+        "closure_reasons": closure_reasons,
         "findings": findings,
     }
 
@@ -749,11 +1420,14 @@ def _projection_payload(
         "generated_at": generated_at,
         "projection_path": evaluation["projection"]["path"],
         "state": evaluation["state"],
+        "source_debt": evaluation["source_debt"],
         "hot_count": evaluation["hot_count"],
         "total_count": evaluation["total_count"],
         "source_count": evaluation["source_count"],
         "selected_count": evaluation["selected_count"],
         "sources": sources,
+        "active_work": evaluation["active_work"],
+        "cleanup_plan": evaluation["cleanup_plan"],
         "finding_codes": sorted(
             {
                 str(finding.get("code"))
@@ -765,32 +1439,12 @@ def _projection_payload(
     }
 
 
-def write_projection(
+def _write_projection_payload(
     root: Path,
     *,
-    now: str | datetime | None = None,
-    config: _config.AgentRuntimeConfig | None = None,
-) -> dict[str, Any]:
-    """Atomically write only the configured generated projection."""
-
-    root = root.resolve()
-    evaluation = evaluate_state(root, config=config)
-    blocking_finding = next(
-        (
-            finding
-            for finding in evaluation["findings"]
-            if finding.get("code") in {"config-invalid", "projection-unsafe"}
-        ),
-        None,
-    )
-    if blocking_finding is not None:
-        raise StateProjectionError(
-            str(
-                blocking_finding.get("detail")
-                or "state projection configuration is invalid"
-            )
-        )
-    relative = str(evaluation["projection"]["path"])
+    relative: str,
+    payload: dict[str, Any],
+) -> None:
     target = _safe_target(root, relative)
     symlink = _symlink_ancestor(root, target)
     if symlink is not None:
@@ -798,9 +1452,9 @@ def write_projection(
             f"projection target or ancestor must not be a symlink: {relative}"
         )
     if not _is_inside(root, target.parent):
-        raise StateProjectionError(f"projection parent resolves outside host root: {relative}")
-
-    payload = _projection_payload(evaluation, generated_at=_now_text(now))
+        raise StateProjectionError(
+            f"projection parent resolves outside host root: {relative}"
+        )
     encoded = (
         json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
     ).encode("utf-8")
@@ -831,6 +1485,149 @@ def write_projection(
                 temporary_path.unlink()
             except OSError:
                 pass
+
+
+def write_projection(
+    root: Path,
+    *,
+    now: str | datetime | None = None,
+    config: _config.AgentRuntimeConfig | None = None,
+) -> dict[str, Any]:
+    """Atomically write only the configured generated projection."""
+
+    root = root.resolve()
+    evaluation = evaluate_state(root, config=config)
+    blocking_finding = next(
+        (
+            finding
+            for finding in evaluation["findings"]
+            if finding.get("code") in {"config-invalid", "projection-unsafe"}
+        ),
+        None,
+    )
+    if blocking_finding is not None:
+        raise StateProjectionError(
+            str(
+                blocking_finding.get("detail")
+                or "state projection configuration is invalid"
+            )
+        )
+    relative = str(evaluation["projection"]["path"])
+    payload = _projection_payload(evaluation, generated_at=_now_text(now))
+    _write_projection_payload(root, relative=relative, payload=payload)
+    return evaluate_state(root, config=config)
+
+
+def record_cleanup(
+    root: Path,
+    *,
+    authorization_ref: str,
+    owner_decision_ref: str = "",
+    now: str | datetime | None = None,
+    config: _config.AgentRuntimeConfig | None = None,
+) -> dict[str, Any]:
+    """Record an authorized cleanup outcome without editing canonical state."""
+
+    root = root.resolve()
+    evaluation = evaluate_state(root, config=config)
+    relative = str(evaluation["projection"]["path"])
+    _status, _findings, before_payload = _projection_status(
+        root,
+        relative,
+        list(evaluation["sources"]),
+    )
+    if not isinstance(before_payload, dict):
+        raise StateProjectionError(
+            "cleanup receipt requires an existing structurally valid projection"
+        )
+    before_sources_raw = before_payload.get("sources")
+    if not isinstance(before_sources_raw, list):
+        raise StateProjectionError("cleanup receipt baseline sources are invalid")
+    before_identity = [
+        (
+            str(source.get("adapter") or ""),
+            str(source.get("path") or ""),
+            source.get("present") is True,
+        )
+        for source in before_sources_raw
+        if isinstance(source, dict)
+    ]
+    after_identity = [
+        (
+            str(source.get("adapter") or ""),
+            str(source.get("path") or ""),
+            source.get("present") is True,
+        )
+        for source in evaluation["sources"]
+    ]
+    if before_identity != after_identity:
+        raise StateProjectionError(
+            "cleanup receipt source adapters or paths changed since the baseline"
+        )
+
+    authorization = _safe_existing_ref(
+        root,
+        authorization_ref,
+        record_kind="task_authorization",
+    )
+    if not authorization:
+        raise StateProjectionError(
+            "cleanup receipt requires an existing safe TASK authorization ref"
+        )
+    owner_decision = ""
+    if owner_decision_ref:
+        owner_decision = _safe_existing_ref(
+            root,
+            owner_decision_ref,
+            record_kind="owner_decision",
+        )
+        if not owner_decision:
+            raise StateProjectionError(
+                "cleanup receipt owner decision ref is missing or unsafe"
+            )
+
+    before_hot = before_payload.get("hot_count")
+    after_hot = evaluation.get("hot_count")
+    if not isinstance(before_hot, int) or not isinstance(after_hot, int):
+        raise StateProjectionError("cleanup receipt requires integer hot counts")
+    if after_hot >= before_hot and not owner_decision:
+        raise StateProjectionError(
+            "cleanup must reduce hot count or cite an explicit owner decision"
+        )
+    prior_plan = before_payload.get("cleanup_plan")
+    prior_plan_digest = (
+        str(prior_plan.get("plan_digest") or "")
+        if isinstance(prior_plan, dict)
+        else ""
+    )
+    if not re.fullmatch(r"[0-9a-f]{64}", prior_plan_digest):
+        raise StateProjectionError(
+            "cleanup receipt requires a valid baseline cleanup plan digest"
+        )
+
+    receipt_core: dict[str, Any] = {
+        "schema": CLEANUP_RECEIPT_SCHEMA,
+        "recorded_at": _now_text(now),
+        "outcome": "owner_decision" if owner_decision else "reduction",
+        "authorization_ref": authorization,
+        "owner_decision_ref": owner_decision or None,
+        "before_sources": _receipt_sources(before_sources_raw),
+        "after_sources": _receipt_sources(evaluation["sources"]),
+        "before_hot_count": before_hot,
+        "resulting_hot_count": after_hot,
+        "active_work_digest": evaluation["active_work"]["digest"],
+        "cleanup_plan_digest": prior_plan_digest,
+    }
+    receipt = {
+        **receipt_core,
+        "receipt_digest": _canonical_digest(receipt_core),
+    }
+    payload = _projection_payload(
+        evaluation,
+        generated_at=str(receipt_core["recorded_at"]),
+    )
+    payload["cleanup_receipt"] = receipt
+    _write_projection_payload(root, relative=relative, payload=payload)
     return evaluate_state(root, config=config)
 
 
@@ -838,9 +1635,15 @@ def compact_summary(evaluation: dict[str, Any]) -> str:
     hot = evaluation.get("hot_count", 0)
     source_count = evaluation.get("source_count", 0)
     projection = evaluation.get("projection", {})
+    source_debt = evaluation.get("source_debt", {})
+    coverage = evaluation.get("active_coverage", {})
+    cleanup = evaluation.get("cleanup_outcome", {})
     return (
         f"state={evaluation.get('state', 'unavailable')} "
         f"hot={hot} sources={source_count} "
         f"projection={projection.get('status', 'missing')} "
+        f"debt={source_debt.get('status', 'unavailable')} "
+        f"coverage={coverage.get('status', 'incomplete')} "
+        f"cleanup={cleanup.get('status', 'none')} "
         f"readiness={evaluation.get('readiness', 'advisory')}"
     )
