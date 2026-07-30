@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "b7cbdd3cd73dba26ed4aba35305f615d9d325c958fe2304d723dbcdd35208a2b"
+          "value": "fd79e9a43aa4c93080cafc016fda71db260857bec8e6c724fb74bcdd1b0ff644"
         },
         {
           "kind": "sha256",
@@ -1099,7 +1099,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "84bf893cefe9f310d27242034ef01a362b5bae7b4910ae490fb3e6e3696d36ef"
+          "value": "cde6b3b941dedbc5719c746ecb0bbb54c6f68c941a2f0832f614c2966ffd2134"
         },
         {
           "kind": "sha256",
@@ -1139,7 +1139,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
-          "value": "ebba02e6ebf7e520011038e788dff90a9eb6ab3835795acf9769aba1fc704038"
+          "value": "36a84cb103a5db898cc5de4b5055c7bdb96bc339a473181ae907c87da9d0207f"
         },
         {
           "kind": "sha256",
@@ -1154,7 +1154,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "24ad58a1d8740145cf5d36784cf371f01c9fa254742eea41355016b57714fe2d"
+          "value": "cc0eac300b62bfa9241fa82b25b2fea808f8fb9c28ab8fadcfab5855655ea3d3"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "64aea4c1b5cdc13ecfa5139e0de0f99c0a4cfe76cc203ed7422ac7b745bd559e"
+          "value": "03ab5fcddeff0feffb33621bd21adcb6af382231079d2038195ff8dfee31ab61"
         },
         {
           "kind": "sha256",
@@ -1290,10 +1290,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md",
           "value": "88591c18414f3e0ad1ede34858e43a92a06e9b007c0b9fb66c849dd0f51c6d0d"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json",
+          "value": "9c54c62519e3756e34c7c8b76c3c1cd44e00b831eae0958a804c8538fefb5f43"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md",
+          "value": "c766b64300385794ca0fdd574b848f690fd7f3288509c6414e1966d392d492e0"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md",
-      "recorded_at": "2026-07-30T20:28:06+09:00",
+      "recorded_at": "2026-07-30T20:45:36+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1509,5 +1519,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T20:28:06+09:00"
+  "updated_at": "2026-07-30T20:45:36+09:00"
 }
