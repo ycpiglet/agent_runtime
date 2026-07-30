@@ -377,6 +377,122 @@ def _quoted_accepted_watch_document(
     )
 
 
+_SEMANTIC_SCALAR_INVALID_STYLES = (
+    "nested-single-inside-double",
+    "nested-double-inside-single",
+    "mixed-single-double",
+    "mixed-double-single",
+)
+_SEMANTIC_SCALAR_VALID_STYLES = (
+    "single",
+    "double",
+    "escaped-double",
+)
+_INDENTED_WATCH_FRAGMENTS = (
+    pytest.param(
+        "  decision: rejected\n",
+        id="space-indented-authority",
+    ),
+    pytest.param(
+        "\tdecision: rejected\n",
+        id="tab-indented-authority",
+    ),
+    pytest.param(
+        "summary: accepted\n  rejected\n",
+        id="malformed-continuation",
+    ),
+    pytest.param(
+        "  - rejected\n",
+        id="orphan-list-item",
+    ),
+)
+
+
+def _valid_watch_scalar(field: str, *, current_work_id: str) -> str:
+    value = _semantic_watch_value(
+        field,
+        current_work_id=current_work_id,
+        valid=True,
+    )
+    if isinstance(value, list):
+        return str(value[0])
+    return str(value)
+
+
+def _styled_watch_scalar(value: str, style: str) -> str:
+    if style == "single":
+        return f"'{value}'"
+    if style == "double":
+        return json.dumps(value)
+    if style == "escaped-double":
+        return f'"\\u{ord(value[0]):04x}{value[1:]}"'
+    if style == "nested-single-inside-double":
+        return json.dumps(f"'{value}'")
+    if style == "nested-double-inside-single":
+        return f"'\"{value}\"'"
+    if style == "mixed-single-double":
+        return f"'{value}\""
+    return f"\"{value}'"
+
+
+def _semantic_scalar_accepted_watch_document(
+    *,
+    field: str,
+    style: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows: list[str] = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        if key == field:
+            scalar = _styled_watch_scalar(
+                _valid_watch_scalar(
+                    field,
+                    current_work_id=current_work_id,
+                ),
+                style,
+            )
+            if key == "work_ids":
+                rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            else:
+                rows.append(f"{key}: {scalar}\n")
+            continue
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        if isinstance(value, list):
+            rows.append(f"{key}:\n")
+            rows.extend(f"  - {item}\n" for item in value)
+        else:
+            rows.append(f"{key}: {value}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Semantic scalar authority\n"
+
+
+def _indented_accepted_watch_document(
+    *,
+    fragment: str,
+    current_work_id: str,
+) -> str:
+    return (
+        "---\n"
+        f"{fragment}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        "---\n\n# Indented watch authority\n"
+    )
+
+
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
     first = records.normalize_signature(" Closure   same-day evidence ")
     second = records.normalize_signature("closure same-day evidence")
@@ -1158,6 +1274,152 @@ def test_work_close_accepts_single_semantic_quoted_watch_keys(
     )
 
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_INVALID_STYLES)
+def test_work_close_rejects_invalid_semantic_watch_scalars(
+    tmp_path: Path,
+    field: str,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "invalid semantic accepted watch scalar"
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject invalid semantic watch scalar",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    if style.startswith("mixed-"):
+        assert (
+            f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+            in result.stderr
+        )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_VALID_STYLES)
+def test_work_close_accepts_valid_semantic_watch_scalars(
+    tmp_path: Path,
+    field: str,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "valid semantic accepted watch scalar"
+    watch_ref = "reviews/REVIEW-2026-07-29-valid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Accept valid semantic watch scalar",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("fragment", _INDENTED_WATCH_FRAGMENTS)
+def test_work_close_rejects_unexpected_watch_indentation(
+    tmp_path: Path,
+    fragment: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "unexpected accepted watch indentation"
+    watch_ref = "reviews/REVIEW-2026-07-29-unexpected-indentation.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _indented_accepted_watch_document(
+            fragment=fragment,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject unexpected watch indentation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
 
 
 @pytest.mark.parametrize("script", [SCRIPT, TEMPLATE_SCRIPT])

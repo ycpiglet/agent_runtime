@@ -326,6 +326,118 @@ def _quoted_accepted_watch_document(*, quote_style, current_work_id):
     )
 
 
+_SEMANTIC_SCALAR_INVALID_STYLES = (
+    "nested-single-inside-double",
+    "nested-double-inside-single",
+    "mixed-single-double",
+    "mixed-double-single",
+)
+_SEMANTIC_SCALAR_VALID_STYLES = (
+    "single",
+    "double",
+    "escaped-double",
+)
+_INDENTED_WATCH_FRAGMENTS = (
+    pytest.param(
+        "  decision: rejected\n",
+        id="space-indented-authority",
+    ),
+    pytest.param(
+        "\tdecision: rejected\n",
+        id="tab-indented-authority",
+    ),
+    pytest.param(
+        "summary: accepted\n  rejected\n",
+        id="malformed-continuation",
+    ),
+    pytest.param(
+        "  - rejected\n",
+        id="orphan-list-item",
+    ),
+)
+
+
+def _valid_watch_scalar(field, *, current_work_id):
+    value = _semantic_watch_value(
+        field,
+        current_work_id=current_work_id,
+        valid=True,
+    )
+    if isinstance(value, list):
+        return str(value[0])
+    return str(value)
+
+
+def _styled_watch_scalar(value, style):
+    if style == "single":
+        return f"'{value}'"
+    if style == "double":
+        return json.dumps(value)
+    if style == "escaped-double":
+        return f'"\\u{ord(value[0]):04x}{value[1:]}"'
+    if style == "nested-single-inside-double":
+        return json.dumps(f"'{value}'")
+    if style == "nested-double-inside-single":
+        return f"'\"{value}\"'"
+    if style == "mixed-single-double":
+        return f"'{value}\""
+    return f"\"{value}'"
+
+
+def _semantic_scalar_accepted_watch_document(
+    *,
+    field,
+    style,
+    current_work_id,
+):
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        if key == field:
+            scalar = _styled_watch_scalar(
+                _valid_watch_scalar(
+                    field,
+                    current_work_id=current_work_id,
+                ),
+                style,
+            )
+            if key == "work_ids":
+                rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            else:
+                rows.append(f"{key}: {scalar}\n")
+            continue
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        if isinstance(value, list):
+            rows.append(f"{key}:\n")
+            rows.extend(f"  - {item}\n" for item in value)
+        else:
+            rows.append(f"{key}: {value}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Semantic scalar authority\n"
+
+
+def _indented_accepted_watch_document(*, fragment, current_work_id):
+    return (
+        "---\n"
+        f"{fragment}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        "---\n\n# Indented watch authority\n"
+    )
+
+
 def test_substantial_closeout_blocks_for_overdue_missing_projection():
     base = closure_gate.decide(
         200,
@@ -1157,6 +1269,198 @@ def test_stop_gate_accepts_single_semantic_quoted_watch_keys(
     assert result["decision"] == "approve"
     assert result["reason"] == "repeated-failure-compound-present"
     assert result["repeat_failure"]["satisfied"] is True
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_INVALID_STYLES)
+def test_stop_gate_rejects_invalid_semantic_watch_scalars(
+    tmp_path,
+    monkeypatch,
+    field,
+    style,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "invalid semantic accepted watch scalar"
+    watch_ref = f"reviews/REVIEW-{TODAY}-invalid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject invalid semantic watch scalar",
+        summary="Authority values need bounded scalar decoding.",
+        cause="Quote characters were trimmed instead of decoded.",
+        prevention="Decode one supported scalar representation.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:48:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    if style.startswith("mixed-"):
+        assert any(
+            f"compound:prevention-watch-invalid:{watch_ref}" in finding
+            for finding in result["repeat_failure"]["findings"]
+        )
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_VALID_STYLES)
+def test_stop_gate_accepts_valid_semantic_watch_scalars(
+    tmp_path,
+    monkeypatch,
+    field,
+    style,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "valid semantic accepted watch scalar"
+    watch_ref = f"reviews/REVIEW-{TODAY}-valid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Accept valid semantic watch scalar",
+        summary="Supported scalar quoting preserves authority values.",
+        cause="Compatibility control for bounded scalar decoding.",
+        prevention="Decode paired and JSON-compatible quoted scalars.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:49:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "approve"
+    assert result["reason"] == "repeated-failure-compound-present"
+    assert result["repeat_failure"]["satisfied"] is True
+
+
+@pytest.mark.parametrize("fragment", _INDENTED_WATCH_FRAGMENTS)
+def test_stop_gate_rejects_unexpected_watch_indentation(
+    tmp_path,
+    monkeypatch,
+    fragment,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "unexpected accepted watch indentation"
+    watch_ref = f"reviews/REVIEW-{TODAY}-unexpected-indentation.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _indented_accepted_watch_document(
+            fragment=fragment,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject unexpected watch indentation",
+        summary="Unsupported indentation must not be silently discarded.",
+        cause="Non-list indented content was ignored.",
+        prevention="Reject indented content outside an active list.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:50:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
+        for finding in result["repeat_failure"]["findings"]
+    )
 
 
 def test_parent_repeated_failure_signal_is_inherited_by_stop_gate(

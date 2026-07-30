@@ -49,6 +49,7 @@ MAX_SIGNATURE_INPUT = 240
 MAX_REFS = 64
 MAX_RECORDS = 10000
 MAX_SEARCH_RESULTS = 100
+MAX_FRONTMATTER_SCALAR = 4096
 ACCEPTED_WATCH_STATUSES = {"accepted", "approved"}
 ACCEPTED_WATCH_DECISIONS = {"accepted_watch"}
 ACCEPTED_WATCH_REVIEWER_FIELDS = (
@@ -219,6 +220,47 @@ def _frontmatter_key(raw_key: str) -> str:
     return key
 
 
+def _frontmatter_scalar(raw_value: str) -> str:
+    token = raw_value.strip()
+    if not token or len(token) > MAX_FRONTMATTER_SCALAR:
+        raise CompoundRecordError("compound:prevention-watch-invalid-value")
+    if token.startswith("'"):
+        if len(token) < 2 or not token.endswith("'"):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        inner = token[1:-1]
+        if "'" in inner.replace("''", ""):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        value = inner.replace("''", "'")
+    elif token.startswith('"'):
+        if len(token) < 2 or not token.endswith('"'):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        try:
+            value = json.loads(token)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            ) from exc
+    else:
+        if token.endswith(("'", '"')):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        value = token
+    if (
+        not isinstance(value, str)
+        or len(value) > MAX_FRONTMATTER_SCALAR
+        or any(ord(character) < 32 for character in value)
+    ):
+        raise CompoundRecordError("compound:prevention-watch-invalid-value")
+    return value
+
+
 def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     for key, value in pairs:
@@ -252,11 +294,16 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
     for raw in lines[1:end]:
         if raw.startswith((" ", "\t")):
             stripped = raw.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
             if active_list and stripped.startswith("- "):
                 payload.setdefault(active_list, []).append(
-                    stripped[2:].strip().strip("\"'")
+                    _frontmatter_scalar(stripped[2:])
                 )
-            continue
+                continue
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-indentation"
+            )
         if ":" not in raw:
             active_list = ""
             if raw.strip() and not raw.lstrip().startswith("#"):
@@ -266,14 +313,14 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
             continue
         key, value = raw.split(":", 1)
         key = _frontmatter_key(key)
-        value = value.strip().strip("\"'")
+        value = value.strip()
         if key in seen:
             raise CompoundRecordError(
                 f"compound:prevention-watch-duplicate-field:{key}"
             )
         seen.add(key)
         if value:
-            payload[key] = value
+            payload[key] = _frontmatter_scalar(value)
             active_list = ""
         else:
             payload[key] = []
