@@ -112,7 +112,7 @@
       "scripts/ambiguity_scan.py": "sha256:9d34915e12ddc4249de63d36ddcdd5afd06ca90e1e0d66ae002fe04231159ad5",
       "scripts/atomic_io.py": "sha256:95e71fed4860a0d9cfafca45bdf0422fe5b2b33241f13d6da103e0a41ecdb9df",
       "scripts/attribution_gate.py": "sha256:be7d9ba6d7d48a3914d55c2784ab51ab79642a62f4621eb06af88a0857050848",
-      "scripts/auto_dispatch.py": "sha256:6dfdce16abc414a576a0192c4cc749b6ee2c415923ae2fc0b49cdbe2f97b6154",
+      "scripts/auto_dispatch.py": "sha256:3d776277f436a7b60d1cdc863395a7dcebff0f6fba9a3b66c44b35fa2c582719",
       "scripts/auto_merge.py": "sha256:0fe30e17d778bcc040adcfaccf8dbac7ed53d5f86581552e397a5fcccf88a69b",
       "scripts/auto_runner.py": "sha256:d0168f9cee6e149925db326f2bfb62a59b5b6485ae2a39e9c35ac9ca6dc28549",
       "scripts/automation_rules_gate.py": "sha256:0677ae6b8464e819ad83bbda5271de963369f5b87febc86e3aaa611abdd6d5d2",
@@ -147,7 +147,7 @@
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
       "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
       "scripts/env_check.py": "sha256:4e556e559a149f63c62af4cd983817243f58938f2c64a5ce03d1196b3fcd0085",
-      "scripts/eval_harness.py": "sha256:c5a74ed70d702486c30c1c97206ee52ac8385869bb22494c6467b32ee6c5d216",
+      "scripts/eval_harness.py": "sha256:425be48810b251b61f29f2132670d5c42355f68e339861926fe01d380d7eaa26",
       "scripts/evidence_index_generator.py": "sha256:9b418f03cafcdf27f6e974f6d432b7ed71ce8c0c6440f9e6a3de6304562b7fbf",
       "scripts/footprint_conflict_gate.py": "sha256:c2a87e2ee0c96ba08d0f1babfc82f4f7ea4d3e1e8d4d9c8364fed1ff130ecc8b",
       "scripts/fs_watch.py": "sha256:ef5c925307270c7c451734602339213d47111645413e033f5f54fed57d6f9fd1",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:632092a6914a3982b220dba2a9badb28092662f85cffe0d5b6d4681fcf8732c2",
+    "template_digest": "sha256:f763a234b2b4201b07f49fcf2f11e9a9a468580d9ad2f142a92d8d259661c608",
     "template_files": 251
   },
   "profiles": [

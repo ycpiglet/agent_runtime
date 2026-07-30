@@ -354,7 +354,13 @@ def _record_execution_receipt(
     baseline_cost, baseline_currency = _eval_baseline_cost(item)
     task_id = _item_task_id(item, dispatch_id)
     try:
-        receipt = eval_harness.record_execution_receipt(
+        record_receipt = (
+            eval_harness.record_pre_provider_skip_receipt
+            if source
+            in {"claim_preflight", "session_budget_preflight"}
+            else eval_harness.record_execution_receipt
+        )
+        receipt = record_receipt(
             dispatch_id=dispatch_id,
             task_id=task_id,
             claim_id=_claim_id(item),

@@ -164,6 +164,21 @@ def test_halts_on_session_budget_blocks_next_dispatch(patch_provider):
     assert len(p.calls) == 2
     assert summary["results"][-1]["finish_reason"] == "skipped"
     assert summary["results"][-1]["error"] == "budget_insufficient"
+    receipts = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )
+    skipped_receipt = receipts[-1]
+    assert skipped_receipt["source"] == "session_budget_preflight"
+    assert skipped_receipt["budget_settlement_basis"] == "pre_provider_skip"
+    assert skipped_receipt["budget_no_provider_settlement_id"].startswith(
+        "no-provider-settlement-"
+    )
+    usage = auto_dispatch.eval_harness.cumulative_usage(
+        path=auto_dispatch.eval_harness.EVAL_LOG,
+        task_id=skipped_receipt["task_id"],
+    )
+    assert usage["task"]["pre_provider_releases"] == 1
+    assert usage["task"]["committed_tokens"] == 0
 
 
 def test_session_budget_caps_provider_per_dispatch_before_call(patch_provider):
@@ -938,6 +953,22 @@ def test_write_back_skips_when_not_open_costs_nothing(tmp_path, monkeypatch):
     assert summary["replied"] == 0
     assert _status_of(msg) == "claimed"  # we did not touch the worker's claim
     assert _reply_metas(tmp_path, exclude=msg.name) == []
+    receipts = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )
+    assert len(receipts) == 1
+    receipt = receipts[0]
+    assert receipt["source"] == "claim_preflight"
+    assert receipt["budget_settlement_basis"] == "pre_provider_skip"
+    assert receipt["budget_no_provider_settlement_id"].startswith(
+        "no-provider-settlement-"
+    )
+    usage = auto_dispatch.eval_harness.cumulative_usage(
+        path=auto_dispatch.eval_harness.EVAL_LOG,
+        task_id=receipt["task_id"],
+    )
+    assert usage["task"]["pre_provider_releases"] == 1
+    assert usage["task"]["committed_tokens"] == 0
 
 
 def test_write_back_provider_error_still_answers(tmp_path, patch_provider):

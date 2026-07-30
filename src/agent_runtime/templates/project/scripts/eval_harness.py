@@ -40,27 +40,23 @@ ESCALATION_FINISH = {"error", "cap", "cap-hit", "max_tokens"}
 ESCALATION_OUTCOME = {"rejected", "needs-changes", "gate-error", "recurrence", "reopen"}
 NEUTRAL_OUTCOME = {"ok", "completed", ""}
 MODEL_TIER = {"haiku": 1, "sonnet": 2, "opus": 3}       # 싼→비싼 (TASK-239 over-route 판정용)
-FAILED_EXECUTION_FINISH = ESCALATION_FINISH | {
-    "blocked",
-    "canceled",
-    "cancelled",
-    "failed",
-    "failure",
-    "skipped",
-    "timed_out",
-    "timeout",
+SUCCESSFUL_EXECUTION_FINISH = {
+    "completed",
+    "end_turn",
+    "stop",
+    "stop_sequence",
+    "success",
 }
-PRE_PROVIDER_SKIP_SOURCES = {
-    "budget_preflight",
-    "claim_preflight",
-    "deterministic_preflight_blocked",
-    "deterministic_preflight_complete",
-    "routing_policy",
-    "session_budget_preflight",
+NO_PROVIDER_SETTLEMENT_TRANSITIONS = {
+    ("auto_dispatch", "claim_preflight"),
+    ("auto_dispatch", "session_budget_preflight"),
 }
 
 EXECUTION_RECEIPT_SCHEMA = "agent-runtime-execution-receipt/v1"
 BUDGET_RESERVATION_SCHEMA = "agent-runtime-budget-reservation/v1"
+NO_PROVIDER_SETTLEMENT_SCHEMA = (
+    "agent-runtime-no-provider-settlement/v1"
+)
 RECEIPT_LOCK_TIMEOUT_SECONDS = 5.0
 ACTIVE_CLAIM_STATUSES = {
     "assigned",
@@ -120,17 +116,35 @@ def _exclusive_log_lock(path: Path):
             pass
 
 
+def _reservation_fingerprint(reservation: dict) -> str:
+    """Bind a settlement to the complete immutable reservation record."""
+    return hashlib.sha256(
+        json.dumps(
+            reservation,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
+
 def _validate_ledger_records(records: list[dict], path: Path) -> None:
     receipt_ids: dict[str, int] = {}
     reservation_ids: dict[str, int] = {}
+    settlement_ids: dict[str, int] = {}
     dispatch_kinds: dict[str, dict[str, int]] = {}
     reservations: dict[str, dict] = {}
     receipts: dict[str, dict] = {}
+    settlements: dict[str, dict] = {}
 
     for index, item in enumerate(records, start=1):
         schema = str(item.get("schema") or "")
         dispatch_id = str(item.get("dispatch_id") or "").strip()
-        if schema in {EXECUTION_RECEIPT_SCHEMA, BUDGET_RESERVATION_SCHEMA}:
+        if schema in {
+            EXECUTION_RECEIPT_SCHEMA,
+            BUDGET_RESERVATION_SCHEMA,
+            NO_PROVIDER_SETTLEMENT_SCHEMA,
+        }:
             if item.get("immutable") is not True:
                 raise ReceiptIntegrityError(
                     f"ledger line {index} is not immutable: {path}"
@@ -178,6 +192,21 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
                 )
             reservations[dispatch_id] = item
             kind = "reservation"
+        elif schema == NO_PROVIDER_SETTLEMENT_SCHEMA:
+            settlement_id = str(item.get("settlement_id") or "").strip()
+            if not settlement_id:
+                raise ReceiptIntegrityError(
+                    f"no-provider settlement line {index} lacks "
+                    f"settlement_id: {path}"
+                )
+            if settlement_id in settlement_ids:
+                raise ReceiptIntegrityError(
+                    f"duplicate settlement_id={settlement_id} at lines "
+                    f"{settlement_ids[settlement_id]} and {index}: {path}"
+                )
+            settlement_ids[settlement_id] = index
+            settlements[dispatch_id] = item
+            kind = "no_provider_settlement"
         else:
             kind = "legacy"
 
@@ -212,6 +241,80 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
             raise ReceiptIntegrityError(
                 f"reservation/receipt claim mismatch for dispatch_id={dispatch_id}: "
                 f"{path}"
+            )
+
+    for dispatch_id, settlement in settlements.items():
+        reservation = reservations.get(dispatch_id)
+        receipt = receipts.get(dispatch_id)
+        if reservation is None or receipt is None:
+            raise ReceiptIntegrityError(
+                "no-provider settlement requires a matching reservation "
+                f"and receipt for dispatch_id={dispatch_id}: {path}"
+            )
+        if str(settlement.get("reservation_id") or "") != str(
+            reservation.get("reservation_id") or ""
+        ):
+            raise ReceiptIntegrityError(
+                "no-provider settlement reservation mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        for field in ("task_id", "claim_id"):
+            if str(settlement.get(field) or "") != str(
+                reservation.get(field) or ""
+            ):
+                raise ReceiptIntegrityError(
+                    f"no-provider settlement {field} mismatch for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+        reservation_source = str(
+            settlement.get("reservation_source") or ""
+        ).strip()
+        receipt_source = str(
+            settlement.get("receipt_source") or ""
+        ).strip()
+        if reservation_source != str(
+            reservation.get("source") or ""
+        ).strip():
+            raise ReceiptIntegrityError(
+                "no-provider settlement reservation source mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if (
+            reservation_source,
+            receipt_source,
+        ) not in NO_PROVIDER_SETTLEMENT_TRANSITIONS:
+            raise ReceiptIntegrityError(
+                "invalid no-provider settlement transition "
+                f"{reservation_source}->{receipt_source} for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if receipt_source != str(receipt.get("source") or "").strip():
+            raise ReceiptIntegrityError(
+                "no-provider settlement receipt source mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if str(settlement.get("reservation_fingerprint") or "") != (
+            _reservation_fingerprint(reservation)
+        ):
+            raise ReceiptIntegrityError(
+                "no-provider settlement reservation fingerprint mismatch "
+                f"for dispatch_id={dispatch_id}: {path}"
+            )
+        if settlement.get("budget_authority_fingerprint") != dict(
+            reservation.get("budget_authority") or {}
+        ).get("authority_fingerprint"):
+            raise ReceiptIntegrityError(
+                "no-provider settlement budget authority mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if not _verified_pre_provider_skip(
+            receipt,
+            reservation,
+            settlement,
+        ):
+            raise ReceiptIntegrityError(
+                "no-provider settlement lacks a valid no-call receipt for "
+                f"dispatch_id={dispatch_id}: {path}"
             )
 
 
@@ -304,7 +407,7 @@ def _execution_succeeded(record: dict) -> bool:
     finish_reason = str(
         record.get("finish_reason") or ""
     ).strip().lower()
-    return finish_reason not in FAILED_EXECUTION_FINISH
+    return finish_reason in SUCCESSFUL_EXECUTION_FINISH
 
 
 def _has_authoritative_token_usage(record: dict) -> bool:
@@ -343,14 +446,46 @@ def _has_authoritative_billed_cost(record: dict) -> bool:
     return math.isfinite(billed_cost) and billed_cost >= 0
 
 
-def _verified_pre_provider_skip(record: dict) -> bool:
-    """Recognize only explicit no-call paths that carry no result or usage."""
+def _verified_pre_provider_skip(
+    record: dict,
+    reservation: dict | None,
+    settlement: dict | None,
+) -> bool:
+    """Require a reservation-bound durable no-provider-call settlement."""
+    if reservation is None or settlement is None:
+        return False
+    reservation_source = str(reservation.get("source") or "").strip()
+    receipt_source = str(record.get("source") or "").strip()
     if (
         str(record.get("status") or "").strip().lower() != "skipped"
         or str(record.get("finish_reason") or "").strip().lower()
         != "skipped"
-        or str(record.get("source") or "").strip()
-        not in PRE_PROVIDER_SKIP_SOURCES
+        or (
+            reservation_source,
+            receipt_source,
+        ) not in NO_PROVIDER_SETTLEMENT_TRANSITIONS
+        or settlement.get("schema") != NO_PROVIDER_SETTLEMENT_SCHEMA
+        or settlement.get("immutable") is not True
+        or str(settlement.get("status") or "")
+        != "released_without_provider_call"
+        or str(settlement.get("dispatch_id") or "")
+        != str(reservation.get("dispatch_id") or "")
+        or str(settlement.get("dispatch_id") or "")
+        != str(record.get("dispatch_id") or "")
+        or str(settlement.get("reservation_id") or "")
+        != str(reservation.get("reservation_id") or "")
+        or str(settlement.get("reservation_source") or "")
+        != reservation_source
+        or str(settlement.get("receipt_source") or "")
+        != receipt_source
+        or str(settlement.get("reservation_fingerprint") or "")
+        != _reservation_fingerprint(reservation)
+        or settlement.get("budget_authority_fingerprint")
+        != dict(reservation.get("budget_authority") or {}).get(
+            "authority_fingerprint"
+        )
+        or str(record.get("budget_no_provider_settlement_id") or "")
+        != str(settlement.get("settlement_id") or "")
     ):
         return False
     if any(
@@ -364,7 +499,7 @@ def _verified_pre_provider_skip(record: dict) -> bool:
         return False
     return (
         str(record.get("token_usage_status") or "").strip().lower()
-        == "unavailable"
+        in {"not_dispatched", "unavailable"}
         and record.get("tokens_in") is None
         and record.get("tokens_out") is None
         and int(record.get("tokens", 0) or 0) == 0
@@ -377,12 +512,13 @@ def _verified_pre_provider_skip(record: dict) -> bool:
 def _budget_settlement_basis(
     record: dict,
     reservation: dict | None,
+    settlement: dict | None = None,
 ) -> str:
     if reservation is None:
         return "not_required_or_unreserved"
     if _has_authoritative_token_usage(record):
         return "observed_usage"
-    if _verified_pre_provider_skip(record):
+    if _verified_pre_provider_skip(record, reservation, settlement):
         return "pre_provider_skip"
     return "conservative_ceiling"
 
@@ -644,6 +780,12 @@ def _usage_from_records(
         if item.get("schema") == BUDGET_RESERVATION_SCHEMA
         and str(item.get("task_id") or "") == str(task_id)
     ]
+    task_settlements = [
+        item
+        for item in records
+        if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+        and str(item.get("task_id") or "") == str(task_id)
+    ]
     claim_receipts = (
         [
             item
@@ -662,8 +804,21 @@ def _usage_from_records(
         if claim_id
         else []
     )
+    claim_settlements = (
+        [
+            item
+            for item in task_settlements
+            if str(item.get("claim_id") or "") == str(claim_id)
+        ]
+        if claim_id
+        else []
+    )
 
-    def _usage(rows: list[dict], reservations: list[dict]) -> dict:
+    def _usage(
+        rows: list[dict],
+        reservations: list[dict],
+        settlements: list[dict],
+    ) -> dict:
         costs: dict[str, float] = {}
         tokens = 0
         for item in rows:
@@ -676,6 +831,10 @@ def _usage_from_records(
         receipts_by_dispatch = {
             str(item.get("dispatch_id") or ""): item for item in rows
         }
+        settlements_by_dispatch = {
+            str(item.get("dispatch_id") or ""): item
+            for item in settlements
+        }
         pending_reservations: list[dict] = []
         conservative_unobserved_tokens = 0
         conservative_settlements = 0
@@ -687,7 +846,14 @@ def _usage_from_records(
             if receipt is None:
                 pending_reservations.append(reservation)
                 continue
-            basis = _budget_settlement_basis(receipt, reservation)
+            settlement = settlements_by_dispatch.get(
+                str(reservation.get("dispatch_id") or "")
+            )
+            basis = _budget_settlement_basis(
+                receipt,
+                reservation,
+                settlement,
+            )
             if basis == "pre_provider_skip":
                 pre_provider_releases += 1
                 continue
@@ -727,8 +893,16 @@ def _usage_from_records(
     return {
         "task_id": str(task_id),
         "claim_id": str(claim_id or "") or None,
-        "task": _usage(task_receipts, task_reservations),
-        "claim": _usage(claim_receipts, claim_reservations),
+        "task": _usage(
+            task_receipts,
+            task_reservations,
+            task_settlements,
+        ),
+        "claim": _usage(
+            claim_receipts,
+            claim_reservations,
+            claim_settlements,
+        ),
     }
 
 
@@ -1294,6 +1468,128 @@ def record_execution_receipt(
     return rec
 
 
+def record_pre_provider_skip_receipt(
+    *,
+    dispatch_id: str,
+    task_id: str,
+    source: str,
+    path: Path = EVAL_LOG,
+    **receipt_fields,
+) -> dict:
+    """Atomically prove one reserved dispatch ended before provider start."""
+    values = dict(receipt_fields)
+    if "_existing_records" in values:
+        raise ValueError("_existing_records is internal")
+    status = str(values.pop("status", "skipped") or "").strip().lower()
+    finish_reason = str(
+        values.pop("finish_reason", "skipped") or ""
+    ).strip().lower()
+    if status != "skipped" or finish_reason != "skipped":
+        raise ValueError(
+            "pre-provider settlement requires skipped status and finish"
+        )
+    dispatch = str(dispatch_id or "").strip()
+    task = str(task_id or "").strip()
+    receipt_source = str(source or "").strip()
+    if not dispatch or not task:
+        raise ValueError("dispatch_id and task_id are required")
+
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        if any(
+            item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                f"immutable receipt already exists for dispatch_id={dispatch}"
+            )
+        if any(
+            item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                "immutable no-provider settlement already exists for "
+                f"dispatch_id={dispatch}"
+            )
+        reservation = next(
+            (
+                item
+                for item in records
+                if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+                and str(item.get("dispatch_id") or "") == dispatch
+            ),
+            None,
+        )
+        if reservation is None:
+            raise ReceiptIntegrityError(
+                "pre-provider settlement requires a matching pending "
+                f"reservation for dispatch_id={dispatch}"
+            )
+        reservation_source = str(
+            reservation.get("source") or ""
+        ).strip()
+        if (
+            reservation_source,
+            receipt_source,
+        ) not in NO_PROVIDER_SETTLEMENT_TRANSITIONS:
+            raise ReceiptIntegrityError(
+                "invalid no-provider settlement transition "
+                f"{reservation_source}->{receipt_source} for "
+                f"dispatch_id={dispatch}"
+            )
+        if str(reservation.get("task_id") or "") != task:
+            raise ReceiptIntegrityError(
+                "pre-provider settlement task differs from reservation "
+                f"for dispatch_id={dispatch}"
+            )
+
+        timestamp = str(
+            values.get("timestamp")
+            or datetime.now().astimezone().isoformat(timespec="seconds")
+        )
+        values["timestamp"] = timestamp
+        reservation_id = str(reservation.get("reservation_id") or "")
+        settlement_id = "no-provider-settlement-" + hashlib.sha256(
+            f"{reservation_id}:{receipt_source}".encode("utf-8")
+        ).hexdigest()[:24]
+        settlement = {
+            "schema": NO_PROVIDER_SETTLEMENT_SCHEMA,
+            "immutable": True,
+            "settlement_id": settlement_id,
+            "ts": timestamp,
+            "dispatch_id": dispatch,
+            "task_id": task,
+            "claim_id": reservation.get("claim_id"),
+            "reservation_id": reservation_id,
+            "reservation_source": reservation_source,
+            "receipt_source": receipt_source,
+            "status": "released_without_provider_call",
+            "reservation_fingerprint": _reservation_fingerprint(
+                reservation
+            ),
+            "budget_authority_fingerprint": dict(
+                reservation.get("budget_authority") or {}
+            ).get("authority_fingerprint"),
+        }
+        rec = record_execution_receipt(
+            dispatch_id=dispatch,
+            task_id=task,
+            source=receipt_source,
+            status="skipped",
+            finish_reason="skipped",
+            path=ledger_path,
+            _existing_records=[*records, settlement],
+            **values,
+        )
+        combined = [*records, settlement, rec]
+        _validate_ledger_records(combined, ledger_path)
+        _append_records_locked(ledger_path, [settlement, rec])
+    return rec
+
+
 def _route_observation_complete(record: dict) -> bool:
     """Require every supported route-identity dimension to be observed."""
     if not str(record.get("observed_model") or "").strip():
@@ -1346,6 +1642,15 @@ def _finalize_execution_receipt(
             item
             for item in records
             if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+        ),
+        None,
+    )
+    settlement = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
             and str(item.get("dispatch_id") or "") == dispatch
         ),
         None,
@@ -1493,12 +1798,16 @@ def _finalize_execution_receipt(
     rec["budget_reservation_id"] = (
         reservation.get("reservation_id") if reservation else None
     )
+    rec["budget_no_provider_settlement_id"] = (
+        settlement.get("settlement_id") if settlement else None
+    )
     rec["budget_reservation_status"] = (
         "settled" if reservation else "not_required_or_unreserved"
     )
     rec["budget_settlement_basis"] = _budget_settlement_basis(
         rec,
         reservation,
+        settlement,
     )
     return rec
 
@@ -1619,7 +1928,11 @@ def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
     return [
         item
         for item in records
-        if item.get("schema") != BUDGET_RESERVATION_SCHEMA
+        if item.get("schema")
+        not in {
+            BUDGET_RESERVATION_SCHEMA,
+            NO_PROVIDER_SETTLEMENT_SCHEMA,
+        }
     ]
 
 

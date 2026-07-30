@@ -69,13 +69,19 @@ common = {
     "task_id": payload["task_id"],
     "claim_id": payload["claim_id"],
 }
-if payload["action"] == "settle":
+if payload["action"] in {"settle", "settle_no_call"}:
     preflight = eh.reserve_dispatch_budget(
         **common,
         dispatch_id=payload["dispatch_id"],
         dispatch_ceiling=payload["dispatch_ceiling"],
+        source=payload.get("reservation_source", "execution_preflight"),
     )
-    receipt = eh.record_execution_receipt(
+    record_receipt = (
+        eh.record_pre_provider_skip_receipt
+        if payload["action"] == "settle_no_call"
+        else eh.record_execution_receipt
+    )
+    receipt = record_receipt(
         dispatch_id=payload["dispatch_id"],
         task_id=payload["task_id"],
         claim_id=payload["claim_id"],
@@ -528,11 +534,11 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
                 "token_usage_status": "unavailable",
             },
             0,
-            0,
-            0,
             10,
-            True,
-            "pre_provider_skip",
+            10,
+            1,
+            False,
+            "conservative_ceiling",
         ),
     ],
     ids=(
@@ -541,7 +547,7 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
         "post-dispatch-skip-unknown",
         "partial-usage",
         "observed-usage",
-        "pre-provider-skip",
+        "generic-pre-provider-skip",
     ),
 )
 def test_terminal_budget_settlement_survives_fresh_process_restart(
@@ -1043,6 +1049,11 @@ def test_report_includes_token_delta_only_with_effective_model_evidence():
         },
         {"status": "completed", "outcome": "rejected"},
         {"status": "completed", "finish_reason": "max_tokens"},
+        {"status": "completed", "finish_reason": "incomplete"},
+        {"status": "completed", "finish_reason": "in_progress"},
+        {"status": "completed", "finish_reason": "queued"},
+        {"status": "completed", "finish_reason": "requires_action"},
+        {"status": "completed", "finish_reason": "unknown_terminal"},
     ],
     ids=(
         "error",
@@ -1051,6 +1062,11 @@ def test_report_includes_token_delta_only_with_effective_model_evidence():
         "completed-with-error",
         "failed-outcome",
         "failed-finish-reason",
+        "incomplete-finish",
+        "in-progress-finish",
+        "queued-finish",
+        "requires-action-finish",
+        "unknown-finish",
     ),
 )
 def test_report_recomputes_actual_execution_success_before_economic_eligibility(
@@ -1099,8 +1115,23 @@ def test_report_recomputes_actual_execution_success_before_economic_eligibility(
         {"status": "skipped", "finish_reason": "skipped"},
         {"status": "completed", "error": "synthetic baseline failure"},
         {"status": "completed", "outcome": "rejected"},
+        {"status": "completed", "finish_reason": "incomplete"},
+        {"status": "completed", "finish_reason": "in_progress"},
+        {"status": "completed", "finish_reason": "queued"},
+        {"status": "completed", "finish_reason": "requires_action"},
+        {"status": "completed", "finish_reason": "unknown_terminal"},
     ],
-    ids=("error", "skipped", "completed-with-error", "failed-outcome"),
+    ids=(
+        "error",
+        "skipped",
+        "completed-with-error",
+        "failed-outcome",
+        "incomplete-finish",
+        "in-progress-finish",
+        "queued-finish",
+        "requires-action-finish",
+        "unknown-finish",
+    ),
 )
 def test_report_requires_successful_baseline_execution(baseline_updates):
     baseline, actual = _verified_delta_records(
@@ -1422,6 +1453,393 @@ def test_finalizer_rejects_unsuccessful_baseline_execution(tmp_path):
     result = eh.report(eh.read_outcomes(path))
     assert result["token_delta"]["eligible_records"] == 0
     assert result["monetary_delta"]["eligible_records"] == 0
+
+
+@pytest.mark.parametrize(
+    "finish_reason",
+    (
+        "incomplete",
+        "in_progress",
+        "queued",
+        "requires_action",
+        "unknown_terminal",
+    ),
+)
+def test_finalizer_rejects_nonterminal_or_unknown_baseline_finish(
+    tmp_path,
+    finish_reason,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id=f"baseline-{finish_reason}",
+        task_id="TASK-NONTERMINAL-BASELINE",
+        workload_id=f"workload-{finish_reason}",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        source="native_codex_reply",
+        status="completed",
+        finish_reason=finish_reason,
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id=f"actual-{finish_reason}",
+        task_id="TASK-NONTERMINAL-BASELINE",
+        workload_id=f"workload-{finish_reason}",
+        provider="native-codex",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        source="native_codex_reply",
+        status="completed",
+        finish_reason="stop",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_execution_not_successful"
+    )
+
+
+@pytest.mark.parametrize(
+    ("reservation_source", "receipt_source"),
+    (
+        ("auto_dispatch", "routing_policy"),
+        ("auto_dispatch", "budget_preflight"),
+        ("auto_dispatch", "deterministic_preflight_blocked"),
+        ("auto_dispatch", "deterministic_preflight_complete"),
+        ("agent_worker", "session_budget_preflight"),
+        ("agent_worker", "claim_preflight"),
+        ("auto_dispatch", "session_budget_preflight"),
+        ("auto_dispatch", "claim_preflight"),
+    ),
+)
+def test_generic_skip_receipt_cannot_release_reserved_budget_across_restart(
+    tmp_path,
+    reservation_source,
+    receipt_source,
+):
+    path = tmp_path / "receipts.jsonl"
+    task_id = "TASK-GENERIC-SKIP"
+    claim_id = "CLAIM-GENERIC-SKIP"
+    _write_claim_authority(
+        tmp_path,
+        claim_id=claim_id,
+        task_id=task_id,
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+
+    first = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "settle",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-first",
+            "dispatch_ceiling": 10,
+            "reservation_source": reservation_source,
+            "receipt": {
+                "source": receipt_source,
+                "status": "skipped",
+                "finish_reason": "skipped",
+                "error": "synthetic no-call claim",
+                "token_usage_status": "unavailable",
+            },
+        },
+    )
+    second = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "inspect",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-second",
+            "dispatch_ceiling": 1,
+        },
+    )
+
+    assert first["preflight"]["allowed"] is True
+    assert (
+        first["receipt"]["budget_settlement_basis"]
+        == "conservative_ceiling"
+    )
+    for scope in ("task", "claim"):
+        usage = second["usage"][scope]
+        assert usage["pre_provider_releases"] == 0
+        assert usage["conservative_unobserved_tokens"] == 10
+        assert usage["committed_tokens"] == 10
+    assert second["preflight"]["allowed"] is False
+    assert second["preflight"]["reason"] == "task_budget_insufficient"
+
+
+@pytest.mark.parametrize(
+    "receipt_source",
+    ("session_budget_preflight", "claim_preflight"),
+)
+def test_dedicated_no_call_settlement_releases_exact_reservation_after_restart(
+    tmp_path,
+    receipt_source,
+):
+    path = tmp_path / "receipts.jsonl"
+    task_id = "TASK-DEDICATED-NO-CALL"
+    claim_id = "CLAIM-DEDICATED-NO-CALL"
+    _write_claim_authority(
+        tmp_path,
+        claim_id=claim_id,
+        task_id=task_id,
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+
+    first = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "settle_no_call",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-first",
+            "dispatch_ceiling": 10,
+            "reservation_source": "auto_dispatch",
+            "receipt": {
+                "source": receipt_source,
+                "status": "skipped",
+                "finish_reason": "skipped",
+                "error": "synthetic post-reservation no-call",
+                "token_usage_status": "unavailable",
+            },
+        },
+    )
+    second = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "inspect",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-second",
+            "dispatch_ceiling": 10,
+        },
+    )
+
+    assert first["preflight"]["allowed"] is True
+    receipt = first["receipt"]
+    assert receipt["budget_settlement_basis"] == "pre_provider_skip"
+    assert receipt["budget_no_provider_settlement_id"].startswith(
+        "no-provider-settlement-"
+    )
+    for scope in ("task", "claim"):
+        usage = second["usage"][scope]
+        assert usage["pre_provider_releases"] == 1
+        assert usage["conservative_unobserved_tokens"] == 0
+        assert usage["committed_tokens"] == 0
+    assert second["preflight"]["allowed"] is True
+    assert second["preflight"]["reason"] == "within_budget"
+
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        eh.BUDGET_RESERVATION_SCHEMA,
+        eh.NO_PROVIDER_SETTLEMENT_SCHEMA,
+        eh.EXECUTION_RECEIPT_SCHEMA,
+    ]
+    assert eh.read_outcomes(path) == [raw[-1]]
+
+
+def test_dedicated_no_call_settlement_rejects_invalid_transition_atomically(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-BAD-TRANSITION",
+        claim_id=None,
+        dispatch_id="dispatch-bad-transition",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="agent_worker",
+    )
+    assert preflight["allowed"] is True
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="invalid no-provider settlement transition",
+    ):
+        eh.record_pre_provider_skip_receipt(
+            dispatch_id="dispatch-bad-transition",
+            task_id="TASK-BAD-TRANSITION",
+            source="session_budget_preflight",
+            status="skipped",
+            finish_reason="skipped",
+            path=path,
+        )
+
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        eh.BUDGET_RESERVATION_SCHEMA
+    ]
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-BAD-TRANSITION",
+    )
+    assert usage["task"]["reserved_tokens"] == 10
+    assert usage["task"]["committed_tokens"] == 10
+
+
+def test_dedicated_no_call_settlement_rejects_provider_observation_atomically(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-NO-CALL-OBSERVED",
+        claim_id=None,
+        dispatch_id="dispatch-no-call-observed",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    assert preflight["allowed"] is True
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="lacks a valid no-call receipt",
+    ):
+        eh.record_pre_provider_skip_receipt(
+            dispatch_id="dispatch-no-call-observed",
+            task_id="TASK-NO-CALL-OBSERVED",
+            source="session_budget_preflight",
+            status="skipped",
+            finish_reason="skipped",
+            observed_provider="native-codex",
+            path=path,
+        )
+
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        eh.BUDGET_RESERVATION_SCHEMA
+    ]
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-NO-CALL-OBSERVED",
+    )
+    assert usage["task"]["reserved_tokens"] == 10
+    assert usage["task"]["committed_tokens"] == 10
+
+
+def test_no_call_settlement_detects_reservation_provenance_tampering(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-TAMPERED-SETTLEMENT",
+        claim_id=None,
+        dispatch_id="dispatch-tampered-settlement",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    assert preflight["allowed"] is True
+    eh.record_pre_provider_skip_receipt(
+        dispatch_id="dispatch-tampered-settlement",
+        task_id="TASK-TAMPERED-SETTLEMENT",
+        source="session_budget_preflight",
+        status="skipped",
+        finish_reason="skipped",
+        path=path,
+    )
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    raw[0]["reserved_tokens"] = 9
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="reservation fingerprint mismatch",
+    ):
+        eh.cumulative_usage(
+            path=path,
+            task_id="TASK-TAMPERED-SETTLEMENT",
+        )
+
+
+def test_forged_stored_settlement_basis_does_not_release_generic_receipt(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-FORGED-SETTLEMENT-BASIS",
+        claim_id=None,
+        dispatch_id="dispatch-forged-basis",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    assert preflight["allowed"] is True
+    eh.record_execution_receipt(
+        dispatch_id="dispatch-forged-basis",
+        task_id="TASK-FORGED-SETTLEMENT-BASIS",
+        source="session_budget_preflight",
+        status="skipped",
+        finish_reason="skipped",
+        token_usage_status="unavailable",
+        budget_preflight_result=preflight,
+        path=path,
+    )
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    raw[-1]["budget_settlement_basis"] = "pre_provider_skip"
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-FORGED-SETTLEMENT-BASIS",
+    )
+    assert usage["task"]["pre_provider_releases"] == 0
+    assert usage["task"]["conservative_unobserved_tokens"] == 10
+    assert usage["task"]["committed_tokens"] == 10
 
 
 def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
