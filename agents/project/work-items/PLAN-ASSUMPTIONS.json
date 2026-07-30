@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "ff4f9e01e58fc934453cd48341660559137c4689a35bac8ef0c3698247a9b846"
+          "value": "5b4b02b64d2e3742efae840318216f25d027bef1d5653a62f48123d8a2d2f2ea"
         },
         {
           "kind": "sha256",
@@ -1099,7 +1099,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "4bc21b947008b1e2c933f172ec1b2761f8d7df58356ec5b86c5ba526370dafbf"
+          "value": "c5a74ed70d702486c30c1c97206ee52ac8385869bb22494c6467b32ee6c5d216"
         },
         {
           "kind": "sha256",
@@ -1139,7 +1139,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
-          "value": "0874b0816fefe3b6be9229e3ff53de69651d8bac8047e49ebdc3178ab17d36c5"
+          "value": "68cdb448f2c93372230ab7d1718d5f75c76d9052e83ea8f7a49d5c3e5407266e"
         },
         {
           "kind": "sha256",
@@ -1154,7 +1154,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "2136b7ce148f01aab28cdd68a2e65d6617f3af134d47e76b4a5b1cac0848b60b"
+          "value": "0a9815bce5a5f9cfe309d3972070ac7d2d0bfbf86187786e0a50b026d7a77e0f"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "994fa5aaa920203f3f5c4a0773ef91d9e0538dc3aaa29ef102bd3a0c183f272c"
+          "value": "4a505ba29162cd254d9b7a5439502fcfe8d7659e17607515bfcec29332fb0341"
         },
         {
           "kind": "sha256",
@@ -1215,10 +1215,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md",
           "value": "4a4d0530cbf37cd9d1196e747a7436212f04e35663267301d65b63fc5c9e578d"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json",
+          "value": "e373bdae0bd052685e8677a578215bbccc201871605529fde226f1a5858ce967"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md",
+          "value": "8d60ff3f9c439ec9c39c8c7e24a197133962adbd1b3aebd33f2f256324623457"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md",
-      "recorded_at": "2026-07-30T18:05:41+09:00",
+      "recorded_at": "2026-07-30T18:26:27+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1434,5 +1444,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T18:05:41+09:00"
+  "updated_at": "2026-07-30T18:26:27+09:00"
 }
