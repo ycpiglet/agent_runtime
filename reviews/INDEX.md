@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T18:03:22+09:00
-record_count: 1158
+generated_at: 2026-07-30T18:05:41+09:00
+record_count: 1159
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1158` review and evidence records under `reviews/`.
+- Summary: indexed `1159` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1158` files |
+| Reviews covered | pass | `1159` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -654,6 +654,7 @@ record_count: 1158
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |

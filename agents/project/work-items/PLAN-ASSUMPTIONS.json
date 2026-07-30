@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "fc6fb8a219b0ea545cfc81e95620795638d6297000c671ad0f17e96aafb9cead"
+          "value": "ff4f9e01e58fc934453cd48341660559137c4689a35bac8ef0c3698247a9b846"
         },
         {
           "kind": "sha256",
@@ -1205,10 +1205,20 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md",
           "value": "17d2163018d4177ff64212cdac4bb04dc7d6751a020a7859770f1dd3926ce8e2"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md",
+          "value": "08425c555976ae0174b3125061e3a19b543a6473c154167d8921230d1a667898"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md",
+          "value": "4a4d0530cbf37cd9d1196e747a7436212f04e35663267301d65b63fc5c9e578d"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md",
-      "recorded_at": "2026-07-30T17:34:21+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md",
+      "recorded_at": "2026-07-30T18:05:41+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1424,5 +1434,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T17:34:21+09:00"
+  "updated_at": "2026-07-30T18:05:41+09:00"
 }

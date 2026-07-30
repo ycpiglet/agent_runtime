@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T17:32:28+09:00
+updated_at: 2026-07-30T18:05:00+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -39,6 +39,8 @@ inputs:
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -87,21 +89,26 @@ evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652.json
-  - reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-followup.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
-  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
-  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md
-  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
