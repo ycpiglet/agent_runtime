@@ -720,6 +720,12 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
         "status_text": "Claim created",
         "worktree_path": ".worktrees/TASK-AR-246",
         "branch": claim["branch"],
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "worker_standard",
+        "routing_policy_id": "task-unit-tier-policy",
+        "routing_escalation_reason": None,
+        "task_token_budget": None,
+        "claim_token_budget": None,
         "claim_path": projection["task_claim_ref"],
         "handoff_path": claim["handoff_path"],
         "log_path": claim["log_path"],
@@ -917,6 +923,10 @@ def test_create_claim_derives_low_requested_and_selected_tier_from_unit(
     assert claim["model_tier"] == "worker_low"
     assert claim["provider_tier"] == "haiku"
     assert claim["routing_status"] == "selected"
+    assert claim["routing_policy_id"] == "task-unit-tier-policy"
+    assert claim["routing_high_tier_authorized"] is True
+    assert claim["routing_escalation_reason"] is None
+    assert claim["routing_registered_triggers"] == []
     assert claim["routing_signals"] == []
     assert claim["actual_model"] is None
     assert claim["actual_model_status"] == "unverified"
@@ -959,8 +969,70 @@ def test_create_claim_visibly_escalates_data_integrity_signal(
     assert claim["model_tier"] == "planner_high"
     assert claim["provider_tier"] == "opus"
     assert claim["routing_status"] == "escalated"
+    assert claim["routing_high_tier_authorized"] is True
+    assert claim["routing_escalation_reason"] == "trigger:data_integrity"
+    assert claim["routing_registered_triggers"] == ["data_integrity"]
     assert claim["routing_signals"] == ["data_integrity"]
     assert claim["routing_unknown_triggers"] == []
+
+
+def test_create_claim_records_durable_task_and_claim_budgets(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-652"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--task-token-budget",
+        "1200",
+        "--claim-token-budget",
+        "400",
+        "--now",
+        "2026-07-30T07:02:00+09:00",
+        "--suffix",
+        "budget",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["task_token_budget"] == 1200
+    assert claim["claim_token_budget"] == 400
+
+
+def test_create_claim_rejects_invalid_durable_budget(tmp_path: Path) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-652"
+    _write_worktree(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--task-token-budget",
+        "-1",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "task_token_budget must be a non-negative integer" in result.stderr
 
 
 def test_create_claim_runs_installed_security_service_gate_before_persistence(

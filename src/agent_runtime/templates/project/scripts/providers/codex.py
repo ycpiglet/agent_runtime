@@ -225,7 +225,8 @@ class CodexProvider(Provider):
     def run(self, role: str, instruction: str, context: dict) -> ProviderResult:
         data = self._client().create(self._payload(role, instruction, context))
         tokens_in, tokens_out = _usage(data)
-        status = str(data.get("status") or "stop")
+        raw_status = data.get("status")
+        status = "stop" if raw_status is None else str(raw_status)
         return ProviderResult(
             text=_extract_output_text(data),
             tokens_in=tokens_in,
@@ -327,7 +328,11 @@ class CodexAgentProvider(CodexProvider):
                     text=last_text,
                     tokens_in=tokens_in,
                     tokens_out=tokens_out,
-                    finish_reason=str(data.get("status") or "stop"),
+                    finish_reason=(
+                        "stop"
+                        if data.get("status") is None
+                        else str(data.get("status"))
+                    ),
                     changed_files=runner.changed_files,
                 )
 

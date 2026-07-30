@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-652:tab-01",
   "pane_id": "terminal:wt-task-ar-652:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -36,12 +36,12 @@
   "worktree_path": ".worktrees/TASK-AR-652",
   "branch": "codex/unit-task-ar-652-001-wave",
   "claimed_at": "2026-07-30T12:36:00+09:00",
-  "last_heartbeat": "2026-07-30T12:36:00+09:00",
-  "updated_at": "2026-07-30T12:36:00+09:00",
+  "last_heartbeat": "2026-07-30T22:06:58+09:00",
+  "updated_at": "2026-07-30T22:06:58+09:00",
   "expires_at": "2026-07-30T13:06:00+09:00",
   "lease": {
     "claimed_at": "2026-07-30T12:36:00+09:00",
-    "heartbeat_at": "2026-07-30T12:36:00+09:00",
+    "heartbeat_at": "2026-07-30T22:06:58+09:00",
     "expires_at": "2026-07-30T13:06:00+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-123600-task-ar-652-ar652001.handoff.md",
@@ -74,10 +74,19 @@
     "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
     "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
     "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-    "src/agent_runtime/templates/project/scripts/test_eval_harness.py"
+    "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
+    "scripts/taskset_work_gate.py",
+    "src/agent_runtime/templates/project/scripts/taskset_work_gate.py",
+    "tests/test_taskset_work_gate.py",
+    "BACKLOG-BOARD.md",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ],
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "released_at": "2026-07-30T22:06:58+09:00",
+  "verified_by": "qa-20260730-w4b-ar652-container-integrity-final",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md"
 }

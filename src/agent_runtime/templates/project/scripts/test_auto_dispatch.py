@@ -18,6 +18,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import auto_dispatch  # noqa: E402
+import subagent_dispatch  # noqa: E402
 from auto_dispatch import SessionBudget, run_bounded_dispatch  # noqa: E402
 
 
@@ -48,6 +49,7 @@ class _FakeProvider:
     def __init__(
         self,
         tokens_per_call=10,
+        tokens_out_per_call=0,
         raise_on=None,
         model=None,
         *,
@@ -56,6 +58,7 @@ class _FakeProvider:
         currency=None,
     ):
         self.tokens_per_call = tokens_per_call
+        self.tokens_out_per_call = tokens_out_per_call
         self.raise_on = raise_on  # index that should raise
         self.model = model
         self.observed_model = observed_model
@@ -70,7 +73,7 @@ class _FakeProvider:
             raise RuntimeError("boom")
         return _FakeResult(
             tokens_in=self.tokens_per_call,
-            tokens_out=0,
+            tokens_out=self.tokens_out_per_call,
             model=self.observed_model,
             billed_cost=self.billed_cost,
             currency=self.currency,
@@ -102,6 +105,8 @@ def isolate_dispatch_events(monkeypatch, tmp_path_factory):
         "CLAIMS_DIR",
         tmp_path_factory.mktemp("auto-dispatch-claims"),
     )
+    receipt_log = tmp_path_factory.mktemp("auto-dispatch-receipts") / "receipts.jsonl"
+    monkeypatch.setattr(auto_dispatch.eval_harness, "EVAL_LOG", receipt_log)
     return events_dir
 
 
@@ -139,6 +144,17 @@ def test_halts_on_work_exhausted(patch_provider):
     assert summary["halt_reason"] == "work_exhausted"
     assert summary["dispatched"] == 3
     assert len(p.calls) == 3
+    raw = [
+        json.loads(line)
+        for line in auto_dispatch.eval_harness.EVAL_LOG.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert sum(
+        row["schema"]
+        == auto_dispatch.eval_harness.PROVIDER_CALL_START_SCHEMA
+        for row in raw
+    ) == 3
 
 
 def test_halts_on_max_dispatches_before_billing(patch_provider):
@@ -159,6 +175,21 @@ def test_halts_on_session_budget_blocks_next_dispatch(patch_provider):
     assert len(p.calls) == 2
     assert summary["results"][-1]["finish_reason"] == "skipped"
     assert summary["results"][-1]["error"] == "budget_insufficient"
+    receipts = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )
+    skipped_receipt = receipts[-1]
+    assert skipped_receipt["source"] == "session_budget_preflight"
+    assert skipped_receipt["budget_settlement_basis"] == "pre_provider_skip"
+    assert skipped_receipt["budget_no_provider_settlement_id"].startswith(
+        "no-provider-settlement-"
+    )
+    usage = auto_dispatch.eval_harness.cumulative_usage(
+        path=auto_dispatch.eval_harness.EVAL_LOG,
+        task_id=skipped_receipt["task_id"],
+    )
+    assert usage["task"]["pre_provider_releases"] == 1
+    assert usage["task"]["committed_tokens"] == 0
 
 
 def test_session_budget_caps_provider_per_dispatch_before_call(patch_provider):
@@ -207,6 +238,35 @@ def test_summary_token_total_sums_in_and_out(patch_provider):
     summary = _run(_items(2), p, session_budget=10_000, max_dispatches=10)
     assert summary["spent"] == 24  # (7+5) * 2
     assert summary["results"][0]["tokens"] == 12
+
+
+def test_auto_dispatch_preserves_explicit_empty_provider_finish(
+    patch_provider,
+):
+    class _EmptyFinishProvider(_FakeProvider):
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            return _FakeResult(
+                tokens_in=2,
+                tokens_out=1,
+                finish_reason="",
+            )
+
+    provider = patch_provider(_EmptyFinishProvider())
+    summary = _run(
+        _items(1),
+        provider,
+        session_budget=100,
+        max_dispatches=1,
+    )
+
+    assert summary["results"][0]["finish_reason"] == ""
+    receipt = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )[0]
+    assert receipt["finish_reason"] == ""
+    assert receipt["application_status"] == "unverified"
+    assert receipt["route_status"] == "unverified"
 
 
 # ---- live gate (real get_provider, no monkeypatch) ----
@@ -315,6 +375,78 @@ def test_inbox_work_items_carries_eval_baseline_and_task_id(tmp_path):
     assert items[0]["eval_baseline_tokens"] == "3000"
 
 
+def test_inbox_work_items_preserves_standard_dispatch_authority(tmp_path):
+    msg = _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="subagent-scribe",
+        status="open",
+        routing_model="opus",
+        body="archive bounded state",
+    )
+    msg.write_text(
+        msg.read_text(encoding="utf-8").replace(
+            "routing_model: opus\n",
+            "routing_model: opus\n"
+            "task_id: TASK-652\n"
+            "dispatch_id: dispatch-explicit-652\n"
+            "claim_id: CLAIM-652\n"
+            "task_token_budget: 1200\n"
+            "claim_token_budget: 300\n"
+            "eval_workload_id: WORKLOAD-652\n"
+            "eval_baseline_receipt_id: receipt-baseline-652\n"
+            "eval_baseline_model: gpt-5.6-sol\n"
+            "eval_baseline_reasoning_effort: high\n"
+            "escalation_triggers:\n"
+            "  - data_integrity\n",
+        ),
+        encoding="utf-8",
+    )
+
+    item = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)[0]
+    assert item["role"] == "scribe"
+    assert item["dispatch_id"] == "dispatch-explicit-652"
+    assert item["claim_id"] == "CLAIM-652"
+    assert item["task_token_budget"] == "1200"
+    assert item["claim_token_budget"] == "300"
+    assert item["eval_workload_id"] == "WORKLOAD-652"
+    assert item["eval_baseline_receipt_id"] == "receipt-baseline-652"
+    assert item["eval_baseline_model"] == "gpt-5.6-sol"
+    assert item["eval_baseline_reasoning_effort"] == "high"
+    assert item["escalation_triggers"] == ["data_integrity"]
+    assert item["context"]["msg_id"] == "MSG-20260603-070000-aaaaaa"
+
+
+def test_inbox_work_items_derives_stable_dispatch_id_from_message_id(tmp_path):
+    _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="qa",
+        status="open",
+    )
+
+    item = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)[0]
+    assert item["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
+    assert item["context"]["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
+
+
+def test_auto_dispatch_role_policy_is_mandatory_and_denies_scribe_opus():
+    implicit = auto_dispatch._routing_decision_for_item(
+        {"role": "scribe"},
+        "archive bounded state",
+    )
+    assert implicit["role_policy_id"] == "scribe"
+    assert implicit["selected_tier"] == "worker_low"
+
+    denied = auto_dispatch._routing_decision_for_item(
+        {"role": "scribe", "routing_model": "opus"},
+        "archive bounded state",
+    )
+    assert denied["selected_tier"] == "worker_low"
+    assert denied["routing_status"] == "high_tier_denied"
+    assert denied["denied_requested_tier"] == "planner_high"
+
+
 def test_inbox_work_items_filters_by_role(tmp_path):
     _write_msg(tmp_path, "MSG-20260603-070000-aaaaaa.md", to="qa", status="open")
     _write_msg(tmp_path, "MSG-20260603-070001-bbbbbb.md", to="backend", status="open")
@@ -361,27 +493,47 @@ def test_dispatch_records_routing_result(patch_provider):
     }]
     summary = _run(items, p, session_budget=1000, max_dispatches=10)
     result = summary["results"][0]
-    assert result["routing_grade"] == "Low"
-    assert result["policy_model"] == "haiku"
-    assert result["selected_model"] == "haiku"
+    assert result["routing_grade"] == "RolePolicy"
+    assert result["policy_model"] == "reviewer_standard"
+    assert result["selected_model"] == "reviewer_standard"
 
 
 def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, patch_provider):
+    receipt_log = tmp_path / "eval.jsonl"
+    baseline = auto_dispatch.eval_harness.record_execution_receipt(
+        dispatch_id="TASK-239-baseline",
+        task_id="TASK-239",
+        workload_id="WORKLOAD-239",
+        provider="claude-agent",
+        resolved_model="claude-opus-4-8",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="unsupported",
+        observed_provider="claude-agent",
+        observed_model="claude-opus-4-8",
+        tokens_in=2500,
+        tokens_out=500,
+        source="provider_completion",
+        status="completed",
+        finish_reason="stop",
+        path=receipt_log,
+    )
     p = patch_provider(
         _FakeProvider(
-            tokens_per_call=12,
+            tokens_per_call=11,
+            tokens_out_per_call=1,
             model="request-default",
             observed_model="claude-haiku-4-5",
         )
     )
     items = [{
-        "role": "qa",
+        "role": "scribe",
         "instruction": "find and list files",
         "context": {"task_id": "TASK-239"},
         "routing_model": "auto",
         "routing_grade": "Low",
-        "eval_baseline_tokens": 3000,
         "eval_baseline_model": "claude-opus-4-8",
+        "eval_baseline_receipt_id": baseline["receipt_id"],
+        "eval_workload_id": "WORKLOAD-239",
     }]
     summary = _run(
         items,
@@ -389,21 +541,25 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         provider_name="claude-agent",
         session_budget=1000,
         max_dispatches=10,
-        eval_log_path=tmp_path / "eval.jsonl",
+        eval_log_path=receipt_log,
     )
     assert summary["results"][0]["eval_recorded"] is True
-    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
-    assert len(recs) == 1
-    rec = recs[0]
+    recs = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(recs) == 2
+    rec = recs[-1]
     assert rec["task_id"] == "TASK-239"
-    assert rec["grade"] == "Low"
+    assert rec["grade"] == "RolePolicy"
     assert rec["tokens"] == 12
-    assert rec["policy_model"] == "haiku"
-    assert rec["selected_model"] == "haiku"
+    assert rec["policy_model"] == "worker_low"
+    assert rec["selected_model"] == "worker_low"
     assert rec["baseline_tokens"] == 3000
     assert rec["observed_model"] == "claude-haiku-4-5"
     assert rec["baseline_model"] == "claude-opus-4-8"
     assert rec["model_changed"] is True
+    assert rec["route_changed"] is True
+    assert rec["baseline_observation_status"] == "observed"
+    assert rec["baseline_reference_status"] == "verified"
+    assert rec["schema"] == auto_dispatch.eval_harness.EXECUTION_RECEIPT_SCHEMA
 
 
 def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_path, patch_provider):
@@ -417,9 +573,13 @@ def test_auto_dispatch_records_eval_on_provider_exception_non_write_back(tmp_pat
         "eval_baseline_tokens": 3000,
     }]
     summary = _run(items, p, session_budget=1000, max_dispatches=10, eval_log_path=tmp_path / "eval.jsonl")
-    assert summary["results"][0]["eval_recorded"] is False
+    assert summary["results"][0]["eval_recorded"] is True
+    assert summary["results"][0]["receipt_recorded"] is True
     assert summary["results"][0]["eval_skip_reason"] == "model_observation_unavailable"
-    assert not (tmp_path / "eval.jsonl").exists()
+    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
+    assert len(recs) == 1
+    assert recs[0]["status"] == "error"
+    assert recs[0]["source"] == "provider_error"
 
 
 def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
@@ -438,6 +598,7 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
         "routing_grade": "Low",
         "eval_baseline_tokens": 3000,
         "eval_baseline_model": "gpt-5.2-codex",
+        "eval_baseline_observation_status": "observed",
     }]
     summary = run_bounded_dispatch(
         items,
@@ -448,12 +609,300 @@ def test_routing_eval_requires_applied_provider_model(tmp_path, patch_provider):
         out=io.StringIO(),
     )
     result = summary["results"][0]
-    assert result["selected_model"] == "haiku"
-    assert result["eval_recorded"] is False
+    assert result["selected_model"] == "reviewer_standard"
+    assert result["eval_recorded"] is True
+    assert result["receipt_recorded"] is True
     assert result["route_status"] == "ineffective_equivalent"
     assert result["model_changed"] is False
     assert result["eval_skip_reason"] == "route_not_effective"
-    assert not (tmp_path / "eval.jsonl").exists()
+    recs = auto_dispatch.eval_harness.read_outcomes(tmp_path / "eval.jsonl")
+    assert len(recs) == 1
+    assert recs[0]["route_changed"] is False
+
+
+def test_every_completion_records_one_receipt_without_routing(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=7))
+    receipt_log = tmp_path / "receipts.jsonl"
+    summary = _run(
+        [{
+            "dispatch_id": "dispatch-generic-1",
+            "role": "worker",
+            "instruction": "bounded work",
+            "context": {"task_id": "TASK-GENERIC"},
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert len(p.calls) == 1
+    assert summary["results"][0]["receipt_recorded"] is True
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "dispatch-generic-1"
+    assert records[0]["task_id"] == "TASK-GENERIC"
+    assert records[0]["source"] == "provider_completion"
+
+
+def test_durable_task_budget_survives_runner_restart(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=10))
+    receipt_log = tmp_path / "receipts.jsonl"
+    first = {
+        "dispatch_id": "dispatch-budget-1",
+        "role": "worker",
+        "instruction": "first",
+        "task_id": "TASK-BUDGET",
+        "task_token_budget": 15,
+    }
+    second = {
+        "dispatch_id": "dispatch-budget-2",
+        "role": "worker",
+        "instruction": "second",
+        "task_id": "TASK-BUDGET",
+        "task_token_budget": 15,
+    }
+
+    first_summary = _run(
+        [first],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    second_summary = _run(
+        [second],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert first_summary["results"][0]["finish_reason"] == "stop"
+    assert len(p.calls) == 1
+    blocked = second_summary["results"][0]
+    assert blocked["finish_reason"] == "skipped"
+    assert blocked["error"] == "task_budget_insufficient"
+    assert blocked["budget_preflight"]["task_tokens_used"] == 10
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert [record["status"] for record in records] == ["completed", "skipped"]
+
+
+def test_configured_budget_blocks_unknown_dispatch_ceiling(tmp_path, patch_provider):
+    class _UnknownCeilingProvider:
+        name = "unknown-ceiling"
+
+        def __init__(self):
+            self.calls = []
+
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            return _FakeResult(tokens_in=1)
+
+    p = patch_provider(_UnknownCeilingProvider())
+    receipt_log = tmp_path / "receipts.jsonl"
+    summary = _run(
+        [{
+            "dispatch_id": "dispatch-unknown-ceiling",
+            "role": "worker",
+            "instruction": "do not call",
+            "task_id": "TASK-BUDGET",
+            "task_token_budget": 100,
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["error"] == "dispatch_ceiling_unavailable"
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["source"] == "budget_preflight"
+
+
+@pytest.mark.parametrize(
+    ("configured_budget", "reason"),
+    [(0, "task_budget_insufficient"), ("not-an-int", "invalid_task_token_budget")],
+)
+def test_zero_and_invalid_budget_fail_closed(
+    tmp_path,
+    patch_provider,
+    configured_budget,
+    reason,
+):
+    p = patch_provider(_FakeProvider(tokens_per_call=10))
+    summary = _run(
+        [{
+            "dispatch_id": f"dispatch-{reason}",
+            "role": "worker",
+            "instruction": "do not call",
+            "task_id": "TASK-BUDGET",
+            "task_token_budget": configured_budget,
+        }],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=tmp_path / "receipts.jsonl",
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["error"] == reason
+
+
+def test_duplicate_dispatch_id_is_not_called_or_rewritten(tmp_path, patch_provider):
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+    item = {
+        "dispatch_id": "dispatch-once",
+        "role": "worker",
+        "instruction": "exactly once",
+        "task_id": "TASK-ONCE",
+    }
+
+    _run(
+        [item],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    duplicate = _run(
+        [item],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert len(p.calls) == 1
+    assert duplicate["results"][0]["error"] == "duplicate_dispatch_id"
+    assert duplicate["results"][0]["receipt_recorded"] is False
+    assert len(auto_dispatch.eval_harness.read_outcomes(receipt_log)) == 1
+
+
+def test_replaying_same_open_inbox_snapshot_calls_provider_exactly_once(
+    tmp_path,
+    patch_provider,
+):
+    _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="qa",
+        status="open",
+    )
+    items = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    first = _run(
+        items,
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    replay = _run(
+        auto_dispatch.inbox_work_items(inbox_dir=tmp_path),
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert first["results"][0]["receipt_recorded"] is True
+    assert len(p.calls) == 1
+    assert replay["results"][0]["error"] == "duplicate_dispatch_id"
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
+
+
+def test_invalid_raw_route_records_terminal_receipt_without_provider_call(
+    tmp_path,
+    patch_provider,
+):
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    summary = _run(
+        [
+            {
+                "dispatch_id": "dispatch-invalid-route",
+                "role": "scribe",
+                "instruction": "archive bounded state",
+                "task_id": "TASK-652",
+                "routing_model": "vendor/raw-expensive-model",
+            }
+        ],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["finish_reason"] == "skipped"
+    assert summary["results"][0]["error"].startswith("routing_policy_rejected:")
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "dispatch-invalid-route"
+    assert records[0]["source"] == "routing_policy"
+    assert records[0]["status"] == "skipped"
+
+
+def test_inbox_without_claim_id_uses_active_zero_budget_authority(
+    tmp_path,
+    monkeypatch,
+    patch_provider,
+):
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-AUTO-652.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-AUTO-652",
+                "task_id": "TASK-652",
+                "status": "claimed",
+                "task_token_budget": 0,
+                "claim_token_budget": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    inbox = tmp_path / "agents" / "messages" / "inbox"
+    monkeypatch.setattr(subagent_dispatch, "MESSAGES_INBOX", inbox)
+    message = subagent_dispatch.emit_call_message(
+        role_id="scribe",
+        task_id="TASK-652",
+        intent="archive bounded state",
+    )
+    assert message.is_file()
+    monkeypatch.setattr(auto_dispatch, "REPO_ROOT", tmp_path)
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    summary = _run(
+        auto_dispatch.inbox_work_items(inbox_dir=inbox),
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+        stop_files=(),
+    )
+
+    assert p.calls == []
+    blocked = summary["results"][0]
+    assert blocked["error"] == "task_budget_insufficient"
+    assert (
+        blocked["budget_preflight"]["budget_authority"]["claim_id"]
+        == "CLAIM-AUTO-652"
+    )
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["claim_id"] == "CLAIM-AUTO-652"
 
 
 def test_dispatch_telemetry_does_not_infer_observed_model(
@@ -545,6 +994,22 @@ def test_write_back_skips_when_not_open_costs_nothing(tmp_path, monkeypatch):
     assert summary["replied"] == 0
     assert _status_of(msg) == "claimed"  # we did not touch the worker's claim
     assert _reply_metas(tmp_path, exclude=msg.name) == []
+    receipts = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )
+    assert len(receipts) == 1
+    receipt = receipts[0]
+    assert receipt["source"] == "claim_preflight"
+    assert receipt["budget_settlement_basis"] == "pre_provider_skip"
+    assert receipt["budget_no_provider_settlement_id"].startswith(
+        "no-provider-settlement-"
+    )
+    usage = auto_dispatch.eval_harness.cumulative_usage(
+        path=auto_dispatch.eval_harness.EVAL_LOG,
+        task_id=receipt["task_id"],
+    )
+    assert usage["task"]["pre_provider_releases"] == 1
+    assert usage["task"]["committed_tokens"] == 0
 
 
 def test_write_back_provider_error_still_answers(tmp_path, patch_provider):

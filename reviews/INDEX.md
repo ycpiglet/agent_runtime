@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T12:32:55+09:00
-record_count: 1133
+generated_at: 2026-07-30T22:23:35+09:00
+record_count: 1184
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1133` review and evidence records under `reviews/`.
+- Summary: indexed `1184` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1133` files |
+| Reviews covered | pass | `1184` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -84,6 +84,7 @@ record_count: 1133
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
 | `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout.md` | `INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout` | md | passed | pass | Independent Auditor Closeout - TASK-AR-650 |
+| `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md` | `INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout` | md | approved | pass | Independent Auditor Closeout - TASK-AR-652 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current.json` | `LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current |
@@ -177,6 +178,7 @@ record_count: 1133
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN.md` | `PILOT-BEAN-WIKI-v080-GREEN` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 3 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
+| `reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md` | `QA-REVIEW-2026-07-30-task-ar-652-additive-closeout` | md | approved | pass | QA Cross-Verification - TASK-AR-652 Additive Closeout Audit |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
@@ -650,6 +652,16 @@ record_count: 1133
 | `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md` | `REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan` | md | accepted | n/a | TASK-AR-650 W4 계약 순환 차단 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md` | `REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan` | md | accepted | n/a | TASK-AR-652 준비성 경로·실행 경계 T3 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md` | `REVIEW-2026-07-30-task-ar-652-scope-transition-approval` | planning | record | pass | TASK-AR-652 operability taskset scope transition approval |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan` | md | accepted | n/a | TASK-AR-652 attested-container sealing replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan` | md | accepted | n/a | TASK-AR-652 economic call-provenance replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan` | md | accepted | n/a | TASK-AR-652 final-approval W4b repair replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan` | md | accepted | n/a | TASK-AR-652 provider-call provenance and empty-finish replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan` | md | accepted | n/a | TASK-AR-652 receipt-row attestation replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan` | md | accepted | n/a | TASK-AR-652 terminal-success and settlement-provenance replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
@@ -969,6 +981,19 @@ record_count: 1133
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000.json` | `VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000.json` | `VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113.json` | `VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -999,6 +1024,19 @@ record_count: 1133
 | `reviews/W4A-2026-07-30-unit-task-ar-648-016.md` | `W4A-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4a — UNIT-TASK-AR-648-016 |
 | `reviews/W4A-2026-07-30-unit-task-ar-649-001.md` | `W4A-2026-07-30-unit-task-ar-649-001` | md | passed | n/a | W4a — UNIT-TASK-AR-649-001 |
 | `reviews/W4A-2026-07-30-unit-task-ar-650-001.md` | `W4A-2026-07-30-unit-task-ar-650-001` | md | pass | n/a | W4a - UNIT-TASK-AR-650-001 |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Attested-Container Sealing Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Economic Call-Provenance Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Final Approval Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Final Recheck Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Economic Routing Repair Follow-up W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Provider-Call Provenance and Empty-Finish Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Provider Identity Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Receipt-Row Attestation Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-recheck-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Second Recheck Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair` | md | passed | pass | TASK-AR-652 UNIT-001 SDK Telemetry Boundary Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Economic and Budget Integrity Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Success and Settlement Provenance Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001.md` | `W4A-2026-07-30-unit-task-ar-652-001` | md | passed | pass | W4a - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1164,6 +1202,19 @@ record_count: 1133
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval` | md | approved | pass | W4b Attested-Container Sealing Approval |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final` | md | blocked | block | W4b Call Provenance Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval` | md | blocked | block | W4b Economic Provenance Approval Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-candidate` | md | blocked | block | W4b Final Candidate - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-provenance-final` | md | blocked | block | W4b Provenance Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md` | `W4B-2026-07-30-unit-task-ar-652-001-provider-identity` | md | blocked | block | W4b Provider Identity - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval` | md | blocked | block | W4b Receipt Attestation Approval Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final` | md | blocked | block | W4b SDK Telemetry Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

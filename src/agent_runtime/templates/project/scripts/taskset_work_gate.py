@@ -33,6 +33,13 @@ _WALL_CLOCK_WIP = re.compile(
 # not go "stale" purely by time passing; real record changes are still caught
 # by the task rows, lane counts, and the other rollup lines.
 _WALL_CLOCK_ATTENTION = re.compile(r"^- Needs attention: .*$", re.MULTILINE)
+# The seven-day throughput window also changes as completed_at timestamps age
+# out, even when the underlying task records are untouched. Keep it visible on
+# the board, but exclude that rolling projection from record-drift detection.
+_WALL_CLOCK_THROUGHPUT = re.compile(
+    r"^- Throughput \(7d\): .*$",
+    re.MULTILINE,
+)
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -51,6 +58,10 @@ def _mask_wall_clock_fields(text: str) -> str:
     text = _WALL_CLOCK_GENERATED_AT.sub("generated_at: <wall-clock>", text)
     text = _WALL_CLOCK_WIP.sub(r"\g<1><wall-clock>\g<2><wall-clock>\g<3>", text)
     text = _WALL_CLOCK_ATTENTION.sub("- Needs attention: <wall-clock>", text)
+    text = _WALL_CLOCK_THROUGHPUT.sub(
+        "- Throughput (7d): <wall-clock>",
+        text,
+    )
     return text
 
 

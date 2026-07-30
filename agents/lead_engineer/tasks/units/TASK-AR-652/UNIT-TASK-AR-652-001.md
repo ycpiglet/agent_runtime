@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T12:38:00+09:00
+updated_at: 2026-07-30T21:44:28+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -27,6 +27,44 @@ claim_refs:
 context: Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses all five tiers, native Codex groups worker and strong tiers, and Scribe/doc/research roles fall back to worker_standard. Pilot evidence therefore could not substantiate any savings.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md
+  - reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md
+  - reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -40,6 +78,10 @@ target_files:
   - src/agent_runtime/templates/project/scripts/agent_worker.py
   - src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
   - src/agent_runtime/templates/project/scripts/eval_harness.py
+  - src/agent_runtime/templates/project/scripts/verify_sdk_backend.py
+  - src/agent_runtime/templates/project/scripts/providers/claude.py
+  - src/agent_runtime/templates/project/scripts/providers/claude_agent.py
+  - src/agent_runtime/templates/project/scripts/providers/codex.py
   - src/agent_runtime/doctor.py
   - tests/test_model_routing.py
   - tests/test_task_claim_dispatcher.py
@@ -50,6 +92,12 @@ target_files:
   - src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py
   - src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
   - src/agent_runtime/templates/project/scripts/test_eval_harness.py
+  - src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py
+  - scripts/taskset_work_gate.py
+  - src/agent_runtime/templates/project/scripts/taskset_work_gate.py
+  - tests/test_taskset_work_gate.py
+  - BACKLOG-BOARD.md
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Enforce routing and accounting truth without making a live provider call or changing provider credentials.
 acceptance:
   - Cheap roles select the configured low-cost lane.
@@ -59,8 +107,60 @@ acceptance:
 verification:
   - python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q
   - python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q
+  - python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q
 handoff: Attach the role matrix, execution-receipt schema, false-savings negatives, persistent-budget restart proof, template parity, and independent W4b.
 stop_condition: Stop before live provider calls, credential reads, account changes, package install, or claims of economic savings without observed usage.
+verified_at: 2026-07-30T21:44:28+09:00
+verified_by: le-20260730-123600-kst-ar652001
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json
+review_refs:
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-followup.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md
+  - reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md
+  - reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
@@ -72,6 +172,12 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 ## Inputs
 
 - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+- reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
+- reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
+- reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
+- reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
+- reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+- reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
 - scripts/model_routing.py
 - src/agent_runtime/templates/project/scripts/auto_dispatch.py
 - agents/project/ORG-MODEL.yml
@@ -87,6 +193,10 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 - src/agent_runtime/templates/project/scripts/agent_worker.py
 - src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
 - src/agent_runtime/templates/project/scripts/eval_harness.py
+- src/agent_runtime/templates/project/scripts/verify_sdk_backend.py
+- src/agent_runtime/templates/project/scripts/providers/claude.py
+- src/agent_runtime/templates/project/scripts/providers/claude_agent.py
+- src/agent_runtime/templates/project/scripts/providers/codex.py
 - src/agent_runtime/doctor.py
 - tests/test_model_routing.py
 - tests/test_task_claim_dispatcher.py
@@ -97,6 +207,12 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 - src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py
 - src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
 - src/agent_runtime/templates/project/scripts/test_eval_harness.py
+- src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py
+- scripts/taskset_work_gate.py
+- src/agent_runtime/templates/project/scripts/taskset_work_gate.py
+- tests/test_taskset_work_gate.py
+- BACKLOG-BOARD.md
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 
@@ -121,6 +237,7 @@ Enforce routing and accounting truth without making a live provider call or chan
 
 - `python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q`
 - `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
+- `python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q`
 
 ## Handoff
 
