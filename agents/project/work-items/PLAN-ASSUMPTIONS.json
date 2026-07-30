@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "46277143ca1fd8b1b4a7ed78080ace07c3ee894e47b22360a97225c7d1ec6c9a"
+          "value": "655c723b13ba02836973fb528002a20c84116c7a2dfc3ae5d6d212e3955ea7a9"
         },
         {
           "kind": "sha256",
@@ -1094,12 +1094,12 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
-          "value": "6dfdce16abc414a576a0192c4cc749b6ee2c415923ae2fc0b49cdbe2f97b6154"
+          "value": "3d776277f436a7b60d1cdc863395a7dcebff0f6fba9a3b66c44b35fa2c582719"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "c5a74ed70d702486c30c1c97206ee52ac8385869bb22494c6467b32ee6c5d216"
+          "value": "425be48810b251b61f29f2132670d5c42355f68e339861926fe01d380d7eaa26"
         },
         {
           "kind": "sha256",
@@ -1139,7 +1139,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
-          "value": "68cdb448f2c93372230ab7d1718d5f75c76d9052e83ea8f7a49d5c3e5407266e"
+          "value": "f42eccbf681761c2dc9cf420d765f0f5306f95216cc6e14bf760ed084c99e425"
         },
         {
           "kind": "sha256",
@@ -1149,12 +1149,12 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-          "value": "9d952ed418654e3e0d635bb8df0f21d9d0baff3bbed7ea118e8f381a02866216"
+          "value": "acab61487185d128e2174af04fe58d55b3b767d43aa6a6e4430ad8c018d5c787"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "0a9815bce5a5f9cfe309d3972070ac7d2d0bfbf86187786e0a50b026d7a77e0f"
+          "value": "52952e95c897d81dca8b05a00e739963dde84820a28bc6806b4300db3b441e03"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "4a505ba29162cd254d9b7a5439502fcfe8d7659e17607515bfcec29332fb0341"
+          "value": "60556ef1b997226f157ad916136ddf25cc7770a631b1d71e23ba83a63aa9fa3f"
         },
         {
           "kind": "sha256",
@@ -1235,10 +1235,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md",
           "value": "1743392d5143063d7a84d8998571bec9a099b867ada554201e09191d3d250410"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json",
+          "value": "68f219dd2d9652f5a34363975fd788dc8fd0f715375c2dbfa433f4eb714c76d8"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md",
+          "value": "a30974782c01dfd00eb32837d56cc20bc48c20b7687f8bbee1f43129e708adfa"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md",
-      "recorded_at": "2026-07-30T18:45:07+09:00",
+      "recorded_at": "2026-07-30T19:03:03+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1454,5 +1464,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T18:45:07+09:00"
+  "updated_at": "2026-07-30T19:03:03+09:00"
 }
