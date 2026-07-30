@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "5b4b02b64d2e3742efae840318216f25d027bef1d5653a62f48123d8a2d2f2ea"
+          "value": "46277143ca1fd8b1b4a7ed78080ace07c3ee894e47b22360a97225c7d1ec6c9a"
         },
         {
           "kind": "sha256",
@@ -1225,10 +1225,20 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md",
           "value": "8d60ff3f9c439ec9c39c8c7e24a197133962adbd1b3aebd33f2f256324623457"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md",
+          "value": "0dbc3c331b1845c84679c0b9ae5c3a88bf8ef5fda97ebcf33bb7da8bf7ce1c78"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md",
+          "value": "1743392d5143063d7a84d8998571bec9a099b867ada554201e09191d3d250410"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md",
-      "recorded_at": "2026-07-30T18:26:27+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md",
+      "recorded_at": "2026-07-30T18:45:07+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1444,5 +1454,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T18:26:27+09:00"
+  "updated_at": "2026-07-30T18:45:07+09:00"
 }

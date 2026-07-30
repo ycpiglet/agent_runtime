@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T18:25:47+09:00
-record_count: 1161
+generated_at: 2026-07-30T18:44:56+09:00
+record_count: 1163
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1161` review and evidence records under `reviews/`.
+- Summary: indexed `1163` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1161` files |
+| Reviews covered | pass | `1163` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -655,6 +655,7 @@ record_count: 1161
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan` | md | accepted | n/a | TASK-AR-652 terminal-success and settlement-provenance replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
@@ -1191,6 +1192,7 @@ record_count: 1161
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md` | `W4B-2026-07-30-unit-task-ar-652-001-provider-identity` | md | blocked | block | W4b Provider Identity - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final` | md | blocked | block | W4b SDK Telemetry Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
