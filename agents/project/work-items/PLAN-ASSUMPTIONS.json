@@ -993,13 +993,23 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
-          "value": "7d6cc73cc9a445ee60420dd23166debd74178216e10c37b7d1c0eb7e85d57ddb"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md",
+          "value": "e68f5ab44b930013a68e69ede1eb3ea4739ac43a619e52f788c9de28a2d60f83"
         },
         {
           "kind": "sha256",
-          "path": "scripts/model_routing.py",
-          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+          "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
+          "value": "0bb6bf18f2b9859099aa05ac96cf6555884dbf7200bd8aa10dbd1577d6eee51b"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
+          "value": "49ad9dc46fbc4844c84159b9498fbb2c20e34632143ff06c0d444ecacdee4a8f"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
         },
         {
           "kind": "sha256",
@@ -1008,12 +1018,52 @@
         },
         {
           "kind": "sha256",
-          "path": "scripts/work.py",
-          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
+          "path": "scripts/model_routing.py",
+          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/model_routing.py",
+          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/subagent_dispatch.py",
+          "value": "922c23eba1e25f290f90ce87fc1b6c58a9dafcb0bfd844cb71cc1387d1be70c1"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/agent_worker.py",
+          "value": "d4816f358b2ab07d6a815a934152f51f7f11ade810102c1eeb0acbcd4ae249fc"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py",
+          "value": "0231c91fcffe15595100d893277b80b9e18335b1902a21741692f7448b1f9928"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
+          "value": "cdd7f17821e76140e1a0e3f299fc7ab7787d0a328bd1bd319ac14a7504435a72"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
+          "value": "90620008642aeb0e5dc2687fc1dde749d7e2ee17ca391ce256cf9034a5f3ae06"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/doctor.py",
+          "value": "c72d8ffe15bfcf5729b2335eafddb0d81c1571d0d4d3a75393a23256d86243e9"
         }
       ],
-      "design_record": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
-      "recorded_at": "2026-07-30T11:28:35+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md",
+      "recorded_at": "2026-07-30T12:26:19+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1229,5 +1279,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T12:17:17+09:00"
+  "updated_at": "2026-07-30T12:26:19+09:00"
 }

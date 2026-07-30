@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-30T12:32:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -30,15 +30,23 @@ inputs:
 target_files:
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/model_routing.py
+  - scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
+  - src/agent_runtime/templates/project/scripts/subagent_dispatch.py
+  - src/agent_runtime/templates/project/scripts/agent_worker.py
+  - src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
   - src/agent_runtime/templates/project/scripts/eval_harness.py
   - src/agent_runtime/doctor.py
   - tests/test_model_routing.py
-  - tests/test_auto_dispatch.py
   - tests/test_task_claim_dispatcher.py
-  - tests/test_eval_harness.py
   - tests/test_doctor.py
+  - src/agent_runtime/templates/project/scripts/test_model_routing.py
+  - src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py
+  - src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py
+  - src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py
+  - src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
+  - src/agent_runtime/templates/project/scripts/test_eval_harness.py
 scope: Enforce routing and accounting truth without making a live provider call or changing provider credentials.
 acceptance:
   - Cheap roles select the configured low-cost lane.
@@ -46,7 +54,8 @@ acceptance:
   - Actual usage cannot be inferred from request configuration.
   - Budget enforcement survives a process restart.
 verification:
-  - python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q
+  - python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q
+  - python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q
 handoff: Attach the role matrix, execution-receipt schema, false-savings negatives, persistent-budget restart proof, template parity, and independent W4b.
 stop_condition: Stop before live provider calls, credential reads, account changes, package install, or claims of economic savings without observed usage.
 ---
@@ -68,15 +77,23 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 
 - scripts/model_routing.py
 - src/agent_runtime/templates/project/scripts/model_routing.py
+- scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/auto_dispatch.py
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
+- src/agent_runtime/templates/project/scripts/subagent_dispatch.py
+- src/agent_runtime/templates/project/scripts/agent_worker.py
+- src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
 - src/agent_runtime/templates/project/scripts/eval_harness.py
 - src/agent_runtime/doctor.py
 - tests/test_model_routing.py
-- tests/test_auto_dispatch.py
 - tests/test_task_claim_dispatcher.py
-- tests/test_eval_harness.py
 - tests/test_doctor.py
+- src/agent_runtime/templates/project/scripts/test_model_routing.py
+- src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py
+- src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py
+- src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py
+- src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
+- src/agent_runtime/templates/project/scripts/test_eval_harness.py
 
 ## Scope
 
@@ -99,7 +116,8 @@ Enforce routing and accounting truth without making a live provider call or chan
 
 ## Verification
 
-- `python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q`
+- `python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q`
+- `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
 
 ## Handoff
 

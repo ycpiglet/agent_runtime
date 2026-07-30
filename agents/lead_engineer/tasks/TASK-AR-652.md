@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-30T12:32:00+09:00
 title: Bind model tiers to actual execution and economic receipts
 status: planned
 priority: P1
@@ -39,7 +39,8 @@ acceptance:
   - Task and claim budget checks use persistent cumulative usage and block an unaffordable dispatch before a provider call.
   - Savings remain unavailable without an observed comparable baseline.
 verification:
-  - python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q
+  - python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q
+  - python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q
   - python scripts/runtime_asset_usage.py --check
 ---
 
@@ -63,5 +64,6 @@ verification:
 
 ## Verification
 
-- `python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q`
+- `python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q`
+- `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
 - `python scripts/runtime_asset_usage.py --check`
