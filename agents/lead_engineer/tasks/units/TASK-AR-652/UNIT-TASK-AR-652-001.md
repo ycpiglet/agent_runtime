@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T16:33:57+09:00
+updated_at: 2026-07-30T17:04:35+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -33,6 +33,8 @@ inputs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -75,7 +77,7 @@ verification:
   - python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q
 handoff: Attach the role matrix, execution-receipt schema, false-savings negatives, persistent-budget restart proof, template parity, and independent W4b.
 stop_condition: Stop before live provider calls, credential reads, account changes, package install, or claims of economic savings without observed usage.
-verified_at: 2026-07-30T16:33:57+09:00
+verified_at: 2026-07-30T17:04:35+09:00
 verified_by: le-20260730-123600-kst-ar652001
 evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json
@@ -92,6 +94,7 @@ evidence_refs:
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement

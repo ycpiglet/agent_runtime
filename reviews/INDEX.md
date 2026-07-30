@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T17:03:32+09:00
-record_count: 1151
+generated_at: 2026-07-30T17:06:01+09:00
+record_count: 1153
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1151` review and evidence records under `reviews/`.
+- Summary: indexed `1153` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1151` files |
+| Reviews covered | pass | `1153` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -977,6 +977,7 @@ record_count: 1151
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1010,6 +1011,7 @@ record_count: 1151
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Final Approval Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Final Recheck Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Economic Routing Repair Follow-up W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Provider Identity Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-recheck-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Second Recheck Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001.md` | `W4A-2026-07-30-unit-task-ar-652-001` | md | passed | pass | W4a - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |

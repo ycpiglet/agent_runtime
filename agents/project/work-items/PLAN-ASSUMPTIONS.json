@@ -1033,13 +1033,23 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json",
+          "value": "0020d1cdef1becd5697ef725fc3bae580d32b2c9e2ba8078891c6c346e3e8bf1"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md",
+          "value": "28a4e09ff105eee77038093a43aa9602f6db29e9b5bbda4629d9988e1feca241"
+        },
+        {
+          "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
           "value": "031f88c614f24b7ad6ef52f331a1ac7c7fdfb9d453a3fb08baa817be1c166a56"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "4b8d60184faa8aee0d0d1ecfcfc672f6df08e87e3b08be0f6339140aebba38a0"
+          "value": "ee7ea1c1b83389e30ce1fa8c5ee8f5bdba9824e46e0500bbf98d868fd0515a3a"
         },
         {
           "kind": "sha256",
@@ -1178,7 +1188,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md",
-      "recorded_at": "2026-07-30T17:03:32+09:00",
+      "recorded_at": "2026-07-30T17:06:01+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1394,5 +1404,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T17:03:32+09:00"
+  "updated_at": "2026-07-30T17:06:01+09:00"
 }
