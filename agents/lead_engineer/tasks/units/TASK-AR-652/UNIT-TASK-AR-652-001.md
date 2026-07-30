@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T17:04:35+09:00
+updated_at: 2026-07-30T17:25:00+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -33,6 +33,8 @@ inputs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md
   - scripts/model_routing.py
@@ -95,6 +97,7 @@ evidence_refs:
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
