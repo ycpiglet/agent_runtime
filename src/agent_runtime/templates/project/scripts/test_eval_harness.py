@@ -6,6 +6,7 @@ import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import MappingProxyType
 
 import pytest
 
@@ -2994,6 +2995,275 @@ def test_validated_collection_snapshots_hidden_provenance_records(tmp_path):
     assert before["monetary_delta"]["eligible_records"] == 1
     assert after["token_delta"]["eligible_records"] == 1
     assert after["monetary_delta"]["eligible_records"] == 1
+
+
+def _mutate_validated_collection(rows, operation, *, direct):
+    baseline, actual = rows
+    target = list if direct else type(rows)
+    if operation == "init":
+        target.__init__(rows, [baseline, actual, actual])
+    elif operation == "append":
+        target.append(rows, actual)
+    elif operation == "extend":
+        target.extend(rows, [actual, actual])
+    elif operation == "insert":
+        target.insert(rows, 0, actual)
+    elif operation == "iadd":
+        target.__iadd__(rows, [actual])
+    elif operation == "imul":
+        target.__imul__(rows, 2)
+    elif operation == "setitem":
+        target.__setitem__(rows, 1, baseline)
+    elif operation == "setslice":
+        target.__setitem__(rows, slice(1, 2), [actual, actual])
+    elif operation == "delitem":
+        target.__delitem__(rows, 0)
+    elif operation == "delslice":
+        target.__delitem__(rows, slice(0, 1))
+    elif operation == "pop":
+        target.pop(rows, 0)
+    elif operation == "remove":
+        target.remove(rows, baseline)
+    elif operation == "clear":
+        target.clear(rows)
+    elif operation == "reverse":
+        target.reverse(rows)
+    elif operation == "sort":
+        target.sort(
+            rows,
+            key=lambda row: str(row.get("receipt_id") or ""),
+        )
+    else:  # pragma: no cover - protects the test matrix itself
+        raise AssertionError(f"unknown collection mutation: {operation}")
+
+
+_VALIDATED_COLLECTION_MUTATIONS = (
+    "append",
+    "extend",
+    "insert",
+    "iadd",
+    "imul",
+    "setitem",
+    "setslice",
+    "delitem",
+    "delslice",
+    "pop",
+    "remove",
+    "clear",
+    "reverse",
+    "sort",
+)
+_DIRECT_VALIDATED_COLLECTION_MUTATIONS = (
+    "init",
+    *_VALIDATED_COLLECTION_MUTATIONS,
+)
+
+
+@pytest.mark.parametrize("operation", _VALIDATED_COLLECTION_MUTATIONS)
+def test_validated_collection_rejects_structural_mutation(operation):
+    baseline, actual = _verified_delta_records(
+        f"sealed-ordinary-{operation}",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="validated outcome collection is immutable",
+    ):
+        _mutate_validated_collection(rows, operation, direct=False)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    _DIRECT_VALIDATED_COLLECTION_MUTATIONS,
+)
+def test_direct_list_mutation_invalidates_collection_attestation(operation):
+    baseline, actual = _verified_delta_records(
+        f"sealed-direct-{operation}",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+    _mutate_validated_collection(rows, operation, direct=True)
+
+    result = eh.report(rows)
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["token_delta"]["saved_tokens"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["verified"] is False
+
+
+def test_validated_collection_cannot_be_reinitialized():
+    baseline, actual = _verified_delta_records(
+        "sealed-reinitialization",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="validated outcome attestation is sealed",
+    ):
+        rows.__init__(
+            [baseline, actual],
+            [baseline, actual],
+        )
+
+
+@pytest.mark.parametrize(
+    "operation",
+    ("assign", "object_assign", "delete", "object_delete"),
+)
+def test_validated_collection_provenance_authority_cannot_be_replaced(
+    operation,
+):
+    baseline, actual = _verified_delta_records(
+        f"sealed-provenance-{operation}",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+    original = getattr(rows, "_economic_provenance", {})
+    actual.update(
+        {
+            "tokens_in": 1,
+            "tokens_out": 0,
+            "tokens": 1,
+            "billed_cost": 0.0,
+        }
+    )
+    if original:
+        original_entry = original[id(actual)]
+        forged_entry = (
+            eh._record_attestation_digest(actual),
+            *original_entry[1:],
+        )
+        forged = MappingProxyType(
+            {
+                id(baseline): original[id(baseline)],
+                id(actual): forged_entry,
+            }
+        )
+    else:
+        forged = MappingProxyType({})
+
+    with pytest.raises(
+        (AttributeError, eh.ReceiptIntegrityError),
+        match="validated outcome attestation is sealed|"
+        "has no attribute|read-only",
+    ):
+        if operation == "assign":
+            rows._economic_provenance = forged
+        elif operation == "object_assign":
+            object.__setattr__(rows, "_economic_provenance", forged)
+        elif operation == "delete":
+            del rows._economic_provenance
+        else:
+            object.__delattr__(rows, "_economic_provenance")
+
+    result = eh.report(rows)
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+
+
+@pytest.mark.parametrize(
+    "attribute",
+    (
+        "_economic_provenance",
+        "_ValidatedOutcomeRecords__attestation",
+        "_ValidatedOutcomeRecords__sealed",
+    ),
+)
+def test_validated_collection_has_no_replaceable_attestation_slot(attribute):
+    baseline, actual = _verified_delta_records(
+        f"sealed-instance-slot-{attribute}",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+
+    with pytest.raises(
+        (AttributeError, eh.ReceiptIntegrityError),
+        match="validated outcome attestation is sealed|"
+        "has no attribute|read-only",
+    ):
+        object.__setattr__(rows, attribute, ())
+
+
+def test_validated_collection_subclass_cannot_override_report_authority():
+    forged = MappingProxyType({})
+
+    class ForgedValidatedRows(eh.ValidatedOutcomeRecords):
+        def _validated_report_inputs(self):
+            return self, forged
+
+    baseline, actual = _verified_delta_records(
+        "sealed-subclass-authority",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    rows = ForgedValidatedRows(
+        [baseline, actual],
+        [baseline, actual],
+    )
+    _, original = eh.ValidatedOutcomeRecords._validated_report_inputs(rows)
+    actual.update(
+        {
+            "tokens_in": 1,
+            "tokens_out": 0,
+            "tokens": 1,
+            "billed_cost": 0.0,
+        }
+    )
+    forged = MappingProxyType(
+        {
+            id(baseline): original[id(baseline)],
+            id(actual): (
+                eh._record_attestation_digest(actual),
+                *original[id(actual)][1:],
+            ),
+        }
+    )
+
+    result = eh.report(rows)
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
 
 
 @pytest.mark.parametrize(

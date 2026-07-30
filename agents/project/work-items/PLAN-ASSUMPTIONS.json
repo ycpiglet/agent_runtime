@@ -1099,7 +1099,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "bca42f205e6f624cfda001bcfd4ca7a4be6608bd1d0b723ffabccbe39e10c989"
+          "value": "fe6de2285d488651e2ea06b949b1119790cedf002a05c6f01203765c87315c03"
         },
         {
           "kind": "sha256",
@@ -1154,7 +1154,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "94fc7fda75a3873695344cb6d3be13be3cab2f72dc8749f045f9f922861061a7"
+          "value": "6e334d553b0267d1cfa64f7259f0c33a454fa74b441ba6534523ddbe49f86468"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "b0a0aa52b88034b89cd7410b326948def17f6eb2a0604f85c24ce7fba8fad649"
+          "value": "887555f64d6e65ceb4606fbc3d2509760fb9b360dc19362b043bdbf3187a124e"
         },
         {
           "kind": "sha256",
@@ -1333,7 +1333,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md",
-      "recorded_at": "2026-07-30T21:32:33+09:00",
+      "recorded_at": "2026-07-30T21:43:44+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1549,5 +1549,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T21:32:33+09:00"
+  "updated_at": "2026-07-30T21:43:44+09:00"
 }

@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import time
+import weakref
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -131,80 +132,171 @@ def _record_attestation_digest(record: dict) -> str:
     ).hexdigest()
 
 
-class ValidatedOutcomeRecords(list):
-    """List-compatible outcome rows carrying strict-ledger provenance.
+def _validated_outcome_records_class():
+    """Create a validated view whose authority is not instance-replaceable."""
+    attestations = {}
+    empty_provenance = MappingProxyType({})
 
-    Reservation and provider-call records stay out of the user-facing rows,
-    but economic reporting still needs their validated relationship. The
-    complete ledger is revalidated even for direct construction, and exposed
-    rows must be the exact filtered members of that ledger. Each execution
-    receipt is bound to its canonical full-record digest; object identity is
-    only the lookup key. Copying rows into a plain list or mutating a returned
-    row therefore drops or invalidates the attestation and fails closed.
-    """
+    def discard_attestation(identity, reference):
+        current = attestations.get(identity)
+        if current is not None and current[0] is reference:
+            attestations.pop(identity, None)
 
-    __slots__ = ("_economic_provenance",)
+    class _ValidatedOutcomeRecords(list):
+        """List-compatible outcome rows carrying strict-ledger provenance.
 
-    def __init__(self, outcomes: list[dict], ledger_records: list[dict]):
-        validation_path = Path("<validated-outcome-records>")
-        _validate_ledger_records(ledger_records, validation_path)
-        expected_outcomes = [
-            item
-            for item in ledger_records
-            if item.get("schema")
-            not in {
-                BUDGET_RESERVATION_SCHEMA,
-                NO_PROVIDER_SETTLEMENT_SCHEMA,
-                PROVIDER_CALL_START_SCHEMA,
-            }
-        ]
-        if (
-            len(outcomes) != len(expected_outcomes)
-            or any(
-                outcome is not expected
-                for outcome, expected in zip(
-                    outcomes,
-                    expected_outcomes,
-                )
-            )
-        ):
+        Reservation and provider-call records stay out of the user-facing
+        rows, but economic reporting still needs their validated relationship.
+        The complete ledger is revalidated even for direct construction, and
+        exposed rows must be the exact filtered members of that ledger. Each
+        execution receipt is bound to its canonical full-record digest;
+        object identity is only the lookup key. Constructor-created membership
+        and provenance are sealed outside caller-replaceable instance state.
+        Copying rows into a plain list, mutating a returned row, or changing
+        the validated collection therefore drops or invalidates the
+        attestation and fails closed.
+        """
+
+        __slots__ = ("__weakref__",)
+
+        def __setattr__(self, name, value):
             raise ReceiptIntegrityError(
-                "outcome rows do not match validated ledger"
+                "validated outcome attestation is sealed"
             )
-        super().__init__(outcomes)
-        reservations = {
-            str(item.get("dispatch_id") or ""): item
-            for item in ledger_records
-            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
-        }
-        settlements = {
-            str(item.get("dispatch_id") or ""): item
-            for item in ledger_records
-            if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
-        }
-        call_starts = {
-            str(item.get("dispatch_id") or ""): item
-            for item in ledger_records
-            if item.get("schema") == PROVIDER_CALL_START_SCHEMA
-        }
-        provenance = {}
-        for item in self:
-            if item.get("schema") != EXECUTION_RECEIPT_SCHEMA:
-                continue
-            dispatch_id = str(item.get("dispatch_id") or "")
-            provenance[id(item)] = (
-                _record_attestation_digest(item),
-                _canonical_record_json(reservations[dispatch_id])
-                if dispatch_id in reservations
-                else None,
-                _canonical_record_json(settlements[dispatch_id])
-                if dispatch_id in settlements
-                else None,
-                _canonical_record_json(call_starts[dispatch_id])
-                if dispatch_id in call_starts
-                else None,
+
+        def __delattr__(self, name):
+            raise ReceiptIntegrityError(
+                "validated outcome attestation is sealed"
             )
-        self._economic_provenance = MappingProxyType(provenance)
+
+        def _reject_collection_mutation(self, *args, **kwargs):
+            raise ReceiptIntegrityError(
+                "validated outcome collection is immutable"
+            )
+
+        append = _reject_collection_mutation
+        clear = _reject_collection_mutation
+        extend = _reject_collection_mutation
+        insert = _reject_collection_mutation
+        pop = _reject_collection_mutation
+        remove = _reject_collection_mutation
+        reverse = _reject_collection_mutation
+        sort = _reject_collection_mutation
+        __delitem__ = _reject_collection_mutation
+        __iadd__ = _reject_collection_mutation
+        __imul__ = _reject_collection_mutation
+        __setitem__ = _reject_collection_mutation
+
+        def __init__(
+            self,
+            outcomes: list[dict],
+            ledger_records: list[dict],
+        ):
+            current_attestation = attestations.get(id(self))
+            if (
+                current_attestation is not None
+                and current_attestation[0]() is self
+            ):
+                raise ReceiptIntegrityError(
+                    "validated outcome attestation is sealed"
+                )
+            validation_path = Path("<validated-outcome-records>")
+            _validate_ledger_records(ledger_records, validation_path)
+            expected_outcomes = [
+                item
+                for item in ledger_records
+                if item.get("schema")
+                not in {
+                    BUDGET_RESERVATION_SCHEMA,
+                    NO_PROVIDER_SETTLEMENT_SCHEMA,
+                    PROVIDER_CALL_START_SCHEMA,
+                }
+            ]
+            if (
+                len(outcomes) != len(expected_outcomes)
+                or any(
+                    outcome is not expected
+                    for outcome, expected in zip(
+                        outcomes,
+                        expected_outcomes,
+                    )
+                )
+            ):
+                raise ReceiptIntegrityError(
+                    "outcome rows do not match validated ledger"
+                )
+            super().__init__(outcomes)
+            reservations = {
+                str(item.get("dispatch_id") or ""): item
+                for item in ledger_records
+                if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+            }
+            settlements = {
+                str(item.get("dispatch_id") or ""): item
+                for item in ledger_records
+                if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+            }
+            call_starts = {
+                str(item.get("dispatch_id") or ""): item
+                for item in ledger_records
+                if item.get("schema") == PROVIDER_CALL_START_SCHEMA
+            }
+            provenance = {}
+            for item in self:
+                if item.get("schema") != EXECUTION_RECEIPT_SCHEMA:
+                    continue
+                dispatch_id = str(item.get("dispatch_id") or "")
+                provenance[id(item)] = (
+                    _record_attestation_digest(item),
+                    _canonical_record_json(reservations[dispatch_id])
+                    if dispatch_id in reservations
+                    else None,
+                    _canonical_record_json(settlements[dispatch_id])
+                    if dispatch_id in settlements
+                    else None,
+                    _canonical_record_json(call_starts[dispatch_id])
+                    if dispatch_id in call_starts
+                    else None,
+                )
+            identity = id(self)
+            reference = weakref.ref(
+                self,
+                lambda ref, key=identity: discard_attestation(key, ref),
+            )
+            attestations[identity] = (
+                reference,
+                tuple(outcomes),
+                MappingProxyType(provenance),
+            )
+
+        def _validated_report_inputs(self):
+            """Return the sealed view, or empty after structure drift."""
+            attestation = attestations.get(id(self))
+            if (
+                attestation is None
+                or attestation[0]() is not self
+            ):
+                return (), empty_provenance
+            expected_members = attestation[1]
+            if (
+                len(self) != len(expected_members)
+                or any(
+                    current is not expected
+                    for current, expected in zip(
+                        self,
+                        expected_members,
+                    )
+                )
+            ):
+                return (), empty_provenance
+            return self, attestation[2]
+
+    _ValidatedOutcomeRecords.__name__ = "ValidatedOutcomeRecords"
+    _ValidatedOutcomeRecords.__qualname__ = "ValidatedOutcomeRecords"
+    return _ValidatedOutcomeRecords
+
+
+ValidatedOutcomeRecords = _validated_outcome_records_class()
 
 
 @contextmanager
@@ -2878,11 +2970,14 @@ def _economic_claim_candidates(records: list[dict]) -> list[dict]:
 
 def report(records: list[dict] | None = None) -> dict:
     records = read_outcomes() if records is None else records
-    provenance_index = (
-        records._economic_provenance
-        if isinstance(records, ValidatedOutcomeRecords)
-        else {}
-    )
+    if type(records) is ValidatedOutcomeRecords:
+        records, provenance_index = (
+            ValidatedOutcomeRecords._validated_report_inputs(records)
+        )
+    elif isinstance(records, ValidatedOutcomeRecords):
+        records, provenance_index = (), {}
+    else:
+        provenance_index = {}
     receipt_index = {
         str(record.get("receipt_id")): record
         for record in records
