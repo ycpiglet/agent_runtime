@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "3284db662a5330cddfc50343188c435f1755b48f9ddd05b290c14d43c95646a9"
+          "value": "5f609745e8f1f9f08b7aa3cbf254e142af4e35aae105b8772ed376a7a03e5b8a"
         },
         {
           "kind": "sha256",
@@ -1084,27 +1084,27 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_worker.py",
-          "value": "08c1d9c5879415aedc596bdea11908215d8095314d28add657942440e6c17914"
+          "value": "8a90f3fde3e7e57e308c233402df38813d43e2494c97b3dba87604e9c014c5e3"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py",
-          "value": "fb1acfb54f08e88892813859e428f4d8b7b9d54ef653a08a44ca15d3dd0c2344"
+          "value": "d500bc9caa6cd8a01ccb09b3162538928cfc52077d0c4a1641308e574504283e"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
-          "value": "3d776277f436a7b60d1cdc863395a7dcebff0f6fba9a3b66c44b35fa2c582719"
+          "value": "ef3b38c5670b61908b39efe82e210af3927cf9b5119e62af2cb1abfd443cd1c4"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "425be48810b251b61f29f2132670d5c42355f68e339861926fe01d380d7eaa26"
+          "value": "84bf893cefe9f310d27242034ef01a362b5bae7b4910ae490fb3e6e3696d36ef"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/verify_sdk_backend.py",
-          "value": "4f2dcfaa7fae02c3365bcd73bd14253e4fa03fdabf3256d3e4915d77fbfaf67f"
+          "value": "d95dcfcb0a8f30bd9e9263e0d3051595445dba0eb240087e1eec9b876d91bcb6"
         },
         {
           "kind": "sha256",
@@ -1139,27 +1139,27 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
-          "value": "f42eccbf681761c2dc9cf420d765f0f5306f95216cc6e14bf760ed084c99e425"
+          "value": "ebba02e6ebf7e520011038e788dff90a9eb6ab3835795acf9769aba1fc704038"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
-          "value": "78c5f04d41c72bf44766f0a0001053039e96e9d2c6af4048ca9b9f934061547f"
+          "value": "5347dd2b7f368aa3e1098e97a85c92fd9229be690218c4ca87611cbdf74c1f8c"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-          "value": "acab61487185d128e2174af04fe58d55b3b767d43aa6a6e4430ad8c018d5c787"
+          "value": "07b732a63b0470fa5971e2838aa6ca95dae4dcd912cf2b80ed8a72db8e8ca2b1"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "52952e95c897d81dca8b05a00e739963dde84820a28bc6806b4300db3b441e03"
+          "value": "24ad58a1d8740145cf5d36784cf371f01c9fa254742eea41355016b57714fe2d"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py",
-          "value": "aa594d85dd292cafbf7f9526d3d3d934b3446b5a792a204c45f3e2a331206259"
+          "value": "390dd779c9c3dd0ffe663527196106e560cb7575defdad49c22618266655400f"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "60556ef1b997226f157ad916136ddf25cc7770a631b1d71e23ba83a63aa9fa3f"
+          "value": "64aea4c1b5cdc13ecfa5139e0de0f99c0a4cfe76cc203ed7422ac7b745bd559e"
         },
         {
           "kind": "sha256",
@@ -1255,10 +1255,35 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md",
           "value": "7b2a5ad21c1b0cb7e82428d8475f8515fa55e1cebc6c5ffc07e4130924937f41"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/providers/claude.py",
+          "value": "7b10180d21e0993c1ca01f258d292fa78f4d1e06b68a456d75b70151a87c1cf7"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/providers/claude_agent.py",
+          "value": "ee8dc1e660086ae594c040ffdd4a8bc73ae28fa221ab987911f6e5898805ce37"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/providers/codex.py",
+          "value": "34ad331d4ec525774a7d54dc280816f2bfc7f53782b5343eb979aa9ae0761048"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353.json",
+          "value": "fafe062d02c2d0973bcdb4d514b884099abb90ae048a554fd97eb2fbd9c9a9a4"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md",
+          "value": "56c2d29a7f45e8b99fcf81a10382fbb810e476152f25579c0ec899270ab5c03b"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md",
-      "recorded_at": "2026-07-30T19:32:45+09:00",
+      "recorded_at": "2026-07-30T20:06:37+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1474,5 +1499,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T19:32:45+09:00"
+  "updated_at": "2026-07-30T20:06:37+09:00"
 }

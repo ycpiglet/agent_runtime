@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T19:33:00+09:00
+updated_at: 2026-07-30T20:04:56+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -49,6 +49,7 @@ inputs:
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -63,6 +64,9 @@ target_files:
   - src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
   - src/agent_runtime/templates/project/scripts/eval_harness.py
   - src/agent_runtime/templates/project/scripts/verify_sdk_backend.py
+  - src/agent_runtime/templates/project/scripts/providers/claude.py
+  - src/agent_runtime/templates/project/scripts/providers/claude_agent.py
+  - src/agent_runtime/templates/project/scripts/providers/codex.py
   - src/agent_runtime/doctor.py
   - tests/test_model_routing.py
   - tests/test_task_claim_dispatcher.py
@@ -91,7 +95,7 @@ verification:
   - python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q
 handoff: Attach the role matrix, execution-receipt schema, false-savings negatives, persistent-budget restart proof, template parity, and independent W4b.
 stop_condition: Stop before live provider calls, credential reads, account changes, package install, or claims of economic savings without observed usage.
-verified_at: 2026-07-30T19:00:52+09:00
+verified_at: 2026-07-30T20:03:53+09:00
 verified_by: le-20260730-123600-kst-ar652001
 evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json
@@ -103,6 +107,7 @@ evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353.json
 review_refs:
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
@@ -125,6 +130,7 @@ review_refs:
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
+  - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
@@ -158,6 +164,9 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 - src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py
 - src/agent_runtime/templates/project/scripts/eval_harness.py
 - src/agent_runtime/templates/project/scripts/verify_sdk_backend.py
+- src/agent_runtime/templates/project/scripts/providers/claude.py
+- src/agent_runtime/templates/project/scripts/providers/claude_agent.py
+- src/agent_runtime/templates/project/scripts/providers/codex.py
 - src/agent_runtime/doctor.py
 - tests/test_model_routing.py
 - tests/test_task_claim_dispatcher.py
