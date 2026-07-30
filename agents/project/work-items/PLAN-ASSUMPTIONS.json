@@ -998,18 +998,23 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md",
+          "value": "3379f888fa878b6459df6cdcde2d096b5b4b3df24e23c1b100413af7e75b1f5e"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
           "value": "7d6cc73cc9a445ee60420dd23166debd74178216e10c37b7d1c0eb7e85d57ddb"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
-          "value": "b9aeb3da55c29bccbfcc5985c240733da5d9d787fd488dcdbd86752c5b8ee2a4"
+          "value": "21c7d9065c14434770810ca8eb8cae075f2110842bd699e5f02ed706d1760d6f"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
-          "value": "3ffca0a387fa508e695f0ec771a45d2033c3a3af54f910f094a993992eb7e41e"
+          "value": "41d7e8abe0853216a2e91ec09aa23b6d8959c58487eb183f1b7b718dbd804b5a"
         },
         {
           "kind": "sha256",
@@ -1113,6 +1118,11 @@
         },
         {
           "kind": "sha256",
+          "path": "tests/test_rsi_operating_system_docs.py",
+          "value": "8a509170b8ad891e0827dc9ddb3bef93775f43e536359545c25da09786a88e40"
+        },
+        {
+          "kind": "sha256",
           "path": "tests/test_inventory_sync_sanitize.py",
           "value": "a6953921d26879abc53ec188261bd651a7b005579960fbe5736de6b9aac8f608"
         },
@@ -1133,7 +1143,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
-      "recorded_at": "2026-07-31T04:10:56+09:00",
+      "recorded_at": "2026-07-31T04:31:31+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1349,5 +1359,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-31T04:10:56+09:00"
+  "updated_at": "2026-07-31T04:31:31+09:00"
 }

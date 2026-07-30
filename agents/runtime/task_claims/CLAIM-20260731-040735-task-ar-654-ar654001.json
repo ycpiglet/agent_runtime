@@ -50,7 +50,7 @@
   "branch": "codex/task-ar-654-v080-compound-hardening",
   "claimed_at": "2026-07-31T04:07:35+09:00",
   "last_heartbeat": "2026-07-31T04:07:35+09:00",
-  "updated_at": "2026-07-31T04:07:35+09:00",
+  "updated_at": "2026-07-31T04:30:20+09:00",
   "expires_at": "2026-07-31T08:07:35+09:00",
   "lease": {
     "claimed_at": "2026-07-31T04:07:35+09:00",
@@ -88,6 +88,7 @@
     "tests/test_compound_records.py",
     "tests/test_task_claim_dispatcher.py",
     "tests/test_runtime_asset_usage.py",
+    "tests/test_rsi_operating_system_docs.py",
     "tests/test_inventory_sync_sanitize.py",
     "tests/test_lock_merge_driver.py",
     "tests/test_regen_host_lock_if_needed.py"

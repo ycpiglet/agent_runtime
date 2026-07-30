@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T04:10:57+09:00
-record_count: 1219
+generated_at: 2026-07-31T04:31:31+09:00
+record_count: 1220
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1219` review and evidence records under `reviews/`.
+- Summary: indexed `1220` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1219` files |
+| Reviews covered | pass | `1220` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -669,6 +669,7 @@ record_count: 1219
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md` | `REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan` | md | accepted | n/a | TASK-AR-654 Compound closure T3 replan |
+| `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

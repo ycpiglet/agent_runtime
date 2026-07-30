@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-31T04:07:35+09:00
+updated_at: 2026-07-31T04:30:20+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -30,6 +30,7 @@ context: The claim dispatcher already searches canonical Compound records, but c
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
+  - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
   - src/agent_runtime/knowledge_records.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
@@ -51,6 +52,7 @@ target_files:
   - tests/test_compound_records.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_runtime_asset_usage.py
+  - tests/test_rsi_operating_system_docs.py
   - tests/test_inventory_sync_sanitize.py
   - tests/test_lock_merge_driver.py
   - tests/test_regen_host_lock_if_needed.py
@@ -61,7 +63,7 @@ acceptance:
   - The skill is discoverable in a freshly adopted host.
   - No legacy Compound log is rewritten.
 verification:
-  - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
+  - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
   - python scripts/runtime_asset_usage.py --check
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
@@ -102,6 +104,7 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - tests/test_compound_records.py
 - tests/test_task_claim_dispatcher.py
 - tests/test_runtime_asset_usage.py
+- tests/test_rsi_operating_system_docs.py
 - tests/test_inventory_sync_sanitize.py
 - tests/test_lock_merge_driver.py
 - tests/test_regen_host_lock_if_needed.py
@@ -129,7 +132,7 @@ Tighten only the repeated-failure lane and preserve ordinary review/retro closur
 
 ## Verification
 
-- `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
+- `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
