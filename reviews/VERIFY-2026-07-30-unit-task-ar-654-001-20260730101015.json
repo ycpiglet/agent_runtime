@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015",
+  "work_id": "UNIT-TASK-AR-654-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-654",
+  "unit_id": "UNIT-TASK-AR-654-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T10:10:15+09:00",
+  "verified_by": "codex-root-task-ar-654",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_merge_queue.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T10:10:15+09:00",
+      "finished_at": "2026-07-30T10:10:32+09:00",
+      "stdout": "........................................                                 [100%]\n40 passed in 16.42s\n",
+      "stderr": ""
+    },
+    {
+      "command": "cmp scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T10:10:32+09:00",
+      "finished_at": "2026-07-30T10:10:32+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "cmp skills/merge-integrator/SKILL.md src/agent_runtime/templates/project/skills/merge-integrator/SKILL.md",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T10:10:32+09:00",
+      "finished_at": "2026-07-30T10:10:32+09:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T10:10:32+09:00",
+      "finished_at": "2026-07-30T10:10:32+09:00",
+      "stdout": "OK: /home/keti-itp-01/ycpiglet/agent_runtime/.worktrees/TASK-AR-654/tests/fixtures/host/agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}
