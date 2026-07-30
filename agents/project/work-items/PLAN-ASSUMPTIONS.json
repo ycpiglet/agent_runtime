@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "655c723b13ba02836973fb528002a20c84116c7a2dfc3ae5d6d212e3955ea7a9"
+          "value": "3284db662a5330cddfc50343188c435f1755b48f9ddd05b290c14d43c95646a9"
         },
         {
           "kind": "sha256",
@@ -1245,10 +1245,20 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md",
           "value": "a30974782c01dfd00eb32837d56cc20bc48c20b7687f8bbee1f43129e708adfa"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md",
+          "value": "ce79eefd74b71316e1c5d53a872264fc8d15b929bf16e18d7511716ccd76680b"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md",
+          "value": "7b2a5ad21c1b0cb7e82428d8475f8515fa55e1cebc6c5ffc07e4130924937f41"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md",
-      "recorded_at": "2026-07-30T19:03:03+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md",
+      "recorded_at": "2026-07-30T19:32:45+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1464,5 +1474,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T19:03:03+09:00"
+  "updated_at": "2026-07-30T19:32:45+09:00"
 }
