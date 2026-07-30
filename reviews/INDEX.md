@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T05:49:15+09:00
-record_count: 1231
+generated_at: 2026-07-31T06:02:57+09:00
+record_count: 1232
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1231` review and evidence records under `reviews/`.
+- Summary: indexed `1232` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1231` files |
+| Reviews covered | pass | `1232` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1261,6 +1261,7 @@ record_count: 1231
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001.md` | `W4B-2026-07-31-unit-task-ar-653-001` | md | blocked | block | TASK-AR-653 Final Independent Implementation W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair` | md | revise | fail | TASK-AR-654 Accepted-Watch Authority Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair` | md | revise | fail | TASK-AR-654 Duplicate Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final` | md | revise | fail | TASK-AR-654 YAML Semantic-Key Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001.md` | `W4B-2026-07-31-unit-task-ar-654-001` | md | revise | fail | TASK-AR-654 Repeated-Failure Compound Hardening Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
