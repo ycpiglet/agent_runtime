@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T20:45:36+09:00
-record_count: 1173
+generated_at: 2026-07-30T21:00:45+09:00
+record_count: 1175
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1173` review and evidence records under `reviews/`.
+- Summary: indexed `1175` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1173` files |
+| Reviews covered | pass | `1175` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -655,6 +655,7 @@ record_count: 1173
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan` | md | accepted | n/a | TASK-AR-652 provider-call provenance and empty-finish replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan` | md | accepted | n/a | TASK-AR-652 receipt-row attestation replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan` | md | accepted | n/a | TASK-AR-652 terminal-success and settlement-provenance replan |
@@ -1195,6 +1196,7 @@ record_count: 1173
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final` | md | blocked | block | W4b Call Provenance Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval` | md | blocked | block | W4b Economic Provenance Approval Review |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-candidate` | md | blocked | block | W4b Final Candidate - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |

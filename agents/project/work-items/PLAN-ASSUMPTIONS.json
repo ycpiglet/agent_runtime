@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "fd79e9a43aa4c93080cafc016fda71db260857bec8e6c724fb74bcdd1b0ff644"
+          "value": "3a242f93ebdd4131febf760b95ae7e97465987574db13fc1b4c69975ccb97e03"
         },
         {
           "kind": "sha256",
@@ -1300,10 +1300,20 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md",
           "value": "c766b64300385794ca0fdd574b848f690fd7f3288509c6414e1966d392d492e0"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md",
+          "value": "8056d4006a6b9207f1a1743c9e2f0380c21700242f051d869830534e423d0ac9"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md",
+          "value": "f9a978b9998d7fd30c0822f2dc3067f66f66d87961526dffed6d32b1130d5044"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md",
-      "recorded_at": "2026-07-30T20:45:36+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md",
+      "recorded_at": "2026-07-30T21:00:45+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1519,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T20:45:36+09:00"
+  "updated_at": "2026-07-30T21:00:45+09:00"
 }
