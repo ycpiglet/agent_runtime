@@ -6,9 +6,9 @@
 - verifier_role: `qa-reviewer`
 - claim_id: `CLAIM-20260730-092200-task-ar-654-host-gates`
 - branch: `codex/unit-task-ar-654-001-host-required-gates`
-- implementation_commit: `fc5df6e7`
-- correction_commit: `0af60f59`
-- reviewed_head: `c94a9fa6`
+- implementation_commit: `898adcdc`
+- correction_commit: `121ad928`
+- reviewed_head: `12ee64e0`
 - worker_evidence: `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331.json`
 - prior_review: `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework.md`
 
@@ -21,7 +21,7 @@ custom integration-branch dry-run agrees with real processing.
 
 W4b nevertheless remains `REWORK` because two additional compatibility/parity
 counterexamples and one generated-host regression remain. The claim must not
-be released at reviewed HEAD `c94a9fa6`.
+be released at reviewed HEAD `12ee64e0`.
 
 ## Round-1 Blocker Revalidation
 
@@ -226,7 +226,7 @@ and behind-base dry-run counterexamples described above.
 ## Footprint and Lifecycle
 
 The functional correction remains within the seven declared implementation
-targets. Correction commit `0af60f59` also absorbs the prior requested W4b
+targets. Correction commit `121ad928` also absorbs the prior requested W4b
 evidence and regenerates its review index:
 
 ```text
@@ -234,7 +234,7 @@ reviews/W4B-2026-07-30-unit-task-ar-654-001-rework.md
 reviews/INDEX.md
 ```
 
-Worker re-verification commit `c94a9fa6` adds or changes:
+Worker re-verification commit `12ee64e0` adds or changes:
 
 ```text
 agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md
@@ -251,5 +251,5 @@ trailing whitespace. No implementation diff has a whitespace error.
 
 ## Release Gate
 
-W4b approval is not granted for HEAD `c94a9fa6`. No claim release, bypass,
+W4b approval is not granted for HEAD `12ee64e0`. No claim release, bypass,
 implementation edit, commit, push, or merge was performed.

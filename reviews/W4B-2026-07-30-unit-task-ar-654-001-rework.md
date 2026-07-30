@@ -6,8 +6,8 @@
 - verifier_role: `qa-reviewer`
 - claim_id: `CLAIM-20260730-092200-task-ar-654-host-gates`
 - branch: `codex/unit-task-ar-654-001-host-required-gates`
-- implementation_commit: `fc5df6e7`
-- reviewed_head: `a1e63c92`
+- implementation_commit: `898adcdc`
+- reviewed_head: `90eac129`
 - worker_evidence: `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218.json`
 
 ## Decision
@@ -164,7 +164,7 @@ python -m pytest tests/test_template_smoke.py tests/test_regen_host_lock_if_need
 python -m py_compile scripts/merge_queue.py src/agent_runtime/templates/project/scripts/merge_queue.py
 # PASS
 
-git diff --check 1bfe08ef...fc5df6e7
+git diff --check 6c648f0a...898adcdc
 # PASS
 ```
 
@@ -182,14 +182,14 @@ python -c 'import runpy,tempfile,json; from pathlib import Path; ns=runpy.run_pa
 
 ## Footprint and Lifecycle Audit
 
-Implementation commit `fc5df6e7` changes exactly the seven declared target
+Implementation commit `898adcdc` changes exactly the seven declared target
 files. The enforced postverify probe reports:
 
 ```text
 declared=7 actual=7 undeclared=0
 ```
 
-W4a commit `a1e63c92` additionally changes three lifecycle/evidence files not
+W4a commit `90eac129` additionally changes three lifecycle/evidence files not
 listed in the claim footprint:
 
 ```text
@@ -214,5 +214,5 @@ No implementation file has a whitespace error.
 
 ## Release Gate
 
-W4b approval is not granted for HEAD `a1e63c92`. The independent verifier did
+W4b approval is not granted for HEAD `90eac129`. The independent verifier did
 not release the claim, commit, push, merge, or modify implementation files.
