@@ -51,6 +51,58 @@ def test_live_verifier_reserves_budget_and_records_terminal_receipt(
     assert receipts[0]["source"] == "verify_sdk_backend"
     assert receipts[0]["status"] == "completed"
     assert receipts[0]["tokens"] == 3
+    assert receipts[0]["provider"] == "claude-agent"
+    assert receipts[0]["observed_provider"] is None
+    economic_report = verify.eval_harness.report(receipts)
+    assert economic_report["token_delta"]["eligible_records"] == 0
+    assert economic_report["monetary_delta"]["eligible_records"] == 0
+
+
+def test_live_verifier_preserves_explicit_completion_provider(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        verify.eval_harness,
+        "EVAL_LOG",
+        tmp_path / "receipts.jsonl",
+    )
+    route = {
+        "provider": "claude-agent",
+        "requested_tier": "worker_standard",
+        "selected_tier": "worker_standard",
+        "resolved_model": "claude-sonnet-4-6",
+        "reasoning_effort": None,
+        "model_source": "test",
+        "reasoning_source": "unsupported",
+        "route_status": "configured_unverified",
+        "application_status": "configured_unverified",
+        "model_changed": None,
+        "route_changed": None,
+    }
+    verify._record(
+        dispatch_id="verify-sdk-explicit-provider",
+        claim_id=None,
+        route=route,
+        preflight={},
+        status="completed",
+        finish_reason="stop",
+        result=SimpleNamespace(
+            provider="claude-agent",
+            model="claude-sonnet-4-6",
+            reasoning_effort=None,
+            tokens_in=2,
+            tokens_out=1,
+            billed_cost=0.01,
+            currency="USD",
+        ),
+    )
+
+    receipts = verify.eval_harness.read_outcomes(verify.eval_harness.EVAL_LOG)
+    assert len(receipts) == 1
+    assert receipts[0]["provider"] == "claude-agent"
+    assert receipts[0]["observed_provider"] == "claude-agent"
+    assert verify.eval_harness._route_observation_complete(receipts[0]) is True
 
 
 def test_live_verifier_obeys_authoritative_zero_budget_before_provider(

@@ -1104,7 +1104,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/verify_sdk_backend.py",
-          "value": "6a035d993cf023bac0a5304c5f56b7ce0190010cdc2d87cf0312c868ad185e01"
+          "value": "4f2dcfaa7fae02c3365bcd73bd14253e4fa03fdabf3256d3e4915d77fbfaf67f"
         },
         {
           "kind": "sha256",
@@ -1159,7 +1159,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py",
-          "value": "a9b62430bb6eb73b5622d7a60192d5c043d3d0bbd0fac3ed5eb411d6190fa341"
+          "value": "aa594d85dd292cafbf7f9526d3d3d934b3446b5a792a204c45f3e2a331206259"
         },
         {
           "kind": "sha256",
@@ -1184,7 +1184,7 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "cb0d72338359ea8494abb8bbcdffda83bb24bb474dffe3bbcb354cb0df2273b8"
+          "value": "994fa5aaa920203f3f5c4a0773ef91d9e0538dc3aaa29ef102bd3a0c183f272c"
         },
         {
           "kind": "sha256",
@@ -1198,7 +1198,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md",
-      "recorded_at": "2026-07-30T17:26:02+09:00",
+      "recorded_at": "2026-07-30T17:31:44+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1414,5 +1414,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T17:26:02+09:00"
+  "updated_at": "2026-07-30T17:31:44+09:00"
 }

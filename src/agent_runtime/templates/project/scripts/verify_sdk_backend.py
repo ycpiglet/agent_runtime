@@ -64,7 +64,7 @@ def _record(
         task_id="verify-sdk",
         claim_id=claim_id,
         role="qa",
-        provider="claude",
+        provider=route.get("provider"),
         execution_surface="provider_worker",
         requested_tier=route.get("requested_tier"),
         selected_tier=route.get("selected_tier"),
@@ -72,9 +72,7 @@ def _record(
         resolved_reasoning_effort=route.get("reasoning_effort"),
         resolved_model_source=route.get("model_source"),
         resolved_reasoning_source=route.get("reasoning_source"),
-        observed_provider=str(getattr(result, "provider", "") or "claude")
-        if result
-        else None,
+        observed_provider=getattr(result, "provider", None) if result else None,
         observed_model=getattr(result, "model", None) if result else None,
         observed_reasoning_effort=(
             getattr(result, "reasoning_effort", None) if result else None

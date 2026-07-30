@@ -240,7 +240,7 @@
       "scripts/update_notify_hook.cmd": "sha256:393830ce47f90fe4691748254b5501eb7091f9072e995a2831c76dcb87f577a8",
       "scripts/validate_task_schema.py": "sha256:2063ead0eb31b7293f74e545da7ef66a54ff8e28e4ad3ce1c5c8f1a2f0864881",
       "scripts/verification_freshness_gate.py": "sha256:ecd9af5956ba6b9692f8af35bbab181d6cf6f07ca1205e3461e8dd76f66fe410",
-      "scripts/verify_sdk_backend.py": "sha256:6a035d993cf023bac0a5304c5f56b7ce0190010cdc2d87cf0312c868ad185e01",
+      "scripts/verify_sdk_backend.py": "sha256:4f2dcfaa7fae02c3365bcd73bd14253e4fa03fdabf3256d3e4915d77fbfaf67f",
       "scripts/wave_dispatcher.py": "sha256:1721527376a7206d43903eb27eac244480127f569273f19ddfc9cdf03b2ba2b9",
       "scripts/work.py": "sha256:cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281",
       "scripts/work_item_classifier.py": "sha256:03237128665f2756847845528bf910a7a8143c1892220402088354f5eb96b926",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:66cd19c9c152ac8c41cac84319b5fc9f533b8dc65c73668f5d6df45b79dac0d6",
+    "template_digest": "sha256:0a22b5b9f64e7a89d9935ff9f4890183847a113e5f1326e8719e525bd6bc2808",
     "template_files": 251
   },
   "profiles": [
