@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T10:01:46+09:00
-record_count: 1038
+generated_at: 2026-07-30T10:06:43+09:00
+record_count: 1040
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1038` review and evidence records under `reviews/`.
+- Summary: indexed `1040` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1038` files |
+| Reviews covered | pass | `1040` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -605,6 +605,7 @@ record_count: 1038
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment` | planning | record | pass | TASK-AR-654 host lock scope amendment |
+| `reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md` | `REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment` | md | record | n/a | TASK-AR-654 W4 evidence footprint amendment |
 | `reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md` | `REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration` | md | record | pass | Host Required Merge Gates Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md` | `REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration` | md | record | pass | Merge Queue Safety Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
@@ -909,6 +910,7 @@ record_count: 1038
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

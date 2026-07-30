@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T09:20:00+09:00
-updated_at: 2026-07-30T10:06:00+09:00
+updated_at: 2026-07-30T10:06:25+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-design-gate-enforcement
 created_by: codex-root
@@ -60,12 +60,13 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Report task/unit IDs, policy schema, compatibility behavior, failure-first tests, exact implementation commit, independent verification, and how Bean Wiki CI mirrors the same required commands.
 stop_condition: Stop if implementation must modify TASK-AR-648 target files, make policy mandatory for legacy hosts, execute commands through a shell, trust policy content from the worker branch, or weaken existing queue safety.
-verified_at: 2026-07-30T10:01:28+09:00
+verified_at: 2026-07-30T10:06:25+09:00
 verified_by: codex-root-task-ar-654
 evidence_refs:
   - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331.json
   - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128.json
+  - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625.json
 ---
 
 # UNIT-TASK-AR-654-001 - Bind and execute host-required merge gates
