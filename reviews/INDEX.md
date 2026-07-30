@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T02:34:03+09:00
-record_count: 1207
+generated_at: 2026-07-31T02:48:40+09:00
+record_count: 1208
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1207` review and evidence records under `reviews/`.
+- Summary: indexed `1208` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1207` files |
+| Reviews covered | pass | `1208` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1237,6 +1237,7 @@ record_count: 1207
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | blocked | block | TASK-AR-653 Audit View and Plan Delta Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | blocked | block | TASK-AR-653 Scribe Git Audit Anchor Repair Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | blocked | block | TASK-AR-653 Receipt and Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final` | md | blocked | block | TASK-AR-653 Semantic Delta and Exact Identity Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-653-001.md` | `W4B-2026-07-31-unit-task-ar-653-001` | md | blocked | block | TASK-AR-653 Final Independent Implementation W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
