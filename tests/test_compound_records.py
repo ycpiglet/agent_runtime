@@ -200,6 +200,183 @@ def _duplicate_accepted_watch_document(
     return "---\n" + "".join(rows) + "---\n\n# Duplicate watch authority\n"
 
 
+_SEMANTIC_WATCH_REVIEWER_FIELDS = (
+    "reviewed_by",
+    "reviewer",
+    "approved_by",
+    "accepted_by",
+    "verified_by",
+)
+_SEMANTIC_WATCH_WORK_FIELDS = (
+    "work_id",
+    "task_id",
+    "unit_id",
+    "work_ids",
+)
+_SEMANTIC_WATCH_FIELDS = (
+    "decision",
+    "status",
+    *_SEMANTIC_WATCH_REVIEWER_FIELDS,
+    *_SEMANTIC_WATCH_WORK_FIELDS,
+)
+_SEMANTIC_WATCH_QUOTE_STYLES = (
+    "single",
+    "double",
+    "escaped-double",
+)
+_SEMANTIC_DUPLICATE_WATCH_CASES = [
+    pytest.param(
+        field,
+        quote_style,
+        order,
+        value_mode,
+        id=f"{field}-{quote_style}-{order}-{value_mode}",
+    )
+    for field in _SEMANTIC_WATCH_FIELDS
+    for quote_style in _SEMANTIC_WATCH_QUOTE_STYLES
+    for order in ("quoted-then-plain", "plain-then-quoted")
+    for value_mode in ("quoted-invalid", "plain-invalid")
+] + [
+    pytest.param(
+        field,
+        quote_style,
+        "quoted-then-plain",
+        "equal",
+        id=f"{field}-{quote_style}-equal",
+    )
+    for field in _SEMANTIC_WATCH_FIELDS
+    for quote_style in _SEMANTIC_WATCH_QUOTE_STYLES
+]
+
+
+def _quoted_watch_key(field: str, quote_style: str) -> str:
+    if quote_style == "single":
+        return f"'{field}'"
+    if quote_style == "double":
+        return json.dumps(field)
+    return f'"\\u{ord(field[0]):04x}{field[1:]}"'
+
+
+def _semantic_watch_value(
+    field: str,
+    *,
+    current_work_id: str,
+    valid: bool,
+) -> object:
+    if field == "decision":
+        return "accepted_watch" if valid else "rejected"
+    if field == "status":
+        return "accepted" if valid else "rejected"
+    if field in _SEMANTIC_WATCH_REVIEWER_FIELDS:
+        return "qa-independent" if valid else None
+    linked_id = (
+        "TASK-AR-645"
+        if field == "task_id"
+        else current_work_id
+    )
+    if not valid:
+        linked_id = (
+            "TASK-AR-999"
+            if field == "task_id"
+            else "UNIT-TASK-AR-999-001"
+        )
+    return [linked_id] if field == "work_ids" else linked_id
+
+
+def _render_watch_frontmatter(entries: list[tuple[str, object]]) -> str:
+    rows: list[str] = []
+    for key, value in entries:
+        if isinstance(value, list):
+            rows.append(f"{key}:\n")
+            rows.extend(f"  - {item}\n" for item in value)
+        else:
+            scalar = "null" if value is None else str(value)
+            rows.append(f"{key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Semantic watch authority\n"
+
+
+def _semantic_duplicate_accepted_watch_document(
+    *,
+    field: str,
+    quote_style: str,
+    order: str,
+    value_mode: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    base_fields = ("status", "decision", reviewer_field, work_field)
+    if value_mode == "quoted-invalid":
+        quoted_valid, plain_valid = False, True
+    elif value_mode == "plain-invalid":
+        quoted_valid, plain_valid = True, False
+    else:
+        quoted_valid = plain_valid = True
+    semantic_pair = [
+        (
+            _quoted_watch_key(field, quote_style),
+            _semantic_watch_value(
+                field,
+                current_work_id=current_work_id,
+                valid=quoted_valid,
+            ),
+        ),
+        (
+            field,
+            _semantic_watch_value(
+                field,
+                current_work_id=current_work_id,
+                valid=plain_valid,
+            ),
+        ),
+    ]
+    if order == "plain-then-quoted":
+        semantic_pair.reverse()
+
+    entries: list[tuple[str, object]] = []
+    for key in base_fields:
+        if key == field:
+            entries.extend(semantic_pair)
+        else:
+            entries.append(
+                (
+                    key,
+                    _semantic_watch_value(
+                        key,
+                        current_work_id=current_work_id,
+                        valid=True,
+                    ),
+                )
+            )
+    return _render_watch_frontmatter(entries)
+
+
+def _quoted_accepted_watch_document(
+    *,
+    quote_style: str,
+    current_work_id: str,
+) -> str:
+    return _render_watch_frontmatter(
+        [
+            (
+                _quoted_watch_key(field, quote_style),
+                _semantic_watch_value(
+                    field,
+                    current_work_id=current_work_id,
+                    valid=True,
+                ),
+            )
+            for field in ("status", "decision", "reviewed_by", "work_id")
+        ]
+    )
+
+
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
     first = records.normalize_signature(" Closure   same-day evidence ")
     second = records.normalize_signature("closure same-day evidence")
@@ -734,6 +911,37 @@ def test_accepted_watch_requires_reviewer_and_current_work_link(
             "prevention_status: accepted_watch\nreviewed_by: qa-independent\n",
             "closeout:compound:prevention-destination-unsupported",
         ),
+        (
+            "? decision\n"
+            ": rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "!!str decision: rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "<<: *authority\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "\"\\x64ecision\": rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "\"decision: rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
     ],
     ids=[
         "empty-list-reviewer",
@@ -742,6 +950,11 @@ def test_accepted_watch_requires_reviewer_and_current_work_link(
         "placeholder-reviewer",
         "disposition-alias",
         "prevention-status-alias",
+        "explicit-key-syntax",
+        "tagged-key-syntax",
+        "merge-key-syntax",
+        "unsupported-key-escape",
+        "unclosed-quoted-key",
     ],
 )
 def test_work_close_rejects_invalid_accepted_watch_metadata(
@@ -842,6 +1055,109 @@ def test_work_close_rejects_duplicate_accepted_watch_authority(
         in result.stderr
     )
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("field", "quote_style", "order", "value_mode"),
+    _SEMANTIC_DUPLICATE_WATCH_CASES,
+)
+def test_work_close_rejects_semantic_duplicate_watch_authority(
+    tmp_path: Path,
+    field: str,
+    quote_style: str,
+    order: str,
+    value_mode: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "semantic duplicate accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-semantic-duplicate-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_duplicate_accepted_watch_document(
+            field=field,
+            quote_style=quote_style,
+            order=order,
+            value_mode=value_mode,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject semantic duplicate accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "quote_style",
+    _SEMANTIC_WATCH_QUOTE_STYLES,
+)
+def test_work_close_accepts_single_semantic_quoted_watch_keys(
+    tmp_path: Path,
+    quote_style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "valid quoted accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-valid-quoted-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _quoted_accepted_watch_document(
+            quote_style=quote_style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Accept valid quoted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 @pytest.mark.parametrize("script", [SCRIPT, TEMPLATE_SCRIPT])

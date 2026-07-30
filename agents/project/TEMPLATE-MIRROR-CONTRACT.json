@@ -90,7 +90,7 @@
     "compound_record.py": {
       "reason": "The source script is a repository entrypoint wrapper, while the packaged script is a standalone consumer implementation.",
       "source_sha256": "sha256:050b123b6608763a3e7ba1abf8bb733e43df21764decd55a4c4415907ff8b10e",
-      "template_sha256": "sha256:5ec29ae67b7ae1855d50ffbe6167b35360ecf11cb889a73b06aa874301a74c0c"
+      "template_sha256": "sha256:3ec98ecb3c238ae663a72f097269accebfb2244155be6e22413c0f30da71da1c"
     },
     "owner_governance_gate.py": {
       "reason": "The source chain validates source-template parity and repository-only substrates; the consumer chain documents and guards those omissions.",

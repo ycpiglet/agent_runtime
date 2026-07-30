@@ -59,6 +59,7 @@ ACCEPTED_WATCH_REVIEWER_FIELDS = (
     "verified_by",
 )
 REVIEWER_IDENTITY_RE = re.compile(r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$")
+FRONTMATTER_KEY_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
 REVIEWER_IDENTITY_PLACEHOLDERS = {
     "-",
     "~",
@@ -185,6 +186,39 @@ def normalize_ref(value: object) -> str:
     return "/".join(parts)
 
 
+def _frontmatter_key(raw_key: str) -> str:
+    token = raw_key.strip()
+    if not token:
+        raise CompoundRecordError("compound:prevention-watch-invalid-field")
+    if token.startswith("'"):
+        if len(token) < 2 or not token.endswith("'"):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        inner = token[1:-1]
+        if "'" in inner.replace("''", ""):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        key = inner.replace("''", "'")
+    elif token.startswith('"'):
+        if len(token) < 2 or not token.endswith('"'):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        try:
+            key = json.loads(token)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            ) from exc
+    else:
+        key = token
+    if not isinstance(key, str) or FRONTMATTER_KEY_RE.fullmatch(key) is None:
+        raise CompoundRecordError("compound:prevention-watch-invalid-field")
+    return key
+
+
 def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     for key, value in pairs:
@@ -225,13 +259,14 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
             continue
         if ":" not in raw:
             active_list = ""
+            if raw.strip() and not raw.lstrip().startswith("#"):
+                raise CompoundRecordError(
+                    "compound:prevention-watch-invalid-field"
+                )
             continue
         key, value = raw.split(":", 1)
-        key = key.strip()
+        key = _frontmatter_key(key)
         value = value.strip().strip("\"'")
-        if not key:
-            active_list = ""
-            continue
         if key in seen:
             raise CompoundRecordError(
                 f"compound:prevention-watch-duplicate-field:{key}"
