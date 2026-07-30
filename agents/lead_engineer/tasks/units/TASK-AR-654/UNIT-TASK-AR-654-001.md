@@ -9,11 +9,12 @@ task_id: TASK-AR-654
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-31T04:02:36+09:00
+updated_at: 2026-07-31T04:07:35+09:00
+started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -23,6 +24,8 @@ model_tier: worker_standard
 escalation_triggers:
   - data_integrity
   - cross_cutting
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
 context: The claim dispatcher already searches canonical Compound records, but closure_gate accepts any one of compound, review, or retro. The failure-to-regression skill exists only in the Runtime repository and is absent from consumer templates.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md

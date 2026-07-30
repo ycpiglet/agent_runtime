@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-31T04:02:36+09:00
+updated_at: 2026-07-31T04:07:35+09:00
+started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 8
@@ -34,6 +35,8 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
 acceptance:
   - Claim-time knowledge lookup remains before persistence.
   - A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.

@@ -1004,12 +1004,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
-          "value": "c1a4aedaaef0d348e77d83dafae54d15eaadf2be6e9897ac210ccffb5093e673"
+          "value": "b9aeb3da55c29bccbfcc5985c240733da5d9d787fd488dcdbd86752c5b8ee2a4"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
-          "value": "b6ab2bf0e4f9dc7f5abc184790092eda4227fb0b9915521df4f526a67442c1e7"
+          "value": "3ffca0a387fa508e695f0ec771a45d2033c3a3af54f910f094a993992eb7e41e"
         },
         {
           "kind": "sha256",
@@ -1133,7 +1133,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
-      "recorded_at": "2026-07-31T04:05:10+09:00",
+      "recorded_at": "2026-07-31T04:10:56+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1349,5 +1349,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-31T04:05:10+09:00"
+  "updated_at": "2026-07-31T04:10:56+09:00"
 }
