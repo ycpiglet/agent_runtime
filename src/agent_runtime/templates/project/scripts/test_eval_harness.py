@@ -1,6 +1,7 @@
 """TASK-238 — agentic 측정 substrate 테스트."""
 import importlib.util
 import json
+import subprocess
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -45,6 +46,82 @@ def _write_claim_authority(
         ),
         encoding="utf-8",
     )
+
+
+_FRESH_BUDGET_PROCESS = r"""
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+module_path = Path(sys.argv[1])
+ledger_path = Path(sys.argv[2])
+authority_root = Path(sys.argv[3])
+payload = json.loads(sys.argv[4])
+spec = importlib.util.spec_from_file_location("_fresh_eval_harness", module_path)
+eh = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = eh
+spec.loader.exec_module(eh)
+
+common = {
+    "path": ledger_path,
+    "root": authority_root,
+    "task_id": payload["task_id"],
+    "claim_id": payload["claim_id"],
+}
+if payload["action"] == "settle":
+    preflight = eh.reserve_dispatch_budget(
+        **common,
+        dispatch_id=payload["dispatch_id"],
+        dispatch_ceiling=payload["dispatch_ceiling"],
+    )
+    receipt = eh.record_execution_receipt(
+        dispatch_id=payload["dispatch_id"],
+        task_id=payload["task_id"],
+        claim_id=payload["claim_id"],
+        budget_preflight_result=preflight,
+        path=ledger_path,
+        **payload["receipt"],
+    )
+    result = {"preflight": preflight, "receipt": receipt}
+elif payload["action"] == "inspect":
+    usage = eh.cumulative_usage(
+        path=ledger_path,
+        task_id=payload["task_id"],
+        claim_id=payload["claim_id"],
+    )
+    preflight = eh.budget_preflight(
+        **common,
+        dispatch_id=payload["dispatch_id"],
+        dispatch_ceiling=payload["dispatch_ceiling"],
+    )
+    result = {"usage": usage, "preflight": preflight}
+else:
+    raise AssertionError(f"unknown action: {payload['action']}")
+print(json.dumps(result, sort_keys=True))
+"""
+
+
+def _run_fresh_budget_process(
+    ledger_path: Path,
+    authority_root: Path,
+    payload: dict,
+) -> dict:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _FRESH_BUDGET_PROCESS,
+            str(ROOT / "scripts" / "eval_harness.py"),
+            str(ledger_path),
+            str(authority_root),
+            json.dumps(payload),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return json.loads(completed.stdout)
 
 
 def _effective_delta_record(**overrides):
@@ -101,7 +178,14 @@ def _verified_delta_records(
         "observed_reasoning_effort": baseline_reasoning,
         "actual_tokens_known": True,
         "token_usage_status": "observed",
+        "tokens_in": baseline_tokens,
+        "tokens_out": 0,
         "tokens": baseline_tokens,
+        "billed_cost_status": (
+            "observed"
+            if baseline_billed_cost is not None
+            else "unavailable"
+        ),
         "billed_cost": baseline_billed_cost,
         "currency": baseline_currency,
         "grade": "Low",
@@ -127,7 +211,14 @@ def _verified_delta_records(
         "token_usage_status": (
             "observed" if actual_tokens_known else "unavailable"
         ),
+        "tokens_in": actual_tokens if actual_tokens_known else None,
+        "tokens_out": 0 if actual_tokens_known else None,
         "tokens": actual_tokens,
+        "billed_cost_status": (
+            "observed"
+            if actual_billed_cost is not None
+            else "unavailable"
+        ),
         "billed_cost": actual_billed_cost,
         "currency": actual_currency,
         "baseline_receipt_id": baseline_receipt_id,
@@ -345,6 +436,176 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
     assert allowed["claim_tokens_used"] == 40
     assert blocked["allowed"] is False
     assert blocked["reason"] == "task_budget_insufficient"
+
+
+@pytest.mark.parametrize(
+    (
+        "receipt_values",
+        "expected_tokens",
+        "expected_conservative",
+        "expected_committed",
+        "next_ceiling",
+        "next_allowed",
+        "settlement_basis",
+    ),
+    [
+        (
+            {
+                "source": "provider_completion",
+                "status": "completed",
+                "token_usage_status": "unavailable",
+            },
+            0,
+            10,
+            10,
+            1,
+            False,
+            "conservative_ceiling",
+        ),
+        (
+            {
+                "source": "provider_error",
+                "status": "error",
+                "finish_reason": "error",
+                "error": "synthetic provider failure",
+                "token_usage_status": "unavailable",
+            },
+            0,
+            10,
+            10,
+            1,
+            False,
+            "conservative_ceiling",
+        ),
+        (
+            {
+                "source": "native_codex_reply",
+                "status": "skipped",
+                "finish_reason": "skipped",
+                "token_usage_status": "unavailable",
+            },
+            0,
+            10,
+            10,
+            1,
+            False,
+            "conservative_ceiling",
+        ),
+        (
+            {
+                "source": "provider_completion",
+                "status": "completed",
+                "tokens_in": 4,
+                "token_usage_status": "partial",
+            },
+            4,
+            6,
+            10,
+            1,
+            False,
+            "conservative_ceiling",
+        ),
+        (
+            {
+                "source": "provider_completion",
+                "status": "completed",
+                "tokens_in": 4,
+                "tokens_out": 0,
+            },
+            4,
+            0,
+            4,
+            6,
+            True,
+            "observed_usage",
+        ),
+        (
+            {
+                "source": "session_budget_preflight",
+                "status": "skipped",
+                "finish_reason": "skipped",
+                "error": "session budget blocked before provider call",
+                "token_usage_status": "unavailable",
+            },
+            0,
+            0,
+            0,
+            10,
+            True,
+            "pre_provider_skip",
+        ),
+    ],
+    ids=(
+        "completed-unknown",
+        "error-unknown",
+        "post-dispatch-skip-unknown",
+        "partial-usage",
+        "observed-usage",
+        "pre-provider-skip",
+    ),
+)
+def test_terminal_budget_settlement_survives_fresh_process_restart(
+    tmp_path,
+    receipt_values,
+    expected_tokens,
+    expected_conservative,
+    expected_committed,
+    next_ceiling,
+    next_allowed,
+    settlement_basis,
+):
+    path = tmp_path / "receipts.jsonl"
+    task_id = "TASK-FRESH-BUDGET"
+    claim_id = "CLAIM-FRESH-BUDGET"
+    _write_claim_authority(
+        tmp_path,
+        claim_id=claim_id,
+        task_id=task_id,
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+
+    first = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "settle",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-first",
+            "dispatch_ceiling": 10,
+            "receipt": receipt_values,
+        },
+    )
+    second = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "inspect",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-second",
+            "dispatch_ceiling": next_ceiling,
+        },
+    )
+
+    assert first["preflight"]["allowed"] is True
+    assert first["receipt"]["budget_reservation_status"] == "settled"
+    assert first["receipt"]["budget_settlement_basis"] == settlement_basis
+    for scope in ("task", "claim"):
+        usage = second["usage"][scope]
+        assert usage["tokens"] == expected_tokens
+        assert usage["reserved_tokens"] == 0
+        assert (
+            usage["conservative_unobserved_tokens"]
+            == expected_conservative
+        )
+        assert usage["committed_tokens"] == expected_committed
+    assert second["preflight"]["allowed"] is next_allowed
+    if next_allowed:
+        assert second["preflight"]["reason"] == "within_budget"
+    else:
+        assert second["preflight"]["reason"] == "task_budget_insufficient"
 
 
 def test_configured_budget_fails_closed_without_provider_ceiling(tmp_path):
@@ -765,6 +1026,183 @@ def test_report_includes_token_delta_only_with_effective_model_evidence():
     assert report["cost_delta"]["deprecated_alias"] is True
 
 
+@pytest.mark.parametrize(
+    "actual_updates",
+    [
+        {
+            "status": "error",
+            "error": "synthetic provider failure",
+            "finish_reason": "error",
+            "outcome": "gate-error",
+        },
+        {"status": "skipped", "finish_reason": "skipped"},
+        {"status": "pending"},
+        {
+            "status": "completed",
+            "error": "synthetic provider failure",
+        },
+        {"status": "completed", "outcome": "rejected"},
+        {"status": "completed", "finish_reason": "max_tokens"},
+    ],
+    ids=(
+        "error",
+        "skipped",
+        "nonterminal",
+        "completed-with-error",
+        "failed-outcome",
+        "failed-finish-reason",
+    ),
+)
+def test_report_recomputes_actual_execution_success_before_economic_eligibility(
+    actual_updates,
+):
+    baseline, actual = _verified_delta_records(
+        "actual-terminal-integrity",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    actual.update(actual_updates)
+    actual.update(
+        {
+            "application_status": "applied",
+            "route_status": "effective",
+            "route_changed": True,
+        }
+    )
+
+    result = eh.report([baseline, actual])
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["token_delta"]["saved_tokens"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+    assert (
+        result["token_delta"]["exclusion_reasons"][
+            "actual_execution_not_successful"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.parametrize(
+    "baseline_updates",
+    [
+        {
+            "status": "error",
+            "error": "synthetic baseline failure",
+            "finish_reason": "error",
+            "outcome": "gate-error",
+        },
+        {"status": "skipped", "finish_reason": "skipped"},
+        {"status": "completed", "error": "synthetic baseline failure"},
+        {"status": "completed", "outcome": "rejected"},
+    ],
+    ids=("error", "skipped", "completed-with-error", "failed-outcome"),
+)
+def test_report_requires_successful_baseline_execution(baseline_updates):
+    baseline, actual = _verified_delta_records(
+        "baseline-terminal-integrity",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    baseline.update(baseline_updates)
+
+    result = eh.report([baseline, actual])
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["token_delta"]["saved_tokens"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+    assert (
+        result["token_delta"]["exclusion_reasons"][
+            "baseline_execution_not_successful"
+        ]
+        == 1
+    )
+
+
+def test_report_rejects_incomplete_actual_token_observation():
+    baseline, actual = _verified_delta_records(
+        "incomplete-actual-token-observation",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+    actual.update(
+        {
+            "actual_tokens_known": True,
+            "token_usage_status": "observed",
+            "tokens_in": None,
+            "tokens_out": None,
+        }
+    )
+
+    result = eh.report([baseline, actual])["token_delta"]
+
+    assert result["eligible_records"] == 0
+    assert result["saved_tokens"] == 0
+    assert result["exclusion_reasons"]["actual_token_usage_unavailable"] == 1
+
+
+def test_report_rejects_incomplete_baseline_token_observation():
+    baseline, actual = _verified_delta_records(
+        "incomplete-baseline-token-observation",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+    baseline.update(
+        {
+            "actual_tokens_known": True,
+            "token_usage_status": "observed",
+            "tokens_in": 99,
+            "tokens_out": 0,
+        }
+    )
+
+    result = eh.report([baseline, actual])["token_delta"]
+
+    assert result["eligible_records"] == 0
+    assert result["saved_tokens"] == 0
+    assert result["exclusion_reasons"]["baseline_observation_unavailable"] == 1
+
+
+@pytest.mark.parametrize(
+    ("actual_status", "baseline_status", "expected_reason"),
+    [
+        ("unavailable", "observed", "actual_billed_cost_unavailable"),
+        ("observed", "unavailable", "baseline_billed_cost_unavailable"),
+    ],
+    ids=("actual-unavailable", "baseline-unavailable"),
+)
+def test_report_requires_observed_billed_cost_status(
+    actual_status,
+    baseline_status,
+    expected_reason,
+):
+    baseline, actual = _verified_delta_records(
+        f"billed-cost-{actual_status}-{baseline_status}",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    actual["billed_cost_status"] = actual_status
+    baseline["billed_cost_status"] = baseline_status
+
+    result = eh.report([baseline, actual])["monetary_delta"]
+
+    assert result["eligible_records"] == 0
+    assert result["verified"] is False
+    assert result["exclusion_reasons"][expected_reason] == 1
+
+
 def test_token_delta_excludes_unknown_zero_actual_tokens():
     recs = (
         _verified_delta_records(
@@ -933,6 +1371,57 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         ]
         == 1
     )
+
+
+def test_finalizer_rejects_unsuccessful_baseline_execution(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-failed",
+        task_id="TASK-FAILED-BASELINE",
+        workload_id="workload-failed-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        source="provider_error",
+        status="error",
+        finish_reason="error",
+        error="synthetic baseline failure",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-after-failed-baseline",
+        task_id="TASK-FAILED-BASELINE",
+        workload_id="workload-failed-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        source="provider_completion",
+        status="completed",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_execution_not_successful"
+    )
+    result = eh.report(eh.read_outcomes(path))
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
 
 
 def test_finalizer_recomputes_route_equivalence_from_observed_receipts(

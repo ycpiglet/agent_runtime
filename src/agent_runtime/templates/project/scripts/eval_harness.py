@@ -40,6 +40,24 @@ ESCALATION_FINISH = {"error", "cap", "cap-hit", "max_tokens"}
 ESCALATION_OUTCOME = {"rejected", "needs-changes", "gate-error", "recurrence", "reopen"}
 NEUTRAL_OUTCOME = {"ok", "completed", ""}
 MODEL_TIER = {"haiku": 1, "sonnet": 2, "opus": 3}       # 싼→비싼 (TASK-239 over-route 판정용)
+FAILED_EXECUTION_FINISH = ESCALATION_FINISH | {
+    "blocked",
+    "canceled",
+    "cancelled",
+    "failed",
+    "failure",
+    "skipped",
+    "timed_out",
+    "timeout",
+}
+PRE_PROVIDER_SKIP_SOURCES = {
+    "budget_preflight",
+    "claim_preflight",
+    "deterministic_preflight_blocked",
+    "deterministic_preflight_complete",
+    "routing_policy",
+    "session_budget_preflight",
+}
 
 EXECUTION_RECEIPT_SCHEMA = "agent-runtime-execution-receipt/v1"
 BUDGET_RESERVATION_SCHEMA = "agent-runtime-budget-reservation/v1"
@@ -273,6 +291,100 @@ def _optional_nonnegative_int(value: int | str | None) -> int | None:
 def _optional_positive_int(value: int | str | None) -> int | None:
     parsed = _optional_nonnegative_int(value)
     return parsed if parsed is not None and parsed > 0 else None
+
+
+def _execution_succeeded(record: dict) -> bool:
+    """Return true only for an internally consistent successful execution."""
+    if str(record.get("status") or "").strip().lower() != "completed":
+        return False
+    if str(record.get("error") or "").strip():
+        return False
+    if str(record.get("outcome") or "").strip().lower() != "ok":
+        return False
+    finish_reason = str(
+        record.get("finish_reason") or ""
+    ).strip().lower()
+    return finish_reason not in FAILED_EXECUTION_FINISH
+
+
+def _has_authoritative_token_usage(record: dict) -> bool:
+    """Validate observed token telemetry instead of trusting a status flag."""
+    if (
+        record.get("actual_tokens_known") is not True
+        or str(record.get("token_usage_status") or "").strip().lower()
+        != "observed"
+    ):
+        return False
+    values: list[int] = []
+    for field in ("tokens_in", "tokens_out", "tokens"):
+        try:
+            value = int(record.get(field))
+        except (TypeError, ValueError):
+            return False
+        if value < 0:
+            return False
+        values.append(value)
+    return values[2] == values[0] + values[1]
+
+
+def _has_authoritative_billed_cost(record: dict) -> bool:
+    """Validate billed cost telemetry and its currency."""
+    if (
+        str(record.get("billed_cost_status") or "").strip().lower()
+        != "observed"
+        or record.get("billed_cost") is None
+        or not str(record.get("currency") or "").strip()
+    ):
+        return False
+    try:
+        billed_cost = float(record["billed_cost"])
+    except (TypeError, ValueError):
+        return False
+    return math.isfinite(billed_cost) and billed_cost >= 0
+
+
+def _verified_pre_provider_skip(record: dict) -> bool:
+    """Recognize only explicit no-call paths that carry no result or usage."""
+    if (
+        str(record.get("status") or "").strip().lower() != "skipped"
+        or str(record.get("finish_reason") or "").strip().lower()
+        != "skipped"
+        or str(record.get("source") or "").strip()
+        not in PRE_PROVIDER_SKIP_SOURCES
+    ):
+        return False
+    if any(
+        str(record.get(field) or "").strip()
+        for field in (
+            "observed_provider",
+            "observed_model",
+            "observed_reasoning_effort",
+        )
+    ):
+        return False
+    return (
+        str(record.get("token_usage_status") or "").strip().lower()
+        == "unavailable"
+        and record.get("tokens_in") is None
+        and record.get("tokens_out") is None
+        and int(record.get("tokens", 0) or 0) == 0
+        and str(record.get("billed_cost_status") or "").strip().lower()
+        == "unavailable"
+        and record.get("billed_cost") is None
+    )
+
+
+def _budget_settlement_basis(
+    record: dict,
+    reservation: dict | None,
+) -> str:
+    if reservation is None:
+        return "not_required_or_unreserved"
+    if _has_authoritative_token_usage(record):
+        return "observed_usage"
+    if _verified_pre_provider_skip(record):
+        return "pre_provider_skip"
+    return "conservative_ceiling"
 
 
 def _safe_record_id(value: str, label: str) -> str:
@@ -526,15 +638,11 @@ def _usage_from_records(
         if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
         and str(item.get("task_id") or "") == str(task_id)
     ]
-    terminal_dispatches = {
-        str(item.get("dispatch_id") or "") for item in task_receipts
-    }
     task_reservations = [
         item
         for item in records
         if item.get("schema") == BUDGET_RESERVATION_SCHEMA
         and str(item.get("task_id") or "") == str(task_id)
-        and str(item.get("dispatch_id") or "") not in terminal_dispatches
     ]
     claim_receipts = (
         [
@@ -560,25 +668,57 @@ def _usage_from_records(
         tokens = 0
         for item in rows:
             tokens += max(0, int(item.get("tokens", 0) or 0))
-            if (
-                item.get("billed_cost_status") == "observed"
-                and item.get("billed_cost") is not None
-                and str(item.get("currency") or "").strip()
-            ):
+            if _has_authoritative_billed_cost(item):
                 currency = str(item["currency"]).upper()
                 costs[currency] = costs.get(currency, 0.0) + float(
                     item["billed_cost"]
                 )
+        receipts_by_dispatch = {
+            str(item.get("dispatch_id") or ""): item for item in rows
+        }
+        pending_reservations: list[dict] = []
+        conservative_unobserved_tokens = 0
+        conservative_settlements = 0
+        pre_provider_releases = 0
+        for reservation in reservations:
+            receipt = receipts_by_dispatch.get(
+                str(reservation.get("dispatch_id") or "")
+            )
+            if receipt is None:
+                pending_reservations.append(reservation)
+                continue
+            basis = _budget_settlement_basis(receipt, reservation)
+            if basis == "pre_provider_skip":
+                pre_provider_releases += 1
+                continue
+            if basis == "observed_usage":
+                continue
+            conservative_settlements += 1
+            reserved = max(
+                0,
+                int(reservation.get("reserved_tokens", 0) or 0),
+            )
+            recorded = max(0, int(receipt.get("tokens", 0) or 0))
+            conservative_unobserved_tokens += max(0, reserved - recorded)
         reserved_tokens = sum(
             max(0, int(item.get("reserved_tokens", 0) or 0))
-            for item in reservations
+            for item in pending_reservations
         )
         return {
             "receipts": len(rows),
             "tokens": tokens,
-            "pending_reservations": len(reservations),
+            "pending_reservations": len(pending_reservations),
             "reserved_tokens": reserved_tokens,
-            "committed_tokens": tokens + reserved_tokens,
+            "conservative_settlements": conservative_settlements,
+            "conservative_unobserved_tokens": (
+                conservative_unobserved_tokens
+            ),
+            "pre_provider_releases": pre_provider_releases,
+            "committed_tokens": (
+                tokens
+                + reserved_tokens
+                + conservative_unobserved_tokens
+            ),
             "billed_cost_by_currency": {
                 key: round(value, 9) for key, value in sorted(costs.items())
             },
@@ -680,9 +820,15 @@ def _budget_preflight_from_records(
     )
     task_used = int(usage["task"]["tokens"])
     task_reserved = int(usage["task"]["reserved_tokens"])
+    task_conservative = int(
+        usage["task"]["conservative_unobserved_tokens"]
+    )
     task_committed = int(usage["task"]["committed_tokens"])
     claim_used = int(usage["claim"]["tokens"])
     claim_reserved = int(usage["claim"]["reserved_tokens"])
+    claim_conservative = int(
+        usage["claim"]["conservative_unobserved_tokens"]
+    )
     claim_committed = int(usage["claim"]["committed_tokens"])
     requested = int(ceiling or 0)
     if task_limit is not None and task_committed + requested > task_limit:
@@ -703,6 +849,7 @@ def _budget_preflight_from_records(
         "task_token_budget": task_limit,
         "task_tokens_used": task_used,
         "task_tokens_reserved": task_reserved,
+        "task_tokens_conservative_unobserved": task_conservative,
         "task_tokens_committed": task_committed,
         "task_tokens_remaining": (
             max(0, task_limit - task_committed)
@@ -712,6 +859,7 @@ def _budget_preflight_from_records(
         "claim_token_budget": claim_limit,
         "claim_tokens_used": claim_used,
         "claim_tokens_reserved": claim_reserved,
+        "claim_tokens_conservative_unobserved": claim_conservative,
         "claim_tokens_committed": claim_committed,
         "claim_tokens_remaining": (
             max(0, claim_limit - claim_committed)
@@ -1219,6 +1367,7 @@ def _finalize_execution_receipt(
             )
         rec["claim_id"] = authoritative_claim
 
+    actual_execution_succeeded = _execution_succeeded(rec)
     baseline_id = str(rec.get("baseline_receipt_id") or "").strip() or None
     baseline = next(
         (
@@ -1252,10 +1401,15 @@ def _finalize_execution_receipt(
         rec["baseline_reference_status"] = "invalid"
         rec["baseline_reference_reason"] = "workload_identity_mismatch"
         _clear_unverified_baseline()
+    elif not _execution_succeeded(baseline):
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = (
+            "baseline_execution_not_successful"
+        )
+        _clear_unverified_baseline()
     elif (
-        baseline.get("status") != "completed"
-        or not str(baseline.get("observed_model") or "").strip()
-        or baseline.get("actual_tokens_known") is not True
+        not str(baseline.get("observed_model") or "").strip()
+        or not _has_authoritative_token_usage(baseline)
     ):
         rec["baseline_reference_status"] = "invalid"
         rec["baseline_reference_reason"] = "baseline_not_observed"
@@ -1300,7 +1454,8 @@ def _finalize_execution_receipt(
             rec.get("resolved_reasoning_effort"),
         )
         if (
-            resolved_identity is None
+            not actual_execution_succeeded
+            or resolved_identity is None
             or actual_identity is None
             or not _route_observation_complete(rec)
         ):
@@ -1321,7 +1476,9 @@ def _finalize_execution_receipt(
                 actual_identity[0] != baseline_identity[0]
             )
             rec["route_changed"] = actual_identity != baseline_identity
-            if rec["route_changed"] is False:
+            if not actual_execution_succeeded:
+                rec["route_status"] = "unverified"
+            elif rec["route_changed"] is False:
                 rec["route_status"] = "ineffective_equivalent"
             elif rec["application_status"] == "applied":
                 rec["route_status"] = "effective"
@@ -1330,11 +1487,18 @@ def _finalize_execution_receipt(
             else:
                 rec["route_status"] = "unverified"
 
+    if not actual_execution_succeeded:
+        rec["application_status"] = "unverified"
+        rec["route_status"] = "unverified"
     rec["budget_reservation_id"] = (
         reservation.get("reservation_id") if reservation else None
     )
     rec["budget_reservation_status"] = (
         "settled" if reservation else "not_required_or_unreserved"
+    )
+    rec["budget_settlement_basis"] = _budget_settlement_basis(
+        rec,
+        reservation,
     )
     return rec
 
@@ -1499,10 +1663,11 @@ def _verified_baseline_receipt(
         or str(baseline.get("workload_id") or "").strip() != workload_id
     ):
         return None, "workload_identity_mismatch"
+    if not _execution_succeeded(baseline):
+        return None, "baseline_execution_not_successful"
     if (
-        baseline.get("status") != "completed"
-        or not str(baseline.get("observed_model") or "").strip()
-        or baseline.get("actual_tokens_known") is not True
+        not str(baseline.get("observed_model") or "").strip()
+        or not _has_authoritative_token_usage(baseline)
     ):
         return None, "baseline_observation_unavailable"
     if not _route_observation_complete(baseline):
@@ -1522,6 +1687,8 @@ def _routing_evidence_exclusion_reason(
     )
     if baseline_reason:
         return baseline_reason
+    if not _execution_succeeded(rec):
+        return "actual_execution_not_successful"
     if not str(rec.get("observed_model") or "").strip():
         return "observed_model_unavailable"
     if not _route_observation_complete(rec):
@@ -1561,7 +1728,7 @@ def _token_delta_exclusion_reason(
     routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
     if routing_reason:
         return routing_reason
-    if rec.get("actual_tokens_known") is not True:
+    if not _has_authoritative_token_usage(rec):
         return "actual_token_usage_unavailable"
     if int(rec.get("tokens", 0) or 0) <= 0:
         return "actual_token_usage_not_positive"
@@ -1578,14 +1745,13 @@ def _monetary_delta_exclusion_reason(
     routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
     if routing_reason:
         return routing_reason
-    if rec.get("billed_cost") is None or not str(rec.get("currency") or "").strip():
+    if not _has_authoritative_billed_cost(rec):
         return "actual_billed_cost_unavailable"
     baseline, _ = _verified_baseline_receipt(rec, receipt_index)
     if baseline is None:
         return "baseline_billed_cost_unavailable"
     if (
-        baseline.get("billed_cost") is None
-        or not str(baseline.get("currency") or "").strip()
+        not _has_authoritative_billed_cost(baseline)
     ):
         return "baseline_billed_cost_unavailable"
     if str(rec["currency"]).upper() != str(baseline["currency"]).upper():

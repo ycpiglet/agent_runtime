@@ -211,6 +211,137 @@ def test_record_reply_records_only_explicit_completion_observations(
     assert receipt["billed_cost"] == 0.012
 
 
+@pytest.mark.parametrize(
+    (
+        "status",
+        "error",
+        "finish_reason",
+        "application_status",
+        "route_status",
+        "eligible_records",
+    ),
+    [
+        (
+            "completed",
+            None,
+            "stop",
+            "applied",
+            "effective",
+            1,
+        ),
+        (
+            "error",
+            "synthetic provider failure",
+            "error",
+            "unverified",
+            "unverified",
+            0,
+        ),
+        (
+            "skipped",
+            None,
+            "skipped",
+            "unverified",
+            "unverified",
+            0,
+        ),
+        (
+            "completed",
+            "synthetic provider failure",
+            "stop",
+            "unverified",
+            "unverified",
+            0,
+        ),
+    ],
+    ids=("completed", "error", "skipped", "completed-with-error"),
+)
+def test_record_reply_execution_status_gates_economic_evidence(
+    tmp_path,
+    monkeypatch,
+    status,
+    error,
+    finish_reason,
+    application_status,
+    route_status,
+    eligible_records,
+):
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    path = bridge.eval_harness.EVAL_LOG
+    workload_id = f"workload-{status}-{bool(error)}"
+    baseline = bridge.eval_harness.record_execution_receipt(
+        dispatch_id=f"baseline-{status}-{bool(error)}",
+        task_id="TASK-TERMINAL-INTEGRITY",
+        workload_id=workload_id,
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="native_codex_reply",
+        status="completed",
+        path=path,
+    )
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-TERMINAL-INTEGRITY",
+        intent="implement bounded change",
+        workload_id=workload_id,
+        baseline_receipt_id=baseline["receipt_id"],
+        receipt_log_path=path,
+    )
+
+    result = bridge.record_reply(
+        bridge_id=packet["id"],
+        verdict="APPROVED",
+        summary="synthetic terminal result",
+        observed_provider="native-codex",
+        observed_model=packet["routing"]["resolved_model"],
+        observed_reasoning_effort=packet["routing"]["reasoning_effort"],
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        status=status,
+        finish_reason=finish_reason,
+        error=error,
+        receipt_log_path=path,
+    )
+
+    receipts = bridge.eval_harness.read_outcomes(path)
+    actual = next(
+        receipt
+        for receipt in receipts
+        if receipt["receipt_id"] == result["execution_receipt"]["receipt_id"]
+    )
+    report = bridge.eval_harness.report(receipts)
+    assert actual["baseline_reference_status"] == "verified"
+    assert actual["application_status"] == application_status
+    assert actual["route_status"] == route_status
+    assert report["token_delta"]["eligible_records"] == eligible_records
+    assert report["monetary_delta"]["eligible_records"] == eligible_records
+    if eligible_records:
+        assert report["token_delta"]["saved_tokens"] == 85
+        assert report["monetary_delta"]["by_currency"]["USD"][
+            "saved_billed_cost"
+        ] == 0.08
+    else:
+        assert report["token_delta"]["saved_tokens"] == 0
+        assert (
+            report["token_delta"]["exclusion_reasons"][
+                "actual_execution_not_successful"
+            ]
+            == 1
+        )
+
+
 def test_record_reply_without_bus_call_still_settles_receipt(
     tmp_path,
     monkeypatch,
