@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T22:59:16+09:00
+updated_at: 2026-07-30T23:20:37+09:00
+started_at: 2026-07-30T23:20:37+09:00
 title: Close the Scribe source-debt and active-work loop
-status: planned
+status: in_progress
 priority: P1
 difficulty: L
 est_hours: 12
@@ -32,6 +33,10 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-225027-task-ar-653-ar653001.json
+  - agents/runtime/task_claims/CLAIM-20260730-231354-task-ar-653-ar653002.json
+  - agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
 acceptance:
   - A fresh projection over an overdue source no longer reports debt clearance.
   - Active task and claim identities are represented or the Scribe result is not ready.

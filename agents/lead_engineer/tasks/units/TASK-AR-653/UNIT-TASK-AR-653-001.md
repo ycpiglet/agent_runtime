@@ -9,11 +9,12 @@ task_id: TASK-AR-653
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T22:59:16+09:00
+updated_at: 2026-07-30T23:20:37+09:00
+started_at: 2026-07-30T23:20:37+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -21,6 +22,10 @@ summary: Implement active-aware Scribe planning, receipt, and closure semantics
 horizon: unit
 model_tier: worker_standard
 escalation_triggers:
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-225027-task-ar-653-ar653001.json
+  - agents/runtime/task_claims/CLAIM-20260730-231354-task-ar-653-ar653002.json
+  - agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
 context: Runtime currently has 769 hot items and Autofolio had 272, yet both become ready after writing a ten-item projection. The Scribe skill promises mandatory archive work above 15 items, so implementation and policy disagree.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md

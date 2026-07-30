@@ -1,25 +1,54 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T22:36:09+09:00
-updated_by: codex-root-task-ar-652-orchestrator
+updated_at: 2026-07-30T23:20:37+09:00
+updated_by: le-20260730-232037-kst-ar653003
 current_state:
-  summary: "TASK-AR-652 is locally integrated and closed; TASK-AR-653 is the next gated scope."
-  status: ready
+  summary: "TASK-AR-653 has an approved-scope claim and active worker worktree."
+  status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 1
+  step_index: 2
   step_total: 7
-  progress_pct: 14
-  status_text: "TASK-AR-652 is complete with W4b, additive audit, retro, and Compound records; revalidate before claiming TASK-AR-653."
+  progress_pct: 15
+  status_text: "TASK-AR-653 is active in the corrected 16-file footprint."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260730-232037-task-ar-653-ar653003
+      agent_role: lead-engineer
+      team_id: quality
+      agent_instance_id: le-20260730-232037-kst-ar653003
+      display_name: "lead_engineer@orchestrator-01"
+      callsite_id: "terminal:wt-task-ar-653:tab-01"
+      pane_id: "terminal:wt-task-ar-653:tab-01"
+      task_id: TASK-AR-653
+      unit_id: UNIT-TASK-AR-653-001
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: claimed
+      phase: taskset-claimed
+      progress_pct: 0
+      step_index: 2
+      step_total: 7
+      status_text: "Starting v0.8 Operability Hardening: TASK-AR-653"
+      worktree_path: .worktrees/TASK-AR-653
+      branch: codex/task-ar-653-v080-operability-hardening
+      requested_model_tier: worker_standard
+      selected_model_tier: worker_standard
+      routing_policy_id: task-unit-tier-policy
+      routing_escalation_reason: null
+      task_token_budget: null
+      claim_token_budget: null
+      claim_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.log.md
+      last_heartbeat: 2026-07-30T23:20:37+09:00
+  current_teams:
+    - quality
 resume:
-  active_task: none
+  active_task: TASK-AR-653
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
-  branch_policy: "Claim TASK-AR-653 in a fresh worktree after plan revalidation; keep consumer primaries and release surfaces read-only."
+  branch_policy: "Continue TASK-AR-653 only in .worktrees/TASK-AR-653; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Revalidate the operability plan, then claim TASK-AR-653 in a fresh worktree."
-    - "Implement active-aware Scribe source-debt, receipt, and closure semantics offline."
+    - "Implement active-aware Scribe source-debt, receipt, and closure semantics in the claimed worktree."
+    - "Keep every implementation write inside UNIT-TASK-AR-653-001's 16-file footprint."
     - "Run W4a and a distinct W4b before release and local integration."
     - "Keep TASK-AR-651, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
@@ -28,7 +57,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

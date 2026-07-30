@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T23:00:17+09:00",
+  "generated_at": "2026-07-30T23:21:39+09:00",
   "record_count": 550,
   "finding_count": 0,
   "findings": [],
@@ -5932,7 +5932,7 @@
       "title": "Ensure Scribe freshness means current work is covered and overdue state was actually…",
       "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
       "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "unit:UNIT-TASK-AR-653-001",
@@ -5943,7 +5943,7 @@
       "title": "UNIT-TASK-AR-653-001 - Implement active-aware Scribe planning, receipt, and closure semantics",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
       "parent_id": "TASK-AR-653",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-654",

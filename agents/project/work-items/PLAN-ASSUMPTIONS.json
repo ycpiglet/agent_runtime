@@ -1014,12 +1014,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
-          "value": "cee58725f4b748a99301fd3e0e30facd0f05b74effa20655171df83f83c0898c"
+          "value": "b47a62643e7ef99db33a393740ac93bb31a61b51251989077817b10854a470c3"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
-          "value": "fc4f3c7ea8bc0a2efab50d6fceb1d21e330b0c857141a9dbb6e3f8c4a9a94110"
+          "value": "93ade4a5554ecde504bec65d39cce93a68f14e550b8694aa45a2a6dc69949b11"
         },
         {
           "kind": "sha256",
@@ -1119,12 +1119,12 @@
         {
           "kind": "sha256",
           "path": "agents/project/NEXT-SESSION-POINTER.yml",
-          "value": "8ca7ea00e505568775a5b2e57fbd0b6c62cb4680b884dcf62f8ffaea25594abc"
+          "value": "81117d868359f6f4d5775320839d3a8bb073f2c0a51443ece5117fb3311b4e3b"
         },
         {
           "kind": "sha256",
           "path": "BACKLOG-BOARD.md",
-          "value": "8b7bb6985dc6160f2dc8a6e2152680aba4a3517c5881f75406b77dd2fb8d47ed"
+          "value": "0360bb5afef61a31685a56d6d5c147a9f518ebf59ea9c26a437ebd90ee42d885"
         },
         {
           "kind": "sha256",
@@ -1138,7 +1138,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-      "recorded_at": "2026-07-30T23:12:52+09:00",
+      "recorded_at": "2026-07-30T23:21:39+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1354,5 +1354,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T23:12:52+09:00"
+  "updated_at": "2026-07-30T23:21:39+09:00"
 }
