@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T12:38:00+09:00
+updated_at: 2026-07-30T22:31:46+09:00
 started_at: 2026-07-30T12:36:00+09:00
 title: Bind model tiers to actual execution and economic receipts
-status: active
+status: completed
 priority: P1
 difficulty: L
 est_hours: 14
@@ -46,6 +46,25 @@ verification:
   - python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q
   - python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q
   - python scripts/runtime_asset_usage.py --check
+verification_status: passed
+verified_at: 2026-07-30T22:30:16+09:00
+verified_by: codex-root-task-ar-652-orchestrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-task-ar-652-20260730223016.json
+review_refs:
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md
+resolution: done
+completed_at: 2026-07-30T22:31:46+09:00
+closed_by: codex-root-task-ar-652-orchestrator
+measurement_unavailable_reason: Implementation hours and worker-token totals were not captured by a trustworthy task receipt; preserve them as unknown rather than zero.
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931.json
+defect_signatures:
+  - defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552
+  - defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300
+  - defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46
 ---
 
 # TASK-AR-652 - Bind model tiers to actual execution and economic receipts
@@ -72,3 +91,22 @@ verification:
 - `python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q`
 - `python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q`
 - `python scripts/runtime_asset_usage.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T22:31:46+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Implementation hours and worker-token totals were not captured by a trustworthy task receipt; preserve them as unknown rather than zero.
+- Closed by: `codex-root-task-ar-652-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-task-ar-652-20260730223016.json`
+- Reviews:
+  - `reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md`
+- Compounds:
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f.json`
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91.json`
+  - `agents/project/knowledge/compounds/records/COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931.json`
+<!-- work-close:end -->

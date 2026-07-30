@@ -1,0 +1,27 @@
+{
+  "cause": "The documented W5 order says integrate before cleanup, while local merge_queue implementation requires the branch to be detached before checkout and does not surface that requirement during dry-run.",
+  "created_at": "2026-07-30T22:35:28+09:00",
+  "created_by": "codex-root-task-ar-652-orchestrator",
+  "defect_signatures": [
+    "defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300"
+  ],
+  "id": "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
+  "prevention": "Add an attached-worktree preflight and regression, then make merge-integrator documentation choose one canonical safe path: verified detach before checkout or integration through the existing worker worktree.",
+  "prevention_refs": [
+    "agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md"
+  ],
+  "status": "active",
+  "summary": "TASK-AR-652 local integration failed before verification because the worker branch was still attached to its clean worktree while merge_queue tried to check it out in the integrator checkout.",
+  "title": "Make merge integration aware of attached worker worktrees",
+  "verification_refs": [
+    "tests/test_merge_queue.py"
+  ],
+  "work_ids": [
+    "TASK-AR-652"
+  ]
+}

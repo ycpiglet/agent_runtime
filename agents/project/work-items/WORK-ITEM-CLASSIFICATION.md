@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T12:32:55+09:00
+generated_at: 2026-07-30T22:46:09+09:00
 record_count: 550
 ---
 
@@ -575,8 +575,8 @@ record_count: 550
 | 41.1.13.1 | Unit 41.1.13.1 | unit | `UNIT-TASK-AR-651-001` | `TASK-AR-651` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md` | UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate |
 | 42 | Initiative 42 | initiative | `INIT-AR-V080-OPERABILITY-HARDENING` | - | active | `agents/project/initiatives/INIT-AR-V080-OPERABILITY-HARDENING.md` | Agent Runtime v0.8 Operability Hardening |
 | 42.1 | Taskset 42.1 | taskset | `TASKSET-AR-V080-OPERABILITY-HARDENING` | `INIT-AR-V080-OPERABILITY-HARDENING` | active | `BACKLOG-BOARD.md` | v0.8 Operability Hardening |
-| 42.1.1 | Task 42.1.1 | task | `TASK-AR-652` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | active | `agents/lead_engineer/tasks/TASK-AR-652.md` | Make selective subagent routing materially change execution and produce trustworthy t… |
-| 42.1.1.1 | Unit 42.1.1.1 | unit | `UNIT-TASK-AR-652-001` | `TASK-AR-652` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md` | UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement |
+| 42.1.1 | Task 42.1.1 | task | `TASK-AR-652` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | completed | `agents/lead_engineer/tasks/TASK-AR-652.md` | Make selective subagent routing materially change execution and produce trustworthy t… |
+| 42.1.1.1 | Unit 42.1.1.1 | unit | `UNIT-TASK-AR-652-001` | `TASK-AR-652` | completed | `agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md` | UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement |
 | 42.1.2 | Task 42.1.2 | task | `TASK-AR-653` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-653.md` | Ensure Scribe freshness means current work is covered and overdue state was actually… |
 | 42.1.2.1 | Unit 42.1.2.1 | unit | `UNIT-TASK-AR-653-001` | `TASK-AR-653` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md` | UNIT-TASK-AR-653-001 - Implement active-aware Scribe planning, receipt, and closure semantics |
 | 42.1.3 | Task 42.1.3 | task | `TASK-AR-654` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-654.md` | Prevent a repeated defect from closing with only a generic review or retro and no reu… |

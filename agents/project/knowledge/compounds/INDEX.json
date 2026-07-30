@@ -21,14 +21,23 @@
     "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4": [
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
     ],
+    "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46": [
+      "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
+    ],
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
     "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
     ],
+    "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552": [
+      "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f"
+    ],
     "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
+    "defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300": [
+      "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91"
     ],
     "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799": [
       "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
@@ -72,6 +81,11 @@
     "TASK-AR-650": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
     ],
+    "TASK-AR-652": [
+      "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f",
+      "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
+      "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -106,7 +120,7 @@
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ]
   },
-  "record_count": 14,
+  "record_count": 17,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -316,8 +330,50 @@
       "work_ids": [
         "TASK-AR-650"
       ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:27+09:00",
+      "defect_signatures": [
+        "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552"
+      ],
+      "id": "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f.json",
+      "recurrence_count": 6,
+      "status": "resolved",
+      "title": "Bind economic eligibility to sealed observed receipts",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:28+09:00",
+      "defect_signatures": [
+        "defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300"
+      ],
+      "id": "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Make merge integration aware of attached worker worktrees",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:29+09:00",
+      "defect_signatures": [
+        "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46"
+      ],
+      "id": "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931.json",
+      "recurrence_count": 3,
+      "status": "active",
+      "title": "Make review artifacts directly consumable by work close",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:9abf2c081721d9128bb64f6db51adf23989bae26540b2f1d75f5626bc6d18202"
+  "source_digest": "sha256:879b7aac054b5f74e2002b1668a5df1fc0c82748f5629eac7da7ce92a324d421"
 }

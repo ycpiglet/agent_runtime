@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-30T22:37:00+09:00
 title: Ship consumer adoption and failure operating skills
 status: planned
 priority: P1
@@ -40,9 +40,12 @@ acceptance:
   - runtime-adoption enforces baseline/control, ownership, safe apply, idempotence, protected bytes, isolation, exact acceptance, rollback, W4a, and W4b order.
   - The skill never authorizes product, credential, deploy, push, tag, or release actions.
   - Independent verification consumes migration contracts and exact execution receipts.
+  - Local merge integration detects attached worker worktrees before mutation and documents one executable-safe W5 order.
+  - Review templates emit canonical task_id and unit_id fields that work close can consume directly.
   - Release conductor requires all three current consumer contracts and zero unresolved release-critical P1 findings.
 verification:
   - python -m pytest tests/test_runtime_asset_usage.py tests/test_template_smoke.py tests/test_pilot_acceptance.py tests/test_release_conductor_skill.py -q
+  - python -m pytest tests/test_merge_queue.py tests/test_closure_gate.py -q
   - python scripts/runtime_asset_usage.py --check
   - python scripts/template_mirror_gate.py --check
 ---
@@ -55,7 +58,7 @@ verification:
 
 ## Scope
 
-- Add a core runtime-adoption skill, ship failure-to-regression, register both assets, and update independent verification and release skill inputs.
+- Add a core runtime-adoption skill, ship failure-to-regression, register both assets, update independent verification and release skill inputs, and align local merge/worktree plus review-evidence contracts with that procedure.
 
 ## Acceptance Criteria
 
@@ -63,10 +66,13 @@ verification:
 - runtime-adoption enforces baseline/control, ownership, safe apply, idempotence, protected bytes, isolation, exact acceptance, rollback, W4a, and W4b order.
 - The skill never authorizes product, credential, deploy, push, tag, or release actions.
 - Independent verification consumes migration contracts and exact execution receipts.
+- Local merge integration detects attached worker worktrees before mutation and documents one executable-safe W5 order.
+- Review templates emit canonical `task_id` and `unit_id` fields that `work close` can consume directly.
 - Release conductor requires all three current consumer contracts and zero unresolved release-critical P1 findings.
 
 ## Verification
 
 - `python -m pytest tests/test_runtime_asset_usage.py tests/test_template_smoke.py tests/test_pilot_acceptance.py tests/test_release_conductor_skill.py -q`
+- `python -m pytest tests/test_merge_queue.py tests/test_closure_gate.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`

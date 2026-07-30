@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T22:23:35+09:00
-record_count: 1184
+generated_at: 2026-07-30T22:39:54+09:00
+record_count: 1188
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1184` review and evidence records under `reviews/`.
+- Summary: indexed `1188` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1184` files |
+| Reviews covered | pass | `1188` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -240,6 +240,7 @@ record_count: 1184
 | `reviews/RETRO-2026-07-29-task-ar-645-compound-scribe.md` | `RETRO-2026-07-29-task-ar-645-compound-scribe` | md | completed | pass | TASK-AR-645 Compound and Scribe Retrospective |
 | `reviews/RETRO-2026-07-29-task-ar-646-model-routing.md` | `RETRO-2026-07-29-task-ar-646-model-routing` | md | completed | pass-with-followup | TASK-AR-646 Model-Routing Retrospective |
 | `reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md` | `RETRO-2026-07-29-task-ar-647-native-events-security-boundary` | md | completed | pass-with-compound | TASK-AR-647 Native-Events and Security-Boundary Retrospective |
+| `reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md` | `RETRO-2026-07-30-task-ar-652-economic-routing-integrity` | md | completed | pass-with-compound | TASK-AR-652 Economic Routing and Receipt-Integrity Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -662,6 +663,8 @@ record_count: 1184
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan` | md | accepted | n/a | TASK-AR-652 terminal-success and settlement-provenance replan |
+| `reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md` | `REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan` | md | approved | pass | TASK-AR-653 Post-TASK-AR-652 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment` | md | approved | pass | TASK-AR-657 Integration and Closeout-Evidence Scope Amendment |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
@@ -974,6 +977,7 @@ record_count: 1184
 | `reviews/VERIFY-2026-07-30-task-ar-649-20260730083005.json` | `VERIFY-2026-07-30-task-ar-649-20260730083005` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083005 |
 | `reviews/VERIFY-2026-07-30-task-ar-649-20260730083100.json` | `VERIFY-2026-07-30-task-ar-649-20260730083100` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083100 |
 | `reviews/VERIFY-2026-07-30-task-ar-650-20260730121429.json` | `VERIFY-2026-07-30-task-ar-650-20260730121429` | json | record | n/a | VERIFY-2026-07-30-task-ar-650-20260730121429 |
+| `reviews/VERIFY-2026-07-30-task-ar-652-20260730223016.json` | `VERIFY-2026-07-30-task-ar-652-20260730223016` | json | record | n/a | VERIFY-2026-07-30-task-ar-652-20260730223016 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json` | `VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630 |

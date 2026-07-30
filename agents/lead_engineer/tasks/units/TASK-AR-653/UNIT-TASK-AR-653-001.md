@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-30T22:45:39+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -29,13 +29,19 @@ inputs:
   - src/agent_runtime/templates/project/scripts/closure_gate.py
 target_files:
   - src/agent_runtime/state_projection.py
+  - src/agent_runtime/doctor.py
+  - scripts/scribe_due.py
   - src/agent_runtime/templates/project/scripts/scribe_due.py
+  - scripts/closure_gate.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
+  - scripts/session_start_hook.py
+  - src/agent_runtime/templates/project/scripts/session_start_hook.py
   - src/agent_runtime/templates/project/agents/scribe/SKILL.md
   - tests/test_scribe_due.py
   - tests/test_closure_gate.py
   - tests/test_session_start_hook.py
   - tests/test_doctor.py
+  - tests/test_template_smoke.py
 scope: Add deterministic planning and verification. Do not autonomously rewrite host-owned canonical state or choose meaning when records conflict.
 acceptance:
   - Projection freshness alone cannot satisfy overdue closure.
@@ -43,7 +49,8 @@ acceptance:
   - Canonical host state changes require an explicit bounded Scribe task.
   - Receipts are replayable without raw prompt or secret content.
 verification:
-  - python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py -q
+  - python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py tests/test_template_smoke.py -q
+  - python scripts/template_mirror_gate.py --check
 handoff: Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture, no-touch proof, template parity, and independent W4b.
 stop_condition: Stop before automatically rewriting host-owned state, compressing active records, or making product/editorial decisions.
 ---
@@ -64,13 +71,19 @@ Runtime currently has 769 hot items and Autofolio had 272, yet both become ready
 ## Target Files
 
 - src/agent_runtime/state_projection.py
+- src/agent_runtime/doctor.py
+- scripts/scribe_due.py
 - src/agent_runtime/templates/project/scripts/scribe_due.py
+- scripts/closure_gate.py
 - src/agent_runtime/templates/project/scripts/closure_gate.py
+- scripts/session_start_hook.py
+- src/agent_runtime/templates/project/scripts/session_start_hook.py
 - src/agent_runtime/templates/project/agents/scribe/SKILL.md
 - tests/test_scribe_due.py
 - tests/test_closure_gate.py
 - tests/test_session_start_hook.py
 - tests/test_doctor.py
+- tests/test_template_smoke.py
 
 ## Scope
 
@@ -93,7 +106,8 @@ Add deterministic planning and verification. Do not autonomously rewrite host-ow
 
 ## Verification
 
-- `python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py -q`
+- `python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py tests/test_template_smoke.py -q`
+- `python scripts/template_mirror_gate.py --check`
 
 ## Handoff
 
