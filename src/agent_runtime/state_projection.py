@@ -409,11 +409,25 @@ def _json_item(entry: object) -> tuple[str, str]:
     return _bounded(" · ".join(values), MAX_ITEM_CHARS), status
 
 
+def _unique_state_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise StateProjectionError(
+                f"JSON state source repeats member {key}"
+            )
+        payload[key] = value
+    return payload
+
+
 def parse_json(text: str) -> dict[str, Any]:
     """Derive only allowlisted scalar fields from one bounded collection."""
 
     try:
-        payload = json.loads(text)
+        payload = json.loads(
+            text,
+            object_pairs_hook=_unique_state_json_object,
+        )
     except json.JSONDecodeError as exc:
         raise StateProjectionError(f"invalid JSON state source: {exc.msg}") from exc
     entries = _json_entries(payload)
@@ -1657,7 +1671,10 @@ def _json_cleanup_view(
     path: str,
 ) -> tuple[str, object, list[str]]:
     try:
-        payload = json.loads(raw.decode("utf-8"))
+        payload = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=_unique_state_json_object,
+        )
     except (UnicodeError, json.JSONDecodeError) as exc:
         raise StateProjectionError(
             f"cleanup source delta cannot parse JSON source {path}"
@@ -1925,31 +1942,18 @@ def _validate_cleanup_delta(
             summary_row = _json_cleanup_summary
         else:
             try:
-                indexed_before_rows = [
-                    (index, row)
-                    for index, row in enumerate(
-                        before_raw.decode("utf-8").splitlines()
-                    )
-                    if row.strip()
-                ]
-                before_rows = [row for _index, row in indexed_before_rows]
-                after_rows = [
-                    row
-                    for row in after_raw.decode("utf-8").splitlines()
-                    if row.strip()
-                ]
+                before_rows = before_raw.decode("utf-8").splitlines()
+                after_rows = after_raw.decode("utf-8").splitlines()
             except UnicodeError as exc:
                 raise StateProjectionError(
                     f"cleanup source delta cannot decode Markdown source {path}"
                 ) from exc
             rewrite_modes = {
-                logical_index: _markdown_candidate_rewrite_mode(
+                source_order: _markdown_candidate_rewrite_mode(
                     before_rows,
-                    logical_index,
+                    source_order,
                 )
-                for logical_index, (source_order, _row) in enumerate(
-                    indexed_before_rows
-                )
+                for source_order in range(len(before_rows))
                 if source_order in allowed
             }
             deletable = {

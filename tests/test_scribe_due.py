@@ -2467,6 +2467,331 @@ def test_default_evaluation_is_read_only_and_explicit_cli_write_is_only_mutation
     assert source.stat().st_mtime_ns == source_mtime
 
 
+_MARKDOWN_BLANK_LINE_CASES = [
+    (
+        "setext-heading",
+        "Protected heading\n---\n",
+        "Protected heading\n\n---\n",
+    ),
+    (
+        "raw-html-block",
+        "<div>\n\nProtected paragraph\n",
+        "<div>\nProtected paragraph\n",
+    ),
+    (
+        "list-continuation",
+        "- TASK-SCRIBE protected parent\n\n  protected continuation\n",
+        "- TASK-SCRIBE protected parent\n  protected continuation\n",
+    ),
+    (
+        "fenced-block-boundary",
+        "```text\nprotected\n```\n\nProtected paragraph\n",
+        "```text\nprotected\n```\nProtected paragraph\n",
+    ),
+    (
+        "comment-boundary",
+        "<!-- protected -->\n\nProtected paragraph\n",
+        "<!-- protected -->\nProtected paragraph\n",
+    ),
+    (
+        "heading-boundary",
+        "## Protected\n\nProtected paragraph\n",
+        "## Protected\nProtected paragraph\n",
+    ),
+]
+
+
+def _rebind_cleanup_receipt_to_current_sources(root: Path) -> None:
+    current = state_projection.evaluate_state(root)
+    projection_path = root / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    payload["sources"] = current["sources"]
+    payload["hot_count"] = current["hot_count"]
+    payload["source_debt"] = current["source_debt"]
+    receipt = payload["cleanup_receipt"]
+    receipt["after_sources"] = _receipt_sources(payload)
+    receipt["resulting_hot_count"] = current["hot_count"]
+    receipt["receipt_digest"] = state_projection._canonical_digest(  # noqa: SLF001
+        {
+            key: value
+            for key, value in receipt.items()
+            if key != "receipt_digest"
+        }
+    )
+    projection_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+@pytest.mark.parametrize(
+    ("_case", "before_prefix", "after_prefix"),
+    _MARKDOWN_BLANK_LINE_CASES,
+)
+def test_cleanup_rejects_markdown_blank_line_semantic_change(
+    tmp_path: Path,
+    _case: str,
+    before_prefix: str,
+    after_prefix: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        before_prefix + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        after_prefix + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound cleanup plan|parse",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+@pytest.mark.parametrize(
+    ("_case", "before_prefix", "after_prefix"),
+    _MARKDOWN_BLANK_LINE_CASES,
+)
+def test_cleanup_receipt_replay_rejects_markdown_blank_line_semantic_change(
+    tmp_path: Path,
+    _case: str,
+    before_prefix: str,
+    after_prefix: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        before_prefix + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        before_prefix + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+
+    source.write_text(
+        after_prefix + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+    _rebind_cleanup_receipt_to_current_sources(tmp_path)
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert any(
+        "bound cleanup plan" in error or "parse" in error
+        for error in result["cleanup_outcome"]["errors"]
+    )
+    assert result["closure_blocking"] is True
+
+
+def _duplicate_json_source(kind: str, plan_digest: str) -> str:
+    kept = [
+        {"id": f"item-{index}", "status": "open"}
+        for index in range(5, 16)
+    ]
+    kept_rows = ",\n    ".join(
+        json.dumps(row, ensure_ascii=False, separators=(",", ":"))
+        for row in kept
+    )
+    if kind == "outer-collection":
+        return (
+            "{\n"
+            '  "items": [{"id":"TASK-INSERTED-OUTSIDE-PLAN","status":"open"}],\n'
+            f'  "items": [\n    {kept_rows}\n  ],\n'
+            '  "version": 1\n'
+            "}\n"
+        )
+    if kind == "entry-field":
+        first = (
+            '{"id":"TASK-INSERTED-OUTSIDE-PLAN",'
+            '"id":"item-5","status":"open"}'
+        )
+        rest = ",\n    ".join(
+            json.dumps(row, ensure_ascii=False, separators=(",", ":"))
+            for row in kept[1:]
+        )
+        return (
+            "{\n"
+            f'  "items": [\n    {first},\n    {rest}\n  ],\n'
+            '  "version": 1\n'
+            "}\n"
+        )
+    assert kind == "summary-field"
+    summary = (
+        '{"kind":"scribe_cleanup_summary","status":"completed",'
+        '"candidate_count":999,"candidate_count":5,'
+        f'"cleanup_plan_digest":"{plan_digest}"'
+        "}"
+    )
+    return (
+        "{\n"
+        f'  "items": [\n    {summary},\n    {kept_rows}\n  ],\n'
+        '  "version": 1\n'
+        "}\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ["outer-collection", "entry-field", "summary-field"],
+)
+def test_cleanup_rejects_duplicate_json_members(
+    tmp_path: Path,
+    kind: str,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": f"item-{index}", "status": "open"}
+                    for index in range(16)
+                ],
+                "version": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"state": "state/current.json"})
+    projection = _write_authorized_projection(tmp_path)
+    source.write_text(
+        _duplicate_json_source(
+            kind,
+            str(projection["cleanup_plan"]["plan_digest"]),  # type: ignore[index]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="repeat|duplicate|parse|source",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ["outer-collection", "entry-field", "summary-field"],
+)
+def test_cleanup_receipt_replay_rejects_duplicate_json_members(
+    tmp_path: Path,
+    kind: str,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": f"item-{index}", "status": "open"}
+                    for index in range(16)
+                ],
+                "version": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"state": "state/current.json"})
+    projection = _write_authorized_projection(tmp_path)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": f"item-{index}", "status": "open"}
+                    for index in range(5, 16)
+                ],
+                "version": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+
+    source.write_text(
+        _duplicate_json_source(
+            kind,
+            str(projection["cleanup_plan"]["plan_digest"]),  # type: ignore[index]
+        ),
+        encoding="utf-8",
+    )
+    _rebind_cleanup_receipt_to_current_sources(tmp_path)
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert result["closure_blocking"] is True
+
+
+def test_cleanup_accepts_unique_json_key_reordering_and_whitespace(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": f"item-{index}", "status": "open"}
+                    for index in range(16)
+                ],
+                "version": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"state": "state/current.json"})
+    _write_authorized_projection(tmp_path)
+    kept = ",\n        ".join(
+        f'{{"status": "open", "id": "item-{index}"}}'
+        for index in range(5, 16)
+    )
+    source.write_text(
+        "{\n"
+        '    "version": 1,\n'
+        f'    "items": [\n        {kept}\n    ]\n'
+        "}\n",
+        encoding="utf-8",
+    )
+
+    result = state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+
+    assert result["cleanup_outcome"]["status"] == "verified_reduction"
+    assert result["readiness"] == "ready"
+
+
 def test_custom_projection_requires_generated_ownership_and_distinct_path(
     tmp_path: Path,
 ) -> None:

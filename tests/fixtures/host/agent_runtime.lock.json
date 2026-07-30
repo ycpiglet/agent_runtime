@@ -103,7 +103,7 @@
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
       "scripts/agent_runtime/config.py": "sha256:ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c",
-      "scripts/agent_runtime/state_projection.py": "sha256:00a4f3050d787a918560c821e86a5f57fca52ceac8d7909d6693f289545b117c",
+      "scripts/agent_runtime/state_projection.py": "sha256:a870b54ffdc52bfc3dd8228dfeb041d11a629a35fc8f68d09d7e4b4e8d7974c7",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
       "scripts/agent_seminar.py": "sha256:836b9706a0531e701591ec1d827c6a64385e557accf1dcaa826ae32461db94e1",
       "scripts/agent_terminal.py": "sha256:8f0f140c3ee42d543f57173069926b6683788fa2e67bb1cdae8e0d535440609c",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:76dee2cc1fd63f973e40b01f7983ad1cb8a573f42d63ac84bed38fba5e3f47f8",
+    "template_digest": "sha256:ea8179762f59073005b10402cf9ebae0369ab81057168d30500a836bef4039bb",
     "template_files": 251
   },
   "profiles": [
