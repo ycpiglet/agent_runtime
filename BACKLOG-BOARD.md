@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T23:51:03+09:00
+generated_at: 2026-07-31T03:49:43+09:00
 task_count: 322
 open_count: 22
 completed_count: 300
@@ -86,7 +86,7 @@ completed_task_set_count: 63
 
 - Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
 - Progress: `1/7` done; `6` open or active.
-- WIP: active `1/3`; oldest `0.0h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-653` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md | in_progress | Action | P1 | High | High | 12h/24000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Ensure Scribe freshness means current work is covered and overdue state was actually… |
