@@ -75,7 +75,7 @@
       "agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md": "sha256:b07cbaf1e1561603dfb0716de3771d85d9b8f74c2ec6c3822c76afd6fcb8db16",
       "agents/roles.yml": "sha256:68fdabe53a249d9c8639f15bb98b28ea3cbd44ddf250d8c6a9d16f2211f9ec8b",
       "agents/runtime/session_checkpoints/.gitignore": "sha256:240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d",
-      "agents/scribe/SKILL.md": "sha256:f7feaaee329755f99b2c0ed3f2c23de54a6ccc3c9bfa7ae9e58fc2eb38f9ae67",
+      "agents/scribe/SKILL.md": "sha256:cc127747ddf47402eeebcb50f8149e9fc47b41c06355449eb6832fb706375749",
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
       "agents/uiux_designer/SKILL.md": "sha256:c0b980b2be22bd1e0350393599189dcff47c56a8303ab6df2e3f4f5914c571f6",
@@ -103,7 +103,7 @@
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
       "scripts/agent_runtime/config.py": "sha256:ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c",
-      "scripts/agent_runtime/state_projection.py": "sha256:977b24b196d53d1446397e7cdacdd5f60454213c631f3f09340b35f7f67a1d58",
+      "scripts/agent_runtime/state_projection.py": "sha256:e0e0f26877ae0ccca89fe972e08a33bfb135314ff003846b72decd3bf49073da",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
       "scripts/agent_seminar.py": "sha256:836b9706a0531e701591ec1d827c6a64385e557accf1dcaa826ae32461db94e1",
       "scripts/agent_terminal.py": "sha256:8f0f140c3ee42d543f57173069926b6683788fa2e67bb1cdae8e0d535440609c",
@@ -206,7 +206,7 @@
       "scripts/schedule_task.py": "sha256:900ec8181ecffc388eaea4d5ce5195618f6ea817577344034dd8454eb6aa97cb",
       "scripts/scheduled_dispatch_gate.py": "sha256:c2a41725d81303a58c3cf80c076137d1fca5414019bd45334bf7893eb88b12cf",
       "scripts/scm_steward.py": "sha256:023a3d5910957e866dc51295b7788c6105cc74cee21a98402a4260a4055961da",
-      "scripts/scribe_due.py": "sha256:c3e3c6cb5157671d6a5032697a404d45ff5a9723cb0047ed9e52ca2439173ca3",
+      "scripts/scribe_due.py": "sha256:20e40e4401c6fc7dcb15359accef807c5842dd888e173bcb1df45ca087a59817",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/security_service_gate.py": "sha256:a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:383e8a022b40bc59d9dcdd3a6f5f5ea6e60ca709b99b444f0a8a46c0c7453132",
+    "template_digest": "sha256:2d389e95b172dab3d5183a4a16382ac5d3d804edadc434d2ca56dffc7e8445be",
     "template_files": 251
   },
   "profiles": [

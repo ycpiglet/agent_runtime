@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -136,6 +137,100 @@ def _write_scribe_task(
     return path
 
 
+def _write_scribe_unit(
+    root: Path,
+    *,
+    source_binding_digest: str = "0" * 64,
+    cleanup_plan_digest: str = "0" * 64,
+) -> Path:
+    path = (
+        root
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-SCRIBE-PARENT"
+        / "UNIT-TASK-SCRIBE-PARENT-001.md"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                "work_id: UNIT-TASK-SCRIBE-PARENT-001",
+                "unit_id: UNIT-TASK-SCRIBE-PARENT-001",
+                "task_id: TASK-SCRIBE-PARENT",
+                "parent_id: TASK-SCRIBE-PARENT",
+                "kind: unit",
+                "status: in_progress",
+                "scribe_authorization: cleanup",
+                "scribe_authorized_by: lead-engineer-fixture",
+                "scribe_authorized_role: lead-engineer",
+                f"scribe_source_binding_digest: {source_binding_digest}",
+                f"scribe_cleanup_plan_digest: {cleanup_plan_digest}",
+                "---",
+                "",
+                "# Authorized Scribe cleanup unit",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _commit_all(root: Path, message: str) -> str:
+    if not (root / ".git").exists():
+        subprocess.run(
+            ["git", "init"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.email", "scribe-fixture@example.invalid"],
+            cwd=root,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Scribe Fixture"],
+            cwd=root,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "config", "commit.gpgsign", "false"],
+            cwd=root,
+            check=True,
+        )
+    subprocess.run(["git", "add", "-A"], cwd=root, check=True)
+    subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def _git_blob(root: Path, commit: str, relative: str) -> str:
+    return subprocess.run(
+        ["git", "rev-parse", f"{commit}:{relative}"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
 def _receipt_sources(payload: dict[str, object]) -> list[dict[str, object]]:
     return [
         {
@@ -167,6 +262,29 @@ def _write_authorized_projection(
         source_binding_digest=source_binding_digest,
         cleanup_plan_digest=cleanup_plan_digest,
     )
+    _commit_all(root, "authorize Scribe cleanup baseline")
+    assert state_projection.evaluate_state(root)["projection"]["status"] == "fresh"
+    return payload
+
+
+def _write_authorized_unit_projection(
+    root: Path,
+    *,
+    now: str = "2026-07-29T00:00:00+09:00",
+) -> dict[str, object]:
+    _active_task(root, "TASK-SCRIBE-PARENT")
+    _write_scribe_unit(root)
+    state_projection.write_projection(root, now=now)
+    projection_path = root / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    _write_scribe_unit(
+        root,
+        source_binding_digest=state_projection._canonical_digest(  # noqa: SLF001
+            _receipt_sources(payload)
+        ),
+        cleanup_plan_digest=payload["cleanup_plan"]["plan_digest"],
+    )
+    _commit_all(root, "authorize Scribe cleanup unit baseline")
     assert state_projection.evaluate_state(root)["projection"]["status"] == "fresh"
     return payload
 
@@ -195,6 +313,7 @@ def _write_owner_no_touch_decision(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    _commit_all(root, "record owner no-touch decision")
     return ref
 
 
@@ -521,6 +640,113 @@ def test_cleanup_receipt_binds_before_after_and_resulting_hot_count(
     assert len(receipt["active_work_digest"]) == 64
     assert len(receipt["cleanup_plan_digest"]) == 64
     assert len(receipt["receipt_digest"]) == 64
+
+
+def test_cleanup_receipt_replays_committed_authority_after_live_rewrite(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+    authorization = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-SCRIBE.md"
+    )
+    authorization.write_text(
+        authorization.read_text(encoding="utf-8").replace(
+            "scribe_authorized_by: lead-engineer-fixture\n",
+            "scribe_authorized_by: later-untrusted-editor\n",
+        ),
+        encoding="utf-8",
+    )
+    _commit_all(tmp_path, "rewrite live Scribe authority after receipt")
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "verified_reduction"
+    assert result["cleanup_outcome"]["valid"] is True
+    assert result["readiness"] == "ready"
+
+
+def test_cleanup_receipt_accepts_canonical_unit_authorization(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_unit_projection(tmp_path)
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    result = state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref=(
+            "agents/lead_engineer/tasks/units/TASK-SCRIBE-PARENT/"
+            "UNIT-TASK-SCRIBE-PARENT-001.md"
+        ),
+        now="2026-07-29T00:10:00+09:00",
+    )
+
+    assert result["cleanup_outcome"]["status"] == "verified_reduction"
+    assert result["cleanup_outcome"]["valid"] is True
+
+
+@pytest.mark.parametrize("field", ["task_id", "parent_id"])
+def test_cleanup_unit_authorization_requires_parent_identity_agreement(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_unit_projection(tmp_path)
+    authorization_ref = (
+        "agents/lead_engineer/tasks/units/TASK-SCRIBE-PARENT/"
+        "UNIT-TASK-SCRIBE-PARENT-001.md"
+    )
+    authorization = tmp_path / authorization_ref
+    authorization.write_text(
+        authorization.read_text(encoding="utf-8").replace(
+            f"{field}: TASK-SCRIBE-PARENT\n",
+            f"{field}: TASK-UNRELATED\n",
+        ),
+        encoding="utf-8",
+    )
+    _commit_all(tmp_path, f"forge Scribe unit {field}")
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound TASK authorization",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref=authorization_ref,
+            now="2026-07-29T00:10:00+09:00",
+        )
 
 
 def test_cleanup_without_reduction_requires_explicit_owner_decision(
@@ -855,6 +1081,246 @@ def test_cleanup_outcome_replays_baseline_validation_after_receipt_tamper(
     assert result["cleanup_outcome"]["status"] == "invalid"
     assert result["closure_blocking"] is True
     assert result["readiness"] == "blocked"
+
+
+def test_cleanup_receipt_rejects_fully_rebound_unchanged_source_baseline(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(11)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    projection_path = tmp_path / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    payload["sources"][0]["hot_count"] = 16
+    payload["hot_count"] = 16
+    payload["source_debt"]["hot_count"] = 16
+    source_binding_digest = state_projection._canonical_digest(  # noqa: SLF001
+        _receipt_sources(payload)
+    )
+    _write_scribe_task(
+        tmp_path,
+        source_binding_digest=source_binding_digest,
+        cleanup_plan_digest=payload["cleanup_plan"]["plan_digest"],
+    )
+    projection_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    _commit_all(tmp_path, "forge a self-consistent Scribe baseline")
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="baseline|anchor",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_outcome_rejects_fully_rebound_receipt_and_authority(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+    projection_path = tmp_path / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    receipt = payload["cleanup_receipt"]
+    receipt["before_sources"][0]["hot_count"] = 99
+    receipt["before_hot_count"] = 99
+    rebound_source_digest = state_projection._canonical_digest(  # noqa: SLF001
+        receipt["before_sources"]
+    )
+    receipt["before_source_binding_digest"] = rebound_source_digest
+    _write_scribe_task(
+        tmp_path,
+        source_binding_digest=rebound_source_digest,
+        cleanup_plan_digest=receipt["cleanup_plan_digest"],
+    )
+    attack_commit = _commit_all(tmp_path, "rebind forged receipt authority")
+    receipt["authorization_commit"] = attack_commit
+    receipt["authorization_blob_oid"] = _git_blob(
+        tmp_path,
+        attack_commit,
+        "agents/lead_engineer/tasks/TASK-SCRIBE.md",
+    )
+    receipt["receipt_digest"] = state_projection._canonical_digest(  # noqa: SLF001
+        {
+            key: value
+            for key, value in receipt.items()
+            if key != "receipt_digest"
+        }
+    )
+    projection_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert result["closure_blocking"] is True
+    assert result["readiness"] == "blocked"
+
+
+def test_owner_decision_rejects_non_string_approver_identity(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    projection = _write_authorized_projection(tmp_path)
+    decision_ref = _write_owner_no_touch_decision(tmp_path, projection)
+    decision_path = tmp_path / decision_ref
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["approved_by"] = {"name": "not-a-scalar"}
+    decision_path.write_text(
+        json.dumps(decision, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    _commit_all(tmp_path, "forge non-scalar owner identity")
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound owner no-touch decision",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            owner_decision_ref=decision_ref,
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+@pytest.mark.parametrize(
+    "authorized_by",
+    [
+        "null",
+        "null # forged identity",
+        "~",
+        "true",
+        "true # forged identity",
+        "{name: forged}",
+        "[forged]",
+        "123",
+    ],
+)
+def test_cleanup_authorization_rejects_non_string_or_placeholder_identity(
+    tmp_path: Path,
+    authorized_by: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    authorization = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-SCRIBE.md"
+    )
+    text = authorization.read_text(encoding="utf-8")
+    text = text.replace(
+        "scribe_authorized_by: lead-engineer-fixture\n",
+        f"scribe_authorized_by: {authorized_by}\n",
+    )
+    authorization.write_text(text, encoding="utf-8")
+    _commit_all(tmp_path, "forge malformed Scribe authority identity")
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound TASK authorization",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_authorization_rejects_conflicting_task_identity(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    projection_path = tmp_path / state_projection.DEFAULT_PROJECTION_PATH
+    authorization = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-SCRIBE.md"
+    )
+    authorization.write_text(
+        authorization.read_text(encoding="utf-8").replace(
+            "id: TASK-SCRIBE\n",
+            "id: TASK-UNRELATED\n",
+        ),
+        encoding="utf-8",
+    )
+    state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T00:01:00+09:00",
+    )
+    projection = json.loads(projection_path.read_text(encoding="utf-8"))
+    text = authorization.read_text(encoding="utf-8")
+    text = re.sub(
+        r"(?m)^scribe_source_binding_digest: .+$",
+        "scribe_source_binding_digest: "
+        + state_projection._canonical_digest(  # noqa: SLF001
+            _receipt_sources(projection)
+        ),
+        text,
+    )
+    text = re.sub(
+        r"(?m)^scribe_cleanup_plan_digest: .+$",
+        "scribe_cleanup_plan_digest: "
+        + projection["cleanup_plan"]["plan_digest"],
+        text,
+    )
+    authorization.write_text(text, encoding="utf-8")
+    _commit_all(tmp_path, "forge conflicting Scribe task identity")
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound TASK authorization",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
 
 
 def test_active_work_discovery_does_not_follow_record_symlink_escape(

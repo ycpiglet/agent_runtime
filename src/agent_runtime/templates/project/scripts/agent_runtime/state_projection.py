@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -113,10 +114,14 @@ _ACTIVE_WORK_STATUSES = {
 }
 _CLEANUP_AUTHORIZED_ROLES = {"lead-engineer", "doc-steward", "owner"}
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_GIT_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 _TASK_AUTHORIZATION_FIELDS = {
     "schema_version",
     "id",
     "work_id",
+    "unit_id",
+    "task_id",
+    "parent_id",
     "kind",
     "status",
     "scribe_authorization",
@@ -135,6 +140,28 @@ _OWNER_DECISION_FIELDS = {
     "approved_by",
     "approver_role",
     "decided_at",
+}
+_CLEANUP_RECEIPT_FIELDS = {
+    "schema",
+    "recorded_at",
+    "outcome",
+    "authorization_ref",
+    "authorization_work_id",
+    "authorization_commit",
+    "authorization_blob_oid",
+    "baseline_commit",
+    "owner_decision_ref",
+    "owner_decision_commit",
+    "owner_decision_blob_oid",
+    "before_sources",
+    "before_source_binding_digest",
+    "after_sources",
+    "before_hot_count",
+    "resulting_hot_count",
+    "active_work_digest",
+    "before_cleanup_plan",
+    "cleanup_plan_digest",
+    "receipt_digest",
 }
 
 
@@ -567,6 +594,204 @@ def _canonical_digest(payload: object) -> str:
         separators=(",", ":"),
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _git_environment() -> dict[str, str]:
+    environment = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("GIT_")
+    }
+    environment["GIT_OPTIONAL_LOCKS"] = "0"
+    return environment
+
+
+def _git_capture(
+    root: Path,
+    *arguments: str,
+) -> bytes:
+    try:
+        result = subprocess.run(
+            ["git", *arguments],
+            cwd=root,
+            env=_git_environment(),
+            capture_output=True,
+            check=False,
+            timeout=15,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise StateProjectionError(
+            "cleanup receipt requires an available local Git audit anchor"
+        ) from exc
+    if result.returncode != 0:
+        raise StateProjectionError(
+            "cleanup receipt requires an available local Git audit anchor"
+        )
+    return result.stdout
+
+
+def _git_commit_for_path(root: Path, relative: str) -> str:
+    output = _git_capture(
+        root,
+        "log",
+        "-n",
+        "1",
+        "--format=%H",
+        "--",
+        relative,
+    ).decode("ascii", "strict").strip()
+    if _GIT_OID_RE.fullmatch(output) is None:
+        raise StateProjectionError(
+            "cleanup authority must be committed before canonical cleanup"
+        )
+    return output
+
+
+def _git_is_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
+    if (
+        _GIT_OID_RE.fullmatch(ancestor) is None
+        or _GIT_OID_RE.fullmatch(descendant) is None
+    ):
+        raise StateProjectionError("cleanup audit anchor ancestry is invalid")
+    try:
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=root,
+            env=_git_environment(),
+            capture_output=True,
+            check=False,
+            timeout=15,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise StateProjectionError(
+            "cleanup receipt requires an available local Git audit anchor"
+        ) from exc
+    if result.returncode not in {0, 1}:
+        raise StateProjectionError(
+            "cleanup receipt requires an available local Git audit anchor"
+        )
+    return result.returncode == 0
+
+
+def _git_blob_at(
+    root: Path,
+    commit: str,
+    relative: str,
+    *,
+    limit: int,
+    required: bool,
+) -> tuple[str, bytes] | None:
+    if _GIT_OID_RE.fullmatch(commit) is None:
+        raise StateProjectionError("cleanup audit anchor commit is invalid")
+    tree = _git_capture(root, "ls-tree", "-z", commit, "--", relative)
+    rows = [row for row in tree.split(b"\0") if row]
+    if not rows:
+        if required:
+            raise StateProjectionError(
+                f"cleanup audit anchor is missing committed path {relative}"
+            )
+        return None
+    if len(rows) != 1 or b"\t" not in rows[0]:
+        raise StateProjectionError(
+            f"cleanup audit anchor path is ambiguous: {relative}"
+        )
+    metadata, raw_name = rows[0].split(b"\t", 1)
+    try:
+        mode, kind, oid = metadata.decode("ascii").split()
+        name = raw_name.decode("utf-8")
+    except (UnicodeError, ValueError) as exc:
+        raise StateProjectionError(
+            f"cleanup audit anchor path is invalid: {relative}"
+        ) from exc
+    if (
+        name != relative
+        or mode not in {"100644", "100755"}
+        or kind != "blob"
+        or _GIT_OID_RE.fullmatch(oid) is None
+    ):
+        raise StateProjectionError(
+            f"cleanup audit anchor is not a regular file: {relative}"
+        )
+    try:
+        size_text = _git_capture(root, "cat-file", "-s", oid).decode(
+            "ascii", "strict"
+        ).strip()
+        size = int(size_text)
+    except (UnicodeError, ValueError) as exc:
+        raise StateProjectionError(
+            f"cleanup audit anchor size is invalid: {relative}"
+        ) from exc
+    if size < 0 or size > limit:
+        raise StateProjectionError(
+            f"cleanup audit anchor exceeds the {limit}-byte limit: {relative}"
+        )
+    raw = _git_capture(root, "cat-file", "blob", oid)
+    if len(raw) != size:
+        raise StateProjectionError(
+            f"cleanup audit anchor size changed while reading: {relative}"
+        )
+    return oid, raw
+
+
+def _committed_artifact(
+    root: Path,
+    relative: str,
+    *,
+    commit: str = "",
+    expected_blob_oid: str = "",
+    require_live_match: bool,
+) -> tuple[str, str, str]:
+    if commit and (
+        not isinstance(commit, str) or _GIT_OID_RE.fullmatch(commit) is None
+    ):
+        raise StateProjectionError("cleanup authority commit identity is invalid")
+    if expected_blob_oid and (
+        not isinstance(expected_blob_oid, str)
+        or _GIT_OID_RE.fullmatch(expected_blob_oid) is None
+    ):
+        raise StateProjectionError("cleanup authority blob identity is invalid")
+    anchor_commit = commit or _git_commit_for_path(root, relative)
+    head_commit = _git_capture(root, "rev-parse", "HEAD").decode(
+        "ascii", "strict"
+    ).strip()
+    if (
+        _GIT_OID_RE.fullmatch(head_commit) is None
+        or not _git_is_ancestor(root, anchor_commit, head_commit)
+    ):
+        raise StateProjectionError(
+            "cleanup authority commit is not reachable from the current HEAD"
+        )
+    anchored = _git_blob_at(
+        root,
+        anchor_commit,
+        relative,
+        limit=MAX_ACTIVE_RECORD_BYTES,
+        required=True,
+    )
+    assert anchored is not None
+    blob_oid, raw = anchored
+    if expected_blob_oid and expected_blob_oid != blob_oid:
+        raise StateProjectionError(
+            "cleanup authority blob identity does not match its audit anchor"
+        )
+    if require_live_match:
+        try:
+            live = _safe_target(root, relative).read_bytes()
+        except (OSError, StateProjectionError) as exc:
+            raise StateProjectionError(
+                "cleanup authority must match its committed audit anchor"
+            ) from exc
+        if live != raw:
+            raise StateProjectionError(
+                "cleanup authority must match its committed audit anchor"
+            )
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeError as exc:
+        raise StateProjectionError(
+            "cleanup authority audit anchor is not UTF-8"
+        ) from exc
+    return text, anchor_commit, blob_oid
 
 
 def _frontmatter_scalar(text: str, field: str) -> str:
@@ -1264,6 +1489,103 @@ def _validated_cleanup_plan(
     return json.loads(json.dumps(value, ensure_ascii=False))
 
 
+def _parsed_anchor_source(
+    source: dict[str, Any],
+    raw: bytes,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    try:
+        text = raw.decode("utf-8")
+        parsed = (
+            parse_json(text)
+            if Path(source["path"]).suffix.lower() == ".json"
+            else parse_markdown(text)
+        )
+    except (UnicodeError, StateProjectionError) as exc:
+        raise StateProjectionError(
+            f"baseline audit anchor cannot parse source {source['path']}"
+        ) from exc
+    anchored = {
+        "adapter": source["adapter"],
+        "path": source["path"],
+        "present": True,
+        "digest": _source_digest(raw),
+        "hot_count": parsed["hot_count"],
+    }
+    if (
+        anchored["digest"] != source["digest"]
+        or anchored["hot_count"] != source["hot_count"]
+    ):
+        raise StateProjectionError(
+            f"baseline source binding disagrees with committed content: "
+            f"{source['path']}"
+        )
+    return (
+        anchored,
+        list(parsed["candidates"]),
+        list(parsed["cold_candidates"]),
+    )
+
+
+def _validate_baseline_audit_anchor(
+    root: Path,
+    *,
+    commit: str,
+    sources: list[dict[str, Any]],
+    cleanup_plan: dict[str, Any],
+    active_work: dict[str, Any],
+) -> None:
+    anchored_sources: list[dict[str, Any]] = []
+    hot_candidates: list[list[dict[str, Any]]] = []
+    cold_candidates: list[list[dict[str, Any]]] = []
+    for source in sources:
+        anchored = _git_blob_at(
+            root,
+            commit,
+            source["path"],
+            limit=MAX_SOURCE_BYTES,
+            required=source["present"],
+        )
+        if not source["present"]:
+            if anchored is not None:
+                raise StateProjectionError(
+                    f"baseline absent source exists in audit anchor: "
+                    f"{source['path']}"
+                )
+            anchored_sources.append(dict(source))
+            hot_candidates.append([])
+            cold_candidates.append([])
+            continue
+        assert anchored is not None
+        _oid, raw = anchored
+        anchored_source, hot, cold = _parsed_anchor_source(source, raw)
+        anchored_sources.append(anchored_source)
+        hot_candidates.append(hot)
+        cold_candidates.append(cold)
+
+    remaining = MAX_SELECTED_ITEMS
+    selected_orders: list[set[int]] = []
+    for candidates in hot_candidates:
+        selected = candidates[:remaining]
+        selected_orders.append(
+            {
+                int(candidate.get("source_order", 0))
+                for candidate in selected
+            }
+        )
+        remaining = max(0, remaining - len(selected))
+    expected_plan = _cleanup_plan(
+        sources=anchored_sources,
+        hot_candidates=hot_candidates,
+        cold_candidates=cold_candidates,
+        selected_orders=selected_orders,
+        active_work=active_work,
+    )
+    if cleanup_plan != expected_plan:
+        raise StateProjectionError(
+            "baseline cleanup plan disagrees with committed source content"
+        )
+
+
 def _validated_projection_baseline(
     payload: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], int, dict[str, Any], str]:
@@ -1312,15 +1634,22 @@ def _safe_existing_ref(
     relative: object,
     *,
     record_kind: str,
+    require_existing: bool = True,
 ) -> str:
-    value = str(relative or "").strip()
+    if not isinstance(relative, str):
+        return ""
+    value = relative.strip()
     if not value or Path(value).is_absolute():
         return ""
     try:
         target = _safe_target(root, value)
     except StateProjectionError:
         return ""
-    if _symlink_ancestor(root, target) is not None or not target.is_file():
+    if _symlink_ancestor(root, target) is not None:
+        return ""
+    if require_existing and not target.is_file():
+        return ""
+    if not require_existing and target.exists() and not target.is_file():
         return ""
     relative_path = Path(value)
     parts = relative_path.parts
@@ -1351,13 +1680,100 @@ def _safe_existing_ref(
 
 
 def _authority_identity(value: object) -> bool:
-    text = str(value or "").strip()
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    placeholders = {
+        "-",
+        "~",
+        "false",
+        "n/a",
+        "na",
+        "nil",
+        "no",
+        "none",
+        "null",
+        "off",
+        "on",
+        "tbd",
+        "true",
+        "unknown",
+        "yes",
+    }
     return (
         bool(text)
         and len(text) <= 160
+        and text.casefold() not in placeholders
+        and re.fullmatch(
+            r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?",
+            text,
+        )
+        is None
+        and text[0] not in "[{&*!|>@`?"
         and redact_text(text, limit=160) == text
         and not any(character in text for character in "\r\n")
     )
+
+
+def _strip_authorization_comment(raw: str) -> str:
+    quote = ""
+    escaped = False
+    index = 0
+    while index < len(raw):
+        character = raw[index]
+        if quote == '"':
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == quote:
+                quote = ""
+            index += 1
+            continue
+        if quote == "'":
+            if character == quote:
+                if index + 1 < len(raw) and raw[index + 1] == quote:
+                    index += 2
+                    continue
+                quote = ""
+            index += 1
+            continue
+        if character in {"'", '"'}:
+            quote = character
+            index += 1
+            continue
+        if character == "#" and (index == 0 or raw[index - 1].isspace()):
+            return raw[:index].rstrip()
+        index += 1
+    return raw
+
+
+def _authorization_scalar(raw: str, field: str) -> str:
+    value = _strip_authorization_comment(raw).strip()
+    if not value:
+        raise StateProjectionError(
+            f"TASK authorization field {field} must be a scalar"
+        )
+    if value[0] in "[{&*!|>@`?" or value.startswith("- "):
+        raise StateProjectionError(
+            f"TASK authorization field {field} must be a scalar"
+        )
+    if value[0] in {"'", '"'}:
+        if len(value) < 2 or value[-1] != value[0]:
+            raise StateProjectionError(
+                f"TASK authorization field {field} has invalid quoting"
+            )
+        value = value[1:-1]
+    elif value[-1] in {"'", '"'}:
+        raise StateProjectionError(
+            f"TASK authorization field {field} has invalid quoting"
+        )
+    value = value.strip()
+    if not value or any(character in value for character in "\r\n"):
+        raise StateProjectionError(
+            f"TASK authorization field {field} must be a scalar"
+        )
+    return value
 
 
 def _authorization_frontmatter(text: str) -> dict[str, str]:
@@ -1378,14 +1794,7 @@ def _authorization_frontmatter(text: str) -> dict[str, str]:
             raise StateProjectionError(
                 f"TASK authorization repeats field {field}"
             )
-        value = match.group(2).strip()
-        if (
-            len(value) >= 2
-            and value[0] == value[-1]
-            and value[0] in {"'", '"'}
-        ):
-            value = value[1:-1]
-        values[field] = value.strip()
+        values[field] = _authorization_scalar(match.group(2), field)
     if not closed:
         raise StateProjectionError("TASK authorization frontmatter is unterminated")
     return values
@@ -1406,22 +1815,29 @@ def _validate_task_authorization(
     *,
     source_binding_digest: str,
     cleanup_plan_digest: str,
-) -> tuple[str, str]:
+    commit: str = "",
+    blob_oid: str = "",
+    require_live_match: bool = True,
+) -> tuple[str, str, str, str]:
     ref = _safe_existing_ref(
         root,
         relative,
         record_kind="task_authorization",
+        require_existing=require_live_match,
     )
     if not ref:
         raise StateProjectionError(
             "cleanup receipt requires an existing bound TASK authorization"
         )
     try:
-        text = _read_bounded_text(
-            _safe_target(root, ref),
-            MAX_ACTIVE_RECORD_BYTES,
+        text, anchor_commit, anchor_blob_oid = _committed_artifact(
+            root,
+            ref,
+            commit=commit,
+            expected_blob_oid=blob_oid,
+            require_live_match=require_live_match,
         )
-    except (OSError, UnicodeError, StateProjectionError) as exc:
+    except StateProjectionError as exc:
         raise StateProjectionError(
             "cleanup receipt requires an existing bound TASK authorization"
         ) from exc
@@ -1432,12 +1848,27 @@ def _validate_task_authorization(
         raise StateProjectionError(
             "cleanup receipt requires an existing bound TASK authorization"
         ) from exc
-    work_id = fields.get("work_id") or fields.get("id") or ""
     kind = fields.get("kind", "")
     expected_kind = "unit" if path.name.startswith("UNIT-TASK-") else "task"
+    if expected_kind == "unit":
+        parent_id = path.parts[4]
+        work_id = fields.get("work_id", "")
+        identity_matches = (
+            work_id == path.stem
+            and fields.get("unit_id") == path.stem
+            and fields.get("task_id") == parent_id
+            and fields.get("parent_id") == parent_id
+            and fields.get("id", path.stem) == path.stem
+        )
+    else:
+        work_id = fields.get("work_id", "")
+        identity_matches = (
+            work_id == path.stem
+            and fields.get("id") == path.stem
+        )
     if (
         fields.get("schema_version") != "agent-runtime-work-item/v1"
-        or work_id != path.stem
+        or not identity_matches
         or kind != expected_kind
         or not _active_status(fields.get("status"))
         or fields.get("scribe_authorization") != "cleanup"
@@ -1451,11 +1882,13 @@ def _validate_task_authorization(
         raise StateProjectionError(
             "cleanup receipt requires an existing bound TASK authorization"
         )
-    return ref, work_id
+    return ref, work_id, anchor_commit, anchor_blob_oid
 
 
 def _valid_decided_at(value: object) -> bool:
-    text = str(value or "").strip()
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
     try:
         parsed = datetime.fromisoformat(
             text[:-1] + "+00:00" if text.endswith("Z") else text
@@ -1473,23 +1906,33 @@ def _validate_owner_decision(
     authorization_work_id: str,
     source_binding_digest: str,
     cleanup_plan_digest: str,
-) -> str:
-    ref = _safe_existing_ref(root, relative, record_kind="owner_decision")
+    commit: str = "",
+    blob_oid: str = "",
+    require_live_match: bool = True,
+) -> tuple[str, str, str]:
+    ref = _safe_existing_ref(
+        root,
+        relative,
+        record_kind="owner_decision",
+        require_existing=require_live_match,
+    )
     if not ref:
         raise StateProjectionError(
             "cleanup receipt requires a bound owner no-touch decision"
         )
     try:
+        text, anchor_commit, anchor_blob_oid = _committed_artifact(
+            root,
+            ref,
+            commit=commit,
+            expected_blob_oid=blob_oid,
+            require_live_match=require_live_match,
+        )
         payload = json.loads(
-            _read_bounded_text(
-                _safe_target(root, ref),
-                MAX_ACTIVE_RECORD_BYTES,
-            ),
+            text,
             object_pairs_hook=_unique_json_object,
         )
     except (
-        OSError,
-        UnicodeError,
         json.JSONDecodeError,
         StateProjectionError,
     ) as exc:
@@ -1512,7 +1955,7 @@ def _validate_owner_decision(
         raise StateProjectionError(
             "cleanup receipt requires a bound owner no-touch decision"
         )
-    return ref
+    return ref, anchor_commit, anchor_blob_oid
 
 
 def _cleanup_outcome(
@@ -1545,6 +1988,8 @@ def _cleanup_outcome(
     errors: list[str] = []
     if projection_status != "fresh":
         errors.append("projection is not fresh")
+    if set(receipt) != _CLEANUP_RECEIPT_FIELDS:
+        errors.append("receipt fields are invalid")
     if receipt.get("schema") != CLEANUP_RECEIPT_SCHEMA:
         errors.append("receipt schema is invalid")
     receipt_core = {
@@ -1595,6 +2040,32 @@ def _cleanup_outcome(
     ):
         errors.append("receipt active-work binding is stale")
 
+    baseline_commit = receipt.get("baseline_commit")
+    authorization_commit = receipt.get("authorization_commit")
+    authorization_blob_oid = receipt.get("authorization_blob_oid")
+    anchor_fields_valid = (
+        isinstance(baseline_commit, str)
+        and _GIT_OID_RE.fullmatch(baseline_commit) is not None
+        and isinstance(authorization_commit, str)
+        and _GIT_OID_RE.fullmatch(authorization_commit) is not None
+        and baseline_commit == authorization_commit
+        and isinstance(authorization_blob_oid, str)
+        and _GIT_OID_RE.fullmatch(authorization_blob_oid) is not None
+    )
+    if not anchor_fields_valid:
+        errors.append("receipt cleanup audit anchor is invalid")
+    elif before_sources and before_plan:
+        try:
+            _validate_baseline_audit_anchor(
+                root,
+                commit=baseline_commit,
+                sources=before_sources,
+                cleanup_plan=before_plan,
+                active_work=active_work,
+            )
+        except StateProjectionError as exc:
+            errors.append(str(exc))
+
     before_identity = [
         (source["adapter"], source["path"], source["present"])
         for source in before_sources
@@ -1612,42 +2083,107 @@ def _cleanup_outcome(
 
     authorization = ""
     authorization_work_id = ""
-    try:
-        authorization, authorization_work_id = _validate_task_authorization(
-            root,
-            receipt.get("authorization_ref"),
-            source_binding_digest=source_binding_digest,
-            cleanup_plan_digest=cleanup_plan_digest,
-        )
-    except StateProjectionError as exc:
-        errors.append(str(exc))
+    anchored_authorization_commit = ""
+    anchored_authorization_blob = ""
+    if anchor_fields_valid:
+        try:
+            (
+                authorization,
+                authorization_work_id,
+                anchored_authorization_commit,
+                anchored_authorization_blob,
+            ) = _validate_task_authorization(
+                root,
+                receipt.get("authorization_ref"),
+                source_binding_digest=source_binding_digest,
+                cleanup_plan_digest=cleanup_plan_digest,
+                commit=authorization_commit,
+                blob_oid=authorization_blob_oid,
+                require_live_match=False,
+            )
+        except StateProjectionError as exc:
+            errors.append(str(exc))
     if receipt.get("authorization_ref") != authorization:
         errors.append("receipt authorization ref is invalid")
     if receipt.get("authorization_work_id") != authorization_work_id:
         errors.append("receipt authorization work identity is invalid")
+    if anchored_authorization_commit != authorization_commit:
+        errors.append("receipt authorization commit identity is invalid")
+    if anchored_authorization_blob != authorization_blob_oid:
+        errors.append("receipt authorization blob identity is invalid")
 
     outcome = str(receipt.get("outcome") or "")
     if outcome == "reduction":
         if before_hot <= hot_count:
             errors.append("reduction receipt did not reduce hot count")
-        if receipt.get("owner_decision_ref") not in {None, ""}:
-            errors.append("reduction receipt must not cite an owner decision")
+        if any(
+            receipt.get(field) is not None
+            for field in (
+                "owner_decision_ref",
+                "owner_decision_commit",
+                "owner_decision_blob_oid",
+            )
+        ):
+            errors.append(
+                "reduction receipt must not cite an owner decision audit anchor"
+            )
         status = "verified_reduction"
     elif outcome == "owner_decision":
-        try:
-            owner_decision = _validate_owner_decision(
-                root,
-                receipt.get("owner_decision_ref"),
-                authorization_ref=authorization,
-                authorization_work_id=authorization_work_id,
-                source_binding_digest=source_binding_digest,
-                cleanup_plan_digest=cleanup_plan_digest,
-            )
-        except StateProjectionError as exc:
-            errors.append(str(exc))
-            owner_decision = ""
+        owner_commit = receipt.get("owner_decision_commit")
+        owner_blob_oid = receipt.get("owner_decision_blob_oid")
+        owner_anchor_valid = (
+            isinstance(owner_commit, str)
+            and _GIT_OID_RE.fullmatch(owner_commit) is not None
+            and isinstance(owner_blob_oid, str)
+            and _GIT_OID_RE.fullmatch(owner_blob_oid) is not None
+        )
+        owner_decision = ""
+        anchored_owner_commit = ""
+        anchored_owner_blob = ""
+        if not owner_anchor_valid:
+            errors.append("receipt owner decision audit anchor is invalid")
+        else:
+            try:
+                if not _git_is_ancestor(
+                    root,
+                    authorization_commit,
+                    owner_commit,
+                ):
+                    raise StateProjectionError(
+                        "owner decision audit anchor does not descend from "
+                        "its TASK authorization"
+                    )
+                (
+                    owner_decision,
+                    anchored_owner_commit,
+                    anchored_owner_blob,
+                ) = _validate_owner_decision(
+                    root,
+                    receipt.get("owner_decision_ref"),
+                    authorization_ref=authorization,
+                    authorization_work_id=authorization_work_id,
+                    source_binding_digest=source_binding_digest,
+                    cleanup_plan_digest=cleanup_plan_digest,
+                    commit=owner_commit,
+                    blob_oid=owner_blob_oid,
+                    require_live_match=False,
+                )
+                _validate_baseline_audit_anchor(
+                    root,
+                    commit=owner_commit,
+                    sources=before_sources,
+                    cleanup_plan=before_plan,
+                    active_work=active_work,
+                )
+            except StateProjectionError as exc:
+                errors.append(str(exc))
+                owner_decision = ""
         if receipt.get("owner_decision_ref") != owner_decision:
             errors.append("receipt owner decision ref is invalid")
+        if anchored_owner_commit != owner_commit:
+            errors.append("receipt owner decision commit identity is invalid")
+        if anchored_owner_blob != owner_blob_oid:
+            errors.append("receipt owner decision blob identity is invalid")
         status = "owner_decision"
     else:
         errors.append("receipt outcome is unsupported")
@@ -2121,21 +2657,55 @@ def record_cleanup(
         raise StateProjectionError(
             "cleanup receipt baseline active-work coverage is incomplete or stale"
         )
-    authorization, authorization_work_id = _validate_task_authorization(
+    (
+        authorization,
+        authorization_work_id,
+        authorization_commit,
+        authorization_blob_oid,
+    ) = _validate_task_authorization(
         root,
         authorization_ref,
         source_binding_digest=source_binding_digest,
         cleanup_plan_digest=prior_plan_digest,
     )
+    _validate_baseline_audit_anchor(
+        root,
+        commit=authorization_commit,
+        sources=before_sources,
+        cleanup_plan=prior_plan,
+        active_work=evaluation["active_work"],
+    )
     owner_decision = ""
+    owner_decision_commit = ""
+    owner_decision_blob_oid = ""
     if owner_decision_ref:
-        owner_decision = _validate_owner_decision(
+        (
+            owner_decision,
+            owner_decision_commit,
+            owner_decision_blob_oid,
+        ) = _validate_owner_decision(
             root,
             owner_decision_ref,
             authorization_ref=authorization,
             authorization_work_id=authorization_work_id,
             source_binding_digest=source_binding_digest,
             cleanup_plan_digest=prior_plan_digest,
+        )
+        if not _git_is_ancestor(
+            root,
+            authorization_commit,
+            owner_decision_commit,
+        ):
+            raise StateProjectionError(
+                "owner decision audit anchor does not descend from its "
+                "TASK authorization"
+            )
+        _validate_baseline_audit_anchor(
+            root,
+            commit=owner_decision_commit,
+            sources=before_sources,
+            cleanup_plan=prior_plan,
+            active_work=evaluation["active_work"],
         )
 
     after_hot = evaluation.get("hot_count")
@@ -2152,7 +2722,12 @@ def record_cleanup(
         "outcome": "owner_decision" if owner_decision else "reduction",
         "authorization_ref": authorization,
         "authorization_work_id": authorization_work_id,
+        "authorization_commit": authorization_commit,
+        "authorization_blob_oid": authorization_blob_oid,
+        "baseline_commit": authorization_commit,
         "owner_decision_ref": owner_decision or None,
+        "owner_decision_commit": owner_decision_commit or None,
+        "owner_decision_blob_oid": owner_decision_blob_oid or None,
         "before_sources": before_sources,
         "before_source_binding_digest": source_binding_digest,
         "after_sources": _receipt_sources(evaluation["sources"]),

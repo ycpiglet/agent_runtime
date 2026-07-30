@@ -75,11 +75,33 @@ receipt를 남긴다. hot count가 줄지 않았다면
 `--owner-decision-ref <repo-relative-owner-record>`가 추가로 필요하다.
 어느 CLI 모드도 canonical host state를 자동 수정하지 않는다.
 
+cleanup 전 감사 순서는 고정한다.
+
+1. `--write-projection`으로 baseline과 cleanup plan을 생성한다.
+2. 그 digest를 활성 TASK/UNIT-TASK authorization에 기록한다.
+3. **canonical source의 baseline bytes가 아직 그대로인 상태에서**
+   authorization을 Git에 commit한다. source가 새 파일이면 같은 commit에
+   반드시 포함한다.
+4. 그 뒤에만 canonical source를 정리하고 `--record-cleanup`을 실행한다.
+5. no-touch라면 owner decision도 source baseline이 그대로인 상태에서
+   authorization commit의 후손 commit으로 먼저 기록한다.
+
+record 시점의 authorization과 owner decision은 각각 현재 파일과 committed
+blob이 byte-for-byte 같아야 한다. receipt는 baseline commit과 authority
+blob OID를 저장하고, 이후 검증은 변경 가능한 현재 권한 파일이 아니라 그
+고정된 Git object를 재생한다. commit되지 않은 승인, 현재 branch에서
+도달할 수 없는 commit, source bytes/count/plan이 맞지 않는 commit은
+fail-closed다.
+
 authorization은 파일명만 TASK처럼 보이는 문서가 아니다. projection을
 생성할 때부터 활성 canonical TASK/UNIT-TASK여야 하며, frontmatter에 아래
 flat fields를 포함한다. source binding digest는 projection `sources`의
 `adapter/path/present/digest/hot_count` 배열에 대한 canonical JSON
 SHA-256이고 plan digest는 projection이 생성한 값을 그대로 사용한다.
+TASK의 `id`/`work_id`는 파일 stem과 같아야 한다. UNIT-TASK의
+`work_id`/`unit_id`는 파일 stem과, `task_id`/`parent_id`는 상위 디렉터리의
+TASK ID와 모두 같아야 한다. 승인자 identity는 비밀이 아닌 명시적 문자열만
+허용하며 null/boolean/숫자/collection/placeholder 값은 권한이 아니다.
 
 ```yaml
 scribe_authorization: cleanup

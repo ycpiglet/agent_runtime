@@ -619,6 +619,18 @@ def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
         ),
         encoding="utf-8",
     )
+    _run(["git", "init", "-q"], cwd=host)
+    _run(
+        ["git", "config", "user.email", "scribe-smoke@example.invalid"],
+        cwd=host,
+    )
+    _run(["git", "config", "user.name", "Scribe Smoke"], cwd=host)
+    _run(["git", "config", "commit.gpgsign", "false"], cwd=host)
+    _run(["git", "add", "-A"], cwd=host)
+    _run(
+        ["git", "commit", "-q", "-m", "anchor Scribe cleanup baseline"],
+        cwd=host,
+    )
     source.write_text(
         "# State\n" + "".join(f"- active {index}\n" for index in range(5, 16)),
         encoding="utf-8",

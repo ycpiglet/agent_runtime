@@ -64,7 +64,8 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help=(
             "record an authorized cleanup outcome in the generated projection; "
-            "canonical source edits must already be complete"
+            "the baseline sources and authorization must have been committed "
+            "together before canonical source edits, which must already be complete"
         ),
     )
     parser.add_argument(
@@ -72,7 +73,8 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help=(
             "repo-relative active TASK/UNIT-TASK whose Scribe authorization "
-            "frontmatter binds the baseline source and cleanup-plan digests"
+            "frontmatter binds the baseline source and cleanup-plan digests; "
+            "the record must byte-match its reachable Git audit anchor"
         ),
     )
     parser.add_argument(
@@ -81,7 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "repo-relative DECISION JSON with explicit owner no-touch schema "
             "and matching authorization/source/plan bindings; valid only with "
-            "--record-cleanup"
+            "--record-cleanup and only after that decision is committed"
         ),
     )
     parser.add_argument("--now", help="deterministic ISO-8601 projection timestamp")
@@ -137,7 +139,8 @@ def main(argv: list[str] | None = None) -> int:
             "  → Refresh the bounded view with "
             "`python scripts/scribe_due.py --write-projection`; "
             "this never cleans canonical source debt. Execute cleanup only "
-            "under a digest-bound active TASK/UNIT-TASK, then record its outcome with "
+            "under a digest-bound active TASK/UNIT-TASK, commit that authorization "
+            "while the baseline source bytes are still present, then record its outcome with "
             "`--record-cleanup --authorization-ref <repo-relative-path>`."
         )
     return 0
