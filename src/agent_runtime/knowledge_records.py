@@ -51,11 +51,6 @@ MAX_RECORDS = 10000
 MAX_SEARCH_RESULTS = 100
 ACCEPTED_WATCH_STATUSES = {"accepted", "approved"}
 ACCEPTED_WATCH_DECISIONS = {"accepted_watch"}
-ACCEPTED_WATCH_DECISION_FIELDS = (
-    "decision",
-    "disposition",
-    "prevention_status",
-)
 ACCEPTED_WATCH_REVIEWER_FIELDS = (
     "reviewed_by",
     "reviewer",
@@ -63,6 +58,26 @@ ACCEPTED_WATCH_REVIEWER_FIELDS = (
     "accepted_by",
     "verified_by",
 )
+REVIEWER_IDENTITY_RE = re.compile(r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$")
+REVIEWER_IDENTITY_PLACEHOLDERS = {
+    "-",
+    "~",
+    "false",
+    "n",
+    "n/a",
+    "na",
+    "nil",
+    "no",
+    "none",
+    "null",
+    "off",
+    "on",
+    "tbd",
+    "true",
+    "unknown",
+    "y",
+    "yes",
+}
 SECRET_RE = re.compile(
     r"(?i)(?:"
     r"\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]|"
@@ -230,6 +245,20 @@ def _value_items(value: object) -> list[str]:
     return [text] if text else []
 
 
+def _reviewer_identity(value: object) -> str:
+    if not isinstance(value, str):
+        return ""
+    text = value
+    if (
+        not text
+        or text != text.strip()
+        or text.casefold() in REVIEWER_IDENTITY_PLACEHOLDERS
+        or REVIEWER_IDENTITY_RE.fullmatch(text) is None
+    ):
+        return ""
+    return text
+
+
 def _accepted_watch_findings(
     path: Path,
     ref: str,
@@ -241,11 +270,11 @@ def _accepted_watch_findings(
     except (OSError, json.JSONDecodeError, CompoundRecordError):
         return False, [f"compound:prevention-watch-invalid:{ref}"]
 
-    decisions = {
-        _normalized_text(payload.get(field)).lower().replace("-", "_")
-        for field in ACCEPTED_WATCH_DECISION_FIELDS
-    }
-    if not decisions.intersection(ACCEPTED_WATCH_DECISIONS):
+    decision = payload.get("decision")
+    if (
+        not isinstance(decision, str)
+        or _normalized_text(decision).lower() not in ACCEPTED_WATCH_DECISIONS
+    ):
         return False, []
 
     findings: list[str] = []
@@ -253,9 +282,9 @@ def _accepted_watch_findings(
     if status not in ACCEPTED_WATCH_STATUSES:
         findings.append(f"compound:prevention-watch-not-accepted:{ref}")
     reviewers = {
-        _normalized_text(value)
+        identity
         for field in ACCEPTED_WATCH_REVIEWER_FIELDS
-        for value in _value_items(payload.get(field))
+        if (identity := _reviewer_identity(payload.get(field)))
     }
     if not any(reviewers):
         findings.append(f"compound:prevention-watch-reviewer-missing:{ref}")

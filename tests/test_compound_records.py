@@ -639,6 +639,87 @@ def test_accepted_watch_requires_reviewer_and_current_work_link(
     assert "compound:prevention-destination-unsupported" in findings
 
 
+@pytest.mark.parametrize(
+    ("watch_metadata", "expected_finding"),
+    [
+        (
+            "decision: accepted_watch\nreviewed_by: []\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: null\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: false\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: TBD\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "disposition: accepted_watch\nreviewed_by: qa-independent\n",
+            "closeout:compound:prevention-destination-unsupported",
+        ),
+        (
+            "prevention_status: accepted_watch\nreviewed_by: qa-independent\n",
+            "closeout:compound:prevention-destination-unsupported",
+        ),
+    ],
+    ids=[
+        "empty-list-reviewer",
+        "null-reviewer",
+        "boolean-reviewer",
+        "placeholder-reviewer",
+        "disposition-alias",
+        "prevention-status-alias",
+    ],
+)
+def test_work_close_rejects_invalid_accepted_watch_metadata(
+    tmp_path: Path,
+    watch_metadata: str,
+    expected_finding: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "invalid accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-watch-authority.md"
+    (tmp_path / watch_ref).write_text(
+        "---\n"
+        "status: accepted\n"
+        f"{watch_metadata}"
+        f"work_id: {unit_id}\n"
+        "---\n\n# Invalid accepted watch authority\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject invalid accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
 @pytest.mark.parametrize("script", [SCRIPT, TEMPLATE_SCRIPT])
 def test_root_and_template_cli_create_check_search(script: Path, tmp_path: Path) -> None:
     command = [

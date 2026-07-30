@@ -581,6 +581,107 @@ def test_declared_repeat_accepts_current_compound_with_supported_prevention(
     assert result["repeat_failure"]["satisfied"] is True
 
 
+@pytest.mark.parametrize(
+    ("watch_metadata", "expected_finding"),
+    [
+        (
+            "decision: accepted_watch\nreviewed_by: []\n",
+            "compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: null\n",
+            "compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: false\n",
+            "compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: TBD\n",
+            "compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "disposition: accepted_watch\nreviewed_by: qa-independent\n",
+            "compound:prevention-destination-unsupported",
+        ),
+        (
+            "prevention_status: accepted_watch\nreviewed_by: qa-independent\n",
+            "compound:prevention-destination-unsupported",
+        ),
+    ],
+    ids=[
+        "empty-list-reviewer",
+        "null-reviewer",
+        "boolean-reviewer",
+        "placeholder-reviewer",
+        "disposition-alias",
+        "prevention-status-alias",
+    ],
+)
+def test_stop_gate_rejects_invalid_accepted_watch_metadata(
+    tmp_path,
+    monkeypatch,
+    watch_metadata,
+    expected_finding,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "invalid accepted watch authority"
+    watch_ref = f"reviews/REVIEW-{TODAY}-invalid-watch-authority.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        "---\n"
+        "status: accepted\n"
+        f"{watch_metadata}"
+        f"work_id: {unit_id}\n"
+        "---\n\n# Invalid accepted watch authority\n",
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject invalid accepted watch authority",
+        summary="An accepted watch must carry explicit review authority.",
+        cause="Untyped frontmatter values were coerced into reviewer identities.",
+        prevention="Require an exact decision and a bounded reviewer identity.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:42:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert any(
+        expected_finding in finding
+        for finding in result["repeat_failure"]["findings"]
+    )
+
+
 def test_parent_repeated_failure_signal_is_inherited_by_stop_gate(
     tmp_path,
     monkeypatch,
