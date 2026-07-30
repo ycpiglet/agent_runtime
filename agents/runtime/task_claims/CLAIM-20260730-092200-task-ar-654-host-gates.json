@@ -92,7 +92,8 @@
     "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
     "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.json",
     "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.handoff.md",
-    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.log.md"
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-654-*-closeout.log.md",
+    "tests/test_backlog_board_tasksets.py"
   ],
   "released_at": "2026-07-30T10:12:31+09:00",
   "verified_by": "qa-20260730-094300-task-ar-654-w4b",

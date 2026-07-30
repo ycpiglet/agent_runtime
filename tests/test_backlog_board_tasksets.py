@@ -388,6 +388,7 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-QUALITY-LOOP",
         "TASKSET-AR-MIGRATION-PARITY",
         "TASKSET-AR-MERGE-QUEUE-SAFETY",
+        "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
         "TASKSET-AR-RELEASE-STEWARD",
         "TASKSET-AR-UI-CONSOLE",
         "TASKSET-AR-RSI-PLANNING",
