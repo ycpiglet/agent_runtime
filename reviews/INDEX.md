@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T21:15:40+09:00
-record_count: 1177
+generated_at: 2026-07-30T21:32:32+09:00
+record_count: 1179
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1177` review and evidence records under `reviews/`.
+- Summary: indexed `1179` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1177` files |
+| Reviews covered | pass | `1179` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -650,6 +650,7 @@ record_count: 1177
 | `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md` | `REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan` | md | accepted | n/a | TASK-AR-650 W4 계약 순환 차단 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md` | `REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan` | md | accepted | n/a | TASK-AR-652 준비성 경로·실행 경계 T3 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md` | `REVIEW-2026-07-30-task-ar-652-scope-transition-approval` | planning | record | pass | TASK-AR-652 operability taskset scope transition approval |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan` | md | accepted | n/a | TASK-AR-652 attested-container sealing replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan` | md | accepted | n/a | TASK-AR-652 economic call-provenance replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan` | md | accepted | n/a | TASK-AR-652 final-approval W4b repair replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
@@ -1204,6 +1205,7 @@ record_count: 1177
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-provenance-final` | md | blocked | block | W4b Provenance Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md` | `W4B-2026-07-30-unit-task-ar-652-001-provider-identity` | md | blocked | block | W4b Provider Identity - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval` | md | blocked | block | W4b Receipt Attestation Approval Review |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final` | md | blocked | block | W4b SDK Telemetry Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |

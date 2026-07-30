@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T21:12:46+09:00
+updated_at: 2026-07-30T21:31:06+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -58,6 +58,8 @@ inputs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -147,6 +149,8 @@ review_refs:
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement

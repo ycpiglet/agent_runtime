@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "2ed5719b1cd7b8cacc285668344ee346d2b83ec8433b2f76d5fe05da7e251f77"
+          "value": "78511c8d5a8504f3fe5b5d54242980717309701a5035626ce3839f117671fbee"
         },
         {
           "kind": "sha256",
@@ -1320,10 +1320,20 @@
           "kind": "sha256",
           "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md",
           "value": "c0d90b1538be274440e87ea49f3826e5be1a38849d9eb21d96a282d3622873cb"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md",
+          "value": "3822f9114886fb547ace9f8abfdc9311de195ab6a689bf333d0f227966c40b9b"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md",
+          "value": "28eb31d96b9eabc07232f4f747888b2a53f5fa4d32640692e56c8f89a7e07602"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md",
-      "recorded_at": "2026-07-30T21:15:57+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md",
+      "recorded_at": "2026-07-30T21:32:33+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1539,5 +1549,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T21:15:57+09:00"
+  "updated_at": "2026-07-30T21:32:33+09:00"
 }
