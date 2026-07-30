@@ -396,6 +396,9 @@ def test_record_reply_execution_status_gates_economic_evidence(
         baseline_receipt_id=baseline["receipt_id"],
         receipt_log_path=path,
     )
+    assert bridge.authorize_dispatch(
+        bridge_id=packet["id"]
+    )["authorized"] is True
 
     result = bridge.record_reply(
         bridge_id=packet["id"],
@@ -788,6 +791,115 @@ def test_pre_spawn_authorization_records_idempotent_provider_call_start(
     assert bridge.eval_harness.read_outcomes(
         bridge.eval_harness.EVAL_LOG
     ) == []
+
+
+@pytest.mark.parametrize(
+    ("authorize_baseline", "authorize_actual", "eligible", "expected_reason"),
+    (
+        (
+            False,
+            True,
+            0,
+            "baseline_provider_call_provenance_unverified",
+        ),
+        (
+            True,
+            False,
+            0,
+            "actual_provider_call_provenance_unverified",
+        ),
+        (True, True, 1, None),
+    ),
+    ids=("baseline-not-authorized", "actual-not-authorized", "both-authorized"),
+)
+def test_native_bridge_economic_pair_requires_both_authorizations(
+    tmp_path,
+    monkeypatch,
+    authorize_baseline,
+    authorize_actual,
+    eligible,
+    expected_reason,
+):
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    task_id = "TASK-NATIVE-ECONOMIC-PROVENANCE"
+    workload_id = "workload-native-economic-provenance"
+
+    baseline_packet = bridge.create_dispatch_packet(
+        role_id="reviewer",
+        task_id=task_id,
+        intent="review bounded synthetic workload",
+        workload_id=workload_id,
+        dispatch_ceiling=200,
+        task_token_budget=1_000,
+    )
+    if authorize_baseline:
+        assert bridge.authorize_dispatch(
+            bridge_id=baseline_packet["id"]
+        )["authorized"] is True
+    baseline_result = bridge.record_reply(
+        bridge_id=baseline_packet["id"],
+        verdict="APPROVED",
+        summary="synthetic baseline",
+        observed_provider="native-codex",
+        observed_model=baseline_packet["routing"]["resolved_model"],
+        observed_reasoning_effort=baseline_packet["routing"][
+            "reasoning_effort"
+        ],
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        status="completed",
+        finish_reason="stop",
+    )
+
+    actual_packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id=task_id,
+        intent="implement bounded synthetic workload",
+        workload_id=workload_id,
+        baseline_receipt_id=baseline_result["execution_receipt"][
+            "receipt_id"
+        ],
+        dispatch_ceiling=200,
+        task_token_budget=1_000,
+    )
+    if authorize_actual:
+        assert bridge.authorize_dispatch(
+            bridge_id=actual_packet["id"]
+        )["authorized"] is True
+    bridge.record_reply(
+        bridge_id=actual_packet["id"],
+        verdict="APPROVED",
+        summary="synthetic actual",
+        observed_provider="native-codex",
+        observed_model=actual_packet["routing"]["resolved_model"],
+        observed_reasoning_effort=actual_packet["routing"][
+            "reasoning_effort"
+        ],
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        status="completed",
+        finish_reason="stop",
+    )
+
+    rows = bridge.eval_harness.read_outcomes(
+        bridge.eval_harness.EVAL_LOG
+    )
+    report = bridge.eval_harness.report(rows)
+
+    assert report["token_delta"]["eligible_records"] == eligible
+    assert report["monetary_delta"]["eligible_records"] == eligible
+    if expected_reason is not None:
+        assert report["token_delta"]["exclusion_reasons"][
+            expected_reason
+        ] == 1
+        assert report["monetary_delta"]["exclusion_reasons"][
+            expected_reason
+        ] == 1
 
 
 def test_council_bulk_authorization_is_atomic_before_call_start(

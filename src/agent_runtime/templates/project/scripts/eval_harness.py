@@ -108,6 +108,52 @@ class ReceiptIntegrityError(RuntimeError):
     """The append-only receipt ledger cannot be trusted."""
 
 
+class ValidatedOutcomeRecords(list):
+    """List-compatible outcome rows carrying strict-ledger provenance.
+
+    Reservation and provider-call records stay out of the user-facing rows,
+    but economic reporting still needs their validated relationship.  The
+    context is intentionally attached to this concrete list instance: copying
+    reserved rows into a plain list drops the attestation and therefore fails
+    closed.
+    """
+
+    __slots__ = ("_economic_provenance",)
+
+    def __init__(self, outcomes: list[dict], ledger_records: list[dict]):
+        super().__init__(outcomes)
+        reservations = {
+            str(item.get("dispatch_id") or ""): item
+            for item in ledger_records
+            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+        }
+        settlements = {
+            str(item.get("dispatch_id") or ""): item
+            for item in ledger_records
+            if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+        }
+        call_starts = {
+            str(item.get("dispatch_id") or ""): item
+            for item in ledger_records
+            if item.get("schema") == PROVIDER_CALL_START_SCHEMA
+        }
+        self._economic_provenance = {
+            id(item): {
+                "reservation": reservations.get(
+                    str(item.get("dispatch_id") or "")
+                ),
+                "settlement": settlements.get(
+                    str(item.get("dispatch_id") or "")
+                ),
+                "call_start": call_starts.get(
+                    str(item.get("dispatch_id") or "")
+                ),
+            }
+            for item in self
+            if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+        }
+
+
 @contextmanager
 def _exclusive_log_lock(path: Path):
     """Cross-platform exclusive lock for one append-only JSONL ledger."""
@@ -497,6 +543,61 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
                 f"dispatch_id={dispatch_id}: {path}"
             )
 
+    derived_fields = (
+        "budget_reservation_id",
+        "budget_no_provider_settlement_id",
+        "budget_provider_call_start_id",
+        "budget_reservation_status",
+        "budget_settlement_basis",
+    )
+    for dispatch_id, receipt in receipts.items():
+        reservation = reservations.get(dispatch_id)
+        settlement = settlements.get(dispatch_id)
+        call_start = call_starts.get(dispatch_id)
+        if reservation is None and not any(
+            field in receipt for field in derived_fields
+        ):
+            # Explicit compatibility for execution receipts written before
+            # reservation-derived fields existed.
+            continue
+        expected_reservation_id = (
+            reservation.get("reservation_id") if reservation else None
+        )
+        expected_settlement_id = (
+            settlement.get("settlement_id") if settlement else None
+        )
+        expected_call_start_id = (
+            call_start.get("call_start_id") if call_start else None
+        )
+        receipt_for_derivation = {
+            **receipt,
+            "budget_reservation_id": expected_reservation_id,
+            "budget_no_provider_settlement_id": expected_settlement_id,
+            "budget_provider_call_start_id": expected_call_start_id,
+        }
+        expected = {
+            "budget_reservation_id": expected_reservation_id,
+            "budget_no_provider_settlement_id": expected_settlement_id,
+            "budget_provider_call_start_id": expected_call_start_id,
+            "budget_reservation_status": (
+                "settled"
+                if reservation
+                else "not_required_or_unreserved"
+            ),
+            "budget_settlement_basis": _budget_settlement_basis(
+                receipt_for_derivation,
+                reservation,
+                settlement,
+                call_start,
+            ),
+        }
+        for field, expected_value in expected.items():
+            if receipt.get(field) != expected_value:
+                raise ReceiptIntegrityError(
+                    f"execution receipt derived {field} mismatch for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+
 
 def _strict_records(path: Path) -> list[dict]:
     path = Path(path)
@@ -763,6 +864,84 @@ def _budget_settlement_basis(
     ):
         return "observed_usage"
     return "conservative_ceiling"
+
+
+def _economic_provider_call_provenance_verified(
+    record: dict,
+    provenance_index: dict[int, dict],
+) -> bool:
+    """Verify reserved economic evidence against strict-ledger context.
+
+    Truly unreserved legacy rows remain compatible.  Any row that claims a
+    reservation-derived state without context from ``read_outcomes`` fails
+    closed.
+    """
+    entry = provenance_index.get(id(record))
+    claims_reserved_state = (
+        bool(str(record.get("budget_reservation_id") or "").strip())
+        or bool(
+            str(
+                record.get("budget_no_provider_settlement_id") or ""
+            ).strip()
+        )
+        or bool(
+            str(record.get("budget_provider_call_start_id") or "").strip()
+        )
+        or str(record.get("budget_reservation_status") or "").strip()
+        == "settled"
+        or str(record.get("budget_settlement_basis") or "").strip()
+        in {
+            "pre_provider_skip",
+            "observed_usage",
+            "conservative_ceiling",
+        }
+    )
+    if entry is None:
+        return not claims_reserved_state
+
+    reservation = entry.get("reservation")
+    settlement = entry.get("settlement")
+    call_start = entry.get("call_start")
+    if reservation is None:
+        return not claims_reserved_state
+
+    expected_reservation_id = reservation.get("reservation_id")
+    expected_settlement_id = (
+        settlement.get("settlement_id") if settlement else None
+    )
+    expected_call_start_id = (
+        call_start.get("call_start_id") if call_start else None
+    )
+    record_for_derivation = {
+        **record,
+        "budget_reservation_id": expected_reservation_id,
+        "budget_no_provider_settlement_id": expected_settlement_id,
+        "budget_provider_call_start_id": expected_call_start_id,
+    }
+    expected_basis = _budget_settlement_basis(
+        record_for_derivation,
+        reservation,
+        settlement,
+        call_start,
+    )
+    if (
+        record.get("budget_reservation_id") != expected_reservation_id
+        or record.get("budget_no_provider_settlement_id")
+        != expected_settlement_id
+        or record.get("budget_provider_call_start_id")
+        != expected_call_start_id
+        or record.get("budget_reservation_status") != "settled"
+        or record.get("budget_settlement_basis") != expected_basis
+    ):
+        return False
+    return (
+        expected_basis == "observed_usage"
+        and _verified_provider_observed_usage(
+            record,
+            reservation,
+            call_start,
+        )
+    )
 
 
 def _safe_record_id(value: str, label: str) -> str:
@@ -2119,6 +2298,26 @@ def _finalize_execution_receipt(
         ),
         None,
     )
+    baseline_reservation = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+            and str(item.get("dispatch_id") or "")
+            == str((baseline or {}).get("dispatch_id") or "")
+        ),
+        None,
+    )
+    baseline_call_start = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == PROVIDER_CALL_START_SCHEMA
+            and str(item.get("dispatch_id") or "")
+            == str((baseline or {}).get("dispatch_id") or "")
+        ),
+        None,
+    )
     def _clear_unverified_baseline() -> None:
         rec["baseline_model"] = None
         rec["baseline_reasoning_effort"] = None
@@ -2154,6 +2353,19 @@ def _finalize_execution_receipt(
     ):
         rec["baseline_reference_status"] = "invalid"
         rec["baseline_reference_reason"] = "baseline_not_observed"
+        _clear_unverified_baseline()
+    elif (
+        baseline_reservation is not None
+        and not _verified_provider_observed_usage(
+            baseline,
+            baseline_reservation,
+            baseline_call_start,
+        )
+    ):
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = (
+            "baseline_provider_call_provenance_unverified"
+        )
         _clear_unverified_baseline()
     elif not _route_observation_complete(baseline):
         rec["baseline_reference_status"] = "invalid"
@@ -2365,7 +2577,7 @@ def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
     ledger_path = Path(path)
     with _exclusive_log_lock(ledger_path):
         records = _strict_records(ledger_path)
-    return [
+    outcomes = [
         item
         for item in records
         if item.get("schema")
@@ -2375,6 +2587,7 @@ def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
             PROVIDER_CALL_START_SCHEMA,
         }
     ]
+    return ValidatedOutcomeRecords(outcomes, records)
 
 
 # ---------- objective judge ----------
@@ -2402,6 +2615,7 @@ def judge_outcome(rec: dict) -> str:
 def _verified_baseline_receipt(
     rec: dict,
     receipt_index: dict[str, dict],
+    provenance_index: dict[int, dict],
 ) -> tuple[dict | None, str | None]:
     if rec.get("schema") != EXECUTION_RECEIPT_SCHEMA:
         return None, "immutable_execution_receipt_required"
@@ -2426,6 +2640,11 @@ def _verified_baseline_receipt(
         return None, "baseline_observation_unavailable"
     if not _route_observation_complete(baseline):
         return None, "baseline_reasoning_observation_unavailable"
+    if not _economic_provider_call_provenance_verified(
+        baseline,
+        provenance_index,
+    ):
+        return None, "baseline_provider_call_provenance_unverified"
     if rec.get("baseline_reference_status") != "verified":
         return None, "baseline_reference_unverified"
     return baseline, None
@@ -2434,15 +2653,22 @@ def _verified_baseline_receipt(
 def _routing_evidence_exclusion_reason(
     rec: dict,
     receipt_index: dict[str, dict],
+    provenance_index: dict[int, dict],
 ) -> str | None:
     baseline, baseline_reason = _verified_baseline_receipt(
         rec,
         receipt_index,
+        provenance_index,
     )
     if baseline_reason:
         return baseline_reason
     if not _execution_succeeded(rec):
         return "actual_execution_not_successful"
+    if not _economic_provider_call_provenance_verified(
+        rec,
+        provenance_index,
+    ):
+        return "actual_provider_call_provenance_unverified"
     if not str(rec.get("observed_model") or "").strip():
         return "observed_model_unavailable"
     if not _route_observation_complete(rec):
@@ -2478,15 +2704,24 @@ def _routing_evidence_exclusion_reason(
 def _token_delta_exclusion_reason(
     rec: dict,
     receipt_index: dict[str, dict],
+    provenance_index: dict[int, dict],
 ) -> str | None:
-    routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
+    routing_reason = _routing_evidence_exclusion_reason(
+        rec,
+        receipt_index,
+        provenance_index,
+    )
     if routing_reason:
         return routing_reason
     if not _has_authoritative_token_usage(rec):
         return "actual_token_usage_unavailable"
     if int(rec.get("tokens", 0) or 0) <= 0:
         return "actual_token_usage_not_positive"
-    baseline, _ = _verified_baseline_receipt(rec, receipt_index)
+    baseline, _ = _verified_baseline_receipt(
+        rec,
+        receipt_index,
+        provenance_index,
+    )
     if baseline is None or int(baseline.get("tokens", 0) or 0) <= 0:
         return "baseline_token_usage_unavailable"
     return None
@@ -2495,13 +2730,22 @@ def _token_delta_exclusion_reason(
 def _monetary_delta_exclusion_reason(
     rec: dict,
     receipt_index: dict[str, dict],
+    provenance_index: dict[int, dict],
 ) -> str | None:
-    routing_reason = _routing_evidence_exclusion_reason(rec, receipt_index)
+    routing_reason = _routing_evidence_exclusion_reason(
+        rec,
+        receipt_index,
+        provenance_index,
+    )
     if routing_reason:
         return routing_reason
     if not _has_authoritative_billed_cost(rec):
         return "actual_billed_cost_unavailable"
-    baseline, _ = _verified_baseline_receipt(rec, receipt_index)
+    baseline, _ = _verified_baseline_receipt(
+        rec,
+        receipt_index,
+        provenance_index,
+    )
     if baseline is None:
         return "baseline_billed_cost_unavailable"
     if (
@@ -2555,6 +2799,7 @@ def _economic_claim_candidates(records: list[dict]) -> list[dict]:
 
 def report(records: list[dict] | None = None) -> dict:
     records = read_outcomes() if records is None else records
+    provenance_index = getattr(records, "_economic_provenance", {})
     receipt_index = {
         str(record.get("receipt_id")): record
         for record in records
@@ -2589,6 +2834,7 @@ def report(records: list[dict] | None = None) -> dict:
     token_reason = lambda record: _token_delta_exclusion_reason(  # noqa: E731
         record,
         receipt_index,
+        provenance_index,
     )
     economic_candidates = _economic_claim_candidates(records)
     delta_records = [
@@ -2627,6 +2873,7 @@ def report(records: list[dict] | None = None) -> dict:
     monetary_reason = lambda record: _monetary_delta_exclusion_reason(  # noqa: E731
         record,
         receipt_index,
+        provenance_index,
     )
     monetary_records = [
         r for r in economic_candidates if monetary_reason(r) is None

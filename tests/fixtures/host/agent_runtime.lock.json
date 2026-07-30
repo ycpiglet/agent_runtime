@@ -147,7 +147,7 @@
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
       "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
       "scripts/env_check.py": "sha256:4e556e559a149f63c62af4cd983817243f58938f2c64a5ce03d1196b3fcd0085",
-      "scripts/eval_harness.py": "sha256:84bf893cefe9f310d27242034ef01a362b5bae7b4910ae490fb3e6e3696d36ef",
+      "scripts/eval_harness.py": "sha256:cde6b3b941dedbc5719c746ecb0bbb54c6f68c941a2f0832f614c2966ffd2134",
       "scripts/evidence_index_generator.py": "sha256:9b418f03cafcdf27f6e974f6d432b7ed71ce8c0c6440f9e6a3de6304562b7fbf",
       "scripts/footprint_conflict_gate.py": "sha256:c2a87e2ee0c96ba08d0f1babfc82f4f7ea4d3e1e8d4d9c8364fed1ff130ecc8b",
       "scripts/fs_watch.py": "sha256:ef5c925307270c7c451734602339213d47111645413e033f5f54fed57d6f9fd1",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:f82eccad2aa16f8342bc6877cf15f952f9f3715cf75fd1513bf61e4a1e03b60f",
+    "template_digest": "sha256:2151f0b7db5472f2c903abd66500fab831a21c3850a0255ce5fbc51d818d4c07",
     "template_files": 251
   },
   "profiles": [

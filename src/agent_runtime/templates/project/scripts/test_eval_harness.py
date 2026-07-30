@@ -145,6 +145,157 @@ def _run_fresh_budget_process(
     return json.loads(completed.stdout)
 
 
+_FRESH_ECONOMIC_REPORT_PROCESS = r"""
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+module_path = Path(sys.argv[1])
+ledger_path = Path(sys.argv[2])
+spec = importlib.util.spec_from_file_location("_fresh_economic_harness", module_path)
+eh = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = eh
+spec.loader.exec_module(eh)
+report = eh.report(eh.read_outcomes(ledger_path))
+print(json.dumps({
+    "token_eligible": report["token_delta"]["eligible_records"],
+    "money_eligible": report["monetary_delta"]["eligible_records"],
+    "token_reasons": report["token_delta"]["exclusion_reasons"],
+    "money_reasons": report["monetary_delta"]["exclusion_reasons"],
+}, sort_keys=True))
+"""
+
+
+def _run_fresh_economic_report(
+    ledger_path: Path,
+    *,
+    check: bool = True,
+) -> dict | subprocess.CompletedProcess:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _FRESH_ECONOMIC_REPORT_PROCESS,
+            str(ROOT / "scripts" / "eval_harness.py"),
+            str(ledger_path),
+        ],
+        check=check,
+        capture_output=True,
+        text=True,
+    )
+    if not check:
+        return completed
+    return json.loads(completed.stdout)
+
+
+def _record_reserved_economic_pair(
+    tmp_path: Path,
+    *,
+    prefix: str,
+    mark_baseline: bool,
+    mark_actual: bool,
+    actual_status: str = "completed",
+) -> tuple[Path, dict, dict]:
+    path = tmp_path / f"{prefix}-receipts.jsonl"
+    task_id = f"TASK-ECONOMIC-{prefix.upper()}"
+    workload_id = f"workload-economic-{prefix}"
+
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id=task_id,
+        claim_id=None,
+        dispatch_id=f"{prefix}-baseline",
+        dispatch_ceiling=200,
+        task_token_budget=1_000,
+        source="auto_dispatch",
+    )
+    if mark_baseline:
+        eh.record_provider_call_start(
+            dispatch_id=f"{prefix}-baseline",
+            task_id=task_id,
+            source="auto_dispatch_provider_run",
+            provider="native-codex",
+            execution_surface="provider_worker",
+            path=path,
+            root=tmp_path,
+        )
+    baseline = eh.record_execution_receipt(
+        dispatch_id=f"{prefix}-baseline",
+        task_id=task_id,
+        workload_id=workload_id,
+        provider="native-codex",
+        execution_surface="provider_worker",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        finish_reason="stop",
+        path=path,
+    )
+
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id=task_id,
+        claim_id=None,
+        dispatch_id=f"{prefix}-actual",
+        dispatch_ceiling=200,
+        task_token_budget=1_000,
+        source="auto_dispatch",
+    )
+    if mark_actual:
+        eh.record_provider_call_start(
+            dispatch_id=f"{prefix}-actual",
+            task_id=task_id,
+            source="auto_dispatch_provider_run",
+            provider="native-codex",
+            execution_surface="provider_worker",
+            path=path,
+            root=tmp_path,
+        )
+    actual_completed = actual_status == "completed"
+    actual = eh.record_execution_receipt(
+        dispatch_id=f"{prefix}-actual",
+        task_id=task_id,
+        workload_id=workload_id,
+        provider="native-codex",
+        execution_surface="provider_worker",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10 if actual_completed else 0,
+        tokens_out=5 if actual_completed else 0,
+        billed_cost=0.02 if actual_completed else None,
+        currency="USD" if actual_completed else None,
+        source="provider_completion",
+        status=actual_status,
+        finish_reason="stop" if actual_completed else actual_status,
+        error=(
+            None
+            if actual_completed
+            else "synthetic provider call did not complete"
+        ),
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+    return path, baseline, actual
+
+
 def _effective_delta_record(**overrides):
     rec = {
         "grade": "Low",
@@ -1946,7 +2097,7 @@ def test_no_call_settlement_detects_reservation_provenance_tampering(
         )
 
 
-def test_forged_stored_settlement_basis_does_not_release_generic_receipt(
+def test_forged_stored_settlement_basis_is_a_ledger_integrity_failure(
     tmp_path,
 ):
     path = tmp_path / "receipts.jsonl"
@@ -1981,13 +2132,14 @@ def test_forged_stored_settlement_basis_does_not_release_generic_receipt(
         encoding="utf-8",
     )
 
-    usage = eh.cumulative_usage(
-        path=path,
-        task_id="TASK-FORGED-SETTLEMENT-BASIS",
-    )
-    assert usage["task"]["pre_provider_releases"] == 0
-    assert usage["task"]["conservative_unobserved_tokens"] == 10
-    assert usage["task"]["committed_tokens"] == 10
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="derived budget_settlement_basis mismatch",
+    ):
+        eh.cumulative_usage(
+            path=path,
+            task_id="TASK-FORGED-SETTLEMENT-BASIS",
+        )
 
 
 @pytest.mark.parametrize(
@@ -2468,6 +2620,225 @@ def test_provider_call_start_rejects_single_field_tampering(
             path=path,
             task_id="TASK-MARKER-FIELD-TAMPER",
         )
+
+
+@pytest.mark.parametrize(
+    ("mark_baseline", "mark_actual", "expected_reason"),
+    (
+        (False, False, "baseline_provider_call_provenance_unverified"),
+        (False, True, "baseline_provider_call_provenance_unverified"),
+        (True, False, "actual_provider_call_provenance_unverified"),
+    ),
+    ids=("both-missing", "baseline-missing", "actual-missing"),
+)
+def test_reserved_economic_pair_requires_both_call_markers_after_restart(
+    tmp_path,
+    mark_baseline,
+    mark_actual,
+    expected_reason,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix=f"missing-{mark_baseline}-{mark_actual}",
+        mark_baseline=mark_baseline,
+        mark_actual=mark_actual,
+    )
+
+    result = _run_fresh_economic_report(path)
+
+    assert result["token_eligible"] == 0
+    assert result["money_eligible"] == 0
+    assert result["token_reasons"][expected_reason] == 1
+    assert result["money_reasons"][expected_reason] == 1
+
+
+def test_reserved_economic_pair_with_both_markers_survives_restart(tmp_path):
+    path, baseline, actual = _record_reserved_economic_pair(
+        tmp_path,
+        prefix="both-marked",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+
+    result = _run_fresh_economic_report(path)
+
+    assert baseline["budget_settlement_basis"] == "observed_usage"
+    assert actual["budget_settlement_basis"] == "observed_usage"
+    assert result["token_eligible"] == 1
+    assert result["money_eligible"] == 1
+
+
+def test_reserved_skipped_result_with_marker_is_ineligible_after_restart(
+    tmp_path,
+):
+    path, _, actual = _record_reserved_economic_pair(
+        tmp_path,
+        prefix="marked-skipped-economic",
+        mark_baseline=True,
+        mark_actual=True,
+        actual_status="skipped",
+    )
+
+    result = _run_fresh_economic_report(path)
+
+    assert actual["budget_settlement_basis"] == "conservative_ceiling"
+    assert result["token_eligible"] == 0
+    assert result["money_eligible"] == 0
+    assert result["token_reasons"]["actual_execution_not_successful"] == 1
+
+
+def test_reserved_rows_copied_without_validated_ledger_context_fail_closed(
+    tmp_path,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix="copied-context",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    validated_rows = eh.read_outcomes(path)
+
+    validated = eh.report(validated_rows)
+    copied = eh.report(list(validated_rows))
+
+    assert validated["token_delta"]["eligible_records"] == 1
+    assert validated["monetary_delta"]["eligible_records"] == 1
+    assert copied["token_delta"]["eligible_records"] == 0
+    assert copied["monetary_delta"]["eligible_records"] == 0
+    assert (
+        copied["token_delta"]["exclusion_reasons"][
+            "baseline_provider_call_provenance_unverified"
+        ]
+        == 1
+    )
+
+
+def test_unreserved_legacy_pair_remains_economically_compatible():
+    baseline, actual = _verified_delta_records(
+        "unreserved-compatibility",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+
+    result = eh.report([baseline, actual])
+
+    assert result["token_delta"]["eligible_records"] == 1
+    assert result["monetary_delta"]["eligible_records"] == 1
+
+
+@pytest.mark.parametrize(
+    ("field", "tampered"),
+    (
+        ("budget_reservation_id", "reservation-forged"),
+        ("budget_reservation_status", "not_required_or_unreserved"),
+        ("budget_settlement_basis", "conservative_ceiling"),
+        ("budget_provider_call_start_id", "provider-call-start-forged"),
+    ),
+)
+def test_fresh_process_rejects_forged_reserved_receipt_derivation(
+    tmp_path,
+    field,
+    tampered,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix=f"forged-{field}",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    actual = next(
+        row
+        for row in raw
+        if row.get("schema") == eh.EXECUTION_RECEIPT_SCHEMA
+        and str(row.get("dispatch_id") or "").endswith("-actual")
+    )
+    actual[field] = tampered
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+
+    completed = _run_fresh_economic_report(path, check=False)
+
+    assert completed.returncode != 0
+    assert "ReceiptIntegrityError" in completed.stderr
+
+
+@pytest.mark.parametrize(
+    ("mutation", "field", "tampered"),
+    (
+        ("orphan", None, None),
+        ("field", "reservation_id", "reservation-mismatched"),
+        ("field", "budget_authority_fingerprint", "authority-mismatched"),
+        ("field", "provider", "wrong-provider"),
+        ("field", "execution_surface", "wrong-surface"),
+        ("field", "source", "agent_worker_provider_run"),
+    ),
+    ids=(
+        "orphan-marker",
+        "reservation-mismatch",
+        "authority-mismatch",
+        "wrong-provider",
+        "wrong-surface",
+        "wrong-transition",
+    ),
+)
+def test_fresh_process_rejects_invalid_economic_call_marker(
+    tmp_path,
+    mutation,
+    field,
+    tampered,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix=f"invalid-marker-{field or mutation}",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    actual_dispatch = next(
+        row["dispatch_id"]
+        for row in raw
+        if row.get("schema") == eh.EXECUTION_RECEIPT_SCHEMA
+        and str(row.get("dispatch_id") or "").endswith("-actual")
+    )
+    if mutation == "orphan":
+        raw = [
+            row
+            for row in raw
+            if not (
+                row.get("schema") == eh.BUDGET_RESERVATION_SCHEMA
+                and row.get("dispatch_id") == actual_dispatch
+            )
+        ]
+    else:
+        marker = next(
+            row
+            for row in raw
+            if row.get("schema") == eh.PROVIDER_CALL_START_SCHEMA
+            and row.get("dispatch_id") == actual_dispatch
+        )
+        marker[field] = tampered
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+
+    completed = _run_fresh_economic_report(path, check=False)
+
+    assert completed.returncode != 0
+    assert "ReceiptIntegrityError" in completed.stderr
 
 
 def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
