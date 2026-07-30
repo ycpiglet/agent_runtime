@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "3a242f93ebdd4131febf760b95ae7e97465987574db13fc1b4c69975ccb97e03"
+          "value": "2ed5719b1cd7b8cacc285668344ee346d2b83ec8433b2f76d5fe05da7e251f77"
         },
         {
           "kind": "sha256",
@@ -1310,10 +1310,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md",
           "value": "f9a978b9998d7fd30c0822f2dc3067f66f66d87961526dffed6d32b1130d5044"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json",
+          "value": "d7ef68a05bb3cae9e5877ffc59a657c76bba92ea86dadd4a864dcc1b2085cef9"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md",
+          "value": "c0d90b1538be274440e87ea49f3826e5be1a38849d9eb21d96a282d3622873cb"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md",
-      "recorded_at": "2026-07-30T21:09:35+09:00",
+      "recorded_at": "2026-07-30T21:15:57+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1539,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T21:09:35+09:00"
+  "updated_at": "2026-07-30T21:15:57+09:00"
 }
