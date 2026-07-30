@@ -91,7 +91,9 @@ blob이 byte-for-byte 같아야 한다. receipt는 baseline commit과 authority
 blob OID를 저장하고, 이후 검증은 변경 가능한 현재 권한 파일이 아니라 그
 고정된 Git object를 재생한다. commit되지 않은 승인, 현재 branch에서
 도달할 수 없는 commit, source bytes/count/plan이 맞지 않는 commit은
-fail-closed다.
+fail-closed다. repository-local replace ref나 graft가 존재하는 Git audit
+view도 거부하며, object 재생은 replacement와 lazy fetch를 비활성화한
+로컬 읽기만 사용한다.
 
 authorization은 파일명만 TASK처럼 보이는 문서가 아니다. projection을
 생성할 때부터 활성 canonical TASK/UNIT-TASK여야 하며, frontmatter에 아래
@@ -101,7 +103,10 @@ SHA-256이고 plan digest는 projection이 생성한 값을 그대로 사용한�
 TASK의 `id`/`work_id`는 파일 stem과 같아야 한다. UNIT-TASK의
 `work_id`/`unit_id`는 파일 stem과, `task_id`/`parent_id`는 상위 디렉터리의
 TASK ID와 모두 같아야 한다. 승인자 identity는 비밀이 아닌 명시적 문자열만
-허용하며 null/boolean/숫자/collection/placeholder 값은 권한이 아니다.
+허용한다. ASCII 영문자로 시작하고 이후에는 영숫자와
+`._@/+:-`만 쓰는 최대 160자 token이어야 한다. null/boolean/숫자/date,
+YAML implicit scalar, collection, escape sequence, placeholder 값은 권한이
+아니다. owner decision의 `approved_by`에도 같은 규칙을 적용한다.
 
 ```yaml
 scribe_authorization: cleanup
@@ -117,6 +122,9 @@ no-touch 예외는 TASK authorization으로 대신할 수 없다. `reviews/` 바
 authorization의 `work_id`/ref, 같은 source/plan digest, `approved_by`,
 `approver_role: owner`, timezone이 있는 `decided_at`을 모두 결합해야 한다.
 관련 없는 REVIEW/AUDIT/RETRO 파일이나 내용 없는 문서는 권한이 아니다.
+`no_touch`는 hot count를 유지한다는 뜻만이 아니라 모든 source binding
+(path, presence, digest, hot count)이 baseline과 정확히 같다는 뜻이다.
+같은 개수의 내용 교체나 항목 추가도 no-touch receipt로 기록할 수 없다.
 
 ### 2. cadence backstop
 
@@ -177,6 +185,11 @@ Cleanup receipt:
 Generated cleanup proposal은 실행 명령이 아니다. 후보는 오래되어 hot
 selection에서 밀린 항목과 명시적으로 완료된 항목으로 제한하며, active
 identity와 canonical/no-touch record reference는 항상 제외한다.
+reduction receipt는 bound plan에 들어 있는 baseline 후보 행만
+삭제·교체할 수 있다. Markdown의 다른 nonblank 행은 내용과 순서를
+보존해야 하고, JSON은 후보가 아닌 entry와 collection 바깥 구조를
+보존해야 한다. hot count만 줄이거나 receipt digest를 다시 계산해도 이
+행 단위 검증을 우회하지 못한다.
 
 ## Operating Rules
 

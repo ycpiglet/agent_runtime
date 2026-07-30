@@ -115,6 +115,9 @@ _ACTIVE_WORK_STATUSES = {
 _CLEANUP_AUTHORIZED_ROLES = {"lead-engineer", "doc-steward", "owner"}
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _GIT_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
+_AUTHORITY_IDENTITY_RE = re.compile(
+    r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$"
+)
 _TASK_AUTHORIZATION_FIELDS = {
     "schema_version",
     "id",
@@ -603,10 +606,13 @@ def _git_environment() -> dict[str, str]:
         if not key.startswith("GIT_")
     }
     environment["GIT_OPTIONAL_LOCKS"] = "0"
+    environment["GIT_NO_REPLACE_OBJECTS"] = "1"
+    environment["GIT_NO_LAZY_FETCH"] = "1"
+    environment["GIT_TERMINAL_PROMPT"] = "0"
     return environment
 
 
-def _git_capture(
+def _git_capture_unchecked(
     root: Path,
     *arguments: str,
 ) -> bytes:
@@ -628,6 +634,60 @@ def _git_capture(
             "cleanup receipt requires an available local Git audit anchor"
         )
     return result.stdout
+
+
+def _validate_git_audit_view(root: Path) -> None:
+    replacements = _git_capture_unchecked(
+        root,
+        "for-each-ref",
+        "--format=%(refname)",
+        "refs/replace",
+    )
+    if replacements.strip():
+        raise StateProjectionError(
+            "cleanup Git audit view must not contain replacement refs"
+        )
+    try:
+        graft_output = _git_capture_unchecked(
+            root,
+            "rev-parse",
+            "--git-path",
+            "info/grafts",
+        ).decode("utf-8", "strict")
+    except UnicodeError as exc:
+        raise StateProjectionError(
+            "cleanup Git audit view has an invalid graft path"
+        ) from exc
+    graft_rows = graft_output.splitlines()
+    if len(graft_rows) != 1 or not graft_rows[0]:
+        raise StateProjectionError(
+            "cleanup Git audit view has an invalid graft path"
+        )
+    graft_path = Path(graft_rows[0])
+    if not graft_path.is_absolute():
+        graft_path = root / graft_path
+    try:
+        graft_present = graft_path.is_symlink() or graft_path.exists()
+        if graft_present and (
+            graft_path.is_symlink()
+            or not graft_path.is_file()
+            or graft_path.stat().st_size > 0
+        ):
+            raise StateProjectionError(
+                "cleanup Git audit view must not contain grafts"
+            )
+    except OSError as exc:
+        raise StateProjectionError(
+            "cleanup Git audit view cannot validate graft state"
+        ) from exc
+
+
+def _git_capture(
+    root: Path,
+    *arguments: str,
+) -> bytes:
+    _validate_git_audit_view(root)
+    return _git_capture_unchecked(root, *arguments)
 
 
 def _git_commit_for_path(root: Path, relative: str) -> str:
@@ -653,6 +713,7 @@ def _git_is_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
         or _GIT_OID_RE.fullmatch(descendant) is None
     ):
         raise StateProjectionError("cleanup audit anchor ancestry is invalid")
+    _validate_git_audit_view(root)
     try:
         result = subprocess.run(
             ["git", "merge-base", "--is-ancestor", ancestor, descendant],
@@ -1586,6 +1647,189 @@ def _validate_baseline_audit_anchor(
         )
 
 
+def _json_cleanup_view(
+    raw: bytes,
+    *,
+    path: str,
+) -> tuple[str, object, list[str]]:
+    try:
+        payload = json.loads(raw.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise StateProjectionError(
+            f"cleanup source delta cannot parse JSON source {path}"
+        ) from exc
+    if isinstance(payload, list):
+        entries = payload
+        collection = "<top-level>"
+        context: object = None
+    elif isinstance(payload, dict):
+        collection = ""
+        entries = []
+        for key in _JSON_LIST_KEYS:
+            value = payload.get(key)
+            if isinstance(value, list):
+                collection = key
+                entries = value
+                break
+        if not collection:
+            raise StateProjectionError(
+                f"cleanup source delta cannot locate JSON collection {path}"
+            )
+        context = {
+            key: value
+            for key, value in payload.items()
+            if key != collection
+        }
+    else:
+        raise StateProjectionError(
+            f"cleanup source delta cannot locate JSON collection {path}"
+        )
+    rows = [
+        json.dumps(
+            entry,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        for entry in entries
+    ]
+    return collection, context, rows
+
+
+def _is_ordered_subsequence(
+    required: list[str],
+    available: list[str],
+) -> bool:
+    required_index = 0
+    for row in available:
+        if (
+            required_index < len(required)
+            and row == required[required_index]
+        ):
+            required_index += 1
+    return required_index == len(required)
+
+
+def _validate_cleanup_delta(
+    root: Path,
+    *,
+    commit: str,
+    before_sources: list[dict[str, Any]],
+    after_sources: list[dict[str, Any]],
+    cleanup_plan: dict[str, Any],
+) -> None:
+    after_by_identity = {
+        (source["adapter"], source["path"]): source
+        for source in after_sources
+    }
+    allowed_orders: dict[tuple[str, str], set[int]] = {}
+    for candidate in cleanup_plan.get("candidates", []):
+        identity = (candidate["adapter"], candidate["path"])
+        allowed_orders.setdefault(identity, set()).add(
+            int(candidate["source_order"])
+        )
+
+    for before_source in before_sources:
+        identity = (
+            before_source["adapter"],
+            before_source["path"],
+        )
+        after_source = after_by_identity.get(identity)
+        path = str(before_source["path"])
+        if (
+            after_source is None
+            or before_source["present"] != after_source["present"]
+        ):
+            raise StateProjectionError(
+                f"cleanup source delta changed identity outside the bound "
+                f"cleanup plan: {path}"
+            )
+        if not before_source["present"]:
+            continue
+        if before_source["digest"] == after_source["digest"]:
+            continue
+        allowed = allowed_orders.get(identity, set())
+        if not allowed:
+            raise StateProjectionError(
+                f"cleanup source delta changes rows outside the bound "
+                f"cleanup plan: {path}"
+            )
+
+        anchored = _git_blob_at(
+            root,
+            commit,
+            path,
+            limit=MAX_SOURCE_BYTES,
+            required=True,
+        )
+        assert anchored is not None
+        _oid, before_raw = anchored
+        try:
+            target = _safe_target(root, path)
+            if (
+                _symlink_ancestor(root, target) is not None
+                or not target.is_file()
+                or target.stat().st_size > MAX_SOURCE_BYTES
+            ):
+                raise StateProjectionError(
+                    f"cleanup source delta cannot safely read {path}"
+                )
+            after_raw = target.read_bytes()
+        except OSError as exc:
+            raise StateProjectionError(
+                f"cleanup source delta cannot safely read {path}"
+            ) from exc
+        if (
+            len(after_raw) > MAX_SOURCE_BYTES
+            or _source_digest(after_raw) != after_source["digest"]
+        ):
+            raise StateProjectionError(
+                f"cleanup source delta changed while validating {path}"
+            )
+
+        if Path(path).suffix.lower() == ".json":
+            before_collection, before_context, before_rows = _json_cleanup_view(
+                before_raw,
+                path=path,
+            )
+            after_collection, after_context, after_rows = _json_cleanup_view(
+                after_raw,
+                path=path,
+            )
+            if (
+                before_collection != after_collection
+                or before_context != after_context
+            ):
+                raise StateProjectionError(
+                    f"cleanup source delta changes JSON structure outside the "
+                    f"bound cleanup plan: {path}"
+                )
+            protected_rows = [
+                row
+                for index, row in enumerate(before_rows)
+                if index not in allowed
+            ]
+        else:
+            try:
+                before_rows = before_raw.decode("utf-8").splitlines()
+                after_rows = after_raw.decode("utf-8").splitlines()
+            except UnicodeError as exc:
+                raise StateProjectionError(
+                    f"cleanup source delta cannot decode Markdown source {path}"
+                ) from exc
+            protected_rows = [
+                row
+                for index, row in enumerate(before_rows)
+                if index not in allowed and row.strip()
+            ]
+
+        if not _is_ordered_subsequence(protected_rows, after_rows):
+            raise StateProjectionError(
+                f"cleanup source delta changes rows outside the bound "
+                f"cleanup plan: {path}"
+            )
+
+
 def _validated_projection_baseline(
     payload: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], int, dict[str, Any], str]:
@@ -1687,6 +1931,7 @@ def _authority_identity(value: object) -> bool:
         "-",
         "~",
         "false",
+        "n",
         "n/a",
         "na",
         "nil",
@@ -1698,20 +1943,13 @@ def _authority_identity(value: object) -> bool:
         "tbd",
         "true",
         "unknown",
+        "y",
         "yes",
     }
     return (
         bool(text)
-        and len(text) <= 160
         and text.casefold() not in placeholders
-        and re.fullmatch(
-            r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?",
-            text,
-        )
-        is None
-        and text[0] not in "[{&*!|>@`?"
-        and redact_text(text, limit=160) == text
-        and not any(character in text for character in "\r\n")
+        and _AUTHORITY_IDENTITY_RE.fullmatch(text) is not None
     )
 
 
@@ -1838,6 +2076,8 @@ def _validate_task_authorization(
             require_live_match=require_live_match,
         )
     except StateProjectionError as exc:
+        if str(exc).startswith("cleanup Git audit view"):
+            raise
         raise StateProjectionError(
             "cleanup receipt requires an existing bound TASK authorization"
         ) from exc
@@ -1936,6 +2176,8 @@ def _validate_owner_decision(
         json.JSONDecodeError,
         StateProjectionError,
     ) as exc:
+        if str(exc).startswith("cleanup Git audit view"):
+            raise
         raise StateProjectionError(
             "cleanup receipt requires a bound owner no-touch decision"
         ) from exc
@@ -1986,6 +2228,12 @@ def _cleanup_outcome(
             ],
         )
     errors: list[str] = []
+    git_audit_view_valid = True
+    try:
+        _validate_git_audit_view(root)
+    except StateProjectionError as exc:
+        errors.append(str(exc))
+        git_audit_view_valid = False
     if projection_status != "fresh":
         errors.append("projection is not fresh")
     if set(receipt) != _CLEANUP_RECEIPT_FIELDS:
@@ -2116,6 +2364,22 @@ def _cleanup_outcome(
     if outcome == "reduction":
         if before_hot <= hot_count:
             errors.append("reduction receipt did not reduce hot count")
+        if (
+            git_audit_view_valid
+            and anchor_fields_valid
+            and before_sources
+            and before_plan
+        ):
+            try:
+                _validate_cleanup_delta(
+                    root,
+                    commit=baseline_commit,
+                    before_sources=before_sources,
+                    after_sources=_receipt_sources(sources),
+                    cleanup_plan=before_plan,
+                )
+            except StateProjectionError as exc:
+                errors.append(str(exc))
         if any(
             receipt.get(field) is not None
             for field in (
@@ -2129,6 +2393,13 @@ def _cleanup_outcome(
             )
         status = "verified_reduction"
     elif outcome == "owner_decision":
+        if (
+            receipt.get("after_sources") != before_sources
+            or hot_count != before_hot
+        ):
+            errors.append(
+                "owner no-touch receipt changed canonical source state"
+            )
         owner_commit = receipt.get("owner_decision_commit")
         owner_blob_oid = receipt.get("owner_decision_blob_oid")
         owner_anchor_valid = (
@@ -2708,12 +2979,26 @@ def record_cleanup(
             active_work=evaluation["active_work"],
         )
 
+    after_sources = _receipt_sources(evaluation["sources"])
     after_hot = evaluation.get("hot_count")
     if not isinstance(after_hot, int):
         raise StateProjectionError("cleanup receipt requires integer hot counts")
-    if after_hot >= before_hot and not owner_decision:
-        raise StateProjectionError(
-            "cleanup must reduce hot count or cite an explicit owner decision"
+    if owner_decision:
+        if after_sources != before_sources or after_hot != before_hot:
+            raise StateProjectionError(
+                "owner no-touch decision requires exactly unchanged sources"
+            )
+    else:
+        if after_hot >= before_hot:
+            raise StateProjectionError(
+                "cleanup must reduce hot count or cite an explicit owner decision"
+            )
+        _validate_cleanup_delta(
+            root,
+            commit=authorization_commit,
+            before_sources=before_sources,
+            after_sources=after_sources,
+            cleanup_plan=prior_plan,
         )
 
     receipt_core: dict[str, Any] = {
@@ -2730,7 +3015,7 @@ def record_cleanup(
         "owner_decision_blob_oid": owner_decision_blob_oid or None,
         "before_sources": before_sources,
         "before_source_binding_digest": source_binding_digest,
-        "after_sources": _receipt_sources(evaluation["sources"]),
+        "after_sources": after_sources,
         "before_hot_count": before_hot,
         "resulting_hot_count": after_hot,
         "active_work_digest": evaluation["active_work"]["digest"],

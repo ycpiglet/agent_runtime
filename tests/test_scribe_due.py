@@ -680,6 +680,52 @@ def test_cleanup_receipt_replays_committed_authority_after_live_rewrite(
     assert result["readiness"] == "ready"
 
 
+def test_cleanup_receipt_replay_rejects_git_replacement_view(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+    payload = json.loads(
+        (tmp_path / state_projection.DEFAULT_PROJECTION_PATH).read_text(
+            encoding="utf-8"
+        )
+    )
+    authorization_commit = payload["cleanup_receipt"]["authorization_commit"]
+    subprocess.run(
+        [
+            "git",
+            "update-ref",
+            f"refs/replace/{authorization_commit}",
+            authorization_commit,
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert any(
+        "audit view" in error
+        for error in result["cleanup_outcome"]["errors"]
+    )
+    assert result["closure_blocking"] is True
+
+
 def test_cleanup_receipt_accepts_canonical_unit_authorization(
     tmp_path: Path,
 ) -> None:
@@ -782,6 +828,311 @@ def test_cleanup_without_reduction_requires_explicit_owner_decision(
     assert result["cleanup_outcome"]["status"] == "owner_decision"
     assert result["readiness"] == "ready_with_owner_decision"
     assert result["closure_blocking"] is False
+
+
+@pytest.mark.parametrize("mutation", ["same-count-rewrite", "increase"])
+def test_owner_no_touch_decision_requires_exactly_unchanged_sources(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    projection = _write_authorized_projection(tmp_path)
+    decision_ref = _write_owner_no_touch_decision(tmp_path, projection)
+    if mutation == "same-count-rewrite":
+        source.write_text(
+            source.read_text(encoding="utf-8").replace(
+                "- item 0\n",
+                "- rewritten item\n",
+            ),
+            encoding="utf-8",
+        )
+    else:
+        source.write_text(
+            source.read_text(encoding="utf-8") + "- added item\n",
+            encoding="utf-8",
+        )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="no-touch",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            owner_decision_ref=decision_ref,
+            now="2026-07-29T00:15:00+09:00",
+        )
+
+
+def test_cleanup_rejects_repository_local_git_replacement_view(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    authorization_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    subprocess.run(
+        [
+            "git",
+            "update-ref",
+            f"refs/replace/{authorization_commit}",
+            authorization_commit,
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="audit view",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_rejects_repository_local_git_graft_view(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    authorization_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    grafts = tmp_path / ".git" / "info" / "grafts"
+    grafts.parent.mkdir(parents=True, exist_ok=True)
+    grafts.write_text(f"{authorization_commit}\n", encoding="ascii")
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="audit view",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_rejects_markdown_row_outside_bound_plan(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n"
+        "- TASK-SCRIBE active record\n"
+        + "".join(f"- item {index}\n" for index in range(15)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(4, 15)),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound cleanup plan",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_rejects_json_row_outside_bound_plan(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": "REVIEW-2026-01-01", "status": "open"},
+                    *[
+                        {"id": f"item-{index}", "status": "open"}
+                        for index in range(15)
+                    ],
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"state": "state/current.json"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        json.dumps(
+            {
+                "items": [
+                    {"id": f"item-{index}", "status": "open"}
+                    for index in range(4, 15)
+                ]
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound cleanup plan",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+def test_cleanup_receipt_replay_rejects_rebound_unplanned_row_removal(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n"
+        "- REVIEW-2026-01-01 protected record\n"
+        + "".join(f"- item {index}\n" for index in range(15)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    _write_authorized_projection(tmp_path)
+    source.write_text(
+        "# Status\n"
+        "- REVIEW-2026-01-01 protected record\n"
+        + "".join(f"- item {index}\n" for index in range(5, 15)),
+        encoding="utf-8",
+    )
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        now="2026-07-29T00:10:00+09:00",
+    )
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(5, 15)),
+        encoding="utf-8",
+    )
+    current = state_projection.evaluate_state(tmp_path)
+    projection_path = tmp_path / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    payload["sources"] = current["sources"]
+    payload["hot_count"] = current["hot_count"]
+    payload["source_debt"] = current["source_debt"]
+    receipt = payload["cleanup_receipt"]
+    receipt["after_sources"] = _receipt_sources(payload)
+    receipt["resulting_hot_count"] = current["hot_count"]
+    receipt["receipt_digest"] = state_projection._canonical_digest(  # noqa: SLF001
+        {
+            key: value
+            for key, value in receipt.items()
+            if key != "receipt_digest"
+        }
+    )
+    projection_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert any(
+        "bound cleanup plan" in error
+        for error in result["cleanup_outcome"]["errors"]
+    )
+    assert result["closure_blocking"] is True
+
+
+def test_owner_no_touch_receipt_replay_rejects_rebound_source_change(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    projection = _write_authorized_projection(tmp_path)
+    decision_ref = _write_owner_no_touch_decision(tmp_path, projection)
+    state_projection.record_cleanup(
+        tmp_path,
+        authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+        owner_decision_ref=decision_ref,
+        now="2026-07-29T00:15:00+09:00",
+    )
+    source.write_text(
+        source.read_text(encoding="utf-8").replace(
+            "- item 0\n",
+            "- rewritten item\n",
+        ),
+        encoding="utf-8",
+    )
+    current = state_projection.evaluate_state(tmp_path)
+    projection_path = tmp_path / state_projection.DEFAULT_PROJECTION_PATH
+    payload = json.loads(projection_path.read_text(encoding="utf-8"))
+    payload["sources"] = current["sources"]
+    payload["hot_count"] = current["hot_count"]
+    payload["source_debt"] = current["source_debt"]
+    receipt = payload["cleanup_receipt"]
+    receipt["after_sources"] = _receipt_sources(payload)
+    receipt["resulting_hot_count"] = current["hot_count"]
+    receipt["receipt_digest"] = state_projection._canonical_digest(  # noqa: SLF001
+        {
+            key: value
+            for key, value in receipt.items()
+            if key != "receipt_digest"
+        }
+    )
+    projection_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    result = state_projection.evaluate_state(tmp_path)
+
+    assert result["cleanup_outcome"]["status"] == "invalid"
+    assert any(
+        "no-touch" in error
+        for error in result["cleanup_outcome"]["errors"]
+    )
+    assert result["closure_blocking"] is True
 
 
 def test_cleanup_receipt_rejects_an_arbitrary_existing_authorization_file(
@@ -1215,6 +1566,43 @@ def test_owner_decision_rejects_non_string_approver_identity(
 
 
 @pytest.mark.parametrize(
+    "approved_by",
+    ["0x10", ".NaN", "2026-07-31", "\\n"],
+)
+def test_owner_decision_rejects_non_identity_string(
+    tmp_path: Path,
+    approved_by: str,
+) -> None:
+    source = tmp_path / "STATUS.md"
+    source.write_text(
+        "# Status\n" + "".join(f"- item {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    _config(tmp_path, {"status": "STATUS.md"})
+    projection = _write_authorized_projection(tmp_path)
+    decision_ref = _write_owner_no_touch_decision(tmp_path, projection)
+    decision_path = tmp_path / decision_ref
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["approved_by"] = approved_by
+    decision_path.write_text(
+        json.dumps(decision, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    _commit_all(tmp_path, "replace owner identity with a non-identity string")
+
+    with pytest.raises(
+        state_projection.StateProjectionError,
+        match="bound owner no-touch decision",
+    ):
+        state_projection.record_cleanup(
+            tmp_path,
+            authorization_ref="agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            owner_decision_ref=decision_ref,
+            now="2026-07-29T00:10:00+09:00",
+        )
+
+
+@pytest.mark.parametrize(
     "authorized_by",
     [
         "null",
@@ -1225,6 +1613,12 @@ def test_owner_decision_rejects_non_string_approver_identity(
         "{name: forged}",
         "[forged]",
         "123",
+        "0x10",
+        ".inf",
+        ".NaN",
+        "2026-07-31",
+        "12:34",
+        r'"\n"',
     ],
 )
 def test_cleanup_authorization_rejects_non_string_or_placeholder_identity(
