@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-31T04:02:36+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -21,21 +21,36 @@ summary: Enforce repeated-failure Compound closure and ship its skill
 horizon: unit
 model_tier: worker_standard
 escalation_triggers:
+  - data_integrity
+  - cross_cutting
 context: The claim dispatcher already searches canonical Compound records, but closure_gate accepts any one of compound, review, or retro. The failure-to-regression skill exists only in the Runtime repository and is absent from consumer templates.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
+  - src/agent_runtime/knowledge_records.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
   - skills/failure-to-regression/SKILL.md
 target_files:
+  - src/agent_runtime/knowledge_records.py
+  - scripts/work.py
+  - src/agent_runtime/templates/project/scripts/work.py
+  - scripts/closure_gate.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
-  - src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
+  - skills/failure-to-regression/SKILL.md
+  - new:src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
+  - agents/project/RUNTIME-ASSET-REGISTRY.json
   - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
+  - agents/project/TEMPLATE-MIRROR-CONTRACT.json
+  - tests/fixtures/host/agent_runtime.lock.json
   - tests/test_closure_gate.py
-  - tests/test_compound_record.py
+  - tests/test_compound_records.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_runtime_asset_usage.py
+  - tests/test_inventory_sync_sanitize.py
+  - tests/test_lock_merge_driver.py
+  - tests/test_regen_host_lock_if_needed.py
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -43,7 +58,10 @@ acceptance:
   - The skill is discoverable in a freshly adopted host.
   - No legacy Compound log is rewritten.
 verification:
-  - python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q
+  - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
+  - python scripts/runtime_asset_usage.py --check
+  - python scripts/template_mirror_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
 ---
@@ -57,20 +75,33 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 ## Inputs
 
 - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+- reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
+- src/agent_runtime/knowledge_records.py
 - src/agent_runtime/templates/project/scripts/compound_record.py
 - src/agent_runtime/templates/project/scripts/closure_gate.py
 - skills/failure-to-regression/SKILL.md
 
 ## Target Files
 
+- src/agent_runtime/knowledge_records.py
+- scripts/work.py
+- src/agent_runtime/templates/project/scripts/work.py
+- scripts/closure_gate.py
 - src/agent_runtime/templates/project/scripts/closure_gate.py
 - src/agent_runtime/templates/project/scripts/compound_record.py
-- src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
+- skills/failure-to-regression/SKILL.md
+- new:src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
+- agents/project/RUNTIME-ASSET-REGISTRY.json
 - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
+- agents/project/TEMPLATE-MIRROR-CONTRACT.json
+- tests/fixtures/host/agent_runtime.lock.json
 - tests/test_closure_gate.py
-- tests/test_compound_record.py
+- tests/test_compound_records.py
 - tests/test_task_claim_dispatcher.py
 - tests/test_runtime_asset_usage.py
+- tests/test_inventory_sync_sanitize.py
+- tests/test_lock_merge_driver.py
+- tests/test_regen_host_lock_if_needed.py
 
 ## Scope
 
@@ -79,8 +110,11 @@ Tighten only the repeated-failure lane and preserve ordinary review/retro closur
 ## Steps
 
 1. Add a negative where repeated_failure closes with review only.
-2. Require a canonical linked Compound record and prevention destination.
-3. Copy and register the failure-to-regression skill in the consumer template.
+2. Aggregate task/unit repeated-failure signals and require a current-work
+   canonical Compound with a repository-contained supported prevention
+   destination.
+3. Rewrite, copy, validate, and register the failure-to-regression skill in the
+   consumer core template without root-only casebook dependencies.
 4. Verify ordinary non-repeated work remains compatible.
 
 ## Acceptance Criteria
@@ -92,7 +126,10 @@ Tighten only the repeated-failure lane and preserve ordinary review/retro closur
 
 ## Verification
 
-- `python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q`
+- `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
+- `python scripts/runtime_asset_usage.py --check`
+- `python scripts/template_mirror_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`
 
 ## Handoff
 

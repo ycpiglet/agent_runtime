@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-31T04:02:36+09:00
 title: Require Compound for declared repeated failures
 status: planned
 priority: P1
@@ -26,6 +26,8 @@ reservation_id: RES-20260730-112500-842c7890-03
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
+review_refs:
+  - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -39,8 +41,10 @@ acceptance:
   - Generic substantial work may still close with an appropriate linked review or retro.
   - failure-to-regression is included in the consumer core profile and asset registry.
 verification:
-  - python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q
+  - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
+  - python scripts/runtime_asset_usage.py --check
   - python scripts/template_mirror_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 ---
 
 # TASK-AR-654 - Require Compound for declared repeated failures
@@ -63,5 +67,7 @@ verification:
 
 ## Verification
 
-- `python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q`
+- `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
+- `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`

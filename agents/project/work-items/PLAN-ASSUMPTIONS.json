@@ -993,13 +993,8 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-          "value": "11c1bb6c5b170c059b52da591d34f1a87377f5d9e73bad19cf72eae3b48a2897"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md",
-          "value": "ab4860de4439f7597b13950a36c1e1d26b83e35aae41392ae60077b07f5a8236"
+          "path": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
+          "value": "3546d85bc644eff4521b84337930cf28ad09fbd450e9d37472e012d048f564a3"
         },
         {
           "kind": "sha256",
@@ -1008,108 +1003,18 @@
         },
         {
           "kind": "sha256",
-          "path": "docs/superpowers/plans/2026-07-30-v080-operability-hardening.md",
-          "value": "0eb0664a292adcb39b2983f6250643f143c00f79e4a4fe7f16c4524df4ab49e7"
+          "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
+          "value": "c1a4aedaaef0d348e77d83dafae54d15eaadf2be6e9897ac210ccffb5093e673"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
-          "value": "4316fd2be4d54aba3c6b0a2a83ef83c3fa7b8958fc6d32dedcaa381f481cefe4"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
+          "value": "b6ab2bf0e4f9dc7f5abc184790092eda4227fb0b9915521df4f526a67442c1e7"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
-          "value": "deda2631a45b858a923b3ba4d553f81834af1d6f44194ceab88e866a8a6bd4d2"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/state_projection.py",
-          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/agent_runtime/state_projection.py",
-          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/agent_runtime/state_projection.py",
-          "value": "c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/doctor.py",
-          "value": "c72d8ffe15bfcf5729b2335eafddb0d81c1571d0d4d3a75393a23256d86243e9"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/scribe_due.py",
-          "value": "25f13f8ef1ff66af51bdbe4d773a67036e9527101e0aabca6c58f13ef9785d4e"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/scribe_due.py",
-          "value": "25f13f8ef1ff66af51bdbe4d773a67036e9527101e0aabca6c58f13ef9785d4e"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/closure_gate.py",
-          "value": "90fe2e42a1de60ab504fb0dd8b111b8c528121f1a03aa054892ebd71e1faabbb"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/closure_gate.py",
-          "value": "90fe2e42a1de60ab504fb0dd8b111b8c528121f1a03aa054892ebd71e1faabbb"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/session_start_hook.py",
-          "value": "8a08c21646df0f8aa3baf0af9129a9c4ee92514b3fff46afc20d08918c29d597"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/scripts/session_start_hook.py",
-          "value": "8a08c21646df0f8aa3baf0af9129a9c4ee92514b3fff46afc20d08918c29d597"
-        },
-        {
-          "kind": "sha256",
-          "path": "src/agent_runtime/templates/project/agents/scribe/SKILL.md",
-          "value": "40a4884b3d127b291b12b50a344536a0d34ad8a887f11bd3f23199585e923d84"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_scribe_due.py",
-          "value": "7d6667b564431f38a61a28a37f3f369b7ddaacb6c0267cfa5859a431412e04bf"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_closure_gate.py",
-          "value": "8d6df488dff7ad640f7292e3f38983baa498659d0b9399b0b687a43be7daf278"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_session_continuity_hooks.py",
-          "value": "459389de5f592d196b5b07803884b2bdae909f1ad39285fc64b5fd20d2655cbe"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_doctor.py",
-          "value": "0e1b2aa8ad50df77a514716f82385bca8dd219aaa8e84bae4c4ff34bdac42317"
-        },
-        {
-          "kind": "sha256",
-          "path": "tests/test_template_smoke.py",
-          "value": "bfee4b03592bc326cfc377fe6eadac9586f2c5faa3ba632be404fc4ea9db41ff"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/task_claim_dispatcher.py",
-          "value": "275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf"
-        },
-        {
-          "kind": "sha256",
-          "path": "scripts/wave_dispatcher.py",
-          "value": "1721527376a7206d43903eb27eac244480127f569273f19ddfc9cdf03b2ba2b9"
+          "path": "src/agent_runtime/knowledge_records.py",
+          "value": "82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
         },
         {
           "kind": "sha256",
@@ -1118,37 +1023,117 @@
         },
         {
           "kind": "sha256",
-          "path": "agents/project/NEXT-SESSION-POINTER.yml",
-          "value": "96e4e4ff3753b0d33802357997ce35260a9b8190576e476e6d425575743ad6fc"
+          "path": "src/agent_runtime/templates/project/scripts/work.py",
+          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
         },
         {
           "kind": "sha256",
-          "path": "BACKLOG-BOARD.md",
-          "value": "ec32e3285ad9c2af646c9f3eacfe504e150be23829650d75171866d6c936834e"
+          "path": "scripts/closure_gate.py",
+          "value": "9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2"
         },
         {
           "kind": "sha256",
-          "path": "reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md",
-          "value": "97965227e758e0b5ec49a80481b0d490cf8e12380deab186e25db4dfed5d629f"
+          "path": "src/agent_runtime/templates/project/scripts/closure_gate.py",
+          "value": "9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2"
         },
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment.md",
-          "value": "c6246fd8c4d559393a5c727a06b046583dafab6353cae0f0c227e4d8786651f1"
+          "path": "src/agent_runtime/templates/project/scripts/compound_record.py",
+          "value": "82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
         },
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md",
-          "value": "ab60261e8a2cb67cdc7b97b49fc030c38012e9176fd1d5eb79f68f0a24c73b6d"
+          "path": "skills/failure-to-regression/SKILL.md",
+          "value": "ca5e74d6776487dc890271071e31f1f1ed3e9f63dd9c5462444079ff871296f4"
+        },
+        {
+          "kind": "absent",
+          "path": "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
+          "value": ""
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/project/RUNTIME-ASSET-REGISTRY.json",
+          "value": "382b47280cbdc1272e3633bd941a8f98e60b1bc5a0af1e9ce344cd5f7103480a"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+          "value": "98d09c825ff497276bfe94c43d2f51883bcf06b653e0401122dff0429100efdc"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-PROFILE-MANIFEST.json",
+          "value": "4475abdecda3d538e4c53244313881b0050f1e944877e8355c00177bd9ab5458"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
+          "value": "7e95f861212c15b50a67e5f7952ae2689cfbebf52ec8dc92b90ddb7f1ef8432e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/runtime_asset_usage.py",
+          "value": "e1d1d9c690943dd1f5c867af66e9547fb20bc2f056b463440a551b26b75d7966"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/template_mirror_gate.py",
+          "value": "8a649bc9d4253651ef1cb7626ca07acd81b7cb5a512bee9368dc79c32c3bce07"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/regen_host_lock_if_needed.py",
+          "value": "015536ef37e681eef78d318f9f7b4cdd656b53340deb92fcd16fee2ccf27f48e"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_compound_records.py",
+          "value": "025446407bed1d005b1262fab8dfd5c0c6c7211732eda89fdc78606cbcb5390b"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_closure_gate.py",
+          "value": "20a67eec82dfe2e9e84178219038b16f45c550044415d5dd308756222ce9011a"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_task_claim_dispatcher.py",
+          "value": "dd56a98bc71ba6cbe33834a57c3650b3b8b2cf110080355385e221d5f3b0f9a5"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_runtime_asset_usage.py",
+          "value": "9f240732bd1c6f2188a6113d43fbc8d8556cd5518effbd945a7f6cb27d7454e0"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_inventory_sync_sanitize.py",
+          "value": "a6953921d26879abc53ec188261bd651a7b005579960fbe5736de6b9aac8f608"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_lock_merge_driver.py",
+          "value": "7b6e8af8f8c89ba48a4d0582aa47740b3d85f13b8cbb96fa17fd6ca53f33d015"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_regen_host_lock_if_needed.py",
+          "value": "c72a5d72952d4c418f3cb29a852d8e2a213ed89ddd4027316c822695889a05cf"
         },
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "887555f64d6e65ceb4606fbc3d2509760fb9b360dc19362b043bdbf3187a124e"
+          "value": "30070d95b21384634ea7b4f020cff0e4d5e50621b118fa26ed50355c8231cefe"
         }
       ],
-      "design_record": "reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md",
-      "recorded_at": "2026-07-30T23:51:03+09:00",
+      "design_record": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
+      "recorded_at": "2026-07-31T04:05:10+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1364,5 +1349,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T23:51:03+09:00"
+  "updated_at": "2026-07-31T04:05:10+09:00"
 }
