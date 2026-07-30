@@ -10,9 +10,11 @@ Contracts are selected by the exact `(host, pilot_id)` pair. A host default or
 
 ## Contract registry
 
-Contracts use schema `agent-runtime-pilot-contract/v1` and live as individual
-JSON files under `tests/fixtures/pilots/contracts/`. The loader rejects the
-entire registry when it finds:
+Execution contracts use schema `agent-runtime-pilot-contract/v1`. Migration
+rehearsals use `agent-runtime-migration-pilot-contract/v1` so they do not need
+to invent a completed product task, claim, or provider run. Both live as
+individual JSON files under `tests/fixtures/pilots/contracts/`. The loader
+rejects the entire registry when it finds:
 
 - an unknown schema, malformed field, unsafe path, or invalid digest;
 - two files for the same host and pilot ID;
@@ -24,6 +26,13 @@ Each record pins the evidence semantic SHA-256, result, Git baselines, adoption
 and content counts, reconcile conflicts, exact task/unit/claim identities,
 finding priorities, verification counters, required external effects, and
 optional supporting-artifact bindings. These are observations, not policy.
+
+A migration contract instead pins the source seam count, exact disposition
+counts, reclaimed conflicts, selected template count, protected-byte
+inventory, verification counters, and both isolation and seam-ledger
+artifacts. Its executable evidence must prove two identical plan/apply
+snapshots, zero remaining conflicts, at least one real seam returned to
+Runtime management, and zero product-work dispatches.
 
 ## Executable invariants
 
@@ -56,6 +65,13 @@ projection. Acceptance checks:
 Changing either the projection or its raw-proof identity therefore invalidates
 the run contract.
 
+A migration contract requires exactly one portable isolation binding and one
+`seam_ledger` binding using schema
+`agent-runtime-migration-seam-ledger/v1`. Acceptance rejects hidden ledger
+fields and absolute-path leaks, independently recounts the entries and
+dispositions, validates every before/after digest and change flag, and binds
+the ledger to the exact host, pilot, host commit, and Runtime commit.
+
 ## Validate a run
 
 ```text
@@ -67,6 +83,15 @@ python scripts/pilot_acceptance.py \
 
 Successful JSON includes the selected identity, for example
 `bean-wiki:bean-wiki-v080-green-attempt-5`.
+
+For a migration rehearsal:
+
+```text
+python scripts/pilot_acceptance.py \
+  --host autofolio \
+  --fixture tests/fixtures/pilots/autofolio/evidence-green-attempt-3.json \
+  --check --json
+```
 
 ## Register another host or run
 

@@ -1,0 +1,495 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+  "created_by": "codex-root-task-ar-650-planner",
+  "initiative": {
+    "id": "INIT-AR-V080-OPERABILITY-HARDENING",
+    "title": "Agent Runtime v0.8 Operability Hardening",
+    "summary": "Close the economic routing, Scribe, Compound, claim, hook, and consumer-skill gaps exposed by the three v0.8 pilots before release.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+    "display_name": "v0.8 Operability Hardening",
+    "summary": "Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.",
+    "order": 645,
+    "plan_slug": "2026-07-30-v080-operability-hardening",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "display_id": "TASK-AR-652",
+      "title": "Bind model tiers to actual execution and economic receipts",
+      "goal": "Make selective subagent routing materially change execution and produce trustworthy task-level token and cost evidence.",
+      "scope": "Add canonical role-tier defaults, provider/native application receipts, model-and-reasoning equivalence, persistent task budgets, and savings eligibility gates.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 14,
+      "est_tokens": 28000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Scribe, exploration, implementation, review, and audit roles resolve through explicit role policy rather than the generic fallback.",
+        "Requested tier, resolved model and reasoning, observed model and reasoning, tokens, cost, and source are persisted in one immutable execution receipt.",
+        "Native equivalence compares model and reasoning effort; provider mappings that collapse remain visibly ineligible.",
+        "Task and claim budget checks use persistent cumulative usage and block an unaffordable dispatch before a provider call.",
+        "Savings remain unavailable without an observed comparable baseline."
+      ],
+      "verification": [
+        "python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q",
+        "python scripts/runtime_asset_usage.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-652-001",
+          "title": "Implement role-aware economic routing receipts and budget enforcement",
+          "context": "Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses all five tiers, native Codex groups worker and strong tiers, and Scribe/doc/research roles fall back to worker_standard. Pilot evidence therefore could not substantiate any savings.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "scripts/model_routing.py",
+            "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
+            "agents/project/ORG-MODEL.yml"
+          ],
+          "target_files": [
+            "scripts/model_routing.py",
+            "src/agent_runtime/templates/project/scripts/model_routing.py",
+            "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/eval_harness.py",
+            "src/agent_runtime/doctor.py",
+            "tests/test_model_routing.py",
+            "tests/test_auto_dispatch.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_eval_harness.py",
+            "tests/test_doctor.py"
+          ],
+          "scope": "Enforce routing and accounting truth without making a live provider call or changing provider credentials.",
+          "steps": [
+            "Add failure-first tests for role fallback, false equivalence, missing observation, and cumulative budget overflow.",
+            "Define role-tier policy and model-plus-reasoning route identity.",
+            "Persist an atomic execution receipt and cumulative task/claim ledger.",
+            "Gate dispatch and savings claims on the receipt.",
+            "Prove template parity and offline provider fixtures."
+          ],
+          "acceptance": [
+            "Cheap roles select the configured low-cost lane.",
+            "High tier requires a registered escalation reason.",
+            "Actual usage cannot be inferred from request configuration.",
+            "Budget enforcement survives a process restart."
+          ],
+          "verification": [
+            "python -m pytest tests/test_model_routing.py tests/test_auto_dispatch.py tests/test_task_claim_dispatcher.py tests/test_eval_harness.py tests/test_doctor.py -q"
+          ],
+          "handoff": "Attach the role matrix, execution-receipt schema, false-savings negatives, persistent-budget restart proof, template parity, and independent W4b.",
+          "stop_condition": "Stop before live provider calls, credential reads, account changes, package install, or claims of economic savings without observed usage."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-653",
+      "title": "Close the Scribe source-debt and active-work loop",
+      "goal": "Ensure Scribe freshness means current work is covered and overdue state was actually handled, not merely projected.",
+      "scope": "Separate projection freshness from source debt, require active task coverage, generate bounded cleanup plans and receipts, and keep overdue closure blocked until a valid outcome exists.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 12,
+      "est_tokens": 24000,
+      "owner": "lead-engineer",
+      "team": "quality",
+      "acceptance": [
+        "A fresh projection over an overdue source no longer reports debt clearance.",
+        "Active task and claim identities are represented or the Scribe result is not ready.",
+        "Cleanup candidates exclude active and no-touch records and select only cold history.",
+        "A cleanup receipt binds source before/after digests and the resulting hot count.",
+        "Scribe can be selectively routed through the low-cost role policy without gaining canonical decision authority."
+      ],
+      "verification": [
+        "python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py -q",
+        "python scripts/scribe_due.py --root . --json"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-653-001",
+          "title": "Implement active-aware Scribe planning, receipt, and closure semantics",
+          "context": "Runtime currently has 769 hot items and Autofolio had 272, yet both become ready after writing a ten-item projection. The Scribe skill promises mandatory archive work above 15 items, so implementation and policy disagree.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "src/agent_runtime/state_projection.py",
+            "src/agent_runtime/templates/project/agents/scribe/SKILL.md",
+            "src/agent_runtime/templates/project/scripts/closure_gate.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/state_projection.py",
+            "src/agent_runtime/templates/project/scripts/scribe_due.py",
+            "src/agent_runtime/templates/project/scripts/closure_gate.py",
+            "src/agent_runtime/templates/project/agents/scribe/SKILL.md",
+            "tests/test_scribe_due.py",
+            "tests/test_closure_gate.py",
+            "tests/test_session_start_hook.py",
+            "tests/test_doctor.py"
+          ],
+          "scope": "Add deterministic planning and verification. Do not autonomously rewrite host-owned canonical state or choose meaning when records conflict.",
+          "steps": [
+            "Add negatives for projection-only readiness and missing active-task coverage.",
+            "Separate projection status, source debt, coverage, and cleanup outcome.",
+            "Generate bounded no-touch-aware cleanup candidates.",
+            "Validate cleanup receipts and post-cleanup counts.",
+            "Update hooks, Doctor, skill contract, and templates."
+          ],
+          "acceptance": [
+            "Projection freshness alone cannot satisfy overdue closure.",
+            "Current work is never dropped from the bounded continuity view.",
+            "Canonical host state changes require an explicit bounded Scribe task.",
+            "Receipts are replayable without raw prompt or secret content."
+          ],
+          "verification": [
+            "python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_start_hook.py tests/test_doctor.py -q"
+          ],
+          "handoff": "Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture, no-touch proof, template parity, and independent W4b.",
+          "stop_condition": "Stop before automatically rewriting host-owned state, compressing active records, or making product/editorial decisions."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-654",
+      "title": "Require Compound for declared repeated failures",
+      "goal": "Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.",
+      "scope": "Make defect signatures and repeated_failure triggers require a linked canonical Compound record and ship the failure-to-regression operating skill to consumers.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 8,
+      "est_tokens": 16000,
+      "owner": "lead-engineer",
+      "team": "quality",
+      "acceptance": [
+        "Claim-time knowledge lookup remains before persistence.",
+        "A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.",
+        "The Compound prevention record links to a regression, gate, task proposal, or accepted watch state.",
+        "Generic substantial work may still close with an appropriate linked review or retro.",
+        "failure-to-regression is included in the consumer core profile and asset registry."
+      ],
+      "verification": [
+        "python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q",
+        "python scripts/template_mirror_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-654-001",
+          "title": "Enforce repeated-failure Compound closure and ship its skill",
+          "context": "The claim dispatcher already searches canonical Compound records, but closure_gate accepts any one of compound, review, or retro. The failure-to-regression skill exists only in the Runtime repository and is absent from consumer templates.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "src/agent_runtime/templates/project/scripts/compound_record.py",
+            "src/agent_runtime/templates/project/scripts/closure_gate.py",
+            "skills/failure-to-regression/SKILL.md"
+          ],
+          "target_files": [
+            "src/agent_runtime/templates/project/scripts/closure_gate.py",
+            "src/agent_runtime/templates/project/scripts/compound_record.py",
+            "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
+            "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "tests/test_closure_gate.py",
+            "tests/test_compound_record.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_runtime_asset_usage.py"
+          ],
+          "scope": "Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.",
+          "steps": [
+            "Add a negative where repeated_failure closes with review only.",
+            "Require a canonical linked Compound record and prevention destination.",
+            "Copy and register the failure-to-regression skill in the consumer template.",
+            "Verify ordinary non-repeated work remains compatible."
+          ],
+          "acceptance": [
+            "Repeated failures cannot bypass Compound.",
+            "Compound dedupe and lookup remain deterministic.",
+            "The skill is discoverable in a freshly adopted host.",
+            "No legacy Compound log is rewritten."
+          ],
+          "verification": [
+            "python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q"
+          ],
+          "handoff": "Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.",
+          "stop_condition": "Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-655",
+      "title": "Add atomic heartbeat and renewal to task claims",
+      "goal": "Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.",
+      "scope": "Add owner-checked task claim heartbeat/renew, wire progress updates to it, and reconcile expired active claims across every consumer.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 8,
+      "est_tokens": 16000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "task_claim_dispatcher exposes atomic owner-checked heartbeat and renew commands.",
+        "Heartbeat updates claim top-level and nested lease timestamps together.",
+        "Wrong owner, expired claim, timestamp regression, and concurrent renewal fail closed.",
+        "A replan-aware renewal binds the current task, unit, target-file, and stop-boundary digests without silently broadening the prior claim.",
+        "Doctor, state sync, worktree lifecycle, and UI use one expiry interpretation.",
+        "Progress updates cannot leave an active pointer paired with an expired claim."
+      ],
+      "verification": [
+        "python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-655-001",
+          "title": "Unify task-claim renewal and expiry consumers",
+          "context": "TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispatcher has only create, projection, and release commands. The separate low-level claim lease heartbeat is not connected to task claim JSON.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/claim_lease.py",
+            "src/agent_runtime/templates/project/scripts/state_sync_gate.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+            "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
+            "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+            "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
+            "src/agent_runtime/ui_state.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_state_sync_gate.py",
+            "tests/test_parallel_worktree_gate.py",
+            "tests/test_worktree_lifecycle_gate.py",
+            "tests/test_ui_state.py"
+          ],
+          "scope": "Unify local lifecycle timestamps without creating a remote lease service.",
+          "steps": [
+            "Add expiry and concurrent-renewal negative fixtures.",
+            "Implement atomic owner-checked heartbeat and renewal.",
+            "Wire orchestrator progress to the same mutation.",
+            "Adopt one expiry classifier in all read consumers.",
+            "Verify crash and restart behavior."
+          ],
+          "acceptance": [
+            "Long tasks can remain legitimately active.",
+            "Stale workers cannot revive another owner's claim.",
+            "Replan renewal records old and new task, unit, target-file, and stop-boundary digests and cannot silently broaden scope.",
+            "Every surface agrees on active versus expired.",
+            "Renewal never commits or pushes host Git state."
+          ],
+          "verification": [
+            "python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q"
+          ],
+          "handoff": "Attach the atomicity tests, owner mismatch, crash/restart, replan old/new scope digest proof, cross-consumer expiry matrix, and independent W4b.",
+          "stop_condition": "Stop before introducing a network lease dependency, auto-committing host state, or recovering a claim without owner identity."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-656",
+      "title": "Make lifecycle hooks composable and deduplicated",
+      "goal": "Let Runtime own its canonical lifecycle while hosts add authority hooks without permanent duplicate commands or seed_once forks.",
+      "scope": "Define a host hook extension registry, deterministic merge/order semantics, semantic duplicate removal, and POSIX/Windows parity checks.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 10,
+      "est_tokens": 19000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "acceptance": [
+        "Runtime lifecycle commands remain managed and host extensions remain host-owned.",
+        "Equivalent legacy commands are removed after successful migration.",
+        "Host Owner-authority hooks retain declared ordering and timeout limits.",
+        "Repeated sync and install produce byte-identical hook state.",
+        "Doctor reports semantic duplicates and missing Windows parity consistently."
+      ],
+      "verification": [
+        "python -m pytest tests/test_doctor.py tests/test_hook_runtime.py tests/test_install_hooks.py tests/test_inventory_sync_sanitize.py -q",
+        "python scripts/template_mirror_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-656-001",
+          "title": "Implement a managed Runtime hook core with host extension registry",
+          "context": "Autofolio needed its Owner-authority hook plus canonical Runtime hooks, but two legacy taskset/stop commands remain duplicated because the tracked hooks file is seed_once and has no typed extension boundary.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "src/agent_runtime/hook_runtime.py",
+            "src/agent_runtime/doctor.py",
+            "src/agent_runtime/templates/project/.codex/hooks.json"
+          ],
+          "target_files": [
+            "src/agent_runtime/hook_runtime.py",
+            "src/agent_runtime/doctor.py",
+            "src/agent_runtime/sync.py",
+            "src/agent_runtime/templates/project/.codex/hooks.json",
+            "src/agent_runtime/templates/project/scripts/install_hooks.py",
+            "tests/test_hook_runtime.py",
+            "tests/test_install_hooks.py",
+            "tests/test_doctor.py",
+            "tests/test_inventory_sync_sanitize.py"
+          ],
+          "scope": "Compose tracked local hooks only. Do not enable machine-local trust settings or execute host side effects.",
+          "steps": [
+            "Define typed host extension entries and canonical ordering.",
+            "Add semantic identity and duplicate migration tests.",
+            "Merge Runtime and host hooks deterministically.",
+            "Verify POSIX/Windows commands, timeouts, and failure semantics.",
+            "Prove repeated sync is byte-identical."
+          ],
+          "acceptance": [
+            "Host authority remains intact.",
+            "Legacy duplicates disappear after migration.",
+            "Canonical Runtime hooks remain updateable.",
+            "No hook is enabled without the existing trust boundary."
+          ],
+          "verification": [
+            "python -m pytest tests/test_doctor.py tests/test_hook_runtime.py tests/test_install_hooks.py tests/test_inventory_sync_sanitize.py -q"
+          ],
+          "handoff": "Attach the merge schema, duplicate migration fixture, host-order proof, cross-platform tests, and independent W4b.",
+          "stop_condition": "Stop before editing user-global settings, enabling trust, running external hooks, or weakening a host Owner-authority command."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-657",
+      "title": "Ship consumer adoption and failure operating skills",
+      "goal": "Make the safe brownfield procedure discoverable and repeatable in every consumer without project-specific harness reinvention.",
+      "scope": "Add a core runtime-adoption skill, ship failure-to-regression, register both assets, and update independent verification and release skill inputs.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 7,
+      "est_tokens": 14000,
+      "owner": "lead-engineer",
+      "team": "release-integrity",
+      "depends_on": [
+        "TASK-AR-654",
+        "TASK-AR-656"
+      ],
+      "acceptance": [
+        "A fresh core-profile host receives runtime-adoption and failure-to-regression skills.",
+        "runtime-adoption enforces baseline/control, ownership, safe apply, idempotence, protected bytes, isolation, exact acceptance, rollback, W4a, and W4b order.",
+        "The skill never authorizes product, credential, deploy, push, tag, or release actions.",
+        "Independent verification consumes migration contracts and exact execution receipts.",
+        "Release conductor requires all three current consumer contracts and zero unresolved release-critical P1 findings."
+      ],
+      "verification": [
+        "python -m pytest tests/test_runtime_asset_usage.py tests/test_template_smoke.py tests/test_pilot_acceptance.py tests/test_release_conductor_skill.py -q",
+        "python scripts/runtime_asset_usage.py --check",
+        "python scripts/template_mirror_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-657-001",
+          "title": "Package the reusable consumer-adoption operating procedure",
+          "context": "The Runtime has adopt/sync/migration CLIs and exact contracts, but no shipped trigger skill joins them into the safe sequence used by Bean Wiki, Allimbot, and Autofolio. failure-to-regression is also root-only.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "docs/pilot-acceptance-contract.md",
+            "docs/pilot-isolation-contract.md",
+            "skills/failure-to-regression/SKILL.md"
+          ],
+          "target_files": [
+            "skills/runtime-adoption/SKILL.md",
+            "src/agent_runtime/templates/project/skills/runtime-adoption/SKILL.md",
+            "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
+            "skills/independent-verification/SKILL.md",
+            "skills/release-conductor/SKILL.md",
+            "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "tests/test_runtime_asset_usage.py",
+            "tests/test_template_smoke.py",
+            "tests/test_release_conductor_skill.py"
+          ],
+          "scope": "Package and enforce the proven procedure; do not add another agent role or a project-specific branch.",
+          "steps": [
+            "Author the runtime-adoption trigger and stop boundaries.",
+            "Ship both skills through the core template and asset registry.",
+            "Update verification and release skills to consume exact artifacts.",
+            "Add fresh-host discovery and forbidden-action tests."
+          ],
+          "acceptance": [
+            "Consumers discover the procedure from the shipped Runtime.",
+            "Every migration uses the same exact evidence sequence.",
+            "Host overlays remain the only customization point.",
+            "No new agent role duplicates Scribe or Independent Auditor."
+          ],
+          "verification": [
+            "python -m pytest tests/test_runtime_asset_usage.py tests/test_template_smoke.py tests/test_pilot_acceptance.py tests/test_release_conductor_skill.py -q"
+          ],
+          "handoff": "Attach fresh-host skill discovery, stop-boundary tests, asset registry evidence, release-skill changes, and independent W4b.",
+          "stop_condition": "Stop before running a real host migration, changing product files, creating a release, or adding a redundant agent role."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-658",
+      "title": "Expose Runtime operability health in the read-only UI",
+      "goal": "Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage, claim expiry, hooks, and pilot identity.",
+      "scope": "Add a secret-free read-only runtime_health resource and console view after the underlying receipt and lifecycle schemas stabilize.",
+      "priority": "P2",
+      "difficulty": "L",
+      "est_hours": 12,
+      "est_tokens": 23000,
+      "owner": "uiux",
+      "team": "ui-ux",
+      "depends_on": [
+        "TASK-AR-652",
+        "TASK-AR-653",
+        "TASK-AR-654",
+        "TASK-AR-655",
+        "TASK-AR-656"
+      ],
+      "acceptance": [
+        "runtime_health exposes routing intent versus observation, token/cost budget, Scribe debt and coverage, Compound coverage, claim expiry, hook health, and latest pilot identity.",
+        "No credential, raw prompt, provider secret, or absolute local path reaches served state.",
+        "The view is read-only and does not grant migration, provider, or release authority.",
+        "Empty and unavailable states are explicit rather than rendered as zero savings or healthy.",
+        "Accessibility and browser smoke cover the new view."
+      ],
+      "verification": [
+        "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_console_e2e.py -q"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-658-001",
+          "title": "Build the secret-free Runtime health resource and console surface",
+          "context": "The current UI exposes task model tiers and generic ops metrics but not actual routing receipts, Scribe source debt, Compound recurrence, task-claim expiry, hook duplicates, or exact pilot contracts in one owner-facing surface.",
+          "inputs": [
+            "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_console_assets.py"
+          ],
+          "target_files": [
+            "src/agent_runtime/ui_state.py",
+            "src/agent_runtime/ui_console.py",
+            "src/agent_runtime/ui_console_assets.py",
+            "src/agent_runtime/ui_design_assets.py",
+            "tests/test_ui_state.py",
+            "tests/test_ui_console.py",
+            "tests/test_ui_console_e2e.py"
+          ],
+          "scope": "Read and summarize stabilized local receipts only. Keep all actions proposal-only or absent.",
+          "steps": [
+            "Define the secret-free runtime_health resource contract.",
+            "Add unavailable, blocked, warning, and healthy fixtures.",
+            "Render the owner summary and drill-down evidence refs.",
+            "Run accessibility, escape, responsive, and browser smoke."
+          ],
+          "acceptance": [
+            "The Owner can see why a tier did or did not save resources.",
+            "Projection freshness is visually distinct from Scribe debt clearance.",
+            "Expired claims and missing Compound coverage are actionable.",
+            "The UI cannot execute external or release actions."
+          ],
+          "verification": [
+            "python -m pytest tests/test_ui_state.py tests/test_ui_console.py tests/test_ui_console_e2e.py -q"
+          ],
+          "handoff": "Attach resource schema, redaction negatives, empty/error states, accessibility evidence, browser screenshots, and independent W4b.",
+          "stop_condition": "Stop before adding provider credentials, raw prompt content, writable migration controls, deploy, or release actions to the UI."
+        }
+      ]
+    }
+  ]
+}

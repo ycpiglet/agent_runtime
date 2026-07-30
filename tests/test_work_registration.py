@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts import backlog_board, org_model_gate
 
 
@@ -199,6 +201,105 @@ def test_work_new_task_round_trips_into_verify_without_frontmatter_repair(tmp_pa
     evidence = json.loads((tmp_path / result["evidence"]).read_text(encoding="utf-8"))
     assert evidence["commands"][0]["command"] == command
     assert evidence["commands"][0]["stdout"].strip() == "registered task verified"
+
+
+def test_work_new_preserves_task_dependencies_and_replays_exactly(
+    tmp_path: Path,
+) -> None:
+    payload = _payload(include_units=True)
+    payload["tasks"][1]["units"] = payload["tasks"][0].pop("units")  # type: ignore[index]
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-901"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    registered = _run(tmp_path, input_path)
+    replayed = _run(tmp_path, input_path)
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert replayed.returncode == 0, replayed.stderr or replayed.stdout
+    assert '"status": "already_exists"' in replayed.stdout
+    task_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-902.md"
+    )
+    task_meta, _ = backlog_board.parse_frontmatter(
+        task_path.read_text(encoding="utf-8")
+    )
+    assert task_meta["depends_on"] == ["TASK-AR-901"]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-902"
+        / "UNIT-TASK-AR-902-001.md"
+    )
+    unit_meta, _ = backlog_board.parse_frontmatter(
+        unit_path.read_text(encoding="utf-8")
+    )
+    assert unit_meta["depends_on"] == ["TASK-AR-901"]
+
+
+def test_work_new_rejects_missing_task_dependency_before_writes(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-999"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert "depends_on:missing:TASK-AR-999" in result.stderr
+    assert not (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    ).exists()
+
+
+def test_work_new_rejects_task_dependency_cycle_before_writes(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][0]["depends_on"] = ["TASK-AR-902"]  # type: ignore[index]
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-901"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert "depends_on:cycle:TASK-AR-901->TASK-AR-902->TASK-AR-901" in result.stderr
+    assert not (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    ).exists()
+
+
+@pytest.mark.parametrize(
+    "depends_on,code",
+    [
+        (["TASK-AR-902"], "depends_on:self:TASK-AR-902"),
+        (
+            ["TASK-AR-901", "TASK-AR-901"],
+            "depends_on:duplicate:TASK-AR-901",
+        ),
+        (["not-a-task"], "depends_on:invalid:not-a-task"),
+    ],
+)
+def test_work_new_rejects_invalid_task_dependencies(
+    tmp_path: Path,
+    depends_on: list[str],
+    code: str,
+) -> None:
+    payload = _payload()
+    payload["tasks"][1]["depends_on"] = depends_on  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert code in result.stderr
 
 
 def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: Path) -> None:

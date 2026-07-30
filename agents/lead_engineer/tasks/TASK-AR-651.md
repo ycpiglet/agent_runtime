@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-30T11:25:00+09:00
 title: Prepare v0.8.0 release candidate from pilot evidence
 status: planned
 priority: P0
@@ -34,6 +34,12 @@ tags:
   - work-cli-created
 depends_on:
   - TASK-AR-650
+  - TASK-AR-652
+  - TASK-AR-653
+  - TASK-AR-654
+  - TASK-AR-655
+  - TASK-AR-656
+  - TASK-AR-657
 ---
 
 # TASK-AR-651 - Prepare v0.8.0 release candidate from pilot evidence
@@ -44,11 +50,12 @@ depends_on:
 
 ## Scope
 
-- Run version/document cascade, tag freshness, clean-tag installs, mandatory browser smoke, release council gates, and prepare but do not publish the final release without Owner approval.
+- Close the release-critical operability tasks, run version/document cascade, tag freshness, clean-tag installs, mandatory browser smoke, release council gates, and prepare but do not publish the final release without Owner approval.
 
 ## Acceptance Criteria
 
 - README, package, module, template, lock, and release metadata agree on v0.8.0-rc.1.
+- TASK-AR-652 through TASK-AR-657 are closed with exact evidence and independent review.
 - Tag discovery cannot silently use stale local refs.
 - Clean installs from the exact candidate tag pass lifecycle and browser smoke.
 - Bean Wiki, Allimbot, and Autofolio evidence is linked from release readiness.

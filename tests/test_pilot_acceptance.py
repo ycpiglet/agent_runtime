@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -23,6 +24,14 @@ GREEN_FIXTURE = (
     / "pilots"
     / "bean-wiki"
     / "evidence-green-attempt-5.json"
+)
+AUTOFOLIO_FIXTURE = (
+    ROOT
+    / "tests"
+    / "fixtures"
+    / "pilots"
+    / "autofolio"
+    / "evidence-green-attempt-3.json"
 )
 CONTRACT_DIR = ROOT / "tests" / "fixtures" / "pilots" / "contracts"
 
@@ -62,6 +71,186 @@ def test_green_attempt_five_uses_its_own_exact_contract():
         == "8a56c8e5a89bfb5bbd7c6224be70f1ec69e41c339dcfe5b0c542b0b26361c39f"
     )
     assert pilot_acceptance.validate_evidence(payload, expected_host="bean-wiki") == []
+
+
+def test_autofolio_migration_fixture_uses_a_distinct_exact_contract():
+    payload = _payload(AUTOFOLIO_FIXTURE)
+    assert payload["schema"] == pilot_acceptance.MIGRATION_SCHEMA
+    assert "tasks" not in payload
+    assert payload["continuity"]["product_work_dispatch_count"] == 0
+    assert (
+        pilot_acceptance._semantic_sha256(payload)
+        == "1b3d702f012a2875e44df91b7391db7bce074f2e41e2929ed2bf7dd6193fec6b"
+    )
+    assert pilot_acceptance.validate_evidence(payload, expected_host="autofolio") == []
+
+
+def test_autofolio_migration_rejects_unclassified_or_temporary_seams():
+    payload = copy.deepcopy(_payload(AUTOFOLIO_FIXTURE))
+    payload["seam_reduction"]["unclassified_count"] = 1
+    payload["seam_reduction"]["temporary_conflict_count"] = 1
+    codes = {
+        finding["code"]
+        for finding in pilot_acceptance.validate_evidence(
+            payload,
+            expected_host="autofolio",
+        )
+    }
+    assert "unclassified-migration-seam" in codes
+    assert "temporary-migration-conflict" in codes
+
+
+def test_autofolio_migration_rejects_false_preservation_and_savings():
+    payload = copy.deepcopy(_payload(AUTOFOLIO_FIXTURE))
+    payload["preservation"]["protected_manifest_after"] = "0" * 64
+    payload["routing"]["savings_claim"] = "70%"
+    codes = {
+        finding["code"]
+        for finding in pilot_acceptance.validate_evidence(
+            payload,
+            expected_host="autofolio",
+        )
+    }
+    assert "protected-product-mutation" in codes
+    assert "unsupported-savings-claim" in codes
+
+
+def test_autofolio_migration_rejects_invented_product_execution_trace():
+    payload = copy.deepcopy(_payload(AUTOFOLIO_FIXTURE))
+    payload["continuity"]["product_work_dispatch_count"] = 1
+    codes = {
+        finding["code"]
+        for finding in pilot_acceptance.validate_evidence(
+            payload,
+            expected_host="autofolio",
+        )
+    }
+    assert "migration-product-work-executed" in codes
+
+
+def test_autofolio_migration_rejects_non_idempotence_and_external_effect():
+    payload = copy.deepcopy(_payload(AUTOFOLIO_FIXTURE))
+    payload["adoption"]["idempotence"]["after"]["lock_sha256"] = "0" * 64
+    payload["external_effects"]["provider_call"] = 1
+    codes = {
+        finding["code"]
+        for finding in pilot_acceptance.validate_evidence(
+            payload,
+            expected_host="autofolio",
+        )
+    }
+    assert "migration-not-idempotent" in codes
+    assert "external-effect-nonzero" in codes
+
+
+def test_autofolio_migration_cannot_hide_compound_scribe_or_routing_gaps():
+    payload = copy.deepcopy(_payload(AUTOFOLIO_FIXTURE))
+    payload["lifecycle"]["compound"]["record_id"] = ""
+    payload["findings"] = [
+        item
+        for item in payload["findings"]
+        if item["code"]
+        not in {
+            "scribe-source-overdue-active-task-unverified",
+            "model-tier-execution-equivalence",
+        }
+    ]
+    codes = {
+        finding["code"]
+        for finding in pilot_acceptance.validate_evidence(
+            payload,
+            expected_host="autofolio",
+        )
+    }
+    assert "compound-migration-proof-missing" in codes
+    assert "scribe-gap-not-declared" in codes
+    assert "routing-gap-not-declared" in codes
+
+
+def test_autofolio_migration_contract_requires_exactly_two_artifacts(
+    tmp_path: Path,
+):
+    contract = _payload(
+        CONTRACT_DIR / "autofolio-v080-green-attempt-3.json"
+    )
+    extra = copy.deepcopy(contract["artifact_bindings"][0])
+    extra["path"] = (
+        "tests/fixtures/pilots/autofolio/isolation-green-attempt-3-copy.json"
+    )
+    contract["artifact_bindings"].append(extra)
+    (tmp_path / "invalid.json").write_text(
+        json.dumps(contract, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        pilot_acceptance.ContractRegistryError,
+        match="artifact-bindings",
+    ):
+        pilot_acceptance.load_contract_registry(tmp_path)
+
+
+def test_autofolio_seam_ledger_is_independently_recounted(tmp_path: Path):
+    payload = _payload(AUTOFOLIO_FIXTURE)
+    registry = pilot_acceptance.load_contract_registry()
+    key = ("autofolio", "autofolio-v080-green-attempt-3")
+    contract = copy.deepcopy(registry[key])
+    for binding in contract["artifact_bindings"]:
+        source = ROOT / binding["path"]
+        target = tmp_path / binding["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        if binding["kind"] == "seam_ledger":
+            ledger = json.loads(target.read_text(encoding="utf-8"))
+            ledger["counts"]["managed"] -= 1
+            target.write_text(
+                json.dumps(ledger, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            binding["semantic_sha256"] = pilot_acceptance._semantic_sha256(
+                ledger
+            )
+    findings = pilot_acceptance.validate_evidence(
+        payload,
+        expected_host="autofolio",
+        contracts={key: contract},
+        artifact_root=tmp_path,
+    )
+    assert "seam-ledger-contract-mismatch" in {
+        finding["code"] for finding in findings
+    }
+
+
+def test_autofolio_seam_ledger_rejects_hidden_fields_and_absolute_paths(
+    tmp_path: Path,
+):
+    payload = _payload(AUTOFOLIO_FIXTURE)
+    registry = pilot_acceptance.load_contract_registry()
+    key = ("autofolio", "autofolio-v080-green-attempt-3")
+    contract = copy.deepcopy(registry[key])
+    for binding in contract["artifact_bindings"]:
+        source = ROOT / binding["path"]
+        target = tmp_path / binding["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        if binding["kind"] == "seam_ledger":
+            ledger = json.loads(target.read_text(encoding="utf-8"))
+            ledger["debug_path"] = "/private/host/path"
+            target.write_text(
+                json.dumps(ledger, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            binding["semantic_sha256"] = pilot_acceptance._semantic_sha256(
+                ledger
+            )
+    findings = pilot_acceptance.validate_evidence(
+        payload,
+        expected_host="autofolio",
+        contracts={key: contract},
+        artifact_root=tmp_path,
+    )
+    codes = {finding["code"] for finding in findings}
+    assert "artifact-absolute-path-leak" in codes
+    assert "invalid-seam-ledger-fields" in codes
 
 
 def test_host_ownership_tamper_is_detected():
@@ -313,3 +502,26 @@ def test_cli_check_passes_for_truthful_green_fixture():
     output = json.loads(result.stdout)
     assert output["status"] == "pass"
     assert output["contract_id"] == "bean-wiki:bean-wiki-v080-green-attempt-5"
+
+
+def test_cli_check_passes_for_autofolio_migration_fixture():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "pilot_acceptance.py"),
+            "--host",
+            "autofolio",
+            "--fixture",
+            str(AUTOFOLIO_FIXTURE.relative_to(ROOT)),
+            "--check",
+            "--json",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    output = json.loads(result.stdout)
+    assert output["status"] == "pass"
+    assert output["contract_id"] == "autofolio:autofolio-v080-green-attempt-3"

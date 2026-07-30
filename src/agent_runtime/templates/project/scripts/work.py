@@ -334,6 +334,111 @@ def _list_value(value: Any) -> list[str]:
     return []
 
 
+def _task_dependencies(task: dict[str, Any]) -> list[str]:
+    return _list_value(task.get("depends_on"))
+
+
+def _unit_dependencies(
+    task: dict[str, Any],
+    unit: dict[str, Any],
+) -> list[str]:
+    return list(
+        dict.fromkeys(
+            [
+                *_list_value(unit.get("depends_on")),
+                *_task_dependencies(task),
+            ]
+        )
+    )
+
+
+def _task_dependency_findings(
+    tasks: list[dict[str, Any]],
+    *,
+    existing_ids: set[str] | None = None,
+) -> list[str]:
+    findings: list[str] = []
+    new_ids = {
+        str(task.get("display_id") or "").strip()
+        for task in tasks
+        if str(task.get("display_id") or "").strip()
+    }
+    graph: dict[str, list[str]] = {}
+    for index, task in enumerate(tasks, start=1):
+        prefix = f"tasks[{index}]"
+        task_id = str(task.get("display_id") or "").strip()
+        raw = task.get("depends_on")
+        if raw is None:
+            dependencies: list[str] = []
+        elif not isinstance(raw, list) or any(
+            not isinstance(item, str) or not item.strip() for item in raw
+        ):
+            findings.append(f"input:{prefix}:depends_on:missing-or-invalid")
+            continue
+        else:
+            dependencies = [item.strip() for item in raw]
+        duplicates = sorted(
+            {
+                dependency
+                for dependency in dependencies
+                if dependencies.count(dependency) > 1
+            }
+        )
+        for dependency in duplicates:
+            findings.append(
+                f"input:{prefix}:depends_on:duplicate:{dependency}"
+            )
+        for dependency in dependencies:
+            if not TASK_DISPLAY_RE.fullmatch(dependency):
+                findings.append(
+                    f"input:{prefix}:depends_on:invalid:{dependency}"
+                )
+            elif task_id and dependency == task_id:
+                findings.append(
+                    f"input:{prefix}:depends_on:self:{dependency}"
+                )
+            elif (
+                existing_ids is not None
+                and dependency not in new_ids
+                and dependency not in existing_ids
+            ):
+                findings.append(
+                    f"input:{prefix}:depends_on:missing:{dependency}"
+                )
+        if task_id:
+            graph[task_id] = [
+                dependency
+                for dependency in dependencies
+                if dependency in new_ids and dependency != task_id
+            ]
+
+    visiting: list[str] = []
+    visited: set[str] = set()
+
+    def visit(task_id: str) -> bool:
+        if task_id in visited:
+            return False
+        if task_id in visiting:
+            start = visiting.index(task_id)
+            cycle = visiting[start:] + [task_id]
+            findings.append(
+                f"input:tasks:depends_on:cycle:{'->'.join(cycle)}"
+            )
+            return True
+        visiting.append(task_id)
+        for dependency in graph.get(task_id, []):
+            if visit(dependency):
+                return True
+        visiting.pop()
+        visited.add(task_id)
+        return False
+
+    for task_id in sorted(graph):
+        if visit(task_id):
+            break
+    return findings
+
+
 def _text_lines(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
@@ -615,6 +720,9 @@ def _render_task(
         "acceptance": acceptance,
         "verification": verification,
     }
+    dependencies = _task_dependencies(task)
+    if dependencies:
+        meta["depends_on"] = dependencies
     return (
         _frontmatter(meta)
         + "\n\n"
@@ -679,6 +787,9 @@ def _render_unit(
         "handoff": unit["handoff"],
         "stop_condition": unit["stop_condition"],
     }
+    dependencies = _unit_dependencies(task, unit)
+    if dependencies:
+        meta["depends_on"] = dependencies
     steps = _text_lines(unit.get("steps"))
     sections = [
         ("Context", str(unit["context"]).strip()),
@@ -824,12 +935,18 @@ def _validate_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str
     duplicates = sorted({display_id for display_id in display_ids if display_ids.count(display_id) > 1})
     for display_id in duplicates:
         findings.append(f"input:tasks:duplicate-display-id:{display_id}")
+    findings.extend(_task_dependency_findings(tasks))
     if findings:
         raise WorkRegistrationError(findings)
     return initiative, taskset, tasks
 
 
-def _existing_task_matches(path: Path, taskset_id: str, initiative_id: str) -> bool:
+def _existing_task_matches(
+    path: Path,
+    taskset_id: str,
+    initiative_id: str,
+    depends_on: list[str] | None = None,
+) -> bool:
     if not path.exists():
         return False
     meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
@@ -837,6 +954,10 @@ def _existing_task_matches(path: Path, taskset_id: str, initiative_id: str) -> b
         str(meta.get("id") or path.stem) == path.stem
         and str(meta.get("task_set_id") or "") == taskset_id
         and str(meta.get("initiative_id") or "") == initiative_id
+        and (
+            depends_on is None
+            or _list_value(meta.get("depends_on")) == depends_on
+        )
     )
 
 
@@ -1031,11 +1152,23 @@ def _unit_targets(root: Path, tasks: list[dict[str, Any]]) -> list[Path]:
     return targets
 
 
-def _existing_unit_matches(path: Path, task_id: str, unit_id: str) -> bool:
+def _existing_unit_matches(
+    path: Path,
+    task_id: str,
+    unit_id: str,
+    depends_on: list[str] | None = None,
+) -> bool:
     if not path.exists():
         return False
     meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
-    return str(meta.get("unit_id") or path.stem) == unit_id and str(meta.get("task_id") or "") == task_id
+    return (
+        str(meta.get("unit_id") or path.stem) == unit_id
+        and str(meta.get("task_id") or "") == task_id
+        and (
+            depends_on is None
+            or _list_value(meta.get("depends_on")) == depends_on
+        )
+    )
 
 
 def _preflight_existing(
@@ -1066,12 +1199,22 @@ def _preflight_existing(
         findings.append(f"{_rel(root, plan_path)}: existing-record-conflict:{taskset['id']}")
     for task in tasks:
         task_path = _task_path(root, str(task["display_id"]))
-        if not _existing_task_matches(task_path, str(taskset["id"]), str(initiative["id"])):
+        if not _existing_task_matches(
+            task_path,
+            str(taskset["id"]),
+            str(initiative["id"]),
+            _task_dependencies(task),
+        ):
             findings.append(f"{_rel(root, task_path)}: existing-task-conflict:{task['display_id']}")
         for unit in _units_for(task):
             unit_id = str(unit["unit_id"])
             unit_path = _unit_path(root, str(task["display_id"]), unit_id)
-            if not _existing_unit_matches(unit_path, str(task["display_id"]), unit_id):
+            if not _existing_unit_matches(
+                unit_path,
+                str(task["display_id"]),
+                unit_id,
+                _unit_dependencies(task, unit),
+            ):
                 findings.append(f"{_rel(root, unit_path)}: existing-unit-conflict:{unit_id}")
     if findings:
         raise WorkRegistrationError(findings)
@@ -1105,10 +1248,26 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
             duplicates = sorted({display_id for display_id in display_ids if display_ids.count(display_id) > 1})
             raise WorkRegistrationError([f"input:tasks:duplicate-display-id:{display_id}" for display_id in duplicates])
         task_displays = task_identity._task_display_ids(root)  # noqa: SLF001
+        dependency_findings = _task_dependency_findings(
+            tasks,
+            existing_ids=set(task_displays),
+        )
+        if dependency_findings:
+            raise WorkRegistrationError(dependency_findings)
         for display_id in display_ids:
             if display_id in task_displays:
                 task_path = _task_path(root, display_id)
-                if not _existing_task_matches(task_path, str(taskset["id"]), str(initiative["id"])):
+                matching_task = next(
+                    task
+                    for task in tasks
+                    if str(task["display_id"]) == display_id
+                )
+                if not _existing_task_matches(
+                    task_path,
+                    str(taskset["id"]),
+                    str(initiative["id"]),
+                    _task_dependencies(matching_task),
+                ):
                     raise WorkRegistrationError([f"task-id:display-id-exists:{display_id}"])
             active = task_identity._active_reservation_for_display(ledger, display_id, now_dt)  # noqa: SLF001
             if active:

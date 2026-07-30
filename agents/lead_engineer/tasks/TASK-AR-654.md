@@ -1,0 +1,67 @@
+---
+schema_version: agent-runtime-work-item/v1
+id: TASK-AR-654
+display_id: TASK-AR-654
+task_uid: ef3cb8e5-d5b9-443e-ad93-5948ade62659
+work_id: TASK-AR-654
+work_uid: ef3cb8e5-d5b9-443e-ad93-5948ade62659
+kind: task
+parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+registered_at: 2026-07-30T11:25:00+09:00
+created_at: 2026-07-30T11:25:00+09:00
+updated_at: 2026-07-30T11:25:00+09:00
+title: Require Compound for declared repeated failures
+status: planned
+priority: P1
+difficulty: M
+est_hours: 8
+est_tokens: 16000
+owner: lead-engineer
+team: quality
+initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
+project_id: PROJECT-AGENT-RUNTIME
+task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md
+reservation_id: RES-20260730-112500-842c7890-03
+origin_type: owner_request
+origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+created_by: codex-root-task-ar-650-planner
+summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
+planner_model_tier: planner_high
+worker_model_tier: worker_standard
+reviewer_model_tier: reviewer_standard
+tags:
+  - work-cli-created
+acceptance:
+  - Claim-time knowledge lookup remains before persistence.
+  - A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.
+  - The Compound prevention record links to a regression, gate, task proposal, or accepted watch state.
+  - Generic substantial work may still close with an appropriate linked review or retro.
+  - failure-to-regression is included in the consumer core profile and asset registry.
+verification:
+  - python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q
+  - python scripts/template_mirror_gate.py --check
+---
+
+# TASK-AR-654 - Require Compound for declared repeated failures
+
+## Goal
+
+- Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
+
+## Scope
+
+- Make defect signatures and repeated_failure triggers require a linked canonical Compound record and ship the failure-to-regression operating skill to consumers.
+
+## Acceptance Criteria
+
+- Claim-time knowledge lookup remains before persistence.
+- A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.
+- The Compound prevention record links to a regression, gate, task proposal, or accepted watch state.
+- Generic substantial work may still close with an appropriate linked review or retro.
+- failure-to-regression is included in the consumer core profile and asset registry.
+
+## Verification
+
+- `python -m pytest tests/test_compound_record.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py -q`
+- `python scripts/template_mirror_gate.py --check`

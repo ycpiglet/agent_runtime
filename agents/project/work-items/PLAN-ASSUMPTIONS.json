@@ -993,6 +993,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+          "value": "7d6cc73cc9a445ee60420dd23166debd74178216e10c37b7d1c0eb7e85d57ddb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/model_routing.py",
+          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
+        }
+      ],
+      "design_record": "reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md",
+      "recorded_at": "2026-07-30T11:28:35+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-06-20-taskset-ar-visual-asset-adoption-registration.md",
           "value": "c93551e9f2b50b26f56a7a2d3c61c4a7fdf598f5ad5b09a7db589d7c7371e4b1"
         },
@@ -1201,5 +1229,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T10:27:02+09:00"
+  "updated_at": "2026-07-30T11:28:35+09:00"
 }

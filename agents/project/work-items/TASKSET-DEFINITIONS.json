@@ -233,6 +233,21 @@
       ]
     },
     {
+      "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "display_name": "v0.8 Operability Hardening",
+      "summary": "Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.",
+      "order": 645,
+      "tasks": [
+        "TASK-AR-652",
+        "TASK-AR-653",
+        "TASK-AR-654",
+        "TASK-AR-655",
+        "TASK-AR-656",
+        "TASK-AR-657",
+        "TASK-AR-658"
+      ]
+    },
+    {
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
       "display_name": "Release Cadence Query Recovery",
       "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",

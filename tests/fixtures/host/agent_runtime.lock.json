@@ -242,7 +242,7 @@
       "scripts/verification_freshness_gate.py": "sha256:ecd9af5956ba6b9692f8af35bbab181d6cf6f07ca1205e3461e8dd76f66fe410",
       "scripts/verify_sdk_backend.py": "sha256:d3b25541b8ea286ba630d4da1d01644b4e0da1d6b14ac1b193610e4d4e8d7e9f",
       "scripts/wave_dispatcher.py": "sha256:1721527376a7206d43903eb27eac244480127f569273f19ddfc9cdf03b2ba2b9",
-      "scripts/work.py": "sha256:ea65f08143efeb06bf0a24b5ffd46f8d2039d3cb10532ed010a05e8a3566a41c",
+      "scripts/work.py": "sha256:cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281",
       "scripts/work_item_classifier.py": "sha256:03237128665f2756847845528bf910a7a8143c1892220402088354f5eb96b926",
       "scripts/work_schema_gate.py": "sha256:5c471d81c92f198b0ec3b5b9b495e574b0ffebb7b842095f84fd15ed5f8c3b41",
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:d8a663bc65fac51f05d68e3db203311a79aeff8408a1dffb812e3ffaabaaf992",
+    "template_digest": "sha256:b13770b98137574ffceff125dcd3fb4672f57d13b468d52fd7d4020ef95e68ae",
     "template_files": 251
   },
   "profiles": [

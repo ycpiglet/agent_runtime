@@ -15,7 +15,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.json
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-30T10:20:00+09:00
+updated_at: 2026-07-30T12:00:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -93,6 +93,7 @@ target_files:
 scope: First preserve work-registration task order in the canonical taskset registry and prove the current lane selects TASK-AR-650 before TASK-AR-651. Preserve exact Runtime 4929415d attempt 1 and c110e6df attempt 2 as red evidence, promote the direct-claim T0/readiness contract into Runtime, and pin a new clean repair candidate. Then, from an entirely fresh attempt-3 target and same-commit control at Autofolio ca88433c, migrate v0.6 config/lock/ownership to that candidate's full-runtime profile, classify every one of the 20 legacy unmanaged paths, and apply only safe Runtime updates. Protect all product, trading, broker, credential, migration, dependency, database, workflow, and deploy surfaces. Do not implement or alter investment-product behavior.
 acceptance:
   - Work registration persists exact ordered task membership; old registry rows remain readable; invalid membership fails closed; the live taskset selects TASK-AR-650 and TASK-AR-651 depends on it.
+  - Work registration preserves declared task dependencies into worker units and rejects missing, invalid, duplicate, self, and cyclic dependencies before writes.
   - Attempts 1 and 2 remain pinned respectively to exact Runtime 4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2 and c110e6df355b960a3c32bd8187eb792b26c8f18f as red evidence; attempt 3 is pinned to a later exact clean repair candidate and its product, template, and scripts trees. All product checkouts stay clean.
   - Target and control start at Autofolio ca88433cf155fd03d616584fda7ed4aa3d33fd71. The control never changes and primary drift is observation-only.
   - The exact v0.6 source contains 20 unmanaged paths. Every path has one evidenced managed, seed_once, host_owned, generated, or temporary_conflict disposition; no stale 21-path claim remains.
@@ -171,6 +172,7 @@ work and never mutate product or trading behavior.
 ## Acceptance Criteria
 
 - Registered task order is durable and 650 precedes 651.
+- Registered task dependencies survive into worker units and invalid dependency graphs fail before writes.
 - Migration is deterministic, conflict-free, and idempotent.
 - Live host data and product/risk surfaces retain explicit ownership and exact
   before/after digests.

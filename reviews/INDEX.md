@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T10:21:11+09:00
-record_count: 1119
+generated_at: 2026-07-30T11:37:14+09:00
+record_count: 1124
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1119` review and evidence records under `reviews/`.
+- Summary: indexed `1124` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1119` files |
+| Reviews covered | pass | `1124` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -166,6 +166,7 @@ record_count: 1119
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
 | `reviews/PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1.md` | `PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1` | md | record | pass | Allimbot Agent Runtime v0.8 Green Pilot — Attempt 1 |
+| `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3` | md | passed | pass | Autofolio v0.8 Migration Pilot - Green Attempt 3 |
 | `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 1 |
 | `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 2 |
 | `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
@@ -223,6 +224,7 @@ record_count: 1119
 | `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RESEARCH-2026-06-24-oss-sprite-generators.md` | `RESEARCH-2026-06-24-oss-sprite-generators` | md | synthesized (license + animation facts fetched from primary sources this run; integration sketch is design, not yet spiked) | n/a | RESEARCH — OSS Sprite Generators for Cute, Role-Distinct, Animated Office-Map Characters |
 | `reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md` | `RESEARCH-2026-07-28-v080-adoption-enforcement-scope` | md | record | watch | Agent Runtime v0.8 Adoption and Enforcement Scope |
+| `reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md` | `RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit` | md | complete | n/a | Agent Runtime 다음 릴리스 하네스 갭 정밀 감사 |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -644,6 +646,9 @@ record_count: 1119
 | `reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md` | `REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan` | md | approved | pass | TASK-AR-649 Allimbot Pilot T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T4 Replan |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
