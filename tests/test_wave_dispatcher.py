@@ -555,6 +555,14 @@ def _host_write_unit(
     metadata: dict[str, object] | None = None,
 ) -> str:
     unit = f"UNIT-{task}-{index:03d}"
+    selected_targets = targets or [f"scripts/{task.lower()}.py"]
+    for target in selected_targets:
+        if target.startswith("new:") or "*" in target:
+            continue
+        path = root / target
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            path.write_text("fixture\n", encoding="utf-8")
     fields: dict[str, object] = {
         "unit_id": unit,
         "task_id": task,
@@ -562,7 +570,13 @@ def _host_write_unit(
         "project_id": HOST_PROJECT,
         "status": status,
         "model_tier": "worker_standard",
-        "target_files": targets or [f"scripts/{task.lower()}.py"],
+        "context": "Wave dispatcher host fixture.",
+        "inputs": [f"agents/lead_engineer/tasks/{task}.md"],
+        "target_files": selected_targets,
+        "scope": "Only this host fixture.",
+        "acceptance": ["Dispatch is safe."],
+        "verification": ["pytest"],
+        "handoff": "Report the result.",
         "stop_condition": f"stop_after:{unit}:no_adjacent_taskset",
     }
     if depends:
@@ -574,7 +588,47 @@ def _host_write_unit(
     ]
     _host_write(
         root / "agents/lead_engineer/tasks/units" / task / f"{unit}.md",
-        ["---", *encoded, "---"],
+        [
+            "---",
+            *encoded,
+            "---",
+            "",
+            "## Context",
+            "",
+            "Wave dispatcher host fixture.",
+            "",
+            "## Inputs",
+            "",
+            f"- agents/lead_engineer/tasks/{task}.md",
+            "",
+            "## Target Files",
+            "",
+            *(f"- {target}" for target in selected_targets),
+            "",
+            "## Scope",
+            "",
+            "Only this host fixture.",
+            "",
+            "## Steps",
+            "",
+            "1. Dispatch safely.",
+            "",
+            "## Acceptance Criteria",
+            "",
+            "- Dispatch is safe.",
+            "",
+            "## Verification",
+            "",
+            "- pytest",
+            "",
+            "## Handoff",
+            "",
+            "Report the result.",
+            "",
+            "## Stop Boundary",
+            "",
+            "Stop after this fixture.",
+        ],
     )
     return unit
 
@@ -824,6 +878,11 @@ def _host_prepare(monkeypatch: pytest.MonkeyPatch, root: Path, nodes: list[host_
     monkeypatch.setattr(host_dispatcher, "select_units", lambda *_a, **_k: (nodes, f"taskset:{HOST_TASKSET}"))
     monkeypatch.setattr(host_dispatcher, "compute_waves", lambda *_a, **_k: plan)
     monkeypatch.setattr(host_dispatcher, "_load_claims", lambda _root: [])
+    monkeypatch.setattr(
+        host_dispatcher,
+        "_candidate_preflight_findings",
+        lambda *_a, **_k: [],
+    )
     monkeypatch.setattr(host_dispatcher, "role_routing", None)
 
 
@@ -876,6 +935,27 @@ def test_claim_command_uses_orchestrator_reservation_mode(tmp_path: Path) -> Non
         branch="fix/task-901", args=_host_args(tmp_path), allow_parallel_task_set=False, suffix=None,
     )
     assert command[command.index("--mode") + 1] == "orchestrator"
+    assert command[-1] == "--json"
+
+
+def test_claim_command_propagates_explicit_scope_transition_approval(
+    tmp_path: Path,
+) -> None:
+    args = _host_args(tmp_path)
+    args.scope_transition_approved = True
+
+    command = host_dispatcher._claim_command(
+        tmp_path,
+        _host_node(tmp_path),
+        wave_no=1,
+        worktree_path=".worktrees/TASK-901",
+        branch="fix/task-901",
+        args=args,
+        allow_parallel_task_set=False,
+        suffix=None,
+    )
+
+    assert "--scope-transition-approved" in command
     assert command[-1] == "--json"
 
 

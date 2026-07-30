@@ -1,33 +1,59 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T08:35:15+09:00
-updated_by: codex-root-task-ar-649-001
+updated_at: 2026-07-30T08:36:49+09:00
+updated_by: codex-root-task-ar-650-001
 current_state:
-  summary: "Bean Wiki and Allimbot pilots are complete; Autofolio migration rehearsal is the next bounded v0.8 task."
-  status: ready
+  summary: "Autofolio attempt 1 is pinned red; Runtime host-contract repairs are green and attempt 2 is active."
+  status: in_progress
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 11
+  step_index: 12
   step_total: 13
-  progress_pct: 85
-  status_text: "TASK-AR-649 closed with exact Allimbot acceptance and independent W4b; TASK-AR-650 is next."
+  progress_pct: 90
+  status_text: "TASK-AR-650 claimed after T3 replan; pinning the repaired Runtime candidate before clean Autofolio attempt 2."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260730-083649-task-ar-650-ar650001
+      agent_role: lead-engineer
+      team_id: release-integrity
+      agent_instance_id: codex-root-task-ar-650-001
+      display_name: lead_engineer@orchestrator-01
+      callsite_id: codex-root-task-ar-650
+      pane_id: root
+      task_id: TASK-AR-650
+      unit_id: UNIT-TASK-AR-650-001
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: claimed
+      phase: taskset-claimed
+      progress_pct: 0
+      step_index: 12
+      step_total: 13
+      status_text: "TASK-AR-650 claimed after T3 replan; preparing isolated Autofolio migration target."
+      worktree_path: /home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl
+      branch: codex/unit-task-ar-648-002-implementation
+      claim_path: agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.log.md
+      last_heartbeat: 2026-07-30T08:36:49+09:00
+  current_teams:
+    - team_id: release-integrity
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: active
 resume:
-  active_task: none
-  active_task_set: none
-  branch_policy: "Preserve completed Bean and Allimbot evidence. Replan and claim TASK-AR-650 before creating any Autofolio migration target."
+  active_task: TASK-AR-650
+  active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+  branch_policy: "Keep exact Runtime 4929415d and Autofolio attempt 1 red; use only a new clean repair-candidate product and new attempt-2 target/control."
   next_actions:
-    - "Run a W0/T3 replan for TASK-AR-650 using the completed Bean and Allimbot findings."
-    - "Create a clean Autofolio migration target and frozen control only after a canonical claim."
-    - "Keep product behavior, live trading state, credentials, origin push, and release actions outside the rehearsal."
+    - "Pin the locally committed Runtime repair candidate and its exact product/template/scripts trees."
+    - "Create fresh Autofolio attempt-2 target and frozen control at ca88433cf155fd03d616584fda7ed4aa3d33fd71."
+    - "Keep product behavior, live trading state, credentials, origin push, and every release action outside the rehearsal."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260730-083649-task-ar-650-ar650001.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
@@ -64,7 +90,7 @@ pointers:
       status: completed
     - task_id: TASK-AR-650
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-651
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
       status: planned

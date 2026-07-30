@@ -44,6 +44,8 @@ import claim_guard
 import compound_record
 import model_routing
 import plan_assumption_gate
+import status_alias
+import task_unit_readiness_gate
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
@@ -848,6 +850,139 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
         file=sys.stderr,
     )
     return True
+
+
+def _canonical_taskset_statuses(root: Path, task_set_id: str) -> list[str]:
+    tasksets_dir = root / "agents" / "project" / "initiatives"
+    if not tasksets_dir.is_dir():
+        return []
+    statuses: list[str] = []
+    for path in sorted(tasksets_dir.glob("TASKSET-*.md")):
+        meta, _body = backlog_board.parse_frontmatter(
+            path.read_text(encoding="utf-8")
+        )
+        if str(meta.get("work_id") or "").strip() == task_set_id:
+            statuses.append(str(meta.get("status") or "").strip())
+    return statuses
+
+
+def _effective_taskset_id(
+    root: Path,
+    *,
+    task_id: str,
+    requested_taskset_id: str,
+) -> tuple[str, list[str]]:
+    """Resolve a missing taskset from the task and reject identity drift."""
+    requested = str(requested_taskset_id or "").strip()
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    matches = [task for task in tasks if task.task_id == task_id]
+    if len(matches) != 1:
+        return requested, []
+    actual = str(matches[0].task_set_id or "").strip()
+    if requested and actual != requested:
+        return requested, [
+            f"task-taskset-mismatch:{actual or 'missing'}:{requested}"
+        ]
+    return requested or actual, []
+
+
+def _claim_readiness_findings(
+    root: Path,
+    *,
+    task_id: str,
+    task_set_id: str,
+    unit_id: str,
+    unit_spec: str,
+) -> list[str]:
+    """Return pre-persistence readiness findings for orchestrated claims.
+
+    This Python entry point lets taskset and wave dispatchers complete their
+    entire preflight before spawning the claim subprocess. The claim CLI keeps
+    its existing compatibility boundary; callers that already selected a unit
+    can use this function to guarantee that no claim, git, or worktree mutation
+    begins after readiness has become invalid.
+    """
+    findings: list[str] = []
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    task_matches = [task for task in tasks if task.task_id == task_id]
+    if len(task_matches) > 1:
+        findings.append(f"task:duplicate-id:{task_id}")
+    elif not task_matches:
+        findings.append(f"task:not-found:{task_id}")
+    else:
+        task_status = str(task_matches[0].status or "").strip()
+        if status_alias.is_blocked(task_status):
+            findings.append(f"task:blocked-status:{task_status}")
+        actual_taskset = str(task_matches[0].task_set_id or "").strip()
+        if task_set_id and actual_taskset != task_set_id:
+            findings.append(
+                f"task-taskset-mismatch:{actual_taskset or 'missing'}:"
+                f"{task_set_id}"
+            )
+
+    taskset_statuses = (
+        _canonical_taskset_statuses(root, task_set_id) if task_set_id else []
+    )
+    if len(taskset_statuses) > 1:
+        findings.append(f"taskset:duplicate-id:{task_set_id}")
+    elif taskset_statuses and status_alias.is_blocked(taskset_statuses[0]):
+        findings.append(f"taskset:blocked-status:{taskset_statuses[0]}")
+
+    units = task_unit_readiness_gate.load_unit_specs(root)
+    task_units = [
+        unit
+        for unit in units
+        if str(unit[1].get("task_id") or "").strip() == task_id
+    ]
+    if not unit_id and not unit_spec and not task_units:
+        return list(dict.fromkeys(findings))
+
+    selected_id = str(unit_id or "").strip()
+    if not selected_id and unit_spec:
+        spec_path = Path(unit_spec)
+        if not spec_path.is_absolute():
+            spec_path = root / spec_path
+        matches = [
+            unit for unit in units if unit[0].resolve() == spec_path.resolve()
+        ]
+        if len(matches) == 1:
+            selected_id = str(matches[0][1].get("unit_id") or "").strip()
+        elif not matches:
+            findings.append(f"unit:spec-not-registered:{unit_spec}")
+        else:
+            findings.append(f"unit:duplicate-spec:{unit_spec}")
+
+    gate_findings = task_unit_readiness_gate.check_root(
+        root,
+        task_id=task_id,
+        unit_id=selected_id,
+        require_ready=True,
+    )
+    selected_units = task_units
+    if selected_id:
+        selected_units = [
+            unit
+            for unit in task_units
+            if str(unit[1].get("unit_id") or "").strip() == selected_id
+        ]
+    localized_ready_statuses = {
+        str(meta.get("status") or "").strip()
+        for _path, meta, _body in selected_units
+        if status_alias.normalize_status(meta.get("status"))
+        in task_unit_readiness_gate.READY_STATUSES
+    }
+    for finding in gate_findings:
+        if any(
+            finding.endswith(f"unit:not-worker-ready:{ready_status}")
+            for ready_status in localized_ready_statuses
+        ):
+            continue
+        findings.append(finding)
+    return list(dict.fromkeys(findings))
 
 
 def _security_service_refusal(

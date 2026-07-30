@@ -920,23 +920,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md",
-          "value": "0c5920a33182a3997bac8ba59ac83aed37154dca17d7ff3c3c1c1242d88d5271"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md",
+          "value": "4e2bc8cd10232c3effe8400f7852f62ace03b89e67795f05f4987ba02a1812de"
         },
         {
           "kind": "sha256",
-          "path": "agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md",
-          "value": "5fdca7f44afed5ae8fa9909c0065fda74166591ec34934691c8787707a1118ec"
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
+          "value": "802fb436e0808bfc1d22b6379745f847b2a07928ffd3e735494020eb5f518b93"
         },
         {
           "kind": "sha256",
-          "path": "docs/ALLIMBOT-INTEGRATION.md",
-          "value": "c5fda009bdca7c61c26e742b898d1e671d95f28c7dc5e617536b0f5be4925010"
-        },
-        {
-          "kind": "sha256",
-          "path": "docs/pilot-isolation-contract.md",
-          "value": "7e32c0d005ca0bdb46560f4962d8bf8e2960d9373d3953cf04d54c066601e195"
+          "path": "docs/configuration-v2.md",
+          "value": "6ad896aaca68f811c542b5619d371da5767c5708a04eacf067a94eae5159a51e"
         },
         {
           "kind": "sha256",
@@ -945,22 +940,37 @@
         },
         {
           "kind": "sha256",
+          "path": "docs/pilot-isolation-contract.md",
+          "value": "7e32c0d005ca0bdb46560f4962d8bf8e2960d9373d3953cf04d54c066601e195"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "ea65f08143efeb06bf0a24b5ffd46f8d2039d3cb10532ed010a05e8a3566a41c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_dispatcher.py",
+          "value": "881d315f735380bb33817038ee5c3faa2c5a34353de6a1e81235dc0205237b3e"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
           "value": "89c5d2751781623a126bb93424fcb944b3272c4ae8a3f2b00de0d9d5b5acf2e1"
         },
         {
           "kind": "sha256",
-          "path": "scripts/pilot_isolation_gate.py",
-          "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
+          "path": "scripts/pilot_acceptance.py",
+          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
         },
         {
           "kind": "sha256",
-          "path": "scripts/pilot_acceptance.py",
-          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
+          "path": "scripts/pilot_isolation_gate.py",
+          "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md",
-      "recorded_at": "2026-07-30T07:31:59+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md",
+      "recorded_at": "2026-07-30T08:41:30+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1176,5 +1186,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T07:31:59+09:00"
+  "updated_at": "2026-07-30T08:41:30+09:00"
 }

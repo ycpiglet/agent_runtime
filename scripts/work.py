@@ -862,15 +862,21 @@ def _load_taskset_registry(root: Path) -> dict[str, Any]:
     return payload
 
 
-def _write_taskset_registry(root: Path, taskset: dict[str, Any]) -> None:
+def _write_taskset_registry(
+    root: Path,
+    taskset: dict[str, Any],
+    tasks: list[dict[str, Any]],
+) -> None:
     path = root / TASKSET_REGISTRY_PATH
     payload = _load_taskset_registry(root)
     rows = [row for row in payload.get("tasksets", []) if isinstance(row, dict)]
+    task_ids = [str(task["display_id"]) for task in tasks]
     new_row = {
         "task_set_id": taskset["id"],
         "display_name": taskset["display_name"],
         "summary": taskset["summary"],
         "order": int(taskset.get("order", 500)),
+        "tasks": task_ids,
     }
     for row in rows:
         if row.get("task_set_id") == taskset["id"]:
@@ -880,8 +886,21 @@ def _write_taskset_registry(root: Path, taskset: dict[str, Any]) -> None:
                 "summary": row.get("summary"),
                 "order": int(row.get("order", 500)),
             }
-            if comparable != new_row:
+            if comparable != {key: value for key, value in new_row.items() if key != "tasks"}:
                 raise WorkRegistrationError([f"{_rel(root, path)}: taskset-definition-conflict:{taskset['id']}"])
+            existing_tasks = row.get("tasks")
+            if existing_tasks is not None and existing_tasks != task_ids:
+                raise WorkRegistrationError(
+                    [f"{_rel(root, path)}: taskset-task-order-conflict:{taskset['id']}"]
+                )
+            if existing_tasks is None:
+                # Backward-compatible migration for registry rows created
+                # before ordered membership was persisted.
+                row["tasks"] = task_ids
+                path.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8",
+                )
             return
     rows.append(new_row)
     rows.sort(key=lambda row: (int(row.get("order", 500)), str(row.get("task_set_id") or "")))
@@ -1100,7 +1119,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
         review_path = _review_path(root, now_text, taskset)
         mode = _preflight_existing(root, initiative, taskset, tasks, initiative_path, plan_path, review_path)
         if mode == "already_exists":
-            _write_taskset_registry(root, taskset)
+            _write_taskset_registry(root, taskset, tasks)
             _ensure_owner_doc(root, review_path)
             _refresh_generated_views(root)
             return {
@@ -1204,7 +1223,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
     finally:
         task_identity._release_lock(lock_path, fd)  # noqa: SLF001
 
-    _write_taskset_registry(root, taskset)
+    _write_taskset_registry(root, taskset, tasks)
     _ensure_owner_doc(root, review_path)
     _refresh_generated_views(root)
     return {

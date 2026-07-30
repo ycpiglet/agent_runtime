@@ -637,7 +637,9 @@ def _pointer_findings(
         return [
             _pointer_finding(
                 "pointer-missing",
-                "canonical pointer is required when STATUS is absent",
+                "canonical pointer is required when STATUS is absent; "
+                "continuity:status-missing: legacy candidates absent "
+                f"({', '.join(path.as_posix() for path in STATUS_CANDIDATES)})",
             )
         ]
     try:

@@ -513,6 +513,46 @@ def test_codex_hook_contract_reports_missing_windows_command(tmp_path):
     assert any(item.kind == "missing-command-windows" for item in findings)
 
 
+def test_codex_hook_contract_accepts_python_alias_for_migration(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    hook = payload["hooks"]["SessionStart"][0]["hooks"][0]
+    hook["command"] = "python -m agent_runtime.hook_runtime session-start"
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert not any(item.severity == "blocker" for item in findings)
+    assert any(item.kind == "compatible-python-alias" for item in findings)
+
+
+def test_codex_hook_contract_preserves_legacy_hook_only_beside_dispatcher(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    payload["hooks"]["UserPromptSubmit"][0]["hooks"].append(
+        {
+            "type": "command",
+            "command": "python scripts/taskset_prompt_hook.py",
+            "timeout": 20,
+        }
+    )
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert not any(item.severity == "blocker" for item in findings)
+    assert any(
+        item.kind == "legacy-hook-command-preserved"
+        and "taskset_prompt_hook.py" in item.detail
+        for item in findings
+    )
+    assert not any(
+        item.kind == "missing-command-windows"
+        and "prompt-submit" in item.detail
+        for item in findings
+    )
+
+
 def test_codex_hook_contract_reports_stale_posix_and_windows_commands(tmp_path):
     root = _prepare_host_root(tmp_path)
     payload = _hook_payload(root)

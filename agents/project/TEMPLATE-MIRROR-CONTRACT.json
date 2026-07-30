@@ -95,7 +95,7 @@
     "owner_governance_gate.py": {
       "reason": "The source chain validates source-template parity and repository-only substrates; the consumer chain documents and guards those omissions.",
       "source_sha256": "sha256:6d3efb90f52521c93e3d97a3bf7a5ecf9568bbdcbdc24e13fcb364f8cd2050a9",
-      "template_sha256": "sha256:5f773a66c02e1e39d1fe78d6e561dd03e476dee9efa38d699b44086dc0df7331"
+      "template_sha256": "sha256:2ad02d797d9aa076069d3ec38cdc89aefdf82c123800f179db3f6cd4c2ebbf08"
     },
     "stop_hook_owner_governance.py": {
       "reason": "The packaged stop hook preserves consumer compatibility flags, while the source hook reports repository-specific governance summaries.",

@@ -529,7 +529,14 @@ def _write_unit(root: Path, task_id: str, index: int, *, target_files: list[str]
     unit_id = f"UNIT-{task_id}-{index:03d}"
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"{unit_id}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
+    for entry in target_files:
+        if entry.startswith("new:"):
+            continue
+        target = root / entry
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("# role-routing fixture\n", encoding="utf-8")
     targets = "\n".join(f"  - {entry}" for entry in target_files)
+    target_bullets = "\n".join(f"- `{entry}`" for entry in target_files)
     path.write_text(
         f"""---
 unit_id: {unit_id}
@@ -554,6 +561,43 @@ stop_condition: "stop_after:{unit_id}:no_adjacent_taskset"
 ---
 
 # {unit_id}
+
+## Context
+
+Exercise the wave role-routing seam with a canonical worker-ready unit.
+
+## Inputs
+
+- `agents/lead_engineer/tasks/{task_id}.md`
+
+## Target Files
+
+{target_bullets}
+
+## Scope
+
+Only the synthetic role-routing fixture is in scope.
+
+## Steps
+
+1. Dispatch the fixture unit through the real wave CLI.
+2. Inspect primary and optional overlay claims.
+
+## Acceptance Criteria
+
+- The flag-specific overlay behavior is additive and deterministic.
+
+## Verification
+
+- `python -m pytest tests/test_role_routing_wiring.py -q`
+
+## Handoff
+
+Report the emitted claim identities and roles.
+
+## Stop Boundary
+
+Stop after this unit; do not dispatch adjacent tasksets.
 """,
         encoding="utf-8",
     )

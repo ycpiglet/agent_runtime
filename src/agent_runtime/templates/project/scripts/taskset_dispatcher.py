@@ -24,6 +24,7 @@ from typing import Any
 import backlog_board
 import model_routing
 import status_alias
+import task_claim_dispatcher
 try:
     from task_id_contract import TASK_ID_TOKEN_RE, TASK_ID_VALUE_RE
 except ImportError:  # imported as scripts.<name> (namespace package)
@@ -79,6 +80,36 @@ TASK_ID_TOKEN = TASK_ID_TOKEN_RE
 TASK_ID_VALUE = TASK_ID_VALUE_RE
 
 
+class DispatchRefusal(RuntimeError):
+    """Typed, machine-readable refusal raised before claim command creation."""
+
+    def __init__(
+        self,
+        reason: str,
+        *,
+        subject_type: str,
+        subject_id: str,
+        subject_status: str,
+    ) -> None:
+        self.reason = reason
+        self.subject_type = subject_type
+        self.subject_id = subject_id
+        self.subject_status = subject_status
+        super().__init__(
+            f"{reason}: {subject_type} {subject_id} has status "
+            f"{subject_status or 'missing-status'}"
+        )
+
+    def as_payload(self) -> dict[str, str]:
+        return {
+            "status": "refused",
+            "reason": self.reason,
+            "subject_type": self.subject_type,
+            "subject_id": self.subject_id,
+            "subject_status": self.subject_status or "missing-status",
+        }
+
+
 def _slug(value: str) -> str:
     text = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower())
     text = re.sub(r"-+", "-", text)
@@ -104,6 +135,10 @@ def _normalize_status(value: str) -> str:
     # Alias-aware (issue #121 item 4): localized statuses like "완료" fold to
     # their canonical enum value before any transition/done comparison.
     return status_alias.normalize_status(value)
+
+
+def _is_blocked_dispatch_status(value: str) -> bool:
+    return status_alias.is_blocked(value)
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -152,8 +187,10 @@ def _ordered_task_ids(body: str) -> list[str]:
 
 def _canonical_taskset_records(
     root: Path,
-) -> list[tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool]]:
-    """Return canonical tasksets, their order, and whether membership is strict.
+) -> list[
+    tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool, str]
+]:
+    """Return canonical tasksets, order, strict membership, and status.
 
     A frontmatter ``tasks`` list is the current strict schema. Legacy host
     records may instead declare order in an explicit localized body section;
@@ -161,7 +198,7 @@ def _canonical_taskset_records(
     retain score-based fallback order.
     """
     tasksets: list[
-        tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool]
+        tuple[backlog_board.TaskSetInfo, tuple[str, ...] | None, bool, str]
     ] = []
     seen_ids: set[str] = set()
 
@@ -191,11 +228,23 @@ def _canonical_taskset_records(
             if not isinstance(row, dict):
                 errors.append(f"tasksets[{index}] must be an object")
                 continue
+            unexpected = sorted(
+                set(row)
+                - {
+                    "task_set_id",
+                    "display_name",
+                    "summary",
+                    "order",
+                    "tasks",
+                }
+            )
             task_set_id = row.get("task_set_id")
             display_name = row.get("display_name")
             summary = row.get("summary")
             order = row.get("order")
             row_errors: list[str] = []
+            if unexpected:
+                row_errors.append("unknown fields: " + ", ".join(unexpected))
             if not isinstance(task_set_id, str) or not re.fullmatch(
                 r"TASKSET-[A-Z0-9][A-Z0-9-]*", task_set_id
             ):
@@ -208,6 +257,39 @@ def _canonical_taskset_records(
                 row_errors.append("order must be an integer")
             if isinstance(task_set_id, str) and task_set_id in seen_ids:
                 row_errors.append(f"duplicate task_set_id: {task_set_id}")
+            ordered_tasks: tuple[str, ...] | None = None
+            strict_membership = False
+            if "tasks" in row:
+                strict_membership = True
+                raw_tasks = row.get("tasks")
+                if not isinstance(raw_tasks, list) or not raw_tasks:
+                    row_errors.append("tasks must be a non-empty list")
+                else:
+                    values = [str(value).strip() for value in raw_tasks]
+                    invalid = [
+                        value
+                        for value in values
+                        if not TASK_ID_VALUE.fullmatch(value)
+                    ]
+                    duplicates = sorted(
+                        {
+                            value
+                            for value in values
+                            if values.count(value) > 1
+                        }
+                    )
+                    if invalid:
+                        row_errors.append(
+                            "tasks contains invalid task ids: "
+                            + ", ".join(repr(value) for value in invalid)
+                        )
+                    if duplicates:
+                        row_errors.append(
+                            "tasks contains duplicate task ids: "
+                            + ", ".join(duplicates)
+                        )
+                    if not invalid and not duplicates:
+                        ordered_tasks = tuple(values)
             if row_errors:
                 errors.append(f"tasksets[{index}]: " + "; ".join(row_errors))
                 continue
@@ -220,8 +302,9 @@ def _canonical_taskset_records(
                         summary=summary.strip(),
                         order=order,
                     ),
-                    None,
-                    False,
+                    ordered_tasks,
+                    strict_membership,
+                    "",
                 )
             )
         if errors:
@@ -298,6 +381,7 @@ def _canonical_taskset_records(
 
         display_name = str(meta.get("title") or work_id).strip() or work_id
         summary = str(meta.get("summary") or "").strip()
+        status = str(meta.get("status") or "").strip()
         tasksets.append(
             (
                 backlog_board.TaskSetInfo(
@@ -308,22 +392,41 @@ def _canonical_taskset_records(
                 ),
                 ordered_tasks,
                 strict_membership,
+                status,
             )
         )
     return tasksets
 
 
 def _canonical_tasksets(root: Path) -> list[backlog_board.TaskSetInfo]:
-    return [info for info, _ordered_tasks, _strict in _canonical_taskset_records(root)]
+    return [
+        info
+        for info, _ordered_tasks, _strict, _status
+        in _canonical_taskset_records(root)
+    ]
 
 
 def _canonical_task_order(
     root: Path, task_set_id: str
 ) -> tuple[tuple[str, ...] | None, bool]:
-    for info, ordered_tasks, strict_membership in _canonical_taskset_records(root):
+    for (
+        info,
+        ordered_tasks,
+        strict_membership,
+        _status,
+    ) in _canonical_taskset_records(root):
         if info.task_set_id == task_set_id:
             return ordered_tasks, strict_membership
     return None, False
+
+
+def _canonical_taskset_status(root: Path, task_set_id: str) -> str:
+    for info, _ordered_tasks, _strict, status in _canonical_taskset_records(
+        root
+    ):
+        if info.task_set_id == task_set_id:
+            return status
+    return ""
 
 
 def _register_alias(
@@ -458,9 +561,17 @@ def _next_task(
     root: Path | None = None,
 ) -> backlog_board.Task:
     for task in tasks:
-        if _normalize_status(task.status) in DONE_STATUSES:
+        normalized_status = _normalize_status(task.status)
+        if normalized_status in DONE_STATUSES:
             continue
         if backlog_board.lane_for(task) != "Done":
+            if _is_blocked_dispatch_status(task.status):
+                raise DispatchRefusal(
+                    "task_blocked",
+                    subject_type="task",
+                    subject_id=task.task_id,
+                    subject_status=str(task.status or ""),
+                )
             dependencies = _task_dependencies(task)
             if dependencies:
                 candidates = tasks
@@ -496,6 +607,17 @@ def _unit_specs_for_task(root: Path, task_id: str) -> list[tuple[Path, dict[str,
     return specs
 
 
+def _unit_runnable_priority(meta: dict[str, Any], status: str) -> int | None:
+    priority = RUNNABLE_UNIT_PRIORITIES.get(status)
+    if priority is None:
+        return None
+    if status in {"planned", "assigned"}:
+        model_tier = str(meta.get("model_tier") or "").strip().lower()
+        if not model_tier.startswith("planner_"):
+            return None
+    return priority
+
+
 def _ready_unit_for_task(
     root: Path,
     task_id: str,
@@ -505,30 +627,37 @@ def _ready_unit_for_task(
 
     An in-progress unit is the live execution source of truth. Otherwise, a
     task's canonical ``unit_spec`` wins when it names a runnable unit; this
-    keeps a newly registered continuation ahead of older ready/planned
-    siblings. Blocked and terminal units are never dispatch fallbacks.
+    keeps a newly registered planner continuation ahead of older ready
+    siblings. Planned or assigned worker units, blocked units, and terminal
+    units are never dispatch fallbacks.
     """
     units = _unit_specs_for_task(root, task_id)
     if not units:
         return None
 
-    classified: list[tuple[tuple[Path, dict[str, Any], str], str]] = []
+    classified: list[
+        tuple[tuple[Path, dict[str, Any], str], str, int | None]
+    ] = []
     known_statuses = set(RUNNABLE_UNIT_PRIORITIES) | NON_RUNNABLE_UNIT_STATUSES
     for unit in units:
         raw_status = str(unit[1].get("status") or "").strip()
         normalized = _normalize_status(raw_status)
+        if _is_blocked_dispatch_status(raw_status):
+            normalized = "blocked"
         if normalized not in known_statuses:
             rendered = raw_status or "<missing>"
             raise SystemExit(
                 f"task {task_id} has unknown unit status '{rendered}': "
                 f"{_rel(root, unit[0])}"
             )
-        classified.append((unit, normalized))
+        classified.append(
+            (unit, normalized, _unit_runnable_priority(unit[1], normalized))
+        )
 
     in_progress = [
         unit
-        for unit, status in classified
-        if RUNNABLE_UNIT_PRIORITIES.get(status) == 0
+        for unit, _status, priority in classified
+        if priority == 0
     ]
     if len(in_progress) > 1:
         unit_ids = ", ".join(
@@ -542,12 +671,33 @@ def _ready_unit_for_task(
         return in_progress[0]
 
     runnable = [
-        (unit, status)
-        for unit, status in classified
-        if status in RUNNABLE_UNIT_PRIORITIES
+        (unit, status, priority)
+        for unit, status, priority in classified
+        if priority is not None
     ]
     if not runnable:
-        raise SystemExit(f"task {task_id} has unit specs but no runnable unit")
+        open_units = [
+            (unit, status)
+            for unit, status, _priority in classified
+            if status not in DONE_STATUSES
+        ]
+        if open_units:
+            candidate, _status = open_units[0]
+            candidate_status = str(candidate[1].get("status") or "").strip()
+            raise DispatchRefusal(
+                (
+                    "unit_blocked"
+                    if _is_blocked_dispatch_status(candidate_status)
+                    else "unit_not_ready"
+                ),
+                subject_type="unit",
+                subject_id=str(candidate[1].get("unit_id") or task_id),
+                subject_status=candidate_status,
+            )
+        raise SystemExit(
+            f"task {task_id} has unit specs but no runnable unit; "
+            f"{task_id} has unit specs but no open unit"
+        )
 
     if preferred_spec:
         preferred = Path(preferred_spec)
@@ -573,8 +723,8 @@ def _ready_unit_for_task(
             ) from exc
         preferred_match = next(
             (
-                (unit, status)
-                for unit, status in classified
+                (unit, status, priority)
+                for unit, status, priority in classified
                 if unit[0].resolve() == preferred_path
             ),
             None,
@@ -584,13 +734,13 @@ def _ready_unit_for_task(
                 f"task {task_id} unit_spec does not name a registered unit: "
                 f"{preferred_spec}"
             )
-        if preferred_match[1] in RUNNABLE_UNIT_PRIORITIES:
+        if preferred_match[2] is not None:
             return preferred_match[0]
 
     return min(
         runnable,
         key=lambda item: (
-            RUNNABLE_UNIT_PRIORITIES[item[1]],
+            item[2],
             item[0][0].as_posix(),
         ),
     )[0]
@@ -676,7 +826,7 @@ def _target_status_for_work_start(current: str | None) -> str | None:
     normalized = _normalize_status(current)
     if normalized in DONE_STATUSES:
         return None
-    if normalized.startswith("hold") or normalized == "blocked":
+    if status_alias.is_blocked(current):
         return normalized
     if normalized in {"review", "waiting_review", "ready_for_governance_review"}:
         return normalized
@@ -1067,6 +1217,14 @@ def _ensure_worktree(root: Path, payload: dict[str, Any]) -> bool:
 def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
     root = args.root.resolve()
     info = _resolve_taskset(args.taskset, root)
+    taskset_status = _canonical_taskset_status(root, info.task_set_id)
+    if _is_blocked_dispatch_status(taskset_status):
+        raise DispatchRefusal(
+            "taskset_blocked",
+            subject_type="taskset",
+            subject_id=info.task_set_id,
+            subject_status=taskset_status,
+        )
     tasks = _tasks_for(root, info.task_set_id)
     task = _next_task(tasks, root=root)
     task_set_slug = _taskset_slug(info.task_set_id)
@@ -1157,6 +1315,8 @@ def _plan_payload(args: argparse.Namespace) -> dict[str, Any]:
         claim_command.extend(["--now", args.now])
     if args.suffix:
         claim_command.extend(["--suffix", args.suffix])
+    if getattr(args, "scope_transition_approved", False):
+        claim_command.append("--scope-transition-approved")
     # The outer command can emit text or JSON, but claim verification always
     # consumes the task_claim_dispatcher's machine-readable response.
     claim_command.append("--json")
@@ -1292,33 +1452,21 @@ def cmd_start(args: argparse.Namespace) -> int:
         )
         return 1
 
-    if str(payload.get("unit_spec_path") or "").strip() and str(payload.get("model_tier") or "").startswith("worker_"):
-        gate = subprocess.run(
-            [
-                sys.executable,
-                str(Path(__file__).resolve().with_name("task_unit_readiness_gate.py")),
-                "--root",
-                str(root),
-                "--task-id",
-                str(payload["next_task_id"]),
-                "--unit-id",
-                str(payload.get("unit_id") or ""),
-                "--require-ready",
-                "--check",
-            ],
-            cwd=root,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
+    if (
+        str(payload.get("unit_spec_path") or "").strip()
+        and str(payload.get("model_tier") or "").startswith("worker_")
+    ):
+        readiness_findings = task_claim_dispatcher._claim_readiness_findings(  # noqa: SLF001
+            root,
+            task_id=str(payload["next_task_id"]),
+            task_set_id=str(payload["task_set_id"]),
+            unit_id=str(payload.get("unit_id") or ""),
+            unit_spec=str(payload.get("unit_spec_path") or ""),
         )
-        if gate.returncode != 0:
-            if gate.stdout:
-                print(gate.stdout, file=sys.stderr, end="")
-            if gate.stderr:
-                print(gate.stderr, file=sys.stderr, end="")
-            return gate.returncode
+        if readiness_findings:
+            for finding in readiness_findings:
+                print(f"taskset-preflight:readiness:{finding}", file=sys.stderr)
+            return 1
 
     result = subprocess.run(
         payload["claim_command"],
@@ -1386,6 +1534,14 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--mode")
         command.add_argument("--now")
         command.add_argument("--suffix")
+        command.add_argument(
+            "--scope-transition-approved",
+            action="store_true",
+            help=(
+                "Record explicit Owner approval to cross a previously completed "
+                "taskset boundary on the created claim"
+            ),
+        )
         command.add_argument("--json", action="store_true")
         command.set_defaults(func=func)
     return parser
@@ -1394,7 +1550,17 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except DispatchRefusal as exc:
+        if getattr(args, "json", False):
+            print(
+                json.dumps(exc.as_payload(), ensure_ascii=False),
+                file=sys.stderr,
+            )
+        else:
+            print(f"taskset-dispatcher: refused: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

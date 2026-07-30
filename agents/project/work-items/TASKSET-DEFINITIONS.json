@@ -215,7 +215,22 @@
       "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
       "display_name": "v0.8 Adoption and Enforcement",
       "summary": "Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.",
-      "order": 640
+      "order": 640,
+      "tasks": [
+        "TASK-AR-639",
+        "TASK-AR-640",
+        "TASK-AR-641",
+        "TASK-AR-642",
+        "TASK-AR-643",
+        "TASK-AR-644",
+        "TASK-AR-645",
+        "TASK-AR-646",
+        "TASK-AR-647",
+        "TASK-AR-648",
+        "TASK-AR-649",
+        "TASK-AR-650",
+        "TASK-AR-651"
+      ]
     },
     {
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",

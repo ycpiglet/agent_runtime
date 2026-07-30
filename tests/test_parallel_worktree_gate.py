@@ -265,6 +265,11 @@ def test_continuity_missing_status_requires_canonical_pointer(tmp_path: Path):
     assert len(findings) == 1
     assert "continuity:pointer-missing" in findings[0]
     assert "agents/project/NEXT-SESSION-POINTER.yml" in findings[0]
+    assert "continuity:status-missing" in findings[0]
+    assert all(
+        candidate in findings[0]
+        for candidate in ("STATUS.md", "agents/lead_engineer/STATUS.md")
+    )
 
 
 def test_continuity_accepts_exact_pointer_and_sidecars_without_status(tmp_path: Path):

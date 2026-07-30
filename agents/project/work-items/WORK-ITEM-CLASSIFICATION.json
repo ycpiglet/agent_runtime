@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T08:27:14+09:00",
+  "generated_at": "2026-07-30T09:31:37+09:00",
   "record_count": 534,
   "finding_count": 0,
   "findings": [],
@@ -5844,7 +5844,7 @@
       "title": "Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams…",
       "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "unit:UNIT-TASK-AR-650-001",
@@ -5855,7 +5855,7 @@
       "title": "UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
       "parent_id": "TASK-AR-650",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-651",

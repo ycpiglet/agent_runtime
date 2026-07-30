@@ -118,6 +118,7 @@ CODEX_HOOK_REQUIREMENTS = (
     ("Stop", "stop-owner", "scripts/stop_hook_owner_governance.py"),
     ("Stop", "stop-closure", "scripts/stop_hook_closure_gate.py"),
 )
+CODEX_HOOK_POSIX_PYTHONS = ("python3", "python")
 ALLIMBOT_ENV_NAMES = (
     "ALLIMBOT_ENDPOINT",
     "ALLIMBOT_PROJECT_TOKEN",
@@ -496,6 +497,10 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
 
     for event, mode, target in CODEX_HOOK_REQUIREMENTS:
         expected_posix = f"python3 -m agent_runtime.hook_runtime {mode}"
+        compatible_posix = {
+            f"{python} -m agent_runtime.hook_runtime {mode}"
+            for python in CODEX_HOOK_POSIX_PYTHONS
+        }
         expected_windows = f"py -3 -m agent_runtime.hook_runtime {mode}"
         entries = _hook_entries(hooks, event)
         candidates = [
@@ -506,7 +511,7 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
         matching = [
             hook
             for hook in candidates
-            if str(hook.get("command") or "").strip() == expected_posix
+            if str(hook.get("command") or "").strip() in compatible_posix
         ]
         if not matching:
             _findings_append(
@@ -520,14 +525,31 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
 
         for hook in candidates:
             command = str(hook.get("command") or "").strip()
-            if command != expected_posix:
+            if command not in compatible_posix:
+                severity = "warning" if matching else "blocker"
+                kind = (
+                    "legacy-hook-command-preserved"
+                    if matching
+                    else "stale-hook-command"
+                )
                 _findings_append(
                     findings,
-                    "blocker",
+                    severity,
                     area="codex-hooks",
                     path=".codex/hooks.json",
-                    kind="stale-hook-command",
+                    kind=kind,
                     detail=f"{event}:{mode}: {command or '<missing>'}",
+                )
+                if matching:
+                    continue
+            elif command != expected_posix:
+                _findings_append(
+                    findings,
+                    "warning",
+                    area="codex-hooks",
+                    path=".codex/hooks.json",
+                    kind="compatible-python-alias",
+                    detail=f"{event}:{mode}: {command}",
                 )
             windows = str(hook.get("commandWindows") or "").strip()
             if not windows:

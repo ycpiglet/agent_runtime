@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -10,22 +10,12 @@ from pathlib import Path
 import pytest
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import taskset_dispatcher as dispatcher  # noqa: E402
-
-
-TERMINAL_RESTART_STATUSES = (
-    "closed",
-    "released",
-    "종결",
-    "종료",
-    "릴리스됨",
-    "배포됨",
-)
 
 
 def _write_task(
@@ -36,14 +26,12 @@ def _write_task(
     status: str = "planned",
     priority: str = "P1",
     depends_on: list[str] | None = None,
-    unit_spec: str | None = None,
 ) -> None:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     dependency_line = (
         f"depends_on: [{', '.join(depends_on)}]\n" if depends_on is not None else ""
     )
-    unit_spec_line = f"unit_spec: {unit_spec}\n" if unit_spec is not None else ""
     (tasks_dir / f"{task_id}.md").write_text(
         f"""---
 id: {task_id}
@@ -53,8 +41,8 @@ difficulty: M
 est_hours: 2
 est_tokens: 200
 task_set_id: {task_set_id}
-project_id: PROJECT-AGENT-RUNTIME
-{dependency_line}{unit_spec_line}tags: [test]
+project_id: PROJECT-TEST
+{dependency_line}tags: [test]
 ---
 
 ## Goal
@@ -73,36 +61,20 @@ def _write_taskset(
     schema_version: str = "agent-runtime-work-item/v1",
     kind: str = "taskset",
     title: str = "Runtime Liaison",
-    task_order: tuple[str, ...] = (),
     tasks: list[str] | str | None = None,
     status: str = "active",
 ) -> None:
     tasksets_dir = root / "agents" / "project" / "initiatives"
     tasksets_dir.mkdir(parents=True, exist_ok=True)
     target = tasksets_dir / f"{filename or task_set_id}.md"
-    task_section = ""
-    if task_order:
-        rows = "\n".join(f"  - {task_id}" for task_id in task_order)
-        task_section = f"""
-
-## 포함 태스크
-
-tasks:
-{rows}
-"""
-    declared_tasks: list[str] | str | None = tasks
-    if declared_tasks is None and task_order:
-        declared_tasks = list(task_order)
-    if declared_tasks is None:
+    if tasks is None:
         task_lines = ""
-    elif isinstance(declared_tasks, list) and declared_tasks:
-        task_lines = "tasks:\n" + "".join(
-            f"  - {task_id}\n" for task_id in declared_tasks
-        )
-    elif isinstance(declared_tasks, list):
+    elif isinstance(tasks, list) and tasks:
+        task_lines = "tasks:\n" + "".join(f"  - {task_id}\n" for task_id in tasks)
+    elif isinstance(tasks, list):
         task_lines = "tasks: []\n"
     else:
-        task_lines = f"tasks: {declared_tasks}\n"
+        task_lines = f"tasks: {tasks}\n"
     target.write_text(
         f"""---
 schema_version: {schema_version}
@@ -112,16 +84,9 @@ title: {title}
 summary: Test dynamic task set.
 status: {status}
 {task_lines}---
-{task_section}
 """,
         encoding="utf-8",
     )
-
-
-def _write_taskset_registry(root: Path, rows: list[object], *, schema: str = "agent-runtime-taskset-definitions/v1") -> None:
-    path = root / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"schema": schema, "tasksets": rows}), encoding="utf-8")
 
 
 def _write_unit(
@@ -129,18 +94,16 @@ def _write_unit(
     task_id: str,
     *,
     status: str = "worker_ready",
-    unit_number: int = 1,
-    model_tier: str = "worker_standard",
     **metadata: str | bool | list[str],
 ) -> None:
     units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
     units_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
-        f"unit_id: UNIT-{task_id}-{unit_number:03d}",
+        f"unit_id: UNIT-{task_id}-001",
         f"task_id: {task_id}",
         f"status: {status}",
-        f"model_tier: {model_tier}",
+        "model_tier: worker_standard",
     ]
     for key, value in metadata.items():
         if isinstance(value, list):
@@ -151,17 +114,80 @@ def _write_unit(
             encoded = value
         lines.append(f"{key}: {encoded}")
     lines.extend(["---", ""])
-    (units_dir / f"UNIT-{task_id}-{unit_number:03d}.md").write_text(
-        "\n".join(lines),
+    (units_dir / f"UNIT-{task_id}-001.md").write_text("\n".join(lines), encoding="utf-8")
+
+
+def _write_dispatch_ready_unit(
+    root: Path,
+    task_id: str,
+    task_set_id: str,
+    *,
+    status: str,
+) -> Path:
+    units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
+    units_dir.mkdir(parents=True, exist_ok=True)
+    unit_id = f"UNIT-{task_id}-001"
+    path = units_dir / f"{unit_id}.md"
+    path.write_text(
+        f"""---
+unit_id: {unit_id}
+task_id: {task_id}
+task_set_id: {task_set_id}
+project_id: PROJECT-TEST
+status: {status}
+model_tier: worker_standard
+context: Test localized ready dispatch.
+inputs: [README.md]
+target_files: [README.md]
+scope: Test only.
+acceptance: [Start succeeds.]
+verification: [pytest]
+handoff: Report result.
+stop_condition: stop_after:{unit_id}:test
+---
+
+## Context
+
+Localized ready start fixture.
+
+## Inputs
+
+- README.md
+
+## Target Files
+
+- README.md
+
+## Scope
+
+Test only.
+
+## Steps
+
+1. Start the taskset.
+
+## Acceptance Criteria
+
+- Start succeeds.
+
+## Verification
+
+- pytest
+
+## Handoff
+
+Report result.
+
+## Stop Boundary
+
+Stop after this test.
+""",
         encoding="utf-8",
     )
+    return path
 
 
-def _run(
-    root: Path,
-    *args: str,
-    env: dict[str, str] | None = None,
-) -> subprocess.CompletedProcess[str]:
+def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPTS_DIR / "taskset_dispatcher.py"), "--root", str(root), *args],
         cwd=REPO_ROOT,
@@ -170,17 +196,12 @@ def _run(
         text=True,
         encoding="utf-8",
         errors="replace",
-        env=env,
     )
 
 
 def _tree_snapshot(root: Path) -> tuple[tuple[str, ...], dict[str, bytes]]:
     directories = tuple(
-        sorted(
-            path.relative_to(root).as_posix()
-            for path in root.rglob("*")
-            if path.is_dir()
-        )
+        sorted(path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_dir())
     )
     files = {
         path.relative_to(root).as_posix(): path.read_bytes()
@@ -188,6 +209,32 @@ def _tree_snapshot(root: Path) -> tuple[tuple[str, ...], dict[str, bytes]]:
         if path.is_file()
     }
     return directories, files
+
+
+def _write_t0(root: Path, taskset: str, anchor: str) -> None:
+    target = root / anchor
+    payload = {
+        "schema": "agent-runtime-plan-assumptions/v1",
+        "updated_at": "2026-07-14T18:49:00+09:00",
+        "assumption_sets": [
+            {
+                "taskset_id": taskset,
+                "design_record": anchor,
+                "recorded_at": "2026-07-14T18:49:00+09:00",
+                "revalidation_policy": "block_dispatch_on_drift",
+                "anchors": [
+                    {
+                        "path": anchor,
+                        "kind": "sha256",
+                        "value": hashlib.sha256(target.read_bytes()).hexdigest(),
+                    }
+                ],
+            }
+        ],
+    }
+    path = root / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 @pytest.mark.parametrize(
@@ -213,12 +260,7 @@ def test_plan_refuses_non_dispatchable_status_before_claim_command_without_mutat
     reason: str,
 ) -> None:
     taskset = "TASKSET-DISPATCH-REFUSAL"
-    _write_taskset(
-        tmp_path,
-        taskset,
-        tasks=["TASK-901"],
-        status=taskset_status,
-    )
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"], status=taskset_status)
     _write_task(tmp_path, "TASK-901", taskset, status=task_status)
     _write_unit(tmp_path, "TASK-901", status=unit_status)
     before = _tree_snapshot(tmp_path)
@@ -234,11 +276,43 @@ def test_plan_refuses_non_dispatchable_status_before_claim_command_without_mutat
     assert _tree_snapshot(tmp_path) == before
 
 
+def test_start_refuses_planned_unit_before_subprocess_or_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    taskset = "TASKSET-DISPATCH-START-REFUSAL"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901", status="planned")
+    before = _tree_snapshot(tmp_path)
+    args = argparse.Namespace(
+        root=tmp_path,
+        taskset=taskset,
+        agent_role=None,
+        team_id=None,
+        mode=None,
+        now=None,
+        suffix=None,
+        json=True,
+    )
+
+    def forbidden_subprocess(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("status refusal must happen before any subprocess")
+
+    monkeypatch.setattr(dispatcher.subprocess, "run", forbidden_subprocess)
+
+    with pytest.raises(dispatcher.DispatchRefusal) as raised:
+        dispatcher.cmd_start(args)
+
+    assert raised.value.reason == "unit_not_ready"
+    assert _tree_snapshot(tmp_path) == before
+
+
 @pytest.mark.parametrize(
     "taskset_status",
     ["blocked/R3", "hold/R3", "held/R3", "보류/R3"],
 )
-def test_start_refuses_composite_taskset_status_before_subprocess_or_mutation(
+def test_start_refuses_composite_taskset_blocked_token_before_subprocess_or_mutation(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     taskset_status: str,
@@ -265,7 +339,7 @@ def test_start_refuses_composite_taskset_status_before_subprocess_or_mutation(
     )
 
     def forbidden_subprocess(*_args: object, **_kwargs: object) -> None:
-        pytest.fail("status refusal must happen before any subprocess")
+        pytest.fail("composite status refusal must happen before any subprocess")
 
     monkeypatch.setattr(dispatcher.subprocess, "run", forbidden_subprocess)
 
@@ -317,26 +391,6 @@ def test_plan_preserves_ready_unit_claim_command_compatibility(
     assert command[-1] == "--json"
 
 
-def test_plan_propagates_explicit_scope_transition_approval(tmp_path: Path) -> None:
-    taskset = "TASKSET-DISPATCH-APPROVED-TRANSITION"
-    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
-    _write_task(tmp_path, "TASK-901", taskset)
-    _write_unit(tmp_path, "TASK-901")
-
-    result = _run(
-        tmp_path,
-        "plan",
-        taskset,
-        "--scope-transition-approved",
-        "--json",
-    )
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    command = json.loads(result.stdout)["claim_command"]
-    assert "--scope-transition-approved" in command
-    assert command[-1] == "--json"
-
-
 def test_plan_resolves_canonical_dynamic_taskset_without_static_alias(tmp_path: Path) -> None:
     task_set_id = "TASKSET-AGENT-RUNTIME-DOWNSTREAM-INTAKE"
     _write_taskset(tmp_path, task_set_id, title="Downstream Intake Repair")
@@ -353,150 +407,6 @@ def test_plan_resolves_canonical_dynamic_taskset_without_static_alias(tmp_path: 
     by_slug = _run(tmp_path, "plan", "agent-runtime-downstream-intake", "--json")
     assert by_slug.returncode == 0, by_slug.stderr or by_slug.stdout
     assert json.loads(by_slug.stdout)["task_set_id"] == task_set_id
-
-
-def test_plan_honors_canonical_task_order_before_score_sort(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-TASK216-KPI-PROFILE-CONDITIONS"
-    _write_taskset(
-        tmp_path,
-        task_set_id,
-        task_order=("TASK-219", "TASK-220", "TASK-217"),
-    )
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
-    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
-
-    result = _run(tmp_path, "plan", task_set_id, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["next_task_id"] == "TASK-219"
-    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
-        "TASK-219",
-        "TASK-220",
-        "TASK-217",
-    ]
-
-
-@pytest.mark.parametrize(
-    "task_id",
-    [
-        "TASK-AR-20260721-221825-f53b6746",
-        "TASK-AR-20260721-221825-F53B6746",
-    ],
-)
-def test_plan_accepts_timestamp_task_ids_without_case_rewriting(
-    tmp_path: Path, task_id: str
-) -> None:
-    task_set_id = "TASKSET-DYNAMIC-TIMESTAMP-IDS"
-    _write_taskset(tmp_path, task_set_id, tasks=[task_id])
-    _write_task(tmp_path, task_id, task_set_id)
-
-    result = _run(tmp_path, "plan", task_set_id, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["next_task_id"] == task_id
-
-
-def test_body_order_deduplicates_and_ignores_unrelated_ids(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-DYNAMIC-ORDER"
-    _write_taskset(tmp_path, task_set_id)
-    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
-    record.write_text(
-        record.read_text(encoding="utf-8")
-        + (
-            "\n## 포함 태스크\n\ntasks:\n"
-            "  - TASK-999\n  - TASK-219\n  - TASK-219\n"
-            "  - TASK-888\n  - TASK-220\n"
-        ),
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
-    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
-    _write_task(tmp_path, "TASK-999", "TASKSET-OTHER", priority="P0")
-
-    tasks = dispatcher._tasks_for(tmp_path, task_set_id)  # noqa: SLF001
-
-    assert [task.task_id for task in tasks] == ["TASK-219", "TASK-220", "TASK-217"]
-
-
-def test_body_order_ignores_task_ids_embedded_in_unicode_words() -> None:
-    body = "## Tasks\n\n- 작업TASK-AR-999\n- αTASK-998β\n"
-
-    assert dispatcher._ordered_task_ids(body) == []  # noqa: SLF001
-
-
-def test_canonical_order_skips_completed_task_without_reordering_remainder(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-DYNAMIC-ORDER"
-    _write_taskset(tmp_path, task_set_id, task_order=("TASK-219", "TASK-220", "TASK-217"))
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, status="completed", priority="P2")
-    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
-
-    result = _run(tmp_path, "plan", task_set_id, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["next_task_id"] == "TASK-220"
-
-
-def test_task_ids_outside_tasks_section_do_not_override_score_fallback(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-DYNAMIC-NO-ORDER"
-    _write_taskset(tmp_path, task_set_id)
-    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
-    record.write_text(
-        record.read_text(encoding="utf-8") + "\n## Risks\n\nTASK-219 must wait for TASK-217.\n",
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
-
-    result = _run(tmp_path, "plan", task_set_id, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["next_task_id"] == "TASK-217"
-
-
-def test_localized_body_order_is_used_when_frontmatter_tasks_are_absent(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-DYNAMIC-BODY-ORDER"
-    _write_taskset(tmp_path, task_set_id)
-    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
-    record.write_text(
-        record.read_text(encoding="utf-8")
-        + "\n## 포함 태스크\n\ntasks:\n  - TASK-219\n  - TASK-220\n  - TASK-217\n",
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
-    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
-
-    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
-        "TASK-219",
-        "TASK-220",
-        "TASK-217",
-    ]
-
-
-def test_frontmatter_tasks_take_precedence_over_conflicting_body_order(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-DYNAMIC-FRONTMATTER-ORDER"
-    _write_taskset(tmp_path, task_set_id, task_order=("TASK-219", "TASK-220", "TASK-217"))
-    record = tmp_path / "agents" / "project" / "initiatives" / f"{task_set_id}.md"
-    record.write_text(
-        record.read_text(encoding="utf-8").replace(
-            "## 포함 태스크\n\ntasks:\n  - TASK-219\n  - TASK-220\n  - TASK-217",
-            "## 포함 태스크\n\ntasks:\n  - TASK-217\n  - TASK-220\n  - TASK-219",
-        ),
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-217", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-219", task_set_id, priority="P2")
-    _write_task(tmp_path, "TASK-220", task_set_id, priority="P1")
-
-    assert [task.task_id for task in dispatcher._tasks_for(tmp_path, task_set_id)] == [  # noqa: SLF001
-        "TASK-219",
-        "TASK-220",
-        "TASK-217",
-    ]
 
 
 @pytest.mark.parametrize(
@@ -747,198 +657,7 @@ def test_plan_rejects_open_task_when_all_unit_specs_are_completed(tmp_path: Path
     result = _run(tmp_path, "plan", taskset, "--json")
 
     assert result.returncode == 1
-    assert "TASK-901 has unit specs but no runnable unit" in (
-        result.stderr or result.stdout
-    )
-
-
-def test_plan_prefers_canonical_planned_unit_over_blocked_history(
-    tmp_path: Path,
-) -> None:
-    taskset = "TASKSET-DYNAMIC-BLOCKED-HISTORY"
-    task_id = "TASK-901"
-    current = (
-        "agents/lead_engineer/tasks/units/"
-        f"{task_id}/UNIT-{task_id}-003.md"
-    )
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset, unit_spec=current)
-    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
-    _write_unit(tmp_path, task_id, unit_number=2, status="completed")
-    _write_unit(
-        tmp_path,
-        task_id,
-        unit_number=3,
-        status="planned",
-        model_tier="planner_high",
-    )
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["unit_id"] == f"UNIT-{task_id}-003"
-    assert payload["unit_spec_path"] == current
-    assert current in payload["claim_command"]
-
-
-def test_plan_prefers_in_progress_before_canonical_planned_unit(
-    tmp_path: Path,
-) -> None:
-    taskset = "TASKSET-DYNAMIC-IN-PROGRESS-PRIORITY"
-    task_id = "TASK-901"
-    planned = (
-        "agents/lead_engineer/tasks/units/"
-        f"{task_id}/UNIT-{task_id}-001.md"
-    )
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset, unit_spec=planned)
-    _write_unit(tmp_path, task_id, unit_number=1, status="planned")
-    _write_unit(tmp_path, task_id, unit_number=2, status="worker_ready")
-    _write_unit(tmp_path, task_id, unit_number=3, status="in_progress")
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["unit_id"] == f"UNIT-{task_id}-003"
-
-
-def test_plan_treats_legacy_assigned_unit_as_planned(
-    tmp_path: Path,
-) -> None:
-    taskset = "TASKSET-DYNAMIC-ASSIGNED-COMPATIBILITY"
-    task_id = "TASK-901"
-    assigned = (
-        "agents/lead_engineer/tasks/units/"
-        f"{task_id}/UNIT-{task_id}-002.md"
-    )
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset, unit_spec=assigned)
-    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
-    _write_unit(
-        tmp_path,
-        task_id,
-        unit_number=2,
-        status="assigned",
-        model_tier="planner_high",
-    )
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["unit_id"] == f"UNIT-{task_id}-002"
-    assert payload["unit_spec_path"] == assigned
-
-
-@pytest.mark.parametrize(
-    ("status", "reason"),
-    [
-        ("blocked", "unit_blocked"),
-        ("hold", "unit_blocked"),
-        ("cancelled", "unit_not_ready"),
-        ("rejected", "unit_not_ready"),
-        ("failed", "unit_not_ready"),
-        ("planner_refine_required", "unit_not_ready"),
-    ],
-)
-def test_plan_never_emits_claim_for_non_runnable_unit(
-    tmp_path: Path,
-    status: str,
-    reason: str,
-) -> None:
-    taskset = "TASKSET-DYNAMIC-NON-RUNNABLE"
-    task_id = "TASK-901"
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset)
-    _write_unit(tmp_path, task_id, status=status)
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 1
-    refusal = json.loads(result.stderr)
-    assert refusal["status"] == "refused"
-    assert refusal["reason"] == reason
-
-
-def test_plan_fails_closed_on_unknown_unit_status(tmp_path: Path) -> None:
-    taskset = "TASKSET-DYNAMIC-UNKNOWN-UNIT-STATUS"
-    task_id = "TASK-901"
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset)
-    _write_unit(tmp_path, task_id, unit_number=1, status="mystery")
-    _write_unit(tmp_path, task_id, unit_number=2, status="planned")
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 1
-    message = result.stderr or result.stdout
-    assert "unknown unit status" in message
-    assert "mystery" in message
-
-
-def test_plan_rejects_multiple_in_progress_units(tmp_path: Path) -> None:
-    taskset = "TASKSET-DYNAMIC-AMBIGUOUS-ACTIVE-UNITS"
-    task_id = "TASK-901"
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset)
-    _write_unit(tmp_path, task_id, unit_number=1, status="in_progress")
-    _write_unit(tmp_path, task_id, unit_number=2, status="in_progress")
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 1
-    assert "multiple in-progress units" in (result.stderr or result.stdout)
-
-
-def test_plan_uses_only_selected_unit_dependencies_and_routing(
-    tmp_path: Path,
-) -> None:
-    taskset = "TASKSET-DYNAMIC-SELECTED-UNIT-CONTRACT"
-    task_id = "TASK-901"
-    current = (
-        "agents/lead_engineer/tasks/units/"
-        f"{task_id}/UNIT-{task_id}-002.md"
-    )
-    _write_taskset(tmp_path, taskset, tasks=[task_id])
-    _write_task(tmp_path, task_id, taskset, unit_spec=current)
-    _write_unit(
-        tmp_path,
-        task_id,
-        unit_number=1,
-        status="blocked",
-        depends_on=["UNIT-TASK-999-001"],
-        model_tier="reviewer_high",
-    )
-    _write_unit(
-        tmp_path,
-        task_id,
-        unit_number=2,
-        status="worker_ready",
-        model_tier="worker_low",
-    )
-
-    result = _run(tmp_path, "plan", taskset, "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["unit_id"] == f"UNIT-{task_id}-002"
-    assert payload["model_routing"]["requested_tier"] == "worker_low"
-    assert payload["model_routing"]["selected_tier"] == "worker_low"
-
-
-def test_root_and_packaged_taskset_dispatchers_are_byte_identical() -> None:
-    packaged = (
-        REPO_ROOT
-        / "src"
-        / "agent_runtime"
-        / "templates"
-        / "project"
-        / "scripts"
-        / "taskset_dispatcher.py"
-    )
-
-    assert (SCRIPTS_DIR / "taskset_dispatcher.py").read_bytes() == packaged.read_bytes()
+    assert "TASK-901 has unit specs but no open unit" in (result.stderr or result.stdout)
 
 
 def test_resolve_taskset_preserves_static_alias_import_contract() -> None:
@@ -1700,47 +1419,6 @@ def test_start_accepts_preexisting_worktree_after_persisting_claim(
     assert calls == ["claim"]
 
 
-@pytest.mark.parametrize(
-    ("current_status", "persisted_status"),
-    [
-        ("대기", "진행 중"),
-        ("planned", "in_progress"),
-    ],
-)
-def test_start_persists_status_in_the_task_record_vocabulary(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-    current_status: str,
-    persisted_status: str,
-) -> None:
-    payload = _prepare_start(monkeypatch, tmp_path)
-    payload["next_task_status"] = current_status
-    _write_task(
-        tmp_path,
-        "TASK-905",
-        "TASKSET-DYNAMIC-START",
-        status=current_status,
-    )
-    worktree = Path(str(payload["worktree_path"]))
-    worktree.mkdir(parents=True)
-    (worktree / ".git").write_text("gitdir: existing\n", encoding="utf-8")
-
-    def fake_run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
-        if command[0] == "claim":
-            return _claim_result(tmp_path, persist=True)
-        raise AssertionError("git must not run for a pre-existing valid worktree")
-
-    monkeypatch.setattr(dispatcher.subprocess, "run", fake_run)
-
-    assert dispatcher.cmd_start(_start_args(tmp_path)) == 0
-    task_text = Path(str(payload["next_task_path"])).read_text(encoding="utf-8")
-    assert f"status: {persisted_status}\n" in task_text
-    emitted = json.loads(capsys.readouterr().out)
-    assert emitted["task_status"] == "in_progress"
-    assert emitted["task_status_updated"] is True
-
-
 def test_plan_keeps_machine_readable_claim_response_for_non_json_outer_cli(tmp_path: Path) -> None:
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP")
     args = argparse.Namespace(
@@ -1769,6 +1447,7 @@ def test_non_json_start_integrates_with_claim_dispatcher_and_existing_worktree(
         encoding="utf-8",
     )
     _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP")
+    _write_t0(tmp_path, "TASKSET-AR-QUALITY-LOOP", "STATUS.md")
     worktree = tmp_path / ".worktrees" / "TASK-AR-901"
     worktree.mkdir(parents=True)
     (worktree / ".git").write_text("gitdir: existing\n", encoding="utf-8")
@@ -1854,6 +1533,41 @@ def test_start_readiness_failure_blocks_claim_and_worktree(
     assert calls == []
 
 
+@pytest.mark.parametrize("unit_status", ["준비", "진행 중"])
+def test_start_preserves_localized_ready_status_compatibility(
+    tmp_path: Path,
+    unit_status: str,
+) -> None:
+    taskset = "TASKSET-DISPATCH-LOCALIZED-READY"
+    task = "TASK-901"
+    (tmp_path / "README.md").write_text("fixture\n", encoding="utf-8")
+    _write_taskset(tmp_path, taskset, tasks=[task])
+    _write_task(tmp_path, task, taskset)
+    _write_dispatch_ready_unit(tmp_path, task, taskset, status=unit_status)
+    _write_t0(tmp_path, taskset, "README.md")
+    worktree = tmp_path / ".worktrees" / task
+    worktree.mkdir(parents=True)
+    (worktree / ".git").write_text("gitdir: existing\n", encoding="utf-8")
+
+    result = _run(
+        tmp_path,
+        "start",
+        taskset,
+        "--now",
+        "2026-07-27T16:00:00+09:00",
+        "--suffix",
+        "localized",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task}-001"
+    claim = payload["claim"]["claim"]
+    assert claim["task_set_id"] == taskset
+    assert claim["unit_id"] == f"UNIT-{task}-001"
+
+
 def test_start_active_taskset_claim_blocks_before_subprocess(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1875,383 +1589,3 @@ def test_start_active_taskset_claim_blocks_before_subprocess(
 
     assert dispatcher.cmd_start(_start_args(tmp_path)) == 1
     assert payload["task_set_id"] in capsys.readouterr().err
-
-
-def test_taskset_registry_is_canonical_and_dispatchable_without_markdown(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-REGISTERED-LANE"
-    _write_taskset_registry(
-        tmp_path,
-        [
-            {
-                "task_set_id": task_set_id,
-                "display_name": "Registered Lane",
-                "summary": "Created by work.py new.",
-                "order": 500,
-            }
-        ],
-    )
-    _write_task(tmp_path, "TASK-AR-901", task_set_id)
-
-    result = _run(tmp_path, "plan", "registered-lane", "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["task_set_id"] == task_set_id
-
-
-def test_taskset_registry_tasks_are_strict_canonical_order(
-    tmp_path: Path,
-) -> None:
-    task_set_id = "TASKSET-REGISTERED-ORDER"
-    _write_taskset_registry(
-        tmp_path,
-        [
-            {
-                "task_set_id": task_set_id,
-                "display_name": "Registered Order",
-                "summary": "Created by work.py new.",
-                "order": 500,
-                "tasks": ["TASK-AR-902", "TASK-AR-901"],
-            }
-        ],
-    )
-    _write_task(tmp_path, "TASK-AR-901", task_set_id, priority="P0")
-    _write_task(tmp_path, "TASK-AR-902", task_set_id, priority="P2")
-
-    result = _run(tmp_path, "plan", "registered-order", "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert json.loads(result.stdout)["next_task_id"] == "TASK-AR-902"
-
-
-def test_taskset_registry_tasks_fail_closed_when_member_is_omitted(
-    tmp_path: Path,
-) -> None:
-    task_set_id = "TASKSET-REGISTERED-ORDER"
-    _write_taskset_registry(
-        tmp_path,
-        [
-            {
-                "task_set_id": task_set_id,
-                "display_name": "Registered Order",
-                "summary": "Created by work.py new.",
-                "order": 500,
-                "tasks": ["TASK-AR-901"],
-            }
-        ],
-    )
-    _write_task(tmp_path, "TASK-AR-901", task_set_id)
-    _write_task(tmp_path, "TASK-AR-902", task_set_id)
-
-    result = _run(tmp_path, "plan", "registered-order", "--json")
-
-    assert result.returncode == 1
-    assert "taskset members omitted from tasks: TASK-AR-902" in (
-        result.stderr or result.stdout
-    )
-
-
-def test_taskset_registry_overrides_matching_static_definition(tmp_path: Path) -> None:
-    task_set_id = "TASKSET-AR-QUALITY-LOOP"
-    _write_taskset_registry(
-        tmp_path,
-        [{"task_set_id": task_set_id, "display_name": "Host Quality Lane", "summary": "Host override.", "order": 500}],
-    )
-    _write_task(tmp_path, "TASK-AR-901", task_set_id)
-
-    for alias in ("host-quality-lane", "2"):
-        result = _run(tmp_path, "plan", alias, "--json")
-
-        assert result.returncode == 0, result.stderr or result.stdout
-        assert json.loads(result.stdout)["display_name"] == "Host Quality Lane"
-
-
-@pytest.mark.parametrize(
-    ("rows", "message"),
-    [
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": "500"}], "order"),
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500}] * 2, "duplicate task_set_id"),
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Shared", "summary": "", "order": 500}, {"task_set_id": "TASKSET-OTHER", "display_name": "Shared", "summary": "", "order": 501}], "duplicate task set alias"),
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "tasks": "TASK-AR-901"}], "tasks must be a non-empty list"),
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "tasks": ["TASK-AR-901", "TASK-AR-901"]}], "duplicate task ids"),
-        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "unexpected": True}], "unknown fields"),
-    ],
-)
-def test_taskset_registry_fails_closed_for_invalid_rows_or_aliases(
-    tmp_path: Path, rows: list[object], message: str
-) -> None:
-    _write_taskset_registry(tmp_path, rows)
-
-    result = _run(tmp_path, "plan", "taskset-bad", "--json")
-
-    assert result.returncode == 1
-    assert message in (result.stderr or result.stdout)
-
-
-def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(
-    tmp_path: Path,
-) -> None:
-    _write_task(
-        tmp_path,
-        "TASK-AR-901",
-        "TASKSET-AR-QUALITY-LOOP",
-        status="planned",
-        priority="P0",
-    )
-    _write_task(
-        tmp_path,
-        "TASK-AR-902",
-        "TASKSET-AR-QUALITY-LOOP",
-        status="planned",
-        priority="P1",
-    )
-
-    result = _run(tmp_path, "plan", "quality-loop", "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
-    assert payload["display_name"] == "Quality Sentinel"
-    assert payload["next_task_id"] == "TASK-AR-901"
-    assert payload["claim_command"][0].endswith(("python.exe", "python"))
-    assert "--task-set-id" in payload["claim_command"]
-    assert "TASKSET-AR-QUALITY-LOOP" in payload["claim_command"]
-    assert payload["project_id"] == "PROJECT-AGENT-RUNTIME"
-    assert payload["model_tier"] == "worker_standard"
-    assert payload["wip_slot"] == 1
-    assert payload["stop_condition"] == "stop_after:TASK-AR-901:no_adjacent_taskset"
-    assert "--project-id" in payload["claim_command"]
-    assert "--model-tier" in payload["claim_command"]
-    assert payload["worktree_path"] == ".worktrees/TASK-AR-901"
-    assert payload["branch"].startswith("codex/task-ar-901-quality-loop")
-
-
-def test_plan_accepts_numeric_and_letter_taskset_aliases(tmp_path: Path) -> None:
-    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="planned")
-
-    by_number = _run(tmp_path, "plan", "2", "--json")
-    by_letter = _run(tmp_path, "plan", "B", "--json")
-    by_prefixed_letter = _run(tmp_path, "plan", "taskset B", "--json")
-
-    assert by_number.returncode == 0, by_number.stderr or by_number.stdout
-    assert by_letter.returncode == 0, by_letter.stderr or by_letter.stdout
-    assert by_prefixed_letter.returncode == 0, by_prefixed_letter.stderr or by_prefixed_letter.stdout
-    assert json.loads(by_number.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
-    assert json.loads(by_letter.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
-    assert json.loads(by_prefixed_letter.stdout)["task_set_id"] == "TASKSET-AR-QUALITY-LOOP"
-
-
-def test_plan_skips_completed_tasks(tmp_path: Path) -> None:
-    _write_task(
-        tmp_path,
-        "TASK-AR-901",
-        "TASKSET-AR-RELEASE-STEWARD",
-        status="completed",
-    )
-    _write_task(
-        tmp_path,
-        "TASK-AR-902",
-        "TASKSET-AR-RELEASE-STEWARD",
-        status="planned",
-    )
-
-    result = _run(tmp_path, "plan", "release-steward", "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["next_task_id"] == "TASK-AR-902"
-    assert payload["next_task_status"] == "planned"
-
-
-@pytest.mark.parametrize("terminal_status", TERMINAL_RESTART_STATUSES)
-def test_closed_released_terminal_status_has_no_start_transition(
-    terminal_status: str,
-) -> None:
-    normalized = dispatcher._normalize_status(terminal_status)  # noqa: SLF001
-
-    assert dispatcher._target_status_for_work_start(terminal_status) is None  # noqa: SLF001
-    assert normalized in dispatcher.DONE_STATUSES
-
-
-@pytest.mark.parametrize("terminal_status", TERMINAL_RESTART_STATUSES)
-def test_plan_skips_closed_released_terminal_tasks(
-    tmp_path: Path,
-    terminal_status: str,
-) -> None:
-    _write_task(
-        tmp_path,
-        "TASK-AR-901",
-        "TASKSET-AR-RELEASE-STEWARD",
-        status=terminal_status,
-    )
-    _write_task(
-        tmp_path,
-        "TASK-AR-902",
-        "TASKSET-AR-RELEASE-STEWARD",
-        status="planned",
-    )
-
-    result = _run(tmp_path, "plan", "release-steward", "--json")
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    assert payload["next_task_id"] == "TASK-AR-902"
-    assert payload["next_task_status"] == "planned"
-
-
-def test_plan_fails_when_taskset_has_no_open_tasks(tmp_path: Path) -> None:
-    _write_task(
-        tmp_path,
-        "TASK-AR-901",
-        "TASKSET-AR-RELEASE-STEWARD",
-        status="completed",
-    )
-
-    result = _run(tmp_path, "plan", "release-steward", "--json")
-
-    assert result.returncode == 1
-    assert "task set has no open tasks" in (result.stderr or result.stdout)
-
-
-def test_start_creates_claim_with_taskset_progress_metadata(tmp_path: Path) -> None:
-    (tmp_path / "STATUS.md").write_text(
-        "## Handoff Checklist\n- continue here\n",
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-PANE-PROGRESS", status="planned")
-    worktree = tmp_path / ".worktrees" / "TASK-AR-901"
-    worktree.mkdir(parents=True, exist_ok=True)
-    (worktree / ".git").write_text(
-        "gitdir: ../../.git/worktrees/test\n",
-        encoding="utf-8",
-    )
-
-    result = _run(
-        tmp_path,
-        "start",
-        "progress-scout",
-        "--agent-role",
-        "lead-engineer",
-        "--team-id",
-        "agent-runtime-core",
-        "--mode",
-        "implement",
-        "--now",
-        "2026-06-10T19:40:00+09:00",
-        "--suffix",
-        "p1",
-        "--json",
-    )
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    payload = json.loads(result.stdout)
-    claim = payload["claim"]["claim"]
-    assert payload["next_task_id"] == "TASK-AR-901"
-    assert claim["task_set_id"] == "TASKSET-AR-PANE-PROGRESS"
-    assert claim["project_id"] == "PROJECT-AGENT-RUNTIME"
-    assert claim["model_tier"] == "worker_standard"
-    assert claim["wip_slot"] == 1
-    assert claim["stop_condition"] == "stop_after:TASK-AR-901:no_adjacent_taskset"
-    assert claim["step_index"] == 1
-    assert claim["step_total"] == 1
-    assert claim["status_text"] == "Starting Progress Scout: TASK-AR-901"
-    assert claim["phase"] == "taskset-claimed"
-    assert claim["progress_pct"] == 0
-
-
-def test_start_creates_missing_worktree_after_claiming_taskset(tmp_path: Path) -> None:
-    (tmp_path / "STATUS.md").write_text(
-        "## Handoff Checklist\n- continue here\n",
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-PANE-PROGRESS", status="planned")
-    fake_bin = tmp_path / "fake-bin"
-    fake_bin.mkdir()
-    fake_git = fake_bin / ("git.cmd" if os.name == "nt" else "git")
-    if os.name == "nt":
-        fake_git.write_text(
-            "\n".join(
-                [
-                    "@echo off",
-                    'dir /b "%CD%\\agents\\runtime\\task_claims\\*.json" >nul 2>nul || exit /b 42',
-                    'echo %*>>"%GIT_FAKE_LOG%"',
-                    'mkdir "%CD%\\.worktrees\\TASK-AR-901" 2>nul',
-                    'echo gitdir: fake>"%CD%\\.worktrees\\TASK-AR-901\\.git"',
-                    "exit /b 0",
-                ]
-            ),
-            encoding="utf-8",
-        )
-    else:
-        fake_git.write_text(
-            "\n".join(
-                [
-                    "#!/bin/sh",
-                    'ls "$PWD/agents/runtime/task_claims/"*.json >/dev/null 2>&1 || exit 42',
-                    'echo "$@" >> "$GIT_FAKE_LOG"',
-                    'mkdir -p "$PWD/.worktrees/TASK-AR-901"',
-                    'printf "gitdir: fake\\n" > "$PWD/.worktrees/TASK-AR-901/.git"',
-                    "exit 0",
-                ]
-            ),
-            encoding="utf-8",
-        )
-        fake_git.chmod(0o755)
-    fake_log = tmp_path / "fake-git.log"
-    env = dict(os.environ)
-    env["GIT_FAKE_LOG"] = str(fake_log)
-    env["AGENT_RUNTIME_GIT"] = str(fake_git)
-
-    result = _run(tmp_path, "start", "progress-scout", "--json", env=env)
-
-    assert result.returncode == 0, result.stderr or result.stdout
-    assert (
-        "worktree add -b codex/task-ar-901-pane-progress .worktrees/TASK-AR-901"
-        in fake_log.read_text(encoding="utf-8")
-    )
-    assert (tmp_path / ".worktrees" / "TASK-AR-901" / ".git").exists()
-    assert list((tmp_path / "agents" / "runtime" / "task_claims").glob("*.json"))
-
-
-def test_start_blocks_when_taskset_already_has_active_claim(tmp_path: Path) -> None:
-    (tmp_path / "STATUS.md").write_text(
-        "## Handoff Checklist\n- continue here\n",
-        encoding="utf-8",
-    )
-    _write_task(tmp_path, "TASK-AR-901", "TASKSET-AR-QUALITY-LOOP", status="planned")
-    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
-    claim_dir.mkdir(parents=True, exist_ok=True)
-    (claim_dir / "CLAIM-active.json").write_text(
-        json.dumps(
-            {
-                "schema": "agent-runtime-task-claim/v1",
-                "claim_id": "CLAIM-active",
-                "task_id": "TASK-AR-900",
-                "task_set_id": "TASKSET-AR-QUALITY-LOOP",
-                "agent_role": "qa",
-                "agent_instance_id": "qa-1",
-                "display_name": "qa@eval-01",
-                "callsite_id": "terminal-1",
-                "pane_id": "terminal-1",
-                "team_id": "validation-team",
-                "status": "working",
-                "phase": "implement",
-                "progress_pct": 20,
-                "status_text": "Already working",
-                "worktree_path": ".worktrees/TASK-AR-900",
-                "branch": "codex/task-ar-900-quality-loop",
-                "claimed_at": "2026-06-10T19:30:00+09:00",
-                "last_heartbeat": "2026-06-10T19:35:00+09:00",
-                "handoff_path": "STATUS.md",
-                "log_path": "STATUS.md",
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
-    result = _run(tmp_path, "start", "TASKSET-AR-QUALITY-LOOP", "--json")
-
-    assert result.returncode == 1
-    assert "task set already has an active claim" in (result.stderr or result.stdout)

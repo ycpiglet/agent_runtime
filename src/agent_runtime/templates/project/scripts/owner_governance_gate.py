@@ -28,6 +28,160 @@ PORTABLE_STATE_SURFACES = (
 )
 
 
+class TrackedStateProbeError(RuntimeError):
+    """Raised when canonical tracked-state inputs cannot be resolved safely."""
+
+
+def _run_git_probe(
+    root: Path,
+    args: list[str],
+    *,
+    label: str,
+    missing_rc: int | None = None,
+) -> bytes | None:
+    command = ["git", "-C", str(root), *args]
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            check=False,
+        )
+    except OSError as exc:
+        raise TrackedStateProbeError(
+            f"git {label} probe unavailable: {type(exc).__name__}"
+        ) from exc
+    if missing_rc is not None and result.returncode == missing_rc:
+        return None
+    if result.returncode != 0:
+        raise TrackedStateProbeError(
+            f"git {label} probe failed with code {result.returncode}"
+        )
+    return result.stdout
+
+
+def _parse_exact_paths(
+    output: bytes,
+    paths: tuple[str, ...],
+    *,
+    label: str,
+) -> set[str]:
+    requested = {path.encode("utf-8") for path in paths}
+    observed = {item for item in output.split(b"\0") if item}
+    if observed - requested:
+        raise TrackedStateProbeError(
+            f"git {label} probe returned an unexpected path"
+        )
+    return {path for path in paths if path.encode("utf-8") in observed}
+
+
+def _tracked_surface_state(
+    root: Path,
+    paths: tuple[str, ...],
+) -> tuple[set[str], set[str]]:
+    """Return exact HEAD and index path sets without opening worktree contents."""
+    index_output = _run_git_probe(
+        root,
+        ["ls-files", "-z", "--cached", "--", *paths],
+        label="index tracked-state",
+    )
+    if index_output is None:
+        raise TrackedStateProbeError(
+            "git index tracked-state probe returned no result"
+        )
+    index_paths = _parse_exact_paths(
+        index_output,
+        paths,
+        label="index tracked-state",
+    )
+
+    head_oid = _run_git_probe(
+        root,
+        ["rev-parse", "--verify", "--quiet", "HEAD"],
+        label="HEAD",
+        missing_rc=1,
+    )
+    if head_oid is None:
+        return set(), index_paths
+
+    head_output = _run_git_probe(
+        root,
+        ["ls-tree", "-rz", "--name-only", "HEAD", "--", *paths],
+        label="HEAD tracked-state",
+    )
+    if head_output is None:
+        raise TrackedStateProbeError(
+            "git HEAD tracked-state probe returned no result"
+        )
+    head_paths = _parse_exact_paths(
+        head_output,
+        paths,
+        label="HEAD tracked-state",
+    )
+    return head_paths, index_paths
+
+
+def _staged_deletion_error(
+    head_paths: set[str],
+    index_paths: set[str],
+    ordered_paths: tuple[str, ...],
+) -> None:
+    staged_deleted = head_paths - index_paths
+    if not staged_deleted:
+        return
+    ordered = [path for path in ordered_paths if path in staged_deleted]
+    raise TrackedStateProbeError(
+        "root state surface staged deletion "
+        f"({', '.join(ordered)})"
+    )
+
+
+def _state_skip_reason(root: Path) -> str:
+    """Accept one complete tracked state model and reject every partial one."""
+    all_paths = tuple(dict.fromkeys(ROOT_STATE_SURFACES + PORTABLE_STATE_SURFACES))
+    head_paths, index_paths = _tracked_surface_state(root, all_paths)
+    _staged_deletion_error(head_paths, index_paths, all_paths)
+    legacy_complete = set(ROOT_STATE_SURFACES).issubset(index_paths)
+    portable_complete = set(PORTABLE_STATE_SURFACES).issubset(index_paths)
+    if legacy_complete or portable_complete:
+        return ""
+    if not head_paths and not index_paths:
+        return (
+            "host checkout skip: root state surfaces absent from HEAD and "
+            "index (portable and legacy)"
+        )
+    raise TrackedStateProbeError(
+        "portable and legacy state surfaces partially tracked "
+        f"(HEAD={len(head_paths)}, index={len(index_paths)}, "
+        f"portable_required={len(PORTABLE_STATE_SURFACES)}, "
+        f"legacy_required={len(ROOT_STATE_SURFACES)})"
+    )
+
+
+def _legacy_state_skip_reason(root: Path) -> str:
+    """Run legacy checks only for a complete legacy tracked-state model."""
+    all_paths = tuple(dict.fromkeys(ROOT_STATE_SURFACES + PORTABLE_STATE_SURFACES))
+    head_paths, index_paths = _tracked_surface_state(root, all_paths)
+    _staged_deletion_error(head_paths, index_paths, all_paths)
+    if set(ROOT_STATE_SURFACES).issubset(index_paths):
+        return ""
+    if set(PORTABLE_STATE_SURFACES).issubset(index_paths):
+        return (
+            "host checkout skip: portable state model selected; "
+            "legacy root state check is not applicable"
+        )
+    if not head_paths and not index_paths:
+        return "host checkout skip: root state surfaces absent from HEAD and index"
+    raise TrackedStateProbeError(
+        "root state surfaces partially tracked "
+        f"(HEAD={len(head_paths)}, index={len(index_paths)}, "
+        f"required={len(ROOT_STATE_SURFACES)})"
+    )
+
+
+def _portable_state_skip_reason(root: Path) -> str:
+    return _state_skip_reason(root)
+
+
 def notify_governance_block(returncode: int) -> None:
     """Best-effort alert for a blocking owner gate; never changes the gate result."""
     if not (ROOT / "scripts" / "allimbot.py").is_file():
@@ -48,42 +202,41 @@ def notify_governance_block(returncode: int) -> None:
         pass
 
 
-def skip_reason(args: list[str]) -> str:
+def skip_reason(args: list[str], *, root: Path | None = None) -> str:
     """Why this check cannot run in this checkout ('' when it can)."""
+    root = root or ROOT
     script = args[0]
-    if not (ROOT / script).exists():
+    if not (root / script).exists():
         return f"script missing: {script}"
-    if script in SOURCE_ONLY_CHECKS and not SOURCE_TEMPLATE_ROOT.exists():
-        return f"host checkout skip: {SOURCE_TEMPLATE_ROOT.relative_to(ROOT).as_posix()} is absent"
-    if script in LEGACY_ROOT_STATE_CHECKS and not all(
-        (ROOT / p).exists() for p in ROOT_STATE_SURFACES
-    ):
-        missing = ", ".join(p for p in ROOT_STATE_SURFACES if not (ROOT / p).exists())
-        return f"host checkout skip: root state surfaces absent ({missing})"
-    portable_state_present = all(
-        (ROOT / p).exists() for p in PORTABLE_STATE_SURFACES
-    )
-    legacy_state_present = all((ROOT / p).exists() for p in ROOT_STATE_SURFACES)
-    if (
-        script in PORTABLE_STATE_CHECKS
-        and not portable_state_present
-        and not legacy_state_present
-    ):
-        missing = ", ".join(
-            p for p in PORTABLE_STATE_SURFACES if not (ROOT / p).exists()
+    source_template_root = root / SOURCE_TEMPLATE_ROOT.relative_to(ROOT)
+    if script in SOURCE_ONLY_CHECKS and not source_template_root.exists():
+        return (
+            "host checkout skip: "
+            f"{source_template_root.relative_to(root).as_posix()} is absent"
         )
-        return f"host checkout skip: portable state surfaces absent ({missing})"
+    if script in LEGACY_ROOT_STATE_CHECKS:
+        return _legacy_state_skip_reason(root)
+    if script in PORTABLE_STATE_CHECKS:
+        return _portable_state_skip_reason(root)
     return ""
 
 
-def run(args: list[str]) -> int:
+def run(args: list[str], *, root: Path | None = None) -> int:
+    root = root or ROOT
     label = " ".join(args)
-    reason = skip_reason(args)
+    try:
+        reason = skip_reason(args, root=root)
+    except TrackedStateProbeError as exc:
+        print(
+            f"owner-governance: block: {label} ({exc})",
+            flush=True,
+        )
+        return 1
     if reason:
         print(f"owner-governance: skip: {label} ({reason})", flush=True)
         return 0
     print(f"owner-governance: start: {label}", flush=True)
-    rc = subprocess.call([sys.executable, *args], cwd=ROOT)
+    rc = subprocess.call([sys.executable, *args], cwd=root)
     print(f"owner-governance: result: {label} -> {rc}", flush=True)
     return rc
 

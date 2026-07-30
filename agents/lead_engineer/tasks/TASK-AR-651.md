@@ -32,6 +32,8 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+depends_on:
+  - TASK-AR-650
 ---
 
 # TASK-AR-651 - Prepare v0.8.0 release candidate from pilot evidence

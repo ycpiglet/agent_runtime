@@ -261,6 +261,7 @@ def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: 
         )
     )
     assert registry["tasksets"][0]["task_set_id"] == "TASKSET-TEST-WORK-CLI"
+    assert registry["tasksets"][0]["tasks"] == ["TASK-AR-901", "TASK-AR-902"]
 
     board = (tmp_path / "BACKLOG-BOARD.md").read_text(encoding="utf-8")
     assert "### Work CLI Test (`TASKSET-TEST-WORK-CLI`)" in board
@@ -285,6 +286,46 @@ def test_work_new_taskset_registry_is_immediately_dispatchable(tmp_path: Path) -
     assert payload["task_set_id"] == "TASKSET-TEST-WORK-CLI"
     assert payload["display_name"] == "Work CLI Test"
     assert payload["next_task_id"] == "TASK-AR-901"
+
+
+def test_work_new_preserves_registration_order_before_score_fallback(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][0]["priority"] = "P2"
+    payload["tasks"][1]["priority"] = "P0"
+    input_path = _write_input(tmp_path, payload)
+
+    registered = _run(tmp_path, input_path)
+    planned = _run_dispatcher(tmp_path, "plan", "test-work-cli", "--json")
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert planned.returncode == 0, planned.stderr or planned.stdout
+    assert json.loads(planned.stdout)["next_task_id"] == "TASK-AR-901"
+
+
+def test_work_new_idempotently_upgrades_legacy_registry_order(
+    tmp_path: Path,
+) -> None:
+    input_path = _write_input(tmp_path, _payload())
+    first = _run(tmp_path, input_path)
+    assert first.returncode == 0, first.stderr or first.stdout
+    registry_path = (
+        tmp_path
+        / "agents"
+        / "project"
+        / "work-items"
+        / "TASKSET-DEFINITIONS.json"
+    )
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["tasksets"][0].pop("tasks")
+    registry_path.write_text(json.dumps(registry, indent=2), encoding="utf-8")
+
+    second = _run(tmp_path, input_path)
+
+    assert second.returncode == 0, second.stderr or second.stdout
+    upgraded = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert upgraded["tasksets"][0]["tasks"] == ["TASK-AR-901", "TASK-AR-902"]
 
 
 def test_work_new_is_idempotent_for_same_structured_input(tmp_path: Path) -> None:
