@@ -921,7 +921,7 @@
         {
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md",
-          "value": "a85299278ba3e4999e7d05634079ef29313996bf70425026fe27118a0e5b725d"
+          "value": "1c59296e1b2c98b9ef8f5c0aca42232da2957fb140ac9a947aff6a2efb8a2688"
         },
         {
           "kind": "sha256",
@@ -985,7 +985,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md",
-      "recorded_at": "2026-07-30T12:00:00+09:00",
+      "recorded_at": "2026-07-30T12:09:17+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1229,5 +1229,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T12:00:00+09:00"
+  "updated_at": "2026-07-30T12:09:17+09:00"
 }
