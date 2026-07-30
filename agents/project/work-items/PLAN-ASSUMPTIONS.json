@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "d0342dbb40a1819a633b36909319787b9ddd3444db1c6723dc40d87fc9591133"
+          "value": "0ae9cde48c3ccb56a099b4cb155865d2fd0e216ec5a4d4e03f5ac9e2fe93c4d7"
         },
         {
           "kind": "sha256",
@@ -1179,7 +1179,7 @@
         {
           "kind": "sha256",
           "path": "BACKLOG-BOARD.md",
-          "value": "f037531f6b4881a3e69cb0776896c658e84f4830ad8060d7b59130fbdba8cdfb"
+          "value": "f867057dad5df814be662460756f8ae151f3c29bc66728ba4fe95e7637ef6ef2"
         },
         {
           "kind": "sha256",
@@ -1345,10 +1345,20 @@
           "kind": "sha256",
           "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md",
           "value": "730f051ebb9403d09519bb0dd3b8fc631f2d1b7363fed638a8d39bb235962bc1"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md",
+          "value": "a28b73f3277f6ae5be5a391b98f4b62fdd098f9c29e3b11486756c369ed83771"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md",
+          "value": "91cec3de4c664a8abd918c291f5923189f689c2bb0438c3a64b8c883b4392464"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md",
-      "recorded_at": "2026-07-30T22:06:03+09:00",
+      "recorded_at": "2026-07-30T22:25:46+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1564,5 +1574,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T22:06:03+09:00"
+  "updated_at": "2026-07-30T22:25:46+09:00"
 }
