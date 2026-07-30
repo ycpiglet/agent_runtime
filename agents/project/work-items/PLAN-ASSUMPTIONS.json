@@ -993,6 +993,16 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md",
+          "value": "24f2f2bf89734fe8de098c1819c2138f26c57eeb1d296b72ded15fa3c7fee9c9"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md",
+          "value": "9bd2e2783b5a3be1623080e8c2bd4155a3955588e3661fca9991d2ddbb75567d"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md",
           "value": "cb812275627671f8f1400a782133be243f45b303c71005424a93857d4b2fc9ff"
         },
@@ -1003,13 +1013,23 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json",
+          "value": "c3365154206949f645825fe48b2639c659ab6462ddc2f90cf9f1974421d7218b"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md",
+          "value": "3bdc66b81553662a9acbe3d407325878c5b85f72cccaded5ed32f66b9b82e725"
+        },
+        {
+          "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
           "value": "031f88c614f24b7ad6ef52f331a1ac7c7fdfb9d453a3fb08baa817be1c166a56"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "88eb143c24f735d754a1d76b0428d80778974e89839081a545a833e65142a48f"
+          "value": "088a469c7e7b5734fc4223334998338cb3eb5fd525714e09c408593a6015ede6"
         },
         {
           "kind": "sha256",
@@ -1148,7 +1168,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md",
-      "recorded_at": "2026-07-30T16:32:15+09:00",
+      "recorded_at": "2026-07-30T16:35:54+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1364,5 +1384,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T16:32:15+09:00"
+  "updated_at": "2026-07-30T16:35:54+09:00"
 }
