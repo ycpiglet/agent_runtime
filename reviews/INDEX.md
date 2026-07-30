@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T23:11:59+09:00
-record_count: 1190
+generated_at: 2026-07-30T23:20:01+09:00
+record_count: 1191
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1190` review and evidence records under `reviews/`.
+- Summary: indexed `1191` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1190` files |
+| Reviews covered | pass | `1191` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1195,6 +1195,7 @@ record_count: 1190
 | `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md` | `W4B-2026-07-29-unit-task-ar-648-006-continuity-block` | md | failed | block | Bean Wiki Attempt-2 Portable Continuity Independent Review |
 | `reviews/W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession.md` | `W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession` | md | supersede | block | TASK-AR-653 Overlay Claim Lifecycle Administrative Supersession |
+| `reviews/W4B-2026-07-30-task-ar-653-replacement-claim-preflight-supersession.md` | `W4B-2026-07-30-task-ar-653-replacement-claim-preflight-supersession` | md | supersede | block | TASK-AR-653 Replacement Claim Preflight Administrative Supersession |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-007.md` | `W4B-2026-07-30-unit-task-ar-648-007` | md | passed | pass | TASK-AR-648 UNIT-007 Blocked Unit Redispatch Guard W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-008.md` | `W4B-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4b |
 | `reviews/W4B-2026-07-30-unit-task-ar-648-009.md` | `W4B-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4b — UNIT-TASK-AR-648-009 Bean attempt 3 |
