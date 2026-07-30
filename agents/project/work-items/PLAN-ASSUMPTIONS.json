@@ -993,8 +993,13 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md",
-          "value": "24f2f2bf89734fe8de098c1819c2138f26c57eeb1d296b72ded15fa3c7fee9c9"
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md",
+          "value": "cb812275627671f8f1400a782133be243f45b303c71005424a93857d4b2fc9ff"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md",
+          "value": "731f59dbc5a922651f9e11fb5faee713eab03958888c5d7a0aaa65911ef7f095"
         },
         {
           "kind": "sha256",
@@ -1004,7 +1009,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "b27ee406055d4f2ecb50fdad8ea710a1681a50396700e5faa64e94a765547973"
+          "value": "88eb143c24f735d754a1d76b0428d80778974e89839081a545a833e65142a48f"
         },
         {
           "kind": "sha256",
@@ -1019,12 +1024,12 @@
         {
           "kind": "sha256",
           "path": "scripts/model_routing.py",
-          "value": "53f266d2d5924ba9a8efbe74e6e665b4d4836b947b4df40bff2c821f6cbfcc55"
+          "value": "afad528ea2d6d870a8b283c774ce976d6583b19e5d914c3f7ad37797a6979a45"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/model_routing.py",
-          "value": "53f266d2d5924ba9a8efbe74e6e665b4d4836b947b4df40bff2c821f6cbfcc55"
+          "value": "afad528ea2d6d870a8b283c774ce976d6583b19e5d914c3f7ad37797a6979a45"
         },
         {
           "kind": "sha256",
@@ -1034,7 +1039,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/subagent_dispatch.py",
-          "value": "980cc8c2fd0629b56d6811de35d558d67cf1d73a3a12774382e4af01cb877240"
+          "value": "3dc1bbc89b75027a5f29e814d3a5ca8493ebf713a787d3a30c3d9c6309c47b17"
         },
         {
           "kind": "sha256",
@@ -1054,12 +1059,67 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "b6117bcc8bec88f225fc4229a64f79823c0a782f98f429f4c617a85d312e0675"
+          "value": "04df1d41659be467d9674284342ea7225f85d519e863050fde20bb7d5f7296a4"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/verify_sdk_backend.py",
+          "value": "6a035d993cf023bac0a5304c5f56b7ce0190010cdc2d87cf0312c868ad185e01"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/doctor.py",
           "value": "c72d8ffe15bfcf5729b2335eafddb0d81c1571d0d4d3a75393a23256d86243e9"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_model_routing.py",
+          "value": "3c2124c975c9f4f08b8657e9ae09638f4f44026d4989278e9f335c5d38392790"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_task_claim_dispatcher.py",
+          "value": "dd56a98bc71ba6cbe33834a57c3650b3b8b2cf110080355385e221d5f3b0f9a5"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_doctor.py",
+          "value": "0e1b2aa8ad50df77a514716f82385bca8dd219aaa8e84bae4c4ff34bdac42317"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_model_routing.py",
+          "value": "262efba122b213e686697f68e537730d66ea5325f2383bf429d8950ab9cf2d87"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py",
+          "value": "c2d7b2e24b2ce531aa4e4959251f41912fe58ced45ceba74be8eae530be4a9df"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
+          "value": "0874b0816fefe3b6be9229e3ff53de69651d8bac8047e49ebdc3178ab17d36c5"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
+          "value": "33062712029c4031ee6a5bde6dfd50830fd2c7675c41467b2c9eb68311845247"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
+          "value": "97496b23fb87dc939666533561a848cf41d5b13af8e0f1ad5c7ff6f4e5c7cf8a"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
+          "value": "7de2df0b682aed45c284d015b9fead1c555e4714ce6f76c5274d88ac2f5e8a7d"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py",
+          "value": "a9b62430bb6eb73b5622d7a60192d5c043d3d0bbd0fac3ed5eb411d6190fa341"
         },
         {
           "kind": "sha256",
@@ -1084,11 +1144,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "f7b4d1e0ff987cdcfe3aa52ab7c87f514b81a2071baf1082dbd083aafb919d9e"
+          "value": "f1fac52c7a14128810b5195d0e1f088a099caa4feb32e4192993db5241628402"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md",
-      "recorded_at": "2026-07-30T15:54:31+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md",
+      "recorded_at": "2026-07-30T16:32:15+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1304,5 +1364,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T15:54:31+09:00"
+  "updated_at": "2026-07-30T16:32:15+09:00"
 }

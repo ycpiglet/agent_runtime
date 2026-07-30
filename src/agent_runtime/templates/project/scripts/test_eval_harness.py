@@ -1045,6 +1045,173 @@ def test_native_baseline_missing_observed_reasoning_is_not_comparable(
     )
 
 
+def test_native_baseline_cannot_forge_unsupported_reasoning_source(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-forged-unsupported",
+        task_id="TASK-FORGED-UNSUPPORTED",
+        workload_id="workload-forged-unsupported",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="unsupported",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="native_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-forged-unsupported",
+        task_id="TASK-FORGED-UNSUPPORTED",
+        workload_id="workload-forged-unsupported",
+        provider="native-codex",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="native_completion",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        model_changed=True,
+        route_changed=True,
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_route_observation_incomplete"
+    )
+    report = eh.report(eh.read_outcomes(path))
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "baseline_reasoning_observation_unavailable"
+        ]
+        == 1
+    )
+
+
+def test_report_rejects_native_actual_forged_as_reasoning_unsupported():
+    baseline, actual = _verified_delta_records(
+        "forged-actual-unsupported",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_model="gpt-5.6-terra",
+        baseline_model="gpt-5.6-sol",
+        actual_reasoning=None,
+        baseline_reasoning="high",
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    baseline.update(
+        {
+            "provider": "native-codex",
+            "observed_provider": "native-codex",
+            "resolved_reasoning_effort": "high",
+            "resolved_reasoning_source": "adapter_default:test",
+        }
+    )
+    actual.update(
+        {
+            "provider": "native-codex",
+            "observed_provider": "native-codex",
+            "resolved_reasoning_effort": "low",
+            "resolved_reasoning_source": "unsupported",
+        }
+    )
+
+    report = eh.report([baseline, actual])
+
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "observed_reasoning_unavailable"
+        ]
+        == 1
+    )
+
+
+def test_canonical_codex_agent_unsupported_reasoning_stays_comparable(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("CODEX_AGENT_OPUS_MODEL", "gpt-codex-expensive")
+    monkeypatch.setenv("CODEX_AGENT_HAIKU_MODEL", "gpt-codex-cheap")
+    baseline_route = eh.model_routing.resolve_provider_route(
+        "codex-agent",
+        "planner_high",
+    )
+    actual_route = eh.model_routing.resolve_provider_route(
+        "codex-agent",
+        "worker_low",
+    )
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-codex-unsupported",
+        task_id="TASK-CODEX-UNSUPPORTED",
+        workload_id="workload-codex-unsupported",
+        provider=baseline_route["provider"],
+        resolved_model=baseline_route["resolved_model"],
+        resolved_reasoning_effort=baseline_route["reasoning_effort"],
+        resolved_model_source=baseline_route["model_source"],
+        resolved_reasoning_source=baseline_route["reasoning_source"],
+        observed_provider="codex-agent",
+        observed_model=baseline_route["resolved_model"],
+        tokens_in=80,
+        tokens_out=20,
+        source="provider_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-codex-unsupported",
+        task_id="TASK-CODEX-UNSUPPORTED",
+        workload_id="workload-codex-unsupported",
+        provider=actual_route["provider"],
+        resolved_model=actual_route["resolved_model"],
+        resolved_reasoning_effort=actual_route["reasoning_effort"],
+        resolved_model_source=actual_route["model_source"],
+        resolved_reasoning_source=actual_route["reasoning_source"],
+        observed_provider="codex-agent",
+        observed_model=actual_route["resolved_model"],
+        tokens_in=10,
+        tokens_out=5,
+        source="provider_completion",
+        status="completed",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "verified"
+    assert actual["application_status"] == "applied"
+    report = eh.report(eh.read_outcomes(path))
+    assert report["token_delta"]["eligible_records"] == 1
+    assert report["token_delta"]["saved_tokens"] == 85
+
+
 def test_report_rejects_forged_verified_native_baseline_without_reasoning():
     baseline, actual = _verified_delta_records(
         "missing-baseline-reasoning",

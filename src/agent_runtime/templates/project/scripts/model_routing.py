@@ -634,6 +634,19 @@ def _provider_mapping(
     }
 
 
+def provider_reasoning_capability(provider_name: str) -> str:
+    """Return the canonical reasoning-observation contract for a provider."""
+    mapping = _provider_mapping(provider_name, "worker_low")
+    if mapping is None:
+        return "unknown"
+    if (
+        mapping.get("reasoning_effort") is None
+        and mapping.get("reasoning_source") == "unsupported"
+    ):
+        return "unsupported"
+    return "required"
+
+
 def _tier_from_compatibility(value: str | None) -> str | None:
     text = str(value or "").strip().lower()
     if text in ALLOWED_PM_TIERS:

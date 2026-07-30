@@ -28,8 +28,11 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 EVAL_LOG = ROOT / "eval_log.jsonl"                       # gitignore (런타임)
 GOLDEN = ROOT / "agents" / "lead_engineer" / "eval" / "golden.jsonl"  # committed fixture
+
+import model_routing  # noqa: E402
 
 # 객관 escalation 신호(model 이 약했거나 task 가 컸다 — under-route).
 # 'length' 는 ambiguous(성공한 긴 출력일 수 있음) → outcome 도 나쁠 때만 escalate(reviewer #1).
@@ -1147,13 +1150,26 @@ def _route_observation_complete(record: dict) -> bool:
     """Require every supported route-identity dimension to be observed."""
     if not str(record.get("observed_model") or "").strip():
         return False
+    if str(record.get("observed_reasoning_effort") or "").strip():
+        return True
+    if str(record.get("resolved_reasoning_effort") or "").strip():
+        return False
+
+    configured_provider = str(record.get("provider") or "").strip()
+    observed_provider = str(record.get("observed_provider") or "").strip()
+    if (
+        model_routing.provider_reasoning_capability(observed_provider)
+        == "required"
+    ):
+        return False
+
     reasoning_source = str(
         record.get("resolved_reasoning_source") or ""
     ).strip().lower()
-    if reasoning_source == "unsupported":
-        return True
-    return bool(
-        str(record.get("observed_reasoning_effort") or "").strip()
+    return (
+        reasoning_source == "unsupported"
+        and model_routing.provider_reasoning_capability(configured_provider)
+        == "unsupported"
     )
 
 

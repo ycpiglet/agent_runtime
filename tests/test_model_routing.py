@@ -196,6 +196,15 @@ def test_native_codex_matrix_is_configured_but_unverified(monkeypatch):
     }
 
 
+def test_provider_reasoning_capability_comes_from_canonical_mapping():
+    assert mr.provider_reasoning_capability("native-codex") == "required"
+    assert mr.provider_reasoning_capability("codex-session") == "required"
+    assert mr.provider_reasoning_capability("codex-agent") == "unsupported"
+    assert mr.provider_reasoning_capability("codex") == "unsupported"
+    assert mr.provider_reasoning_capability("claude-agent") == "unsupported"
+    assert mr.provider_reasoning_capability("unknown-provider") == "unknown"
+
+
 def test_native_route_change_compares_model_and_reasoning(monkeypatch):
     for name in (
         "CODEX_NATIVE_WORKER_LOW_MODEL",

@@ -146,6 +146,32 @@ def test_render_prompt_rejects_forged_raw_provider_route_assertion():
         )
 
 
+@pytest.mark.parametrize(
+    ("tier_route", "provider_route"),
+    [
+        ({"requested_tier": "reviewer_standard"}, None),
+        (None, {"provider": "codex-agent"}),
+        (
+            {"requested_tier": "reviewer_standard"},
+            {"provider": "codex-agent"},
+        ),
+    ],
+    ids=("partial-tier", "partial-alternate-provider", "mixed-partials"),
+)
+def test_render_prompt_rejects_partial_route_assertions_as_authority(
+    tier_route,
+    provider_route,
+):
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier_route,
+            provider_route=provider_route,
+        )
+
+
 def test_render_prompt_skeptic_has_severity():
     prompt = sd.render_prompt("skeptic", "TASK-116", "find holes")
     assert "SKEPTIC subagent" in prompt
@@ -311,6 +337,37 @@ def test_emit_call_message_rejects_forged_raw_provider_route_assertion(
             intent="archive bounded state",
             tier_route=tier,
             provider_route=forged_provider,
+        )
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    ("tier_route", "provider_route"),
+    [
+        ({"requested_tier": "reviewer_standard"}, None),
+        (None, {"provider": "codex-agent"}),
+        (
+            {"requested_tier": "reviewer_standard"},
+            {"provider": "codex-agent"},
+        ),
+    ],
+    ids=("partial-tier", "partial-alternate-provider", "mixed-partials"),
+)
+def test_emit_call_message_rejects_partial_route_assertions_as_authority(
+    tmp_path,
+    monkeypatch,
+    tier_route,
+    provider_route,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier_route,
+            provider_route=provider_route,
         )
     assert not list(tmp_path.iterdir())
 

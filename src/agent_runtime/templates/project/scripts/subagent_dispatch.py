@@ -492,11 +492,8 @@ def _resolve_role_bound_routes(
     provider_route: dict | None = None,
 ) -> tuple[dict, dict]:
     """Resolve final executable authority and validate caller assertions."""
-    asserted_tier = dict(tier_route or {})
-    asserted_provider = dict(provider_route or {})
     requested = (
         str(requested_tier or "").strip()
-        or str(asserted_tier.get("requested_tier") or "").strip()
         or "auto"
     )
     authoritative_tier = model_routing.resolve_subagent_tier(
@@ -506,7 +503,6 @@ def _resolve_role_bound_routes(
     )
     provider_name = (
         str(provider or "").strip()
-        or str(asserted_provider.get("provider") or "").strip()
         or "native-codex"
     )
     authoritative_provider = model_routing.resolve_provider_route(

@@ -147,7 +147,7 @@
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
       "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
       "scripts/env_check.py": "sha256:4e556e559a149f63c62af4cd983817243f58938f2c64a5ce03d1196b3fcd0085",
-      "scripts/eval_harness.py": "sha256:b6117bcc8bec88f225fc4229a64f79823c0a782f98f429f4c617a85d312e0675",
+      "scripts/eval_harness.py": "sha256:04df1d41659be467d9674284342ea7225f85d519e863050fde20bb7d5f7296a4",
       "scripts/evidence_index_generator.py": "sha256:9b418f03cafcdf27f6e974f6d432b7ed71ce8c0c6440f9e6a3de6304562b7fbf",
       "scripts/footprint_conflict_gate.py": "sha256:c2a87e2ee0c96ba08d0f1babfc82f4f7ea4d3e1e8d4d9c8364fed1ff130ecc8b",
       "scripts/fs_watch.py": "sha256:ef5c925307270c7c451734602339213d47111645413e033f5f54fed57d6f9fd1",
@@ -170,7 +170,7 @@
       "scripts/macro_detect.py": "sha256:15a7ecad24ee5e73922ba7f276d3e8439a37f6a6e2e6b95fdcfc843cababd813",
       "scripts/merge_queue.py": "sha256:fa58f4b4a7fd0a7a59a9a2e3606705a83300508d49abc16871d1b7cd4b9ea41f",
       "scripts/message_queue.py": "sha256:3c6eb116d0c6db0229daad7eda983afd2d048bc43ed15f7348ba325b9ccb4c7a",
-      "scripts/model_routing.py": "sha256:53f266d2d5924ba9a8efbe74e6e665b4d4836b947b4df40bff2c821f6cbfcc55",
+      "scripts/model_routing.py": "sha256:afad528ea2d6d870a8b283c774ce976d6583b19e5d914c3f7ad37797a6979a45",
       "scripts/now.py": "sha256:eeee3a63a66373bb39af16cc5b22a6a6b1044bc778ed069eed6e297c6b641ad0",
       "scripts/orchestrator_safety_gate.py": "sha256:ff588238e9e0ab497f7a82caf52cb674c362409ca0583b33e402321efb29c7c7",
       "scripts/owner_doc_format_gate.py": "sha256:0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815",
@@ -223,7 +223,7 @@
       "scripts/stop_hook_owner_governance.py": "sha256:1263152acb9a4f18a51e77a7895ae03ae0c4027b28a6e873083dab84f0919b2f",
       "scripts/stop_hook_session_scope.py": "sha256:75cc7332461618d985ec716044ae993ced1d391ec87a57ef903db63a2aaf1cf5",
       "scripts/subagent_council.py": "sha256:d86012bb61ab057f299cf994c1ff6f04d1a8e84c39d1b2e4712a94c27e62d608",
-      "scripts/subagent_dispatch.py": "sha256:980cc8c2fd0629b56d6811de35d558d67cf1d73a3a12774382e4af01cb877240",
+      "scripts/subagent_dispatch.py": "sha256:3dc1bbc89b75027a5f29e814d3a5ca8493ebf713a787d3a30c3d9c6309c47b17",
       "scripts/summarize_warning_summary_gate_report.py": "sha256:1c77c2d444b3d732dd2aff431317f4468dfed1fa3fad8b18fbefd1294b2b5c53",
       "scripts/task_api.py": "sha256:423a76253d47d195901dd836bd6edc08c4011338263ee0abc4b382b1f53f0540",
       "scripts/task_claim_dispatcher.py": "sha256:275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:aa8c26f0214e0085467b504230dd4a7ed3593da928f9ce3070aab27a44236300",
+    "template_digest": "sha256:435209dcab39ced36992cc90be3dd08b0dbc1869911790a6b421d94fe7933203",
     "template_files": 251
   },
   "profiles": [
