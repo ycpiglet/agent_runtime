@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T23:20:37+09:00
+updated_at: 2026-07-30T23:49:34+09:00
 started_at: 2026-07-30T23:20:37+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -26,6 +26,7 @@ claim_refs:
   - agents/runtime/task_claims/CLAIM-20260730-225027-task-ar-653-ar653001.json
   - agents/runtime/task_claims/CLAIM-20260730-231354-task-ar-653-ar653002.json
   - agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
+  - agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.json
 context: Runtime currently has 769 hot items and Autofolio had 272, yet both become ready after writing a ten-item projection. The Scribe skill promises mandatory archive work above 15 items, so implementation and policy disagree.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -50,6 +51,7 @@ target_files:
   - tests/test_session_continuity_hooks.py
   - tests/test_doctor.py
   - tests/test_template_smoke.py
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Add deterministic planning and verification. Do not autonomously rewrite host-owned canonical state or choose meaning when records conflict.
 acceptance:
   - Projection freshness alone cannot satisfy overdue closure.
@@ -95,6 +97,7 @@ Runtime currently has 769 hot items and Autofolio had 272, yet both become ready
 - tests/test_session_continuity_hooks.py
 - tests/test_doctor.py
 - tests/test_template_smoke.py
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 

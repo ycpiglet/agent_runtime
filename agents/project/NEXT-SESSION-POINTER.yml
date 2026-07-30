@@ -1,21 +1,21 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-30T23:20:37+09:00
-updated_by: le-20260730-232037-kst-ar653003
+updated_at: 2026-07-30T23:49:34+09:00
+updated_by: le-20260730-234934-kst-ar653004
 current_state:
-  summary: "TASK-AR-653 has an approved-scope claim and active worker worktree."
+  summary: "TASK-AR-653 has an approved 17-file claim and preserved worker worktree."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 2
   step_total: 7
-  progress_pct: 15
-  status_text: "TASK-AR-653 is active in the corrected 16-file footprint."
+  progress_pct: 20
+  status_text: "TASK-AR-653 resumed after host-lock footprint supersession."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260730-232037-task-ar-653-ar653003
+    - claim_id: CLAIM-20260730-234934-task-ar-653-ar653004
       agent_role: lead-engineer
       team_id: quality
-      agent_instance_id: le-20260730-232037-kst-ar653003
+      agent_instance_id: le-20260730-234934-kst-ar653004
       display_name: "lead_engineer@orchestrator-01"
       callsite_id: "terminal:wt-task-ar-653:tab-01"
       pane_id: "terminal:wt-task-ar-653:tab-01"
@@ -36,10 +36,10 @@ active_work:
       routing_escalation_reason: null
       task_token_budget: null
       claim_token_budget: null
-      claim_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.handoff.md
-      log_path: agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.log.md
-      last_heartbeat: 2026-07-30T23:20:37+09:00
+      claim_path: agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.log.md
+      last_heartbeat: 2026-07-30T23:49:34+09:00
   current_teams:
     - quality
 resume:
@@ -48,7 +48,7 @@ resume:
   branch_policy: "Continue TASK-AR-653 only in .worktrees/TASK-AR-653; keep consumer primaries and release surfaces read-only."
   next_actions:
     - "Implement active-aware Scribe source-debt, receipt, and closure semantics in the claimed worktree."
-    - "Keep every implementation write inside UNIT-TASK-AR-653-001's 16-file footprint."
+    - "Keep every implementation write inside UNIT-TASK-AR-653-001's corrected 17-file footprint."
     - "Run W4a and a distinct W4b before release and local integration."
     - "Keep TASK-AR-651, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
@@ -58,7 +58,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.json
+    - agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

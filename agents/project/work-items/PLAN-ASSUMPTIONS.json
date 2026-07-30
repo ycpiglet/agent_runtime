@@ -1014,12 +1014,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-653.md",
-          "value": "b47a62643e7ef99db33a393740ac93bb31a61b51251989077817b10854a470c3"
+          "value": "4316fd2be4d54aba3c6b0a2a83ef83c3fa7b8958fc6d32dedcaa381f481cefe4"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
-          "value": "93ade4a5554ecde504bec65d39cce93a68f14e550b8694aa45a2a6dc69949b11"
+          "value": "deda2631a45b858a923b3ba4d553f81834af1d6f44194ceab88e866a8a6bd4d2"
         },
         {
           "kind": "sha256",
@@ -1119,12 +1119,12 @@
         {
           "kind": "sha256",
           "path": "agents/project/NEXT-SESSION-POINTER.yml",
-          "value": "81117d868359f6f4d5775320839d3a8bb073f2c0a51443ece5117fb3311b4e3b"
+          "value": "96e4e4ff3753b0d33802357997ce35260a9b8190576e476e6d425575743ad6fc"
         },
         {
           "kind": "sha256",
           "path": "BACKLOG-BOARD.md",
-          "value": "0360bb5afef61a31685a56d6d5c147a9f518ebf59ea9c26a437ebd90ee42d885"
+          "value": "ec32e3285ad9c2af646c9f3eacfe504e150be23829650d75171866d6c936834e"
         },
         {
           "kind": "sha256",
@@ -1135,10 +1135,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment.md",
           "value": "c6246fd8c4d559393a5c727a06b046583dafab6353cae0f0c227e4d8786651f1"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md",
+          "value": "ab60261e8a2cb67cdc7b97b49fc030c38012e9176fd1d5eb79f68f0a24c73b6d"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "887555f64d6e65ceb4606fbc3d2509760fb9b360dc19362b043bdbf3187a124e"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md",
-      "recorded_at": "2026-07-30T23:21:39+09:00",
+      "design_record": "reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md",
+      "recorded_at": "2026-07-30T23:51:03+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1354,5 +1364,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T23:21:39+09:00"
+  "updated_at": "2026-07-30T23:51:03+09:00"
 }

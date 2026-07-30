@@ -1,15 +1,15 @@
 {
   "schema": "agent-runtime-task-claim/v1",
-  "claim_id": "CLAIM-20260730-232037-task-ar-653-ar653003",
+  "claim_id": "CLAIM-20260730-234934-task-ar-653-ar653004",
   "task_id": "TASK-AR-653",
   "agent_role": "lead-engineer",
   "team_id": "quality",
-  "agent_instance_id": "le-20260730-232037-kst-ar653003",
+  "agent_instance_id": "le-20260730-234934-kst-ar653004",
   "display_name": "lead_engineer@orchestrator-01",
   "callsite_id": "terminal:wt-task-ar-653:tab-01",
   "pane_id": "terminal:wt-task-ar-653:tab-01",
   "mode": "orchestrator",
-  "status": "released",
+  "status": "claimed",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -42,17 +42,17 @@
   "status_text": "Starting v0.8 Operability Hardening: TASK-AR-653",
   "worktree_path": ".worktrees/TASK-AR-653",
   "branch": "codex/task-ar-653-v080-operability-hardening",
-  "claimed_at": "2026-07-30T23:20:37+09:00",
-  "last_heartbeat": "2026-07-30T23:46:39+09:00",
-  "updated_at": "2026-07-30T23:46:39+09:00",
-  "expires_at": "2026-07-30T23:50:37+09:00",
+  "claimed_at": "2026-07-30T23:49:34+09:00",
+  "last_heartbeat": "2026-07-30T23:49:34+09:00",
+  "updated_at": "2026-07-30T23:49:34+09:00",
+  "expires_at": "2026-07-31T00:19:34+09:00",
   "lease": {
-    "claimed_at": "2026-07-30T23:20:37+09:00",
-    "heartbeat_at": "2026-07-30T23:46:39+09:00",
-    "expires_at": "2026-07-30T23:50:37+09:00"
+    "claimed_at": "2026-07-30T23:49:34+09:00",
+    "heartbeat_at": "2026-07-30T23:49:34+09:00",
+    "expires_at": "2026-07-31T00:19:34+09:00"
   },
-  "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.handoff.md",
-  "log_path": "agents/runtime/task_claims/CLAIM-20260730-232037-task-ar-653-ar653003.log.md",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260730-234934-task-ar-653-ar653004.log.md",
   "allow_parallel_task_set": false,
   "tags": [],
   "escalation_triggers": [],
@@ -78,14 +78,11 @@
     "tests/test_closure_gate.py",
     "tests/test_session_continuity_hooks.py",
     "tests/test_doctor.py",
-    "tests/test_template_smoke.py"
+    "tests/test_template_smoke.py",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ],
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  },
-  "released_at": "2026-07-30T23:46:39+09:00",
-  "verified_by": "qa-20260730-ar653-host-lock-footprint-supersession",
-  "verifier_role": "qa-reviewer",
-  "verification_evidence": "reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md"
+  }
 }
