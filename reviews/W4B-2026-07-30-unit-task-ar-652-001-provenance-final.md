@@ -336,4 +336,3 @@ Because this verdict contains task-scope P1 findings, it must remain claimed.
 ## Final verdict
 
 `REVISE — P0: 0, P1: 2, P2: 0`
-

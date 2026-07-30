@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T20:06:06+09:00
-record_count: 1169
+generated_at: 2026-07-30T20:27:35+09:00
+record_count: 1171
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1169` review and evidence records under `reviews/`.
+- Summary: indexed `1171` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1169` files |
+| Reviews covered | pass | `1171` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -650,6 +650,7 @@ record_count: 1169
 | `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md` | `REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan` | md | accepted | n/a | TASK-AR-650 W4 계약 순환 차단 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md` | `REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan` | md | accepted | n/a | TASK-AR-652 준비성 경로·실행 경계 T3 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md` | `REVIEW-2026-07-30-task-ar-652-scope-transition-approval` | planning | record | pass | TASK-AR-652 operability taskset scope transition approval |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan` | md | accepted | n/a | TASK-AR-652 economic call-provenance replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan` | md | accepted | n/a | TASK-AR-652 final-approval W4b repair replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
 | `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
@@ -1191,6 +1192,7 @@ record_count: 1169
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final` | md | blocked | block | W4b Call Provenance Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-candidate` | md | blocked | block | W4b Final Candidate - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |

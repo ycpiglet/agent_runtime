@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T20:04:56+09:00
+updated_at: 2026-07-30T20:27:00+09:00
 started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -50,6 +50,8 @@ inputs:
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -131,6 +133,8 @@ review_refs:
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
