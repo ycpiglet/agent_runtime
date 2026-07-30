@@ -138,6 +138,7 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
         currency="USD",
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         path=cfg.eval_log_path,
     )
     meta = {
@@ -221,6 +222,50 @@ def test_wrong_observed_model_records_receipt_but_not_savings_evidence(tmp_path)
     assert eval_harness.report(records)["token_delta"]["eligible_records"] == 0
 
 
+def test_worker_receipt_preserves_explicit_empty_provider_finish(tmp_path):
+    decision = _low_decision()
+    cfg = worker.WorkerConfig(
+        role="qa",
+        provider_name="claude-agent",
+        eval_log_path=tmp_path / "eval.jsonl",
+    )
+    observation = worker._completion_observation(
+        SimpleNamespace(
+            provider="claude-agent",
+            model="claude-haiku-4-5",
+            reasoning_effort=None,
+            tokens_in=2,
+            tokens_out=1,
+        ),
+        latency_ms=1,
+    )
+    route = worker._route_with_observation(
+        "claude-agent",
+        decision,
+        baseline_model=None,
+        observation=observation,
+    )
+
+    recorded, _ = worker._record_execution_receipt(
+        cfg,
+        {"id": "MSG-EMPTY", "task_id": "TASK-EMPTY-WORKER"},
+        decision,
+        route,
+        observation,
+        dispatch_id="MSG-EMPTY",
+        status="completed",
+        source="provider_completion",
+        finish_reason="",
+        error=None,
+    )
+
+    assert recorded is True
+    receipt = eval_harness.read_outcomes(cfg.eval_log_path)[0]
+    assert receipt["finish_reason"] == ""
+    assert receipt["application_status"] == "unverified"
+    assert receipt["route_status"] == "unverified"
+
+
 def test_worker_budget_preflight_skips_provider_and_closes_claim(
     tmp_path,
     monkeypatch,
@@ -284,6 +329,89 @@ def test_worker_budget_preflight_skips_provider_and_closes_claim(
     assert records[0]["status"] == "skipped"
     assert records[0]["source"] == "budget_preflight"
     assert records[0]["budget_preflight"]["reason"] == "task_budget_insufficient"
+
+
+def test_worker_records_provider_call_start_immediately_before_run(
+    tmp_path,
+    monkeypatch,
+):
+    import json
+    import message_queue
+
+    repo_root = tmp_path / "repo"
+    inbox = repo_root / "agents" / "messages" / "inbox"
+    events = repo_root / "agents" / "runtime" / "events"
+    claims = repo_root / "agents" / "runtime" / "claims"
+    inbox.mkdir(parents=True)
+    message = inbox / "MSG-20260730-000000-provider.md"
+    message.write_text(
+        "---\n"
+        "id: MSG-20260730-000000-provider\n"
+        "from: backend\n"
+        "to: qa\n"
+        "task_id: TASK-WORKER-PROVIDER\n"
+        "task_token_budget: 10\n"
+        "type: question\n"
+        "status: open\n"
+        "ts: 2026-07-30T00:00:00+09:00\n"
+        "---\n"
+        "run the fake provider\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(worker, "REPO_ROOT", repo_root)
+    monkeypatch.setattr(worker, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(worker, "EVENTS_DIR", events)
+    monkeypatch.setattr(message_queue, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(message_queue, "CLAIMS_DIR", claims)
+
+    class _CalledProvider:
+        name = "dummy"
+        tokens_per_call = 10
+        model = "dummy"
+
+        def __init__(self):
+            self.calls = []
+
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            return SimpleNamespace(
+                text="done",
+                tokens_in=2,
+                tokens_out=1,
+                finish_reason="stop",
+                error=None,
+                changed_files=[],
+                provider="dummy",
+                model=self.model,
+                reasoning_effort=None,
+                billed_cost=None,
+                currency=None,
+            )
+
+    provider = _CalledProvider()
+    receipt_log = tmp_path / "receipts.jsonl"
+    cfg = worker.WorkerConfig(
+        role="qa",
+        provider_name="dummy",
+        eval_log_path=receipt_log,
+        verbose=False,
+    )
+
+    assert worker.process_one(cfg, provider) is True
+    assert len(provider.calls) == 1
+    raw = [
+        json.loads(line)
+        for line in receipt_log.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        eval_harness.BUDGET_RESERVATION_SCHEMA,
+        eval_harness.PROVIDER_CALL_START_SCHEMA,
+        eval_harness.EXECUTION_RECEIPT_SCHEMA,
+    ]
+    assert raw[1]["source"] == "agent_worker_provider_run"
+    assert raw[1]["provider"] == "dummy"
+    assert raw[1]["execution_surface"] == raw[2]["execution_surface"]
+    assert raw[2]["budget_settlement_basis"] == "observed_usage"
 
 
 def test_worker_invalid_raw_route_records_receipt_and_closes_claim(

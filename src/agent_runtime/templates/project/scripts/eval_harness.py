@@ -51,12 +51,36 @@ NO_PROVIDER_SETTLEMENT_TRANSITIONS = {
     ("auto_dispatch", "claim_preflight"),
     ("auto_dispatch", "session_budget_preflight"),
 }
+PROVIDER_CALL_START_TRANSITIONS = {
+    ("agent_worker", "agent_worker_provider_run"): frozenset(
+        {
+            "provider_completion",
+            "provider_error",
+            "provider_exception",
+            "provider_unsupported",
+        }
+    ),
+    ("auto_dispatch", "auto_dispatch_provider_run"): frozenset(
+        {"provider_completion", "provider_error"}
+    ),
+    ("codex_subagent_bridge", "native_codex_authorize"): frozenset(
+        {"native_codex_reply"}
+    ),
+    ("codex_subagent_council", "native_codex_authorize"): frozenset(
+        {"native_codex_council_reply"}
+    ),
+    ("verify_sdk_backend", "verify_sdk_provider_run"): frozenset(
+        {"verify_sdk_backend"}
+    ),
+}
+PROVIDER_RESULT_STATUSES = {"completed", "error"}
 
 EXECUTION_RECEIPT_SCHEMA = "agent-runtime-execution-receipt/v1"
 BUDGET_RESERVATION_SCHEMA = "agent-runtime-budget-reservation/v1"
 NO_PROVIDER_SETTLEMENT_SCHEMA = (
     "agent-runtime-no-provider-settlement/v1"
 )
+PROVIDER_CALL_START_SCHEMA = "agent-runtime-provider-call-start/v1"
 RECEIPT_LOCK_TIMEOUT_SECONDS = 5.0
 ACTIVE_CLAIM_STATUSES = {
     "assigned",
@@ -128,14 +152,30 @@ def _reservation_fingerprint(reservation: dict) -> str:
     ).hexdigest()
 
 
+def _provider_call_start_id(
+    reservation_id: str,
+    source: str,
+    provider: str,
+    execution_surface: str,
+) -> str:
+    return "provider-call-start-" + hashlib.sha256(
+        (
+            f"{reservation_id}:{source}:"
+            f"{provider}:{execution_surface}"
+        ).encode("utf-8")
+    ).hexdigest()[:24]
+
+
 def _validate_ledger_records(records: list[dict], path: Path) -> None:
     receipt_ids: dict[str, int] = {}
     reservation_ids: dict[str, int] = {}
     settlement_ids: dict[str, int] = {}
+    call_start_ids: dict[str, int] = {}
     dispatch_kinds: dict[str, dict[str, int]] = {}
     reservations: dict[str, dict] = {}
     receipts: dict[str, dict] = {}
     settlements: dict[str, dict] = {}
+    call_starts: dict[str, dict] = {}
 
     for index, item in enumerate(records, start=1):
         schema = str(item.get("schema") or "")
@@ -144,6 +184,7 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
             EXECUTION_RECEIPT_SCHEMA,
             BUDGET_RESERVATION_SCHEMA,
             NO_PROVIDER_SETTLEMENT_SCHEMA,
+            PROVIDER_CALL_START_SCHEMA,
         }:
             if item.get("immutable") is not True:
                 raise ReceiptIntegrityError(
@@ -207,6 +248,21 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
             settlement_ids[settlement_id] = index
             settlements[dispatch_id] = item
             kind = "no_provider_settlement"
+        elif schema == PROVIDER_CALL_START_SCHEMA:
+            call_start_id = str(item.get("call_start_id") or "").strip()
+            if not call_start_id:
+                raise ReceiptIntegrityError(
+                    f"provider call-start line {index} lacks "
+                    f"call_start_id: {path}"
+                )
+            if call_start_id in call_start_ids:
+                raise ReceiptIntegrityError(
+                    f"duplicate call_start_id={call_start_id} at lines "
+                    f"{call_start_ids[call_start_id]} and {index}: {path}"
+                )
+            call_start_ids[call_start_id] = index
+            call_starts[dispatch_id] = item
+            kind = "provider_call_start"
         else:
             kind = "legacy"
 
@@ -243,6 +299,125 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
                 f"{path}"
             )
 
+    for dispatch_id, call_start in call_starts.items():
+        reservation = reservations.get(dispatch_id)
+        receipt = receipts.get(dispatch_id)
+        settlement = settlements.get(dispatch_id)
+        if reservation is None:
+            raise ReceiptIntegrityError(
+                "provider call-start requires a matching reservation for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if settlement is not None:
+            raise ReceiptIntegrityError(
+                "provider call-start conflicts with no-provider settlement "
+                f"for dispatch_id={dispatch_id}: {path}"
+            )
+        if str(call_start.get("reservation_id") or "") != str(
+            reservation.get("reservation_id") or ""
+        ):
+            raise ReceiptIntegrityError(
+                "provider call-start reservation mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        for field in ("task_id", "claim_id"):
+            if str(call_start.get(field) or "") != str(
+                reservation.get(field) or ""
+            ):
+                raise ReceiptIntegrityError(
+                    f"provider call-start {field} mismatch for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+        reservation_source = str(
+            call_start.get("reservation_source") or ""
+        ).strip()
+        call_source = str(call_start.get("source") or "").strip()
+        if reservation_source != str(
+            reservation.get("source") or ""
+        ).strip():
+            raise ReceiptIntegrityError(
+                "provider call-start reservation source mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        allowed_receipt_sources = PROVIDER_CALL_START_TRANSITIONS.get(
+            (reservation_source, call_source)
+        )
+        if allowed_receipt_sources is None:
+            raise ReceiptIntegrityError(
+                "invalid provider call-start transition "
+                f"{reservation_source}->{call_source} for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if str(call_start.get("status") or "") != "provider_call_started":
+            raise ReceiptIntegrityError(
+                "provider call-start status mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        provider = str(call_start.get("provider") or "").strip()
+        execution_surface = str(
+            call_start.get("execution_surface") or ""
+        ).strip()
+        if not provider or not execution_surface:
+            raise ReceiptIntegrityError(
+                "provider call-start lacks provider/execution surface for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        expected_call_start_id = _provider_call_start_id(
+            str(reservation.get("reservation_id") or ""),
+            call_source,
+            provider,
+            execution_surface,
+        )
+        if str(call_start.get("call_start_id") or "") != (
+            expected_call_start_id
+        ):
+            raise ReceiptIntegrityError(
+                "provider call-start identity mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if str(call_start.get("reservation_fingerprint") or "") != (
+            _reservation_fingerprint(reservation)
+        ):
+            raise ReceiptIntegrityError(
+                "provider call-start reservation fingerprint mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if call_start.get("budget_authority_fingerprint") != dict(
+            reservation.get("budget_authority") or {}
+        ).get("authority_fingerprint"):
+            raise ReceiptIntegrityError(
+                "provider call-start budget authority mismatch for "
+                f"dispatch_id={dispatch_id}: {path}"
+            )
+        if receipt is not None:
+            if str(
+                receipt.get("budget_provider_call_start_id") or ""
+            ) != str(call_start.get("call_start_id") or ""):
+                raise ReceiptIntegrityError(
+                    "provider call-start receipt linkage mismatch for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+            if str(receipt.get("provider") or "").strip() != provider:
+                raise ReceiptIntegrityError(
+                    "provider call-start receipt provider mismatch for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+            if str(
+                receipt.get("execution_surface") or ""
+            ).strip() != execution_surface:
+                raise ReceiptIntegrityError(
+                    "provider call-start receipt execution surface mismatch "
+                    f"for dispatch_id={dispatch_id}: {path}"
+                )
+            if str(receipt.get("source") or "").strip() not in (
+                allowed_receipt_sources
+            ):
+                raise ReceiptIntegrityError(
+                    "invalid provider call-result transition "
+                    f"{call_source}->{receipt.get('source')} for "
+                    f"dispatch_id={dispatch_id}: {path}"
+                )
+
     for dispatch_id, settlement in settlements.items():
         reservation = reservations.get(dispatch_id)
         receipt = receipts.get(dispatch_id)
@@ -250,6 +425,11 @@ def _validate_ledger_records(records: list[dict], path: Path) -> None:
             raise ReceiptIntegrityError(
                 "no-provider settlement requires a matching reservation "
                 f"and receipt for dispatch_id={dispatch_id}: {path}"
+            )
+        if dispatch_id in call_starts:
+            raise ReceiptIntegrityError(
+                "no-provider settlement conflicts with provider call-start "
+                f"for dispatch_id={dispatch_id}: {path}"
             )
         if str(settlement.get("reservation_id") or "") != str(
             reservation.get("reservation_id") or ""
@@ -430,6 +610,63 @@ def _has_authoritative_token_usage(record: dict) -> bool:
     return values[2] == values[0] + values[1]
 
 
+def _verified_provider_observed_usage(
+    record: dict,
+    reservation: dict | None,
+    call_start: dict | None,
+) -> bool:
+    """Require durable call provenance before settling observed token usage."""
+    if (
+        reservation is None
+        or call_start is None
+        or not _has_authoritative_token_usage(record)
+        or str(record.get("status") or "").strip().lower()
+        not in PROVIDER_RESULT_STATUSES
+        or call_start.get("schema") != PROVIDER_CALL_START_SCHEMA
+        or call_start.get("immutable") is not True
+        or str(call_start.get("status") or "")
+        != "provider_call_started"
+        or str(call_start.get("dispatch_id") or "")
+        != str(reservation.get("dispatch_id") or "")
+        or str(call_start.get("dispatch_id") or "")
+        != str(record.get("dispatch_id") or "")
+        or str(call_start.get("reservation_id") or "")
+        != str(reservation.get("reservation_id") or "")
+        or str(call_start.get("task_id") or "")
+        != str(reservation.get("task_id") or "")
+        or str(call_start.get("claim_id") or "")
+        != str(reservation.get("claim_id") or "")
+        or str(call_start.get("reservation_fingerprint") or "")
+        != _reservation_fingerprint(reservation)
+        or call_start.get("budget_authority_fingerprint")
+        != dict(reservation.get("budget_authority") or {}).get(
+            "authority_fingerprint"
+        )
+        or str(record.get("budget_provider_call_start_id") or "")
+        != str(call_start.get("call_start_id") or "")
+    ):
+        return False
+    reservation_source = str(
+        call_start.get("reservation_source") or ""
+    ).strip()
+    call_source = str(call_start.get("source") or "").strip()
+    allowed_receipt_sources = PROVIDER_CALL_START_TRANSITIONS.get(
+        (reservation_source, call_source)
+    )
+    if (
+        reservation_source != str(reservation.get("source") or "").strip()
+        or allowed_receipt_sources is None
+        or str(record.get("source") or "").strip()
+        not in allowed_receipt_sources
+        or str(record.get("provider") or "").strip()
+        != str(call_start.get("provider") or "").strip()
+        or str(record.get("execution_surface") or "").strip()
+        != str(call_start.get("execution_surface") or "").strip()
+    ):
+        return False
+    return True
+
+
 def _has_authoritative_billed_cost(record: dict) -> bool:
     """Validate billed cost telemetry and its currency."""
     if (
@@ -513,13 +750,18 @@ def _budget_settlement_basis(
     record: dict,
     reservation: dict | None,
     settlement: dict | None = None,
+    call_start: dict | None = None,
 ) -> str:
     if reservation is None:
         return "not_required_or_unreserved"
-    if _has_authoritative_token_usage(record):
-        return "observed_usage"
     if _verified_pre_provider_skip(record, reservation, settlement):
         return "pre_provider_skip"
+    if _verified_provider_observed_usage(
+        record,
+        reservation,
+        call_start,
+    ):
+        return "observed_usage"
     return "conservative_ceiling"
 
 
@@ -786,6 +1028,12 @@ def _usage_from_records(
         if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
         and str(item.get("task_id") or "") == str(task_id)
     ]
+    task_call_starts = [
+        item
+        for item in records
+        if item.get("schema") == PROVIDER_CALL_START_SCHEMA
+        and str(item.get("task_id") or "") == str(task_id)
+    ]
     claim_receipts = (
         [
             item
@@ -813,11 +1061,21 @@ def _usage_from_records(
         if claim_id
         else []
     )
+    claim_call_starts = (
+        [
+            item
+            for item in task_call_starts
+            if str(item.get("claim_id") or "") == str(claim_id)
+        ]
+        if claim_id
+        else []
+    )
 
     def _usage(
         rows: list[dict],
         reservations: list[dict],
         settlements: list[dict],
+        call_starts: list[dict],
     ) -> dict:
         costs: dict[str, float] = {}
         tokens = 0
@@ -835,6 +1093,10 @@ def _usage_from_records(
             str(item.get("dispatch_id") or ""): item
             for item in settlements
         }
+        call_starts_by_dispatch = {
+            str(item.get("dispatch_id") or ""): item
+            for item in call_starts
+        }
         pending_reservations: list[dict] = []
         conservative_unobserved_tokens = 0
         conservative_settlements = 0
@@ -849,10 +1111,14 @@ def _usage_from_records(
             settlement = settlements_by_dispatch.get(
                 str(reservation.get("dispatch_id") or "")
             )
+            call_start = call_starts_by_dispatch.get(
+                str(reservation.get("dispatch_id") or "")
+            )
             basis = _budget_settlement_basis(
                 receipt,
                 reservation,
                 settlement,
+                call_start,
             )
             if basis == "pre_provider_skip":
                 pre_provider_releases += 1
@@ -897,11 +1163,13 @@ def _usage_from_records(
             task_receipts,
             task_reservations,
             task_settlements,
+            task_call_starts,
         ),
         "claim": _usage(
             claim_receipts,
             claim_reservations,
             claim_settlements,
+            claim_call_starts,
         ),
     }
 
@@ -1287,6 +1555,154 @@ def validate_dispatch_reservation(
         }
 
 
+def record_provider_call_start(
+    *,
+    dispatch_id: str,
+    task_id: str,
+    source: str,
+    provider: str,
+    execution_surface: str,
+    path: Path = EVAL_LOG,
+    root: Path = ROOT,
+    timestamp: str | None = None,
+) -> dict:
+    """Durably bind a pending reservation immediately before a provider call."""
+    dispatch = str(dispatch_id or "").strip()
+    task = str(task_id or "").strip()
+    call_source = str(source or "").strip()
+    configured_provider = str(provider or "").strip()
+    surface = str(execution_surface or "").strip()
+    if not dispatch or not task:
+        raise ValueError("dispatch_id and task_id are required")
+    if not configured_provider or not surface:
+        raise ValueError("provider and execution_surface are required")
+
+    ledger_path = Path(path)
+    with _exclusive_log_lock(ledger_path):
+        records = _strict_records(ledger_path)
+        reservation = next(
+            (
+                item
+                for item in records
+                if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+                and str(item.get("dispatch_id") or "") == dispatch
+            ),
+            None,
+        )
+        if reservation is None:
+            raise ReceiptIntegrityError(
+                "provider call-start requires a matching pending "
+                f"reservation for dispatch_id={dispatch}"
+            )
+        if str(reservation.get("task_id") or "") != task:
+            raise ReceiptIntegrityError(
+                "provider call-start task differs from reservation "
+                f"for dispatch_id={dispatch}"
+            )
+        reservation_source = str(
+            reservation.get("source") or ""
+        ).strip()
+        if (
+            reservation_source,
+            call_source,
+        ) not in PROVIDER_CALL_START_TRANSITIONS:
+            raise ReceiptIntegrityError(
+                "invalid provider call-start transition "
+                f"{reservation_source}->{call_source} for "
+                f"dispatch_id={dispatch}"
+            )
+        current_authority = _budget_authority(
+            root=Path(root),
+            task_id=task,
+            claim_id=str(
+                reservation.get("claim_id") or ""
+            ).strip()
+            or None,
+            task_token_budget=reservation.get("task_token_budget"),
+            claim_token_budget=reservation.get("claim_token_budget"),
+        )
+        reserved_authority = dict(
+            reservation.get("budget_authority") or {}
+        )
+        if current_authority.get(
+            "authority_fingerprint"
+        ) != reserved_authority.get("authority_fingerprint"):
+            raise ReceiptIntegrityError(
+                "provider call-start budget authority changed for "
+                f"dispatch_id={dispatch}"
+            )
+
+        reservation_id = str(reservation.get("reservation_id") or "")
+        call_start_id = _provider_call_start_id(
+            reservation_id,
+            call_source,
+            configured_provider,
+            surface,
+        )
+        expected = {
+            "schema": PROVIDER_CALL_START_SCHEMA,
+            "immutable": True,
+            "call_start_id": call_start_id,
+            "dispatch_id": dispatch,
+            "task_id": task,
+            "claim_id": reservation.get("claim_id"),
+            "reservation_id": reservation_id,
+            "reservation_source": reservation_source,
+            "source": call_source,
+            "status": "provider_call_started",
+            "provider": configured_provider,
+            "execution_surface": surface,
+            "reservation_fingerprint": _reservation_fingerprint(
+                reservation
+            ),
+            "budget_authority_fingerprint": reserved_authority.get(
+                "authority_fingerprint"
+            ),
+        }
+        existing = next(
+            (
+                item
+                for item in records
+                if item.get("schema") == PROVIDER_CALL_START_SCHEMA
+                and str(item.get("dispatch_id") or "") == dispatch
+            ),
+            None,
+        )
+        if existing is not None:
+            if all(existing.get(key) == value for key, value in expected.items()):
+                return existing
+            raise ReceiptConflictError(
+                "immutable provider call-start already exists for "
+                f"dispatch_id={dispatch}"
+            )
+        if any(
+            item.get("schema") == EXECUTION_RECEIPT_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                "provider call-start cannot follow terminal receipt for "
+                f"dispatch_id={dispatch}"
+            )
+        if any(
+            item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                "provider call-start conflicts with no-provider settlement "
+                f"for dispatch_id={dispatch}"
+            )
+        marker = {
+            **expected,
+            "ts": timestamp
+            or datetime.now().astimezone().isoformat(timespec="seconds"),
+        }
+        _validate_ledger_records([*records, marker], ledger_path)
+        _append_records_locked(ledger_path, [marker])
+    return marker
+
+
 def record_execution_receipt(
     *,
     dispatch_id: str,
@@ -1313,7 +1729,7 @@ def record_execution_receipt(
     billed_cost_status: str | None = None,
     billed_cost: float | None = None,
     currency: str | None = None,
-    finish_reason: str = "stop",
+    finish_reason: str | None = None,
     error: str | None = None,
     route_status: str | None = None,
     application_status: str | None = None,
@@ -1422,7 +1838,9 @@ def record_execution_receipt(
         "currency": actual_currency,
         "source": str(source or "").strip() or "unavailable",
         "status": str(status or "").strip() or "unknown",
-        "finish_reason": str(finish_reason or "stop"),
+        "finish_reason": (
+            None if finish_reason is None else str(finish_reason)
+        ),
         "outcome": "ok" if not error else "gate-error",
         "error": str(error or "").strip() or None,
         "route_status": route_status,
@@ -1513,6 +1931,15 @@ def record_pre_provider_skip_receipt(
             raise ReceiptConflictError(
                 "immutable no-provider settlement already exists for "
                 f"dispatch_id={dispatch}"
+            )
+        if any(
+            item.get("schema") == PROVIDER_CALL_START_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+            for item in records
+        ):
+            raise ReceiptConflictError(
+                "no-provider settlement conflicts with provider call-start "
+                f"for dispatch_id={dispatch}"
             )
         reservation = next(
             (
@@ -1651,6 +2078,15 @@ def _finalize_execution_receipt(
             item
             for item in records
             if item.get("schema") == NO_PROVIDER_SETTLEMENT_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+        ),
+        None,
+    )
+    call_start = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == PROVIDER_CALL_START_SCHEMA
             and str(item.get("dispatch_id") or "") == dispatch
         ),
         None,
@@ -1801,6 +2237,9 @@ def _finalize_execution_receipt(
     rec["budget_no_provider_settlement_id"] = (
         settlement.get("settlement_id") if settlement else None
     )
+    rec["budget_provider_call_start_id"] = (
+        call_start.get("call_start_id") if call_start else None
+    )
     rec["budget_reservation_status"] = (
         "settled" if reservation else "not_required_or_unreserved"
     )
@@ -1808,6 +2247,7 @@ def _finalize_execution_receipt(
         rec,
         reservation,
         settlement,
+        call_start,
     )
     return rec
 
@@ -1932,6 +2372,7 @@ def read_outcomes(path: Path = EVAL_LOG) -> list[dict]:
         not in {
             BUDGET_RESERVATION_SCHEMA,
             NO_PROVIDER_SETTLEMENT_SCHEMA,
+            PROVIDER_CALL_START_SCHEMA,
         }
     ]
 

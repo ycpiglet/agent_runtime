@@ -174,7 +174,11 @@ class ClaudeAgentProvider(Provider):
                 if resp.stop_reason != "tool_use":
                     return ProviderResult(
                         text=text, tokens_in=tokens_in, tokens_out=tokens_out,
-                        finish_reason=resp.stop_reason or "stop",
+                        finish_reason=(
+                            "stop"
+                            if resp.stop_reason is None
+                            else str(resp.stop_reason)
+                        ),
                         changed_files=runner.changed_files,
                     )
 

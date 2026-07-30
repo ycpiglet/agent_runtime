@@ -209,6 +209,9 @@ def test_record_reply_records_only_explicit_completion_observations(
     assert receipt["observed_reasoning_effort"] == "low"
     assert receipt["tokens"] == 150
     assert receipt["billed_cost"] == 0.012
+    assert receipt["finish_reason"] is None
+    assert receipt["application_status"] == "unverified"
+    assert receipt["route_status"] == "unverified"
 
 
 @pytest.mark.parametrize(
@@ -260,6 +263,14 @@ def test_record_reply_records_only_explicit_completion_observations(
             "applied",
             "effective",
             1,
+        ),
+        (
+            "completed",
+            None,
+            "",
+            "unverified",
+            "unverified",
+            0,
         ),
         (
             "error",
@@ -332,6 +343,7 @@ def test_record_reply_records_only_explicit_completion_observations(
         "end-turn-finish",
         "stop-sequence-finish",
         "success-finish",
+        "explicit-empty-finish",
         "error",
         "skipped",
         "completed-with-error",
@@ -373,6 +385,7 @@ def test_record_reply_execution_status_gates_economic_evidence(
         currency="USD",
         source="native_codex_reply",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     packet = bridge.create_dispatch_packet(
@@ -492,10 +505,15 @@ def test_council_packet_and_record(tmp_path, monkeypatch):
         packet["execution"]["pre_spawn_guard_by_member"]["reviewer"]["required"]
         is True
     )
-    assert bridge.authorize_dispatch(
+    authorization = bridge.authorize_dispatch(
         bridge_id=packet["id"],
         role_id="reviewer",
-    )["authorized"] is True
+    )
+    assert authorization["authorized"] is True
+    marker = authorization["checks"]["reviewer"]["provider_call_start"]
+    assert marker["schema"] == bridge.eval_harness.PROVIDER_CALL_START_SCHEMA
+    assert marker["reservation_source"] == "codex_subagent_council"
+    assert marker["source"] == "native_codex_authorize"
     result = bridge.record_council(
         bridge_id=packet["id"],
         task_id=None,
@@ -725,6 +743,159 @@ def test_record_reply_rejects_duplicate_before_second_reply(
 
     assert len(list((tmp_path / "inbox").glob("*.md"))) == reply_count
     assert len(bridge.eval_harness.read_outcomes(bridge.eval_harness.EVAL_LOG)) == 1
+
+
+def test_pre_spawn_authorization_records_idempotent_provider_call_start(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-AUTHORIZE-MARKER",
+        intent="implement bounded change",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+    )
+
+    first = bridge.authorize_dispatch(bridge_id=packet["id"])
+    second = bridge.authorize_dispatch(bridge_id=packet["id"])
+
+    assert first["authorized"] is True
+    assert second["authorized"] is True
+    assert first["provider_call_start"]["schema"] == (
+        bridge.eval_harness.PROVIDER_CALL_START_SCHEMA
+    )
+    assert (
+        second["provider_call_start"]["call_start_id"]
+        == first["provider_call_start"]["call_start_id"]
+    )
+    raw = [
+        json.loads(line)
+        for line in bridge.eval_harness.EVAL_LOG.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        bridge.eval_harness.BUDGET_RESERVATION_SCHEMA,
+        bridge.eval_harness.PROVIDER_CALL_START_SCHEMA,
+    ]
+    marker = raw[-1]
+    assert marker["source"] == "native_codex_authorize"
+    assert marker["provider"] == "native-codex"
+    assert marker["execution_surface"] == "native_subagent_spawn"
+    assert bridge.eval_harness.read_outcomes(
+        bridge.eval_harness.EVAL_LOG
+    ) == []
+
+
+def test_council_bulk_authorization_is_atomic_before_call_start(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    packet = bridge.create_council_packet(
+        task_id="TASK-COUNCIL-AUTH-ATOMIC",
+        members=["reviewer", "skeptic"],
+        intent="review bounded change",
+        dispatch_ceiling=10,
+        task_token_budget=20,
+    )
+    bridge.eval_harness.record_execution_receipt(
+        dispatch_id=f"{packet['id']}:skeptic",
+        task_id="TASK-COUNCIL-AUTH-ATOMIC",
+        role="skeptic",
+        provider="native-codex",
+        execution_surface="native_subagent_spawn",
+        source="native_codex_council_reply",
+        status="skipped",
+        finish_reason="skipped",
+        error="synthetic pre-spawn cancellation",
+        path=bridge.eval_harness.EVAL_LOG,
+    )
+
+    authorization = bridge.authorize_dispatch(bridge_id=packet["id"])
+
+    assert authorization["authorized"] is False
+    assert authorization["checks"]["reviewer"]["authorized"] is True
+    assert authorization["checks"]["skeptic"]["authorized"] is False
+    assert "provider_call_start" not in authorization["checks"]["reviewer"]
+    raw = [
+        json.loads(line)
+        for line in bridge.eval_harness.EVAL_LOG.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert not any(
+        row.get("schema")
+        == bridge.eval_harness.PROVIDER_CALL_START_SCHEMA
+        for row in raw
+    )
+
+
+def test_skipped_observed_zero_reply_without_authorize_keeps_budget_reserved(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(bridge, "ROOT", tmp_path)
+    monkeypatch.setattr(bridge, "BRIDGE_DIR", tmp_path / "packets")
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-NO-SPAWN.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-NO-SPAWN",
+                "task_id": "TASK-NO-SPAWN",
+                "status": "claimed",
+                "task_token_budget": 10,
+                "claim_token_budget": 10,
+            }
+        ),
+        encoding="utf-8",
+    )
+    packet = bridge.create_dispatch_packet(
+        role_id="implementer",
+        task_id="TASK-NO-SPAWN",
+        intent="implement bounded change",
+        claim_id="CLAIM-NO-SPAWN",
+        dispatch_ceiling=10,
+    )
+
+    result = bridge.record_reply(
+        bridge_id=packet["id"],
+        verdict="INCOMPLETE",
+        summary="spawn did not occur",
+        tokens_in=0,
+        tokens_out=0,
+        status="skipped",
+        finish_reason="skipped",
+        error="synthetic spawn did not occur",
+    )
+
+    receipt = bridge.eval_harness.read_outcomes(
+        bridge.eval_harness.EVAL_LOG
+    )[0]
+    assert receipt["receipt_id"] == result["execution_receipt"]["receipt_id"]
+    assert receipt["budget_settlement_basis"] == "conservative_ceiling"
+    usage = bridge.eval_harness.cumulative_usage(
+        path=bridge.eval_harness.EVAL_LOG,
+        task_id="TASK-NO-SPAWN",
+        claim_id="CLAIM-NO-SPAWN",
+    )
+    assert usage["task"]["committed_tokens"] == 10
+    assert usage["claim"]["committed_tokens"] == 10
+    second = bridge.eval_harness.budget_preflight(
+        path=bridge.eval_harness.EVAL_LOG,
+        root=tmp_path,
+        task_id="TASK-NO-SPAWN",
+        claim_id="CLAIM-NO-SPAWN",
+        dispatch_id="dispatch-second",
+        dispatch_ceiling=1,
+    )
+    assert second["allowed"] is False
 
 
 def test_pre_spawn_authorization_blocks_released_claim(tmp_path, monkeypatch):

@@ -144,6 +144,17 @@ def test_halts_on_work_exhausted(patch_provider):
     assert summary["halt_reason"] == "work_exhausted"
     assert summary["dispatched"] == 3
     assert len(p.calls) == 3
+    raw = [
+        json.loads(line)
+        for line in auto_dispatch.eval_harness.EVAL_LOG.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert sum(
+        row["schema"]
+        == auto_dispatch.eval_harness.PROVIDER_CALL_START_SCHEMA
+        for row in raw
+    ) == 3
 
 
 def test_halts_on_max_dispatches_before_billing(patch_provider):
@@ -227,6 +238,35 @@ def test_summary_token_total_sums_in_and_out(patch_provider):
     summary = _run(_items(2), p, session_budget=10_000, max_dispatches=10)
     assert summary["spent"] == 24  # (7+5) * 2
     assert summary["results"][0]["tokens"] == 12
+
+
+def test_auto_dispatch_preserves_explicit_empty_provider_finish(
+    patch_provider,
+):
+    class _EmptyFinishProvider(_FakeProvider):
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            return _FakeResult(
+                tokens_in=2,
+                tokens_out=1,
+                finish_reason="",
+            )
+
+    provider = patch_provider(_EmptyFinishProvider())
+    summary = _run(
+        _items(1),
+        provider,
+        session_budget=100,
+        max_dispatches=1,
+    )
+
+    assert summary["results"][0]["finish_reason"] == ""
+    receipt = auto_dispatch.eval_harness.read_outcomes(
+        auto_dispatch.eval_harness.EVAL_LOG
+    )[0]
+    assert receipt["finish_reason"] == ""
+    assert receipt["application_status"] == "unverified"
+    assert receipt["route_status"] == "unverified"
 
 
 # ---- live gate (real get_provider, no monkeypatch) ----
@@ -474,6 +514,7 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         tokens_out=500,
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         path=receipt_log,
     )
     p = patch_provider(

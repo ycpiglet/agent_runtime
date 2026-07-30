@@ -55,7 +55,7 @@ def _record(
     route: dict,
     preflight: dict,
     status: str,
-    finish_reason: str,
+    finish_reason: str | None,
     result=None,
     error: str | None = None,
 ) -> None:
@@ -141,6 +141,15 @@ def main() -> int:
         print(f"BLOCKED: {preflight['reason']}")
         return 1
     try:
+        eval_harness.record_provider_call_start(
+            dispatch_id=dispatch_id,
+            task_id="verify-sdk",
+            source="verify_sdk_provider_run",
+            provider=str(route.get("provider") or ""),
+            execution_surface="provider_worker",
+            path=eval_harness.EVAL_LOG,
+            root=ROOT,
+        )
         result: ProviderResult = provider.run(
             prompt_role,
             instruction,
@@ -196,7 +205,7 @@ def main() -> int:
         route=route,
         preflight=preflight,
         status="completed" if not getattr(result, "error", None) else "error",
-        finish_reason=str(getattr(result, "finish_reason", None) or "stop"),
+        finish_reason=getattr(result, "finish_reason", None),
         result=result,
         error=str(getattr(result, "error", None) or "").strip() or None,
     )

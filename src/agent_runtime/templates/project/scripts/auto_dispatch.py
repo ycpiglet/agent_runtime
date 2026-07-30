@@ -429,7 +429,7 @@ def _record_execution_receipt(
             ),
             budget_preflight_result=budget_preflight_result,
             path=eval_log_path or eval_harness.EVAL_LOG,
-            finish_reason=str(finish_reason or "stop"),
+            finish_reason=finish_reason,
         )
     except eval_harness.ReceiptConflictError:
         return False, "duplicate_dispatch_id"
@@ -854,6 +854,19 @@ def run_bounded_dispatch(
             src_meta, _ = claimed
             call_started = time.monotonic()
             try:
+                eval_harness.record_provider_call_start(
+                    dispatch_id=dispatch_id,
+                    task_id=task_id,
+                    source="auto_dispatch_provider_run",
+                    provider=provider_name,
+                    execution_surface=(
+                        planned_route.get("execution_surface")
+                        if planned_route
+                        else "provider_worker"
+                    ),
+                    path=receipt_path,
+                    root=REPO_ROOT,
+                )
                 res = provider.run(role, instruction, context)
                 reply_text = (getattr(res, "text", "") or getattr(res, "error", "") or "").strip()
                 tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
@@ -921,6 +934,19 @@ def run_bounded_dispatch(
 
         call_started = time.monotonic()
         try:
+            eval_harness.record_provider_call_start(
+                dispatch_id=dispatch_id,
+                task_id=task_id,
+                source="auto_dispatch_provider_run",
+                provider=provider_name,
+                execution_surface=(
+                    planned_route.get("execution_surface")
+                    if planned_route
+                    else "provider_worker"
+                ),
+                path=receipt_path,
+                root=REPO_ROOT,
+            )
             res = provider.run(role, instruction, context)
             tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
             observation = _completion_observation(

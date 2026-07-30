@@ -76,6 +76,17 @@ if payload["action"] in {"settle", "settle_no_call"}:
         dispatch_ceiling=payload["dispatch_ceiling"],
         source=payload.get("reservation_source", "execution_preflight"),
     )
+    call_start = None
+    if payload.get("call_start"):
+        call_start = eh.record_provider_call_start(
+            dispatch_id=payload["dispatch_id"],
+            task_id=payload["task_id"],
+            source=payload["call_start"]["source"],
+            provider=payload["call_start"]["provider"],
+            execution_surface=payload["call_start"]["execution_surface"],
+            path=ledger_path,
+            root=authority_root,
+        )
     record_receipt = (
         eh.record_pre_provider_skip_receipt
         if payload["action"] == "settle_no_call"
@@ -89,7 +100,11 @@ if payload["action"] in {"settle", "settle_no_call"}:
         path=ledger_path,
         **payload["receipt"],
     )
-    result = {"preflight": preflight, "receipt": receipt}
+    result = {
+        "preflight": preflight,
+        "call_start": call_start,
+        "receipt": receipt,
+    }
 elif payload["action"] == "inspect":
     usage = eh.cumulative_usage(
         path=ledger_path,
@@ -519,11 +534,11 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
                 "tokens_out": 0,
             },
             4,
-            0,
-            4,
             6,
-            True,
-            "observed_usage",
+            10,
+            1,
+            False,
+            "conservative_ceiling",
         ),
         (
             {
@@ -546,7 +561,7 @@ def test_persistent_task_and_claim_budget_survives_restart(tmp_path):
         "error-unknown",
         "post-dispatch-skip-unknown",
         "partial-usage",
-        "observed-usage",
+        "observed-usage-without-call-start",
         "generic-pre-provider-skip",
     ),
 )
@@ -1327,6 +1342,7 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         currency="USD",
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -1347,6 +1363,7 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         currency="USD",
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         route_status="effective",
         application_status="applied",
         route_changed=True,
@@ -1510,6 +1527,137 @@ def test_finalizer_rejects_nonterminal_or_unknown_baseline_finish(
         path=path,
     )
 
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_execution_not_successful"
+    )
+
+
+def test_recording_preserves_explicit_empty_actual_finish_and_fails_closed(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-explicit-empty-actual",
+        task_id="TASK-EMPTY-ACTUAL",
+        workload_id="workload-explicit-empty-actual",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="native_codex_reply",
+        status="completed",
+        finish_reason="stop",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-explicit-empty",
+        task_id="TASK-EMPTY-ACTUAL",
+        workload_id="workload-explicit-empty-actual",
+        provider="native-codex",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="native_codex_reply",
+        status="completed",
+        finish_reason="",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["finish_reason"] == ""
+    assert actual["application_status"] == "unverified"
+    assert actual["route_status"] == "unverified"
+    result = eh.report(eh.read_outcomes(path))
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+
+
+def test_recording_does_not_promote_omitted_finish_to_success(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+
+    receipt = eh.record_execution_receipt(
+        dispatch_id="actual-omitted-finish",
+        task_id="TASK-OMITTED-FINISH",
+        provider="native-codex",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        tokens_in=10,
+        tokens_out=5,
+        source="native_codex_reply",
+        status="completed",
+        path=path,
+    )
+
+    assert receipt["finish_reason"] is None
+    assert receipt["application_status"] == "unverified"
+    assert receipt["route_status"] == "unverified"
+    result = eh.report(eh.read_outcomes(path))
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+
+
+def test_recording_preserves_explicit_empty_baseline_finish_and_rejects_it(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-explicit-empty",
+        task_id="TASK-EMPTY-BASELINE",
+        workload_id="workload-explicit-empty-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        source="native_codex_reply",
+        status="completed",
+        finish_reason="",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-after-explicit-empty-baseline",
+        task_id="TASK-EMPTY-BASELINE",
+        workload_id="workload-explicit-empty-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-terra",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        source="native_codex_reply",
+        status="completed",
+        finish_reason="stop",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert baseline["finish_reason"] == ""
     assert actual["baseline_reference_status"] == "invalid"
     assert actual["baseline_reference_reason"] == (
         "baseline_execution_not_successful"
@@ -1842,6 +1990,486 @@ def test_forged_stored_settlement_basis_does_not_release_generic_receipt(
     assert usage["task"]["committed_tokens"] == 10
 
 
+@pytest.mark.parametrize(
+    ("status", "finish_reason", "error"),
+    (
+        ("completed", "stop", None),
+        ("error", "error", "synthetic provider error"),
+        ("skipped", "skipped", "synthetic spawn did not occur"),
+    ),
+)
+def test_observed_usage_without_provider_call_start_keeps_full_commitment(
+    tmp_path,
+    status,
+    finish_reason,
+    error,
+):
+    path = tmp_path / "receipts.jsonl"
+    task_id = f"TASK-NO-CALL-START-{status}"
+    claim_id = f"CLAIM-NO-CALL-START-{status}"
+    _write_claim_authority(
+        tmp_path,
+        claim_id=claim_id,
+        task_id=task_id,
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+
+    first = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "settle",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-first",
+            "dispatch_ceiling": 10,
+            "reservation_source": "auto_dispatch",
+            "receipt": {
+                "provider": "dummy",
+                "execution_surface": "provider_worker",
+                "source": "provider_completion",
+                "status": status,
+                "finish_reason": finish_reason,
+                "error": error,
+                "tokens_in": 0,
+                "tokens_out": 0,
+            },
+        },
+    )
+    second = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "inspect",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-second",
+            "dispatch_ceiling": 1,
+        },
+    )
+
+    assert (
+        first["receipt"]["budget_settlement_basis"]
+        == "conservative_ceiling"
+    )
+    for scope in ("task", "claim"):
+        assert second["usage"][scope]["committed_tokens"] == 10
+        assert (
+            second["usage"][scope]["conservative_unobserved_tokens"]
+            == 10
+        )
+    assert second["preflight"]["allowed"] is False
+
+
+def test_matching_provider_call_start_allows_observed_usage_after_restart(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    task_id = "TASK-VALID-CALL-START"
+    claim_id = "CLAIM-VALID-CALL-START"
+    _write_claim_authority(
+        tmp_path,
+        claim_id=claim_id,
+        task_id=task_id,
+        task_token_budget=10,
+        claim_token_budget=10,
+    )
+
+    first = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "settle",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-first",
+            "dispatch_ceiling": 10,
+            "reservation_source": "auto_dispatch",
+            "call_start": {
+                "source": "auto_dispatch_provider_run",
+                "provider": "dummy",
+                "execution_surface": "provider_worker",
+            },
+            "receipt": {
+                "provider": "dummy",
+                "execution_surface": "provider_worker",
+                "source": "provider_completion",
+                "status": "completed",
+                "finish_reason": "stop",
+                "tokens_in": 4,
+                "tokens_out": 0,
+            },
+        },
+    )
+    second = _run_fresh_budget_process(
+        path,
+        tmp_path,
+        {
+            "action": "inspect",
+            "task_id": task_id,
+            "claim_id": claim_id,
+            "dispatch_id": "dispatch-second",
+            "dispatch_ceiling": 6,
+        },
+    )
+
+    assert first["call_start"]["schema"] == eh.PROVIDER_CALL_START_SCHEMA
+    assert first["receipt"]["budget_settlement_basis"] == "observed_usage"
+    for scope in ("task", "claim"):
+        assert second["usage"][scope]["tokens"] == 4
+        assert second["usage"][scope]["committed_tokens"] == 4
+    assert second["preflight"]["allowed"] is True
+
+
+def test_provider_call_start_without_receipt_stays_reserved_after_restart(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-CALL-START-CRASH",
+        claim_id=None,
+        dispatch_id="dispatch-call-start-crash",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="agent_worker",
+    )
+    assert preflight["allowed"] is True
+    marker = eh.record_provider_call_start(
+        dispatch_id="dispatch-call-start-crash",
+        task_id="TASK-CALL-START-CRASH",
+        source="agent_worker_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+    )
+
+    assert marker["schema"] == eh.PROVIDER_CALL_START_SCHEMA
+    assert eh.read_outcomes(path) == []
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-CALL-START-CRASH",
+    )
+    assert usage["task"]["pending_reservations"] == 1
+    assert usage["task"]["reserved_tokens"] == 10
+    assert usage["task"]["committed_tokens"] == 10
+
+
+def test_provider_call_start_plus_skipped_zero_receipt_stays_conservative(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    preflight = eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKED-SKIP",
+        claim_id=None,
+        dispatch_id="dispatch-marked-skip",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    assert preflight["allowed"] is True
+    eh.record_provider_call_start(
+        dispatch_id="dispatch-marked-skip",
+        task_id="TASK-MARKED-SKIP",
+        source="auto_dispatch_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+    receipt = eh.record_execution_receipt(
+        dispatch_id="dispatch-marked-skip",
+        task_id="TASK-MARKED-SKIP",
+        provider="dummy",
+        execution_surface="provider_worker",
+        source="provider_completion",
+        status="skipped",
+        finish_reason="skipped",
+        error="synthetic provider call did not complete",
+        tokens_in=0,
+        tokens_out=0,
+        path=path,
+    )
+
+    assert receipt["budget_settlement_basis"] == "conservative_ceiling"
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-MARKED-SKIP",
+    )
+    assert usage["task"]["committed_tokens"] == 10
+    assert usage["task"]["conservative_unobserved_tokens"] == 10
+
+
+def test_provider_error_with_matching_call_start_can_settle_observed_usage(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKED-ERROR",
+        claim_id=None,
+        dispatch_id="dispatch-marked-error",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    eh.record_provider_call_start(
+        dispatch_id="dispatch-marked-error",
+        task_id="TASK-MARKED-ERROR",
+        source="auto_dispatch_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+    receipt = eh.record_execution_receipt(
+        dispatch_id="dispatch-marked-error",
+        task_id="TASK-MARKED-ERROR",
+        provider="dummy",
+        execution_surface="provider_worker",
+        source="provider_error",
+        status="error",
+        finish_reason="error",
+        error="synthetic provider error with usage",
+        tokens_in=2,
+        tokens_out=1,
+        path=path,
+    )
+
+    assert receipt["budget_settlement_basis"] == "observed_usage"
+    usage = eh.cumulative_usage(
+        path=path,
+        task_id="TASK-MARKED-ERROR",
+    )
+    assert usage["task"]["tokens"] == 3
+    assert usage["task"]["committed_tokens"] == 3
+
+
+def test_provider_call_start_rejects_mismatched_result_atomically(tmp_path):
+    path = tmp_path / "receipts.jsonl"
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKER-MISMATCH",
+        claim_id=None,
+        dispatch_id="dispatch-marker-mismatch",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    eh.record_provider_call_start(
+        dispatch_id="dispatch-marker-mismatch",
+        task_id="TASK-MARKER-MISMATCH",
+        source="auto_dispatch_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="receipt provider mismatch",
+    ):
+        eh.record_execution_receipt(
+            dispatch_id="dispatch-marker-mismatch",
+            task_id="TASK-MARKER-MISMATCH",
+            provider="other-provider",
+            execution_surface="provider_worker",
+            source="provider_completion",
+            status="completed",
+            finish_reason="stop",
+            tokens_in=2,
+            tokens_out=1,
+            path=path,
+        )
+
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["schema"] for row in raw] == [
+        eh.BUDGET_RESERVATION_SCHEMA,
+        eh.PROVIDER_CALL_START_SCHEMA,
+    ]
+
+
+def test_provider_call_start_and_no_call_settlement_are_mutually_exclusive(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKER-NO-CALL-CONFLICT",
+        claim_id=None,
+        dispatch_id="dispatch-marker-no-call-conflict",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    eh.record_provider_call_start(
+        dispatch_id="dispatch-marker-no-call-conflict",
+        task_id="TASK-MARKER-NO-CALL-CONFLICT",
+        source="auto_dispatch_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+
+    with pytest.raises(
+        eh.ReceiptConflictError,
+        match="conflicts with provider call-start",
+    ):
+        eh.record_pre_provider_skip_receipt(
+            dispatch_id="dispatch-marker-no-call-conflict",
+            task_id="TASK-MARKER-NO-CALL-CONFLICT",
+            source="session_budget_preflight",
+            status="skipped",
+            finish_reason="skipped",
+            path=path,
+        )
+
+    assert eh.read_outcomes(path) == []
+    assert eh.cumulative_usage(
+        path=path,
+        task_id="TASK-MARKER-NO-CALL-CONFLICT",
+    )["task"]["committed_tokens"] == 10
+
+
+def test_provider_call_start_detects_tampering_and_conflicting_replay(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKER-TAMPER",
+        claim_id=None,
+        dispatch_id="dispatch-marker-tamper",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="agent_worker",
+    )
+    marker = eh.record_provider_call_start(
+        dispatch_id="dispatch-marker-tamper",
+        task_id="TASK-MARKER-TAMPER",
+        source="agent_worker_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+    same = eh.record_provider_call_start(
+        dispatch_id="dispatch-marker-tamper",
+        task_id="TASK-MARKER-TAMPER",
+        source="agent_worker_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+    assert same["call_start_id"] == marker["call_start_id"]
+    with pytest.raises(
+        eh.ReceiptConflictError,
+        match="immutable provider call-start",
+    ):
+        eh.record_provider_call_start(
+            dispatch_id="dispatch-marker-tamper",
+            task_id="TASK-MARKER-TAMPER",
+            source="agent_worker_provider_run",
+            provider="other-provider",
+            execution_surface="provider_worker",
+            path=path,
+            root=tmp_path,
+        )
+
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    raw[-1]["reservation_fingerprint"] = "tampered"
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="reservation fingerprint mismatch",
+    ):
+        eh.cumulative_usage(
+            path=path,
+            task_id="TASK-MARKER-TAMPER",
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "tampered"),
+    (
+        ("schema", "agent-runtime-provider-call-start/tampered"),
+        ("immutable", False),
+        ("call_start_id", "provider-call-start-tampered"),
+        ("dispatch_id", "dispatch-tampered"),
+        ("task_id", "TASK-TAMPERED"),
+        ("claim_id", "CLAIM-TAMPERED"),
+        ("reservation_id", "reservation-tampered"),
+        ("reservation_source", "agent_worker"),
+        ("source", "agent_worker_provider_run"),
+        ("status", "pending"),
+        ("provider", "other-provider"),
+        ("execution_surface", "other-surface"),
+        ("reservation_fingerprint", "tampered"),
+        ("budget_authority_fingerprint", "tampered"),
+    ),
+)
+def test_provider_call_start_rejects_single_field_tampering(
+    tmp_path,
+    field,
+    tampered,
+):
+    path = tmp_path / "receipts.jsonl"
+    eh.reserve_dispatch_budget(
+        path=path,
+        root=tmp_path,
+        task_id="TASK-MARKER-FIELD-TAMPER",
+        claim_id=None,
+        dispatch_id="dispatch-marker-field-tamper",
+        dispatch_ceiling=10,
+        task_token_budget=10,
+        source="auto_dispatch",
+    )
+    eh.record_provider_call_start(
+        dispatch_id="dispatch-marker-field-tamper",
+        task_id="TASK-MARKER-FIELD-TAMPER",
+        source="auto_dispatch_provider_run",
+        provider="dummy",
+        execution_surface="provider_worker",
+        path=path,
+        root=tmp_path,
+    )
+    raw = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    raw[-1][field] = tampered
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in raw) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(eh.ReceiptIntegrityError):
+        eh.cumulative_usage(
+            path=path,
+            task_id="TASK-MARKER-FIELD-TAMPER",
+        )
+
+
 def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
     tmp_path,
 ):
@@ -1860,6 +2488,7 @@ def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
         tokens_out=20,
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -1878,6 +2507,7 @@ def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
         tokens_out=5,
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         route_status="effective",
         application_status="applied",
         model_changed=True,
@@ -1923,6 +2553,7 @@ def test_native_baseline_missing_observed_reasoning_is_not_comparable(
         currency="USD",
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -1943,6 +2574,7 @@ def test_native_baseline_missing_observed_reasoning_is_not_comparable(
         currency="USD",
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         route_status="effective",
         application_status="applied",
         model_changed=False,
@@ -1989,6 +2621,7 @@ def test_native_baseline_cannot_forge_unsupported_reasoning_source(
         currency="USD",
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -2009,6 +2642,7 @@ def test_native_baseline_cannot_forge_unsupported_reasoning_source(
         currency="USD",
         source="native_completion",
         status="completed",
+        finish_reason="stop",
         route_status="effective",
         application_status="applied",
         model_changed=True,
@@ -2107,6 +2741,7 @@ def test_canonical_codex_agent_unsupported_reasoning_stays_comparable(
         tokens_out=20,
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -2124,6 +2759,7 @@ def test_canonical_codex_agent_unsupported_reasoning_stays_comparable(
         tokens_out=5,
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         baseline_receipt_id=baseline["receipt_id"],
         path=path,
     )
@@ -2171,6 +2807,7 @@ def _unsupported_codex_pair(
         currency="USD",
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         path=path,
     )
     actual = eh.record_execution_receipt(
@@ -2190,6 +2827,7 @@ def _unsupported_codex_pair(
         currency="USD",
         source="provider_completion",
         status="completed",
+        finish_reason="stop",
         baseline_receipt_id=baseline["receipt_id"],
         path=path,
     )

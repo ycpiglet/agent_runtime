@@ -383,8 +383,21 @@ def authorize_dispatch(
             )
             for role in roles
         }
+        authorized = all(check["authorized"] for check in checks.values())
+        if authorized:
+            for role, check in checks.items():
+                marker = eval_harness.record_provider_call_start(
+                    dispatch_id=f"{bridge_id}:{role}",
+                    task_id=str(check["task_id"]),
+                    source="native_codex_authorize",
+                    provider="native-codex",
+                    execution_surface="native_subagent_spawn",
+                    path=receipt_path,
+                    root=ROOT,
+                )
+                check["provider_call_start"] = marker
         return {
-            "authorized": all(check["authorized"] for check in checks.values()),
+            "authorized": authorized,
             "bridge_id": bridge_id,
             "checks": checks,
         }
@@ -395,6 +408,18 @@ def authorize_dispatch(
         path=receipt_path,
         root=ROOT,
     )
+    if check["authorized"]:
+        check["provider_call_start"] = (
+            eval_harness.record_provider_call_start(
+                dispatch_id=str(packet.get("dispatch_id") or bridge_id),
+                task_id=str(check["task_id"]),
+                source="native_codex_authorize",
+                provider="native-codex",
+                execution_surface="native_subagent_spawn",
+                path=receipt_path,
+                root=ROOT,
+            )
+        )
     return {
         **check,
         "bridge_id": bridge_id,
@@ -709,9 +734,12 @@ def record_reply(
     terminal_error = str(error or "").strip() or None
     if terminal_status == "error" and terminal_error is None:
         raise ValueError("error detail is required when status=error")
-    terminal_finish = str(
-        finish_reason
-        or ("stop" if terminal_status == "completed" else terminal_status)
+    terminal_finish = (
+        None
+        if finish_reason is None and terminal_status == "completed"
+        else terminal_status
+        if finish_reason is None
+        else str(finish_reason)
     )
 
     call_message = packet.get("call_message")
@@ -1260,11 +1288,13 @@ def record_council(
             raise ValueError(f"member {role} error detail is required")
         if status == "skipped" and error is None and role not in verdict_roles:
             error = "member_verdict_missing"
-        finish_reason = str(
-            raw.pop(
-                "finish_reason",
-                "stop" if status == "completed" else status,
-            )
+        supplied_finish = raw.pop("finish_reason", None)
+        finish_reason = (
+            None
+            if supplied_finish is None and status == "completed"
+            else status
+            if supplied_finish is None
+            else str(supplied_finish)
         )
         workload_id = str(raw.pop("workload_id", "") or "").strip() or None
         baseline_receipt_id = (

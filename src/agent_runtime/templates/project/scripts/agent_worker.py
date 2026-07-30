@@ -663,7 +663,7 @@ def _record_execution_receipt(
             currency=observation.get("currency"),
             source=source,
             status=status,
-            finish_reason=str(finish_reason or "stop"),
+            finish_reason=finish_reason,
             error=str(error or "").strip() or None,
             route_status=route.get("route_status") if route else None,
             application_status=(
@@ -928,6 +928,19 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     try:
         if not budget_preflight["allowed"]:
             raise BudgetPreflightBlocked(budget_preflight)
+        eval_harness.record_provider_call_start(
+            dispatch_id=dispatch_id,
+            task_id=_metadata_task_id(meta),
+            source="agent_worker_provider_run",
+            provider=cfg.provider_name,
+            execution_surface=(
+                planned_route.get("execution_surface")
+                if planned_route
+                else "provider_worker"
+            ),
+            path=receipt_path,
+            root=REPO_ROOT,
+        )
         result = provider.run(cfg.role, instruction, context)
     except BudgetPreflightBlocked as exc:
         observation = _not_dispatched_observation()
@@ -1132,7 +1145,7 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             dispatch_id=dispatch_id,
             status="completed" if not result.error else "error",
             source="provider_completion",
-            finish_reason=str(result.finish_reason or "stop"),
+            finish_reason=result.finish_reason,
             error=result.error,
             budget_preflight_result=budget_preflight,
         )
