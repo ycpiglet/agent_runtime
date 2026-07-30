@@ -18,6 +18,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import auto_dispatch  # noqa: E402
+import subagent_dispatch  # noqa: E402
 from auto_dispatch import SessionBudget, run_bounded_dispatch  # noqa: E402
 
 
@@ -317,6 +318,61 @@ def test_inbox_work_items_carries_eval_baseline_and_task_id(tmp_path):
     items = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)
     assert items[0]["context"]["task_id"] == "MSG-20260603-070000-aaaaaa"
     assert items[0]["eval_baseline_tokens"] == "3000"
+
+
+def test_inbox_work_items_preserves_standard_dispatch_authority(tmp_path):
+    msg = _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="subagent-scribe",
+        status="open",
+        routing_model="opus",
+        body="archive bounded state",
+    )
+    msg.write_text(
+        msg.read_text(encoding="utf-8").replace(
+            "routing_model: opus\n",
+            "routing_model: opus\n"
+            "task_id: TASK-652\n"
+            "dispatch_id: dispatch-explicit-652\n"
+            "claim_id: CLAIM-652\n"
+            "task_token_budget: 1200\n"
+            "claim_token_budget: 300\n"
+            "eval_workload_id: WORKLOAD-652\n"
+            "eval_baseline_receipt_id: receipt-baseline-652\n"
+            "eval_baseline_model: gpt-5.6-sol\n"
+            "eval_baseline_reasoning_effort: high\n"
+            "escalation_triggers:\n"
+            "  - data_integrity\n",
+        ),
+        encoding="utf-8",
+    )
+
+    item = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)[0]
+    assert item["role"] == "scribe"
+    assert item["dispatch_id"] == "dispatch-explicit-652"
+    assert item["claim_id"] == "CLAIM-652"
+    assert item["task_token_budget"] == "1200"
+    assert item["claim_token_budget"] == "300"
+    assert item["eval_workload_id"] == "WORKLOAD-652"
+    assert item["eval_baseline_receipt_id"] == "receipt-baseline-652"
+    assert item["eval_baseline_model"] == "gpt-5.6-sol"
+    assert item["eval_baseline_reasoning_effort"] == "high"
+    assert item["escalation_triggers"] == ["data_integrity"]
+    assert item["context"]["msg_id"] == "MSG-20260603-070000-aaaaaa"
+
+
+def test_inbox_work_items_derives_stable_dispatch_id_from_message_id(tmp_path):
+    _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="qa",
+        status="open",
+    )
+
+    item = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)[0]
+    assert item["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
+    assert item["context"]["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
 
 
 def test_auto_dispatch_role_policy_is_mandatory_and_denies_scribe_opus():
@@ -664,6 +720,129 @@ def test_duplicate_dispatch_id_is_not_called_or_rewritten(tmp_path, patch_provid
     assert duplicate["results"][0]["error"] == "duplicate_dispatch_id"
     assert duplicate["results"][0]["receipt_recorded"] is False
     assert len(auto_dispatch.eval_harness.read_outcomes(receipt_log)) == 1
+
+
+def test_replaying_same_open_inbox_snapshot_calls_provider_exactly_once(
+    tmp_path,
+    patch_provider,
+):
+    _write_msg(
+        tmp_path,
+        "MSG-20260603-070000-aaaaaa.md",
+        to="qa",
+        status="open",
+    )
+    items = auto_dispatch.inbox_work_items(inbox_dir=tmp_path)
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    first = _run(
+        items,
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+    replay = _run(
+        auto_dispatch.inbox_work_items(inbox_dir=tmp_path),
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert first["results"][0]["receipt_recorded"] is True
+    assert len(p.calls) == 1
+    assert replay["results"][0]["error"] == "duplicate_dispatch_id"
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "MSG-20260603-070000-aaaaaa"
+
+
+def test_invalid_raw_route_records_terminal_receipt_without_provider_call(
+    tmp_path,
+    patch_provider,
+):
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    summary = _run(
+        [
+            {
+                "dispatch_id": "dispatch-invalid-route",
+                "role": "scribe",
+                "instruction": "archive bounded state",
+                "task_id": "TASK-652",
+                "routing_model": "vendor/raw-expensive-model",
+            }
+        ],
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+    )
+
+    assert p.calls == []
+    assert summary["results"][0]["finish_reason"] == "skipped"
+    assert summary["results"][0]["error"].startswith("routing_policy_rejected:")
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["dispatch_id"] == "dispatch-invalid-route"
+    assert records[0]["source"] == "routing_policy"
+    assert records[0]["status"] == "skipped"
+
+
+def test_inbox_without_claim_id_uses_active_zero_budget_authority(
+    tmp_path,
+    monkeypatch,
+    patch_provider,
+):
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claim_dir.mkdir(parents=True)
+    (claim_dir / "CLAIM-AUTO-652.json").write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-AUTO-652",
+                "task_id": "TASK-652",
+                "status": "claimed",
+                "task_token_budget": 0,
+                "claim_token_budget": 0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    inbox = tmp_path / "agents" / "messages" / "inbox"
+    monkeypatch.setattr(subagent_dispatch, "MESSAGES_INBOX", inbox)
+    message = subagent_dispatch.emit_call_message(
+        role_id="scribe",
+        task_id="TASK-652",
+        intent="archive bounded state",
+    )
+    assert message.is_file()
+    monkeypatch.setattr(auto_dispatch, "REPO_ROOT", tmp_path)
+    p = patch_provider(_FakeProvider(tokens_per_call=5))
+    receipt_log = tmp_path / "receipts.jsonl"
+
+    summary = _run(
+        auto_dispatch.inbox_work_items(inbox_dir=inbox),
+        p,
+        session_budget=1000,
+        max_dispatches=1,
+        eval_log_path=receipt_log,
+        stop_files=(),
+    )
+
+    assert p.calls == []
+    blocked = summary["results"][0]
+    assert blocked["error"] == "task_budget_insufficient"
+    assert (
+        blocked["budget_preflight"]["budget_authority"]["claim_id"]
+        == "CLAIM-AUTO-652"
+    )
+    records = auto_dispatch.eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["claim_id"] == "CLAIM-AUTO-652"
 
 
 def test_dispatch_telemetry_does_not_infer_observed_model(

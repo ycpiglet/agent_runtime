@@ -74,6 +74,8 @@ def _verified_delta_records(
     actual_tokens_known: bool = True,
     actual_model: str = "claude-haiku-4-5",
     baseline_model: str = "claude-opus-4-8",
+    actual_reasoning: str | None = "low",
+    baseline_reasoning: str | None = "high",
     route_status: str = "effective",
     route_changed: bool = True,
     actual_billed_cost: float | None = None,
@@ -92,7 +94,7 @@ def _verified_delta_records(
         "workload_id": workload_id,
         "status": "completed",
         "observed_model": baseline_model,
-        "observed_reasoning_effort": "high",
+        "observed_reasoning_effort": baseline_reasoning,
         "actual_tokens_known": True,
         "token_usage_status": "observed",
         "tokens": baseline_tokens,
@@ -112,7 +114,7 @@ def _verified_delta_records(
         "workload_id": workload_id,
         "status": "completed",
         "observed_model": actual_model,
-        "observed_reasoning_effort": "low",
+        "observed_reasoning_effort": actual_reasoning,
         "actual_tokens_known": actual_tokens_known,
         "token_usage_status": (
             "observed" if actual_tokens_known else "unavailable"
@@ -499,6 +501,93 @@ def test_claim_record_is_authoritative_budget_source(tmp_path):
     assert result["budget_authority"]["source"] == "claim_record"
 
 
+def test_unique_active_claim_is_authoritative_when_caller_omits_claim_id(
+    tmp_path,
+):
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-AUTO-AUTH",
+        task_id="TASK-AUTO-AUTH",
+        task_token_budget=0,
+        claim_token_budget=0,
+    )
+
+    result = eh.reserve_dispatch_budget(
+        root=tmp_path,
+        path=tmp_path / "receipts.jsonl",
+        task_id="TASK-AUTO-AUTH",
+        claim_id=None,
+        dispatch_id="dispatch-auto-authority",
+        dispatch_ceiling=1,
+    )
+
+    assert result["allowed"] is False
+    assert result["reason"] == "task_budget_insufficient"
+    assert result["budget_authority"]["claim_id"] == "CLAIM-AUTO-AUTH"
+    assert result["budget_authority"]["source"] == "claim_record"
+
+
+def test_auto_resolved_claim_identity_survives_reservation_and_receipt(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    _write_claim_authority(
+        tmp_path,
+        claim_id="CLAIM-AUTO-SETTLE",
+        task_id="TASK-AUTO-SETTLE",
+        task_token_budget=100,
+        claim_token_budget=100,
+    )
+
+    preflight = eh.reserve_dispatch_budget(
+        root=tmp_path,
+        path=path,
+        task_id="TASK-AUTO-SETTLE",
+        claim_id=None,
+        dispatch_id="dispatch-auto-settle",
+        dispatch_ceiling=10,
+    )
+    receipt = eh.record_execution_receipt(
+        dispatch_id="dispatch-auto-settle",
+        task_id="TASK-AUTO-SETTLE",
+        claim_id=None,
+        source="provider_completion",
+        status="completed",
+        tokens_in=2,
+        tokens_out=3,
+        budget_preflight_result=preflight,
+        path=path,
+    )
+
+    rows = eh.read_outcomes(path)
+    assert preflight["allowed"] is True
+    assert preflight["claim_id"] == "CLAIM-AUTO-SETTLE"
+    assert rows[0]["claim_id"] == "CLAIM-AUTO-SETTLE"
+    assert receipt["claim_id"] == "CLAIM-AUTO-SETTLE"
+    assert receipt["budget_reservation_status"] == "settled"
+
+
+def test_ambiguous_active_claim_authority_fails_closed(tmp_path):
+    for claim_id in ("CLAIM-AUTO-A", "CLAIM-AUTO-B"):
+        _write_claim_authority(
+            tmp_path,
+            claim_id=claim_id,
+            task_id="TASK-AUTO-AMBIGUOUS",
+            task_token_budget=100,
+            claim_token_budget=100,
+        )
+
+    with pytest.raises(eh.ReceiptIntegrityError, match="multiple active claim"):
+        eh.reserve_dispatch_budget(
+            root=tmp_path,
+            path=tmp_path / "receipts.jsonl",
+            task_id="TASK-AUTO-AMBIGUOUS",
+            claim_id=None,
+            dispatch_id="dispatch-auto-ambiguous",
+            dispatch_ceiling=1,
+        )
+
+
 def test_duplicate_or_mismatched_ledger_identity_fails_closed(tmp_path):
     path = tmp_path / "receipts.jsonl"
     rows = [
@@ -694,9 +783,28 @@ def test_equivalent_route_cannot_contribute_to_token_delta():
         "equivalent",
         actual_model="gpt-5.2-codex",
         baseline_model="gpt-5.2-codex",
+        actual_reasoning="high",
+        baseline_reasoning="high",
         route_changed=False,
         route_status="ineffective_equivalent",
     )
+    delta = eh.report(recs)["token_delta"]
+    assert delta["eligible_records"] == 0
+    assert delta["saved_tokens"] == 0
+    assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
+
+
+def test_forged_route_flags_cannot_hide_observed_route_equivalence():
+    recs = _verified_delta_records(
+        "forged-equivalent",
+        actual_model="gpt-5.6-sol",
+        baseline_model="gpt-5.6-sol",
+        actual_reasoning="high",
+        baseline_reasoning="high",
+        route_changed=True,
+        route_status="effective",
+    )
+
     delta = eh.report(recs)["token_delta"]
     assert delta["eligible_records"] == 0
     assert delta["saved_tokens"] == 0
@@ -748,6 +856,10 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         observed_provider="provider",
         observed_model="cheap-model",
         observed_reasoning_effort="low",
+        resolved_model="cheap-model",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
         tokens_in=15,
         tokens_out=5,
         billed_cost=0.02,
@@ -808,6 +920,63 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         ]
         == 1
     )
+
+
+def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-equivalent",
+        task_id="TASK-EQUIVALENT",
+        workload_id="workload-equivalent",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=80,
+        tokens_out=20,
+        source="native_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-equivalent",
+        task_id="TASK-EQUIVALENT",
+        workload_id="workload-equivalent",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="high",
+        tokens_in=10,
+        tokens_out=5,
+        source="native_completion",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        model_changed=True,
+        route_changed=True,
+        baseline_receipt_id=baseline["receipt_id"],
+        baseline_model="caller-forged-expensive-model",
+        baseline_reasoning_effort="max",
+        baseline_observation_status="observed",
+        baseline_tokens=10_000,
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "verified"
+    assert actual["baseline_model"] == "gpt-5.6-sol"
+    assert actual["baseline_reasoning_effort"] == "high"
+    assert actual["model_changed"] is False
+    assert actual["route_changed"] is False
+    assert actual["route_status"] == "ineffective_equivalent"
+    assert actual["application_status"] == "applied"
+    delta = eh.report(eh.read_outcomes(path))["token_delta"]
+    assert delta["eligible_records"] == 0
+    assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
 
 
 def test_monetary_delta_requires_comparable_same_currency_billed_cost():

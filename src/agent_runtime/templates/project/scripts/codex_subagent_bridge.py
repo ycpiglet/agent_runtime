@@ -591,6 +591,17 @@ def create_dispatch_packet(
             evidence=ev,
             tier_route=tier_route,
             provider_route=provider_route,
+            dispatch_id=bridge_id,
+            claim_id=(
+                (budget_preflight.get("budget_authority") or {}).get(
+                    "claim_id"
+                )
+                or claim_id
+            ),
+            task_token_budget=budget_preflight.get("task_token_budget"),
+            claim_token_budget=budget_preflight.get("claim_token_budget"),
+            workload_id=workload_id,
+            baseline_receipt_id=baseline_receipt_id,
             dry_run=dry_run,
         )
         event_path = sd.emit_event(
@@ -1089,18 +1100,28 @@ def create_council_packet(
                 intent=f"{intent} (council member: {member})",
                 sender=sender,
                 evidence=ev,
-                tier_route={
-                    key: value
-                    for key, value in member_route.items()
-                    if key
-                    in {
-                        "role",
-                        "escalation_triggers",
-                        "unknown_triggers",
-                        "reason",
-                    }
-                },
+                tier_route=member_route,
                 provider_route=member_route,
+                dispatch_id=f"{bridge_id}:{member}",
+                claim_id=(
+                    (
+                        member_budget_preflights[member].get(
+                            "budget_authority"
+                        )
+                        or {}
+                    ).get("claim_id")
+                    or claim_id
+                ),
+                task_token_budget=member_budget_preflights[member].get(
+                    "task_token_budget"
+                ),
+                claim_token_budget=member_budget_preflights[member].get(
+                    "claim_token_budget"
+                ),
+                workload_id=workload_id,
+                baseline_receipt_id=(
+                    (baseline_receipt_ids or {}).get(member)
+                ),
                 dry_run=dry_run,
             )
             event_path = sd.emit_event(

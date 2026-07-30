@@ -279,3 +279,68 @@ def test_worker_budget_preflight_skips_provider_and_closes_claim(
     assert records[0]["status"] == "skipped"
     assert records[0]["source"] == "budget_preflight"
     assert records[0]["budget_preflight"]["reason"] == "task_budget_insufficient"
+
+
+def test_worker_invalid_raw_route_records_receipt_and_closes_claim(
+    tmp_path,
+    monkeypatch,
+):
+    import message_queue
+
+    repo_root = tmp_path / "repo"
+    inbox = repo_root / "agents" / "messages" / "inbox"
+    events = repo_root / "agents" / "runtime" / "events"
+    claims = repo_root / "agents" / "runtime" / "claims"
+    inbox.mkdir(parents=True)
+    message = inbox / "MSG-20260730-000000-routing.md"
+    message.write_text(
+        "---\n"
+        "id: MSG-20260730-000000-routing\n"
+        "from: backend\n"
+        "to: qa\n"
+        "task_id: TASK-ROUTING\n"
+        "routing_model: vendor/raw-expensive-model\n"
+        "type: question\n"
+        "status: open\n"
+        "ts: 2026-07-30T00:00:00+09:00\n"
+        "---\n"
+        "must not reach provider\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(worker, "REPO_ROOT", repo_root)
+    monkeypatch.setattr(worker, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(worker, "EVENTS_DIR", events)
+    monkeypatch.setattr(message_queue, "MESSAGES_INBOX", inbox)
+    monkeypatch.setattr(message_queue, "CLAIMS_DIR", claims)
+
+    class _NeverCalledProvider:
+        name = "never-called"
+        tokens_per_call = 10
+
+        def __init__(self):
+            self.calls = []
+
+        def run(self, role, instruction, context):
+            self.calls.append((role, instruction, context))
+            raise AssertionError("provider must not be called")
+
+    provider = _NeverCalledProvider()
+    receipt_log = tmp_path / "receipts.jsonl"
+    cfg = worker.WorkerConfig(
+        role="qa",
+        provider_name="dummy",
+        eval_log_path=receipt_log,
+        verbose=False,
+    )
+
+    assert worker.process_one(cfg, provider) is True
+    assert provider.calls == []
+    updated_meta, _ = worker.parse_frontmatter(
+        message.read_text(encoding="utf-8")
+    )
+    assert updated_meta["status"] == "answered"
+    records = eval_harness.read_outcomes(receipt_log)
+    assert len(records) == 1
+    assert records[0]["status"] == "skipped"
+    assert records[0]["source"] == "routing_policy"
+    assert records[0]["error"].startswith("routing_policy_rejected:")

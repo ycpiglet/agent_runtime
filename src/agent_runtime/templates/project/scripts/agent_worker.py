@@ -832,18 +832,28 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
                  message_id=msg_id, path=str(path.relative_to(REPO_ROOT)))
 
     instruction = body if body.strip() else str(meta.get("intent", ""))
-    routing_decision = _message_routing_decision(cfg, meta, instruction)
-    comparison_model = _baseline_model(meta)
-    comparison_reasoning = _baseline_reasoning_effort(meta)
-    planned_route = _apply_routing_to_provider(
-        provider,
-        cfg.provider_name,
-        routing_decision,
-        baseline_model=comparison_model,
-        baseline_reasoning_effort=comparison_reasoning,
-    )
     dispatch_id = str(meta.get("dispatch_id") or msg_id)
     receipt_path = Path(cfg.eval_log_path or eval_harness.EVAL_LOG)
+    comparison_model = _baseline_model(meta)
+    comparison_reasoning = _baseline_reasoning_effort(meta)
+    routing_policy_error = None
+    try:
+        routing_decision = _message_routing_decision(
+            cfg,
+            meta,
+            instruction,
+        )
+        planned_route = _apply_routing_to_provider(
+            provider,
+            cfg.provider_name,
+            routing_decision,
+            baseline_model=comparison_model,
+            baseline_reasoning_effort=comparison_reasoning,
+        )
+    except (KeyError, ValueError) as exc:
+        routing_decision = None
+        planned_route = None
+        routing_policy_error = f"routing_policy_rejected: {exc}"
     if not has_active_claim(path, role=cfg.role, worker_identity=claim_identity):
         log(cfg, f"WARN lost claim before processing {path.name}")
         append_event(EVENTS_DIR, cfg.role, "claim_lost", message_id=msg_id, phase="pre_process")
@@ -861,25 +871,33 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
         )
         return True
 
-    try:
-        budget_preflight = eval_harness.reserve_dispatch_budget(
-            path=receipt_path,
-            root=REPO_ROOT,
-            task_id=_metadata_task_id(meta),
-            claim_id=_metadata_claim_id(meta),
-            dispatch_id=dispatch_id,
-            dispatch_ceiling=_provider_dispatch_ceiling(provider),
-            task_token_budget=_metadata_budget(meta, "task_token_budget"),
-            claim_token_budget=_metadata_budget(meta, "claim_token_budget"),
-            source="agent_worker",
-        )
-    except eval_harness.ReceiptIntegrityError as exc:
+    if routing_policy_error:
         budget_preflight = {
             "allowed": False,
-            "reason": "receipt_ledger_untrusted",
+            "reason": "routing_policy_rejected",
             "dispatch_id": dispatch_id,
-            "error": str(exc),
+            "error": routing_policy_error,
         }
+    else:
+        try:
+            budget_preflight = eval_harness.reserve_dispatch_budget(
+                path=receipt_path,
+                root=REPO_ROOT,
+                task_id=_metadata_task_id(meta),
+                claim_id=_metadata_claim_id(meta),
+                dispatch_id=dispatch_id,
+                dispatch_ceiling=_provider_dispatch_ceiling(provider),
+                task_token_budget=_metadata_budget(meta, "task_token_budget"),
+                claim_token_budget=_metadata_budget(meta, "claim_token_budget"),
+                source="agent_worker",
+            )
+        except eval_harness.ReceiptIntegrityError as exc:
+            budget_preflight = {
+                "allowed": False,
+                "reason": "receipt_ledger_untrusted",
+                "dispatch_id": dispatch_id,
+                "error": str(exc),
+            }
     context = {
         "original_msg_id": msg_id,
         "task_id": _metadata_task_id(meta),
@@ -914,6 +932,14 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
     except BudgetPreflightBlocked as exc:
         observation = _not_dispatched_observation()
         completion_route = planned_route
+        blocked_error = str(
+            exc.result.get("error") or exc.result.get("reason") or exc
+        )
+        blocked_source = (
+            "routing_policy"
+            if exc.result.get("reason") == "routing_policy_rejected"
+            else "budget_preflight"
+        )
         receipt_recorded, eval_skip_reason = _record_execution_receipt(
             cfg,
             meta,
@@ -922,9 +948,9 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             observation,
             dispatch_id=dispatch_id,
             status="skipped",
-            source="budget_preflight",
+            source=blocked_source,
             finish_reason="skipped",
-            error=str(exc),
+            error=blocked_error,
             budget_preflight_result=exc.result,
         )
         event_fields = {
@@ -932,7 +958,7 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
             "message_id": msg_id,
             "dispatch_status": "skipped",
             "error_type": type(exc).__name__,
-            "error": str(exc),
+            "error": blocked_error,
             "budget_preflight": exc.result,
             "eval_recorded": receipt_recorded,
             "receipt_recorded": receipt_recorded,
@@ -948,7 +974,7 @@ def process_one(cfg: WorkerConfig, provider: Provider) -> bool:
         append_event(EVENTS_DIR, cfg.role, "provider_skipped", **event_fields)
         reply_text = (
             f"[{cfg.role}/{provider.name}] dispatch skipped before provider call: "
-            f"{exc}"
+            f"{blocked_error}"
         )
     except NotImplementedError as exc:
         observation = _completion_observation(

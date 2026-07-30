@@ -94,8 +94,11 @@ def _routing_decision_for_item(item: dict, instruction: str) -> dict | None:
         or context.get("routing_escalation_triggers")
         or []
     )
+    role = str(item.get("role") or context.get("role") or "worker").strip()
+    if role.lower().startswith("subagent-"):
+        role = role[len("subagent-"):]
     return model_routing.resolve_subagent_tier(
-        str(item.get("role") or context.get("role") or "worker"),
+        role,
         requested_tier=str(model or "auto"),
         escalation_triggers=triggers,
     )
@@ -616,19 +619,64 @@ def run_bounded_dispatch(
         if budget.exhausted():
             halt_reason = f"session_budget ({budget.total})"
             break
-        routing_decision = _routing_decision_for_item(item, instruction)
         baseline_model = _eval_baseline_model(item)
         baseline_reasoning = _eval_baseline_reasoning(item)
-        planned_route = _apply_routing_to_provider(
-            provider,
-            provider_name,
-            routing_decision,
-            baseline_model=baseline_model,
-            baseline_reasoning_effort=baseline_reasoning,
-        )
         dispatch_ceiling = _provider_dispatch_ceiling(provider)
         receipt_path = Path(eval_log_path or eval_harness.EVAL_LOG)
         task_id = _item_task_id(item, dispatch_id)
+        try:
+            routing_decision = _routing_decision_for_item(item, instruction)
+            planned_route = _apply_routing_to_provider(
+                provider,
+                provider_name,
+                routing_decision,
+                baseline_model=baseline_model,
+                baseline_reasoning_effort=baseline_reasoning,
+            )
+        except (KeyError, ValueError) as exc:
+            observation = _not_dispatched_observation()
+            error = f"routing_policy_rejected: {exc}"
+            receipt_recorded, receipt_skip_reason = _record_execution_receipt(
+                item,
+                provider_name,
+                None,
+                None,
+                observation,
+                "skipped",
+                error,
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="skipped",
+                source="routing_policy",
+            )
+            skipped = {
+                "index": i,
+                "role": role,
+                "tokens": 0,
+                "finish_reason": "skipped",
+                "error": error,
+                "budget_preflight": None,
+                "eval_recorded": receipt_recorded,
+                "receipt_recorded": receipt_recorded,
+                "eval_skip_reason": receipt_skip_reason,
+                **_routing_result_fields(
+                    None,
+                    None,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
+            }
+            results.append(skipped)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_skipped",
+                provider=provider_name,
+                dispatch_status="skipped",
+                **{key: value for key, value in skipped.items() if key != "role"},
+            )
+            continue
         try:
             persistent_preflight = eval_harness.reserve_dispatch_budget(
                 path=receipt_path,
@@ -1044,21 +1092,64 @@ def inbox_work_items(role=None, *, limit=DEFAULT_MAX_DISPATCHES, inbox_dir=None)
         if not meta or meta.get("status") != "open" or meta.get("type") == "reply":
             continue
         to = meta.get("to")
-        if role is not None and to != role:
-            continue
+        normalized_to = str(to or "worker").strip()
+        if normalized_to.lower().startswith("subagent-"):
+            normalized_to = normalized_to[len("subagent-"):]
+        if role is not None:
+            normalized_filter = str(role).strip()
+            if normalized_filter.lower().startswith("subagent-"):
+                normalized_filter = normalized_filter[len("subagent-"):]
+            if normalized_to != normalized_filter:
+                continue
         msg_id = meta.get("id")
         task_id = _metadata_task_id(meta, msg_id)
-        eval_baseline_tokens = meta.get("eval_baseline_tokens") or meta.get("baseline_tokens")
-        context = {"msg_id": msg_id, "type": meta.get("type"), "task_id": task_id}
-        if eval_baseline_tokens is not None:
-            context["eval_baseline_tokens"] = eval_baseline_tokens
-        items.append({
-            "role": str(to or "worker"),
+        dispatch_id = str(meta.get("dispatch_id") or msg_id or p.stem).strip()
+        role_id = normalized_to
+
+        def _metadata_list(value) -> list[str]:
+            if value in (None, "", "[]"):
+                return []
+            if isinstance(value, list):
+                return [
+                    str(item).strip()
+                    for item in value
+                    if str(item).strip()
+                ]
+            text = str(value).strip()
+            if text.startswith("[") and text.endswith("]"):
+                text = text[1:-1]
+            return [
+                part.strip()
+                for part in text.split(",")
+                if part.strip()
+            ]
+
+        eval_baseline_tokens = (
+            meta.get("eval_baseline_tokens")
+            if meta.get("eval_baseline_tokens") not in (None, "")
+            else meta.get("baseline_tokens")
+        )
+        context = {
+            "msg_id": msg_id,
+            "type": meta.get("type"),
+            "task_id": task_id,
+            "dispatch_id": dispatch_id,
+            "recipient": to,
+        }
+        item = {
+            "role": role_id,
             "instruction": (body or "").strip() or str(meta.get("subject", "")),
             "context": context,
-            "routing_model": meta.get("routing_model"),
+            "dispatch_id": dispatch_id,
+            "routing_model": (
+                meta.get("routing_model")
+                or meta.get("requested_model_tier")
+                or meta.get("selected_model_tier")
+            ),
             "routing_grade": meta.get("routing_grade"),
-            "routing_changed_files": meta.get("routing_changed_files") or [],
+            "routing_changed_files": _metadata_list(
+                meta.get("routing_changed_files")
+            ),
             "routing_diff_lines": meta.get("routing_diff_lines") or 0,
             "task_id": task_id,
             "eval_baseline_tokens": eval_baseline_tokens,
@@ -1067,7 +1158,40 @@ def inbox_work_items(role=None, *, limit=DEFAULT_MAX_DISPATCHES, inbox_dir=None)
             # re-reads fresh at claim time so a stale snapshot can never
             # overwrite a message a worker changed since the scan.
             "_source_path": p,
-        })
+        }
+        triggers = _metadata_list(
+            meta.get("escalation_triggers")
+            or meta.get("routing_escalation_triggers")
+        )
+        if triggers:
+            item["escalation_triggers"] = triggers
+            context["escalation_triggers"] = triggers
+        for key in (
+            "claim_id",
+            "task_token_budget",
+            "claim_token_budget",
+            "eval_workload_id",
+            "workload_id",
+            "eval_baseline_receipt_id",
+            "baseline_receipt_id",
+            "eval_baseline_model",
+            "baseline_model",
+            "eval_baseline_reasoning_effort",
+            "baseline_reasoning_effort",
+            "eval_baseline_observation_status",
+            "baseline_observation_status",
+            "eval_baseline_billed_cost",
+            "baseline_billed_cost",
+            "eval_baseline_currency",
+            "baseline_currency",
+        ):
+            value = meta.get(key)
+            if value not in (None, ""):
+                item[key] = value
+                context[key] = value
+        if eval_baseline_tokens is not None:
+            context["eval_baseline_tokens"] = eval_baseline_tokens
+        items.append(item)
     return items
 
 

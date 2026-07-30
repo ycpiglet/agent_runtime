@@ -328,6 +328,55 @@ def _budget_authority(
     authority_ref = None
     authority_fingerprint = None
 
+    if not claim:
+        claim_dir = Path(root) / "agents" / "runtime" / "task_claims"
+        active_claims: list[str] = []
+        if claim_dir.is_dir():
+            for candidate_path in sorted(claim_dir.glob("*.json")):
+                try:
+                    candidate = json.loads(
+                        candidate_path.read_text(encoding="utf-8")
+                    )
+                except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                    raise ReceiptIntegrityError(
+                        "claim budget authority scan unreadable: "
+                        f"{candidate_path}"
+                    ) from exc
+                if not isinstance(candidate, dict):
+                    raise ReceiptIntegrityError(
+                        "claim budget authority scan found a non-object: "
+                        f"{candidate_path}"
+                    )
+                if candidate.get("schema") != "agent-runtime-task-claim/v1":
+                    raise ReceiptIntegrityError(
+                        "claim budget authority scan found a schema mismatch: "
+                        f"{candidate_path}"
+                    )
+                if str(candidate.get("task_id") or "") != task:
+                    continue
+                candidate_status = str(
+                    candidate.get("status") or ""
+                ).strip().lower()
+                if candidate_status not in ACTIVE_CLAIM_STATUSES:
+                    continue
+                candidate_id = _safe_record_id(
+                    str(candidate.get("claim_id") or ""),
+                    "claim_id",
+                )
+                if candidate_path.stem != candidate_id:
+                    raise ReceiptIntegrityError(
+                        "claim budget authority identity mismatch: "
+                        f"{candidate_path}"
+                    )
+                active_claims.append(candidate_id)
+        if len(active_claims) > 1:
+            raise ReceiptIntegrityError(
+                "multiple active claim budget authorities for "
+                f"task_id={task}: {', '.join(active_claims)}"
+            )
+        if active_claims:
+            claim = active_claims[0]
+
     if claim:
         safe_claim = _safe_record_id(claim, "claim_id")
         claim_path = (
@@ -607,6 +656,9 @@ def _budget_preflight_from_records(
     )
     task_limit = authority["task_token_budget"]
     claim_limit = authority["claim_token_budget"]
+    effective_claim_id = (
+        str(authority.get("claim_id") or "").strip() or None
+    )
     ceiling = _optional_positive_int(dispatch_ceiling)
     configured = task_limit is not None or claim_limit is not None
     if configured and ceiling is None:
@@ -621,7 +673,7 @@ def _budget_preflight_from_records(
     usage = _usage_from_records(
         records,
         task_id=str(task_id),
-        claim_id=str(claim_id or "").strip() or None,
+        claim_id=effective_claim_id,
     )
     task_used = int(usage["task"]["tokens"])
     task_reserved = int(usage["task"]["reserved_tokens"])
@@ -643,6 +695,7 @@ def _budget_preflight_from_records(
         "allowed": allowed,
         "reason": reason,
         "dispatch_id": str(dispatch_id),
+        "claim_id": effective_claim_id,
         "dispatch_ceiling": ceiling,
         "task_token_budget": task_limit,
         "task_tokens_used": task_used,
@@ -741,8 +794,15 @@ def reserve_dispatch_budgets(
                     ),
                     "dispatch_id": dispatch_id,
                     "task_id": task_id,
-                    "claim_id": str(request.get("claim_id") or "").strip()
-                    or None,
+                    "claim_id": (
+                        str(
+                            (
+                                result.get("budget_authority") or {}
+                            ).get("claim_id")
+                            or ""
+                        ).strip()
+                        or None
+                    ),
                     "reserved_tokens": int(result.get("dispatch_ceiling") or 0),
                     "source": str(source or "execution_preflight"),
                     "task_token_budget": result.get("task_token_budget"),
@@ -1098,6 +1158,32 @@ def _finalize_execution_receipt(
             f"immutable receipt already exists for dispatch_id={dispatch}"
         )
 
+    reservation = next(
+        (
+            item
+            for item in records
+            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
+            and str(item.get("dispatch_id") or "") == dispatch
+        ),
+        None,
+    )
+    preflight_authority = dict(
+        (rec.get("budget_preflight") or {}).get("budget_authority") or {}
+    )
+    authoritative_claim = str(
+        (reservation or {}).get("claim_id")
+        or preflight_authority.get("claim_id")
+        or ""
+    ).strip() or None
+    if authoritative_claim:
+        supplied_claim = str(rec.get("claim_id") or "").strip() or None
+        if supplied_claim and supplied_claim != authoritative_claim:
+            raise ReceiptIntegrityError(
+                "execution receipt claim differs from reserved budget "
+                f"authority for dispatch_id={dispatch}"
+            )
+        rec["claim_id"] = authoritative_claim
+
     baseline_id = str(rec.get("baseline_receipt_id") or "").strip() or None
     baseline = next(
         (
@@ -1151,15 +1237,64 @@ def _finalize_execution_receipt(
         rec["baseline_billed_cost"] = baseline.get("billed_cost")
         rec["baseline_currency"] = baseline.get("currency")
 
-    reservation = next(
-        (
-            item
-            for item in records
-            if item.get("schema") == BUDGET_RESERVATION_SCHEMA
-            and str(item.get("dispatch_id") or "") == dispatch
-        ),
-        None,
-    )
+        def _route_identity(model, reasoning):
+            normalized_model = str(model or "").strip()
+            if not normalized_model:
+                return None
+            normalized_reasoning = (
+                str(reasoning or "").strip().lower() or None
+            )
+            return normalized_model, normalized_reasoning
+
+        actual_identity = _route_identity(
+            rec.get("observed_model"),
+            rec.get("observed_reasoning_effort"),
+        )
+        baseline_identity = _route_identity(
+            baseline.get("observed_model"),
+            baseline.get("observed_reasoning_effort"),
+        )
+        resolved_identity = _route_identity(
+            rec.get("resolved_model"),
+            rec.get("resolved_reasoning_effort"),
+        )
+        reasoning_required = bool(
+            str(rec.get("resolved_reasoning_effort") or "").strip()
+        )
+        actual_reasoning_observed = bool(
+            str(rec.get("observed_reasoning_effort") or "").strip()
+        )
+        if (
+            resolved_identity is None
+            or actual_identity is None
+            or (reasoning_required and not actual_reasoning_observed)
+        ):
+            rec["application_status"] = "unverified"
+        else:
+            rec["application_status"] = (
+                "applied"
+                if actual_identity == resolved_identity
+                else "not_applied"
+            )
+
+        if actual_identity is None or baseline_identity is None:
+            rec["model_changed"] = None
+            rec["route_changed"] = None
+            rec["route_status"] = "unverified"
+        else:
+            rec["model_changed"] = (
+                actual_identity[0] != baseline_identity[0]
+            )
+            rec["route_changed"] = actual_identity != baseline_identity
+            if rec["route_changed"] is False:
+                rec["route_status"] = "ineffective_equivalent"
+            elif rec["application_status"] == "applied":
+                rec["route_status"] = "effective"
+            elif rec["application_status"] == "not_applied":
+                rec["route_status"] = "not_applied"
+            else:
+                rec["route_status"] = "unverified"
+
     rec["budget_reservation_id"] = (
         reservation.get("reservation_id") if reservation else None
     )
@@ -1344,13 +1479,30 @@ def _routing_evidence_exclusion_reason(
     rec: dict,
     receipt_index: dict[str, dict],
 ) -> str | None:
-    _, baseline_reason = _verified_baseline_receipt(rec, receipt_index)
+    baseline, baseline_reason = _verified_baseline_receipt(
+        rec,
+        receipt_index,
+    )
     if baseline_reason:
         return baseline_reason
     if not str(rec.get("observed_model") or "").strip():
         return "observed_model_unavailable"
     if not str(rec.get("baseline_model") or "").strip():
         return "baseline_model_unavailable"
+    actual_identity = (
+        str(rec.get("observed_model") or "").strip(),
+        str(rec.get("observed_reasoning_effort") or "").strip().lower()
+        or None,
+    )
+    baseline_identity = (
+        str((baseline or {}).get("observed_model") or "").strip(),
+        str(
+            (baseline or {}).get("observed_reasoning_effort") or ""
+        ).strip().lower()
+        or None,
+    )
+    if actual_identity == baseline_identity:
+        return "route_ineffective_equivalent"
     if rec.get("application_status") != "applied":
         return "route_not_applied"
     changed = rec.get("route_changed")
