@@ -20,6 +20,9 @@ the enforced post-verification footprint check runs.
 - `reviews/INDEX.md`, the unit's W4a evidence glob, and its W4b review glob.
 - This amendment record.
 - The standard claim-release pane-event and A2A append-only projections.
+- The task registration, planning snapshot, owner-manifest, backlog, and
+  runtime-instance projections already committed as part of TASK-AR-654 before
+  its implementation worktree branched.
 
 No implementation scope, acceptance criterion, product behavior, or protected
 TASK-AR-648 surface changed.

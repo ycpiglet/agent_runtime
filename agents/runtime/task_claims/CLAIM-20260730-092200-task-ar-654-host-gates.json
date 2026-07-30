@@ -76,6 +76,19 @@
     "reviews/INDEX.md",
     "reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json",
     "reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md",
-    "reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md"
+    "reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md",
+    "BACKLOG-BOARD.md",
+    "agents/lead_engineer/tasks/TASK-AR-654.md",
+    "agents/project/initiatives/INIT-AR-PROJECT-MERGE-GOVERNANCE.md",
+    "agents/project/work-items/PLAN-ASSUMPTIONS.json",
+    "agents/project/work-items/TASK-ID-RESERVATIONS.json",
+    "agents/project/work-items/TASKSET-DEFINITIONS.json",
+    "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+    "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+    "agents/runtime/instances/codex-root-task-ar-654.json",
+    "docs/superpowers/plans/2026-07-30-host-required-merge-gates.md",
+    "owner-docs.yml",
+    "reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md",
+    "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md"
   ]
 }

@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: passed
 owner: lead_engineer
 created_at: 2026-07-30T09:20:00+09:00
-updated_at: 2026-07-30T10:06:25+09:00
+updated_at: 2026-07-30T10:09:00+09:00
 origin_type: owner_request
 origin_ref: conversation:2026-07-30-design-gate-enforcement
 created_by: codex-root
@@ -45,6 +45,19 @@ target_files:
   - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json
   - reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md
   - reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md
+  - BACKLOG-BOARD.md
+  - agents/lead_engineer/tasks/TASK-AR-654.md
+  - agents/project/initiatives/INIT-AR-PROJECT-MERGE-GOVERNANCE.md
+  - agents/project/work-items/PLAN-ASSUMPTIONS.json
+  - agents/project/work-items/TASK-ID-RESERVATIONS.json
+  - agents/project/work-items/TASKSET-DEFINITIONS.json
+  - agents/project/work-items/WORK-ITEM-CLASSIFICATION.json
+  - agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+  - agents/runtime/instances/codex-root-task-ar-654.json
+  - docs/superpowers/plans/2026-07-30-host-required-merge-gates.md
+  - owner-docs.yml
+  - reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md
+  - reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md
 scope: Implement optional agents/host/MERGE-GATES.json loading, canonical digest binding, base-owned revalidation, path selection, safe placeholder substitution, required execution, feedback, dry-run visibility, focused tests, and exact template/skill parity. Do not touch src/agent_runtime/config.py, adoption/sync/doctor/CLI files, TASK-AR-648 pilot files, or GitHub workflow/release surfaces.
 acceptance:
   - Absent policy produces the existing queue schema and behavior.
@@ -101,6 +114,19 @@ work.py verify executes task-authored commands, but W5 merge_queue only runs opt
 - reviews/VERIFY-2026-07-30-unit-task-ar-654-001-*.json
 - reviews/W4B-2026-07-30-unit-task-ar-654-001-*.md
 - reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md
+- BACKLOG-BOARD.md
+- agents/lead_engineer/tasks/TASK-AR-654.md
+- agents/project/initiatives/INIT-AR-PROJECT-MERGE-GOVERNANCE.md
+- agents/project/work-items/PLAN-ASSUMPTIONS.json
+- agents/project/work-items/TASK-ID-RESERVATIONS.json
+- agents/project/work-items/TASKSET-DEFINITIONS.json
+- agents/project/work-items/WORK-ITEM-CLASSIFICATION.json
+- agents/project/work-items/WORK-ITEM-CLASSIFICATION.md
+- agents/runtime/instances/codex-root-task-ar-654.json
+- docs/superpowers/plans/2026-07-30-host-required-merge-gates.md
+- owner-docs.yml
+- reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md
+- reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md
 
 ## Scope
 
