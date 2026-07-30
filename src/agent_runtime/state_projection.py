@@ -16,7 +16,7 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from . import config as _config
 
@@ -116,7 +116,11 @@ _CLEANUP_AUTHORIZED_ROLES = {"lead-engineer", "doc-steward", "owner"}
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _GIT_OID_RE = re.compile(r"^[0-9a-f]{40,64}$")
 _AUTHORITY_IDENTITY_RE = re.compile(
-    r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$"
+    r"[A-Za-z][A-Za-z0-9._@/+:-]{0,159}"
+)
+_TOP_LEVEL_BULLET_RE = re.compile(r"^[-+*]\s+(.+?)\s*$")
+_MARKDOWN_BLOCK_CONTROL_RE = re.compile(
+    r"<!--|-->|(?:^|\s)(?:```|~~~)|^\s*</?[A-Za-z]"
 )
 _TASK_AUTHORIZATION_FIELDS = {
     "schema_version",
@@ -1696,18 +1700,125 @@ def _json_cleanup_view(
     return collection, context, rows
 
 
-def _is_ordered_subsequence(
-    required: list[str],
-    available: list[str],
-) -> bool:
-    required_index = 0
-    for row in available:
+def _markdown_cleanup_summary(count: int, plan_digest: str) -> str:
+    noun = "candidate" if count == 1 else "candidates"
+    return (
+        f"- [x] Scribe archived {count} bound cleanup {noun}; "
+        f"plan {plan_digest}"
+    )
+
+
+def _json_cleanup_summary(count: int, plan_digest: str) -> str:
+    return json.dumps(
+        {
+            "candidate_count": count,
+            "cleanup_plan_digest": plan_digest,
+            "kind": "scribe_cleanup_summary",
+            "status": "completed",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _markdown_candidate_rewrite_mode(
+    rows: list[str],
+    index: int,
+) -> str:
+    bullet = _TOP_LEVEL_BULLET_RE.fullmatch(rows[index])
+    if bullet is not None:
+        content = bullet.group(1)
+        checkbox = _CHECKBOX_RE.match(content)
+        if checkbox is not None:
+            content = checkbox.group(2)
+        if _MARKDOWN_BLOCK_CONTROL_RE.search(content):
+            return ""
+        if index + 1 == len(rows):
+            return "summarize"
+        following = rows[index + 1]
         if (
-            required_index < len(required)
-            and row == required[required_index]
+            _TOP_LEVEL_BULLET_RE.fullmatch(following) is not None
+            or _HEADING_RE.match(following) is not None
         ):
-            required_index += 1
-    return required_index == len(required)
+            return "summarize"
+        return ""
+
+    heading = _HEADING_RE.match(rows[index])
+    if heading is None or _MARKDOWN_BLOCK_CONTROL_RE.search(heading.group(2)):
+        return ""
+    if index + 1 == len(rows):
+        return "delete"
+    following_heading = _HEADING_RE.match(rows[index + 1])
+    if (
+        following_heading is not None
+        and len(following_heading.group(1)) <= len(heading.group(1))
+    ):
+        return "delete"
+    return ""
+
+
+def _cleanup_rewrite_closure(
+    states: set[int],
+    *,
+    deletable: set[int],
+    row_count: int,
+) -> set[int]:
+    closed = set(states)
+    pending = list(states)
+    while pending:
+        index = pending.pop()
+        if index >= row_count or index not in deletable:
+            continue
+        skipped = index + 1
+        if skipped not in closed:
+            closed.add(skipped)
+            pending.append(skipped)
+    return closed
+
+
+def _matches_bound_cleanup_rewrite(
+    before_rows: list[str],
+    after_rows: list[str],
+    *,
+    deletable: set[int],
+    summarizable: set[int],
+    plan_digest: str,
+    summary_row: Callable[[int, str], str],
+) -> bool:
+    """Match a source rewrite whose only emissions come from bound candidates."""
+
+    if len(after_rows) > len(before_rows):
+        return False
+    row_count = len(before_rows)
+    states = _cleanup_rewrite_closure(
+        {0},
+        deletable=deletable,
+        row_count=row_count,
+    )
+    for row in after_rows:
+        next_states: set[int] = set()
+        for index in states:
+            if index >= row_count:
+                continue
+            if row == before_rows[index]:
+                next_states.add(index + 1)
+            if index not in summarizable:
+                continue
+            run_end = index
+            while run_end < row_count and run_end in summarizable:
+                run_end += 1
+                count = run_end - index
+                if row == summary_row(count, plan_digest):
+                    next_states.add(run_end)
+        if not next_states:
+            return False
+        states = _cleanup_rewrite_closure(
+            next_states,
+            deletable=deletable,
+            row_count=row_count,
+        )
+    return row_count in states
 
 
 def _validate_cleanup_delta(
@@ -1728,6 +1839,7 @@ def _validate_cleanup_delta(
         allowed_orders.setdefault(identity, set()).add(
             int(candidate["source_order"])
         )
+    plan_digest = str(cleanup_plan.get("plan_digest") or "")
 
     for before_source in before_sources:
         identity = (
@@ -1804,26 +1916,62 @@ def _validate_cleanup_delta(
                     f"cleanup source delta changes JSON structure outside the "
                     f"bound cleanup plan: {path}"
                 )
-            protected_rows = [
-                row
-                for index, row in enumerate(before_rows)
-                if index not in allowed
-            ]
+            deletable = {
+                index
+                for index in range(len(before_rows))
+                if index in allowed
+            }
+            summarizable = set(deletable)
+            summary_row = _json_cleanup_summary
         else:
             try:
-                before_rows = before_raw.decode("utf-8").splitlines()
-                after_rows = after_raw.decode("utf-8").splitlines()
+                indexed_before_rows = [
+                    (index, row)
+                    for index, row in enumerate(
+                        before_raw.decode("utf-8").splitlines()
+                    )
+                    if row.strip()
+                ]
+                before_rows = [row for _index, row in indexed_before_rows]
+                after_rows = [
+                    row
+                    for row in after_raw.decode("utf-8").splitlines()
+                    if row.strip()
+                ]
             except UnicodeError as exc:
                 raise StateProjectionError(
                     f"cleanup source delta cannot decode Markdown source {path}"
                 ) from exc
-            protected_rows = [
-                row
-                for index, row in enumerate(before_rows)
-                if index not in allowed and row.strip()
-            ]
+            rewrite_modes = {
+                logical_index: _markdown_candidate_rewrite_mode(
+                    before_rows,
+                    logical_index,
+                )
+                for logical_index, (source_order, _row) in enumerate(
+                    indexed_before_rows
+                )
+                if source_order in allowed
+            }
+            deletable = {
+                index
+                for index, mode in rewrite_modes.items()
+                if mode
+            }
+            summarizable = {
+                index
+                for index, mode in rewrite_modes.items()
+                if mode == "summarize"
+            }
+            summary_row = _markdown_cleanup_summary
 
-        if not _is_ordered_subsequence(protected_rows, after_rows):
+        if not _matches_bound_cleanup_rewrite(
+            before_rows,
+            after_rows,
+            deletable=deletable,
+            summarizable=summarizable,
+            plan_digest=plan_digest,
+            summary_row=summary_row,
+        ):
             raise StateProjectionError(
                 f"cleanup source delta changes rows outside the bound "
                 f"cleanup plan: {path}"
@@ -1926,7 +2074,7 @@ def _safe_existing_ref(
 def _authority_identity(value: object) -> bool:
     if not isinstance(value, str):
         return False
-    text = value.strip()
+    text = value
     placeholders = {
         "-",
         "~",
@@ -1948,6 +2096,7 @@ def _authority_identity(value: object) -> bool:
     }
     return (
         bool(text)
+        and text == text.strip()
         and text.casefold() not in placeholders
         and _AUTHORITY_IDENTITY_RE.fullmatch(text) is not None
     )
@@ -2006,8 +2155,11 @@ def _authorization_scalar(raw: str, field: str) -> str:
         raise StateProjectionError(
             f"TASK authorization field {field} has invalid quoting"
         )
-    value = value.strip()
-    if not value or any(character in value for character in "\r\n"):
+    if (
+        not value
+        or value != value.strip()
+        or any(character in value for character in "\r\n")
+    ):
         raise StateProjectionError(
             f"TASK authorization field {field} must be a scalar"
         )

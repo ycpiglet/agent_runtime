@@ -106,7 +106,10 @@ TASK ID와 모두 같아야 한다. 승인자 identity는 비밀이 아닌 명�
 허용한다. ASCII 영문자로 시작하고 이후에는 영숫자와
 `._@/+:-`만 쓰는 최대 160자 token이어야 한다. null/boolean/숫자/date,
 YAML implicit scalar, collection, escape sequence, placeholder 값은 권한이
-아니다. owner decision의 `approved_by`에도 같은 규칙을 적용한다.
+아니다. 따옴표를 제거한 **원문 logical value 자체**가 token과 정확히
+같아야 하며, 앞뒤 ASCII/Unicode 공백이나 control character를 trim한 뒤
+승인해서는 안 된다. owner decision의 `approved_by`에도 같은 규칙을
+적용한다.
 
 ```yaml
 scribe_authorization: cleanup
@@ -189,7 +192,39 @@ reduction receipt는 bound plan에 들어 있는 baseline 후보 행만
 삭제·교체할 수 있다. Markdown의 다른 nonblank 행은 내용과 순서를
 보존해야 하고, JSON은 후보가 아닌 entry와 collection 바깥 구조를
 보존해야 한다. hot count만 줄이거나 receipt digest를 다시 계산해도 이
-행 단위 검증을 우회하지 못한다.
+행 단위 검증을 우회하지 못한다. 보호 행 앞뒤에 heading, HTML
+comment/block, code fence, list parent 또는 임의 entry를 삽입하여 보호
+행을 숨기거나 re-parent하는 것도 금지한다. continuation이나 nested
+content의 구조적 부모인 Markdown 후보는 자동 정리하지 않는다.
+본문이 없고 다음 heading이 같은 level 또는 상위 level인 heading 후보는
+deletion-only로 정리할 수 있지만 summary로 교체할 수는 없다.
+
+후보를 요약 행으로 교체할 때는 임의 문장을 넣지 않고 아래의 bounded
+형식만 사용한다. `<N>`은 그 위치에서 연속으로 교체하는 bound 후보 수,
+`<PLAN_DIGEST>`는 authorization에 결합된 64자리 cleanup plan digest다.
+각 요약은 반드시 해당 후보 span의 위치에서만 나타나야 한다.
+Markdown summary는 안전한 top-level list 후보 span에서만 허용한다.
+
+```text
+- [x] Scribe archived <N> bound cleanup <candidate|candidates>; plan <PLAN_DIGEST>
+```
+
+`<N>`이 1이면 `candidate`, 그 외에는 `candidates`를 쓴다. JSON
+collection에서는 키가 정확히 아래 네 개뿐인 object를 사용한다(파일의
+공백과 key order는 자유지만 logical object는 같아야 한다).
+
+```json
+{
+  "candidate_count": 5,
+  "cleanup_plan_digest": "<PLAN_DIGEST>",
+  "kind": "scribe_cleanup_summary",
+  "status": "completed"
+}
+```
+
+상세 서술과 source link는 canonical state에 임의 삽입하지 말고 별도의
+`[Scribe Cleanup Note]`에 기록한다. deletion-only cleanup은 계속
+허용되며, 원래 후보 행을 그대로 두는 것도 허용된다.
 
 ## Operating Rules
 
