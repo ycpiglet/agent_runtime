@@ -32,6 +32,7 @@ def _create(
     signature: str = "same-day closeout accepted unrelated review",
     title: str = "Link closure evidence",
     created_at: str = "2026-07-29T04:00:00+09:00",
+    prevention_refs: list[str] | None = None,
     update_index: bool = True,
 ) -> tuple[Path, dict]:
     return records.create_record(
@@ -43,7 +44,7 @@ def _create(
         cause="The gate searched by date instead of work identity.",
         prevention="Validate explicit review and compound references against work IDs.",
         source_refs=["reviews/REVIEW-2026-07-29-source.md"],
-        prevention_refs=["scripts/closure_gate.py"],
+        prevention_refs=prevention_refs or ["scripts/closure_gate.py"],
         verification_refs=["reviews/VERIFY-2026-07-29-unit.json"],
         recurrence_count=2,
         status="mitigated",
@@ -236,6 +237,9 @@ def test_work_close_keeps_verification_review_and_compound_refs_separate(
     tmp_path: Path,
 ) -> None:
     unit_id, evidence_ref = _write_closeable_unit(tmp_path)
+    prevention = tmp_path / "scripts" / "closure_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
     review_ref = "reviews/REVIEW-2026-07-29-task-ar-645-closeout.md"
     review = tmp_path / review_ref
     review.write_text(
@@ -324,13 +328,10 @@ def test_work_close_rejects_unrelated_review_and_compound_refs(
     assert "closeout:compound-work-mismatch" in result.stderr
 
 
-def test_repeat_defect_requires_a_current_work_compound_ref(tmp_path: Path) -> None:
+def test_declared_defect_requires_a_current_work_compound_without_prior_match(
+    tmp_path: Path,
+) -> None:
     unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
-    _create(
-        tmp_path,
-        work_id="UNIT-TASK-AR-640-001",
-        signature="same recurring defect",
-    )
 
     result = _run_work(
         tmp_path,
@@ -347,6 +348,295 @@ def test_repeat_defect_requires_a_current_work_compound_ref(tmp_path: Path) -> N
 
     assert result.returncode == 1
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_parent_repeated_failure_trigger_requires_compound_for_unit(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    task = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-645.md"
+    )
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-AR-645\n"
+        "display_id: TASK-AR-645\n"
+        "work_id: TASK-AR-645\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "title: Compound closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "---\n\n# Compound closeout fixture\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_parent_compound_ref_with_supported_prevention_satisfies_unit(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    prevention = tmp_path / "scripts" / "repeat_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    record_path, _record = _create(
+        tmp_path,
+        work_id="TASK-AR-645",
+        signature="parent repeated failure",
+        prevention_refs=["scripts/repeat_gate.py"],
+    )
+    compound_ref = records.record_ref(tmp_path, record_path)
+    task = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-645.md"
+    )
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-AR-645\n"
+        "display_id: TASK-AR-645\n"
+        "work_id: TASK-AR-645\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "title: Compound closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "compound_refs:\n"
+        f"  - {compound_ref}\n"
+        "---\n\n# Compound closeout fixture\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_current_compound_with_missing_prevention_destination_is_rejected(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature="missing prevention destination",
+        prevention_refs=["tests/regressions/test_missing.py"],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        "missing prevention destination",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:compound:prevention-ref-missing" in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_ordinary_closeout_remains_compatible_with_linked_review_only(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    review_ref = "reviews/REVIEW-2026-07-29-ordinary-closeout.md"
+    review = tmp_path / review_ref
+    review.write_text(
+        "---\n"
+        f"work_id: {unit_id}\n"
+        "task_id: TASK-AR-645\n"
+        "---\n\n# Ordinary closeout review\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--review-ref",
+        review_ref,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    ("prevention_ref", "contents"),
+    [
+        ("tests/regressions/test_repeat.py", "def test_repeat():\n    assert True\n"),
+        ("scripts/repeat_gate.py", "raise SystemExit(0)\n"),
+        (
+            "agents/lead_engineer/tasks/TASK-PREVENT-1.md",
+            "---\nwork_id: TASK-PREVENT-1\n---\n\n# Prevention task\n",
+        ),
+        (
+            "reviews/REVIEW-2026-07-29-accepted-watch.md",
+            "---\n"
+            "status: accepted\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n"
+            "work_id: UNIT-TASK-AR-645-001\n"
+            "---\n\n# Accepted watch\n",
+        ),
+    ],
+    ids=["regression", "gate", "task-proposal", "accepted-watch"],
+)
+def test_prevention_destinations_accept_supported_repo_paths(
+    tmp_path: Path,
+    prevention_ref: str,
+    contents: str,
+) -> None:
+    destination = tmp_path / prevention_ref
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(contents, encoding="utf-8")
+    _path, record = _create(tmp_path, prevention_refs=[prevention_ref])
+
+    assert (
+        records.validate_prevention_destinations(
+            tmp_path,
+            record,
+            current_work_ids=["UNIT-TASK-AR-645-001", "TASK-AR-645"],
+        )
+        == []
+    )
+
+
+def test_prevention_destinations_reject_missing_unsupported_and_symlink_escape(
+    tmp_path: Path,
+) -> None:
+    _path, missing = _create(
+        tmp_path,
+        title="Missing prevention",
+        prevention_refs=["tests/regressions/test_missing.py"],
+        update_index=False,
+    )
+    missing_findings = records.validate_prevention_destinations(
+        tmp_path,
+        missing,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert any("prevention-ref-missing" in finding for finding in missing_findings)
+
+    unsupported_ref = "docs/repeated-failure-note.md"
+    unsupported_path = tmp_path / unsupported_ref
+    unsupported_path.parent.mkdir(parents=True)
+    unsupported_path.write_text("# Note\n", encoding="utf-8")
+    _path, unsupported = _create(
+        tmp_path,
+        title="Unsupported prevention",
+        prevention_refs=[unsupported_ref],
+        update_index=False,
+    )
+    unsupported_findings = records.validate_prevention_destinations(
+        tmp_path,
+        unsupported,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert "compound:prevention-destination-unsupported" in unsupported_findings
+
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-gate.py"
+    outside.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    link_ref = "scripts/escaped_gate.py"
+    link = tmp_path / link_ref
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    _path, escaped = _create(
+        tmp_path,
+        title="Escaped prevention",
+        prevention_refs=[link_ref],
+        update_index=False,
+    )
+    escaped_findings = records.validate_prevention_destinations(
+        tmp_path,
+        escaped,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert any("prevention-ref-outside-root" in finding for finding in escaped_findings)
+
+
+def test_accepted_watch_requires_reviewer_and_current_work_link(
+    tmp_path: Path,
+) -> None:
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True)
+    watch.write_text(
+        "---\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "work_id: UNIT-TASK-AR-999-001\n"
+        "---\n\n# Invalid watch\n",
+        encoding="utf-8",
+    )
+    _path, record = _create(
+        tmp_path,
+        title="Invalid accepted watch",
+        prevention_refs=[watch_ref],
+        update_index=False,
+    )
+
+    findings = records.validate_prevention_destinations(
+        tmp_path,
+        record,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+
+    assert any("prevention-watch-reviewer-missing" in item for item in findings)
+    assert any("prevention-watch-work-mismatch" in item for item in findings)
+    assert "compound:prevention-destination-unsupported" in findings
 
 
 @pytest.mark.parametrize("script", [SCRIPT, TEMPLATE_SCRIPT])

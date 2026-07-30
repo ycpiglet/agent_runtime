@@ -2388,6 +2388,44 @@ def _accepted_work_ids(meta: dict[str, Any], resolved_id: str) -> set[str]:
     return {value for value in values if value}
 
 
+def _parent_task_meta(
+    root: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> dict[str, Any] | None:
+    task_id = str(meta.get("task_id") or meta.get("parent_id") or "").strip()
+    if not task_id.startswith("TASK-") or task_id == resolved_id:
+        return None
+    path = root / TASKS_DIR / f"{task_id}.md"
+    if not path.is_file():
+        return None
+    try:
+        parent, _body = backlog_board.parse_frontmatter(
+            path.read_text(encoding="utf-8")
+        )
+    except OSError:
+        return None
+    return dict(parent) if parent else None
+
+
+def _closeout_contexts(
+    root: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> list[dict[str, Any]]:
+    contexts = [meta]
+    parent = _parent_task_meta(root, meta, resolved_id)
+    if parent:
+        contexts.append(parent)
+    return contexts
+
+
+def _normalized_trigger(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip(
+        "_"
+    )
+
+
 def _review_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -2423,17 +2461,41 @@ def _validate_linked_closeout_refs(
     root: Path, meta: dict[str, Any], resolved_id: str
 ) -> list[str]:
     findings: list[str] = []
-    work_ids = _accepted_work_ids(meta, resolved_id)
+    contexts = _closeout_contexts(root, meta, resolved_id)
+    work_ids: set[str] = set()
+    for context in contexts:
+        work_ids.update(_accepted_work_ids(context, resolved_id))
     try:
         defect_signatures = compound_record.normalize_signatures(
-            _list_value(meta.get("defect_signatures"))
+            [
+                signature
+                for context in contexts
+                for signature in _list_value(context.get("defect_signatures"))
+            ]
+        )
+        compound_refs = list(
+            dict.fromkeys(
+                compound_record.normalize_ref(ref)
+                for context in contexts
+                for ref in _list_value(context.get("compound_refs"))
+            )
         )
     except compound_record.CompoundRecordError as exc:
         return [f"{resolved_id}: closeout:{finding}" for finding in exc.findings]
+    escalation_triggers = list(
+        dict.fromkeys(
+            trigger
+            for context in contexts
+            for raw in _list_value(context.get("escalation_triggers"))
+            if (trigger := _normalized_trigger(raw))
+        )
+    )
+    compound_required = bool(
+        defect_signatures or "repeated_failure" in escalation_triggers
+    )
 
     evidence_refs = set(_list_value(meta.get("evidence_refs")))
     review_refs = _list_value(meta.get("review_refs"))
-    compound_refs = _list_value(meta.get("compound_refs"))
     mixed_refs = evidence_refs.intersection({*review_refs, *compound_refs})
     for ref in sorted(mixed_refs):
         findings.append(f"{ref}: closeout:mixed-evidence-and-learning-ref")
@@ -2454,7 +2516,7 @@ def _validate_linked_closeout_refs(
         ):
             findings.append(f"{normalized}: closeout:review-work-mismatch:{resolved_id}")
 
-    current_compounds = 0
+    valid_current_compounds = 0
     for ref in compound_refs:
         try:
             _path, record = compound_record.load_record_ref(root, ref)
@@ -2470,23 +2532,24 @@ def _validate_linked_closeout_refs(
         ):
             findings.append(f"{ref}: closeout:compound-work-mismatch:{resolved_id}")
             continue
-        if work_ids.intersection(record["work_ids"]):
-            current_compounds += 1
+        if not work_ids.intersection(record["work_ids"]):
+            findings.append(f"{ref}: closeout:compound-work-mismatch:{resolved_id}")
+            continue
+        prevention_findings = compound_record.validate_prevention_destinations(
+            root,
+            record,
+            current_work_ids=work_ids,
+        )
+        findings.extend(
+            f"{ref}: closeout:{finding}" for finding in prevention_findings
+        )
+        if not prevention_findings:
+            valid_current_compounds += 1
 
-    if defect_signatures:
-        try:
-            prior = compound_record.search_records(
-                root, defect_signatures=defect_signatures, limit=100
-            )
-        except compound_record.CompoundRecordError as exc:
-            findings.extend(
-                f"{resolved_id}: closeout:{finding}" for finding in exc.findings
-            )
-        else:
-            if prior and current_compounds == 0:
-                findings.append(
-                    f"{resolved_id}: closeout:repeat-defect-current-compound-required"
-                )
+    if compound_required and valid_current_compounds == 0:
+        findings.append(
+            f"{resolved_id}: closeout:repeat-defect-current-compound-required"
+        )
     return findings
 
 

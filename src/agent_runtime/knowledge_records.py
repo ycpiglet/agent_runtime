@@ -49,6 +49,20 @@ MAX_SIGNATURE_INPUT = 240
 MAX_REFS = 64
 MAX_RECORDS = 10000
 MAX_SEARCH_RESULTS = 100
+ACCEPTED_WATCH_STATUSES = {"accepted", "approved"}
+ACCEPTED_WATCH_DECISIONS = {"accepted_watch"}
+ACCEPTED_WATCH_DECISION_FIELDS = (
+    "decision",
+    "disposition",
+    "prevention_status",
+)
+ACCEPTED_WATCH_REVIEWER_FIELDS = (
+    "reviewed_by",
+    "reviewer",
+    "approved_by",
+    "accepted_by",
+    "verified_by",
+)
 SECRET_RE = re.compile(
     r"(?i)(?:"
     r"\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]|"
@@ -154,6 +168,184 @@ def normalize_ref(value: object) -> str:
     if any(part in {"", ".", ".."} for part in parts) or parts[0] == ".git":
         raise CompoundRecordError(f"compound:invalid-ref:{text[:80]}")
     return "/".join(parts)
+
+
+def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
+    """Read only the scalar/list metadata needed by accepted-watch refs."""
+
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+    try:
+        end = next(
+            index
+            for index, line in enumerate(lines[1:], start=1)
+            if line.strip() == "---"
+        )
+    except StopIteration:
+        return {}
+
+    payload: dict[str, Any] = {}
+    active_list = ""
+    for raw in lines[1:end]:
+        if raw.startswith((" ", "\t")):
+            stripped = raw.strip()
+            if active_list and stripped.startswith("- "):
+                payload.setdefault(active_list, []).append(
+                    stripped[2:].strip().strip("\"'")
+                )
+            continue
+        if ":" not in raw:
+            active_list = ""
+            continue
+        key, value = raw.split(":", 1)
+        key = key.strip()
+        value = value.strip().strip("\"'")
+        if not key:
+            active_list = ""
+            continue
+        if value:
+            payload[key] = value
+            active_list = ""
+        else:
+            payload[key] = []
+            active_list = key
+    return payload
+
+
+def _watch_payload(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise CompoundRecordError("compound:prevention-watch-invalid-root")
+        return payload
+    return _simple_frontmatter_payload(path)
+
+
+def _value_items(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value or "").strip()
+    return [text] if text else []
+
+
+def _accepted_watch_findings(
+    path: Path,
+    ref: str,
+    *,
+    current_work_ids: set[str],
+) -> tuple[bool, list[str]]:
+    try:
+        payload = _watch_payload(path)
+    except (OSError, json.JSONDecodeError, CompoundRecordError):
+        return False, [f"compound:prevention-watch-invalid:{ref}"]
+
+    decisions = {
+        _normalized_text(payload.get(field)).lower().replace("-", "_")
+        for field in ACCEPTED_WATCH_DECISION_FIELDS
+    }
+    if not decisions.intersection(ACCEPTED_WATCH_DECISIONS):
+        return False, []
+
+    findings: list[str] = []
+    status = _normalized_text(payload.get("status")).lower()
+    if status not in ACCEPTED_WATCH_STATUSES:
+        findings.append(f"compound:prevention-watch-not-accepted:{ref}")
+    reviewers = {
+        _normalized_text(value)
+        for field in ACCEPTED_WATCH_REVIEWER_FIELDS
+        for value in _value_items(payload.get(field))
+    }
+    if not any(reviewers):
+        findings.append(f"compound:prevention-watch-reviewer-missing:{ref}")
+
+    linked_work: set[str] = set()
+    for field in ("work_id", "task_id", "unit_id", "work_ids"):
+        for value in _value_items(payload.get(field)):
+            try:
+                linked_work.add(normalize_work_id(value))
+            except CompoundRecordError:
+                continue
+    if not current_work_ids.intersection(linked_work):
+        findings.append(f"compound:prevention-watch-work-mismatch:{ref}")
+    return not findings, findings
+
+
+def validate_prevention_destinations(
+    root: Path,
+    record: dict[str, Any],
+    *,
+    current_work_ids: Iterable[object] = (),
+) -> list[str]:
+    """Validate durable prevention destinations when a Compound is consumed.
+
+    This is deliberately separate from store validation so historical
+    append-only records are never rewritten or newly invalidated in bulk.
+    """
+
+    try:
+        normalized_record = validate_record(record)
+        accepted_work_ids = {
+            normalize_work_id(value) for value in current_work_ids
+        }
+    except CompoundRecordError as exc:
+        return list(exc.findings)
+
+    repository = Path(root).resolve()
+    findings: list[str] = []
+    supported = False
+    for ref in normalized_record["prevention_refs"]:
+        candidate = repository / ref
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (FileNotFoundError, OSError):
+            findings.append(f"compound:prevention-ref-missing:{ref}")
+            continue
+        try:
+            resolved.relative_to(repository)
+        except ValueError:
+            findings.append(f"compound:prevention-ref-outside-root:{ref}")
+            continue
+        if not resolved.is_file():
+            findings.append(f"compound:prevention-ref-not-file:{ref}")
+            continue
+
+        relative = Path(ref)
+        parts = relative.parts
+        is_regression = bool(
+            parts
+            and (
+                parts[0] == "tests"
+                or (
+                    parts[0] == "scripts"
+                    and relative.suffix == ".py"
+                    and relative.name.startswith("test_")
+                )
+            )
+        )
+        is_gate = relative.suffix == ".py" and relative.name.endswith("_gate.py")
+        is_task = (
+            len(parts) >= 4
+            and parts[:3] == ("agents", "lead_engineer", "tasks")
+            and relative.suffix.lower() == ".md"
+        )
+        if is_regression or is_gate or is_task:
+            supported = True
+            continue
+
+        if parts and parts[0] == "reviews":
+            accepted, watch_findings = _accepted_watch_findings(
+                resolved,
+                ref,
+                current_work_ids=accepted_work_ids,
+            )
+            supported = supported or accepted
+            findings.extend(watch_findings)
+
+    if not supported:
+        findings.append("compound:prevention-destination-unsupported")
+    return list(dict.fromkeys(findings))
 
 
 def _string_field(payload: dict[str, Any], field: str) -> str:
@@ -757,6 +949,7 @@ __all__ = [
     "search_knowledge",
     "search_legacy",
     "search_records",
+    "validate_prevention_destinations",
     "validate_record",
     "write_index",
 ]

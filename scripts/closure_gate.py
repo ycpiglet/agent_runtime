@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -260,6 +261,133 @@ def _accepted_work_ids(meta: dict[str, Any]) -> set[str]:
     return {value for value in values if value}
 
 
+def _parent_task_context(
+    root: Path,
+    meta: dict[str, Any],
+) -> dict[str, Any] | None:
+    current_id = str(
+        meta.get("unit_id") or meta.get("work_id") or meta.get("id") or ""
+    ).strip()
+    task_id = str(meta.get("task_id") or meta.get("parent_id") or "").strip()
+    if not task_id.startswith("TASK-") or task_id == current_id:
+        return None
+    path = _work_item_path(root, task_id)
+    return _read_work(path) if path else None
+
+
+def _repeat_contexts(
+    root: Path,
+    contexts: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    expanded: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for meta in contexts:
+        for candidate in (meta, _parent_task_context(root, meta)):
+            if not candidate:
+                continue
+            identity = str(
+                candidate.get("unit_id")
+                or candidate.get("work_id")
+                or candidate.get("id")
+                or candidate.get("display_id")
+                or id(candidate)
+            ).strip()
+            if identity in seen:
+                continue
+            seen.add(identity)
+            expanded.append(candidate)
+    return expanded
+
+
+def _normalized_trigger(value: object) -> str:
+    return re.sub(
+        r"[^a-z0-9]+", "_", str(value or "").strip().lower()
+    ).strip("_")
+
+
+def repeated_failure_requirement(
+    root: Path,
+    contexts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    expanded = _repeat_contexts(root, contexts)
+    work_ids: set[str] = set()
+    for meta in expanded:
+        work_ids.update(_accepted_work_ids(meta))
+
+    findings: list[str] = []
+    raw_signatures = [
+        signature
+        for meta in expanded
+        for signature in _list_value(meta.get("defect_signatures"))
+    ]
+    raw_compound_refs = [
+        ref
+        for meta in expanded
+        for ref in _list_value(meta.get("compound_refs"))
+    ]
+    try:
+        signatures = compound_record.normalize_signatures(raw_signatures)
+    except compound_record.CompoundRecordError as exc:
+        signatures = []
+        findings.extend(exc.findings)
+    try:
+        compound_refs = list(
+            dict.fromkeys(
+                compound_record.normalize_ref(ref)
+                for ref in raw_compound_refs
+            )
+        )
+    except compound_record.CompoundRecordError as exc:
+        compound_refs = []
+        findings.extend(exc.findings)
+
+    triggers = list(
+        dict.fromkeys(
+            trigger
+            for meta in expanded
+            for raw in _list_value(meta.get("escalation_triggers"))
+            if (trigger := _normalized_trigger(raw))
+        )
+    )
+    required = bool(raw_signatures or "repeated_failure" in triggers)
+    valid_refs: list[str] = []
+    if required:
+        for ref in compound_refs:
+            try:
+                _path, record = compound_record.load_record_ref(root, ref)
+            except compound_record.CompoundRecordError as exc:
+                findings.extend(f"{ref}:{finding}" for finding in exc.findings)
+                continue
+            if not work_ids.intersection(record["work_ids"]):
+                findings.append(f"{ref}:compound:current-work-mismatch")
+                continue
+            prevention_findings = (
+                compound_record.validate_prevention_destinations(
+                    root,
+                    record,
+                    current_work_ids=work_ids,
+                )
+            )
+            findings.extend(
+                f"{ref}:{finding}" for finding in prevention_findings
+            )
+            if not prevention_findings:
+                valid_refs.append(ref)
+        if not valid_refs:
+            findings.append("compound:current-work-record-required")
+
+    findings = list(dict.fromkeys(findings))
+    return {
+        "required": required,
+        "satisfied": bool(required and valid_refs and not findings),
+        "defect_signatures": signatures,
+        "escalation_triggers": triggers,
+        "compound_refs": compound_refs,
+        "valid_compound_refs": valid_refs,
+        "findings": findings,
+    }
+
+
 def _review_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -295,15 +423,23 @@ def _linked_closure_records(
     root: Path, contexts: list[dict[str, Any]]
 ) -> dict[str, bool]:
     found = {"compound": False, "review": False, "retro": False}
-    for meta in contexts:
-        work_ids = _accepted_work_ids(meta)
-        try:
-            signatures = compound_record.normalize_signatures(
-                _list_value(meta.get("defect_signatures"))
-            )
-        except compound_record.CompoundRecordError:
-            continue
-
+    repeat_contexts = _repeat_contexts(root, contexts)
+    work_ids = {
+        work_id
+        for meta in repeat_contexts
+        for work_id in _accepted_work_ids(meta)
+    }
+    try:
+        signatures = compound_record.normalize_signatures(
+            [
+                signature
+                for meta in repeat_contexts
+                for signature in _list_value(meta.get("defect_signatures"))
+            ]
+        )
+    except compound_record.CompoundRecordError:
+        signatures = []
+    for meta in repeat_contexts:
         for ref in _list_value(meta.get("compound_refs")):
             try:
                 _path, record = compound_record.load_record_ref(root, ref)
@@ -316,6 +452,14 @@ def _linked_closure_records(
             ):
                 found["compound"] = True
 
+    for meta in contexts:
+        work_ids = _accepted_work_ids(meta)
+        try:
+            signatures = compound_record.normalize_signatures(
+                _list_value(meta.get("defect_signatures"))
+            )
+        except compound_record.CompoundRecordError:
+            continue
         for ref in _list_value(meta.get("review_refs")):
             try:
                 normalized = compound_record.normalize_ref(ref)
@@ -380,10 +524,39 @@ def decide(
     threshold: int,
     disabled: bool,
     now_lines: int | None = None,
+    repeat_failure: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     lines = now_lines if now_lines is not None else substantial_lines
     if disabled:
         return {"decision": "approve", "reason": "closure-gate-disabled", "substantial": False, "missing": [], "message": ""}
+    repeat_failure = repeat_failure or {
+        "required": False,
+        "satisfied": False,
+        "findings": [],
+    }
+    if repeat_failure.get("required"):
+        if not repeat_failure.get("satisfied"):
+            return {
+                "decision": "block",
+                "reason": "repeated-failure-compound-required",
+                "substantial": substantial_lines >= threshold,
+                "missing": ["compound"],
+                "message": (
+                    "Declared repeated-failure work requires a canonical "
+                    "Compound linked to the current task or unit, and every "
+                    "prevention ref must stay inside the repository and exist. "
+                    "At least one prevention destination must be a regression "
+                    "fixture, executable *_gate.py, task proposal, or accepted "
+                    "watch state."
+                ),
+            }
+        return {
+            "decision": "approve",
+            "reason": "repeated-failure-compound-present",
+            "substantial": substantial_lines >= threshold,
+            "missing": [],
+            "message": "current-work Compound and supported prevention destination present",
+        }
     if substantial_lines < threshold:
         return {"decision": "approve", "reason": "not-substantial", "substantial": False, "missing": [], "message": ""}
     present = [kind for kind in RECORD_KINDS if records.get(kind)]
@@ -563,7 +736,18 @@ def assess(
     disabled = _env_bool("AGENT_RUNTIME_CLOSURE_GATE_DISABLE", False) if disabled is None else disabled
     lines = count_substantial_lines(root, now=moment, window_hours=window_hours)
     records = has_closure_record(root, now=moment, work_id=work_id)
-    result = decide(lines, records, threshold=threshold, disabled=disabled, now_lines=lines)
+    repeat_failure = repeated_failure_requirement(
+        Path(root).resolve(),
+        _active_work_contexts(Path(root).resolve(), work_id=work_id),
+    )
+    result = decide(
+        lines,
+        records,
+        threshold=threshold,
+        disabled=disabled,
+        now_lines=lines,
+        repeat_failure=repeat_failure,
+    )
     try:
         scribe_evaluation = state_projection.evaluate_state(Path(root))
     except Exception as exc:
@@ -587,6 +771,7 @@ def assess(
     )
     result["substantial_lines"] = lines
     result["records"] = records
+    result["repeat_failure"] = repeat_failure
     result["threshold"] = threshold
     return result
 

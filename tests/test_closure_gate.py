@@ -379,6 +379,7 @@ def _write_active_unit(
     review_refs: list[str] | None = None,
     compound_refs: list[str] | None = None,
     signatures: list[str] | None = None,
+    triggers: list[str] | None = None,
 ) -> None:
     unit_id = "UNIT-TASK-AR-645-001"
     unit_path = (
@@ -408,6 +409,7 @@ def _write_active_unit(
         + block("review_refs", review_refs)
         + block("compound_refs", compound_refs)
         + block("defect_signatures", signatures)
+        + block("escalation_triggers", triggers)
         + "---\n\n# Active unit\n",
         encoding="utf-8",
     )
@@ -487,6 +489,196 @@ def test_active_work_accepts_explicit_linked_review_and_compound(tmp_path):
     rec = closure_gate.has_closure_record(tmp_path, now=NOW)
 
     assert rec == {"compound": True, "review": True, "retro": False}
+
+
+def test_declared_repeat_blocks_review_only_even_below_churn_threshold(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = f"reviews/REVIEW-{TODAY}-repeat-review-only.md"
+    review = tmp_path / review_ref
+    review.parent.mkdir(parents=True)
+    review.write_text(
+        "---\n"
+        "work_id: UNIT-TASK-AR-645-001\n"
+        "task_id: TASK-AR-645\n"
+        "---\n\n# Linked review only\n",
+        encoding="utf-8",
+    )
+    _write_active_unit(
+        tmp_path,
+        review_refs=[review_ref],
+        signatures=["review-only repeated failure"],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["required"] is True
+
+
+def test_declared_repeat_accepts_current_compound_with_supported_prevention(
+    tmp_path,
+    monkeypatch,
+):
+    prevention = tmp_path / "scripts" / "closure_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=["UNIT-TASK-AR-645-001", "TASK-AR-645"],
+        defect_signatures=["repeat with prevention"],
+        title="Prevent the repeated failure",
+        summary="The repeated failure now has a durable prevention target.",
+        cause="Review-only closure did not preserve the prevention.",
+        prevention="Run an executable closure gate.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=["scripts/closure_gate.py"],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:40:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=["repeat with prevention"],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "approve"
+    assert result["reason"] == "repeated-failure-compound-present"
+    assert result["repeat_failure"]["satisfied"] is True
+
+
+def test_parent_repeated_failure_signal_is_inherited_by_stop_gate(
+    tmp_path,
+    monkeypatch,
+):
+    task = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-645.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: TASK-AR-645\n"
+        "id: TASK-AR-645\n"
+        "kind: task\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "---\n\n# Parent task\n",
+        encoding="utf-8",
+    )
+    _write_active_unit(tmp_path)
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert "repeated_failure" in result["repeat_failure"]["escalation_triggers"]
+
+
+def test_parent_compound_ref_satisfies_inherited_stop_requirement(
+    tmp_path,
+    monkeypatch,
+):
+    prevention = tmp_path / "scripts" / "repeat_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=["TASK-AR-645"],
+        defect_signatures=["parent repeat with prevention"],
+        title="Prevent parent repeat",
+        summary="The parent task owns the repeated-failure decision.",
+        cause="The unit inherited a task-level repeat signal.",
+        prevention="Run the executable repeated-failure gate.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=["scripts/repeat_gate.py"],
+        verification_refs=["reviews/VERIFY-task.json"],
+        created_at="2026-06-14T11:45:00+09:00",
+    )
+    compound_ref = compound_record.record_ref(tmp_path, record_path)
+    task = tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-645.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: TASK-AR-645\n"
+        "id: TASK-AR-645\n"
+        "kind: task\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "compound_refs:\n"
+        f"  - {compound_ref}\n"
+        "---\n\n# Parent task\n",
+        encoding="utf-8",
+    )
+    _write_active_unit(tmp_path)
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "approve"
+    assert result["records"]["compound"] is True
+    assert result["repeat_failure"]["valid_compound_refs"] == [compound_ref]
 
 
 def test_multiple_active_claims_fail_closed_without_explicit_work_id(tmp_path):

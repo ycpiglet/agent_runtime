@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-asset-registry/v1",
   "version": 1,
-  "updated_at": "2026-07-29T04:00:00+09:00",
+  "updated_at": "2026-07-31T04:21:40+09:00",
   "status_scale": ["active", "watch", "deprecated", "removed"],
   "lifecycle_decisions": ["keep", "modify", "deprecate", "remove", "observe"],
   "assets": [
@@ -143,6 +143,24 @@
     {"id":"capability.compound_record","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/compound_record.py","scripts/kedb_search.py"],"evidence_paths":["agents/project/WORK-SCHEMA.yml","agents/lead_engineer/compound_log.md"],"tokens":["compound_record.py","defect_signatures"],"min_recent_uses":1},
     {"id":"capability.session_closeout","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/session_baseline.py","scripts/dirty_intake.py"],"evidence_paths":["skills/session-closeout/SKILL.md"],"tokens":["session_baseline.py","dirty_intake.py"],"min_recent_uses":1},
     {"id":"capability.save_report","kind":"script","status":"active","lifecycle":"keep","paths":["scripts/save_report.py"],"evidence_paths":["docs/agent_bootstrap/codex.md"],"tokens":["save_report.py"],"min_recent_uses":1},
+    {
+      "id": "skill.failure_to_regression",
+      "kind": "skill",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["skills/failure-to-regression/SKILL.md"],
+      "evidence_paths": [
+        "scripts/work.py",
+        "scripts/closure_gate.py",
+        "agents/project/WORK-SCHEMA.yml"
+      ],
+      "tokens": [
+        "failure-to-regression",
+        "repeated_failure",
+        "validate_prevention_destinations"
+      ],
+      "min_recent_uses": 1
+    },
     {"id":"hook.session_continuity","kind":"hook","status":"active","lifecycle":"keep","paths":[".codex/hooks.json","scripts/session_start_hook.py","scripts/session_compact_hook.py","scripts/session_resume_check.py"],"evidence_paths":["AGENTS.md","CLAUDE.md",".codex/hooks.json"],"tokens":["session-start","pre-compact","post-compact","state_projection"],"min_recent_uses":1}
   ]
 }

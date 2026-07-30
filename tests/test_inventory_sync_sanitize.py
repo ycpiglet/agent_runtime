@@ -95,6 +95,7 @@ def test_packaged_profile_selection_is_deterministic_across_effective_combinatio
     names = lambda paths: {path.relative_to(root).as_posix() for path in paths}
     assert names(core) == names(web)
     assert "scripts/allimbot.py" not in names(core)
+    assert "skills/failure-to-regression/SKILL.md" in names(core)
     profile_only = {
         ".allimbot.json",
         "agents/project/SECURITY-SERVICE-POLICY.json",
