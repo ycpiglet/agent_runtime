@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T00:51:21+09:00
-record_count: 1199
+generated_at: 2026-07-31T01:20:18+09:00
+record_count: 1201
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1199` review and evidence records under `reviews/`.
+- Summary: indexed `1201` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1199` files |
+| Reviews covered | pass | `1201` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1001,6 +1001,7 @@ record_count: 1199
 | `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407 |
 | `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019 |
 | `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1044,6 +1045,7 @@ record_count: 1199
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Economic and Budget Integrity Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Success and Settlement Provenance Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001.md` | `W4A-2026-07-30-unit-task-ar-652-001` | md | passed | pass | W4a - UNIT-TASK-AR-652-001 |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | passed | pass | TASK-AR-653 Scribe Git Audit Anchor Repair W4a |
 | `reviews/W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | passed | pass | TASK-AR-653 Scribe Receipt and Authority Repair W4a |
 | `reviews/W4A-2026-07-31-unit-task-ar-653-001.md` | `W4A-2026-07-31-unit-task-ar-653-001` | md | passed | pass | TASK-AR-653 Scribe Source-Debt Loop W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
