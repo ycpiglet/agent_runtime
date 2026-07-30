@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T23:49:53+09:00
-record_count: 1192
+generated_at: 2026-07-31T03:46:55+09:00
+record_count: 1217
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1192` review and evidence records under `reviews/`.
+- Summary: indexed `1217` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1192` files |
+| Reviews covered | pass | `1217` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -998,6 +998,15 @@ record_count: 1192
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1041,6 +1050,14 @@ record_count: 1192
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Economic and Budget Integrity Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Success and Settlement Provenance Repair W4a |
 | `reviews/W4A-2026-07-30-unit-task-ar-652-001.md` | `W4A-2026-07-30-unit-task-ar-652-001` | md | passed | pass | W4a - UNIT-TASK-AR-652-001 |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | passed | pass | TASK-AR-653 Scribe Audit View and Plan Delta Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-repair` | md | passed | pass | TASK-AR-653 Scribe Blank Structure and Unique JSON Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-configured-source-integrity-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-configured-source-integrity-repair` | md | passed | pass | TASK-AR-653 Configured Source Integrity Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | passed | pass | TASK-AR-653 Scribe Git Audit Anchor Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-repair` | md | passed | pass | TASK-AR-653 Invalid Runtime Config Fail-closed Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | passed | pass | TASK-AR-653 Scribe Receipt and Authority Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-repair` | md | passed | pass | TASK-AR-653 Scribe Semantic Delta and Exact Identity Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001.md` | `W4A-2026-07-31-unit-task-ar-653-001` | md | passed | pass | TASK-AR-653 Scribe Source-Debt Loop W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1223,6 +1240,14 @@ record_count: 1192
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md` | `W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession` | md | supersede | block | W4b Administrative Preimplementation Supersession |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | blocked | block | TASK-AR-653 Audit View and Plan Delta Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final` | md | blocked | block | TASK-AR-653 Blank Structure and Unique JSON Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final` | md | blocked | block | TASK-AR-653 Configured Source Integrity Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | blocked | block | TASK-AR-653 Scribe Git Audit Anchor Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final` | md | approved | approve | TASK-AR-653 Invalid Runtime Config Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | blocked | block | TASK-AR-653 Receipt and Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final` | md | blocked | block | TASK-AR-653 Semantic Delta and Exact Identity Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001.md` | `W4B-2026-07-31-unit-task-ar-653-001` | md | blocked | block | TASK-AR-653 Final Independent Implementation W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

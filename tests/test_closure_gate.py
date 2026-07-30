@@ -52,16 +52,41 @@ def test_decide_disabled_always_approves():
     assert d["reason"] == "closure-gate-disabled"
 
 
-def _scribe_evaluation(*, state="overdue", projection="missing", blocking=True):
+def _scribe_evaluation(
+    *,
+    state="overdue",
+    projection="missing",
+    blocking=True,
+    reasons=None,
+    cleanup_status="none",
+):
+    closure_reasons = (
+        list(reasons)
+        if reasons is not None
+        else (["source-debt-overdue", "projection-not-fresh"] if blocking else [])
+    )
     return {
         "state": state,
         "readiness": "blocked" if blocking else "ready",
+        "source_debt": {
+            "status": state,
+            "hot_count": 20 if state == "overdue" else 13,
+            "overdue_sources": ["STATUS.md"] if state == "overdue" else [],
+        },
         "projection": {
             "path": "agents/project/state/SCRIBE-PROJECTION.json",
             "status": projection,
         },
+        "active_coverage": {
+            "status": "complete",
+            "missing_task_ids": [],
+            "missing_claim_ids": [],
+        },
+        "cleanup_plan": {"status": "available", "candidate_count": 4},
+        "cleanup_outcome": {"status": cleanup_status, "valid": cleanup_status != "invalid"},
         "overdue_sources": ["STATUS.md"] if state == "overdue" else [],
         "closure_blocking": blocking,
+        "closure_reasons": closure_reasons,
     }
 
 
@@ -81,8 +106,9 @@ def test_substantial_closeout_blocks_for_overdue_missing_projection():
         disabled=False,
     )
     assert result["decision"] == "block"
-    assert result["reason"] == "scribe-projection-overdue"
-    assert result["missing"] == ["scribe_projection"]
+    assert result["reason"] == "scribe-source-debt-overdue"
+    assert result["missing"] == ["scribe_source_debt", "scribe_projection"]
+    assert "projection is only a bounded view" in result["message"]
 
 
 def test_mini_closeout_and_due_state_keep_scribe_advisory():
@@ -110,7 +136,7 @@ def test_mini_closeout_and_due_state_keep_scribe_advisory():
         assert result["decision"] == "approve"
 
 
-def test_fresh_projection_satisfies_substantial_scribe_obligation():
+def test_fresh_projection_does_not_satisfy_overdue_source_debt():
     base = closure_gate.decide(
         200,
         {"compound": False, "review": True, "retro": False},
@@ -120,13 +146,207 @@ def test_fresh_projection_satisfies_substantial_scribe_obligation():
     )
     result = closure_gate.apply_scribe_obligation(
         base,
-        _scribe_evaluation(projection="fresh", blocking=False),
+        _scribe_evaluation(
+            projection="fresh",
+            blocking=True,
+            reasons=["source-debt-overdue"],
+        ),
         substantial_lines=200,
         threshold=80,
         disabled=False,
     )
-    assert result["decision"] == "approve"
+    assert result["decision"] == "block"
+    assert result["missing"] == ["scribe_source_debt"]
     assert result["scribe"]["projection"]["status"] == "fresh"
+
+
+def test_verified_cleanup_or_owner_decision_satisfies_substantial_scribe_obligation():
+    base = closure_gate.decide(
+        200,
+        {"compound": False, "review": True, "retro": False},
+        threshold=80,
+        disabled=False,
+        now_lines=200,
+    )
+    for evaluation in (
+        _scribe_evaluation(
+            state="ok",
+            projection="fresh",
+            blocking=False,
+            cleanup_status="verified_reduction",
+        ),
+        _scribe_evaluation(
+            projection="fresh",
+            blocking=False,
+            cleanup_status="owner_decision",
+        ),
+    ):
+        result = closure_gate.apply_scribe_obligation(
+            dict(base),
+            evaluation,
+            substantial_lines=200,
+            threshold=80,
+            disabled=False,
+        )
+        assert result["decision"] == "approve"
+
+
+def test_missing_active_coverage_has_its_own_closure_obligation():
+    base = closure_gate.decide(
+        200,
+        {"compound": False, "review": True, "retro": False},
+        threshold=80,
+        disabled=False,
+        now_lines=200,
+    )
+    evaluation = _scribe_evaluation(
+        state="ok",
+        projection="fresh",
+        blocking=True,
+        reasons=["active-coverage-incomplete"],
+    )
+    evaluation["active_coverage"] = {
+        "status": "incomplete",
+        "missing_task_ids": ["TASK-ACTIVE"],
+        "missing_claim_ids": ["CLAIM-ACTIVE"],
+    }
+
+    result = closure_gate.apply_scribe_obligation(
+        base,
+        evaluation,
+        substantial_lines=200,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-active-coverage-incomplete"
+    assert result["missing"] == ["scribe_active_coverage"]
+
+
+def test_substantial_closeout_blocks_for_configured_source_integrity(
+    tmp_path,
+    monkeypatch,
+):
+    source = tmp_path / "state" / "current.json"
+    source.parent.mkdir(parents=True)
+    source.write_text('{"items":[],"items":[]}\n', encoding="utf-8")
+    (tmp_path / "agent_runtime.yml").write_text(
+        "schema: agent-runtime-config/v2\n"
+        "project: closure-fixture\n"
+        "sync:\n"
+        "  mode: check-diff-apply\n"
+        "  allow_silent_overwrite: false\n"
+        "profiles:\n"
+        "  - core\n"
+        "ownership:\n"
+        "  host_owned:\n"
+        "    - state/current.json\n"
+        "host:\n"
+        "  state_adapters:\n"
+        "    state: state/current.json\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "count_substantial_lines",
+        lambda *args, **kwargs: 200,
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "has_closure_record",
+        lambda *args, **kwargs: {
+            "compound": False,
+            "review": True,
+            "retro": False,
+        },
+    )
+
+    result = closure_gate.assess(tmp_path, threshold=80, disabled=False)
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-source-integrity"
+    assert result["missing"] == ["scribe_source_integrity"]
+    assert "state/current.json" in result["message"]
+    assert "repair" in result["message"].lower()
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - ../outside.md\n"
+        ),
+        (
+            "schema: agent-runtime-config/v2\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+            "ownership:\n"
+            "  host_owned:\n"
+            "    - state/current.md\n"
+            "host:\n"
+            "  state_adapters:\n"
+            "    escaped: ../outside.md\n"
+        ),
+        (
+            "  project: invalid-fixture\n"
+            "  sync:\n"
+            "    mode: check-diff-apply\n"
+            "    allow_silent_overwrite: false\n"
+        ),
+        (
+            "schema: agent-runtime-config/v1\n"
+            "project: invalid-fixture\n"
+            "sync:\n"
+            "  mode: check-diff-apply\n"
+            "  allow_silent_overwrite: false\n"
+        ),
+    ],
+    ids=[
+        "unsafe-ownership",
+        "unsafe-adapter",
+        "malformed",
+        "schema-invalid",
+    ],
+)
+def test_substantial_closeout_blocks_for_invalid_runtime_config_integrity(
+    tmp_path,
+    monkeypatch,
+    raw,
+):
+    (tmp_path / "agent_runtime.yml").write_text(raw, encoding="utf-8")
+    monkeypatch.setattr(
+        closure_gate,
+        "count_substantial_lines",
+        lambda *args, **kwargs: 200,
+    )
+    monkeypatch.setattr(
+        closure_gate,
+        "has_closure_record",
+        lambda *args, **kwargs: {
+            "compound": False,
+            "review": True,
+            "retro": False,
+        },
+    )
+
+    result = closure_gate.assess(tmp_path, threshold=80, disabled=False)
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "scribe-source-integrity"
+    assert result["missing"] == ["scribe_source_integrity"]
+    assert result["scribe"]["unavailable_sources"] == ["agent_runtime.yml"]
+    assert "agent_runtime.yml" in result["message"]
+    assert "repair" in result["message"].lower()
 
 
 # --- closure record detection ---

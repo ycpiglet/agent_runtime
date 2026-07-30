@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T23:49:34+09:00
+updated_at: 2026-07-31T03:35:33+09:00
 started_at: 2026-07-30T23:20:37+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -63,6 +63,18 @@ verification:
   - python scripts/template_mirror_gate.py --check
 handoff: Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture, no-touch proof, template parity, and independent W4b.
 stop_condition: Stop before automatically rewriting host-owned state, compressing active records, or making product/editorial decisions.
+verified_at: 2026-07-31T03:35:33+09:00
+verified_by: le-20260730-234934-kst-ar653004
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048.json
+  - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533.json
 ---
 
 # UNIT-TASK-AR-653-001 - Implement active-aware Scribe planning, receipt, and closure semantics

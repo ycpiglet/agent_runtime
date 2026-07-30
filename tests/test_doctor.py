@@ -367,7 +367,12 @@ def test_doctor_reports_scribe_missing_overdue_and_fresh_without_writing(tmp_pat
         finding.area == "scribe" and finding.kind == "projection-fresh"
         for finding in fresh.findings
     )
-    assert fresh.scribe and fresh.scribe["closure_blocking"] is False
+    assert fresh.scribe and fresh.scribe["closure_blocking"] is True
+    assert fresh.scribe["source_debt"]["status"] == "overdue"
+    assert fresh.scribe["active_coverage"]["status"] == "complete"
+    assert fresh.scribe["cleanup_plan"]["status"] == "available"
+    assert fresh.scribe["cleanup_outcome"]["status"] == "none"
+    assert "source-debt-overdue" in fresh.scribe["closure_reasons"]
     assert source.stat().st_mtime_ns == source_mtime
     assert projection.stat().st_mtime_ns == projection_mtime
 

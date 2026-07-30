@@ -75,7 +75,7 @@
       "agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md": "sha256:b07cbaf1e1561603dfb0716de3771d85d9b8f74c2ec6c3822c76afd6fcb8db16",
       "agents/roles.yml": "sha256:68fdabe53a249d9c8639f15bb98b28ea3cbd44ddf250d8c6a9d16f2211f9ec8b",
       "agents/runtime/session_checkpoints/.gitignore": "sha256:240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d",
-      "agents/scribe/SKILL.md": "sha256:40a4884b3d127b291b12b50a344536a0d34ad8a887f11bd3f23199585e923d84",
+      "agents/scribe/SKILL.md": "sha256:0ae25bf6c4cf107f8af2aec6f77ea552ba94ef5c5b2b499162ba99919146c278",
       "agents/secretary/SKILL.md": "sha256:861ae7a9306e2b992270382363517cc5333ea692e0f261f4c9705734d19279cf",
       "agents/timeline_agent/SKILL.md": "sha256:97d74f064c695550f5f8032341ca0a810ff83706d96e0c1e7044cb86c13fb01c",
       "agents/uiux_designer/SKILL.md": "sha256:c0b980b2be22bd1e0350393599189dcff47c56a8303ab6df2e3f4f5914c571f6",
@@ -103,7 +103,7 @@
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
       "scripts/agent_runtime/config.py": "sha256:ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c",
-      "scripts/agent_runtime/state_projection.py": "sha256:c3cc5adcce631bf46952aa848dafacec7d451bb32fbc08f4ae80adc112ad401f",
+      "scripts/agent_runtime/state_projection.py": "sha256:ad9a1072600e31b7c7612a19d3088c1586cba5a5626b5dcda6d71c23eedfbc9b",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
       "scripts/agent_seminar.py": "sha256:836b9706a0531e701591ec1d827c6a64385e557accf1dcaa826ae32461db94e1",
       "scripts/agent_terminal.py": "sha256:8f0f140c3ee42d543f57173069926b6683788fa2e67bb1cdae8e0d535440609c",
@@ -130,7 +130,7 @@
       "scripts/claim_reaper.py": "sha256:a34c02461ae28bc121f0f6b68db013701a4084fa7b32968378b6c43081674f4e",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
-      "scripts/closure_gate.py": "sha256:90fe2e42a1de60ab504fb0dd8b111b8c528121f1a03aa054892ebd71e1faabbb",
+      "scripts/closure_gate.py": "sha256:9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2",
       "scripts/codex_subagent_bridge.py": "sha256:d500bc9caa6cd8a01ccb09b3162538928cfc52077d0c4a1641308e574504283e",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4",
@@ -206,7 +206,7 @@
       "scripts/schedule_task.py": "sha256:900ec8181ecffc388eaea4d5ce5195618f6ea817577344034dd8454eb6aa97cb",
       "scripts/scheduled_dispatch_gate.py": "sha256:c2a41725d81303a58c3cf80c076137d1fca5414019bd45334bf7893eb88b12cf",
       "scripts/scm_steward.py": "sha256:023a3d5910957e866dc51295b7788c6105cc74cee21a98402a4260a4055961da",
-      "scripts/scribe_due.py": "sha256:25f13f8ef1ff66af51bdbe4d773a67036e9527101e0aabca6c58f13ef9785d4e",
+      "scripts/scribe_due.py": "sha256:20e40e4401c6fc7dcb15359accef807c5842dd888e173bcb1df45ca087a59817",
       "scripts/secretary_digest.py": "sha256:66a5e85681877eec911fc3dca0f1b19b71004a840f87500d1c78f10cda55b004",
       "scripts/security_service_gate.py": "sha256:a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce",
       "scripts/session_baseline.py": "sha256:adf81af3b935c0876f353360a99e92d32bb106a927086786dc627e537c56ed10",
@@ -513,7 +513,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:e91b92710f93bd66232f8f917efaa4363a321587cf33d4131f975b96686adfdc",
+    "template_digest": "sha256:6e581a3d5685c5023e28f55a96827c57162e629246fc953b0197f732512a5944",
     "template_files": 251
   },
   "profiles": [
