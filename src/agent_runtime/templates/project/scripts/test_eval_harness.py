@@ -408,6 +408,11 @@ def _verified_delta_records(
     return [baseline, actual]
 
 
+def _validated_execution_rows(records: list[dict]):
+    """Attest synthetic execution rows as one complete strict ledger."""
+    return eh.ValidatedOutcomeRecords(records, records)
+
+
 def _golden_records():
     committed = eh.load_golden()
     if committed:
@@ -1188,7 +1193,7 @@ def test_report_includes_token_delta_only_with_effective_model_evidence():
             actual_model="claude-sonnet-4-6",
         )
     )
-    report = eh.report(recs)
+    report = eh.report(_validated_execution_rows(recs))
     delta = report["token_delta"]
     assert delta["actual_tokens"] == 350
     assert delta["baseline_tokens"] == 900
@@ -1256,7 +1261,9 @@ def test_report_recomputes_actual_execution_success_before_economic_eligibility(
         }
     )
 
-    result = eh.report([baseline, actual])
+    result = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )
 
     assert result["token_delta"]["eligible_records"] == 0
     assert result["token_delta"]["saved_tokens"] == 0
@@ -1311,7 +1318,9 @@ def test_report_requires_successful_baseline_execution(baseline_updates):
     )
     baseline.update(baseline_updates)
 
-    result = eh.report([baseline, actual])
+    result = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )
 
     assert result["token_delta"]["eligible_records"] == 0
     assert result["token_delta"]["saved_tokens"] == 0
@@ -1339,7 +1348,9 @@ def test_report_rejects_incomplete_actual_token_observation():
         }
     )
 
-    result = eh.report([baseline, actual])["token_delta"]
+    result = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )["token_delta"]
 
     assert result["eligible_records"] == 0
     assert result["saved_tokens"] == 0
@@ -1361,7 +1372,9 @@ def test_report_rejects_incomplete_baseline_token_observation():
         }
     )
 
-    result = eh.report([baseline, actual])["token_delta"]
+    result = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )["token_delta"]
 
     assert result["eligible_records"] == 0
     assert result["saved_tokens"] == 0
@@ -1393,7 +1406,9 @@ def test_report_requires_observed_billed_cost_status(
     actual["billed_cost_status"] = actual_status
     baseline["billed_cost_status"] = baseline_status
 
-    result = eh.report([baseline, actual])["monetary_delta"]
+    result = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )["monetary_delta"]
 
     assert result["eligible_records"] == 0
     assert result["verified"] is False
@@ -1413,7 +1428,7 @@ def test_token_delta_excludes_unknown_zero_actual_tokens():
             baseline_tokens=500,
         )
     )
-    delta = eh.report(recs)["token_delta"]
+    delta = eh.report(_validated_execution_rows(recs))["token_delta"]
     assert delta["actual_tokens"] == 250
     assert delta["baseline_tokens"] == 500
     assert delta["saved_tokens"] == 250
@@ -1431,7 +1446,7 @@ def test_equivalent_route_cannot_contribute_to_token_delta():
         route_changed=False,
         route_status="ineffective_equivalent",
     )
-    delta = eh.report(recs)["token_delta"]
+    delta = eh.report(_validated_execution_rows(recs))["token_delta"]
     assert delta["eligible_records"] == 0
     assert delta["saved_tokens"] == 0
     assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
@@ -1448,7 +1463,7 @@ def test_forged_route_flags_cannot_hide_observed_route_equivalence():
         route_status="effective",
     )
 
-    delta = eh.report(recs)["token_delta"]
+    delta = eh.report(_validated_execution_rows(recs))["token_delta"]
     assert delta["eligible_records"] == 0
     assert delta["saved_tokens"] == 0
     assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
@@ -1561,9 +1576,12 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
     assert forged["baseline_tokens"] is None
     assert forged["baseline_billed_cost"] is None
     assert forged["baseline_currency"] is None
-    forged_report = eh.report([baseline, forged])
-    assert forged_report["token_delta"]["eligible_records"] == 0
-    assert forged_report["monetary_delta"]["eligible_records"] == 0
+    forged_report = eh.report(eh.read_outcomes(path))
+    # The earlier valid comparison remains eligible; the forged row must not
+    # create a second comparison.
+    assert forged_report["token_delta"]["eligible_records"] == 1
+    assert forged_report["token_delta"]["saved_tokens"] == 80
+    assert forged_report["monetary_delta"]["eligible_records"] == 1
     assert (
         forged_report["token_delta"]["exclusion_reasons"][
             "baseline_receipt_unavailable"
@@ -2713,9 +2731,34 @@ def test_reserved_rows_copied_without_validated_ledger_context_fail_closed(
     )
 
 
-def test_unreserved_legacy_pair_remains_economically_compatible():
+def test_unreserved_legacy_pair_remains_economically_compatible(tmp_path):
     baseline, actual = _verified_delta_records(
         "unreserved-compatibility",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    path = tmp_path / "unreserved-legacy.jsonl"
+    path.write_text(
+        "".join(
+            json.dumps(row, sort_keys=True) + "\n"
+            for row in (baseline, actual)
+        ),
+        encoding="utf-8",
+    )
+
+    result = eh.report(eh.read_outcomes(path))
+
+    assert result["token_delta"]["eligible_records"] == 1
+    assert result["monetary_delta"]["eligible_records"] == 1
+
+
+def test_plain_execution_receipts_cannot_self_declare_legacy_compatibility():
+    baseline, actual = _verified_delta_records(
+        "plain-list-unreserved",
         actual_tokens=15,
         baseline_tokens=100,
         actual_billed_cost=0.02,
@@ -2726,8 +2769,231 @@ def test_unreserved_legacy_pair_remains_economically_compatible():
 
     result = eh.report([baseline, actual])
 
-    assert result["token_delta"]["eligible_records"] == 1
-    assert result["monetary_delta"]["eligible_records"] == 1
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+    assert (
+        result["token_delta"]["exclusion_reasons"][
+            "baseline_provider_call_provenance_unverified"
+        ]
+        == 1
+    )
+
+
+def test_reserved_rows_cannot_strip_derived_fields_to_claim_legacy_status(
+    tmp_path,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix="copy-strip-derived",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    copied = [dict(row) for row in eh.read_outcomes(path)]
+    for row in copied:
+        for field in (
+            "budget_reservation_id",
+            "budget_no_provider_settlement_id",
+            "budget_provider_call_start_id",
+            "budget_reservation_status",
+            "budget_settlement_basis",
+        ):
+            row.pop(field, None)
+
+    result = eh.report(copied)
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+    assert (
+        result["token_delta"]["exclusion_reasons"][
+            "baseline_provider_call_provenance_unverified"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.parametrize(
+    ("target", "updates"),
+    (
+        ("actual", {"tokens_in": 1, "tokens_out": 0, "tokens": 1}),
+        ("actual", {"billed_cost": 0.0}),
+        ("actual", {"currency": "EUR"}),
+        ("actual", {"provider": "mutated-provider"}),
+        ("actual", {"execution_surface": "mutated-surface"}),
+        ("actual", {"observed_provider": "mutated-provider"}),
+        ("actual", {"observed_model": "gpt-5.6-luna"}),
+        ("actual", {"observed_reasoning_effort": "medium"}),
+        ("actual", {"resolved_model": "gpt-5.6-luna"}),
+        ("actual", {"resolved_reasoning_effort": "medium"}),
+        ("actual", {"resolved_model_source": "mutated-source"}),
+        ("actual", {"resolved_reasoning_source": "mutated-source"}),
+        ("actual", {"actual_tokens_known": False}),
+        ("actual", {"token_usage_status": "unavailable"}),
+        ("actual", {"billed_cost_status": "unavailable"}),
+        ("actual", {"status": "error"}),
+        ("actual", {"error": "mutated-error"}),
+        ("actual", {"finish_reason": "success"}),
+        ("actual", {"outcome": "completed"}),
+        ("actual", {"task_id": "TASK-MUTATED"}),
+        ("actual", {"claim_id": "CLAIM-MUTATED"}),
+        ("actual", {"workload_id": "mutated-workload"}),
+        ("actual", {"baseline_receipt_id": "mutated-baseline-id"}),
+        ("actual", {"baseline_model": "mutated-baseline-model"}),
+        ("actual", {"baseline_reasoning_effort": "max"}),
+        ("actual", {"route_changed": False}),
+        ("actual", {"model_changed": False}),
+        ("actual", {"application_status": "not_applied"}),
+        ("actual", {"route_status": "not_applied"}),
+        ("actual", {"source": "provider_error"}),
+        ("actual", {"budget_reservation_id": "reservation-mutated"}),
+        (
+            "actual",
+            {"budget_provider_call_start_id": "provider-call-start-mutated"},
+        ),
+        ("actual", {"budget_reservation_status": "pending"}),
+        ("actual", {"budget_settlement_basis": "conservative_ceiling"}),
+        ("actual", {"dispatch_id": "mutated-actual-dispatch"}),
+        ("actual", {"receipt_id": "mutated-actual-receipt"}),
+        ("actual", {"immutable": False}),
+        ("baseline", {"tokens_in": 1, "tokens_out": 0, "tokens": 1}),
+        ("baseline", {"billed_cost": 0.0}),
+        ("baseline", {"currency": "EUR"}),
+        ("baseline", {"provider": "mutated-provider"}),
+        ("baseline", {"execution_surface": "mutated-surface"}),
+        ("baseline", {"observed_provider": "mutated-provider"}),
+        ("baseline", {"observed_model": "gpt-5.6-max"}),
+        ("baseline", {"observed_reasoning_effort": "max"}),
+        ("baseline", {"resolved_model": "gpt-5.6-max"}),
+        ("baseline", {"resolved_reasoning_effort": "max"}),
+        ("baseline", {"resolved_model_source": "mutated-source"}),
+        ("baseline", {"resolved_reasoning_source": "mutated-source"}),
+        ("baseline", {"actual_tokens_known": False}),
+        ("baseline", {"token_usage_status": "unavailable"}),
+        ("baseline", {"billed_cost_status": "unavailable"}),
+        ("baseline", {"status": "error"}),
+        ("baseline", {"error": "mutated-error"}),
+        ("baseline", {"finish_reason": "success"}),
+        ("baseline", {"outcome": "completed"}),
+        ("baseline", {"task_id": "TASK-MUTATED"}),
+        ("baseline", {"claim_id": "CLAIM-MUTATED"}),
+        ("baseline", {"workload_id": "mutated-workload"}),
+        ("baseline", {"source": "provider_error"}),
+        ("baseline", {"budget_reservation_id": "reservation-mutated"}),
+        (
+            "baseline",
+            {"budget_provider_call_start_id": "provider-call-start-mutated"},
+        ),
+        ("baseline", {"budget_reservation_status": "pending"}),
+        ("baseline", {"budget_settlement_basis": "conservative_ceiling"}),
+        ("baseline", {"dispatch_id": "mutated-baseline-dispatch"}),
+        ("baseline", {"receipt_id": "mutated-baseline-receipt"}),
+        ("baseline", {"immutable": False}),
+    ),
+)
+def test_post_read_receipt_mutation_invalidates_economic_attestation(
+    tmp_path,
+    target,
+    updates,
+):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix=f"mutate-{target}-{len(updates)}",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    rows = eh.read_outcomes(path)
+    baseline, actual = rows
+    (baseline if target == "baseline" else actual).update(updates)
+
+    result = eh.report(rows)
+
+    assert result["token_delta"]["eligible_records"] == 0
+    assert result["monetary_delta"]["eligible_records"] == 0
+
+
+def test_validated_outcome_constructor_requires_exact_ledger_membership():
+    baseline, actual = _verified_delta_records(
+        "constructor-membership",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+
+    with pytest.raises(
+        eh.ReceiptIntegrityError,
+        match="outcome rows do not match validated ledger",
+    ):
+        eh.ValidatedOutcomeRecords([baseline], [baseline, actual])
+
+
+def test_validated_outcome_constructor_validates_complete_ledger():
+    baseline, actual = _verified_delta_records(
+        "constructor-ledger-integrity",
+        actual_tokens=15,
+        baseline_tokens=100,
+    )
+    actual["dispatch_id"] = baseline["dispatch_id"]
+
+    with pytest.raises(eh.ReceiptIntegrityError, match="duplicate dispatch_id"):
+        eh.ValidatedOutcomeRecords([baseline, actual], [baseline, actual])
+
+
+def test_direct_validated_collection_binds_complete_receipt_value():
+    baseline, actual = _verified_delta_records(
+        "constructor-receipt-binding",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    rows = eh.ValidatedOutcomeRecords(
+        [baseline, actual],
+        [baseline, actual],
+    )
+    before = eh.report(rows)
+    actual.update({"tokens_in": 1, "tokens_out": 0, "tokens": 1})
+    after = eh.report(rows)
+
+    assert before["token_delta"]["eligible_records"] == 1
+    assert before["monetary_delta"]["eligible_records"] == 1
+    assert after["token_delta"]["eligible_records"] == 0
+    assert after["monetary_delta"]["eligible_records"] == 0
+
+
+def test_validated_collection_snapshots_hidden_provenance_records(tmp_path):
+    path, _, _ = _record_reserved_economic_pair(
+        tmp_path,
+        prefix="hidden-provenance-snapshot",
+        mark_baseline=True,
+        mark_actual=True,
+    )
+    ledger = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    outcomes = [
+        row
+        for row in ledger
+        if row.get("schema")
+        not in {
+            eh.BUDGET_RESERVATION_SCHEMA,
+            eh.NO_PROVIDER_SETTLEMENT_SCHEMA,
+            eh.PROVIDER_CALL_START_SCHEMA,
+        }
+    ]
+    rows = eh.ValidatedOutcomeRecords(outcomes, ledger)
+    before = eh.report(rows)
+    for row in ledger:
+        if row.get("schema") == eh.BUDGET_RESERVATION_SCHEMA:
+            row["reserved_tokens"] = 1
+        elif row.get("schema") == eh.PROVIDER_CALL_START_SCHEMA:
+            row["provider"] = "mutated-provider"
+    after = eh.report(rows)
+
+    assert before["token_delta"]["eligible_records"] == 1
+    assert before["monetary_delta"]["eligible_records"] == 1
+    assert after["token_delta"]["eligible_records"] == 1
+    assert after["monetary_delta"]["eligible_records"] == 1
 
 
 @pytest.mark.parametrize(
@@ -3069,7 +3335,9 @@ def test_report_rejects_native_actual_forged_as_reasoning_unsupported():
         }
     )
 
-    report = eh.report([baseline, actual])
+    report = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )
 
     assert report["token_delta"]["eligible_records"] == 0
     assert report["token_delta"]["saved_tokens"] == 0
@@ -3349,7 +3617,9 @@ def test_provider_identity_is_required_even_when_reasoning_is_observed(
         }
     )
 
-    report = eh.report([baseline, actual])
+    report = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )
 
     assert report["token_delta"]["eligible_records"] == 0
     assert report["token_delta"]["saved_tokens"] == 0
@@ -3381,7 +3651,9 @@ def test_report_rejects_forged_verified_native_baseline_without_reasoning():
     actual["observed_provider"] = "native-codex"
     actual["resolved_reasoning_source"] = "adapter_default:test"
 
-    report = eh.report([baseline, actual])
+    report = eh.report(
+        _validated_execution_rows([baseline, actual])
+    )
 
     assert report["token_delta"]["eligible_records"] == 0
     assert report["token_delta"]["saved_tokens"] == 0
@@ -3411,7 +3683,7 @@ def test_monetary_delta_requires_comparable_same_currency_billed_cost():
             baseline_currency="EUR",
         )
     )
-    delta = eh.report(recs)["monetary_delta"]
+    delta = eh.report(_validated_execution_rows(recs))["monetary_delta"]
     assert delta["verified"] is True
     assert delta["eligible_records"] == 1
     assert delta["by_currency"]["USD"]["saved_billed_cost"] == 0.3

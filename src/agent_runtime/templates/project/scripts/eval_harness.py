@@ -26,6 +26,7 @@ import time
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from types import MappingProxyType
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -108,19 +109,68 @@ class ReceiptIntegrityError(RuntimeError):
     """The append-only receipt ledger cannot be trusted."""
 
 
+def _canonical_record_json(record: dict) -> str:
+    """Return the immutable canonical value used for ledger attestation."""
+    try:
+        return json.dumps(
+            record,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+    except (TypeError, ValueError) as exc:
+        raise ReceiptIntegrityError(
+            "ledger record cannot be canonically attested"
+        ) from exc
+
+
+def _record_attestation_digest(record: dict) -> str:
+    return hashlib.sha256(
+        _canonical_record_json(record).encode("utf-8")
+    ).hexdigest()
+
+
 class ValidatedOutcomeRecords(list):
     """List-compatible outcome rows carrying strict-ledger provenance.
 
     Reservation and provider-call records stay out of the user-facing rows,
-    but economic reporting still needs their validated relationship.  The
-    context is intentionally attached to this concrete list instance: copying
-    reserved rows into a plain list drops the attestation and therefore fails
-    closed.
+    but economic reporting still needs their validated relationship. The
+    complete ledger is revalidated even for direct construction, and exposed
+    rows must be the exact filtered members of that ledger. Each execution
+    receipt is bound to its canonical full-record digest; object identity is
+    only the lookup key. Copying rows into a plain list or mutating a returned
+    row therefore drops or invalidates the attestation and fails closed.
     """
 
     __slots__ = ("_economic_provenance",)
 
     def __init__(self, outcomes: list[dict], ledger_records: list[dict]):
+        validation_path = Path("<validated-outcome-records>")
+        _validate_ledger_records(ledger_records, validation_path)
+        expected_outcomes = [
+            item
+            for item in ledger_records
+            if item.get("schema")
+            not in {
+                BUDGET_RESERVATION_SCHEMA,
+                NO_PROVIDER_SETTLEMENT_SCHEMA,
+                PROVIDER_CALL_START_SCHEMA,
+            }
+        ]
+        if (
+            len(outcomes) != len(expected_outcomes)
+            or any(
+                outcome is not expected
+                for outcome, expected in zip(
+                    outcomes,
+                    expected_outcomes,
+                )
+            )
+        ):
+            raise ReceiptIntegrityError(
+                "outcome rows do not match validated ledger"
+            )
         super().__init__(outcomes)
         reservations = {
             str(item.get("dispatch_id") or ""): item
@@ -137,21 +187,24 @@ class ValidatedOutcomeRecords(list):
             for item in ledger_records
             if item.get("schema") == PROVIDER_CALL_START_SCHEMA
         }
-        self._economic_provenance = {
-            id(item): {
-                "reservation": reservations.get(
-                    str(item.get("dispatch_id") or "")
-                ),
-                "settlement": settlements.get(
-                    str(item.get("dispatch_id") or "")
-                ),
-                "call_start": call_starts.get(
-                    str(item.get("dispatch_id") or "")
-                ),
-            }
-            for item in self
-            if item.get("schema") == EXECUTION_RECEIPT_SCHEMA
-        }
+        provenance = {}
+        for item in self:
+            if item.get("schema") != EXECUTION_RECEIPT_SCHEMA:
+                continue
+            dispatch_id = str(item.get("dispatch_id") or "")
+            provenance[id(item)] = (
+                _record_attestation_digest(item),
+                _canonical_record_json(reservations[dispatch_id])
+                if dispatch_id in reservations
+                else None,
+                _canonical_record_json(settlements[dispatch_id])
+                if dispatch_id in settlements
+                else None,
+                _canonical_record_json(call_starts[dispatch_id])
+                if dispatch_id in call_starts
+                else None,
+            )
+        self._economic_provenance = MappingProxyType(provenance)
 
 
 @contextmanager
@@ -868,13 +921,14 @@ def _budget_settlement_basis(
 
 def _economic_provider_call_provenance_verified(
     record: dict,
-    provenance_index: dict[int, dict],
+    provenance_index,
 ) -> bool:
     """Verify reserved economic evidence against strict-ledger context.
 
-    Truly unreserved legacy rows remain compatible.  Any row that claims a
-    reservation-derived state without context from ``read_outcomes`` fails
-    closed.
+    Execution receipts without a validated entry always fail closed. Truly
+    unreserved historical rows remain compatible only when strict ledger
+    validation explicitly attested the complete receipt and found no
+    reservation.
     """
     entry = provenance_index.get(id(record))
     claims_reserved_state = (
@@ -897,11 +951,36 @@ def _economic_provider_call_provenance_verified(
         }
     )
     if entry is None:
-        return not claims_reserved_state
+        return False
+    if not isinstance(entry, tuple) or len(entry) != 4:
+        return False
+    (
+        receipt_digest,
+        reservation_json,
+        settlement_json,
+        call_start_json,
+    ) = entry
+    try:
+        if _record_attestation_digest(record) != receipt_digest:
+            return False
+        reservation = (
+            json.loads(reservation_json)
+            if reservation_json is not None
+            else None
+        )
+        settlement = (
+            json.loads(settlement_json)
+            if settlement_json is not None
+            else None
+        )
+        call_start = (
+            json.loads(call_start_json)
+            if call_start_json is not None
+            else None
+        )
+    except (ReceiptIntegrityError, TypeError, json.JSONDecodeError):
+        return False
 
-    reservation = entry.get("reservation")
-    settlement = entry.get("settlement")
-    call_start = entry.get("call_start")
     if reservation is None:
         return not claims_reserved_state
 
@@ -2799,7 +2878,11 @@ def _economic_claim_candidates(records: list[dict]) -> list[dict]:
 
 def report(records: list[dict] | None = None) -> dict:
     records = read_outcomes() if records is None else records
-    provenance_index = getattr(records, "_economic_provenance", {})
+    provenance_index = (
+        records._economic_provenance
+        if isinstance(records, ValidatedOutcomeRecords)
+        else {}
+    )
     receipt_index = {
         str(record.get("receipt_id")): record
         for record in records
