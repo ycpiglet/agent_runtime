@@ -1143,6 +1143,20 @@ def record_execution_receipt(
     return rec
 
 
+def _route_observation_complete(record: dict) -> bool:
+    """Require every supported route-identity dimension to be observed."""
+    if not str(record.get("observed_model") or "").strip():
+        return False
+    reasoning_source = str(
+        record.get("resolved_reasoning_source") or ""
+    ).strip().lower()
+    if reasoning_source == "unsupported":
+        return True
+    return bool(
+        str(record.get("observed_reasoning_effort") or "").strip()
+    )
+
+
 def _finalize_execution_receipt(
     rec: dict,
     records: list[dict],
@@ -1225,6 +1239,12 @@ def _finalize_execution_receipt(
         rec["baseline_reference_status"] = "invalid"
         rec["baseline_reference_reason"] = "baseline_not_observed"
         _clear_unverified_baseline()
+    elif not _route_observation_complete(baseline):
+        rec["baseline_reference_status"] = "invalid"
+        rec["baseline_reference_reason"] = (
+            "baseline_route_observation_incomplete"
+        )
+        _clear_unverified_baseline()
     else:
         rec["baseline_reference_status"] = "verified"
         rec["baseline_reference_reason"] = None
@@ -1258,16 +1278,10 @@ def _finalize_execution_receipt(
             rec.get("resolved_model"),
             rec.get("resolved_reasoning_effort"),
         )
-        reasoning_required = bool(
-            str(rec.get("resolved_reasoning_effort") or "").strip()
-        )
-        actual_reasoning_observed = bool(
-            str(rec.get("observed_reasoning_effort") or "").strip()
-        )
         if (
             resolved_identity is None
             or actual_identity is None
-            or (reasoning_required and not actual_reasoning_observed)
+            or not _route_observation_complete(rec)
         ):
             rec["application_status"] = "unverified"
         else:
@@ -1470,6 +1484,8 @@ def _verified_baseline_receipt(
         or baseline.get("actual_tokens_known") is not True
     ):
         return None, "baseline_observation_unavailable"
+    if not _route_observation_complete(baseline):
+        return None, "baseline_reasoning_observation_unavailable"
     if rec.get("baseline_reference_status") != "verified":
         return None, "baseline_reference_unverified"
     return baseline, None
@@ -1487,6 +1503,8 @@ def _routing_evidence_exclusion_reason(
         return baseline_reason
     if not str(rec.get("observed_model") or "").strip():
         return "observed_model_unavailable"
+    if not _route_observation_complete(rec):
+        return "observed_reasoning_unavailable"
     if not str(rec.get("baseline_model") or "").strip():
         return "baseline_model_unavailable"
     actual_identity = (

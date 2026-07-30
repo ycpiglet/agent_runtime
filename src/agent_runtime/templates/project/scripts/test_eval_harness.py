@@ -979,6 +979,104 @@ def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
     assert delta["exclusion_reasons"]["route_ineffective_equivalent"] == 1
 
 
+def test_native_baseline_missing_observed_reasoning_is_not_comparable(
+    tmp_path,
+):
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-missing-reasoning",
+        task_id="TASK-INCOMPLETE-BASELINE",
+        workload_id="workload-incomplete-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="high",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="native_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-missing-baseline-reasoning",
+        task_id="TASK-INCOMPLETE-BASELINE",
+        workload_id="workload-incomplete-baseline",
+        provider="native-codex",
+        resolved_model="gpt-5.6-sol",
+        resolved_reasoning_effort="low",
+        resolved_model_source="adapter_default:test",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
+        observed_model="gpt-5.6-sol",
+        observed_reasoning_effort="low",
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="native_completion",
+        status="completed",
+        route_status="effective",
+        application_status="applied",
+        model_changed=False,
+        route_changed=True,
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_route_observation_incomplete"
+    )
+    assert actual["baseline_reasoning_effort"] is None
+    report = eh.report(eh.read_outcomes(path))
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "baseline_reasoning_observation_unavailable"
+        ]
+        == 1
+    )
+
+
+def test_report_rejects_forged_verified_native_baseline_without_reasoning():
+    baseline, actual = _verified_delta_records(
+        "missing-baseline-reasoning",
+        actual_model="gpt-5.6-sol",
+        baseline_model="gpt-5.6-sol",
+        actual_reasoning="low",
+        baseline_reasoning=None,
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    baseline["provider"] = "native-codex"
+    baseline["observed_provider"] = "native-codex"
+    baseline["resolved_reasoning_source"] = "adapter_default:test"
+    actual["provider"] = "native-codex"
+    actual["observed_provider"] = "native-codex"
+    actual["resolved_reasoning_source"] = "adapter_default:test"
+
+    report = eh.report([baseline, actual])
+
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "baseline_reasoning_observation_unavailable"
+        ]
+        == 1
+    )
+
+
 def test_monetary_delta_requires_comparable_same_currency_billed_cost():
     recs = (
         _verified_delta_records(

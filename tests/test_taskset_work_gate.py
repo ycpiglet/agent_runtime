@@ -148,6 +148,26 @@ def test_packaged_gate_masks_iso_second_and_attention_wall_clock_drift(
     assert "stale:content-mismatch" not in result.stdout
 
 
+def test_root_and_packaged_gates_mask_rolling_throughput_drift(
+    tmp_path: Path,
+) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    board = _write_rendered_board(tmp_path)
+    aged = re.sub(
+        r"(?m)^- Throughput \(7d\): .*$",
+        "- Throughput (7d): `999` tasks completed in the last 7 days "
+        "(TASK-AR-627).",
+        board,
+    )
+    assert aged != board
+    (tmp_path / "BACKLOG-BOARD.md").write_text(aged, encoding="utf-8")
+
+    for script in (SCRIPT, PACKAGED_SCRIPT):
+        result = _run(tmp_path, script)
+        assert result.returncode == 0, result.stdout or result.stderr
+        assert "stale:content-mismatch" not in result.stdout
+
+
 def test_gate_flags_stale_board_after_task_status_change(tmp_path: Path) -> None:
     _write_task(tmp_path, "TASK-AR-901", "planned")
     _write_rendered_board(tmp_path)

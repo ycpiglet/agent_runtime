@@ -993,23 +993,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md",
-          "value": "e68f5ab44b930013a68e69ede1eb3ea4739ac43a619e52f788c9de28a2d60f83"
-        },
-        {
-          "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md",
-          "value": "932ad89547f0b63aa1def3cea92b540a72500d8828092a18143c40d4b849dbb6"
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md",
+          "value": "24f2f2bf89734fe8de098c1819c2138f26c57eeb1d296b72ded15fa3c7fee9c9"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
-          "value": "3545213b494a69c511519b86455aca2c63348b47709d734e8ca411ebd8bc7d47"
+          "value": "031f88c614f24b7ad6ef52f331a1ac7c7fdfb9d453a3fb08baa817be1c166a56"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "a1562b7b2210c455799ab4a933cc724a26af1d03d6e7a09a576bf6bca6a52ab6"
+          "value": "21f2762e85d1d97a890aac24c34936d02780cb9e59f9593895a49c8bbe28f53d"
         },
         {
           "kind": "sha256",
@@ -1019,56 +1014,81 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+          "value": "275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf"
         },
         {
           "kind": "sha256",
           "path": "scripts/model_routing.py",
-          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+          "value": "53f266d2d5924ba9a8efbe74e6e665b4d4836b947b4df40bff2c821f6cbfcc55"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/model_routing.py",
-          "value": "fe3fe5000d84a6fced98a9c7d523a99bfc954c6bea50d60cf27c95b323e82666"
+          "value": "53f266d2d5924ba9a8efbe74e6e665b4d4836b947b4df40bff2c821f6cbfcc55"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "eacd08e0356447a92bd5fafc5470c5b93bb54199024d13b638b5a38283e8f6b3"
+          "value": "275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/subagent_dispatch.py",
-          "value": "922c23eba1e25f290f90ce87fc1b6c58a9dafcb0bfd844cb71cc1387d1be70c1"
+          "value": "980cc8c2fd0629b56d6811de35d558d67cf1d73a3a12774382e4af01cb877240"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_worker.py",
-          "value": "d4816f358b2ab07d6a815a934152f51f7f11ade810102c1eeb0acbcd4ae249fc"
+          "value": "08c1d9c5879415aedc596bdea11908215d8095314d28add657942440e6c17914"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/codex_subagent_bridge.py",
-          "value": "0231c91fcffe15595100d893277b80b9e18335b1902a21741692f7448b1f9928"
+          "value": "fb1acfb54f08e88892813859e428f4d8b7b9d54ef653a08a44ca15d3dd0c2344"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/auto_dispatch.py",
-          "value": "cdd7f17821e76140e1a0e3f299fc7ab7787d0a328bd1bd319ac14a7504435a72"
+          "value": "6dfdce16abc414a576a0192c4cc749b6ee2c415923ae2fc0b49cdbe2f97b6154"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "90620008642aeb0e5dc2687fc1dde749d7e2ee17ca391ce256cf9034a5f3ae06"
+          "value": "b6117bcc8bec88f225fc4229a64f79823c0a782f98f429f4c617a85d312e0675"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/doctor.py",
           "value": "c72d8ffe15bfcf5729b2335eafddb0d81c1571d0d4d3a75393a23256d86243e9"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/taskset_work_gate.py",
+          "value": "3437ca86e587555ea9746aaf182a156b99e5cbcc3fcbb025b88c80b8d3a673e7"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/taskset_work_gate.py",
+          "value": "3437ca86e587555ea9746aaf182a156b99e5cbcc3fcbb025b88c80b8d3a673e7"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_taskset_work_gate.py",
+          "value": "d89948e1dff4516efeaeb6bd0a668b22d3724dfe2973957bf40052f41716c4b0"
+        },
+        {
+          "kind": "sha256",
+          "path": "BACKLOG-BOARD.md",
+          "value": "f037531f6b4881a3e69cb0776896c658e84f4830ad8060d7b59130fbdba8cdfb"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "f7b4d1e0ff987cdcfe3aa52ab7c87f514b81a2071baf1082dbd083aafb919d9e"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md",
-      "recorded_at": "2026-07-30T12:32:55+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md",
+      "recorded_at": "2026-07-30T15:52:01+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1284,5 +1304,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T12:32:55+09:00"
+  "updated_at": "2026-07-30T15:52:01+09:00"
 }

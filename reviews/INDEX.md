@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T15:08:35+09:00
-record_count: 1141
+generated_at: 2026-07-30T15:46:40+09:00
+record_count: 1143
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1141` review and evidence records under `reviews/`.
+- Summary: indexed `1143` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1141` files |
+| Reviews covered | pass | `1143` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -650,6 +650,7 @@ record_count: 1141
 | `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md` | `REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan` | md | accepted | n/a | TASK-AR-650 W4 계약 순환 차단 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md` | `REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan` | md | accepted | n/a | TASK-AR-652 준비성 경로·실행 경계 T3 재계획 |
 | `reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md` | `REVIEW-2026-07-30-task-ar-652-scope-transition-approval` | planning | record | pass | TASK-AR-652 operability taskset scope transition approval |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
@@ -1170,6 +1171,7 @@ record_count: 1141
 | `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
 | `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
 | `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |

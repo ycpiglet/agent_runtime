@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T13:10:13+09:00
+generated_at: 2026-07-30T15:43:29+09:00
 task_count: 322
 open_count: 23
 completed_count: 299
@@ -86,7 +86,7 @@ completed_task_set_count: 63
 
 - Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
 - Progress: `0/7` done; `7` open or active.
-- WIP: active `1/3`; oldest `0.6h`; stale `0`.
+- WIP: active `1/3`; oldest `3.1h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-657` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md | planned | Action | P1 | High | Medium | 7h/14000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the safe brownfield procedure discoverable and repeatable in every consumer with… |
@@ -172,7 +172,7 @@ completed_task_set_count: 63
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `23` open across `4` task sets (see Action Board above).
-- Throughput (7d): `16` tasks completed in the last 7 days (TASK-AR-627).
+- Throughput (7d): `15` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `299` — see `ARCHIVE-INDEX.md`.
 

@@ -575,6 +575,9 @@ def create_dispatch_packet(
         ),
         tier_route=tier_route,
         provider_route=provider_route,
+        requested_tier=requested_tier,
+        escalation_triggers=escalation_triggers,
+        provider="native-codex",
     )
     packet_path = _packet_path(bridge_id)
     ev = list(evidence or [])
@@ -591,6 +594,9 @@ def create_dispatch_packet(
             evidence=ev,
             tier_route=tier_route,
             provider_route=provider_route,
+            requested_tier=requested_tier,
+            escalation_triggers=escalation_triggers,
+            provider="native-codex",
             dispatch_id=bridge_id,
             claim_id=(
                 (budget_preflight.get("budget_authority") or {}).get(
@@ -1078,6 +1084,7 @@ def create_council_packet(
             ),
             tier_route=member_route,
             provider_route=member_route,
+            provider="native-codex",
         )
         instructions = _execution_instructions(
             member,
@@ -1102,6 +1109,7 @@ def create_council_packet(
                 evidence=ev,
                 tier_route=member_route,
                 provider_route=member_route,
+                provider="native-codex",
                 dispatch_id=f"{bridge_id}:{member}",
                 claim_id=(
                     (

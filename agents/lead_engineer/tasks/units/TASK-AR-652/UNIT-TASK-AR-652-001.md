@@ -27,6 +27,8 @@ claim_refs:
 context: Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses all five tiers, native Codex groups worker and strong tiers, and Scribe/doc/research roles fall back to worker_standard. Pilot evidence therefore could not substantiate any savings.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -52,6 +54,11 @@ target_files:
   - src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
   - src/agent_runtime/templates/project/scripts/test_eval_harness.py
   - src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py
+  - scripts/taskset_work_gate.py
+  - src/agent_runtime/templates/project/scripts/taskset_work_gate.py
+  - tests/test_taskset_work_gate.py
+  - BACKLOG-BOARD.md
+  - tests/fixtures/host/agent_runtime.lock.json
 scope: Enforce routing and accounting truth without making a live provider call or changing provider credentials.
 acceptance:
   - Cheap roles select the configured low-cost lane.
@@ -82,6 +89,8 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 ## Inputs
 
 - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+- reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md
+- reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
 - scripts/model_routing.py
 - src/agent_runtime/templates/project/scripts/auto_dispatch.py
 - agents/project/ORG-MODEL.yml
@@ -109,6 +118,11 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 - src/agent_runtime/templates/project/scripts/test_auto_dispatch.py
 - src/agent_runtime/templates/project/scripts/test_eval_harness.py
 - src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py
+- scripts/taskset_work_gate.py
+- src/agent_runtime/templates/project/scripts/taskset_work_gate.py
+- tests/test_taskset_work_gate.py
+- BACKLOG-BOARD.md
+- tests/fixtures/host/agent_runtime.lock.json
 
 ## Scope
 

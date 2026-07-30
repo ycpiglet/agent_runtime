@@ -109,6 +109,43 @@ def test_render_prompt_uses_provider_aware_route_without_legacy_tier_conflict():
     assert "Agent tool model: sonnet" not in prompt
 
 
+def test_render_prompt_rejects_forged_high_route_assertions_for_scribe():
+    forged_tier = sd.model_routing.resolve_subagent_tier("auditor")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        "planner_high",
+        requested_tier="planner_high",
+    )
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=forged_tier,
+            provider_route=forged_provider,
+        )
+
+
+def test_render_prompt_rejects_forged_raw_provider_route_assertion():
+    tier = sd.model_routing.resolve_subagent_tier("scribe")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    forged_provider["resolved_model"] = "vendor/raw-expensive-model"
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier,
+            provider_route=forged_provider,
+        )
+
+
 def test_render_prompt_skeptic_has_severity():
     prompt = sd.render_prompt("skeptic", "TASK-116", "find holes")
     assert "SKEPTIC subagent" in prompt
@@ -175,6 +212,9 @@ def test_emit_call_message_carries_dispatch_claim_budget_and_eval_authority(
         baseline_receipt_id="receipt-baseline-652",
         tier_route=tier,
         provider_route=route,
+        requested_tier="worker_low",
+        escalation_triggers=["data_integrity"],
+        provider="native-codex",
     )
 
     meta, err = cm.load_frontmatter(path)
@@ -226,6 +266,53 @@ def test_provider_aware_dispatch_records_role_policy_and_reasoning(
     assert fields["reasoning_effort"] == "low"
     assert fields["reasoning_source"].startswith("adapter_default:")
     assert fields["route_changed"] is None
+
+
+def test_emit_call_message_rejects_forged_high_route_assertions_for_scribe(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    forged_tier = sd.model_routing.resolve_subagent_tier("auditor")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        "planner_high",
+        requested_tier="planner_high",
+    )
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=forged_tier,
+            provider_route=forged_provider,
+        )
+    assert not list(tmp_path.iterdir())
+
+
+def test_emit_call_message_rejects_forged_raw_provider_route_assertion(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    tier = sd.model_routing.resolve_subagent_tier("scribe")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    forged_provider["resolved_model"] = "vendor/raw-expensive-model"
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier,
+            provider_route=forged_provider,
+        )
+    assert not list(tmp_path.iterdir())
 
 
 def test_emit_reply_message_links_to_parent(tmp_path, monkeypatch):

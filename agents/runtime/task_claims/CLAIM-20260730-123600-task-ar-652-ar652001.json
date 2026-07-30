@@ -74,7 +74,12 @@
     "src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py",
     "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
     "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-    "src/agent_runtime/templates/project/scripts/test_eval_harness.py"
+    "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
+    "scripts/taskset_work_gate.py",
+    "src/agent_runtime/templates/project/scripts/taskset_work_gate.py",
+    "tests/test_taskset_work_gate.py",
+    "BACKLOG-BOARD.md",
+    "tests/fixtures/host/agent_runtime.lock.json"
   ],
   "persistence": {
     "mode": "working_tree",
