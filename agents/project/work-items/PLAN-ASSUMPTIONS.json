@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "fdcb5014b027a9c2d6450574842c2435f442e180ba035ca471b4ebee35478086"
+          "value": "fc6fb8a219b0ea545cfc81e95620795638d6297000c671ad0f17e96aafb9cead"
         },
         {
           "kind": "sha256",
@@ -1195,10 +1195,20 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md",
           "value": "9481ab8e48ab584283d7ff7963b08dc7837766eaa654230f8d7d983b64198d92"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json",
+          "value": "fa864e995670f793fa8a10d65cb4993de9c9e6dabcb11178df445fc3a99c6942"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md",
+          "value": "17d2163018d4177ff64212cdac4bb04dc7d6751a020a7859770f1dd3926ce8e2"
         }
       ],
       "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md",
-      "recorded_at": "2026-07-30T17:31:44+09:00",
+      "recorded_at": "2026-07-30T17:34:21+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1414,5 +1424,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T17:31:44+09:00"
+  "updated_at": "2026-07-30T17:34:21+09:00"
 }
