@@ -31,6 +31,8 @@ inputs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
   - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
   - scripts/model_routing.py
   - src/agent_runtime/templates/project/scripts/auto_dispatch.py
   - agents/project/ORG-MODEL.yml
@@ -88,6 +90,8 @@ evidence_refs:
   - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
   - reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json
   - reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md
+  - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+  - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
 ---
 
 # UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement
@@ -103,6 +107,8 @@ Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses a
 - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md
 - reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md
 - reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md
+- reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md
+- reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md
 - scripts/model_routing.py
 - src/agent_runtime/templates/project/scripts/auto_dispatch.py
 - agents/project/ORG-MODEL.yml

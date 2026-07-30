@@ -634,9 +634,24 @@ def _provider_mapping(
     }
 
 
+def canonical_provider_identity(provider_name: str) -> str | None:
+    """Return a stable identity only for registered provider names."""
+    provider = str(provider_name or "").strip().lower()
+    if provider in {"native-codex", "codex-session", "codex-native"}:
+        return "native-codex"
+    if provider in {"codex-agent", "codex"}:
+        return "codex-agent"
+    if provider in PROVIDER_MODEL_ENV:
+        return provider
+    return None
+
+
 def provider_reasoning_capability(provider_name: str) -> str:
     """Return the canonical reasoning-observation contract for a provider."""
-    mapping = _provider_mapping(provider_name, "worker_low")
+    identity = canonical_provider_identity(provider_name)
+    if identity is None:
+        return "unknown"
+    mapping = _provider_mapping(identity, "worker_low")
     if mapping is None:
         return "unknown"
     if (

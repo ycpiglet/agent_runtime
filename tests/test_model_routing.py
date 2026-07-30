@@ -205,6 +205,17 @@ def test_provider_reasoning_capability_comes_from_canonical_mapping():
     assert mr.provider_reasoning_capability("unknown-provider") == "unknown"
 
 
+def test_provider_identity_canonicalizes_only_registered_aliases():
+    assert mr.canonical_provider_identity("native-codex") == "native-codex"
+    assert mr.canonical_provider_identity("codex-session") == "native-codex"
+    assert mr.canonical_provider_identity("codex-native") == "native-codex"
+    assert mr.canonical_provider_identity("codex-agent") == "codex-agent"
+    assert mr.canonical_provider_identity("codex") == "codex-agent"
+    assert mr.canonical_provider_identity("claude-agent") == "claude-agent"
+    assert mr.canonical_provider_identity("") is None
+    assert mr.canonical_provider_identity("unknown-provider") is None
+
+
 def test_native_route_change_compares_model_and_reasoning(monkeypatch):
     for name in (
         "CODEX_NATIVE_WORKER_LOW_MODEL",

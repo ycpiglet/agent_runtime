@@ -98,6 +98,7 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
         baseline_model="claude-opus-4-8",
     )
     result = SimpleNamespace(
+        provider="claude-agent",
         model="claude-haiku-4-5",
         reasoning_effort=None,
         tokens_in=12,
@@ -129,7 +130,7 @@ def test_effective_observed_route_records_token_and_monetary_evidence(tmp_path):
         resolved_model="claude-opus-4-8",
         resolved_model_source="adapter_default:test",
         resolved_reasoning_source="unsupported",
-        observed_provider="claude",
+        observed_provider="claude-agent",
         observed_model="claude-opus-4-8",
         tokens_in=30,
         tokens_out=10,

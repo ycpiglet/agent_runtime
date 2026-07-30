@@ -1150,17 +1150,22 @@ def _route_observation_complete(record: dict) -> bool:
     """Require every supported route-identity dimension to be observed."""
     if not str(record.get("observed_model") or "").strip():
         return False
+    configured_identity = model_routing.canonical_provider_identity(
+        record.get("provider")
+    )
+    observed_identity = model_routing.canonical_provider_identity(
+        record.get("observed_provider")
+    )
+    if (
+        configured_identity is None
+        or observed_identity is None
+        or configured_identity != observed_identity
+    ):
+        return False
+
     if str(record.get("observed_reasoning_effort") or "").strip():
         return True
     if str(record.get("resolved_reasoning_effort") or "").strip():
-        return False
-
-    configured_provider = str(record.get("provider") or "").strip()
-    observed_provider = str(record.get("observed_provider") or "").strip()
-    if (
-        model_routing.provider_reasoning_capability(observed_provider)
-        == "required"
-    ):
         return False
 
     reasoning_source = str(
@@ -1168,7 +1173,7 @@ def _route_observation_complete(record: dict) -> bool:
     ).strip().lower()
     return (
         reasoning_source == "unsupported"
-        and model_routing.provider_reasoning_capability(configured_provider)
+        and model_routing.provider_reasoning_capability(configured_identity)
         == "unsupported"
     )
 

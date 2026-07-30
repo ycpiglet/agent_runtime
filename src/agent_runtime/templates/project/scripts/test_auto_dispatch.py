@@ -453,7 +453,7 @@ def test_dispatch_records_routed_eval_outcome_when_baseline_present(tmp_path, pa
         resolved_model="claude-opus-4-8",
         resolved_model_source="adapter_default:test",
         resolved_reasoning_source="unsupported",
-        observed_provider="claude",
+        observed_provider="claude-agent",
         observed_model="claude-opus-4-8",
         tokens_in=2500,
         tokens_out=500,

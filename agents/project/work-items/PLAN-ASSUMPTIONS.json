@@ -1023,13 +1023,23 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md",
+          "value": "ae466cd8d3be0e0e238b243557dd610532776743ee0dedb40cb01d81d973ad1f"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md",
+          "value": "1159119617a0adf3219f8ed4a4b6b5716edcf207c85550a2e1aba07a3e5ec884"
+        },
+        {
+          "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
           "value": "031f88c614f24b7ad6ef52f331a1ac7c7fdfb9d453a3fb08baa817be1c166a56"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "088a469c7e7b5734fc4223334998338cb3eb5fd525714e09c408593a6015ede6"
+          "value": "4b8d60184faa8aee0d0d1ecfcfc672f6df08e87e3b08be0f6339140aebba38a0"
         },
         {
           "kind": "sha256",
@@ -1044,12 +1054,12 @@
         {
           "kind": "sha256",
           "path": "scripts/model_routing.py",
-          "value": "afad528ea2d6d870a8b283c774ce976d6583b19e5d914c3f7ad37797a6979a45"
+          "value": "8ed8d4ca9415e2c8dfb3b61b271c76509925d2446dbbedf43e5dfde09da73c45"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/model_routing.py",
-          "value": "afad528ea2d6d870a8b283c774ce976d6583b19e5d914c3f7ad37797a6979a45"
+          "value": "8ed8d4ca9415e2c8dfb3b61b271c76509925d2446dbbedf43e5dfde09da73c45"
         },
         {
           "kind": "sha256",
@@ -1079,7 +1089,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/eval_harness.py",
-          "value": "04df1d41659be467d9674284342ea7225f85d519e863050fde20bb7d5f7296a4"
+          "value": "4bc21b947008b1e2c933f172ec1b2761f8d7df58356ec5b86c5ba526370dafbf"
         },
         {
           "kind": "sha256",
@@ -1094,7 +1104,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_model_routing.py",
-          "value": "3c2124c975c9f4f08b8657e9ae09638f4f44026d4989278e9f335c5d38392790"
+          "value": "71ba44e0a8242a3ffdadd14114d66fecfcacbf2869a640b239ff6a03cf5683dd"
         },
         {
           "kind": "sha256",
@@ -1109,7 +1119,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_model_routing.py",
-          "value": "262efba122b213e686697f68e537730d66ea5325f2383bf429d8950ab9cf2d87"
+          "value": "7d2df70af2291b0a09216b71beefbb0d0b83021d8751afaf0ba6aecda827e480"
         },
         {
           "kind": "sha256",
@@ -1124,17 +1134,17 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py",
-          "value": "33062712029c4031ee6a5bde6dfd50830fd2c7675c41467b2c9eb68311845247"
+          "value": "78c5f04d41c72bf44766f0a0001053039e96e9d2c6af4048ca9b9f934061547f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_auto_dispatch.py",
-          "value": "97496b23fb87dc939666533561a848cf41d5b13af8e0f1ad5c7ff6f4e5c7cf8a"
+          "value": "9d952ed418654e3e0d635bb8df0f21d9d0baff3bbed7ea118e8f381a02866216"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/test_eval_harness.py",
-          "value": "7de2df0b682aed45c284d015b9fead1c555e4714ce6f76c5274d88ac2f5e8a7d"
+          "value": "2136b7ce148f01aab28cdd68a2e65d6617f3af134d47e76b4a5b1cac0848b60b"
         },
         {
           "kind": "sha256",
@@ -1164,11 +1174,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "f1fac52c7a14128810b5195d0e1f088a099caa4feb32e4192993db5241628402"
+          "value": "cb0d72338359ea8494abb8bbcdffda83bb24bb474dffe3bbcb354cb0df2273b8"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md",
-      "recorded_at": "2026-07-30T16:35:54+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md",
+      "recorded_at": "2026-07-30T17:03:32+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1384,5 +1394,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T16:35:54+09:00"
+  "updated_at": "2026-07-30T17:03:32+09:00"
 }

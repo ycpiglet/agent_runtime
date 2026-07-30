@@ -93,6 +93,10 @@ def _verified_delta_records(
         "task_id": "TASK-SAVE",
         "workload_id": workload_id,
         "status": "completed",
+        "provider": "native-codex",
+        "resolved_reasoning_effort": baseline_reasoning,
+        "resolved_reasoning_source": "adapter_default:test",
+        "observed_provider": "native-codex",
         "observed_model": baseline_model,
         "observed_reasoning_effort": baseline_reasoning,
         "actual_tokens_known": True,
@@ -113,6 +117,10 @@ def _verified_delta_records(
         "task_id": "TASK-SAVE",
         "workload_id": workload_id,
         "status": "completed",
+        "provider": "native-codex",
+        "resolved_reasoning_effort": actual_reasoning,
+        "resolved_reasoning_source": "adapter_default:test",
+        "observed_provider": "native-codex",
         "observed_model": actual_model,
         "observed_reasoning_effort": actual_reasoning,
         "actual_tokens_known": actual_tokens_known,
@@ -838,7 +846,10 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         dispatch_id="baseline-dispatch",
         task_id="TASK-SAVE",
         workload_id="workload-same",
-        observed_provider="provider",
+        provider="native-codex",
+        resolved_reasoning_effort="high",
+        resolved_reasoning_source="adapter_default:test",
+        observed_provider="native-codex",
         observed_model="expensive-model",
         observed_reasoning_effort="high",
         tokens_in=80,
@@ -853,7 +864,8 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         dispatch_id="actual-dispatch",
         task_id="TASK-SAVE",
         workload_id="workload-same",
-        observed_provider="provider",
+        provider="native-codex",
+        observed_provider="native-codex",
         observed_model="cheap-model",
         observed_reasoning_effort="low",
         resolved_model="cheap-model",
@@ -886,7 +898,8 @@ def test_savings_require_referenced_baseline_receipt_and_workload_identity(
         dispatch_id="forged-dispatch",
         task_id="TASK-SAVE",
         workload_id="workload-same",
-        observed_provider="provider",
+        provider="native-codex",
+        observed_provider="native-codex",
         observed_model="cheap-model",
         tokens_in=15,
         tokens_out=5,
@@ -930,6 +943,9 @@ def test_finalizer_recomputes_route_equivalence_from_observed_receipts(
         dispatch_id="baseline-equivalent",
         task_id="TASK-EQUIVALENT",
         workload_id="workload-equivalent",
+        provider="native-codex",
+        resolved_reasoning_effort="high",
+        resolved_reasoning_source="adapter_default:test",
         observed_provider="native-codex",
         observed_model="gpt-5.6-sol",
         observed_reasoning_effort="high",
@@ -1210,6 +1226,224 @@ def test_canonical_codex_agent_unsupported_reasoning_stays_comparable(
     report = eh.report(eh.read_outcomes(path))
     assert report["token_delta"]["eligible_records"] == 1
     assert report["token_delta"]["saved_tokens"] == 85
+
+
+def _unsupported_codex_pair(
+    tmp_path,
+    monkeypatch,
+    *,
+    baseline_observed_provider="codex-agent",
+    actual_observed_provider="codex-agent",
+    configured_provider="codex-agent",
+):
+    monkeypatch.setenv("CODEX_AGENT_OPUS_MODEL", "gpt-codex-expensive")
+    monkeypatch.setenv("CODEX_AGENT_HAIKU_MODEL", "gpt-codex-cheap")
+    baseline_route = eh.model_routing.resolve_provider_route(
+        configured_provider,
+        "planner_high",
+    )
+    actual_route = eh.model_routing.resolve_provider_route(
+        configured_provider,
+        "worker_low",
+    )
+    path = tmp_path / "receipts.jsonl"
+    baseline = eh.record_execution_receipt(
+        dispatch_id="baseline-provider-identity",
+        task_id="TASK-PROVIDER-IDENTITY",
+        workload_id="workload-provider-identity",
+        provider=configured_provider,
+        resolved_model=baseline_route["resolved_model"],
+        resolved_reasoning_effort=baseline_route["reasoning_effort"],
+        resolved_model_source=baseline_route["model_source"],
+        resolved_reasoning_source=baseline_route["reasoning_source"],
+        observed_provider=baseline_observed_provider,
+        observed_model=baseline_route["resolved_model"],
+        tokens_in=80,
+        tokens_out=20,
+        billed_cost=0.10,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        path=path,
+    )
+    actual = eh.record_execution_receipt(
+        dispatch_id="actual-provider-identity",
+        task_id="TASK-PROVIDER-IDENTITY",
+        workload_id="workload-provider-identity",
+        provider=configured_provider,
+        resolved_model=actual_route["resolved_model"],
+        resolved_reasoning_effort=actual_route["reasoning_effort"],
+        resolved_model_source=actual_route["model_source"],
+        resolved_reasoning_source=actual_route["reasoning_source"],
+        observed_provider=actual_observed_provider,
+        observed_model=actual_route["resolved_model"],
+        tokens_in=10,
+        tokens_out=5,
+        billed_cost=0.02,
+        currency="USD",
+        source="provider_completion",
+        status="completed",
+        baseline_receipt_id=baseline["receipt_id"],
+        path=path,
+    )
+    return actual, eh.report(eh.read_outcomes(path))
+
+
+@pytest.mark.parametrize(
+    "observed_provider",
+    [
+        None,
+        "unknown-provider",
+        "claude-agent",
+        "native-codex",
+        "codex-session",
+        "codex-native",
+    ],
+    ids=(
+        "missing",
+        "unknown",
+        "different-unsupported",
+        "native",
+        "native-session-alias",
+        "native-name-alias",
+    ),
+)
+def test_unsupported_actual_requires_matching_observed_provider(
+    tmp_path,
+    monkeypatch,
+    observed_provider,
+):
+    actual, report = _unsupported_codex_pair(
+        tmp_path,
+        monkeypatch,
+        actual_observed_provider=observed_provider,
+    )
+
+    assert actual["application_status"] == "unverified"
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "observed_reasoning_unavailable"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.parametrize(
+    "observed_provider",
+    [
+        None,
+        "unknown-provider",
+        "claude-agent",
+        "native-codex",
+        "codex-session",
+        "codex-native",
+    ],
+    ids=(
+        "missing",
+        "unknown",
+        "different-unsupported",
+        "native",
+        "native-session-alias",
+        "native-name-alias",
+    ),
+)
+def test_unsupported_baseline_requires_matching_observed_provider(
+    tmp_path,
+    monkeypatch,
+    observed_provider,
+):
+    actual, report = _unsupported_codex_pair(
+        tmp_path,
+        monkeypatch,
+        baseline_observed_provider=observed_provider,
+    )
+
+    assert actual["baseline_reference_status"] == "invalid"
+    assert actual["baseline_reference_reason"] == (
+        "baseline_route_observation_incomplete"
+    )
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "baseline_reasoning_observation_unavailable"
+        ]
+        == 1
+    )
+
+
+def test_registered_codex_aliases_share_one_observed_provider_identity(
+    tmp_path,
+    monkeypatch,
+):
+    actual, report = _unsupported_codex_pair(
+        tmp_path,
+        monkeypatch,
+        configured_provider="codex",
+        baseline_observed_provider="codex-agent",
+        actual_observed_provider="codex-agent",
+    )
+
+    assert actual["baseline_reference_status"] == "verified"
+    assert actual["application_status"] == "applied"
+    assert report["token_delta"]["eligible_records"] == 1
+    assert report["token_delta"]["saved_tokens"] == 85
+    assert report["monetary_delta"]["eligible_records"] == 1
+
+
+@pytest.mark.parametrize(
+    "observed_provider",
+    [None, "unknown-provider", "claude-agent"],
+    ids=("missing", "unknown", "mismatched"),
+)
+def test_provider_identity_is_required_even_when_reasoning_is_observed(
+    observed_provider,
+):
+    baseline, actual = _verified_delta_records(
+        f"provider-first-{observed_provider}",
+        actual_tokens=15,
+        baseline_tokens=100,
+        actual_model="gpt-5.6-terra",
+        baseline_model="gpt-5.6-sol",
+        actual_reasoning="low",
+        baseline_reasoning="high",
+        actual_billed_cost=0.02,
+        actual_currency="USD",
+        baseline_billed_cost=0.10,
+        baseline_currency="USD",
+    )
+    baseline.update(
+        {
+            "provider": "native-codex",
+            "observed_provider": "native-codex",
+            "resolved_reasoning_effort": "high",
+            "resolved_reasoning_source": "adapter_default:test",
+        }
+    )
+    actual.update(
+        {
+            "provider": "native-codex",
+            "observed_provider": observed_provider,
+            "resolved_reasoning_effort": "low",
+            "resolved_reasoning_source": "adapter_default:test",
+        }
+    )
+
+    report = eh.report([baseline, actual])
+
+    assert report["token_delta"]["eligible_records"] == 0
+    assert report["token_delta"]["saved_tokens"] == 0
+    assert report["monetary_delta"]["eligible_records"] == 0
+    assert (
+        report["token_delta"]["exclusion_reasons"][
+            "observed_reasoning_unavailable"
+        ]
+        == 1
+    )
 
 
 def test_report_rejects_forged_verified_native_baseline_without_reasoning():
