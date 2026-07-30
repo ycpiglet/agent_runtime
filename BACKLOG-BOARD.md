@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T12:26:18+09:00
+generated_at: 2026-07-30T12:32:55+09:00
 task_count: 322
 open_count: 23
 completed_count: 299
@@ -86,7 +86,7 @@ completed_task_set_count: 63
 
 - Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
 - Progress: `0/7` done; `7` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-657` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md | planned | Action | P1 | High | Medium | 7h/14000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the safe brownfield procedure discoverable and repeatable in every consumer with… |
@@ -94,8 +94,8 @@ completed_task_set_count: 63
 | `TASK-AR-655` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md | planned | Action | P1 | High | Medium | 8h/16000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Keep long-running task claims truthful and make expiry consistent across claim, point… |
 | `TASK-AR-656` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md | planned | Action | P1 | High | Medium | 10h/19000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Let Runtime own its canonical lifecycle while hosts add authority hooks without perma… |
 | `TASK-AR-653` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md | planned | Action | P1 | High | High | 12h/24000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Ensure Scribe freshness means current work is covered and overdue state was actually… |
-| `TASK-AR-652` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md | planned | Action | P1 | High | High | 14h/28000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make selective subagent routing materially change execution and produce trustworthy t… |
 | `TASK-AR-658` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md | planned | Ask | P2 | Medium | High | 12h/23000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage… |
+| `TASK-AR-652` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md | active | Action | P1 | High | High | 14h/28000tok | Low | 5 | agent-runtime-core | lead-engineer | Execute next | Make selective subagent routing materially change execution and produce trustworthy t… |
 
 ## Archived Task Sets
 

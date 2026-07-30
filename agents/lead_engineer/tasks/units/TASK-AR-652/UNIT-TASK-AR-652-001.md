@@ -9,11 +9,12 @@ task_id: TASK-AR-652
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T12:32:00+09:00
+updated_at: 2026-07-30T12:38:00+09:00
+started_at: 2026-07-30T12:36:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
@@ -21,6 +22,8 @@ summary: Implement role-aware economic routing receipts and budget enforcement
 horizon: unit
 model_tier: worker_standard
 escalation_triggers:
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-123600-task-ar-652-ar652001.json
 context: Autofolio doctor reported six tier-equivalence warnings; codex-agent collapses all five tiers, native Codex groups worker and strong tiers, and Scribe/doc/research roles fall back to worker_standard. Pilot evidence therefore could not substantiate any savings.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md

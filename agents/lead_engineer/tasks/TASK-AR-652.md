@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T12:32:00+09:00
+updated_at: 2026-07-30T12:38:00+09:00
+started_at: 2026-07-30T12:36:00+09:00
 title: Bind model tiers to actual execution and economic receipts
-status: planned
+status: active
 priority: P1
 difficulty: L
 est_hours: 14
@@ -32,6 +33,8 @@ worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
 tags:
   - work-cli-created
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260730-123600-task-ar-652-ar652001.json
 acceptance:
   - Scribe, exploration, implementation, review, and audit roles resolve through explicit role policy rather than the generic fallback.
   - Requested tier, resolved model and reasoning, observed model and reasoning, tokens, cost, and source are persisted in one immutable execution receipt.

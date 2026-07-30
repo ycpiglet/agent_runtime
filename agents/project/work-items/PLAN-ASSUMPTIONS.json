@@ -998,13 +998,18 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md",
+          "value": "932ad89547f0b63aa1def3cea92b540a72500d8828092a18143c40d4b849dbb6"
+        },
+        {
+          "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
-          "value": "0bb6bf18f2b9859099aa05ac96cf6555884dbf7200bd8aa10dbd1577d6eee51b"
+          "value": "3545213b494a69c511519b86455aca2c63348b47709d734e8ca411ebd8bc7d47"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
-          "value": "49ad9dc46fbc4844c84159b9498fbb2c20e34632143ff06c0d444ecacdee4a8f"
+          "value": "a1562b7b2210c455799ab4a933cc724a26af1d03d6e7a09a576bf6bca6a52ab6"
         },
         {
           "kind": "sha256",
@@ -1062,8 +1067,8 @@
           "value": "c72d8ffe15bfcf5729b2335eafddb0d81c1571d0d4d3a75393a23256d86243e9"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md",
-      "recorded_at": "2026-07-30T12:26:19+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md",
+      "recorded_at": "2026-07-30T12:32:55+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1279,5 +1284,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T12:26:19+09:00"
+  "updated_at": "2026-07-30T12:32:55+09:00"
 }
