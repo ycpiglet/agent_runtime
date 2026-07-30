@@ -16,6 +16,7 @@ claim_refs:
 evidence_refs:
   - reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-650-001.md
   - reviews/W4B-2026-07-30-unit-task-ar-650-001.md
 owner: lead-engineer
@@ -109,7 +110,7 @@ acceptance:
   - Compound and Scribe use task-linked/generated state, preserve legacy compound/status sources, and restart/continuity evidence remains local.
   - No-install host tests and Runtime migration, adoption, sync, isolation, and exact acceptance tests pass.
   - Publish, deploy, migration, origin push, consumer commit, credential read/change, network/provider call, notification, broker call, order, package install, and product mutation counters are integer zero.
-  - Canonical W4a and fresh independent W4b pass with no Runtime P0/P1 before TASK-AR-651.
+  - Canonical W4a and fresh independent W4b pass with no task-scope Runtime P0/P1 in the exact migration candidate; cross-cutting operability P1 findings remain registered in TASK-AR-652 through TASK-AR-657 and block TASK-AR-651 through explicit dependencies.
 verification:
   - python scripts/pilot_isolation_gate.py --evidence tests/fixtures/pilots/autofolio/isolation-green-attempt-3.json --check --json
   - python scripts/pilot_acceptance.py --host autofolio --fixture tests/fixtures/pilots/autofolio/evidence-green-attempt-3.json --check --json
@@ -185,6 +186,9 @@ work and never mutate product or trading behavior.
   temporary forks decrease.
 - Host tests and exact acceptance remain green without install or external
   effects.
+- Cross-cutting Runtime operability P1 findings remain visible and continue to
+  block TASK-AR-651 through TASK-AR-652~657; this unit does not claim RC
+  readiness.
 
 ## Verification
 

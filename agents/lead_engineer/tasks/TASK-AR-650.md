@@ -18,6 +18,7 @@ claim_refs:
 evidence_refs:
   - reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
+  - reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md
   - reviews/W4A-2026-07-30-unit-task-ar-650-001.md
   - reviews/W4B-2026-07-30-unit-task-ar-650-001.md
 priority: P0
@@ -83,3 +84,10 @@ risk_tier: high
 - `python scripts/pilot_acceptance.py --host autofolio --check`
 - `python -m pytest tests/test_work_registration.py tests/test_taskset_dispatcher.py -q`
 - `python -m pytest tests/test_adoption.py tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q`
+
+## W4 Contract Boundary
+
+- TASK-AR-650 closes only the exact Autofolio migration-rehearsal scope.
+- Cross-cutting operability findings remain registered in TASK-AR-652 through
+  TASK-AR-657 and continue to block TASK-AR-651 through explicit dependencies.
+- Closing TASK-AR-650 does not assert RC or release readiness.

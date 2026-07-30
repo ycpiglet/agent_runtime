@@ -920,18 +920,18 @@
       "anchors": [
         {
           "kind": "sha256",
-          "path": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md",
-          "value": "4e195a901108452cad8960aab3788ab93d0f9566dd1c549e3c0fe82ca1928f11"
+          "path": "reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md",
+          "value": "a85299278ba3e4999e7d05634079ef29313996bf70425026fe27118a0e5b725d"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
-          "value": "22d9a814b59c2d6e365d723654edb769dbed82679794823d648f9ae0c2c4c481"
+          "value": "f313b8f0ddba755956c2060b6d759de09a899d596eca28e7bc568c29ef667875"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
-          "value": "9b2900655ffb6a71b4ded5f200880ac4d80c8f67a0a197dfad378077b2ba1722"
+          "value": "d7e87ae865eeff848833f0032c59d466e04712a3dbb0e1c6a901a918f949a65f"
         },
         {
           "kind": "sha256",
@@ -941,7 +941,7 @@
         {
           "kind": "sha256",
           "path": "docs/pilot-acceptance-contract.md",
-          "value": "2dfd068e8e8d294ead0e8d26dedabc8d9c584fcd6d4a3376c7bf34399b08275a"
+          "value": "002260c3e506cbe5f99438b81329b74380c22d573bbdb4f8e7100148ef268f35"
         },
         {
           "kind": "sha256",
@@ -951,7 +951,7 @@
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "ea65f08143efeb06bf0a24b5ffd46f8d2039d3cb10532ed010a05e8a3566a41c"
+          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
         },
         {
           "kind": "sha256",
@@ -976,7 +976,7 @@
         {
           "kind": "sha256",
           "path": "scripts/pilot_acceptance.py",
-          "value": "019ceaba3ec110e8fe3781d586137436130e1fcd1f6e8ffc2bbfb4ebe98fdbcf"
+          "value": "d5a9632d64d9943bc764dbe181211887bf914210b186d7901e39ab8ce52a5edc"
         },
         {
           "kind": "sha256",
@@ -984,8 +984,8 @@
           "value": "021e724bedeb832d130b1f917facba07e47bd2a9636e94b45e63281008bd8cf6"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md",
-      "recorded_at": "2026-07-30T10:27:02+09:00",
+      "design_record": "reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md",
+      "recorded_at": "2026-07-30T12:00:00+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
     },
@@ -1229,5 +1229,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T11:28:35+09:00"
+  "updated_at": "2026-07-30T12:00:00+09:00"
 }
