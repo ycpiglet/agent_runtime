@@ -224,6 +224,12 @@
       "order": 653
     },
     {
+      "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "display_name": "Host Required Merge Gates",
+      "summary": "Bind immutable host policy to queue entries and execute applicable required gates after rebase but before merge.",
+      "order": 654
+    },
+    {
       "task_set_id": "TASKSET-AR-RELEASE-CADENCE-QUERY-RECOVERY",
       "display_name": "Release Cadence Query Recovery",
       "summary": "Harden the cadence query boundary and prove release-auto fails loud on exhausted transient queries while preserving genuine no-tag behavior.",

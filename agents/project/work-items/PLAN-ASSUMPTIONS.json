@@ -383,6 +383,34 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
+          "value": "381c151fe636b01da64622f206c6a9963af1814d35713f683e89a0d083dea2b2"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/merge_queue.py",
+          "value": "6a5521a5a6a34be84f82875301c2a4764e3fefc2b2d8ab814780912cdd91e5c2"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "6db9d6c1af921a488ed0e52cfdd2aaa8896b7d60c6b77895437405095f6427df"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "55b952a8ebe376962d9cc0f28b1242e493365e7b557b25c5fe5c5228d0981dae"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md",
+      "recorded_at": "2026-07-30T09:29:30+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-23-task-ar-609-dispatch-t3-replan.md",
           "value": "e52665ae325c054005af1ec22b13ff006eade5546d7de9709e39301e374c9a3f"
         },
@@ -1434,5 +1462,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-30T07:42:31+09:00"
+  "updated_at": "2026-07-30T09:29:30+09:00"
 }

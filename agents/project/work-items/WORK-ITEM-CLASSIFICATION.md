@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T08:48:28+09:00
-record_count: 524
+generated_at: 2026-07-30T09:29:29+09:00
+record_count: 528
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `524` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `528` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `43` records |
-| Tasksets | pass | `67` records |
-| Tasks | pass | `316` records |
-| Units | pass | `98` records |
+| Initiatives | pass | `44` records |
+| Tasksets | pass | `68` records |
+| Tasks | pass | `317` records |
+| Units | pass | `99` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -563,6 +563,10 @@ record_count: 524
 | 42.1 | Taskset 42.1 | taskset | `TASKSET-AR-MERGE-QUEUE-SAFETY` | `INIT-AR-PARALLEL-INTEGRATION-INTEGRITY` | complete | `BACKLOG-BOARD.md` | Merge Queue Safety |
 | 42.1.1 | Task 42.1.1 | task | `TASK-AR-653` | `TASKSET-AR-MERGE-QUEUE-SAFETY` | completed | `agents/lead_engineer/tasks/TASK-AR-653.md` | Serialize all queue mutations through a repository-common lock, persist queue state a… |
 | 42.1.1.1 | Unit 42.1.1.1 | unit | `UNIT-TASK-AR-653-001` | `TASK-AR-653` | completed | `agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md` | UNIT-TASK-AR-653-001 - Add repository-common lock, atomic state, and dependency-aware processing |
+| 43 | Initiative 43 | initiative | `INIT-AR-PROJECT-MERGE-GOVERNANCE` | - | active | `agents/project/initiatives/INIT-AR-PROJECT-MERGE-GOVERNANCE.md` | Project Merge Governance |
+| 43.1 | Taskset 43.1 | taskset | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | `INIT-AR-PROJECT-MERGE-GOVERNANCE` | active | `BACKLOG-BOARD.md` | Host Required Merge Gates |
+| 43.1.1 | Task 43.1.1 | task | `TASK-AR-654` | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | planned | `agents/lead_engineer/tasks/TASK-AR-654.md` | Prevent worker branches from bypassing project contract, ownership, and visual gates… |
+| 43.1.1.1 | Unit 43.1.1.1 | unit | `UNIT-TASK-AR-654-001` | `TASK-AR-654` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md` | UNIT-TASK-AR-654-001 - Bind and execute host-required merge gates |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

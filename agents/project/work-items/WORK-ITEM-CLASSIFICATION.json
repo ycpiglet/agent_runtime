@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T08:48:28+09:00",
-  "record_count": 524,
+  "generated_at": "2026-07-30T09:29:29+09:00",
+  "record_count": 528,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5768,6 +5768,50 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md",
       "parent_id": "TASK-AR-653",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-AR-PROJECT-MERGE-GOVERNANCE",
+      "level": "initiative",
+      "number": "43",
+      "label": "Initiative 43",
+      "id": "INIT-AR-PROJECT-MERGE-GOVERNANCE",
+      "title": "Project Merge Governance",
+      "path": "agents/project/initiatives/INIT-AR-PROJECT-MERGE-GOVERNANCE.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "level": "taskset",
+      "number": "43.1",
+      "label": "Taskset 43.1",
+      "id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "title": "Host Required Merge Gates",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-PROJECT-MERGE-GOVERNANCE",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-654",
+      "level": "task",
+      "number": "43.1.1",
+      "label": "Task 43.1.1",
+      "id": "TASK-AR-654",
+      "title": "Prevent worker branches from bypassing project contract, ownership, and visual gates…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
+      "parent_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-654-001",
+      "level": "unit",
+      "number": "43.1.1.1",
+      "label": "Unit 43.1.1.1",
+      "id": "UNIT-TASK-AR-654-001",
+      "title": "UNIT-TASK-AR-654-001 - Bind and execute host-required merge gates",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
+      "parent_id": "TASK-AR-654",
+      "status": "worker_ready"
     }
   ]
 }
