@@ -104,6 +104,10 @@ class CommandTimedOut(MergeQueueError):
     """A bounded subprocess exceeded the configured timeout."""
 
 
+class CommandLaunchFailed(MergeQueueError):
+    """A configured subprocess could not be started."""
+
+
 def _command_timeout_seconds() -> float:
     raw = os.environ.get("MERGE_QUEUE_TIMEOUT_SECONDS", "").strip()
     if raw:
@@ -304,7 +308,11 @@ def shared_state_root(root: Path) -> Path:
 
 
 def _empty_merge_gate_policy() -> dict[str, Any]:
-    return {"schema": MERGE_GATES_SCHEMA, "gates": []}
+    return {
+        "schema": MERGE_GATES_SCHEMA,
+        "protected_paths": [],
+        "gates": [],
+    }
 
 
 def _validate_gate_patterns(gate_id: str, field: str, raw: Any) -> list[str]:
@@ -344,6 +352,19 @@ def normalize_merge_gate_policy(payload: Any) -> dict[str, Any]:
     raw_gates = payload.get("gates")
     if not isinstance(raw_gates, list):
         raise MergeQueueError(f"{MERGE_GATES_REL}: gates must be a list")
+    protected_paths = _validate_gate_patterns(
+        "policy", "protected_paths", payload.get("protected_paths")
+    )
+    if raw_gates and not protected_paths:
+        raise MergeQueueError(
+            f"{MERGE_GATES_REL}: protected_paths must be a non-empty list "
+            "when gates are configured"
+        )
+    if raw_gates and MERGE_GATES_REL not in protected_paths:
+        raise MergeQueueError(
+            f"{MERGE_GATES_REL}: protected_paths must include "
+            f"{MERGE_GATES_REL!r}"
+        )
 
     gates: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -401,7 +422,11 @@ def normalize_merge_gate_policy(payload: Any) -> dict[str, Any]:
                 ),
             }
         )
-    return {"schema": MERGE_GATES_SCHEMA, "gates": gates}
+    return {
+        "schema": MERGE_GATES_SCHEMA,
+        "protected_paths": protected_paths,
+        "gates": gates,
+    }
 
 
 def _parse_merge_gate_policy(text: str) -> dict[str, Any]:
@@ -420,7 +445,7 @@ def load_merge_gate_policy(root: Path) -> dict[str, Any]:
         return _empty_merge_gate_policy()
     try:
         text = path.read_text(encoding="utf-8")
-    except OSError as exc:
+    except (OSError, UnicodeError) as exc:
         raise MergeQueueError(f"{MERGE_GATES_REL}: unreadable ({exc})") from exc
     return _parse_merge_gate_policy(text)
 
@@ -499,6 +524,17 @@ def gate_applies(gate: dict[str, Any], changed_paths: list[str]) -> bool:
         _path_matches(path, pattern)
         for path in remaining
         for pattern in includes
+    )
+
+
+def protected_path_changes(
+    policy: dict[str, Any], changed_paths: list[str]
+) -> list[str]:
+    patterns = policy.get("protected_paths", [])
+    return sorted(
+        path
+        for path in changed_paths
+        if any(_path_matches(path, pattern) for pattern in patterns)
     )
 
 
@@ -631,6 +667,10 @@ def _run_argv(
         )
     except subprocess.TimeoutExpired as exc:
         raise CommandTimedOut(f"{display_command} exceeded {timeout}s") from exc
+    except OSError as exc:
+        raise CommandLaunchFailed(
+            f"{display_command} could not start: {exc}"
+        ) from exc
 
 
 def _run_command(root: Path, command: str) -> subprocess.CompletedProcess[str]:
@@ -974,14 +1014,18 @@ def _process_entry(
         return False
 
     diff_paths = changed_paths(root, ctx.rebase_target)
-    if MERGE_GATES_REL in diff_paths:
+    protected_changes = protected_path_changes(
+        ctx.required_gate_policy, diff_paths
+    )
+    if protected_changes:
         _restore_worktree(root, ctx.start_branch)
         reason = (
-            f"required-gate-policy-modified: {MERGE_GATES_REL} is owned by "
-            "the integration base; update it through an owner-controlled "
-            "policy change, then re-enqueue"
+            "required-gate-protected-path-modified: gate control files are "
+            "owned by the integration base; update them through an "
+            "owner-controlled policy change, then re-enqueue: "
+            + ", ".join(protected_changes)
         )
-        _fail_entry(ctx, root, queue, entry, "required-gate-policy", reason)
+        _fail_entry(ctx, root, queue, entry, "required-gate-integrity", reason)
         return False
 
     entry["status"] = "testing"
@@ -1014,6 +1058,11 @@ def _process_entry(
         except CommandTimedOut as exc:
             _restore_worktree(root, ctx.start_branch)
             reason = f"required-gate-timed-out:{gate_id}: {exc}"
+            _fail_entry(ctx, root, queue, entry, "required-gate", reason)
+            return False
+        except CommandLaunchFailed as exc:
+            _restore_worktree(root, ctx.start_branch)
+            reason = f"required-gate-launch-failed:{gate_id}: {exc}"
             _fail_entry(ctx, root, queue, entry, "required-gate", reason)
             return False
         if result.returncode != 0:
@@ -1332,7 +1381,20 @@ def cmd_process(args: argparse.Namespace) -> int:
             )
 
     if args.dry_run:
-        required_policy = load_merge_gate_policy_from_ref(root, args.base)
+        dry_ctx = ProcessContext(
+            root,
+            args.base,
+            args.integration_branch,
+            args.pr_mode,
+            args.regen_cmd,
+        )
+        policy_ref = dry_ctx.rebase_target
+        if (
+            not dry_ctx.pr_mode
+            and not _branch_exists(root, dry_ctx.integration_branch)
+        ):
+            policy_ref = args.base
+        required_policy = load_merge_gate_policy_from_ref(root, policy_ref)
         for entry in pending:
             validate_entry_gate_policy(entry, required_policy)
         mode = "pr" if args.pr_mode else "local"
@@ -1344,7 +1406,7 @@ def cmd_process(args: argparse.Namespace) -> int:
         for index, entry in enumerate(pending, start=1):
             cmds = entry.get("narrow_verification_cmds") or [DEFAULT_VERIFY_CMD]
             diff_paths = (
-                changed_paths(root, args.base, str(entry.get("branch") or ""))
+                changed_paths(root, policy_ref, str(entry.get("branch") or ""))
                 if required_policy["gates"]
                 else []
             )

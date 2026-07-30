@@ -126,7 +126,11 @@ def _queue(work: Path) -> dict:
 
 
 def _write_policy(
-    work: Path, gates: list[dict[str, object]], *, commit: bool = True
+    work: Path,
+    gates: list[dict[str, object]],
+    *,
+    commit: bool = True,
+    protected_paths: list[str] | None = None,
 ) -> Path:
     path = work / merge_queue_module.MERGE_GATES_REL
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,6 +138,8 @@ def _write_policy(
         json.dumps(
             {
                 "schema": merge_queue_module.MERGE_GATES_SCHEMA,
+                "protected_paths": protected_paths
+                or [merge_queue_module.MERGE_GATES_REL],
                 "gates": gates,
             },
             indent=2,
@@ -848,6 +854,36 @@ def test_invalid_or_duplicate_required_gate_policy_blocks_enqueue_without_queue_
     assert not (work / QUEUE_REL).exists()
 
 
+def test_nonempty_required_gate_policy_requires_protected_paths(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    path = work / merge_queue_module.MERGE_GATES_REL
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": merge_queue_module.MERGE_GATES_SCHEMA,
+                "gates": [{"id": "design", "command": PASS_VERIFY}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/unprotected-gate",
+        "--task-id",
+        "TASK-UNPROTECTED-GATE",
+    )
+
+    assert result.returncode == 2
+    assert "protected_paths must be a non-empty list" in result.stdout
+    assert not (work / QUEUE_REL).exists()
+
+
 def test_required_gates_append_after_narrow_verify_and_apply_path_filters(
     tmp_path: Path,
 ):
@@ -1063,7 +1099,7 @@ def test_worker_branch_cannot_delete_base_owned_required_gate_policy(
     assert result.returncode == 1
     entry = _queue(work)["entries"][0]
     assert entry["failure_reason"].startswith(
-        "required-gate-policy-modified"
+        "required-gate-protected-path-modified"
     )
     assert _git(work, "rev-parse", "main") == main_before
     assert (work / merge_queue_module.MERGE_GATES_REL).exists()
@@ -1101,6 +1137,164 @@ def test_required_gate_placeholders_are_substituted_as_argv(tmp_path: Path):
     assert (work / "placeholder.log").read_text(encoding="utf-8") == (
         "TASK-PLACEHOLDER|feat/placeholders|main"
     )
+
+
+def test_worker_cannot_weaken_a_base_owned_gate_implementation(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    gate_path = work / "gate.py"
+    gate_path.write_text("raise SystemExit(3)\n", encoding="utf-8")
+    _git(work, "add", "gate.py")
+    _git(work, "commit", "-m", "add failing owner gate")
+    _git(work, "push")
+    _write_policy(
+        work,
+        [{"id": "owner-gate", "command": "python gate.py"}],
+        protected_paths=[merge_queue_module.MERGE_GATES_REL, "gate.py"],
+    )
+    _git(work, "checkout", "-b", "feat/weaken-gate", "main")
+    gate_path.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    (work / "product.txt").write_text("rollback\n", encoding="utf-8")
+    _git(work, "add", "gate.py", "product.txt")
+    _git(work, "commit", "-m", "weaken gate with product rollback")
+    _git(work, "checkout", "main")
+    main_before = _git(work, "rev-parse", "main")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/weaken-gate",
+        "--task-id",
+        "TASK-WEAKEN",
+        "--verify",
+        PASS_VERIFY,
+    )
+
+    result = _run_mq(
+        work, "process", "--all", "--regen-cmd", REGEN_CMD
+    )
+
+    assert result.returncode == 1
+    entry = _queue(work)["entries"][0]
+    assert entry["status"] == "failed"
+    assert entry["failure_reason"].startswith(
+        "required-gate-protected-path-modified"
+    )
+    assert "gate.py" in entry["failure_reason"]
+    assert _git(work, "rev-parse", "main") == main_before
+    assert gate_path.read_text(encoding="utf-8") == "raise SystemExit(3)\n"
+    assert not (work / "product.txt").exists()
+
+
+def test_missing_required_gate_executable_fails_entry_with_feedback(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    _write_policy(
+        work,
+        [{"id": "missing", "command": "definitely-not-a-real-executable"}],
+    )
+    _make_branch(work, "feat/missing-gate", "missing-gate.txt")
+    main_before = _git(work, "rev-parse", "main")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/missing-gate",
+        "--task-id",
+        "TASK-MISSING-GATE",
+        "--verify",
+        PASS_VERIFY,
+    )
+
+    result = _run_mq(
+        work, "process", "--all", "--regen-cmd", REGEN_CMD
+    )
+
+    assert result.returncode == 1
+    assert "Traceback" not in result.stdout + result.stderr
+    entry = _queue(work)["entries"][0]
+    assert entry["status"] == "failed"
+    assert entry["failure_reason"].startswith(
+        "required-gate-launch-failed:missing"
+    )
+    assert _git(work, "rev-parse", "main") == main_before
+    assert not (work / "missing-gate.txt").exists()
+    feedback = (
+        work
+        / "agents/runtime/merge_queue/feedback-feat-missing-gate.md"
+    ).read_text(encoding="utf-8")
+    assert "required-gate-launch-failed:missing" in feedback
+
+
+def test_invalid_utf8_required_gate_policy_fails_without_queue_write(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    path = work / merge_queue_module.MERGE_GATES_REL
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"\xff\xfe\x00")
+
+    result = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/invalid-policy",
+        "--task-id",
+        "TASK-INVALID-POLICY",
+    )
+
+    assert result.returncode == 2
+    assert "unreadable" in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert not (work / QUEUE_REL).exists()
+
+
+def test_dry_run_uses_custom_integration_branch_policy(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    _write_policy(
+        work,
+        [{"id": "main-gate", "command": PASS_VERIFY}],
+    )
+    _git(work, "checkout", "-b", "staging", "main")
+    _write_policy(
+        work,
+        [
+            {"id": "main-gate", "command": PASS_VERIFY},
+            {"id": "staging-gate", "command": PASS_VERIFY},
+        ],
+        commit=False,
+    )
+    _git(work, "add", merge_queue_module.MERGE_GATES_REL)
+    _git(work, "commit", "-m", "configure staging gates")
+    _git(work, "push", "-u", "origin", "staging")
+    _git(work, "checkout", "main")
+    _make_branch(work, "feat/staging-drift", "staging-drift.txt")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/staging-drift",
+        "--task-id",
+        "TASK-STAGING-DRIFT",
+    )
+    before = (work / QUEUE_REL).read_bytes()
+
+    result = _run_mq(
+        work,
+        "process",
+        "--all",
+        "--dry-run",
+        "--integration-branch",
+        "staging",
+    )
+
+    assert result.returncode == 2
+    assert "required-gate policy drift" in result.stdout
+    assert (work / QUEUE_REL).read_bytes() == before
 
 
 def test_dry_run_lists_applied_and_skipped_required_gates_without_mutation(

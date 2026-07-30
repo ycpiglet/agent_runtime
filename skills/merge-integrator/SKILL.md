@@ -58,6 +58,13 @@ mandatory:
 ```json
 {
   "schema": "agent-runtime-merge-gates/v1",
+  "protected_paths": [
+    "agents/host/MERGE-GATES.json",
+    "package.json",
+    "playwright.config.ts",
+    "scripts/design-contract.mjs",
+    "tests/visual/**"
+  ],
   "gates": [
     {
       "id": "design-check",
@@ -73,11 +80,16 @@ mandatory:
 }
 ```
 
-Absence (or an empty gate list) preserves legacy behavior. Enqueue validates
-the policy and binds its canonical digest plus ordered gate IDs to the entry.
-Process reloads policy from the integration base before mutation; missing
-bindings or policy drift require removal and re-enqueue. Worker-branch policy
-edits/deletions are rejected.
+Absence (or an empty gate list) preserves legacy behavior. A nonempty gate
+list requires nonempty `protected_paths`, including the policy file itself.
+List every repository-controlled launcher, script, configuration, test,
+baseline, and package manifest that could weaken a required gate. Enqueue
+validates the policy and binds its canonical digest plus ordered gate IDs to
+the entry. Process reloads policy from the integration base before mutation;
+missing bindings or policy drift require removal and re-enqueue. Worker
+changes matching `protected_paths` are rejected before any required gate runs.
+Intentional gate-control changes therefore use a separate owner-controlled
+policy lane, not an ordinary worker queue entry.
 
 `include_paths` and `exclude_paths` select gates from the actual rebased diff.
 Commands are argv-parsed without a shell. Only `{task_id}`, `{branch}`, and
@@ -121,7 +133,8 @@ the board is regenerated once (`python scripts/backlog_board.py --write`).
   pending while later independent entries remain eligible.
 - Host gate policy is read from the integration base, never the worker branch.
   Enqueue-bound policy drift, unbound legacy entries under a nonempty policy,
-  policy edits, and required-gate failures all fail closed before merge.
+  protected gate-control edits, launch errors, and required-gate failures all
+  fail closed before merge.
 - NEVER force-pushes and NEVER deletes branches.
 - Failed rebases/merges are aborted and the work tree is restored.
 - `--pr-mode` performs no remote merge: it pushes the rebased branch only when

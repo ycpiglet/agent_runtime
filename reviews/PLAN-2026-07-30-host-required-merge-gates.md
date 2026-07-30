@@ -14,10 +14,14 @@ W5 without changing existing hosts that have no merge-gate policy.
 - Enqueue binds the canonical policy digest and ordered gate IDs to the queue
   entry.
 - Process reads policy from the integration base, not the worker branch.
+- A nonempty gate list requires `protected_paths`, including the policy file.
+  Every repository-controlled launcher, config, test, baseline, and manifest
+  that can weaken a gate belongs in this integration-base-owned set.
 - A missing binding or digest/ID drift blocks before rebase or merge and
   requires re-enqueue.
-- A worker branch cannot add, edit, or delete the policy through the queue.
-  Policy evolution is an owner-controlled integration-base operation.
+- A worker branch cannot change any protected gate-control path through the
+  queue. Policy and gate-control evolution are owner-controlled
+  integration-base operations.
 
 ## Gate contract
 
@@ -35,17 +39,22 @@ including deletions.
 
 - Invalid policy: enqueue fails without writing queue state.
 - Policy drift/unbound legacy entry: process stops before branch mutation.
-- Required command failure or timeout: entry becomes `failed`, feedback names
-  the gate and command, and the integration branch is restored.
-- Dry-run remains read-only and reports applied/skipped gate IDs.
+- Required command failure, launch error, or timeout: entry becomes `failed`,
+  feedback names the gate and command, and the integration branch is restored.
+- Dry-run remains read-only, reads the same effective integration ref as real
+  processing, and reports applied/skipped gate IDs.
 
 ## Bean Wiki vertical slice
 
-Bean Wiki supplies three host gates through this policy:
+Bean Wiki supplies two host gates through this policy:
 
 1. `design-contract` — canonical token generation/drift and ownership manifest
-2. `ownership` — protected design/shared-shell/baseline path contract
-3. `design-visual` — pinned-browser reviewed screenshot baselines
+2. `design-visual` — pinned-browser reviewed screenshot baselines
+
+Its `protected_paths` cover the policy, package scripts/lock, CI workflow,
+design gate implementation, Playwright configuration/specs, and approved
+screenshots so a worker cannot weaken the judge in the same change being
+judged.
 
 The same commands run in GitHub CI because PR handoff does not control the
 later remote merge. GitHub required checks, rather than the local queue alone,
