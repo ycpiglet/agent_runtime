@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T23:49:34+09:00
+updated_at: 2026-07-31T03:55:54+09:00
 started_at: 2026-07-30T23:20:37+09:00
 title: Close the Scribe source-debt and active-work loop
-status: in_progress
+status: completed
 priority: P1
 difficulty: L
 est_hours: 12
@@ -48,6 +48,17 @@ verification:
   - python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q
   - python scripts/scribe_due.py --root . --json
   - python scripts/template_mirror_gate.py --check
+verification_status: passed
+verified_at: 2026-07-31T03:54:53+09:00
+verified_by: codex-root-task-ar-653-orchestrator
+evidence_refs:
+  - reviews/VERIFY-2026-07-31-task-ar-653-20260731035453.json
+review_refs:
+  - reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md
+resolution: done
+completed_at: 2026-07-31T03:55:54+09:00
+closed_by: codex-root-task-ar-653-orchestrator
+measurement_unavailable_reason: Implementation hours and trustworthy task-level token totals were not captured; preserve them as unknown rather than zero.
 ---
 
 # TASK-AR-653 - Close the Scribe source-debt and active-work loop
@@ -73,3 +84,18 @@ verification:
 - `python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q`
 - `python scripts/scribe_due.py --root . --json`
 - `python scripts/template_mirror_gate.py --check`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-31T03:55:54+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Implementation hours and trustworthy task-level token totals were not captured; preserve them as unknown rather than zero.
+- Closed by: `codex-root-task-ar-653-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-31-task-ar-653-20260731035453.json`
+- Reviews:
+  - `reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md`
+<!-- work-close:end -->

@@ -9,11 +9,11 @@ task_id: TASK-AR-653
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-31T03:35:33+09:00
+updated_at: 2026-07-31T03:53:44+09:00
 started_at: 2026-07-30T23:20:37+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -75,6 +75,12 @@ evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533.json
+review_refs:
+  - reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md
+resolution: done
+completed_at: 2026-07-31T03:53:44+09:00
+closed_by: codex-root-task-ar-653-orchestrator
+measurement_unavailable_reason: Implementation hours and trustworthy task-level token totals were not captured; preserve them as unknown rather than zero.
 ---
 
 # UNIT-TASK-AR-653-001 - Implement active-aware Scribe planning, receipt, and closure semantics
@@ -142,3 +148,26 @@ Attach the state matrix, active-coverage negative, cleanup plan/receipt fixture,
 ## Stop Boundary
 
 Stop before automatically rewriting host-owned state, compressing active records, or making product/editorial decisions.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-31T03:53:44+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Implementation hours and trustworthy task-level token totals were not captured; preserve them as unknown rather than zero.
+- Closed by: `codex-root-task-ar-653-orchestrator`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048.json`
+  - `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533.json`
+- Reviews:
+  - `reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md`
+<!-- work-close:end -->
