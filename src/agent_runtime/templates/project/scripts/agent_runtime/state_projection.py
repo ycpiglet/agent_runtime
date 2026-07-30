@@ -194,21 +194,29 @@ def parse_markdown(text: str) -> dict[str, Any]:
     hot_count = 0
     cold_count = 0
     nearest_heading = ""
+    nearest_heading_ids: list[str] = []
 
     for index, line in enumerate(text.splitlines()):
         heading_match = _HEADING_RE.match(line)
         if heading_match:
+            raw_heading = _strip_heading_suffix(heading_match.group(2))
             heading = redact_text(
-                _strip_heading_suffix(heading_match.group(2)),
+                raw_heading,
                 limit=MAX_HEADING_CHARS,
             )
             if heading:
                 nearest_heading = heading
+                nearest_heading_ids = _record_ids(raw_heading)
                 headings.append(
                     {
                         "heading": heading,
                         "level": len(heading_match.group(1)),
                         "source_order": index,
+                        **(
+                            {"_record_ids": nearest_heading_ids}
+                            if nearest_heading_ids
+                            else {}
+                        ),
                     }
                 )
             continue
@@ -221,7 +229,14 @@ def parse_markdown(text: str) -> dict[str, Any]:
         checkbox_match = _CHECKBOX_RE.match(raw_item)
         if checkbox_match:
             checked = checkbox_match.group(1).lower() == "x"
-            item = redact_text(checkbox_match.group(2), limit=MAX_ITEM_CHARS)
+            raw_checkbox_item = checkbox_match.group(2)
+            item = redact_text(raw_checkbox_item, limit=MAX_ITEM_CHARS)
+            record_ids = sorted(
+                {
+                    *nearest_heading_ids,
+                    *_record_ids(raw_checkbox_item),
+                }
+            )
             if checked:
                 cold_count += 1
                 cold_candidates.append(
@@ -231,6 +246,7 @@ def parse_markdown(text: str) -> dict[str, Any]:
                         "checklist": "checked",
                         "source_order": index,
                         "_priority": 0,
+                        **({"_record_ids": record_ids} if record_ids else {}),
                     }
                 )
                 continue
@@ -242,12 +258,19 @@ def parse_markdown(text: str) -> dict[str, Any]:
                     "checklist": "unchecked",
                     "source_order": index,
                     "_priority": 0,
+                    **({"_record_ids": record_ids} if record_ids else {}),
                 }
             )
             continue
 
         hot_count += 1
         item = redact_text(raw_item, limit=MAX_ITEM_CHARS)
+        record_ids = sorted(
+            {
+                *nearest_heading_ids,
+                *_record_ids(raw_item),
+            }
+        )
         candidates.append(
             {
                 "heading": nearest_heading,
@@ -255,6 +278,7 @@ def parse_markdown(text: str) -> dict[str, Any]:
                 "checklist": "none",
                 "source_order": index,
                 "_priority": 1,
+                **({"_record_ids": record_ids} if record_ids else {}),
             }
         )
 
@@ -268,6 +292,11 @@ def parse_markdown(text: str) -> dict[str, Any]:
                 "checklist": "heading",
                 "source_order": heading["source_order"],
                 "_priority": 2,
+                **(
+                    {"_record_ids": heading["_record_ids"]}
+                    if heading.get("_record_ids")
+                    else {}
+                ),
             }
             for heading in headings
         ]
@@ -340,6 +369,13 @@ def parse_json(text: str) -> dict[str, Any]:
     cold_count = 0
     for index, entry in enumerate(entries):
         item, status = _json_item(entry)
+        if isinstance(entry, dict):
+            raw_identity_fields = " ".join(
+                str(entry.get(key) or "") for key in _JSON_VALUE_KEYS
+            )
+        else:
+            raw_identity_fields = str(entry or "")
+        record_ids = _record_ids(raw_identity_fields)
         cold = status.strip().lower() in _COLD_JSON_STATUSES
         if cold:
             cold_count += 1
@@ -351,6 +387,7 @@ def parse_json(text: str) -> dict[str, Any]:
                         "checklist": "closed-status",
                         "source_order": index,
                         "_priority": 0,
+                        **({"_record_ids": record_ids} if record_ids else {}),
                     }
                 )
             continue
@@ -364,6 +401,7 @@ def parse_json(text: str) -> dict[str, Any]:
                 "checklist": "none",
                 "source_order": index,
                 "_priority": 1,
+                **({"_record_ids": record_ids} if record_ids else {}),
             }
         )
     candidates.sort(key=lambda item: (item["_priority"], -item["source_order"]))
@@ -709,7 +747,13 @@ def _cleanup_plan(
             for candidate, reason in source_candidates:
                 item = str(candidate.get("item") or "")
                 heading = str(candidate.get("heading") or "")
-                ids = _record_ids(f"{heading} {item}")
+                ids = {
+                    *[
+                        str(record_id).upper()
+                        for record_id in candidate.get("_record_ids", [])
+                    ],
+                    *_record_ids(f"{heading} {item}"),
+                }
                 exclusion = ""
                 if item == "[REDACTED]":
                     exclusion = "redacted"

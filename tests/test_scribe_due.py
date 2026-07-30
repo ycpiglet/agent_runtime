@@ -350,6 +350,7 @@ def test_cleanup_plan_selects_cold_history_and_excludes_no_touch_records(
                 "## TASK-ACTIVE",
                 "- heading-scoped active detail",
                 "## Current",
+                f"- {'x' * 250} TASK-ACTIVE hidden after projection truncation",
                 *[f"- recent item {index}" for index in range(10)],
                 "- [x] completed plain note",
                 "",
@@ -373,7 +374,11 @@ def test_cleanup_plan_selects_cold_history_and_excludes_no_touch_records(
     assert "TASK-ACTIVE keep active" not in rendered
     assert "heading-scoped active detail" not in rendered
     assert "REVIEW-2026-01-01 keep canonical" not in rendered
-    assert plan["excluded_reason_counts"]["active-reference"] == 2
+    assert not any(
+        str(candidate["item"]).startswith("x" * 50)
+        for candidate in plan["candidates"]
+    )
+    assert plan["excluded_reason_counts"]["active-reference"] == 3
     assert plan["excluded_reason_counts"]["canonical-reference"] == 1
     assert all(item["cold_history"] is True for item in plan["candidates"])
     assert len(plan["plan_digest"]) == 64
