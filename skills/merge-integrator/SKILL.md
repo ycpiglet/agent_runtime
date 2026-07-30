@@ -62,7 +62,7 @@ mandatory:
     "agents/host/MERGE-GATES.json",
     "package.json",
     "playwright.config.ts",
-    "scripts/design-contract.mjs",
+    "scripts/merge_queue.py",
     "tests/visual/**"
   ],
   "gates": [

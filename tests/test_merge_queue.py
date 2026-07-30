@@ -827,6 +827,46 @@ def test_absent_required_gate_policy_preserves_legacy_entry_shape(tmp_path: Path
     assert (work / "legacy.txt").exists()
 
 
+def test_empty_required_gate_policy_ignores_protected_paths_for_legacy_behavior(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    _write_policy(
+        work,
+        [],
+        protected_paths=[
+            merge_queue_module.MERGE_GATES_REL,
+            "legacy-protected.txt",
+        ],
+    )
+    _make_branch(
+        work,
+        "feat/empty-policy",
+        "legacy-protected.txt",
+    )
+
+    enqueued = _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/empty-policy",
+        "--task-id",
+        "TASK-EMPTY-POLICY",
+        "--verify",
+        PASS_VERIFY,
+    )
+
+    assert enqueued.returncode == 0, enqueued.stdout + enqueued.stderr
+    entry = _queue(work)["entries"][0]
+    assert "required_gate_policy_digest" not in entry
+    assert "required_gate_ids" not in entry
+    processed = _run_mq(
+        work, "process", "--all", "--regen-cmd", REGEN_CMD
+    )
+    assert processed.returncode == 0, processed.stdout + processed.stderr
+    assert (work / "legacy-protected.txt").exists()
+
+
 def test_invalid_or_duplicate_required_gate_policy_blocks_enqueue_without_queue_write(
     tmp_path: Path,
 ):
@@ -1187,6 +1227,52 @@ def test_worker_cannot_weaken_a_base_owned_gate_implementation(
     assert not (work / "product.txt").exists()
 
 
+def test_worker_cannot_rename_a_protected_gate_implementation(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    gate_path = work / "gate.py"
+    gate_path.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    _git(work, "add", "gate.py")
+    _git(work, "commit", "-m", "add owner gate")
+    _git(work, "push")
+    _write_policy(
+        work,
+        [{"id": "owner-gate", "command": "python gate.py"}],
+        protected_paths=[merge_queue_module.MERGE_GATES_REL, "gate.py"],
+    )
+    _git(work, "checkout", "-b", "feat/rename-gate", "main")
+    _git(work, "mv", "gate.py", "renamed-gate.py")
+    (work / "product.txt").write_text("rollback\n", encoding="utf-8")
+    _git(work, "add", "product.txt")
+    _git(work, "commit", "-m", "rename gate with product rollback")
+    _git(work, "checkout", "main")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/rename-gate",
+        "--task-id",
+        "TASK-RENAME-GATE",
+        "--verify",
+        PASS_VERIFY,
+    )
+
+    result = _run_mq(
+        work, "process", "--all", "--regen-cmd", REGEN_CMD
+    )
+
+    assert result.returncode == 1
+    entry = _queue(work)["entries"][0]
+    assert entry["failure_reason"].startswith(
+        "required-gate-protected-path-modified"
+    )
+    assert "gate.py" in entry["failure_reason"]
+    assert gate_path.exists()
+    assert not (work / "renamed-gate.py").exists()
+    assert not (work / "product.txt").exists()
+
+
 def test_missing_required_gate_executable_fails_entry_with_feedback(
     tmp_path: Path,
 ):
@@ -1295,6 +1381,52 @@ def test_dry_run_uses_custom_integration_branch_policy(
     assert result.returncode == 2
     assert "required-gate policy drift" in result.stdout
     assert (work / QUEUE_REL).read_bytes() == before
+
+
+def test_dry_run_uses_remote_base_policy_when_local_main_would_fast_forward(
+    tmp_path: Path,
+):
+    work = _make_repos(tmp_path)
+    _write_policy(
+        work,
+        [{"id": "base-gate", "command": PASS_VERIFY}],
+    )
+    _make_branch(work, "feat/stale-main", "stale-main.txt")
+    _run_mq(
+        work,
+        "enqueue",
+        "--branch",
+        "feat/stale-main",
+        "--task-id",
+        "TASK-STALE-MAIN",
+    )
+    before = (work / QUEUE_REL).read_bytes()
+
+    updater = tmp_path / "updater"
+    _git(tmp_path, "clone", str(tmp_path / "origin.git"), str(updater))
+    _git(updater, "config", "user.email", "updater@test.local")
+    _git(updater, "config", "user.name", "Policy Updater")
+    _write_policy(
+        updater,
+        [
+            {"id": "base-gate", "command": PASS_VERIFY},
+            {"id": "updated-gate", "command": PASS_VERIFY},
+        ],
+        commit=False,
+    )
+    _git(updater, "add", merge_queue_module.MERGE_GATES_REL)
+    _git(updater, "commit", "-m", "update remote main policy")
+    _git(updater, "push", "origin", "main")
+    _git(work, "fetch", "origin")
+
+    result = _run_mq(work, "process", "--all", "--dry-run")
+
+    assert result.returncode == 2
+    assert "required-gate policy drift" in result.stdout
+    assert (work / QUEUE_REL).read_bytes() == before
+    assert _git(work, "rev-parse", "main") != _git(
+        work, "rev-parse", "origin/main"
+    )
 
 
 def test_dry_run_lists_applied_and_skipped_required_gates_without_mutation(

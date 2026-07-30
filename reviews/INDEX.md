@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T09:53:47+09:00
-record_count: 1036
+generated_at: 2026-07-30T10:01:15+09:00
+record_count: 1037
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1036` review and evidence records under `reviews/`.
+- Summary: indexed `1037` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1036` files |
+| Reviews covered | pass | `1037` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1067,6 +1067,7 @@ record_count: 1036
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework2.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework2` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review — Round 2 |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

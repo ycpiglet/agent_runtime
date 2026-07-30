@@ -352,19 +352,21 @@ def normalize_merge_gate_policy(payload: Any) -> dict[str, Any]:
     raw_gates = payload.get("gates")
     if not isinstance(raw_gates, list):
         raise MergeQueueError(f"{MERGE_GATES_REL}: gates must be a list")
-    protected_paths = _validate_gate_patterns(
-        "policy", "protected_paths", payload.get("protected_paths")
-    )
-    if raw_gates and not protected_paths:
-        raise MergeQueueError(
-            f"{MERGE_GATES_REL}: protected_paths must be a non-empty list "
-            "when gates are configured"
+    protected_paths: list[str] = []
+    if raw_gates:
+        protected_paths = _validate_gate_patterns(
+            "policy", "protected_paths", payload.get("protected_paths")
         )
-    if raw_gates and MERGE_GATES_REL not in protected_paths:
-        raise MergeQueueError(
-            f"{MERGE_GATES_REL}: protected_paths must include "
-            f"{MERGE_GATES_REL!r}"
-        )
+        if not protected_paths:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: protected_paths must be a non-empty list "
+                "when gates are configured"
+            )
+        if MERGE_GATES_REL not in protected_paths:
+            raise MergeQueueError(
+                f"{MERGE_GATES_REL}: protected_paths must include "
+                f"{MERGE_GATES_REL!r}"
+            )
 
     gates: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -702,6 +704,8 @@ def changed_paths(root: Path, base: str, head: str = "HEAD") -> list[str]:
         root,
         "diff",
         "--name-only",
+        "-z",
+        "--no-renames",
         "--diff-filter=ACDMRTUXB",
         f"{base}...{head}",
         check=False,
@@ -713,9 +717,9 @@ def changed_paths(root: Path, base: str, head: str = "HEAD") -> list[str]:
         )
     return sorted(
         {
-            line.strip().replace("\\", "/")
-            for line in (result.stdout or "").splitlines()
-            if line.strip()
+            path
+            for path in (result.stdout or "").split("\0")
+            if path
         }
     )
 
@@ -906,6 +910,26 @@ class ProcessContext:
                     f"integration branch {branch!r} diverged from {self.base!r}; "
                     "resolve manually before processing the queue"
                 )
+
+
+def dry_run_policy_ref(root: Path, ctx: ProcessContext) -> str:
+    """Resolve the ref that local preflight would use, without mutating git."""
+
+    if ctx.pr_mode:
+        return ctx.rebase_target
+    branch = ctx.integration_branch
+    if not _branch_exists(root, branch):
+        return ctx.base
+    if not ctx.remote:
+        return branch
+    if _git_ok(root, "merge-base", "--is-ancestor", branch, ctx.base):
+        return ctx.base
+    if _git_ok(root, "merge-base", "--is-ancestor", ctx.base, branch):
+        return branch
+    raise MergeQueueError(
+        f"integration branch {branch!r} diverged from {ctx.base!r}; "
+        "resolve manually before processing the queue"
+    )
 
 
 def _fail_entry(
@@ -1388,12 +1412,7 @@ def cmd_process(args: argparse.Namespace) -> int:
             args.pr_mode,
             args.regen_cmd,
         )
-        policy_ref = dry_ctx.rebase_target
-        if (
-            not dry_ctx.pr_mode
-            and not _branch_exists(root, dry_ctx.integration_branch)
-        ):
-            policy_ref = args.base
+        policy_ref = dry_run_policy_ref(root, dry_ctx)
         required_policy = load_merge_gate_policy_from_ref(root, policy_ref)
         for entry in pending:
             validate_entry_gate_policy(entry, required_policy)
