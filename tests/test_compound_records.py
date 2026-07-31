@@ -505,6 +505,22 @@ _NBSP_AUTHORITY_POSITIONS = (
     "value-before",
     "value-after",
 )
+_NONEXACT_MARKER_STYLES = (
+    "tab-open",
+    "tab-close",
+    "nbsp-open",
+    "nbsp-close",
+)
+_LOSSY_AUTHORITY_STYLES = (
+    "decision-padding",
+    "status-padding",
+    "work-id-padding",
+    "work-ids-padding",
+    "decision-nfkc",
+    "status-nfkc",
+    "work-id-nfkc",
+    "work-ids-nfkc",
+)
 
 
 def _noncanonical_work_ids_watch_document(
@@ -577,6 +593,93 @@ def _nbsp_accepted_watch_document(
             scalar += "\u00a0"
         rows.append(f"{rendered_key}: {scalar}\n")
     return "---\n" + "".join(rows) + "---\n\n# NBSP authority\n"
+
+
+def _nonexact_marker_watch_document(
+    *,
+    style: str,
+    current_work_id: str,
+) -> str:
+    opening = "---"
+    closing = "---"
+    if style == "tab-open":
+        opening = "\t---"
+    elif style == "tab-close":
+        closing = "\t---"
+    elif style == "nbsp-open":
+        opening = "\u00a0---\u00a0"
+    else:
+        closing = "\u00a0---\u00a0"
+    return (
+        f"{opening}\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"{closing}\n"
+        "---\n\n# Nonexact marker authority\n"
+    )
+
+
+def _fullwidth_ascii(value: str) -> str:
+    return "".join(
+        chr(ord(character) + 0xFEE0)
+        if 0x21 <= ord(character) <= 0x7E
+        else character
+        for character in value
+    )
+
+
+def _lossy_accepted_watch_document(
+    *,
+    style: str,
+    watch_format: str,
+    current_work_id: str,
+) -> str:
+    field, mode = style.rsplit("-", 1)
+    field = field.replace("-", "_")
+    target_field = "work_id" if field == "work_id" else field
+    if field == "work_ids":
+        target_field = "work_ids"
+    canonical = {
+        "decision": "accepted_watch",
+        "status": "accepted",
+        "work_id": current_work_id,
+        "work_ids": current_work_id,
+    }[target_field]
+    semantic = (
+        f" {canonical} "
+        if mode == "padding"
+        else _fullwidth_ascii(canonical)
+    )
+    values: dict[str, object] = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    if target_field == "work_ids":
+        values.pop("work_id")
+        values["work_ids"] = [semantic]
+    else:
+        values[target_field] = semantic
+
+    if watch_format == "json":
+        return json.dumps(values, ensure_ascii=False, indent=2) + "\n"
+
+    rows: list[str] = []
+    for key, value in values.items():
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == target_field and mode == "padding":
+                scalar = f"'{scalar}'"
+            rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            continue
+        scalar = str(value)
+        if key == target_field and mode == "padding":
+            scalar = f"'{scalar}'"
+        rows.append(f"{key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Lossy authority\n"
 
 
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
@@ -1581,6 +1684,98 @@ def test_work_close_rejects_nbsp_watch_authority_separation(
         work_id=unit_id,
         signature=signature,
         title="Reject NBSP watch authority separation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _NONEXACT_MARKER_STYLES)
+def test_work_close_rejects_nonexact_watch_frontmatter_markers(
+    tmp_path: Path,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "nonexact accepted watch frontmatter marker"
+    watch_ref = "reviews/REVIEW-2026-07-29-nonexact-marker.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nonexact_marker_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject nonexact watch frontmatter marker",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _LOSSY_AUTHORITY_STYLES)
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_work_close_rejects_lossy_watch_authority_normalization(
+    tmp_path: Path,
+    style: str,
+    watch_format: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "lossy accepted watch authority normalization"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-lossy-authority.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _lossy_accepted_watch_document(
+            style=style,
+            watch_format=watch_format,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject lossy watch authority normalization",
         prevention_refs=[watch_ref],
     )
 

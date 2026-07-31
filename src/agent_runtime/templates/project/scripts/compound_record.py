@@ -188,7 +188,7 @@ def normalize_ref(value: object) -> str:
 
 
 def _frontmatter_key(raw_key: str) -> str:
-    token = raw_key.strip()
+    token = raw_key.strip(" \t")
     if not token:
         raise CompoundRecordError("compound:prevention-watch-invalid-field")
     if token.startswith("'"):
@@ -221,7 +221,7 @@ def _frontmatter_key(raw_key: str) -> str:
 
 
 def _frontmatter_scalar(raw_value: str) -> str:
-    token = raw_value.strip()
+    token = raw_value.strip(" \t")
     if not token or len(token) > MAX_FRONTMATTER_SCALAR:
         raise CompoundRecordError("compound:prevention-watch-invalid-value")
     if token.startswith("'"):
@@ -256,6 +256,7 @@ def _frontmatter_scalar(raw_value: str) -> str:
         not isinstance(value, str)
         or len(value) > MAX_FRONTMATTER_SCALAR
         or any(ord(character) < 32 for character in value)
+        or any(character.isspace() and character != " " for character in value)
     ):
         raise CompoundRecordError("compound:prevention-watch-invalid-value")
     return value
@@ -273,17 +274,17 @@ def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 
 def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
-    """Read unambiguous scalar/list metadata needed by accepted-watch refs."""
+    """Read the bounded ASCII-separation subset used by accepted-watch refs."""
 
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
+    if not lines or lines[0] != "---":
         return {}
     try:
         end = next(
             index
             for index, line in enumerate(lines[1:], start=1)
-            if line.strip() == "---"
+            if line == "---"
         )
     except StopIteration:
         return {}
@@ -291,14 +292,29 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     seen: set[str] = set()
     active_list = ""
+    active_list_indent: int | None = None
     for raw in lines[1:end]:
+        if not raw or raw.startswith("#"):
+            continue
         if raw.startswith((" ", "\t")):
-            stripped = raw.strip()
-            if not stripped or stripped.startswith("#"):
+            prefix_length = len(raw) - len(raw.lstrip(" \t"))
+            indentation = raw[:prefix_length]
+            content = raw[prefix_length:]
+            if "\t" in indentation:
+                raise CompoundRecordError(
+                    "compound:prevention-watch-invalid-indentation"
+                )
+            if not content or content.startswith("#"):
                 continue
-            if active_list and stripped.startswith("- "):
+            if active_list and content.startswith("- "):
+                if active_list_indent is None:
+                    active_list_indent = prefix_length
+                elif prefix_length != active_list_indent:
+                    raise CompoundRecordError(
+                        "compound:prevention-watch-invalid-indentation"
+                    )
                 payload.setdefault(active_list, []).append(
-                    _frontmatter_scalar(stripped[2:])
+                    _frontmatter_scalar(content[2:])
                 )
                 continue
             raise CompoundRecordError(
@@ -306,25 +322,25 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
             )
         if ":" not in raw:
             active_list = ""
-            if raw.strip() and not raw.lstrip().startswith("#"):
-                raise CompoundRecordError(
-                    "compound:prevention-watch-invalid-field"
-                )
-            continue
+            active_list_indent = None
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
         key, value = raw.split(":", 1)
         key = _frontmatter_key(key)
-        value = value.strip()
         if key in seen:
             raise CompoundRecordError(
                 f"compound:prevention-watch-duplicate-field:{key}"
             )
         seen.add(key)
-        if value:
+        if value.strip(" \t"):
             payload[key] = _frontmatter_scalar(value)
             active_list = ""
+            active_list_indent = None
         else:
             payload[key] = []
             active_list = key
+            active_list_indent = None
     return payload
 
 
@@ -342,9 +358,12 @@ def _watch_payload(path: Path) -> dict[str, Any]:
 
 def _value_items(value: object) -> list[str]:
     if isinstance(value, list):
-        return [str(item).strip() for item in value if str(item).strip()]
-    text = str(value or "").strip()
-    return [text] if text else []
+        return [item for item in value if isinstance(item, str) and item]
+    return [value] if isinstance(value, str) and value else []
+
+
+def _accepted_watch_token(value: object, allowed: set[str]) -> bool:
+    return isinstance(value, str) and value.casefold() in allowed
 
 
 def _reviewer_identity(value: object) -> str:
@@ -373,15 +392,11 @@ def _accepted_watch_findings(
         return False, [f"compound:prevention-watch-invalid:{ref}"]
 
     decision = payload.get("decision")
-    if (
-        not isinstance(decision, str)
-        or _normalized_text(decision).lower() not in ACCEPTED_WATCH_DECISIONS
-    ):
+    if not _accepted_watch_token(decision, ACCEPTED_WATCH_DECISIONS):
         return False, []
 
     findings: list[str] = []
-    status = _normalized_text(payload.get("status")).lower()
-    if status not in ACCEPTED_WATCH_STATUSES:
+    if not _accepted_watch_token(payload.get("status"), ACCEPTED_WATCH_STATUSES):
         findings.append(f"compound:prevention-watch-not-accepted:{ref}")
     reviewers = {
         identity
@@ -395,9 +410,11 @@ def _accepted_watch_findings(
     for field in ("work_id", "task_id", "unit_id", "work_ids"):
         for value in _value_items(payload.get(field)):
             try:
-                linked_work.add(normalize_work_id(value))
+                normalized = normalize_work_id(value)
             except CompoundRecordError:
                 continue
+            if normalized == value:
+                linked_work.add(normalized)
     if not current_work_ids.intersection(linked_work):
         findings.append(f"compound:prevention-watch-work-mismatch:{ref}")
     return not findings, findings

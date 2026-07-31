@@ -450,6 +450,22 @@ _NBSP_AUTHORITY_POSITIONS = (
     "value-before",
     "value-after",
 )
+_NONEXACT_MARKER_STYLES = (
+    "tab-open",
+    "tab-close",
+    "nbsp-open",
+    "nbsp-close",
+)
+_LOSSY_AUTHORITY_STYLES = (
+    "decision-padding",
+    "status-padding",
+    "work-id-padding",
+    "work-ids-padding",
+    "decision-nfkc",
+    "status-nfkc",
+    "work-id-nfkc",
+    "work-ids-nfkc",
+)
 
 
 def _noncanonical_work_ids_watch_document(*, style, current_work_id):
@@ -513,6 +529,89 @@ def _nbsp_accepted_watch_document(*, field, position, current_work_id):
             scalar += "\u00a0"
         rows.append(f"{rendered_key}: {scalar}\n")
     return "---\n" + "".join(rows) + "---\n\n# NBSP authority\n"
+
+
+def _nonexact_marker_watch_document(*, style, current_work_id):
+    opening = "---"
+    closing = "---"
+    if style == "tab-open":
+        opening = "\t---"
+    elif style == "tab-close":
+        closing = "\t---"
+    elif style == "nbsp-open":
+        opening = "\u00a0---\u00a0"
+    else:
+        closing = "\u00a0---\u00a0"
+    return (
+        f"{opening}\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"{closing}\n"
+        "---\n\n# Nonexact marker authority\n"
+    )
+
+
+def _fullwidth_ascii(value):
+    return "".join(
+        chr(ord(character) + 0xFEE0)
+        if 0x21 <= ord(character) <= 0x7E
+        else character
+        for character in value
+    )
+
+
+def _lossy_accepted_watch_document(
+    *,
+    style,
+    watch_format,
+    current_work_id,
+):
+    field, mode = style.rsplit("-", 1)
+    field = field.replace("-", "_")
+    target_field = "work_id" if field == "work_id" else field
+    if field == "work_ids":
+        target_field = "work_ids"
+    canonical = {
+        "decision": "accepted_watch",
+        "status": "accepted",
+        "work_id": current_work_id,
+        "work_ids": current_work_id,
+    }[target_field]
+    semantic = (
+        f" {canonical} "
+        if mode == "padding"
+        else _fullwidth_ascii(canonical)
+    )
+    values = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    if target_field == "work_ids":
+        values.pop("work_id")
+        values["work_ids"] = [semantic]
+    else:
+        values[target_field] = semantic
+
+    if watch_format == "json":
+        return json.dumps(values, ensure_ascii=False, indent=2) + "\n"
+
+    rows = []
+    for key, value in values.items():
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == target_field and mode == "padding":
+                scalar = f"'{scalar}'"
+            rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            continue
+        scalar = str(value)
+        if key == target_field and mode == "padding":
+            scalar = f"'{scalar}'"
+        rows.append(f"{key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Lossy authority\n"
 
 
 def test_substantial_closeout_blocks_for_overdue_missing_projection():
@@ -1636,6 +1735,128 @@ def test_stop_gate_rejects_nbsp_watch_authority_separation(
         prevention_refs=[watch_ref],
         verification_refs=["reviews/VERIFY-unit.json"],
         created_at="2026-06-14T11:52:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+
+
+@pytest.mark.parametrize("style", _NONEXACT_MARKER_STYLES)
+def test_stop_gate_rejects_nonexact_watch_frontmatter_markers(
+    tmp_path,
+    monkeypatch,
+    style,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "nonexact accepted watch frontmatter marker"
+    watch_ref = f"reviews/REVIEW-{TODAY}-nonexact-marker.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nonexact_marker_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject nonexact watch frontmatter marker",
+        summary="Authority metadata requires exact frontmatter delimiters.",
+        cause="Unicode-wide trimming treated padded delimiters as exact.",
+        prevention="Require exact column-zero frontmatter delimiters.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:53:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+
+
+@pytest.mark.parametrize("style", _LOSSY_AUTHORITY_STYLES)
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_stop_gate_rejects_lossy_watch_authority_normalization(
+    tmp_path,
+    monkeypatch,
+    style,
+    watch_format,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "lossy accepted watch authority normalization"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-{TODAY}-lossy-authority.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _lossy_accepted_watch_document(
+            style=style,
+            watch_format=watch_format,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject lossy watch authority normalization",
+        summary="Decoded authority must already equal its canonical token.",
+        cause="Whitespace and NFKC normalization widened authority semantics.",
+        prevention="Compare decoded authority without lossy normalization.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:54:00+09:00",
     )
     _write_active_unit(
         tmp_path,
