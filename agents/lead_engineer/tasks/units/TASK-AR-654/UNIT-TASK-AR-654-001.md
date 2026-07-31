@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-31T23:33:54+09:00
+updated_at: 2026-08-01T00:00:05+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -26,11 +26,14 @@ escalation_triggers:
   - cross_cutting
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
+  - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
 context: The claim dispatcher already searches canonical Compound records, but closure_gate accepts any one of compound, review, or retro. The failure-to-regression skill exists only in the Runtime repository and is absent from consumer templates.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
+  - reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md
+  - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - src/agent_runtime/knowledge_records.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
@@ -69,8 +72,8 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
-verified_at: 2026-07-31T23:33:54+09:00
-verified_by: le-20260731-040735-kst-ar654001
+verified_at: 2026-07-31T23:54:53+09:00
+verified_by: codex-skeptic-task-ar-654-closeout
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030.json
@@ -78,6 +81,7 @@ evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json
+  - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
 ---
 
 # UNIT-TASK-AR-654-001 - Enforce repeated-failure Compound closure and ship its skill
@@ -153,3 +157,11 @@ Attach failure-first closure evidence, skill packaging proof, backward compatibi
 ## Stop Boundary
 
 Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
+
+## Reopened after skeptic closeout
+
+The 2026-07-31 skeptic closeout found a P1 physical-line boundary bypass after
+the prior W4a/W4b sequence. The unit is therefore failed and reopened under
+`reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` until
+the exact repaired candidate passes fresh machine evidence, W4a, independent
+W4b, and skeptic review.

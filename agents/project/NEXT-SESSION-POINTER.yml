@@ -1,45 +1,45 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-31T04:07:35+09:00
-updated_by: le-20260731-040735-kst-ar654001
+updated_at: 2026-08-01T00:01:56+09:00
+updated_by: le-20260801-000005-kst-ar654repair001
 current_state:
-  summary: "TASK-AR-654 has a plan-validated claim and is active in its governed worktree scope."
+  summary: "TASK-AR-654 is reopened under a plan-validated repair claim after the skeptic found a physical-line authority bypass."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 3
   step_total: 7
   progress_pct: 28
-  status_text: "TASK-AR-654 is enforcing the repeated-failure Compound lane and consumer skill."
+  status_text: "TASK-AR-654 is repairing the accepted-watch physical-line trust boundary."
 active_work:
   current_agents:
-    - claim_id: CLAIM-20260731-040735-task-ar-654-ar654001
+    - claim_id: CLAIM-20260801-000156-task-ar-654-ar654repair001
       agent_role: lead-engineer
       team_id: quality
-      agent_instance_id: le-20260731-040735-kst-ar654001
-      display_name: "lead_engineer@orchestrator-01"
-      callsite_id: "terminal:wt-task-ar-654:tab-01"
-      pane_id: "terminal:wt-task-ar-654:tab-01"
+      agent_instance_id: le-20260801-000005-kst-ar654repair001
+      display_name: "lead_engineer@orchestrator-02"
+      callsite_id: "terminal:wt-task-ar-654:tab-02"
+      pane_id: "terminal:wt-task-ar-654:tab-02"
       task_id: TASK-AR-654
       unit_id: UNIT-TASK-AR-654-001
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: claimed
-      phase: unit-claimed
+      phase: repair-claimed
       progress_pct: 0
       step_index: 1
       step_total: 6
-      status_text: "Implementing TASK-AR-654 repeated-failure Compound closure"
+      status_text: "Repairing TASK-AR-654 physical-line authority boundary"
       worktree_path: .worktrees/TASK-AR-654
       branch: codex/task-ar-654-v080-compound-hardening
       requested_model_tier: worker_standard
       selected_model_tier: planner_high
       routing_policy_id: task-unit-tier-policy
-      routing_escalation_reason: "trigger:cross_cutting,data_integrity"
+      routing_escalation_reason: "trigger:cross_cutting,data_integrity,repeated_failure"
       task_token_budget: null
       claim_token_budget: null
-      claim_path: agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.handoff.md
-      log_path: agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.log.md
-      last_heartbeat: 2026-07-31T04:07:35+09:00
+      claim_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.log.md
+      last_heartbeat: 2026-08-01T00:01:56+09:00
   current_teams:
     - quality
 resume:
@@ -47,9 +47,9 @@ resume:
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
   branch_policy: "Continue TASK-AR-654 only in .worktrees/TASK-AR-654; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Implement the repeated-failure Compound requirement and supported prevention-destination validation."
-    - "Ship and validate failure-to-regression in the consumer core template."
-    - "Run W4a and a distinct W4b before claim release and local integration."
+    - "Add failure-first coverage for all Unicode-wide splitlines separators at both accepted-watch delimiters."
+    - "Restrict authority-bearing Markdown to LF/CRLF and reject lone CR and noncanonical line separators."
+    - "Run fresh W4a, independent W4b, and skeptic closeout before claim release and local integration."
     - "Keep TASK-AR-651, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -58,7 +58,7 @@ roles:
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
   active_claims:
-    - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
+    - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

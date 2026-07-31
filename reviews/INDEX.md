@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-31T23:44:26+09:00
-record_count: 1238
+generated_at: 2026-08-01T00:02:36+09:00
+record_count: 1240
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1238` review and evidence records under `reviews/`.
+- Summary: indexed `1240` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1238` files |
+| Reviews covered | pass | `1240` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -670,6 +670,7 @@ record_count: 1238
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md` | `REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan` | md | accepted | n/a | TASK-AR-654 Compound closure T3 replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -741,6 +742,7 @@ record_count: 1238
 | `reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md` | `SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract` | md | request_changes | block | TASK-AR-648 Skeptic Audit — Closeout Overlay Claim Contract |
 | `reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md` | `SKEPTIC-2026-07-30-task-ar-649-closeout` | md | passed | pass | TASK-AR-649 Closeout Skeptic Review |
 | `reviews/SKEPTIC-2026-07-30-task-ar-650-closeout.md` | `SKEPTIC-2026-07-30-task-ar-650-closeout` | md | passed | pass | TASK-AR-650 Skeptic Closeout |
+| `reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md` | `SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout` | md | revise | fail | TASK-AR-654 YAML Conformance Closeout Skeptic Review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |

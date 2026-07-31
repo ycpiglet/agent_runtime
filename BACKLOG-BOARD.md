@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-31T04:31:32+09:00
+generated_at: 2026-08-01T00:02:37+09:00
 task_count: 322
 open_count: 21
 completed_count: 301
@@ -86,7 +86,7 @@ completed_task_set_count: 63
 
 - Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
 - Progress: `2/7` done; `5` open or active.
-- WIP: active `1/3`; oldest `0.4h`; stale `0`.
+- WIP: active `1/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-654` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md | in_progress | Action | P1 | High | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent a repeated defect from closing with only a generic review or retro and no reu… |
@@ -170,7 +170,7 @@ completed_task_set_count: 63
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `4` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `21` open across `4` task sets (see Action Board above).
-- Throughput (7d): `16` tasks completed in the last 7 days (TASK-AR-627).
+- Throughput (7d): `15` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `63` (see Archived Task Sets above).
 - Archived task files: `301` — see `ARCHIVE-INDEX.md`.
 

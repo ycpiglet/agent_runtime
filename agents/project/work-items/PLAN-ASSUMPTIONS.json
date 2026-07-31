@@ -993,6 +993,16 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md",
+          "value": "ef0ec48d677e7674a25303a959517e7e70dfd70ae40d0a54d8f222f69c8856d7"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md",
+          "value": "fac84529cf29ad17ba821a6a46124257afb6ec062d27f112f3702971c22c9347"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
           "value": "3546d85bc644eff4521b84337930cf28ad09fbd450e9d37472e012d048f564a3"
         },
@@ -1009,62 +1019,62 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
-          "value": "21c7d9065c14434770810ca8eb8cae075f2110842bd699e5f02ed706d1760d6f"
+          "value": "dbadfcc8ee5320145be99e1f62c63ae4c18526b54990d4369f558ea602ad4169"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
-          "value": "41d7e8abe0853216a2e91ec09aa23b6d8959c58487eb183f1b7b718dbd804b5a"
+          "value": "448a96333fd8f4b26ce18d8133f342bb00b126c3013363b0c1fc56e92ec0aa09"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/knowledge_records.py",
-          "value": "82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
+          "value": "826617de44ebc82cef26ae5e66dfd7b15aef6f08ad201185648d0769129d0187"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
+          "value": "e89ac68031ac8747403f2002ee937d87ca5b427b96406ca3682b6f001d1a1cac"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/work.py",
-          "value": "cc461b628383a17edf0c0a71ebef00699c0c3d3bf2c413ec75b13ec0622b7281"
+          "value": "e89ac68031ac8747403f2002ee937d87ca5b427b96406ca3682b6f001d1a1cac"
         },
         {
           "kind": "sha256",
           "path": "scripts/closure_gate.py",
-          "value": "9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2"
+          "value": "87c4c10f5eb0c06cffaf95fc1f0304152c99103223d022372b5c14e9fd3402b1"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/closure_gate.py",
-          "value": "9b1ccb00a9014ff20a9af9dba8cdeeacabe1b2db7e43cead261d46101cb83ee2"
+          "value": "87c4c10f5eb0c06cffaf95fc1f0304152c99103223d022372b5c14e9fd3402b1"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/compound_record.py",
-          "value": "82edf7e85e144de971d555e1190bdaf4357e3ce6b9538f1c7a7d2ca81480b206"
+          "value": "826617de44ebc82cef26ae5e66dfd7b15aef6f08ad201185648d0769129d0187"
         },
         {
           "kind": "sha256",
           "path": "skills/failure-to-regression/SKILL.md",
-          "value": "ca5e74d6776487dc890271071e31f1f1ed3e9f63dd9c5462444079ff871296f4"
+          "value": "af125ac7007089f70eaa8ed760611807f9515e185459be38bcadca301e782d59"
         },
         {
-          "kind": "absent",
+          "kind": "sha256",
           "path": "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
-          "value": ""
+          "value": "af125ac7007089f70eaa8ed760611807f9515e185459be38bcadca301e782d59"
         },
         {
           "kind": "sha256",
           "path": "agents/project/RUNTIME-ASSET-REGISTRY.json",
-          "value": "382b47280cbdc1272e3633bd941a8f98e60b1bc5a0af1e9ce344cd5f7103480a"
+          "value": "943970571c41021ef9f610f94ccd0e3706c4fd8e41a8f2c7b97d0ed8b52fbc11"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
-          "value": "98d09c825ff497276bfe94c43d2f51883bcf06b653e0401122dff0429100efdc"
+          "value": "5a6229045f324bda4a2352cd1c55b80aa44221201559426ea2367c9470b7d8e4"
         },
         {
           "kind": "sha256",
@@ -1074,7 +1084,7 @@
         {
           "kind": "sha256",
           "path": "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
-          "value": "7e95f861212c15b50a67e5f7952ae2689cfbebf52ec8dc92b90ddb7f1ef8432e"
+          "value": "ba59ffb6fec6305ebf7bf171902b6cad30baa8d89dd3a720e705662171f5bece"
         },
         {
           "kind": "sha256",
@@ -1099,12 +1109,12 @@
         {
           "kind": "sha256",
           "path": "tests/test_compound_records.py",
-          "value": "025446407bed1d005b1262fab8dfd5c0c6c7211732eda89fdc78606cbcb5390b"
+          "value": "9f767af6eb1b8de4fb7f74d83acbb4a7c609bca08f26a15d21da4bb94171fda6"
         },
         {
           "kind": "sha256",
           "path": "tests/test_closure_gate.py",
-          "value": "20a67eec82dfe2e9e84178219038b16f45c550044415d5dd308756222ce9011a"
+          "value": "b68c8dff36e33f186c71ac1677b741b7ee408a4e0cfc57e8cd51021ad6808bf1"
         },
         {
           "kind": "sha256",
@@ -1114,17 +1124,17 @@
         {
           "kind": "sha256",
           "path": "tests/test_runtime_asset_usage.py",
-          "value": "9f240732bd1c6f2188a6113d43fbc8d8556cd5518effbd945a7f6cb27d7454e0"
+          "value": "71e0a26a49bda4a7b944e737f906bfbcb98b4c795a73d67ee91570b582026304"
         },
         {
           "kind": "sha256",
           "path": "tests/test_rsi_operating_system_docs.py",
-          "value": "8a509170b8ad891e0827dc9ddb3bef93775f43e536359545c25da09786a88e40"
+          "value": "51be7e51bf9bcdabc6979b38b1ae87121ddf283814a6795146f0fee3016228f6"
         },
         {
           "kind": "sha256",
           "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "a6953921d26879abc53ec188261bd651a7b005579960fbe5736de6b9aac8f608"
+          "value": "3f38b28ff978c4d84b38f878c64275e05b466d9bfe3cb0edd814626a5c45ab0d"
         },
         {
           "kind": "sha256",
@@ -1139,11 +1149,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "30070d95b21384634ea7b4f020cff0e4d5e50621b118fa26ed50355c8231cefe"
+          "value": "164ea6f8535bc2a71280be85407f463113b2bf9247b426a4a359d46c1324e71d"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
-      "recorded_at": "2026-07-31T04:31:31+09:00",
+      "design_record": "reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md",
+      "recorded_at": "2026-08-01T00:05:16+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1359,5 +1369,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-07-31T04:31:31+09:00"
+  "updated_at": "2026-08-01T00:05:16+09:00"
 }
