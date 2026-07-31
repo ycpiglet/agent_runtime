@@ -44,19 +44,19 @@
   "wip_slot": 1,
   "stop_condition": "Stop before rewriting legacy Compound history, widening Compound to ordinary work, or modifying consumer repositories.",
   "phase": "repair-claimed",
-  "progress_pct": 0,
-  "step_index": 1,
+  "progress_pct": 75,
+  "step_index": 5,
   "step_total": 6,
-  "status_text": "Repairing TASK-AR-654 physical-line authority boundary",
+  "status_text": "Physical-line repair verified; preparing W4a and fresh independent reviews",
   "worktree_path": ".worktrees/TASK-AR-654",
   "branch": "codex/task-ar-654-v080-compound-hardening",
   "claimed_at": "2026-08-01T00:01:56+09:00",
-  "last_heartbeat": "2026-08-01T00:01:56+09:00",
-  "updated_at": "2026-08-01T00:01:56+09:00",
+  "last_heartbeat": "2026-08-01T00:27:00+09:00",
+  "updated_at": "2026-08-01T00:27:00+09:00",
   "expires_at": "2026-08-01T08:01:56+09:00",
   "lease": {
     "claimed_at": "2026-08-01T00:01:56+09:00",
-    "heartbeat_at": "2026-08-01T00:01:56+09:00",
+    "heartbeat_at": "2026-08-01T00:27:00+09:00",
     "expires_at": "2026-08-01T08:01:56+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.handoff.md",
@@ -99,7 +99,9 @@
     "tests/test_rsi_operating_system_docs.py",
     "tests/test_inventory_sync_sanitize.py",
     "tests/test_lock_merge_driver.py",
-    "tests/test_regen_host_lock_if_needed.py"
+    "tests/test_regen_host_lock_if_needed.py",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json",
+    "agents/project/knowledge/compounds/INDEX.json"
   ],
   "persistence": {
     "mode": "working_tree",

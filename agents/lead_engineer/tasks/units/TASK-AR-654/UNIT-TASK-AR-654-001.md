@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T00:00:05+09:00
+updated_at: 2026-08-01T00:27:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -33,6 +33,7 @@ inputs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
   - reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md
+  - reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - src/agent_runtime/knowledge_records.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
@@ -59,6 +60,8 @@ target_files:
   - tests/test_inventory_sync_sanitize.py
   - tests/test_lock_merge_driver.py
   - tests/test_regen_host_lock_if_needed.py
+  - agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json
+  - agents/project/knowledge/compounds/INDEX.json
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -72,8 +75,8 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
-verified_at: 2026-07-31T23:54:53+09:00
-verified_by: codex-skeptic-task-ar-654-closeout
+verified_at: 2026-08-01T00:21:51+09:00
+verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030.json
@@ -82,6 +85,8 @@ evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
+  - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json
+  - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
 ---
 
 # UNIT-TASK-AR-654-001 - Enforce repeated-failure Compound closure and ship its skill
@@ -94,6 +99,7 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 
 - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
+- reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
 - src/agent_runtime/knowledge_records.py
 - src/agent_runtime/templates/project/scripts/compound_record.py
 - src/agent_runtime/templates/project/scripts/closure_gate.py
@@ -121,6 +127,8 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - tests/test_inventory_sync_sanitize.py
 - tests/test_lock_merge_driver.py
 - tests/test_regen_host_lock_if_needed.py
+- agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json
+- agents/project/knowledge/compounds/INDEX.json
 
 ## Scope
 
@@ -165,3 +173,11 @@ the prior W4a/W4b sequence. The unit is therefore failed and reopened under
 `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` until
 the exact repaired candidate passes fresh machine evidence, W4a, independent
 W4b, and skeptic review.
+
+## Compound record scope amendment
+
+The repeated-failure repair owns its current-work canonical Compound record and
+generated Compound index under
+`reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md`.
+This does not widen the ordinary-work closure contract or permit legacy record
+rewrites.

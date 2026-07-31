@@ -1,0 +1,28 @@
+{
+  "cause": "Authority checks compared delimiter text only after universal newline and Unicode-wide line normalization had discarded the original physical boundary.",
+  "created_at": "2026-08-01T00:23:36+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694"
+  ],
+  "id": "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+  "prevention": "Read Markdown with untranslated newlines, accept only LF or CRLF, reject lone CR and Unicode-wide separators, and exercise source, packaged, work-close, and Stop consumers.",
+  "prevention_refs": [
+    "tests/test_compound_records.py",
+    "tests/test_closure_gate.py"
+  ],
+  "recurrence_count": 2,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md"
+  ],
+  "status": "mitigated",
+  "summary": "A Unicode-wide line splitter erased noncanonical separators around frontmatter markers and let repeated-failure prevention watches gain authority.",
+  "title": "Preserve physical accepted-watch line boundaries",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json"
+  ],
+  "work_ids": [
+    "UNIT-TASK-AR-654-001"
+  ]
+}

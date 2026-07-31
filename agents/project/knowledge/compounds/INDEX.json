@@ -1,5 +1,8 @@
 {
   "by_signature": {
+    "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694": [
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b"
+    ],
     "defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
     ],
@@ -118,9 +121,12 @@
     "UNIT-TASK-AR-648-014": [
       "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
+    "UNIT-TASK-AR-654-001": [
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b"
     ]
   },
-  "record_count": 17,
+  "record_count": 18,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -372,8 +378,22 @@
       "work_ids": [
         "TASK-AR-652"
       ]
+    },
+    {
+      "created_at": "2026-08-01T00:23:36+09:00",
+      "defect_signatures": [
+        "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694"
+      ],
+      "id": "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Preserve physical accepted-watch line boundaries",
+      "work_ids": [
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:879b7aac054b5f74e2002b1668a5df1fc0c82748f5629eac7da7ce92a324d421"
+  "source_digest": "sha256:2d90de849b61ffc4405167b8fd32def8f6d99b932c12d3a44f2b2b2dd9dc9204"
 }

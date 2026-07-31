@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-01T00:02:36+09:00
-record_count: 1240
+generated_at: 2026-08-01T00:28:51+09:00
+record_count: 1243
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1240` review and evidence records under `reviews/`.
+- Summary: indexed `1243` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1240` files |
+| Reviews covered | pass | `1243` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -670,6 +670,7 @@ record_count: 1240
 | `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md` | `REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan` | md | accepted | n/a | TASK-AR-654 Compound closure T3 replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment` | md | accepted | n/a | TASK-AR-654 Compound record scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -1018,6 +1019,7 @@ record_count: 1240
 | `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736 |
 | `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244 |
 | `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354 |
+| `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1075,6 +1077,7 @@ record_count: 1240
 | `reviews/W4A-2026-07-31-unit-task-ar-654-001-yaml-scalar-final-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-yaml-scalar-final-repair` | md | passed | pass | TASK-AR-654 YAML Scalar Final Repair W4a |
 | `reviews/W4A-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-repair` | md | passed | pass | TASK-AR-654 YAML Semantic Key Repair W4a |
 | `reviews/W4A-2026-07-31-unit-task-ar-654-001.md` | `W4A-2026-07-31-unit-task-ar-654-001` | md | passed | pass | TASK-AR-654 Repeated-Failure Compound Hardening W4a |
+| `reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair` | md | passed | pass | TASK-AR-654 Physical-Line Boundary Repair W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
