@@ -121,6 +121,47 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
     return unit_id, evidence_ref
 
 
+def _write_claim_only_repeat_authority(
+    root: Path,
+    *,
+    signature: str,
+) -> Path:
+    task_id = "TASK-AR-645"
+    unit_id = "UNIT-TASK-AR-645-001"
+    unit_spec = (
+        "agents/lead_engineer/tasks/units/TASK-AR-645/"
+        "UNIT-TASK-AR-645-001.md"
+    )
+    claim = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-claim-only-repeat-close",
+        "task_id": task_id,
+        "unit_id": unit_id,
+        "unit_spec": unit_spec,
+        "agent_role": "lead-engineer",
+        "agent_instance_id": "le-claim-only-repeat-close",
+        "status": "claimed",
+        "worktree_path": str(root.resolve()),
+        "claimed_at": "2026-07-29T03:00:00+09:00",
+        "last_heartbeat": "2026-07-29T03:00:00+09:00",
+        "updated_at": "2026-07-29T03:00:00+09:00",
+        "expires_at": "2099-07-29T03:30:00+09:00",
+        "lease": {
+            "claimed_at": "2026-07-29T03:00:00+09:00",
+            "heartbeat_at": "2026-07-29T03:00:00+09:00",
+            "expires_at": "2099-07-29T03:30:00+09:00",
+        },
+        "escalation_triggers": ["repeated_failure"],
+        "defect_signatures": [signature],
+        "compound_refs": [],
+    }
+    claims = root / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True, exist_ok=True)
+    path = claims / "CLAIM-claim-only-repeat-close.json"
+    path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(WORK_SCRIPT), "--root", str(root), *args],
@@ -131,6 +172,40 @@ def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         errors="replace",
     )
+
+
+def test_work_close_honors_claim_only_repeat_authority_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "claim only repeated failure close authority"
+    _write_claim_only_repeat_authority(tmp_path, signature=signature)
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = unit_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before
 
 
 _DUPLICATE_WATCH_FIELDS = (
@@ -523,6 +598,7 @@ _SPLITLINES_SEPARATORS = (
     pytest.param("\u2029", id="paragraph-separator"),
 )
 _FRONTMATTER_MARKER_POSITIONS = ("opening", "closing")
+_ACCEPTED_WATCH_MAX_BYTES = 256 * 1024
 _LOSSY_AUTHORITY_STYLES = (
     "decision-padding",
     "status-padding",
@@ -672,19 +748,66 @@ def _line_ending_accepted_watch_document(
     )
 
 
-@pytest.fixture(scope="module", params=("source", "packaged"))
-def _accepted_watch_helper(request):
-    if request.param == "source":
-        return records._accepted_watch_findings
+def _accepted_watch_bytes(
+    *,
+    watch_format: str,
+    current_work_id: str,
+    size: int | None = None,
+) -> bytes:
+    if watch_format == "markdown":
+        prefix = (
+            "---\n"
+            "status: accepted\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n"
+            f"work_id: {current_work_id}\n"
+            "---\n"
+            "# Raw accepted-watch size fixture\n"
+        ).encode("utf-8")
+        if size is None:
+            return prefix
+        assert len(prefix) <= size
+        return prefix + (b"x" * (size - len(prefix)))
 
+    prefix = (
+        "{"
+        '"status":"accepted",'
+        '"decision":"accepted_watch",'
+        '"reviewed_by":"qa-independent",'
+        f'"work_id":"{current_work_id}",'
+        '"padding":"'
+    ).encode("utf-8")
+    suffix = b'"}'
+    if size is None:
+        return prefix + suffix
+    assert len(prefix) + len(suffix) <= size
+    return prefix + (b"x" * (size - len(prefix) - len(suffix))) + suffix
+
+
+def _load_packaged_compound_record():
     spec = importlib.util.spec_from_file_location(
-        "_packaged_compound_record_for_line_boundary_test",
+        "_packaged_compound_record_for_accepted_watch_boundary_test",
         TEMPLATE_SCRIPT,
     )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module._accepted_watch_findings
+    return module
+
+
+@pytest.fixture(scope="module", params=("source", "packaged"))
+def _accepted_watch_module(request):
+    if request.param == "source":
+        return records
+    return _load_packaged_compound_record()
+
+
+@pytest.fixture(scope="module", params=("source", "packaged"))
+def _accepted_watch_helper(request):
+    if request.param == "source":
+        return records._accepted_watch_findings
+
+    return _load_packaged_compound_record()._accepted_watch_findings
 
 
 def _fullwidth_ascii(value: str) -> str:
@@ -1883,6 +2006,202 @@ def test_accepted_watch_helpers_enforce_physical_line_endings(
         if expected_accepted
         else [f"compound:prevention-watch-invalid:{watch_ref}"]
     )
+
+
+def test_accepted_watch_raw_size_limit_is_shared_by_source_and_packaged(
+    _accepted_watch_module,
+) -> None:
+    assert (
+        getattr(_accepted_watch_module, "MAX_ACCEPTED_WATCH_BYTES", None)
+        == _ACCEPTED_WATCH_MAX_BYTES
+    )
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_accepted_watch_helpers_bound_malformed_utf8(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    watch_format: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-malformed-utf8-helper.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+        )
+        + b"\xff"
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+@pytest.mark.parametrize(
+    ("size", "expected_accepted"),
+    (
+        pytest.param(None, True, id="normal"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES, True, id="exact-boundary"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES + 1, False, id="over-boundary"),
+    ),
+)
+def test_accepted_watch_helpers_enforce_raw_size_bound(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    watch_format: str,
+    size: int | None,
+    expected_accepted: bool,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-raw-size-helper.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+            size=size,
+        )
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is expected_accepted
+    assert findings == (
+        []
+        if expected_accepted
+        else [f"compound:prevention-watch-invalid:{watch_ref}"]
+    )
+
+
+def _run_work_close_with_raw_watch(
+    root: Path,
+    *,
+    watch_format: str,
+    raw_watch: bytes,
+    signature: str,
+) -> tuple[subprocess.CompletedProcess[str], bytes, bytes, str]:
+    unit_id, _evidence_ref = _write_closeable_unit(root)
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-raw-watch-close.{suffix}"
+    watch = root / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(raw_watch)
+    record_path, _record = _create(
+        root,
+        work_id=unit_id,
+        signature=signature,
+        title="Bound raw accepted-watch input",
+        prevention_refs=[watch_ref],
+    )
+    unit_path = (
+        root
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = unit_path.read_bytes()
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(root, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+    return result, before, unit_path.read_bytes(), watch_ref
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_work_close_bounds_malformed_utf8_watch_without_mutation(
+    tmp_path: Path,
+    watch_format: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    result, before, after, watch_ref = _run_work_close_with_raw_watch(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=(
+            _accepted_watch_bytes(
+                watch_format=watch_format,
+                current_work_id=unit_id,
+            )
+            + b"\xff"
+        ),
+        signature="malformed utf8 accepted watch",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "UnicodeDecodeError" not in result.stdout + result.stderr
+    assert len(result.stdout + result.stderr) < 4096
+    assert after == before
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+@pytest.mark.parametrize(
+    ("size", "expected_returncode"),
+    (
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES, 0, id="exact-boundary"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES + 1, 1, id="over-boundary"),
+    ),
+)
+def test_work_close_enforces_raw_watch_size_bound(
+    tmp_path: Path,
+    watch_format: str,
+    size: int,
+    expected_returncode: int,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    result, before, after, watch_ref = _run_work_close_with_raw_watch(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=_accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+            size=size,
+        ),
+        signature="oversized accepted watch input",
+    )
+
+    assert result.returncode == expected_returncode, result.stdout + result.stderr
+    if expected_returncode == 0:
+        assert after != before
+    else:
+        assert (
+            f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+            in result.stderr
+        )
+        assert "Traceback" not in result.stdout + result.stderr
+        assert after == before
 
 
 @pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)

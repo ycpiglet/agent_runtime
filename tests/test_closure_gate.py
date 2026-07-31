@@ -1,6 +1,7 @@
 """Tests for closure_gate — require compound/review/retro for substantial work."""
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
@@ -17,6 +18,10 @@ import stop_hook_closure_gate  # noqa: E402
 
 NOW = datetime(2026, 6, 14, 12, 0, 0, tzinfo=timezone(timedelta(hours=9)))
 TODAY = "2026-06-14"
+_ACCEPTED_WATCH_MAX_BYTES = 256 * 1024
+_CLAIM_ONLY_SIGNATURE = compound_record.normalize_signature(
+    "claim only repeated failure authority"
+)
 
 
 # --- pure decision logic ---
@@ -580,6 +585,37 @@ def _line_boundary_accepted_watch_document(
     )
 
 
+def _accepted_watch_bytes(*, watch_format, current_work_id, size=None):
+    if watch_format == "markdown":
+        prefix = (
+            "---\n"
+            "status: accepted\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n"
+            f"work_id: {current_work_id}\n"
+            "---\n"
+            "# Raw accepted-watch size fixture\n"
+        ).encode("utf-8")
+        if size is None:
+            return prefix
+        assert len(prefix) <= size
+        return prefix + (b"x" * (size - len(prefix)))
+
+    prefix = (
+        "{"
+        '"status":"accepted",'
+        '"decision":"accepted_watch",'
+        '"reviewed_by":"qa-independent",'
+        f'"work_id":"{current_work_id}",'
+        '"padding":"'
+    ).encode("utf-8")
+    suffix = b'"}'
+    if size is None:
+        return prefix + suffix
+    assert len(prefix) + len(suffix) <= size
+    return prefix + (b"x" * (size - len(prefix) - len(suffix))) + suffix
+
+
 def _fullwidth_ascii(value):
     return "".join(
         chr(ord(character) + 0xFEE0)
@@ -982,6 +1018,159 @@ def _write_active_unit(
     )
 
 
+def _write_canonical_active_claim(
+    root: Path,
+    *,
+    claim_id: str = "CLAIM-active",
+    task_id: str = "TASK-AR-645",
+    unit_id: str = "UNIT-TASK-AR-645-001",
+    unit_spec: str | None = None,
+    worktree_path: str | None = None,
+    defect_signatures: list[str] | None = None,
+    escalation_triggers: list[str] | None = None,
+) -> Path:
+    if unit_spec is None:
+        unit_spec = (
+            "agents/lead_engineer/tasks/units/TASK-AR-645/"
+            "UNIT-TASK-AR-645-001.md"
+        )
+    claim = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": task_id,
+        "unit_id": unit_id,
+        "unit_spec": unit_spec,
+        "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "agent_instance_id": f"test-{claim_id.lower()}",
+        "display_name": f"lead_engineer@{claim_id.lower()}",
+        "callsite_id": f"terminal:{claim_id.lower()}",
+        "pane_id": f"terminal:{claim_id.lower()}",
+        "mode": "work",
+        "status": "claimed",
+        "task_set_id": "TASKSET-AR-TEST",
+        "active_scope": "TASKSET-AR-TEST",
+        "project_id": "PROJECT-AGENT-RUNTIME",
+        "model_tier": "worker_standard",
+        "wip_slot": 1,
+        "stop_condition": "Stop after the declared unit.",
+        "phase": "claim-created",
+        "progress_pct": 0,
+        "step_index": 1,
+        "step_total": 2,
+        "status_text": "Claim-only repeated-failure fixture",
+        "worktree_path": worktree_path or str(root.resolve()),
+        "branch": f"test/{claim_id.lower()}",
+        "claimed_at": "2026-06-14T11:00:00+09:00",
+        "last_heartbeat": "2026-06-14T11:00:00+09:00",
+        "updated_at": "2026-06-14T11:00:00+09:00",
+        "expires_at": "2099-06-14T11:30:00+09:00",
+        "lease": {
+            "claimed_at": "2026-06-14T11:00:00+09:00",
+            "heartbeat_at": "2026-06-14T11:00:00+09:00",
+            "expires_at": "2099-06-14T11:30:00+09:00",
+        },
+        "handoff_path": f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        "log_path": f"agents/runtime/task_claims/{claim_id}.log.md",
+        "allow_parallel_task_set": False,
+        "tags": [],
+        "target_files": [unit_spec] if unit_spec else [],
+        "defect_signatures": defect_signatures or [],
+        "escalation_triggers": escalation_triggers or [],
+    }
+    claims = root / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True, exist_ok=True)
+    path = claims / f"{claim_id}.json"
+    path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["schema"] == "agent-runtime-task-claim/v1"
+    assert persisted["claim_id"] == claim_id
+    return path
+
+
+def _write_linked_review(root: Path) -> str:
+    review_ref = f"reviews/REVIEW-{TODAY}-claim-only-closeout.md"
+    review = root / review_ref
+    review.parent.mkdir(parents=True, exist_ok=True)
+    review.write_text(
+        "---\n"
+        "work_id: UNIT-TASK-AR-645-001\n"
+        "task_id: TASK-AR-645\n"
+        "---\n\n# Generic linked review\n",
+        encoding="utf-8",
+    )
+    return review_ref
+
+
+def _write_repeat_watch_context(
+    root: Path,
+    *,
+    watch_format: str,
+    raw_watch: bytes,
+    signature: str,
+) -> tuple[str, str]:
+    unit_id = "UNIT-TASK-AR-645-001"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-{TODAY}-raw-watch-stop.{suffix}"
+    watch = root / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(raw_watch)
+    record_path, _record = compound_record.create_record(
+        root,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Bound accepted-watch input",
+        summary="Authority-bearing watch input must fail closed within a bound.",
+        cause="A malformed or oversized watch escaped bounded validation.",
+        prevention="Reject malformed and oversized watch bytes before authority parsing.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:54:00+09:00",
+    )
+    _write_active_unit(
+        root,
+        compound_refs=[compound_record.record_ref(root, record_path)],
+        signatures=[signature],
+    )
+    return unit_id, watch_ref
+
+
+def _set_low_churn_and_neutral_scribe(monkeypatch) -> None:
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+
+def _run_actual_stop_hook(root: Path) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env.pop("AGENT_RUNTIME_CLOSURE_GATE_DISABLE", None)
+    env["AGENT_RUNTIME_STOP_SCOPE_DISABLE"] = "1"
+    env["AGENT_RUNTIME_CLOSURE_GATE_THRESHOLD"] = "80"
+    local_source = str(ROOT / "src")
+    env["PYTHONPATH"] = os.pathsep.join(
+        value for value in (local_source, env.get("PYTHONPATH", "")) if value
+    )
+    return subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "stop_hook_closure_gate.py")],
+        cwd=root,
+        env=env,
+        input="{}\n",
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
 def test_active_work_rejects_unrelated_same_day_records(tmp_path):
     unrelated_review = f"reviews/REVIEW-{TODAY}-unrelated-closeout.md"
     path = tmp_path / unrelated_review
@@ -1082,6 +1271,229 @@ def test_declared_repeat_blocks_review_only_even_below_churn_threshold(
     assert result["decision"] == "block"
     assert result["reason"] == "repeated-failure-compound-required"
     assert result["repeat_failure"]["required"] is True
+
+
+@pytest.mark.parametrize("claim_signal", ("repeated_failure", "defect_signature"))
+def test_inferred_stop_context_preserves_claim_only_repeat_authority(
+    tmp_path,
+    monkeypatch,
+    claim_signal,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        defect_signatures=(
+            [_CLAIM_ONLY_SIGNATURE]
+            if claim_signal == "defect_signature"
+            else []
+        ),
+        escalation_triggers=(
+            ["repeated_failure"]
+            if claim_signal == "repeated_failure"
+            else []
+        ),
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["substantial_lines"] == 10
+    assert result["records"]["review"] is True
+    assert result["repeat_failure"]["required"] is True
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    if claim_signal == "defect_signature":
+        assert result["repeat_failure"]["defect_signatures"] == [
+            _CLAIM_ONLY_SIGNATURE
+        ]
+    else:
+        assert "repeated_failure" in result["repeat_failure"][
+            "escalation_triggers"
+        ]
+
+
+@pytest.mark.parametrize("claim_signal", ("repeated_failure", "defect_signature"))
+def test_explicit_stop_context_preserves_matching_claim_only_repeat_authority(
+    tmp_path,
+    monkeypatch,
+    claim_signal,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        defect_signatures=(
+            [_CLAIM_ONLY_SIGNATURE]
+            if claim_signal == "defect_signature"
+            else []
+        ),
+        escalation_triggers=(
+            ["repeated_failure"]
+            if claim_signal == "repeated_failure"
+            else []
+        ),
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["repeat_failure"]["required"] is True
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+
+
+@pytest.mark.parametrize("claim_signal", ("repeated_failure", "defect_signature"))
+def test_actual_stop_hook_blocks_claim_only_repeat_below_churn(
+    tmp_path,
+    claim_signal,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        defect_signatures=(
+            [_CLAIM_ONLY_SIGNATURE]
+            if claim_signal == "defect_signature"
+            else []
+        ),
+        escalation_triggers=(
+            ["repeated_failure"]
+            if claim_signal == "repeated_failure"
+            else []
+        ),
+    )
+
+    result = _run_actual_stop_hook(tmp_path)
+
+    assert result.returncode == 0
+    assert result.stderr == ""
+    payload = json.loads(result.stdout)
+    assert payload["decision"] == "block"
+    assert payload["reason"] == "repeated-failure-compound-required"
+
+
+def test_inferred_stop_rejects_identity_mismatched_claim_without_signal_leak(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        task_id="TASK-AR-999",
+        unit_id="UNIT-TASK-AR-999-001",
+        unit_spec=(
+            "agents/lead_engineer/tasks/units/TASK-AR-645/"
+            "UNIT-TASK-AR-645-001.md"
+        ),
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "active-claim-context-invalid"
+    assert result["repeat_failure"]["defect_signatures"] == []
+    assert "repeated_failure" not in result["repeat_failure"][
+        "escalation_triggers"
+    ]
+
+
+def test_explicit_work_ignores_unrelated_active_claim_authority(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        task_id="TASK-AR-999",
+        unit_id="UNIT-TASK-AR-999-001",
+        unit_spec="",
+        worktree_path=str((tmp_path / "other-worktree").resolve()),
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "approve"
+    assert result["reason"] == "not-substantial"
+    assert result["records"]["review"] is True
+    assert result["repeat_failure"]["required"] is False
+    assert result["repeat_failure"]["defect_signatures"] == []
+    assert "repeated_failure" not in result["repeat_failure"][
+        "escalation_triggers"
+    ]
+
+
+def test_inferred_stop_blocks_ambiguous_claims_without_unioning_authority(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    first_signature = compound_record.normalize_signature(
+        "first ambiguous claim authority"
+    )
+    second_signature = compound_record.normalize_signature(
+        "second ambiguous claim authority"
+    )
+    _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-active",
+        defect_signatures=[first_signature],
+        escalation_triggers=["repeated_failure"],
+    )
+    _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-other",
+        defect_signatures=[second_signature],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "active-claim-context-ambiguous"
+    assert result["missing"] == ["work_id"]
+    assert result["repeat_failure"]["defect_signatures"] == []
+    assert "repeated_failure" not in result["repeat_failure"][
+        "escalation_triggers"
+    ]
+    assert result["repeat_failure"]["compound_refs"] == []
 
 
 def test_declared_repeat_accepts_current_compound_with_supported_prevention(
@@ -1913,6 +2325,115 @@ def test_stop_gate_rejects_splitlines_separator_markers(
         f"compound:prevention-watch-invalid:{watch_ref}" in finding
         for finding in result["repeat_failure"]["findings"]
     )
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_direct_repeat_requirement_bounds_malformed_utf8(
+    tmp_path,
+    watch_format,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    unit_id, watch_ref = _write_repeat_watch_context(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=(
+            _accepted_watch_bytes(
+                watch_format=watch_format,
+                current_work_id=unit_id,
+            )
+            + b"\xff"
+        ),
+        signature="malformed utf8 accepted watch stop",
+    )
+
+    requirement = closure_gate.repeated_failure_requirement(
+        tmp_path,
+        closure_gate._active_work_contexts(tmp_path, work_id=unit_id),
+    )
+    result = closure_gate.decide(
+        10,
+        {"compound": True, "review": False, "retro": False},
+        threshold=80,
+        disabled=False,
+        repeat_failure=requirement,
+    )
+
+    assert requirement["required"] is True
+    assert requirement["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
+        for finding in requirement["findings"]
+    )
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_actual_stop_hook_blocks_malformed_utf8_watch(
+    tmp_path,
+    watch_format,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    _write_repeat_watch_context(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=(
+            _accepted_watch_bytes(
+                watch_format=watch_format,
+                current_work_id=unit_id,
+            )
+            + b"\xff"
+        ),
+        signature="malformed utf8 accepted watch actual stop",
+    )
+
+    result = _run_actual_stop_hook(tmp_path)
+
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert "Traceback" not in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["decision"] == "block"
+    assert payload["reason"] == "repeated-failure-compound-required"
+    assert len(result.stdout) < 4096
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+@pytest.mark.parametrize(
+    ("size", "expected_block"),
+    (
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES, False, id="exact-boundary"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES + 1, True, id="over-boundary"),
+    ),
+)
+def test_actual_stop_hook_enforces_raw_watch_size_bound(
+    tmp_path,
+    watch_format,
+    size,
+    expected_block,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    _write_repeat_watch_context(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=_accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+            size=size,
+        ),
+        signature="oversized accepted watch actual stop",
+    )
+
+    result = _run_actual_stop_hook(tmp_path)
+
+    assert result.returncode == 0
+    assert result.stderr == ""
+    if expected_block:
+        payload = json.loads(result.stdout)
+        assert payload["decision"] == "block"
+        assert payload["reason"] == "repeated-failure-compound-required"
+    else:
+        assert result.stdout == ""
 
 
 @pytest.mark.parametrize("style", _LOSSY_AUTHORITY_STYLES)
