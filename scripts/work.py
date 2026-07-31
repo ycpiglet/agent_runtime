@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import backlog_board
+import closure_gate
 import compound_record
 import evidence_index_generator
 import inflight_overlay
@@ -70,6 +71,7 @@ CLOSEOUT_END = "<!-- work-close:end -->"
 PLANNING_OUTBOX_DIR = Path("agents/planning/outbox")
 PLANNING_DRAFTS_DIR = Path("agents/planning/drafts")
 ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+RELEASED_CLAIM_AUTHORITY_STATUSES = {"released", "completed", "done", "closed"}
 ASSIGNMENT_RULES: list[tuple[str, str, tuple[str, ...]]] = [
     (
         "agent-runtime-core",
@@ -2426,6 +2428,119 @@ def _normalized_trigger(value: object) -> str:
     )
 
 
+def _linked_released_claim_authority(
+    root: Path,
+    path: Path,
+    meta: dict[str, Any],
+    *,
+    selected_active_claim_ids: set[str],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Load only explicitly linked, identity-bound released claim authority."""
+
+    claims: list[dict[str, Any]] = []
+    findings: list[str] = []
+    expected_dir = Path("agents/runtime/task_claims")
+    for raw_ref in _list_value(meta.get("claim_refs")):
+        try:
+            ref = compound_record.normalize_ref(raw_ref)
+        except compound_record.CompoundRecordError as exc:
+            findings.extend(f"{raw_ref}: closeout:{item}" for item in exc.findings)
+            continue
+        relative = Path(ref)
+        if (
+            relative.parent != expected_dir
+            or not relative.name.startswith("CLAIM-")
+            or relative.suffix.lower() != ".json"
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-invalid")
+            continue
+        claim_path = root / relative
+        try:
+            resolved_claim_path = claim_path.resolve(strict=True)
+            resolved_claim_path.relative_to(root)
+        except FileNotFoundError:
+            findings.append(f"{ref}: closeout:claim-ref-missing")
+            continue
+        except ValueError:
+            findings.append(f"{ref}: closeout:claim-ref-outside-root")
+            continue
+        except OSError:
+            findings.append(f"{ref}: closeout:claim-ref-unavailable")
+            continue
+        if not resolved_claim_path.is_file():
+            findings.append(f"{ref}: closeout:claim-ref-not-file")
+            continue
+        try:
+            claim = json.loads(resolved_claim_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            findings.append(f"{ref}: closeout:claim-ref-invalid-json")
+            continue
+        if not isinstance(claim, dict):
+            findings.append(f"{ref}: closeout:claim-ref-invalid-root")
+            continue
+        claim_id = str(claim.get("claim_id") or "").strip()
+        if (
+            claim.get("schema") != "agent-runtime-task-claim/v1"
+            or not claim_id
+            or relative.name != f"{claim_id}.json"
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-identity-invalid")
+            continue
+        if closure_gate._claim_is_overlay(claim):
+            findings.append(f"{ref}: closeout:claim-ref-overlay")
+            continue
+        status = str(claim.get("status") or "").strip()
+        if status in ACTIVE_CLAIM_STATUSES:
+            if claim_id not in selected_active_claim_ids:
+                findings.append(f"{ref}: closeout:claim-ref-active-not-selected")
+                continue
+        elif status not in RELEASED_CLAIM_AUTHORITY_STATUSES:
+            findings.append(
+                f"{ref}: closeout:claim-ref-status-invalid:{status or 'missing'}"
+            )
+            continue
+        if not closure_gate._claim_matches_canonical(
+            root, claim, path, meta
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-work-mismatch")
+            continue
+        if status in RELEASED_CLAIM_AUTHORITY_STATUSES:
+            claims.append(claim)
+    return claims, findings
+
+
+def _claim_authority_for_close(
+    root: Path,
+    path: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> tuple[dict[str, Any], list[str]]:
+    """Resolve active authority once and retain linked released authority."""
+
+    resolution = closure_gate.resolve_active_work_contexts(
+        root, work_id=resolved_id
+    )
+    reason = str(resolution.get("reason") or "").strip()
+    if reason:
+        return dict(meta), [f"{resolved_id}: closeout:{reason}"]
+    contexts = list(resolution.get("contexts") or [])
+    merged = dict(contexts[0]) if contexts else dict(meta)
+    selected_ids = {
+        str(value).strip()
+        for value in resolution.get("selected_claim_ids", [])
+        if str(value).strip()
+    }
+    released, findings = _linked_released_claim_authority(
+        root,
+        path,
+        merged,
+        selected_active_claim_ids=selected_ids,
+    )
+    if findings:
+        return dict(meta), findings
+    return closure_gate._merge_claim_authority(merged, released), []
+
+
 def _review_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -2797,6 +2912,11 @@ def close_work(
         reject_unsafe_legacy_scalars=True,
     )
     resolved_id = _work_id_from_meta(path, meta)
+    meta, claim_authority_findings = _claim_authority_for_close(
+        root, path, meta, resolved_id
+    )
+    if claim_authority_findings:
+        raise WorkRegistrationError(claim_authority_findings)
     findings: list[str] = []
     actual_hours_text = "" if actual_hours is None else str(actual_hours).strip()
     actual_tokens_text = "" if actual_tokens is None else str(actual_tokens).strip()
@@ -2829,6 +2949,13 @@ def close_work(
                 *(defect_signatures or []),
             ]
         )
+        normalized_triggers = list(
+            dict.fromkeys(
+                trigger
+                for raw in _list_value(meta.get("escalation_triggers"))
+                if (trigger := _normalized_trigger(raw))
+            )
+        )
     except compound_record.CompoundRecordError as exc:
         raise WorkRegistrationError(
             [f"work-close:{finding}" for finding in exc.findings]
@@ -2839,6 +2966,8 @@ def close_work(
         meta["compound_refs"] = normalized_compounds
     if normalized_signatures:
         meta["defect_signatures"] = normalized_signatures
+    if normalized_triggers:
+        meta["escalation_triggers"] = normalized_triggers
 
     if resolution == "done":
         findings.extend(
@@ -2852,6 +2981,11 @@ def close_work(
                 measurement_unavailable_reason=measurement_unavailable_reason_text,
             )
         )
+    else:
+        # Learning authority is resolution-independent. A repeated defect may
+        # be closed as wontfix/duplicate/superseded/moved-to-vault only after
+        # the same current-work Compound contract has been satisfied.
+        findings.extend(_validate_linked_closeout_refs(root, meta, resolved_id))
     if actual_cost_text:
         _validate_actual_number(actual_cost_text, "actual-cost", findings)
     if findings:

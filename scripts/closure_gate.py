@@ -45,6 +45,11 @@ ACTIVE_CLAIM_STATUSES = {
     "waiting_review",
     "working",
 }
+CLAIM_AUTHORITY_FIELDS = (
+    "escalation_triggers",
+    "defect_signatures",
+    "compound_refs",
+)
 
 
 def _parse_now(value: str | None = None) -> datetime:
@@ -90,6 +95,57 @@ def _git(root: Path, *args: str) -> str:
     except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
         return ""
     return result.stdout if result.returncode == 0 else ""
+
+
+def _git_primary_root(root: Path) -> Path | None:
+    """Return the primary checkout for the repository containing ``root``."""
+
+    common_text = _git(root, "rev-parse", "--git-common-dir").strip()
+    if not common_text:
+        return None
+    common = Path(common_text)
+    if not common.is_absolute():
+        common = root / common
+    try:
+        return common.resolve().parent
+    except OSError:
+        return common.absolute().parent
+
+
+def _resolved_claim_worktree(
+    root: Path,
+    value: str,
+    *,
+    primary_root: Path | None,
+) -> Path | None:
+    """Resolve protocol-relative claim paths against the primary checkout."""
+
+    text = str(value or "").strip()
+    if not text:
+        return None
+    path = Path(text)
+    if path.is_absolute():
+        candidates = [path]
+    elif (
+        primary_root is not None
+        and primary_root.resolve() != root.resolve()
+    ):
+        # Protocol-relative paths are anchored at the primary checkout. The
+        # current-worktree fallback is legacy-only and must not let a shadow
+        # path override an existing primary-relative target.
+        candidates = [primary_root / path, root / path]
+    else:
+        candidates = [root / path]
+    resolved: list[Path] = []
+    for candidate in candidates:
+        try:
+            resolved.append(candidate.resolve())
+        except OSError:
+            resolved.append(candidate.absolute())
+    for candidate in resolved:
+        if candidate.exists():
+            return candidate
+    return resolved[0] if resolved else None
 
 
 def _sum_numstat(text: str) -> int:
@@ -176,36 +232,68 @@ def _read_work(path: Path) -> dict[str, Any] | None:
     return dict(meta) if meta else None
 
 
-def _active_work_contexts(
-    root: Path, *, work_id: str | None = None
-) -> list[dict[str, Any]]:
-    """Return explicit or actively claimed work metadata.
+def _claim_is_overlay(claim: dict[str, Any]) -> bool:
+    marker = claim.get("overlay")
+    if isinstance(marker, str):
+        return marker.strip().lower() not in {
+            "",
+            "0",
+            "false",
+            "no",
+            "off",
+            "none",
+            "null",
+        }
+    if marker is None:
+        return False
+    if isinstance(marker, (bool, int, float)):
+        return bool(marker)
+    return True
 
-    The linked mode is intentionally unavailable when no canonical work item
-    can be resolved. That preserves legacy date-based behavior for old hosts
-    without allowing an unrelated same-day file to satisfy a known claim.
-    """
-    if work_id:
-        path = _work_item_path(root, work_id)
-        meta = _read_work(path) if path else None
-        return [meta] if meta else []
 
+def _claim_authority_shape_valid(claim: dict[str, Any]) -> bool:
+    for field in CLAIM_AUTHORITY_FIELDS:
+        if field not in claim:
+            continue
+        value = claim[field]
+        if not isinstance(value, list) or not all(
+            isinstance(item, str) and item.strip() for item in value
+        ):
+            return False
+    return True
+
+
+def _active_claims(
+    root: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
     claims_dir = root / "agents" / "runtime" / "task_claims"
     claims: list[dict[str, Any]] = []
-    if claims_dir.is_dir():
-        for path in sorted(claims_dir.glob("CLAIM-*.json")):
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if (
-                isinstance(payload, dict)
-                and str(payload.get("status") or "").strip()
-                in ACTIVE_CLAIM_STATUSES
-            ):
-                claims.append(payload)
-
-    ordered_claims = sorted(
+    findings: list[str] = []
+    if not claims_dir.is_dir():
+        return claims, findings
+    for path in sorted(claims_dir.glob("CLAIM-*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            findings.append(f"active-claim-invalid-json:{path.name}")
+            continue
+        if not isinstance(payload, dict):
+            findings.append(f"active-claim-invalid-root:{path.name}")
+            continue
+        status = str(payload.get("status") or "").strip()
+        if status not in ACTIVE_CLAIM_STATUSES or _claim_is_overlay(payload):
+            continue
+        claim_id = str(payload.get("claim_id") or "").strip()
+        if (
+            payload.get("schema") != "agent-runtime-task-claim/v1"
+            or not claim_id
+            or path.name != f"{claim_id}.json"
+            or not _claim_authority_shape_valid(payload)
+        ):
+            findings.append(f"active-claim-integrity-invalid:{path.name}")
+            continue
+        claims.append(payload)
+    ordered = sorted(
         claims,
         key=lambda row: (
             str(row.get("updated_at") or row.get("last_heartbeat") or ""),
@@ -213,41 +301,240 @@ def _active_work_contexts(
         ),
         reverse=True,
     )
-    matching_claims: list[dict[str, Any]] = []
-    for claim in ordered_claims:
-        worktree = str(claim.get("worktree_path") or "").strip()
-        if not worktree:
-            continue
-        try:
-            if Path(worktree).resolve() == root.resolve():
-                matching_claims.append(claim)
-        except OSError:
-            continue
-    candidates = matching_claims or ordered_claims
-    if len(candidates) > 1:
-        # A global Stop hook cannot safely guess which of several active
-        # claims the caller intends to close. A non-linking sentinel keeps the
-        # gate fail-closed; callers can disambiguate with --work-id.
-        return [{"work_id": "__ambiguous_active_claim__"}]
+    return ordered, findings
 
-    contexts: list[dict[str, Any]] = []
-    for claim in candidates:
-        path: Path | None = None
-        unit_spec = str(claim.get("unit_spec") or "").strip()
-        if unit_spec:
-            candidate = root / unit_spec
-            if candidate.is_file():
-                path = candidate
-        claimed_work = str(
-            claim.get("unit_id") or claim.get("task_id") or ""
-        ).strip()
-        if path is None and claimed_work:
-            path = _work_item_path(root, claimed_work)
-        meta = _read_work(path) if path else None
-        resolved = str((meta or {}).get("work_id") or claimed_work).strip()
-        if meta and resolved:
-            contexts.append(meta)
-    return contexts
+
+def _claim_unit_path(root: Path, claim: dict[str, Any]) -> Path | None:
+    unit_spec = str(claim.get("unit_spec") or "").strip()
+    if unit_spec:
+        candidate = root / unit_spec
+        try:
+            resolved = candidate.resolve()
+            resolved.relative_to(root.resolve())
+        except (OSError, ValueError):
+            return None
+        return resolved if resolved.is_file() else None
+    claimed_work = str(
+        claim.get("unit_id") or claim.get("task_id") or ""
+    ).strip()
+    return _work_item_path(root, claimed_work) if claimed_work else None
+
+
+def _canonical_identity(
+    path: Path,
+    meta: dict[str, Any],
+) -> tuple[str, str, str]:
+    work_id = str(
+        meta.get("work_id")
+        or meta.get("unit_id")
+        or meta.get("id")
+        or ""
+    ).strip()
+    unit_id = str(meta.get("unit_id") or "").strip()
+    task_id = str(
+        meta.get("task_id")
+        or meta.get("parent_id")
+        or (work_id if work_id.startswith("TASK-") else "")
+    ).strip()
+    if work_id.startswith("UNIT-") and not unit_id:
+        unit_id = work_id
+    if work_id.startswith("TASK-") and not task_id:
+        task_id = work_id
+    return task_id, unit_id, work_id
+
+
+def _claim_matches_canonical(
+    root: Path,
+    claim: dict[str, Any],
+    path: Path,
+    meta: dict[str, Any],
+) -> bool:
+    task_id, unit_id, work_id = _canonical_identity(path, meta)
+    claim_task = str(claim.get("task_id") or "").strip()
+    claim_unit = str(claim.get("unit_id") or "").strip()
+    if claim_task != task_id:
+        return False
+    if unit_id:
+        if claim_unit != unit_id:
+            return False
+        claim_path = _claim_unit_path(root, claim)
+        return claim_path is not None and claim_path.resolve() == path.resolve()
+    if work_id.startswith("TASK-"):
+        if claim_unit:
+            claim_path = _claim_unit_path(root, claim)
+            canonical_unit_path = _work_item_path(root, claim_unit)
+            if (
+                claim_path is None
+                or canonical_unit_path is None
+                or claim_path.resolve() != canonical_unit_path.resolve()
+            ):
+                return False
+            claim_meta = _read_work(claim_path) if claim_path else None
+            if not claim_meta:
+                return False
+            linked_task, linked_unit, _linked_work = _canonical_identity(
+                claim_path, claim_meta
+            )
+            return linked_task == task_id and linked_unit == claim_unit
+        return not str(claim.get("unit_spec") or "").strip()
+    return False
+
+
+def _claim_may_target_canonical(
+    root: Path,
+    claim: dict[str, Any],
+    path: Path,
+    meta: dict[str, Any],
+) -> bool:
+    task_id, unit_id, _work_id = _canonical_identity(path, meta)
+    if str(claim.get("task_id") or "").strip() == task_id:
+        return True
+    if unit_id and str(claim.get("unit_id") or "").strip() == unit_id:
+        return True
+    claim_path = _claim_unit_path(root, claim)
+    return claim_path is not None and claim_path.resolve() == path.resolve()
+
+
+def _merge_claim_authority(
+    meta: dict[str, Any],
+    claims: list[dict[str, Any]],
+) -> dict[str, Any]:
+    merged = dict(meta)
+    for field in CLAIM_AUTHORITY_FIELDS:
+        merged[field] = list(
+            dict.fromkeys(
+                value
+                for source in (meta, *claims)
+                for value in _list_value(source.get(field))
+            )
+        )
+    return merged
+
+
+def resolve_active_work_contexts(
+    root: Path,
+    *,
+    work_id: str | None = None,
+) -> dict[str, Any]:
+    """Resolve one immutable active-claim authority snapshot.
+
+    Explicit work selects claims only from the current worktree (or an
+    unbound legacy claim that names the canonical work). Inferred Stop selects
+    exactly one non-overlay claim for the current linked worktree. Any selected
+    claim must agree on task, unit, and unit-spec identity before its authority
+    fields can be merged.
+    """
+
+    root = Path(root).resolve()
+    claims, claim_findings = _active_claims(root)
+    if claim_findings:
+        return {
+            "contexts": [],
+            "linked_mode": True,
+            "reason": "active-claim-context-invalid",
+            "selected_claim_ids": [],
+            "findings": claim_findings,
+        }
+    primary_root = _git_primary_root(root)
+    selected: list[dict[str, Any]] = []
+    canonical_path: Path | None = None
+    canonical_meta: dict[str, Any] | None = None
+
+    if work_id:
+        canonical_path = _work_item_path(root, work_id)
+        canonical_meta = _read_work(canonical_path) if canonical_path else None
+        if not canonical_path or not canonical_meta:
+            return {
+                "contexts": [],
+                "linked_mode": False,
+                "reason": None,
+                "selected_claim_ids": [],
+            }
+        for claim in claims:
+            raw_worktree = str(claim.get("worktree_path") or "").strip()
+            resolved_worktree = _resolved_claim_worktree(
+                root,
+                raw_worktree,
+                primary_root=primary_root,
+            )
+            if raw_worktree:
+                if resolved_worktree is not None and resolved_worktree == root:
+                    selected.append(claim)
+                continue
+            if _claim_may_target_canonical(
+                root, claim, canonical_path, canonical_meta
+            ):
+                selected.append(claim)
+    else:
+        bound_matches: list[dict[str, Any]] = []
+        unbound: list[dict[str, Any]] = []
+        for claim in claims:
+            raw_worktree = str(claim.get("worktree_path") or "").strip()
+            if not raw_worktree:
+                unbound.append(claim)
+                continue
+            resolved_worktree = _resolved_claim_worktree(
+                root,
+                raw_worktree,
+                primary_root=primary_root,
+            )
+            if resolved_worktree is not None and resolved_worktree == root:
+                bound_matches.append(claim)
+        selected = bound_matches if bound_matches else unbound
+
+    if len(selected) > 1:
+        return {
+            "contexts": [],
+            "linked_mode": True,
+            "reason": "active-claim-context-ambiguous",
+            "selected_claim_ids": [],
+        }
+    if not selected:
+        contexts = [canonical_meta] if canonical_meta else []
+        return {
+            "contexts": contexts,
+            "linked_mode": bool(canonical_meta),
+            "reason": None,
+            "selected_claim_ids": [],
+        }
+
+    claim = selected[0]
+    if canonical_path is None:
+        canonical_path = _claim_unit_path(root, claim)
+        canonical_meta = _read_work(canonical_path) if canonical_path else None
+    if (
+        canonical_path is None
+        or canonical_meta is None
+        or not _claim_matches_canonical(
+            root, claim, canonical_path, canonical_meta
+        )
+    ):
+        return {
+            "contexts": [],
+            "linked_mode": True,
+            "reason": "active-claim-context-invalid",
+            "selected_claim_ids": [],
+        }
+    return {
+        "contexts": [_merge_claim_authority(canonical_meta, [claim])],
+        "linked_mode": True,
+        "reason": None,
+        "selected_claim_ids": [str(claim.get("claim_id") or "").strip()],
+    }
+
+
+def _active_work_contexts(
+    root: Path, *, work_id: str | None = None
+) -> list[dict[str, Any]]:
+    """Compatibility wrapper for callers that need only resolved metadata."""
+
+    resolution = resolve_active_work_contexts(root, work_id=work_id)
+    if resolution["contexts"]:
+        return list(resolution["contexts"])
+    reason = str(resolution.get("reason") or "").strip()
+    if reason:
+        return [{"work_id": f"__{reason.replace('-', '_')}__"}]
+    return []
 
 
 def _accepted_work_ids(meta: dict[str, Any]) -> set[str]:
@@ -509,11 +796,17 @@ def has_closure_record(
     *,
     now: str | datetime | None = None,
     work_id: str | None = None,
+    _resolution: dict[str, Any] | None = None,
 ) -> dict[str, bool]:
     root = Path(root).resolve()
-    contexts = _active_work_contexts(root, work_id=work_id)
+    resolution = _resolution or resolve_active_work_contexts(
+        root, work_id=work_id
+    )
+    contexts = list(resolution["contexts"])
     if contexts:
         return _linked_closure_records(root, contexts)
+    if resolution.get("linked_mode"):
+        return {"compound": False, "review": False, "retro": False}
     return _legacy_date_records(root, now=now)
 
 
@@ -730,15 +1023,23 @@ def assess(
     window_hours: int | None = None,
     disabled: bool | None = None,
 ) -> dict[str, Any]:
+    root = Path(root).resolve()
     moment = _coerce_now(now)
     threshold = _env_int("AGENT_RUNTIME_CLOSURE_GATE_THRESHOLD", DEFAULT_THRESHOLD) if threshold is None else threshold
     window_hours = _env_int("AGENT_RUNTIME_CLOSURE_GATE_WINDOW_HOURS", DEFAULT_WINDOW_HOURS) if window_hours is None else window_hours
     disabled = _env_bool("AGENT_RUNTIME_CLOSURE_GATE_DISABLE", False) if disabled is None else disabled
     lines = count_substantial_lines(root, now=moment, window_hours=window_hours)
-    records = has_closure_record(root, now=moment, work_id=work_id)
+    resolution = resolve_active_work_contexts(root, work_id=work_id)
+    contexts = list(resolution["contexts"])
+    records = has_closure_record(
+        root,
+        now=moment,
+        work_id=work_id,
+        _resolution=resolution,
+    )
     repeat_failure = repeated_failure_requirement(
-        Path(root).resolve(),
-        _active_work_contexts(Path(root).resolve(), work_id=work_id),
+        root,
+        contexts,
     )
     result = decide(
         lines,
@@ -748,8 +1049,21 @@ def assess(
         now_lines=lines,
         repeat_failure=repeat_failure,
     )
+    resolution_reason = str(resolution.get("reason") or "").strip()
+    if resolution_reason and not disabled:
+        result = {
+            "decision": "block",
+            "reason": resolution_reason,
+            "substantial": lines >= threshold,
+            "missing": ["work_id"],
+            "message": (
+                "Active claim authority could not be bound to exactly one "
+                "canonical task/unit identity. Supply an explicit work ID or "
+                "repair the claim identity before closure."
+            ),
+        }
     try:
-        scribe_evaluation = state_projection.evaluate_state(Path(root))
+        scribe_evaluation = state_projection.evaluate_state(root)
     except Exception as exc:
         scribe_evaluation = {
             "state": "unavailable",

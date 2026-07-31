@@ -50,6 +50,7 @@ MAX_REFS = 64
 MAX_RECORDS = 10000
 MAX_SEARCH_RESULTS = 100
 MAX_FRONTMATTER_SCALAR = 4096
+MAX_ACCEPTED_WATCH_BYTES = 256 * 1024
 ACCEPTED_WATCH_STATUSES = {"accepted", "approved"}
 ACCEPTED_WATCH_DECISIONS = {"accepted_watch"}
 ACCEPTED_WATCH_REVIEWER_FIELDS = (
@@ -301,11 +302,27 @@ def _frontmatter_lines(text: str) -> list[str]:
     return normalized.split("\n")
 
 
+def _read_accepted_watch_text(path: Path) -> str:
+    """Read one authority-bearing watch without unbounded text decoding."""
+
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_ACCEPTED_WATCH_BYTES + 1)
+    if len(raw) > MAX_ACCEPTED_WATCH_BYTES:
+        raise CompoundRecordError(
+            "compound:prevention-watch-oversized"
+        )
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-utf8"
+        ) from exc
+
+
 def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
     """Read the bounded ASCII-separation subset used by accepted-watch refs."""
 
-    with path.open("r", encoding="utf-8", newline="") as stream:
-        text = stream.read()
+    text = _read_accepted_watch_text(path)
     lines = _frontmatter_lines(text)
     if not lines or lines[0] != "---":
         return {}
@@ -376,7 +393,7 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
 def _watch_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
         payload = json.loads(
-            path.read_text(encoding="utf-8"),
+            _read_accepted_watch_text(path),
             object_pairs_hook=_unique_watch_object,
         )
         if not isinstance(payload, dict):

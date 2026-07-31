@@ -131,6 +131,77 @@ def _write_closeable_unit(
     return unit_id, evidence_ref
 
 
+def _write_closeable_task_with_unit(root: Path) -> tuple[str, str]:
+    _write_closeable_unit(root)
+    task_id = "TASK-AR-645"
+    evidence_ref = "reviews/VERIFY-2026-07-29-task-ar-645.json"
+    task = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        f"id: {task_id}\n"
+        f"display_id: {task_id}\n"
+        f"work_id: {task_id}\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "verification_status: passed\n"
+        "title: Compound task closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "evidence_refs:\n"
+        f"  - {evidence_ref}\n"
+        "---\n\n# Compound task closeout fixture\n",
+        encoding="utf-8",
+    )
+    evidence = root / evidence_ref
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-work-verification/v1",
+                "work_id": task_id,
+                "task_id": task_id,
+                "status": "passed",
+                "signal": "pass",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return task_id, evidence_ref
+
+
+def _write_self_declared_duplicate_unit_spec(root: Path) -> str:
+    ref = "reviews/REVIEW-2026-07-29-self-declared-duplicate-unit.md"
+    path = root / ref
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: UNIT-TASK-AR-645-001\n"
+        "kind: unit\n"
+        "parent_id: TASK-AR-645\n"
+        "task_id: TASK-AR-645\n"
+        "unit_id: UNIT-TASK-AR-645-001\n"
+        "---\n\n# Non-canonical duplicate unit\n",
+        encoding="utf-8",
+    )
+    return ref
+
+
+def _tracked_closeout_snapshot(root: Path, work_path: Path, claim_path: Path) -> dict[Path, bytes | None]:
+    paths = (
+        work_path,
+        claim_path,
+        root / "BACKLOG-BOARD.md",
+        root / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        root / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        root / "reviews/INDEX.md",
+    )
+    return {path: path.read_bytes() if path.is_file() else None for path in paths}
+
+
 def _write_claim_only_repeat_authority(
     root: Path,
     *,
@@ -238,6 +309,61 @@ def test_work_close_honors_claim_only_repeat_authority_without_mutation(
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
     assert "Traceback" not in result.stdout + result.stderr
     assert unit_path.read_bytes() == before
+    assert claim_path.read_bytes() == before_claim
+    assert {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    } == before_generated
+
+
+@pytest.mark.parametrize(
+    "resolution",
+    ("wontfix", "duplicate", "superseded", "moved_to_vault"),
+)
+def test_non_done_work_close_still_requires_claim_repeat_compound_without_mutation(
+    tmp_path: Path,
+    resolution: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"claim repeat non-done resolution {resolution}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    generated_paths = (
+        tmp_path / "BACKLOG-BOARD.md",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        tmp_path / "reviews/INDEX.md",
+    )
+    before_unit = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+    before_generated = {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    }
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        resolution,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before_unit
     assert claim_path.read_bytes() == before_claim
     assert {
         path: path.read_bytes() if path.is_file() else None
@@ -555,6 +681,84 @@ def test_work_close_fails_closed_for_invalid_linked_released_claim(
     assert "Traceback" not in result.stdout + result.stderr
     assert unit_path.read_bytes() == before_unit
     assert claim_path.read_bytes() == before_claim
+
+
+def test_task_work_close_rejects_self_declared_duplicate_unit_spec(
+    tmp_path: Path,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    duplicate_ref = _write_self_declared_duplicate_unit_spec(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="self declared duplicate unit claim authority",
+        unit_spec=duplicate_ref,
+        claim_id="CLAIM-self-declared-duplicate-unit",
+    )
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, task_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        task_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "repeat-defect-current-compound-required" not in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, task_path, claim_path) == before
+
+
+@pytest.mark.parametrize(
+    "resolution",
+    ("wontfix", "duplicate", "superseded", "moved_to_vault"),
+)
+def test_claim_only_repeat_requires_compound_for_every_non_done_resolution(
+    tmp_path: Path,
+    resolution: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"claim only repeat non done {resolution}",
+        claim_id=f"CLAIM-repeat-non-done-{resolution}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        resolution,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
 
 
 _DUPLICATE_WATCH_FIELDS = (

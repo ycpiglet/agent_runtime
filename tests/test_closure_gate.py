@@ -1576,6 +1576,105 @@ def test_inferred_stop_ignores_review_overlay_beside_valid_worker_claim(
     ]
 
 
+@pytest.mark.parametrize(
+    "invalid_kind",
+    ("schema", "claim-id", "malformed-json", "authority-type"),
+)
+def test_selected_active_claim_integrity_fails_closed_without_signal_leak(
+    tmp_path,
+    monkeypatch,
+    invalid_kind,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    claim_path = _write_canonical_active_claim(
+        tmp_path,
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    if invalid_kind == "malformed-json":
+        claim_path.write_bytes(b'{"status":"claimed",')
+    else:
+        payload = json.loads(claim_path.read_text(encoding="utf-8"))
+        if invalid_kind == "schema":
+            payload["schema"] = "agent-runtime-task-claim/v0"
+        elif invalid_kind == "claim-id":
+            payload["claim_id"] = "CLAIM-does-not-match-filename"
+        else:
+            payload["defect_signatures"] = {"not": "a-list"}
+        claim_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "active-claim-context-invalid"
+    assert result["repeat_failure"]["defect_signatures"] == []
+    assert "repeated_failure" not in result["repeat_failure"][
+        "escalation_triggers"
+    ]
+
+
+def test_explicit_task_rejects_noncanonical_duplicate_unit_spec(
+    tmp_path,
+    monkeypatch,
+):
+    task = tmp_path / "agents/lead_engineer/tasks/TASK-AR-645.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: TASK-AR-645\n"
+        "id: TASK-AR-645\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "---\n\n# Canonical task\n",
+        encoding="utf-8",
+    )
+    canonical_unit = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645/"
+        "UNIT-TASK-AR-645-001.md"
+    )
+    canonical_unit.parent.mkdir(parents=True, exist_ok=True)
+    canonical_unit.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: UNIT-TASK-AR-645-001\n"
+        "unit_id: UNIT-TASK-AR-645-001\n"
+        "task_id: TASK-AR-645\n"
+        "kind: unit\n"
+        "---\n\n# Canonical unit\n",
+        encoding="utf-8",
+    )
+    duplicate = canonical_unit.with_name("duplicate-self-declared-unit.md")
+    duplicate.write_bytes(canonical_unit.read_bytes())
+    _write_canonical_active_claim(
+        tmp_path,
+        unit_spec=duplicate.relative_to(tmp_path).as_posix(),
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="TASK-AR-645",
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "active-claim-context-invalid"
+    assert result["repeat_failure"]["defect_signatures"] == []
+
+
 def test_inferred_stop_blocks_ambiguous_claims_without_unioning_authority(
     tmp_path,
     monkeypatch,
@@ -1643,6 +1742,11 @@ def test_inferred_stop_selects_primary_relative_claim_from_linked_worktree(
         str(local_worktree),
         "HEAD",
     ).returncode == 0
+
+    # Relative claim paths are protocol-relative to the primary checkout.
+    # A shadow path under the linked worktree must never win resolution.
+    (local_worktree / ".worktrees" / "TASK-AR-645").mkdir(parents=True)
+    (local_worktree / ".worktrees" / "TASK-AR-999").mkdir(parents=True)
     assert _git(
         primary,
         "worktree",

@@ -130,13 +130,13 @@
       "scripts/claim_reaper.py": "sha256:a34c02461ae28bc121f0f6b68db013701a4084fa7b32968378b6c43081674f4e",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
-      "scripts/closure_gate.py": "sha256:87c4c10f5eb0c06cffaf95fc1f0304152c99103223d022372b5c14e9fd3402b1",
+      "scripts/closure_gate.py": "sha256:e429cd4b945ebe69a1d716e522f2626e1e2cc7271ee6612dec96eae60eb8fca1",
       "scripts/codex_subagent_bridge.py": "sha256:d500bc9caa6cd8a01ccb09b3162538928cfc52077d0c4a1641308e574504283e",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4",
       "scripts/collaboration_governance_gate.py": "sha256:287252596cc55c14e61a1a774eec165f565ee1cc6c9fb928d1ca57e04ba062cc",
       "scripts/compound_metrics.py": "sha256:2dfb0c74f030d1c4070abcc60fbb965ef018d997bdacecda46a13c5ffeeb9817",
-      "scripts/compound_record.py": "sha256:30913e6d5ff776124beccb5f736846963882bac20c3da68af982177e3dde5b4e",
+      "scripts/compound_record.py": "sha256:b9770c129889e11638e9b90cefa8dc37c45c3a096702b65655a0bed2e3e49b9a",
       "scripts/continuity_contract_gate.py": "sha256:ca28a4fe2c7883d070dd953e907c1b0907e1244fd417e95c0f0ef96f6704c030",
       "scripts/conversation_work_audit.py": "sha256:371f9c18d19dd8d7230451dd2a9cfbf386863352b02380fcc22934d2d3e96d3c",
       "scripts/cycle_gate.py": "sha256:8316cdeeef228f0078427d5c275060c5a79a23835bb6f31906e970ccbdf1e617",
@@ -242,7 +242,7 @@
       "scripts/verification_freshness_gate.py": "sha256:ecd9af5956ba6b9692f8af35bbab181d6cf6f07ca1205e3461e8dd76f66fe410",
       "scripts/verify_sdk_backend.py": "sha256:d95dcfcb0a8f30bd9e9263e0d3051595445dba0eb240087e1eec9b876d91bcb6",
       "scripts/wave_dispatcher.py": "sha256:1721527376a7206d43903eb27eac244480127f569273f19ddfc9cdf03b2ba2b9",
-      "scripts/work.py": "sha256:e89ac68031ac8747403f2002ee937d87ca5b427b96406ca3682b6f001d1a1cac",
+      "scripts/work.py": "sha256:ebfc74f9b94df7e8a5e4602ec599d73d7826b2ad77a83e0c19b7ff64380ff573",
       "scripts/work_item_classifier.py": "sha256:03237128665f2756847845528bf910a7a8143c1892220402088354f5eb96b926",
       "scripts/work_schema_gate.py": "sha256:5c471d81c92f198b0ec3b5b9b495e574b0ffebb7b842095f84fd15ed5f8c3b41",
       "scripts/worktree_lifecycle_gate.py": "sha256:a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143",
@@ -515,7 +515,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:3de1039e05af3eaba0d6bd20d4a90b1efdc25ae67d81adf276841be79bed182a",
+    "template_digest": "sha256:e9b9e1bb7be285a11f93b60131d1e7bf770f5b411b7b98b4d9c54a1880a44508",
     "template_files": 252
   },
   "profiles": [
