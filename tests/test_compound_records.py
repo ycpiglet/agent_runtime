@@ -493,6 +493,92 @@ def _indented_accepted_watch_document(
     )
 
 
+_NONCANONICAL_LIST_INDENT_STYLES = (
+    "tab-only",
+    "space-tab",
+    "tab-space",
+    "inconsistent",
+)
+_NBSP_AUTHORITY_POSITIONS = (
+    "key-before",
+    "key-after",
+    "value-before",
+    "value-after",
+)
+
+
+def _noncanonical_work_ids_watch_document(
+    *,
+    style: str,
+    current_work_id: str,
+) -> str:
+    if style == "tab-only":
+        items = f"\t- {current_work_id}\n"
+    elif style == "space-tab":
+        items = f" \t- {current_work_id}\n"
+    elif style == "tab-space":
+        items = f"\t - {current_work_id}\n"
+    else:
+        items = (
+            "  - UNIT-TASK-AR-999-001\n"
+            f"   - {current_work_id}\n"
+        )
+    return (
+        "---\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        "work_ids:\n"
+        f"{items}"
+        "---\n\n# Noncanonical list indentation\n"
+    )
+
+
+def _nbsp_accepted_watch_document(
+    *,
+    field: str,
+    position: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows: list[str] = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        rendered_key = key
+        if key == field and position == "key-before":
+            rendered_key = "\u00a0" + key
+        elif key == field and position == "key-after":
+            rendered_key = key + "\u00a0"
+
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == field and position == "value-before":
+                scalar = "\u00a0" + scalar
+            elif key == field and position == "value-after":
+                scalar += "\u00a0"
+            rows.extend((f"{rendered_key}:\n", f"  - {scalar}\n"))
+            continue
+
+        scalar = str(value)
+        if key == field and position == "value-before":
+            scalar = "\u00a0" + scalar
+        elif key == field and position == "value-after":
+            scalar += "\u00a0"
+        rows.append(f"{rendered_key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# NBSP authority\n"
+
+
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
     first = records.normalize_signature(" Closure   same-day evidence ")
     second = records.normalize_signature("closure same-day evidence")
@@ -1419,6 +1505,101 @@ def test_work_close_rejects_unexpected_watch_indentation(
         f"closeout:compound:prevention-watch-invalid:{watch_ref}"
         in result.stderr
     )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _NONCANONICAL_LIST_INDENT_STYLES)
+def test_work_close_rejects_noncanonical_watch_list_indentation(
+    tmp_path: Path,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "noncanonical accepted watch list indentation"
+    watch_ref = "reviews/REVIEW-2026-07-29-noncanonical-list-indent.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _noncanonical_work_ids_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject noncanonical watch list indentation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("position", _NBSP_AUTHORITY_POSITIONS)
+def test_work_close_rejects_nbsp_watch_authority_separation(
+    tmp_path: Path,
+    field: str,
+    position: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "nbsp accepted watch authority separation"
+    watch_ref = "reviews/REVIEW-2026-07-29-nbsp-authority.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nbsp_accepted_watch_document(
+            field=field,
+            position=position,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject NBSP watch authority separation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
 
 

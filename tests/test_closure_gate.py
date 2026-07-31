@@ -438,6 +438,83 @@ def _indented_accepted_watch_document(*, fragment, current_work_id):
     )
 
 
+_NONCANONICAL_LIST_INDENT_STYLES = (
+    "tab-only",
+    "space-tab",
+    "tab-space",
+    "inconsistent",
+)
+_NBSP_AUTHORITY_POSITIONS = (
+    "key-before",
+    "key-after",
+    "value-before",
+    "value-after",
+)
+
+
+def _noncanonical_work_ids_watch_document(*, style, current_work_id):
+    if style == "tab-only":
+        items = f"\t- {current_work_id}\n"
+    elif style == "space-tab":
+        items = f" \t- {current_work_id}\n"
+    elif style == "tab-space":
+        items = f"\t - {current_work_id}\n"
+    else:
+        items = (
+            "  - UNIT-TASK-AR-999-001\n"
+            f"   - {current_work_id}\n"
+        )
+    return (
+        "---\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        "work_ids:\n"
+        f"{items}"
+        "---\n\n# Noncanonical list indentation\n"
+    )
+
+
+def _nbsp_accepted_watch_document(*, field, position, current_work_id):
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        rendered_key = key
+        if key == field and position == "key-before":
+            rendered_key = "\u00a0" + key
+        elif key == field and position == "key-after":
+            rendered_key = key + "\u00a0"
+
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == field and position == "value-before":
+                scalar = "\u00a0" + scalar
+            elif key == field and position == "value-after":
+                scalar += "\u00a0"
+            rows.extend((f"{rendered_key}:\n", f"  - {scalar}\n"))
+            continue
+
+        scalar = str(value)
+        if key == field and position == "value-before":
+            scalar = "\u00a0" + scalar
+        elif key == field and position == "value-after":
+            scalar += "\u00a0"
+        rows.append(f"{rendered_key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# NBSP authority\n"
+
+
 def test_substantial_closeout_blocks_for_overdue_missing_projection():
     base = closure_gate.decide(
         200,
@@ -1461,6 +1538,131 @@ def test_stop_gate_rejects_unexpected_watch_indentation(
         f"compound:prevention-watch-invalid:{watch_ref}" in finding
         for finding in result["repeat_failure"]["findings"]
     )
+
+
+@pytest.mark.parametrize("style", _NONCANONICAL_LIST_INDENT_STYLES)
+def test_stop_gate_rejects_noncanonical_watch_list_indentation(
+    tmp_path,
+    monkeypatch,
+    style,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "noncanonical accepted watch list indentation"
+    watch_ref = f"reviews/REVIEW-{TODAY}-noncanonical-list-indent.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _noncanonical_work_ids_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject noncanonical watch list indentation",
+        summary="Authority list indentation must use one space-only depth.",
+        cause="Broad whitespace trimming erased malformed indentation.",
+        prevention="Reject tab-bearing and inconsistent list indentation.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:51:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
+        for finding in result["repeat_failure"]["findings"]
+    )
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("position", _NBSP_AUTHORITY_POSITIONS)
+def test_stop_gate_rejects_nbsp_watch_authority_separation(
+    tmp_path,
+    monkeypatch,
+    field,
+    position,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "nbsp accepted watch authority separation"
+    watch_ref = f"reviews/REVIEW-{TODAY}-nbsp-authority.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nbsp_accepted_watch_document(
+            field=field,
+            position=position,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject NBSP watch authority separation",
+        summary="Only explicit ASCII YAML separation can grant authority.",
+        cause="Unicode-wide trimming erased NBSP around authority tokens.",
+        prevention="Preserve or reject non-ASCII separation before authority checks.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:52:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
 
 
 def test_parent_repeated_failure_signal_is_inherited_by_stop_gate(
