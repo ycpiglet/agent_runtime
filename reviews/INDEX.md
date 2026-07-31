@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-01T00:28:51+09:00
-record_count: 1243
+generated_at: 2026-08-01T00:46:28+09:00
+record_count: 1246
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1243` review and evidence records under `reviews/`.
+- Summary: indexed `1246` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1243` files |
+| Reviews covered | pass | `1246` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -671,6 +671,7 @@ record_count: 1243
 | `reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md` | `REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan` | md | accepted | n/a | TASK-AR-654 Compound closure T3 replan |
 | `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment` | md | accepted | n/a | TASK-AR-654 Compound record scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -744,6 +745,7 @@ record_count: 1243
 | `reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md` | `SKEPTIC-2026-07-30-task-ar-649-closeout` | md | passed | pass | TASK-AR-649 Closeout Skeptic Review |
 | `reviews/SKEPTIC-2026-07-30-task-ar-650-closeout.md` | `SKEPTIC-2026-07-30-task-ar-650-closeout` | md | passed | pass | TASK-AR-650 Skeptic Closeout |
 | `reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md` | `SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout` | md | revise | fail | TASK-AR-654 YAML Conformance Closeout Skeptic Review |
+| `reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md` | `SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Closeout Skeptic Review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -1274,6 +1276,7 @@ record_count: 1243
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-scalar-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-scalar-final` | md | revise | fail | TASK-AR-654 YAML Conformance Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final` | md | revise | fail | TASK-AR-654 YAML Semantic-Key Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001.md` | `W4B-2026-07-31-unit-task-ar-654-001` | md | revise | fail | TASK-AR-654 Repeated-Failure Compound Hardening Independent W4b |
+| `reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md` | `W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Final W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T00:01:56+09:00
+updated_at: 2026-08-01T00:45:10+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -27,11 +27,22 @@ reservation_id: RES-20260730-112500-842c7890-03
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
+escalation_triggers:
+  - repeated_failure
+defect_signatures:
+  - defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694
+  - defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1
+  - defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb
+  - defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
   - reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
+  - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
+  - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
+  - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
+  - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -78,3 +89,11 @@ verification:
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
+
+## Reopened fail-closed authority repair
+
+Fresh independent review superseded the physical-line W4a for release
+purposes. TASK-AR-654 remains in progress under
+`reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` until
+malformed input, claim-signal propagation, bounded reads, and both task/unit
+closeout authorities pass a new W4 sequence.
