@@ -1028,6 +1028,7 @@ def _write_canonical_active_claim(
     worktree_path: str | None = None,
     defect_signatures: list[str] | None = None,
     escalation_triggers: list[str] | None = None,
+    overlay: bool = False,
 ) -> Path:
     if unit_spec is None:
         unit_spec = (
@@ -1078,6 +1079,8 @@ def _write_canonical_active_claim(
         "defect_signatures": defect_signatures or [],
         "escalation_triggers": escalation_triggers or [],
     }
+    if overlay:
+        claim["overlay"] = True
     claims = root / "agents" / "runtime" / "task_claims"
     claims.mkdir(parents=True, exist_ok=True)
     path = claims / f"{claim_id}.json"
@@ -1472,6 +1475,104 @@ def test_explicit_work_ignores_unrelated_active_claim_authority(
     assert result["repeat_failure"]["defect_signatures"] == []
     assert "repeated_failure" not in result["repeat_failure"][
         "escalation_triggers"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("claim_task_id", "claim_unit_id"),
+    (
+        pytest.param(
+            "TASK-AR-999",
+            "UNIT-TASK-AR-645-001",
+            id="same-unit-wrong-task",
+        ),
+        pytest.param(
+            "TASK-AR-645",
+            "UNIT-TASK-AR-999-001",
+            id="same-task-wrong-unit",
+        ),
+    ),
+)
+def test_explicit_stop_rejects_partial_claim_identity_without_signal_leak(
+    tmp_path,
+    monkeypatch,
+    claim_task_id,
+    claim_unit_id,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    _write_canonical_active_claim(
+        tmp_path,
+        task_id=claim_task_id,
+        unit_id=claim_unit_id,
+        unit_spec=(
+            "agents/lead_engineer/tasks/units/TASK-AR-645/"
+            "UNIT-TASK-AR-645-001.md"
+        ),
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "active-claim-context-invalid"
+    assert result["repeat_failure"]["defect_signatures"] == []
+    assert "repeated_failure" not in result["repeat_failure"][
+        "escalation_triggers"
+    ]
+
+
+def test_inferred_stop_ignores_review_overlay_beside_valid_worker_claim(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    worker_signature = compound_record.normalize_signature(
+        "valid worker claim beside review overlay"
+    )
+    overlay_signature = compound_record.normalize_signature(
+        "review overlay must not become closure authority"
+    )
+    _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-active-worker",
+        defect_signatures=[worker_signature],
+        escalation_triggers=["repeated_failure"],
+    )
+    _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-review-overlay",
+        task_id="REVIEW-TASK-AR-645-independent-auditor",
+        unit_id="",
+        unit_spec="",
+        defect_signatures=[overlay_signature],
+        escalation_triggers=["repeated_failure"],
+        overlay=True,
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["reason"] != "active-claim-context-ambiguous"
+    assert result["repeat_failure"]["defect_signatures"] == [worker_signature]
+    assert overlay_signature not in result["repeat_failure"][
+        "defect_signatures"
     ]
 
 
