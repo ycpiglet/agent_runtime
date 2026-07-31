@@ -333,8 +333,7 @@ def _canonical_identity(
     unit_id = str(meta.get("unit_id") or "").strip()
     task_id = str(
         meta.get("task_id")
-        or meta.get("parent_id")
-        or (work_id if work_id.startswith("TASK-") else "")
+        or (work_id if work_id.startswith("TASK-") else meta.get("parent_id"))
     ).strip()
     if work_id.startswith("UNIT-") and not unit_id:
         unit_id = work_id

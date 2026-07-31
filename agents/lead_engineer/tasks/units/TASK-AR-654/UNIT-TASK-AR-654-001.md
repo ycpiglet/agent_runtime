@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T00:45:10+09:00
+updated_at: 2026-08-01T01:44:22+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -30,6 +30,8 @@ defect_signatures:
   - defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1
   - defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb
   - defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
   - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
@@ -41,6 +43,7 @@ inputs:
   - reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md
   - reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
+  - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -70,6 +73,7 @@ target_files:
   - tests/test_lock_merge_driver.py
   - tests/test_regen_host_lock_if_needed.py
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/INDEX.json
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
@@ -84,8 +88,8 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
-verified_at: 2026-08-01T00:41:04+09:00
-verified_by: codex-skeptic-task-ar-654-physical-line-closeout
+verified_at: 2026-08-01T01:44:22+09:00
+verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030.json
@@ -94,7 +98,9 @@ evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json
+  - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json
 review_refs:
+  - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -113,6 +119,7 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
 - reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
 - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
+- reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
 - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
 - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
 - src/agent_runtime/knowledge_records.py
@@ -143,6 +150,7 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - tests/test_lock_merge_driver.py
 - tests/test_regen_host_lock_if_needed.py
 - agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json
+- agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
 - agents/project/knowledge/compounds/INDEX.json
 
 ## Scope
@@ -206,3 +214,12 @@ inconsistencies. The unit remains failed under
 `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` until
 one new candidate passes fresh machine, W4a, W4b, skeptic, and actual closeout
 validation.
+
+## Corrective Compound scope amendment
+
+The fresh Verify-backed record at
+`agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json`
+is an additive lifecycle target under
+`reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md`.
+The earlier physical-line record remains immutable and is retained only as
+source history.

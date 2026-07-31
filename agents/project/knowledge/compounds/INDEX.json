@@ -1,7 +1,14 @@
 {
   "by_signature": {
+    "defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
     "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694": [
-      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b"
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
     ],
     "defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
@@ -20,6 +27,9 @@
     ],
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
     ],
     "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4": [
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
@@ -89,6 +99,9 @@
       "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
       "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
     ],
+    "TASK-AR-654": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -123,10 +136,11 @@
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
     "UNIT-TASK-AR-654-001": [
-      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b"
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
     ]
   },
-  "record_count": 18,
+  "record_count": 19,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -392,8 +406,26 @@
       "work_ids": [
         "UNIT-TASK-AR-654-001"
       ]
+    },
+    {
+      "created_at": "2026-08-01T01:46:07+09:00",
+      "defect_signatures": [
+        "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694",
+        "defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1",
+        "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb",
+        "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a"
+      ],
+      "id": "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Fail closed across accepted-watch and claim authority boundaries",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:2d90de849b61ffc4405167b8fd32def8f6d99b932c12d3a44f2b2b2dd9dc9204"
+  "source_digest": "sha256:11628154f6939d3070d3a725c1fcd8a2cc440b0eb6affd18f523239f27e1728f"
 }

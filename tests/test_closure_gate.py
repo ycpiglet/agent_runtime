@@ -1357,6 +1357,55 @@ def test_explicit_stop_context_preserves_matching_claim_only_repeat_authority(
     assert result["reason"] == "repeated-failure-compound-required"
 
 
+def test_explicit_task_context_uses_task_work_id_when_parent_is_taskset(
+    tmp_path,
+    monkeypatch,
+):
+    review_ref = _write_linked_review(tmp_path)
+    _write_active_unit(tmp_path, review_refs=[review_ref])
+    task_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-645.md"
+    )
+    task_path.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-AR-645\n"
+        "work_id: TASK-AR-645\n"
+        "kind: task\n"
+        "parent_id: TASKSET-AR-TEST\n"
+        "unit_spec: agents/lead_engineer/tasks/units/TASK-AR-645/"
+        "UNIT-TASK-AR-645-001.md\n"
+        "review_refs:\n"
+        f"  - {review_ref}\n"
+        "---\n\n# Active task\n",
+        encoding="utf-8",
+    )
+    _write_canonical_active_claim(
+        tmp_path,
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="TASK-AR-645",
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["required"] is True
+    assert result["repeat_failure"]["defect_signatures"] == [
+        _CLAIM_ONLY_SIGNATURE
+    ]
+
+
 @pytest.mark.parametrize("claim_signal", ("repeated_failure", "defect_signature"))
 def test_actual_stop_hook_blocks_claim_only_repeat_below_churn(
     tmp_path,

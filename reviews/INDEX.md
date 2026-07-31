@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-01T00:46:28+09:00
-record_count: 1246
+generated_at: 2026-08-01T01:51:36+09:00
+record_count: 1248
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1246` review and evidence records under `reviews/`.
+- Summary: indexed `1248` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1246` files |
+| Reviews covered | pass | `1248` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -672,6 +672,7 @@ record_count: 1246
 | `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment` | md | accepted | n/a | TASK-AR-654 Compound record scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
+| `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -1022,6 +1023,7 @@ record_count: 1246
 | `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244 |
 | `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354 |
 | `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151 |
+| `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

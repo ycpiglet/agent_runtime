@@ -130,7 +130,7 @@
       "scripts/claim_reaper.py": "sha256:a34c02461ae28bc121f0f6b68db013701a4084fa7b32968378b6c43081674f4e",
       "scripts/claim_reaper_hook.py": "sha256:07591f4caaca373a26792af8234fc6436405974815a3c3801a2b43795934d0fa",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
-      "scripts/closure_gate.py": "sha256:e429cd4b945ebe69a1d716e522f2626e1e2cc7271ee6612dec96eae60eb8fca1",
+      "scripts/closure_gate.py": "sha256:501f7e3fab8c26d1eaba794354c788a025018e4079e5852327c926fb7dbf139f",
       "scripts/codex_subagent_bridge.py": "sha256:d500bc9caa6cd8a01ccb09b3162538928cfc52077d0c4a1641308e574504283e",
       "scripts/collab_log.py": "sha256:594cd860b176507271e65d2d30edf003c1fce166481c392888e78bc625148083",
       "scripts/collaboration_concurrency_gate.py": "sha256:a2c731f4883cd2e6beb1ad16e4380866df45c9496ccbeddadaa58d03072b62b4",
@@ -515,7 +515,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:e9b9e1bb7be285a11f93b60131d1e7bf770f5b411b7b98b4d9c54a1880a44508",
+    "template_digest": "sha256:89739c660b79f48287a2dccce0a55281223d12a429c4d74a6e34fbaa5a617c41",
     "template_files": 252
   },
   "profiles": [
