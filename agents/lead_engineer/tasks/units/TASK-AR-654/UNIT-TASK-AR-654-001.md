@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T01:44:22+09:00
+updated_at: 2026-08-01T02:01:34+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -88,7 +88,7 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
-verified_at: 2026-08-01T01:44:22+09:00
+verified_at: 2026-08-01T01:57:50+09:00
 verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
@@ -99,8 +99,10 @@ evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json
+  - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750.json
 review_refs:
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
+  - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
