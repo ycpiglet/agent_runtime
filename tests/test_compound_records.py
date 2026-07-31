@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -511,6 +512,17 @@ _NONEXACT_MARKER_STYLES = (
     "nbsp-open",
     "nbsp-close",
 )
+_SPLITLINES_SEPARATORS = (
+    pytest.param("\v", id="vt"),
+    pytest.param("\f", id="ff"),
+    pytest.param("\x1c", id="fs"),
+    pytest.param("\x1d", id="gs"),
+    pytest.param("\x1e", id="rs"),
+    pytest.param("\x85", id="nel"),
+    pytest.param("\u2028", id="line-separator"),
+    pytest.param("\u2029", id="paragraph-separator"),
+)
+_FRONTMATTER_MARKER_POSITIONS = ("opening", "closing")
 _LOSSY_AUTHORITY_STYLES = (
     "decision-padding",
     "status-padding",
@@ -619,6 +631,60 @@ def _nonexact_marker_watch_document(
         f"{closing}\n"
         "---\n\n# Nonexact marker authority\n"
     )
+
+
+def _line_boundary_accepted_watch_document(
+    *,
+    separator: str,
+    marker_position: str,
+    current_work_id: str,
+) -> str:
+    opening_ending = separator if marker_position == "opening" else "\n"
+    closing_ending = separator if marker_position == "closing" else "\n"
+    return (
+        f"---{opening_ending}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"---{closing_ending}"
+        "# Noncanonical physical line boundary\n"
+    )
+
+
+def _line_ending_accepted_watch_document(
+    *,
+    line_ending: str,
+    current_work_id: str,
+) -> str:
+    return line_ending.join(
+        (
+            "---",
+            "status: accepted",
+            "decision: accepted_watch",
+            "reviewed_by: qa-independent",
+            f"work_id: {current_work_id}",
+            "---",
+            "",
+            "# Physical line-ending control",
+            "",
+        )
+    )
+
+
+@pytest.fixture(scope="module", params=("source", "packaged"))
+def _accepted_watch_helper(request):
+    if request.param == "source":
+        return records._accepted_watch_findings
+
+    spec = importlib.util.spec_from_file_location(
+        "_packaged_compound_record_for_line_boundary_test",
+        TEMPLATE_SCRIPT,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module._accepted_watch_findings
 
 
 def _fullwidth_ascii(value: str) -> str:
@@ -1747,6 +1813,125 @@ def test_work_close_rejects_nonexact_watch_frontmatter_markers(
     )
 
     assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)
+@pytest.mark.parametrize("marker_position", _FRONTMATTER_MARKER_POSITIONS)
+def test_accepted_watch_helpers_reject_splitlines_separator_markers(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    separator: str,
+    marker_position: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-boundary-helper.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_boundary_accepted_watch_document(
+            separator=separator,
+            marker_position=marker_position,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
+
+
+@pytest.mark.parametrize(
+    ("line_ending", "expected_accepted"),
+    (
+        pytest.param("\n", True, id="lf"),
+        pytest.param("\r\n", True, id="crlf"),
+        pytest.param("\r", False, id="lone-cr"),
+    ),
+)
+def test_accepted_watch_helpers_enforce_physical_line_endings(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    line_ending: str,
+    expected_accepted: bool,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-ending-helper.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_ending_accepted_watch_document(
+            line_ending=line_ending,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is expected_accepted
+    assert findings == (
+        []
+        if expected_accepted
+        else [f"compound:prevention-watch-invalid:{watch_ref}"]
+    )
+
+
+@pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)
+@pytest.mark.parametrize("marker_position", _FRONTMATTER_MARKER_POSITIONS)
+def test_work_close_rejects_splitlines_separator_markers(
+    tmp_path: Path,
+    separator: str,
+    marker_position: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "splitlines separator accepted watch marker"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-boundary-close.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_boundary_accepted_watch_document(
+            separator=separator,
+            marker_position=marker_position,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject splitlines separator watch marker",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
 
 

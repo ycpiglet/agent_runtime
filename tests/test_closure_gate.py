@@ -456,6 +456,17 @@ _NONEXACT_MARKER_STYLES = (
     "nbsp-open",
     "nbsp-close",
 )
+_SPLITLINES_SEPARATORS = (
+    pytest.param("\v", id="vt"),
+    pytest.param("\f", id="ff"),
+    pytest.param("\x1c", id="fs"),
+    pytest.param("\x1d", id="gs"),
+    pytest.param("\x1e", id="rs"),
+    pytest.param("\x85", id="nel"),
+    pytest.param("\u2028", id="line-separator"),
+    pytest.param("\u2029", id="paragraph-separator"),
+)
+_FRONTMATTER_MARKER_POSITIONS = ("opening", "closing")
 _LOSSY_AUTHORITY_STYLES = (
     "decision-padding",
     "status-padding",
@@ -550,6 +561,22 @@ def _nonexact_marker_watch_document(*, style, current_work_id):
         f"work_id: {current_work_id}\n"
         f"{closing}\n"
         "---\n\n# Nonexact marker authority\n"
+    )
+
+
+def _line_boundary_accepted_watch_document(
+    *, separator, marker_position, current_work_id
+):
+    opening_ending = separator if marker_position == "opening" else "\n"
+    closing_ending = separator if marker_position == "closing" else "\n"
+    return (
+        f"---{opening_ending}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"---{closing_ending}"
+        "# Noncanonical physical line boundary\n"
     )
 
 
@@ -1821,6 +1848,71 @@ def test_stop_gate_rejects_nonexact_watch_frontmatter_markers(
     assert result["decision"] == "block"
     assert result["reason"] == "repeated-failure-compound-required"
     assert result["repeat_failure"]["satisfied"] is False
+
+
+@pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)
+@pytest.mark.parametrize("marker_position", _FRONTMATTER_MARKER_POSITIONS)
+def test_stop_gate_rejects_splitlines_separator_markers(
+    tmp_path,
+    monkeypatch,
+    separator,
+    marker_position,
+):
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "splitlines separator accepted watch marker"
+    watch_ref = f"reviews/REVIEW-{TODAY}-line-boundary-stop.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_boundary_accepted_watch_document(
+            separator=separator,
+            marker_position=marker_position,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=[unit_id],
+        defect_signatures=[signature],
+        title="Reject splitlines separator watch marker",
+        summary="Only LF and CRLF may delimit authority-bearing Markdown.",
+        cause="Unicode-wide splitting erased a noncanonical line separator.",
+        prevention="Reject noncanonical physical line boundaries before parsing.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=[watch_ref],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:54:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[signature],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id=unit_id,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
+        for finding in result["repeat_failure"]["findings"]
+    )
 
 
 @pytest.mark.parametrize("style", _LOSSY_AUTHORITY_STYLES)
