@@ -1518,6 +1518,82 @@ def test_inferred_stop_blocks_ambiguous_claims_without_unioning_authority(
     assert result["repeat_failure"]["compound_refs"] == []
 
 
+def test_inferred_stop_selects_primary_relative_claim_from_linked_worktree(
+    tmp_path,
+    monkeypatch,
+):
+    primary = tmp_path / "primary"
+    primary.mkdir()
+    assert _git(primary, "init").returncode == 0
+    assert _git(primary, "config", "user.email", "test@example.invalid").returncode == 0
+    assert _git(primary, "config", "user.name", "Test User").returncode == 0
+    (primary / "seed.txt").write_text("seed\n", encoding="utf-8")
+    assert _git(primary, "add", "seed.txt").returncode == 0
+    assert _git(primary, "commit", "-m", "seed").returncode == 0
+
+    local_worktree = primary / ".worktrees" / "TASK-AR-645"
+    other_worktree = primary / ".worktrees" / "TASK-AR-999"
+    assert _git(
+        primary,
+        "worktree",
+        "add",
+        "-b",
+        "test/relative-local",
+        str(local_worktree),
+        "HEAD",
+    ).returncode == 0
+    assert _git(
+        primary,
+        "worktree",
+        "add",
+        "-b",
+        "test/relative-other",
+        str(other_worktree),
+        "HEAD",
+    ).returncode == 0
+
+    review_ref = _write_linked_review(local_worktree)
+    _write_active_unit(local_worktree, review_refs=[review_ref])
+    local_signature = compound_record.normalize_signature(
+        "primary relative linked worktree authority"
+    )
+    other_signature = compound_record.normalize_signature(
+        "other relative linked worktree authority"
+    )
+    _write_canonical_active_claim(
+        local_worktree,
+        claim_id="CLAIM-relative-local",
+        worktree_path=".worktrees/TASK-AR-645",
+        defect_signatures=[local_signature],
+        escalation_triggers=["repeated_failure"],
+    )
+    _write_canonical_active_claim(
+        local_worktree,
+        claim_id="CLAIM-relative-other",
+        task_id="TASK-AR-999",
+        unit_id="UNIT-TASK-AR-999-001",
+        unit_spec="",
+        worktree_path=".worktrees/TASK-AR-999",
+        defect_signatures=[other_signature],
+        escalation_triggers=["repeated_failure"],
+    )
+    _set_low_churn_and_neutral_scribe(monkeypatch)
+    monkeypatch.chdir(local_worktree)
+
+    result = closure_gate.assess(
+        local_worktree,
+        now=NOW,
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["reason"] == "repeated-failure-compound-required"
+    assert result["reason"] != "active-claim-context-ambiguous"
+    assert result["repeat_failure"]["defect_signatures"] == [local_signature]
+    assert other_signature not in result["repeat_failure"]["defect_signatures"]
+
+
 def test_declared_repeat_accepts_current_compound_with_supported_prevention(
     tmp_path,
     monkeypatch,

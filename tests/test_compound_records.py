@@ -55,7 +55,11 @@ def _create(
     )
 
 
-def _write_closeable_unit(root: Path) -> tuple[str, str]:
+def _write_closeable_unit(
+    root: Path,
+    *,
+    claim_refs: list[str] | None = None,
+) -> tuple[str, str]:
     task_id = "TASK-AR-645"
     unit_id = "UNIT-TASK-AR-645-001"
     task = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
@@ -86,6 +90,11 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
         / f"{unit_id}.md"
     )
     unit.parent.mkdir(parents=True, exist_ok=True)
+    claim_ref_lines = ""
+    if claim_refs:
+        claim_ref_lines = "claim_refs:\n" + "".join(
+            f"  - {claim_ref}\n" for claim_ref in claim_refs
+        )
     unit.write_text(
         "---\n"
         "schema_version: agent-runtime-work-item/v1\n"
@@ -99,6 +108,7 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
         "owner: lead_engineer\n"
         "evidence_refs:\n"
         f"  - {evidence_ref}\n"
+        f"{claim_ref_lines}"
         "---\n\n# Compound closeout fixture\n",
         encoding="utf-8",
     )
@@ -126,22 +136,27 @@ def _write_claim_only_repeat_authority(
     *,
     signature: str,
     compound_refs: list[str] | None = None,
+    status: str = "claimed",
+    claim_id: str = "CLAIM-claim-only-repeat-close",
+    task_id: str = "TASK-AR-645",
+    unit_id: str = "UNIT-TASK-AR-645-001",
+    unit_spec: str | None = None,
+    overlay: bool = False,
 ) -> Path:
-    task_id = "TASK-AR-645"
-    unit_id = "UNIT-TASK-AR-645-001"
-    unit_spec = (
-        "agents/lead_engineer/tasks/units/TASK-AR-645/"
-        "UNIT-TASK-AR-645-001.md"
-    )
+    if unit_spec is None:
+        unit_spec = (
+            "agents/lead_engineer/tasks/units/TASK-AR-645/"
+            "UNIT-TASK-AR-645-001.md"
+        )
     claim = {
         "schema": "agent-runtime-task-claim/v1",
-        "claim_id": "CLAIM-claim-only-repeat-close",
+        "claim_id": claim_id,
         "task_id": task_id,
         "unit_id": unit_id,
         "unit_spec": unit_spec,
         "agent_role": "lead-engineer",
         "agent_instance_id": "le-claim-only-repeat-close",
-        "status": "claimed",
+        "status": status,
         "worktree_path": str(root.resolve()),
         "claimed_at": "2026-07-29T03:00:00+09:00",
         "last_heartbeat": "2026-07-29T03:00:00+09:00",
@@ -153,12 +168,14 @@ def _write_claim_only_repeat_authority(
             "expires_at": "2099-07-29T03:30:00+09:00",
         },
         "escalation_triggers": ["repeated_failure"],
-        "defect_signatures": [signature],
+        "defect_signatures": [records.normalize_signature(signature)],
         "compound_refs": compound_refs or [],
     }
+    if overlay:
+        claim["overlay"] = True
     claims = root / "agents" / "runtime" / "task_claims"
     claims.mkdir(parents=True, exist_ok=True)
-    path = claims / "CLAIM-claim-only-repeat-close.json"
+    path = claims / f"{claim_id}.json"
     path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
     return path
 
@@ -280,6 +297,263 @@ def test_work_close_persists_valid_claim_only_repeat_authority(
     unit_text = unit_path.read_text(encoding="utf-8")
     assert f"  - {records.normalize_signature(signature)}" in unit_text
     assert f"  - {record_ref}" in unit_text
+    assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_consumes_only_linked_released_claim_and_persists_authority(
+    tmp_path: Path,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "released claim repeated failure close authority"
+    prevention_ref = "tests/test_released_claim_repeat_authority.py"
+    prevention = tmp_path / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text(
+        "def test_released_claim_repeat_authority():\n    assert True\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Persist released claim repeat authority",
+        prevention_refs=[prevention_ref],
+    )
+    record_ref = records.record_ref(tmp_path, record_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-repeat-close",
+    )
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    _write_closeable_unit(tmp_path, claim_refs=[claim_ref])
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    normalized_signature = records.normalize_signature(signature)
+    assert payload["defect_signatures"] == [normalized_signature]
+    assert payload["compound_refs"] == [record_ref]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    assert f"  - {normalized_signature}" in unit_text
+    assert f"  - {record_ref}" in unit_text
+    assert f"  - {claim_ref}" in unit_text
+    assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_unions_multiple_linked_released_claim_authorities(
+    tmp_path: Path,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    claim_refs: list[str] = []
+    compound_refs: list[str] = []
+    signatures: list[str] = []
+    claim_snapshots: dict[Path, bytes] = {}
+    for index in (1, 2):
+        signature = f"released linked claim union authority {index}"
+        normalized_signature = records.normalize_signature(signature)
+        prevention_ref = f"tests/test_released_claim_union_{index}.py"
+        prevention = tmp_path / prevention_ref
+        prevention.parent.mkdir(parents=True, exist_ok=True)
+        prevention.write_text(
+            f"def test_released_claim_union_{index}():\n    assert True\n",
+            encoding="utf-8",
+        )
+        record_path, _record = _create(
+            tmp_path,
+            work_id=unit_id,
+            signature=signature,
+            title=f"Persist released claim union authority {index}",
+            prevention_refs=[prevention_ref],
+        )
+        record_ref = records.record_ref(tmp_path, record_path)
+        claim_path = _write_claim_only_repeat_authority(
+            tmp_path,
+            signature=normalized_signature,
+            compound_refs=[record_ref],
+            status="released",
+            claim_id=f"CLAIM-released-repeat-union-{index}",
+        )
+        claim_refs.append(claim_path.relative_to(tmp_path).as_posix())
+        compound_refs.append(record_ref)
+        signatures.append(normalized_signature)
+        claim_snapshots[claim_path] = claim_path.read_bytes()
+    _write_closeable_unit(tmp_path, claim_refs=claim_refs)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert set(payload["defect_signatures"]) == set(signatures)
+    assert set(payload["compound_refs"]) == set(compound_refs)
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    for value in (*claim_refs, *compound_refs, *signatures):
+        assert f"  - {value}" in unit_text
+    assert {
+        path: path.read_bytes() for path in claim_snapshots
+    } == claim_snapshots
+
+
+def test_work_close_does_not_scan_unlinked_released_claims(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "unlinked released claim must stay out of closeout"
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        status="released",
+        claim_id="CLAIM-unlinked-released-repeat-close",
+    )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert payload["defect_signatures"] == []
+    assert payload["compound_refs"] == []
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    assert records.normalize_signature(signature) not in unit_path.read_text(
+        encoding="utf-8"
+    )
+    assert claim_path.read_bytes() == before_claim
+
+
+@pytest.mark.parametrize(
+    "invalid_kind",
+    (
+        "overlay",
+        "expired-status",
+        "wrong-task",
+        "wrong-unit",
+        "wrong-unit-spec",
+        "malformed-json",
+    ),
+)
+def test_work_close_fails_closed_for_invalid_linked_released_claim(
+    tmp_path: Path,
+    invalid_kind: str,
+) -> None:
+    signature = f"invalid linked released claim {invalid_kind}"
+    kwargs: dict[str, object] = {
+        "status": "released",
+        "claim_id": f"CLAIM-invalid-linked-{invalid_kind}",
+    }
+    if invalid_kind == "overlay":
+        kwargs["overlay"] = True
+    elif invalid_kind == "expired-status":
+        # Explicit lifecycle state only. Wall-clock lease expiry belongs to
+        # TASK-AR-655 and is deliberately not inferred in this test.
+        kwargs["status"] = "expired"
+    elif invalid_kind == "wrong-task":
+        kwargs["task_id"] = "TASK-AR-999"
+    elif invalid_kind == "wrong-unit":
+        kwargs["unit_id"] = "UNIT-TASK-AR-999-001"
+    elif invalid_kind == "wrong-unit-spec":
+        kwargs["unit_spec"] = (
+            "agents/lead_engineer/tasks/units/TASK-AR-999/"
+            "UNIT-TASK-AR-999-001.md"
+        )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        **kwargs,
+    )
+    if invalid_kind == "malformed-json":
+        claim_path.write_bytes(b'{"status":"released",')
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_unit = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before_unit
     assert claim_path.read_bytes() == before_claim
 
 
