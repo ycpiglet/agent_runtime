@@ -61,6 +61,16 @@ ACCEPTED_WATCH_REVIEWER_FIELDS = (
 )
 REVIEWER_IDENTITY_RE = re.compile(r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$")
 FRONTMATTER_KEY_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
+NONCANONICAL_FRONTMATTER_LINE_SEPARATORS = (
+    "\v",
+    "\f",
+    "\x1c",
+    "\x1d",
+    "\x1e",
+    "\x85",
+    "\u2028",
+    "\u2029",
+)
 REVIEWER_IDENTITY_PLACEHOLDERS = {
     "-",
     "~",
@@ -273,11 +283,30 @@ def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return payload
 
 
+def _frontmatter_lines(text: str) -> list[str]:
+    """Split authority Markdown using only explicit LF or CRLF endings."""
+
+    if any(
+        separator in text
+        for separator in NONCANONICAL_FRONTMATTER_LINE_SEPARATORS
+    ):
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-line-ending"
+        )
+    normalized = text.replace("\r\n", "\n")
+    if "\r" in normalized:
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-line-ending"
+        )
+    return normalized.split("\n")
+
+
 def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
     """Read the bounded ASCII-separation subset used by accepted-watch refs."""
 
-    text = path.read_text(encoding="utf-8")
-    lines = text.splitlines()
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        text = stream.read()
+    lines = _frontmatter_lines(text)
     if not lines or lines[0] != "---":
         return {}
     try:
