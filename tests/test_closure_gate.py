@@ -1384,16 +1384,38 @@ def test_actual_stop_hook_blocks_claim_only_repeat_below_churn(
     assert payload["reason"] == "repeated-failure-compound-required"
 
 
+@pytest.mark.parametrize(
+    ("claim_task_id", "claim_unit_id"),
+    (
+        pytest.param(
+            "TASK-AR-999",
+            "UNIT-TASK-AR-645-001",
+            id="same-unit-wrong-task",
+        ),
+        pytest.param(
+            "TASK-AR-645",
+            "UNIT-TASK-AR-999-001",
+            id="same-task-wrong-unit",
+        ),
+        pytest.param(
+            "TASK-AR-999",
+            "UNIT-TASK-AR-999-001",
+            id="both-identities-wrong",
+        ),
+    ),
+)
 def test_inferred_stop_rejects_identity_mismatched_claim_without_signal_leak(
     tmp_path,
     monkeypatch,
+    claim_task_id,
+    claim_unit_id,
 ):
     review_ref = _write_linked_review(tmp_path)
     _write_active_unit(tmp_path, review_refs=[review_ref])
     _write_canonical_active_claim(
         tmp_path,
-        task_id="TASK-AR-999",
-        unit_id="UNIT-TASK-AR-999-001",
+        task_id=claim_task_id,
+        unit_id=claim_unit_id,
         unit_spec=(
             "agents/lead_engineer/tasks/units/TASK-AR-645/"
             "UNIT-TASK-AR-645-001.md"

@@ -125,6 +125,7 @@ def _write_claim_only_repeat_authority(
     root: Path,
     *,
     signature: str,
+    compound_refs: list[str] | None = None,
 ) -> Path:
     task_id = "TASK-AR-645"
     unit_id = "UNIT-TASK-AR-645-001"
@@ -153,7 +154,7 @@ def _write_claim_only_repeat_authority(
         },
         "escalation_triggers": ["repeated_failure"],
         "defect_signatures": [signature],
-        "compound_refs": [],
+        "compound_refs": compound_refs or [],
     }
     claims = root / "agents" / "runtime" / "task_claims"
     claims.mkdir(parents=True, exist_ok=True)
@@ -179,7 +180,10 @@ def test_work_close_honors_claim_only_repeat_authority_without_mutation(
 ) -> None:
     unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
     signature = "claim only repeated failure close authority"
-    _write_claim_only_repeat_authority(tmp_path, signature=signature)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+    )
     unit_path = (
         tmp_path
         / "agents"
@@ -190,6 +194,17 @@ def test_work_close_honors_claim_only_repeat_authority_without_mutation(
         / f"{unit_id}.md"
     )
     before = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+    generated_paths = (
+        tmp_path / "BACKLOG-BOARD.md",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        tmp_path / "reviews/INDEX.md",
+    )
+    before_generated = {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    }
 
     result = _run_work(
         tmp_path,
@@ -206,6 +221,66 @@ def test_work_close_honors_claim_only_repeat_authority_without_mutation(
     assert "closeout:repeat-defect-current-compound-required" in result.stderr
     assert "Traceback" not in result.stdout + result.stderr
     assert unit_path.read_bytes() == before
+    assert claim_path.read_bytes() == before_claim
+    assert {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    } == before_generated
+
+
+def test_work_close_persists_valid_claim_only_repeat_authority(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "claim only repeated failure close authority"
+    prevention_ref = "tests/test_claim_repeat_authority.py"
+    prevention = tmp_path / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text("def test_claim_repeat_authority():\n    assert True\n", encoding="utf-8")
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Persist claim-only repeat authority",
+        prevention_refs=[prevention_ref],
+    )
+    record_ref = records.record_ref(tmp_path, record_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+    )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert payload["defect_signatures"] == [records.normalize_signature(signature)]
+    assert payload["compound_refs"] == [record_ref]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    assert f"  - {records.normalize_signature(signature)}" in unit_text
+    assert f"  - {record_ref}" in unit_text
+    assert claim_path.read_bytes() == before_claim
 
 
 _DUPLICATE_WATCH_FIELDS = (
