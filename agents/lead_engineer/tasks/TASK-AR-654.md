@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T00:09:30+09:00
+updated_at: 2026-08-03T00:18:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -116,6 +116,7 @@ review_refs:
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
+  - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -384,6 +385,16 @@ This sets bounded W4b acceptance true but does not authorize release. The task
 remains in progress and the claim remains held pending a distinct skeptic,
 native Windows evidence, Scribe closure work, and the registered adjacent
 release blockers.
+
+## Post-W4 handoff to adjacent blockers
+
+The taskset T2 gate was revalidated in
+`reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md`.
+Because the bounded worker and W4 chain is complete but closure/release remains
+blocked, the AR-654 claim is transitioned from active `claimed` to inactive
+`blocked` with the skeptic report as evidence. This is not claim release:
+TASK-AR-654 remains in progress, its unit remains failed, and native Windows,
+Scribe, AR-655, AR-657, and AR-651 remain explicit prerequisites.
 
 ## Adverse-W4b repair final skeptic
 

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T00:10:07+09:00
-record_count: 1291
+generated_at: 2026-08-03T00:19:46+09:00
+record_count: 1292
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1291` review and evidence records under `reviews/`.
+- Summary: indexed `1292` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1291` files |
+| Reviews covered | pass | `1292` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -699,6 +699,7 @@ record_count: 1291
 | `reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan` | md | accepted | n/a | TASK-AR-654 transaction-truth T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md` | `REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction` | md | accepted | correction | TASK-AR-654 W4b evidence and contract correction |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
+| `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

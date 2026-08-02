@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T00:09:30+09:00
+updated_at: 2026-08-03T00:18:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -120,6 +120,7 @@ inputs:
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
+  - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -204,6 +205,7 @@ target_files:
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
+  - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -248,6 +250,7 @@ review_refs:
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
+  - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
@@ -574,3 +577,11 @@ chain is complete, but the unit remains `verification_status: failed` pending
 native Windows execution, Scribe source-debt and active-coverage closure, and
 the registered adjacent release blockers. Claim release and external release
 remain unauthorized.
+
+## Post-W4 handoff to adjacent blockers
+
+The taskset plan is revalidated after the complete bounded W4 chain. The claim
+is now inactive `blocked`, not released, so AR-655 can take its own registered
+overlapping footprint without pretending this unit passed closure. The unit
+remains `verification_status: failed` pending native Windows, Scribe, and the
+adjacent release-critical tasks.

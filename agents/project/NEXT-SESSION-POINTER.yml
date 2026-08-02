@@ -1,47 +1,18 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-01T00:01:56+09:00
-updated_by: le-20260801-000005-kst-ar654repair001
+updated_at: 2026-08-03T00:24:13+09:00
+updated_by: codex-root-task-ar-654-orchestrator
 current_state:
-  summary: "TASK-AR-654 is reopened under a plan-validated repair claim after the skeptic found a physical-line authority bypass."
+  summary: "TASK-AR-654 completed its bounded W4 chain without release; TASK-AR-655 is next after the documented task-set revalidation."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 3
+  step_index: 4
   step_total: 7
-  progress_pct: 28
-  status_text: "TASK-AR-654 is repairing the accepted-watch physical-line trust boundary."
+  progress_pct: 43
+  status_text: "AR-654 is blocked on external and adjacent closure gates; claim AR-655 before lease-bound implementation."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260801-000156-task-ar-654-ar654repair001
-      agent_role: lead-engineer
-      team_id: quality
-      agent_instance_id: le-20260801-000005-kst-ar654repair001
-      display_name: "lead_engineer@orchestrator-02"
-      callsite_id: "terminal:wt-task-ar-654:tab-02"
-      pane_id: "terminal:wt-task-ar-654:tab-02"
-      task_id: TASK-AR-654
-      unit_id: UNIT-TASK-AR-654-001
-      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
-      status: claimed
-      phase: repair-claimed
-      progress_pct: 0
-      step_index: 1
-      step_total: 6
-      status_text: "Repairing TASK-AR-654 physical-line authority boundary"
-      worktree_path: .worktrees/TASK-AR-654
-      branch: codex/task-ar-654-v080-compound-hardening
-      requested_model_tier: worker_standard
-      selected_model_tier: planner_high
-      routing_policy_id: task-unit-tier-policy
-      routing_escalation_reason: "trigger:cross_cutting,data_integrity,repeated_failure"
-      task_token_budget: null
-      claim_token_budget: null
-      claim_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.handoff.md
-      log_path: agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.log.md
-      last_heartbeat: 2026-08-01T00:01:56+09:00
-  current_teams:
-    - quality
+  current_agents: []
+  current_teams: []
 resume:
   active_task: TASK-AR-654
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
@@ -57,8 +28,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

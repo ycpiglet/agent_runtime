@@ -993,6 +993,11 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md",
+          "value": "9a06aa7dbedcb92cf37964b9be296ba50fe1219fcf6366e90174e61094f5744d"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md",
           "value": "ef0ec48d677e7674a25303a959517e7e70dfd70ae40d0a54d8f222f69c8856d7"
         },
@@ -1018,43 +1023,63 @@
         },
         {
           "kind": "sha256",
+          "path": "reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md",
+          "value": "678ee5480c55822f8335428cc1e60e2afa1dd0868178f96786a02286c5fb97fa"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md",
+          "value": "9a6a466622a2730a94f83075f0e9e1ed0e8d850463c46c456cbac1ab238aa60d"
+        },
+        {
+          "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-654.md",
-          "value": "dbadfcc8ee5320145be99e1f62c63ae4c18526b54990d4369f558ea602ad4169"
+          "value": "4da24aad1e5f946c58e9786e46e80dd45a3e0218b891b82f639263a6873cb2ce"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
-          "value": "448a96333fd8f4b26ce18d8133f342bb00b126c3013363b0c1fc56e92ec0aa09"
+          "value": "a14cb4ab9242c0f0ef1cd63eeae58cf23657f466ea260f60d5df60dcb1b2d00e"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
+          "value": "0f95300fb40707422f78a9ff11ad32d046aad045495ae9d89c9d05f05e7c28a6"
+        },
+        {
+          "kind": "sha256",
+          "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
+          "value": "3a891879839b6b47f3a5dfa20be2185a525fe262008437903335b55bfcd19e6a"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/knowledge_records.py",
-          "value": "826617de44ebc82cef26ae5e66dfd7b15aef6f08ad201185648d0769129d0187"
+          "value": "2e75f1b93c12b17f5e5995d64760318cb24a6ab3a83a9b9bde8a5eb9c12d344c"
         },
         {
           "kind": "sha256",
           "path": "scripts/work.py",
-          "value": "e89ac68031ac8747403f2002ee937d87ca5b427b96406ca3682b6f001d1a1cac"
+          "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/work.py",
-          "value": "e89ac68031ac8747403f2002ee937d87ca5b427b96406ca3682b6f001d1a1cac"
+          "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
         },
         {
           "kind": "sha256",
           "path": "scripts/closure_gate.py",
-          "value": "87c4c10f5eb0c06cffaf95fc1f0304152c99103223d022372b5c14e9fd3402b1"
+          "value": "c765949a0ad332cc3d385b16715ba6bbc0ef9db51e62684b300cd2c656351584"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/closure_gate.py",
-          "value": "87c4c10f5eb0c06cffaf95fc1f0304152c99103223d022372b5c14e9fd3402b1"
+          "value": "c765949a0ad332cc3d385b16715ba6bbc0ef9db51e62684b300cd2c656351584"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/compound_record.py",
-          "value": "826617de44ebc82cef26ae5e66dfd7b15aef6f08ad201185648d0769129d0187"
+          "value": "2e75f1b93c12b17f5e5995d64760318cb24a6ab3a83a9b9bde8a5eb9c12d344c"
         },
         {
           "kind": "sha256",
@@ -1084,12 +1109,102 @@
         {
           "kind": "sha256",
           "path": "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
-          "value": "ba59ffb6fec6305ebf7bf171902b6cad30baa8d89dd3a720e705662171f5bece"
+          "value": "ae56051d37cb0f4b2af319071d1d3fc724dfd120fbf35911df8507ed86c94d0f"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "275c381e2f455ed772349b7ad8e8e3145fbea2c731e8950da7589ba51cc29dbf"
+          "value": "de7961dcb650df46613ed77af3703e81c4d0a179fa7d057fd7ba302813ccb6a6"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+          "value": "de7961dcb650df46613ed77af3703e81c4d0a179fa7d057fd7ba302813ccb6a6"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/claim_store.py",
+          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/agent_runtime/claim_store.py",
+          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
+          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_lease.py",
+          "value": "b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/claim_lease.py",
+          "value": "b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_reaper.py",
+          "value": "91d4cbd6905ddc5e2a11854db05edab6cded6b5768cdbc0de26fe987cba2a64c"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
+          "value": "91d4cbd6905ddc5e2a11854db05edab6cded6b5768cdbc0de26fe987cba2a64c"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/deadlock_watchdog.py",
+          "value": "93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/deadlock_watchdog.py",
+          "value": "93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+          "value": "4cdf74188e7c7d1818ad40d6e0a17a96504d5783da5904c154d3fa0b44c1bd6e"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/state_sync_gate.py",
+          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
+          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/parallel_worktree_gate.py",
+          "value": "8b98b6f72a38a63843399686719346b5d9bedce05e3eaef94074e3f19a3153c8"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+          "value": "8b98b6f72a38a63843399686719346b5d9bedce05e3eaef94074e3f19a3153c8"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/worktree_lifecycle_gate.py",
+          "value": "a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
+          "value": "a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/ui_state.py",
+          "value": "93d32e5da2392105283a9bff851dad6277b34f606016538a1feec8d9921fb7a2"
         },
         {
           "kind": "sha256",
@@ -1099,7 +1214,7 @@
         {
           "kind": "sha256",
           "path": "scripts/template_mirror_gate.py",
-          "value": "8a649bc9d4253651ef1cb7626ca07acd81b7cb5a512bee9368dc79c32c3bce07"
+          "value": "97522d59f1f673b4177eea26bd78f8836dfb4a398db5b4a9bc2bfdcfd22339e0"
         },
         {
           "kind": "sha256",
@@ -1109,17 +1224,62 @@
         {
           "kind": "sha256",
           "path": "tests/test_compound_records.py",
-          "value": "9f767af6eb1b8de4fb7f74d83acbb4a7c609bca08f26a15d21da4bb94171fda6"
+          "value": "ef5dd3df0fc2ebda6d7bf5e49dc275e7c4a7bde2a5cdae12a9c744e178ec264e"
         },
         {
           "kind": "sha256",
           "path": "tests/test_closure_gate.py",
-          "value": "b68c8dff36e33f186c71ac1677b741b7ee408a4e0cfc57e8cd51021ad6808bf1"
+          "value": "64b387f9f448922d6de1ff50aeb08ef95a98824848ba002a3b1f59c5d7b24ee3"
         },
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "dd56a98bc71ba6cbe33834a57c3650b3b8b2cf110080355385e221d5f3b0f9a5"
+          "value": "603a4257d586835198a7e32e008e200323c563cc074d5440dd50abc939aabd90"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_claim_store.py",
+          "value": "cbcd1a05e8914e5dabf7994c7a877c2f27750f4650edc557e746637a839c2858"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_claim_reaper.py",
+          "value": "f9fcb7fdcf7546f7287bd6bb8b08f3a0620aaafc686437a0c04424c3feb4c8ce"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_claim_reaper_concurrency.py",
+          "value": "5f789d9880bc0cf5f349232369351e5342a1ee13e3025c0fa8da0098a3dc0a3f"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_claim_reaper_hook.py",
+          "value": "82c2a7dba6f2c546a910e2c4a953ed4edd48c6a042945d0da6f89f566aad9cff"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_deadlock_watchdog.py",
+          "value": "f85a936f38d3de2bcdeb238b0f0b9cbb45180d87e3e609d30181e0ffe9d16207"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_state_sync_gate.py",
+          "value": "1545e9be210b426ea85f9fe3464179e41fe2ea0fe337af47a9d21d836ab9a8ab"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_parallel_worktree_gate.py",
+          "value": "ea768f6d7a017008e397791fe8585e932bac05406ce791e5535d81a10e68dc66"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_worktree_lifecycle_gate.py",
+          "value": "a509623fae6585bc9b79d53d4a51f93d6fcf5a332f3bdcc66835fefb1c0aabcd"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_ui_state.py",
+          "value": "4feb9e6980f689089a3a90ed7d3b034062b3706c6c91d462d1de97c01e5942e5"
         },
         {
           "kind": "sha256",
@@ -1134,7 +1294,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_inventory_sync_sanitize.py",
-          "value": "3f38b28ff978c4d84b38f878c64275e05b466d9bfe3cb0edd814626a5c45ab0d"
+          "value": "13804f844da45d1e1a88f70750d8b7555d1a3943388ecbfb9d4ad41fffa37bfb"
         },
         {
           "kind": "sha256",
@@ -1149,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "164ea6f8535bc2a71280be85407f463113b2bf9247b426a4a359d46c1324e71d"
+          "value": "4d9724724501d10f97d1833be4948f9dad4b795e6ea1e77c5d62098fe9cf0ddc"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md",
-      "recorded_at": "2026-08-01T00:05:16+09:00",
+      "design_record": "reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md",
+      "recorded_at": "2026-08-03T00:19:46+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1369,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-01T00:05:16+09:00"
+  "updated_at": "2026-08-03T00:19:46+09:00"
 }
