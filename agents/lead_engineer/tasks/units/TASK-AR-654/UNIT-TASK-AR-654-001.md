@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T12:26:08+09:00
+updated_at: 2026-08-02T12:51:20+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -36,6 +36,10 @@ defect_signatures:
   - defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df
   - defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2
   - defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac
+  - defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428
+  - defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824
+  - defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660
+  - defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -54,6 +58,9 @@ inputs:
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -88,6 +95,7 @@ target_files:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
   - agents/project/knowledge/compounds/INDEX.json
+  - reviews/INDEX.md
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -122,6 +130,9 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -258,6 +269,16 @@ The W4a candidate is superseded for release purposes by
 The unit is failed and reopened under
 `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` for six
 new failure-first repairs and an entirely fresh W4 sequence.
+
+## Reopened after final canonical-authority reviews
+
+The candidate recorded by the prior W4a is superseded by the final W4b and
+skeptic reviews. Four strict-authority classes remain open: direct active-claim
+store identity, typed non-empty unit specs, typed canonical frontmatter
+identity, and path-derived close resolver identity. The unit remains failed
+under `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` until
+the new REDs, implementation, Verify, Compound, W4a, W4b, and skeptic sequence
+is complete.
 
 ## Canonical-authority Compound scope amendment
 

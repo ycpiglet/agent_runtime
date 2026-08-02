@@ -43,21 +43,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 1,
   "stop_condition": "Stop before rewriting legacy Compound history, widening Compound to ordinary work, or modifying consumer repositories.",
-  "phase": "w4a-complete",
-  "progress_pct": 80,
-  "step_index": 7,
+  "phase": "falsy-authority-replanned",
+  "progress_pct": 20,
+  "step_index": 2,
   "step_total": 8,
-  "status_text": "W4a complete; awaiting distinct W4b and skeptic decisions",
+  "status_text": "Repairing active-claim store, typed unit-spec, canonical identity, and resolver-key authority",
   "worktree_path": ".worktrees/TASK-AR-654",
   "branch": "codex/task-ar-654-v080-compound-hardening",
   "claimed_at": "2026-08-01T00:01:56+09:00",
-  "last_heartbeat": "2026-08-02T12:26:08+09:00",
-  "updated_at": "2026-08-02T12:26:08+09:00",
-  "expires_at": "2026-08-02T20:22:38+09:00",
+  "last_heartbeat": "2026-08-02T12:51:20+09:00",
+  "updated_at": "2026-08-02T12:51:20+09:00",
+  "expires_at": "2026-08-02T20:51:20+09:00",
   "lease": {
     "claimed_at": "2026-08-01T00:01:56+09:00",
-    "heartbeat_at": "2026-08-02T12:26:08+09:00",
-    "expires_at": "2026-08-02T20:22:38+09:00"
+    "heartbeat_at": "2026-08-02T12:51:20+09:00",
+    "expires_at": "2026-08-02T20:51:20+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.log.md",
@@ -81,7 +81,11 @@
     "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7",
     "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df",
     "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2",
-    "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac"
+    "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac",
+    "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428",
+    "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824",
+    "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660",
+    "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4"
   ],
   "compound_refs": [
     "agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json",
@@ -118,7 +122,11 @@
     "agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json",
     "agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json",
     "agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json",
-    "agents/project/knowledge/compounds/INDEX.json"
+    "agents/project/knowledge/compounds/INDEX.json",
+    "reviews/INDEX.md",
+    "reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md",
+    "reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md"
   ],
   "persistence": {
     "mode": "working_tree",

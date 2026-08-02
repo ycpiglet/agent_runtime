@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T12:26:08+09:00
+updated_at: 2026-08-02T12:51:20+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -40,6 +40,10 @@ defect_signatures:
   - defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df
   - defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2
   - defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac
+  - defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428
+  - defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824
+  - defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660
+  - defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -53,6 +57,9 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -140,3 +147,12 @@ is owned under
 `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md`.
 It carries both work IDs and the six canonical path, shape, identity, and deep
 JSON signatures without changing either earlier Compound record.
+
+## Reopened strict canonical authority repair
+
+The final canonical-authority W4b and skeptic reviews found four additional
+claim-store, typed-field, and resolver-key failures in actual closeout. The
+prior W4a is superseded and the claim remains held under
+`reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` until
+failure-first repairs, fresh machine evidence, a new append-only Compound, and
+an entirely fresh W4 sequence all pass.
