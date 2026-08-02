@@ -4435,6 +4435,38 @@ def test_heartbeat_accepts_exact_expiry_equality_but_requires_newer_heartbeat(
     assert persisted["expires_at"] == "2026-08-03T09:20:00+09:00"
 
 
+@pytest.mark.parametrize("operation", ("heartbeat", "renew"))
+def test_claim_mutation_preserves_subsecond_timestamp_monotonicity(
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"subsecond-{operation}",
+    )
+    claim = created["claim"]
+    now = "2026-08-03T09:00:00.000001+09:00"
+    args = (
+        _heartbeat_args(claim, now=now)
+        if operation == "heartbeat"
+        else _renew_args(claim, now=now)
+    )
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == now
+    assert persisted["lease"]["heartbeat_at"] == now
+    expected_expiry = (
+        "2026-08-03T09:30:00.000001+09:00"
+        if operation == "heartbeat"
+        else "2026-08-03T09:45:00.000001+09:00"
+    )
+    assert persisted["expires_at"] == expected_expiry
+    assert persisted["lease"]["expires_at"] == expected_expiry
+
+
 def test_heartbeat_without_progress_options_preserves_coherent_progress(
     tmp_path: Path,
 ) -> None:
