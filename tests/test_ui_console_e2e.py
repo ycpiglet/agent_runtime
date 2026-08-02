@@ -138,6 +138,187 @@ def _browser_home_metrics(console_url: str, viewport: dict[str, int]) -> dict:
             browser.close()
 
 
+class _HeldStateRoute:
+    """Hold the first state fetch until the test has observed inbox rendering."""
+
+    def __init__(self, payload: dict):
+        self.payload = payload
+        self.request_seen = threading.Event()
+        self._outcome = None
+        self._pending = []
+
+    def __call__(self, route) -> None:
+        self.request_seen.set()
+        if self._outcome is None:
+            self._pending.append(route)
+            return
+        self._complete(route)
+
+    def release(self, outcome: str) -> None:
+        self._outcome = outcome
+        pending, self._pending = self._pending, []
+        for route in pending:
+            self._complete(route)
+
+    def abort_pending(self) -> None:
+        pending, self._pending = self._pending, []
+        for route in pending:
+            route.abort("failed")
+
+    def _complete(self, route) -> None:
+        if self._outcome == "success":
+            route.fulfill(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                body=json.dumps(self.payload),
+            )
+        elif self._outcome == "http_failure":
+            route.fulfill(
+                status=503,
+                content_type="application/json; charset=utf-8",
+                body='{"status":"error","error":"state unavailable"}',
+            )
+        elif self._outcome == "abort":
+            route.abort("failed")
+        else:  # pragma: no cover - test harness misuse
+            raise AssertionError(f"unknown held-state outcome: {self._outcome}")
+
+
+def _known_nonzero_state(console_url: str) -> dict:
+    """Return a real full snapshot with deterministic home-summary metrics."""
+
+    status, body = _get(console_url + "/api/state")
+    assert status == 200
+    state = json.loads(body)
+    state["task_claims"] = [
+        {
+            "authority_active": True,
+            "agent_instance_id": "preload-regression-agent",
+        }
+    ]
+    ops = state["ops_metrics"]
+    ops["health_snapshot"]["verdict"] = "at_risk"
+    ops["gates"]["counts"].update({"pass": 5, "watch": 0, "block": 2})
+    ops["velocity"].update(
+        {
+            "available": True,
+            "weeks": [
+                {"week": "2026-W30", "done": 3},
+                {"week": "2026-W31", "done": 7},
+            ],
+        }
+    )
+    ops["cycle_time"].update(
+        {
+            "available": True,
+            "median_hours": 12,
+            "weeks": [
+                {"week": "2026-W30", "median_hours": 14},
+                {"week": "2026-W31", "median_hours": 12},
+            ],
+        }
+    )
+    return state
+
+
+def _home_state_snapshot(page) -> dict:
+    return page.evaluate(
+        """() => {
+            const verdict = document.querySelector("#home-verdict");
+            const flow = document.querySelector("#flow-tiles");
+            return {
+              clock: freshnessClock(),
+              status: document.querySelector("#status-line").textContent.trim(),
+              pollState: document.querySelector("#poll-state").textContent.trim(),
+              summary: document.querySelector("#strip-line").textContent.trim(),
+              flowCount: flow.querySelectorAll(".flow-tile").length,
+              flowText: flow.textContent.trim(),
+              flowValues: Array.from(flow.querySelectorAll(".ft-value"), (node) => node.textContent.trim()),
+              verdictHidden: verdict.hidden,
+              verdictBadge: document.querySelector("#verdict-badge").textContent.trim(),
+            };
+        }"""
+    )
+
+
+def _neutral_preload_issues(snapshot: dict) -> list[str]:
+    issues = []
+    if snapshot["clock"] != "--:--:--":
+        issues.append(f"freshness clock={snapshot['clock']!r}")
+    if snapshot["summary"]:
+        issues.append(f"summary={snapshot['summary']!r}")
+    if snapshot["flowCount"] or snapshot["flowText"]:
+        issues.append(
+            f"flowCount={snapshot['flowCount']}, flowText={snapshot['flowText']!r}"
+        )
+    if not snapshot["verdictHidden"] or snapshot["verdictBadge"]:
+        issues.append(
+            f"verdictHidden={snapshot['verdictHidden']}, "
+            f"verdictBadge={snapshot['verdictBadge']!r}"
+        )
+    return issues
+
+
+def _browser_initial_state_transition(
+    console_url: str,
+    viewport: dict[str, int],
+    outcome: str,
+) -> dict:
+    playwright_sync = pytest.importorskip(
+        "playwright.sync_api",
+        reason="initial-state truthfulness regression requires Playwright",
+    )
+    payload = _known_nonzero_state(console_url)
+    with playwright_sync.sync_playwright() as playwright:
+        try:
+            browser = playwright.chromium.launch(headless=True)
+        except Exception as exc:  # pragma: no cover - environment failure path
+            pytest.fail(f"Playwright Chromium is required for initial-state regression: {exc}")
+        gate = _HeldStateRoute(payload)
+        try:
+            page = browser.new_page(viewport=viewport)
+            page_errors = []
+            page.on("pageerror", lambda exc: page_errors.append(str(exc)))
+            page.add_init_script(
+                """localStorage.setItem("agent-runtime-language", "en");
+                Object.defineProperty(window, "EventSource", {
+                  configurable: true,
+                  value: undefined,
+                });"""
+            )
+            page.route("**/api/state", gate)
+            page.goto(console_url + "/", wait_until="load")
+
+            # Explicitly synchronize on both independent requests: state is held,
+            # while the real inbox response has already painted the cockpit.
+            page.wait_for_function(
+                """() => document.querySelector("#inbox-total").textContent.trim().length > 0"""
+            )
+            page.wait_for_function(
+                """() => typeof i18nStrings !== "undefined" && Object.keys(i18nStrings).length > 0"""
+            )
+            assert gate.request_seen.wait(timeout=2), "/api/state was not intercepted"
+            before = _home_state_snapshot(page)
+
+            gate.release(outcome)
+            if outcome == "success":
+                page.wait_for_function(
+                    """() => {
+                      const text = document.querySelector("#strip-line").textContent;
+                      return text.includes("WIP 1/3") && text.includes("block 2");
+                    }"""
+                )
+            else:
+                page.wait_for_function(
+                    """() => document.querySelector("#poll-state").textContent === 'error'"""
+                )
+            after = _home_state_snapshot(page)
+            return {"before": before, "after": after, "pageErrors": page_errors}
+        finally:
+            gate.abort_pending()
+            browser.close()
+
+
 def test_console_home_serves_html(console_url):
     status, body = _get(console_url + "/")
     assert status == 200
@@ -316,6 +497,72 @@ def test_decision_first_home_fits_two_screens_in_browser(console_url, label, vie
     assert metrics["workSurfaceOpen"] == "false"
     assert metrics["workSurfaceDisplay"] == "none"
     assert metrics["scrollHeight"] <= metrics["innerHeight"] * 2, json.dumps({"label": label, **metrics}, sort_keys=True)
+
+
+@pytest.mark.parametrize(
+    "viewport",
+    [
+        pytest.param({"width": 1366, "height": 768}, id="desktop"),
+        pytest.param({"width": 390, "height": 844}, id="mobile"),
+    ],
+)
+def test_initial_state_preload_stays_neutral_then_renders_real_metrics(
+    console_url,
+    viewport,
+):
+    result = _browser_initial_state_transition(console_url, viewport, "success")
+    before, after = result["before"], result["after"]
+
+    preload_issues = _neutral_preload_issues(before)
+    assert not result["pageErrors"], f"page errors: {result['pageErrors']}"
+    assert not preload_issues, (
+        "runtime-state pre-load fabricated factual health/flow values: "
+        f"{preload_issues}; snapshot={json.dumps(before, sort_keys=True)}"
+    )
+    assert after["verdictHidden"] is False
+    assert after["verdictBadge"] == "At risk — act now"
+    assert "WIP 1/3" in after["summary"]
+    assert "gates block 2" in after["summary"]
+    assert "agents 1 active" in after["summary"]
+    assert after["flowValues"] == ["1/3", "7/wk", "12h"]
+
+
+@pytest.mark.parametrize(
+    "viewport",
+    [
+        pytest.param({"width": 1366, "height": 768}, id="desktop"),
+        pytest.param({"width": 390, "height": 844}, id="mobile"),
+    ],
+)
+@pytest.mark.parametrize(
+    ("outcome", "error_fragment"),
+    [
+        pytest.param("http_failure", "HTTP 503", id="http-failure"),
+        pytest.param("abort", "Failed to fetch", id="network-abort"),
+    ],
+)
+def test_initial_state_failure_keeps_neutral_summary_and_error_signal(
+    console_url,
+    viewport,
+    outcome,
+    error_fragment,
+):
+    result = _browser_initial_state_transition(console_url, viewport, outcome)
+    before, after = result["before"], result["after"]
+
+    assert not result["pageErrors"], f"page errors: {result['pageErrors']}"
+    assert after["pollState"] == "error"
+    assert "State load failed" in after["status"]
+    assert error_fragment in after["status"]
+    neutral_issues = {
+        "before": _neutral_preload_issues(before),
+        "after": _neutral_preload_issues(after),
+    }
+    assert not neutral_issues["before"] and not neutral_issues["after"], (
+        "failed initial state must preserve the neutral home summary: "
+        f"issues={neutral_issues}; snapshots="
+        f"{json.dumps({'before': before, 'after': after}, sort_keys=True)}"
+    )
 
 
 # ---------------------------------------------------------------------------
