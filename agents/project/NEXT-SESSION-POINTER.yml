@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T00:43:11+09:00
+updated_at: 2026-08-03T01:22:02+09:00
 updated_by: le-20260803-001200-kst-ar655lease001
 current_state:
-  summary: "TASK-AR-655 is claimed under a bounded T3 amendment for fail-closed lease/grace inputs before atomic heartbeat and renewal implementation."
+  summary: "TASK-AR-655 lease/grace bounds are compounded; heartbeat, renewal, and shared expiry-consumer scope is frozen before the next RED baseline."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 4
-  step_total: 7
-  progress_pct: 45
-  status_text: "AR-655 shared duration scope is registered; RED regressions are being added before implementation."
+  step_total: 10
+  progress_pct: 42
+  status_text: "AR-655 heartbeat/renewal and expiry-consumer T3 scope is frozen; RED regressions are next."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260803-002651-task-ar-655-5f27
@@ -23,11 +23,11 @@ active_work:
       unit_id: UNIT-TASK-AR-655-001
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: claimed
-      phase: shared-duration-scope-amended
-      progress_pct: 18
-      step_index: 2
+      phase: heartbeat-expiry-scope-frozen
+      progress_pct: 42
+      step_index: 4
       step_total: 10
-      status_text: "Shared portable duration primitives registered; RED tests in progress"
+      status_text: "Heartbeat, renewal, and expiry-consumer T3 scope frozen; RED baseline is next"
       worktree_path: .worktrees/TASK-AR-655
       branch: codex/task-ar-655-v080-lease-bounds
       requested_model_tier: worker_standard
@@ -47,9 +47,9 @@ resume:
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
   branch_policy: "Continue TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Add and run RED regressions for nonpositive/overflowing lease and negative explicit grace."
-    - "Implement root/template fail-closed bounds while preserving zero/environment compatibility."
-    - "Continue atomic heartbeat/renewal and cross-consumer expiry acceptance after the bound repair."
+    - "Add and commit RED regressions for owner/CAS/scope-bound heartbeat and renewal."
+    - "Add the shared liveness matrix across reaper, gates, lifecycle, UI, console, and Doctor."
+    - "Implement only after the exact failure-first baseline is captured."
     - "Keep TASK-AR-654, TASK-AR-657, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -110,7 +110,7 @@ pointers:
       status: in_progress
     - task_id: TASK-AR-655
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
-      status: planned
+      status: in_progress
     - task_id: TASK-AR-656
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: planned

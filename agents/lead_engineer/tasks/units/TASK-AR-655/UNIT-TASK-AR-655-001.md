@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T01:04:35+09:00
+updated_at: 2026-08-03T01:22:02+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -27,6 +27,10 @@ escalation_triggers:
 defect_signatures:
   - defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424
   - defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a
+  - defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88
+  - defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c
+  - defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9
+  - defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
 claim_refs:
@@ -39,6 +43,9 @@ inputs:
   - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
   - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
   - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+  - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
   - src/agent_runtime/templates/project/scripts/state_sync_gate.py
@@ -49,6 +56,8 @@ target_files:
   - scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
+  - scripts/agent_instance_registry.py
+  - src/agent_runtime/templates/project/scripts/agent_instance_registry.py
   - scripts/claim_lease.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
   - scripts/claim_reaper.py
@@ -62,6 +71,9 @@ target_files:
   - scripts/worktree_lifecycle_gate.py
   - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
   - src/agent_runtime/ui_state.py
+  - src/agent_runtime/ui_console_assets.py
+  - src/agent_runtime/doctor.py
+  - agents/project/NEXT-SESSION-POINTER.yml
   - tests/test_task_claim_dispatcher.py
   - tests/test_claim_store.py
   - tests/test_claim_lease.py
@@ -73,6 +85,10 @@ target_files:
   - tests/test_parallel_worktree_gate.py
   - tests/test_worktree_lifecycle_gate.py
   - tests/test_ui_state.py
+  - tests/test_ui_design_assets.py
+  - tests/test_doctor.py
+  - tests/test_agent_identity_gate.py
+  - tests/test_orchestrator_atomic_writes.py
   - tests/test_template_mirror_gate.py
   - tests/test_regen_host_lock_if_needed.py
   - tests/test_lock_merge_driver.py
@@ -80,6 +96,8 @@ target_files:
   - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
   - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
   - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
   - Long tasks can remain legitimately active.
@@ -93,7 +111,7 @@ acceptance:
   - Zero and equality boundaries, one-minute lease, environment normalization, and huge nonnegative grace remain safe and compatible.
   - Deadline overflow cannot split a sweep's durable mutations from its audit trail.
 verification:
-  - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q
+  - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
@@ -119,6 +137,9 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
 - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
 - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
+- reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
+- reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+- reviews/INDEX.md
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
 - src/agent_runtime/templates/project/scripts/state_sync_gate.py
@@ -131,6 +152,8 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
+- scripts/agent_instance_registry.py
+- src/agent_runtime/templates/project/scripts/agent_instance_registry.py
 - scripts/claim_lease.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
 - scripts/claim_reaper.py
@@ -144,6 +167,9 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - scripts/worktree_lifecycle_gate.py
 - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
 - src/agent_runtime/ui_state.py
+- src/agent_runtime/ui_console_assets.py
+- src/agent_runtime/doctor.py
+- agents/project/NEXT-SESSION-POINTER.yml
 - tests/test_task_claim_dispatcher.py
 - tests/test_claim_store.py
 - tests/test_claim_lease.py
@@ -155,6 +181,10 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - tests/test_parallel_worktree_gate.py
 - tests/test_worktree_lifecycle_gate.py
 - tests/test_ui_state.py
+- tests/test_ui_design_assets.py
+- tests/test_doctor.py
+- tests/test_agent_identity_gate.py
+- tests/test_orchestrator_atomic_writes.py
 - tests/test_template_mirror_gate.py
 - tests/test_regen_host_lock_if_needed.py
 - tests/test_lock_merge_driver.py
@@ -162,6 +192,8 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
 - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
 - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
+- reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
+- reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
 
 ## Scope
 
@@ -173,10 +205,10 @@ Unify local lifecycle timestamps without creating a remote lease service.
 2. Add RED coverage for invalid create lease and explicit reaper/watchdog grace before changing implementation.
 3. Add RED coverage for low-level acquire/heartbeat TTL and overflow-safe full-sweep auditing.
 4. Implement fail-closed lease/grace value domains in root/template mirrors.
-5. Implement atomic owner-checked heartbeat and renewal.
-6. Wire orchestrator progress to the same mutation.
-7. Adopt one expiry classifier in all read consumers.
-8. Verify crash and restart behavior.
+5. Implement atomic owner-checked heartbeat and renewal with revision and scope bindings.
+6. Wire orchestrator progress and instance/pane receipts to the same mutation.
+7. Adopt one expiry classifier in registered read, cleanup, Doctor, and UI consumers.
+8. Verify crash, restart, stale projection, and cross-surface behavior.
 
 ## Acceptance Criteria
 
@@ -192,7 +224,7 @@ Unify local lifecycle timestamps without creating a remote lease service.
 
 ## Verification
 
-- `python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q`
+- `python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q`
 - `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
