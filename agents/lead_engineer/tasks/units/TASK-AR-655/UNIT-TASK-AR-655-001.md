@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T00:52:34+09:00
+updated_at: 2026-08-03T00:59:54+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -97,6 +97,10 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach the atomicity tests, owner mismatch, crash/restart, replan old/new scope digest proof, cross-consumer expiry matrix, and independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, or recovering a claim without owner identity.
+verified_at: 2026-08-03T00:59:54+09:00
+verified_by: le-20260803-001200-kst-ar655lease001
+evidence_refs:
+  - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954.json
 ---
 
 # UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers
