@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:08:00+09:00
+updated_at: 2026-08-02T23:26:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -72,6 +72,7 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
   - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
@@ -115,6 +116,7 @@ inputs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -193,6 +195,9 @@ target_files:
   - agents/project/knowledge/compounds/INDEX.json
   - reviews/INDEX.md
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -215,7 +220,7 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach the failure-first transaction matrix, native Windows evidence state, full-suite Verify, complete Compound coverage proof, template parity, W4a, independent W4b, and skeptic verdict.
 stop_condition: Stop before rewriting legacy Compound history, widening Compound to ordinary work, dispatching CI without Owner approval, or performing version, publish, deployment, consumer, or external release actions.
-verified_at: 2026-08-02T19:50:23+09:00
+verified_at: 2026-08-02T23:14:00+09:00
 verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
@@ -230,7 +235,10 @@ evidence_refs:
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json
 review_refs:
+  - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
@@ -519,5 +527,16 @@ The fresh W4b subsequently superseded that W4a with `REVISE`: an existing
 direct parent can hide a symlinked ancestor from POSIX atomic publication,
 container-valued claim identities can activate and permit duplicate authority,
 and released role overlays can omit terminal provenance. The unit remains
-failed under the accepted ancestor/identity/provenance T3 replan; skeptic
-review is paused until both P1 repairs have fresh RED-to-GREEN evidence.
+failed under the accepted ancestor/identity/provenance T3 replan. Fresh local
+Verify and append-only Compound coverage are now complete, but exact-candidate
+W4a, distinct W4b, skeptic review, native Windows evidence, and Scribe closure
+debt remain pending.
+
+## Adverse-W4b Verify and Compound
+
+Exact implementation `94589d68` passed the registered five-command Verify.
+The fifth immutable Compound links the atomic ancestor, core identity, and
+released provenance regressions and makes the linked-record union cover all 41
+declared signatures. The unit intentionally remains `verification_status:
+failed` pending a fresh exact-candidate W4 sequence, native Windows evidence,
+Scribe debt, and adjacent release blockers.

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T23:06:33+09:00
-record_count: 1286
+generated_at: 2026-08-02T23:25:56+09:00
+record_count: 1288
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1286` review and evidence records under `reviews/`.
+- Summary: indexed `1288` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1286` files |
+| Reviews covered | pass | `1288` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -683,6 +683,7 @@ record_count: 1286
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment` | md | accepted | pass | TASK-AR-654 adverse-W4b Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan` | md | accepted | revise | TASK-AR-654 ancestor, identity, and provenance T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan` | md | accepted | n/a | TASK-AR-654 authority-seam T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan` | md | accepted | n/a | TASK-AR-654 broken-parent claim-store T3 replan |
@@ -1054,6 +1055,7 @@ record_count: 1286
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023 |
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243 |
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

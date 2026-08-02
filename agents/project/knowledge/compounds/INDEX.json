@@ -20,7 +20,8 @@
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4": [
-      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ],
     "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
@@ -85,6 +86,9 @@
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
+    "defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f": [
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
     "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
@@ -110,7 +114,8 @@
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4": [
-      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ],
     "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
@@ -211,7 +216,8 @@
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
-      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -251,10 +257,11 @@
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
-      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ]
   },
-  "record_count": 22,
+  "record_count": 23,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -616,8 +623,25 @@
         "TASK-AR-654",
         "UNIT-TASK-AR-654-001"
       ]
+    },
+    {
+      "created_at": "2026-08-02T23:24:00+09:00",
+      "defect_signatures": [
+        "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+        "defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f",
+        "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4"
+      ],
+      "id": "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Bind ancestor identity and release provenance at admission",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:4f5e25a534a7680e7c1b21af923ce303ca4444f9855c7394ae078edd9239a653"
+  "source_digest": "sha256:b5c7c3cadfef0590b20a0ecfe6f226be16e554ac87893144dd0833370df270c2"
 }

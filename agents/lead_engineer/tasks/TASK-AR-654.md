@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:08:00+09:00
+updated_at: 2026-08-02T23:26:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -112,6 +112,7 @@ review_refs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -120,8 +121,10 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json
 evidence_refs:
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -346,3 +349,14 @@ W4a evidence rule are corrected without rewriting historical reviews in
 The unit remains failed and claimed until the implementation is committed, a
 fresh registered Verify and append-only Compound are recorded, and a new exact
 W4 sequence succeeds.
+
+## Adverse-W4b Verify and Compound recorded
+
+Implementation `94589d68` passed fresh registered Verify with full Runtime
+`4295 passed, 11 skipped` and focused governance `1252 passed, 2 skipped`.
+The fifth append-only Compound now covers the one previously uncovered
+container-identity signature and records the two recurrent prevention failures.
+All 41 declared signatures are covered by the five linked records. The exact
+scope and immutable-overlap rationale are recorded in
+`reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md`.
+This does not change the failed/in-progress disposition or authorize release.
