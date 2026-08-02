@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T01:22:02+09:00
+updated_at: 2026-08-03T02:22:47+09:00
 updated_by: le-20260803-001200-kst-ar655lease001
 current_state:
-  summary: "TASK-AR-655 lease/grace bounds are compounded; heartbeat, renewal, and shared expiry-consumer scope is frozen before the next RED baseline."
+  summary: "TASK-AR-655 heartbeat, renewal, progress, and shared expiry-consumer failure-first regressions are committed; GREEN implementation is next."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 4
+  step_index: 5
   step_total: 10
-  progress_pct: 42
-  status_text: "AR-655 heartbeat/renewal and expiry-consumer T3 scope is frozen; RED regressions are next."
+  progress_pct: 50
+  status_text: "AR-655 heartbeat/renewal and expiry-consumer RED baseline is committed; GREEN implementation is next."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260803-002651-task-ar-655-5f27
@@ -23,11 +23,11 @@ active_work:
       unit_id: UNIT-TASK-AR-655-001
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: claimed
-      phase: heartbeat-expiry-scope-frozen
-      progress_pct: 42
-      step_index: 4
+      phase: heartbeat-expiry-red-captured
+      progress_pct: 50
+      step_index: 5
       step_total: 10
-      status_text: "Heartbeat, renewal, and expiry-consumer T3 scope frozen; RED baseline is next"
+      status_text: "Failure-first heartbeat, renewal, and expiry-consumer regressions committed; GREEN implementation is next"
       worktree_path: .worktrees/TASK-AR-655
       branch: codex/task-ar-655-v080-lease-bounds
       requested_model_tier: worker_standard
@@ -47,9 +47,9 @@ resume:
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
   branch_policy: "Continue TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Add and commit RED regressions for owner/CAS/scope-bound heartbeat and renewal."
-    - "Add the shared liveness matrix across reaper, gates, lifecycle, UI, console, and Doctor."
-    - "Implement only after the exact failure-first baseline is captured."
+    - "Implement owner/CAS/scope-bound heartbeat and renewal against RED commit 7ccc95b3bf36eac38d2028d38c57c3d4c159a659."
+    - "Implement one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor."
+    - "Drive the exact registered suite from 127 failures to GREEN without weakening the committed regressions."
     - "Keep TASK-AR-654, TASK-AR-657, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
