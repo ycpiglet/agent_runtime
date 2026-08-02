@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T18:41:09+09:00
+updated_at: 2026-08-02T19:21:52+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -106,6 +106,8 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md
   - reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -151,11 +153,14 @@ target_files:
   - src/agent_runtime/doctor.py
   - src/agent_runtime/lock.py
   - scripts/template_mirror_gate.py
+  - scripts/inflight_overlay.py
+  - src/agent_runtime/templates/project/scripts/inflight_overlay.py
   - .github/workflows/test.yml
   - new:agents/runtime/task_claims/.claim-store
   - tests/test_atomic_io.py
   - tests/test_claim_store.py
   - tests/test_lifecycle_defaults.py
+  - tests/test_inflight_overlay.py
   - tests/test_claim_guard.py
   - tests/test_parallel_worktree_gate.py
   - tests/test_adoption.py
@@ -245,6 +250,8 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md
   - reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -470,3 +477,14 @@ unit remains failed under
 post-commit ownership/cleanup truth, complete snapshots, canonical W0 status,
 finite JSON, actual sync post-state, and complete stable role metadata lack
 failure-first proof. Native Windows and all fresh W4 evidence remain pending.
+
+## Refined after combined-green precommit review
+
+The `4230 passed` local baseline is superseded by
+`reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md`. The unit
+remains failed under
+`reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md`
+until post-close projection warnings, sync exit truth, optional SCM isolation,
+marker-aware witness preservation, and canonical dispatcher/W0 projections
+have failure-first proof. Adjacent release blockers remain assigned to their
+existing planned tasks and do not broaden this unit.

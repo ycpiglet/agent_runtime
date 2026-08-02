@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T18:47:21+09:00
-record_count: 1278
+generated_at: 2026-08-02T19:23:46+09:00
+record_count: 1280
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1278` review and evidence records under `reviews/`.
+- Summary: indexed `1280` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1278` files |
+| Reviews covered | pass | `1280` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -41,6 +41,7 @@ record_count: 1278
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final` | md | revise | fail | TASK-AR-654 claim-authority continuity final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-store-component-final` | md | revise | fail | TASK-AR-654 claim-store component final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md` | `AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary` | md | revise | fail | TASK-AR-654 claim transaction-boundary audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md` | `AUDIT-2026-08-02-task-ar-654-combined-green-precommit` | md | revise | fail | TASK-AR-654 combined-green precommit audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md` | `AUDIT-2026-08-02-task-ar-654-precommit-authority-seams` | md | revise | fail | TASK-AR-654 precommit authority-seam audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md` | `AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth` | md | revise | fail | TASK-AR-654 preverify transaction-truth audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md` | `AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final` | md | revise | fail | TASK-AR-654 Windows native-evidence final audit |
@@ -690,6 +691,7 @@ record_count: 1278
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store continuity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim transaction continuity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 strict canonical authority T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan` | md | accepted | n/a | TASK-AR-654 post-commit and projection T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 strict-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan` | md | accepted | n/a | TASK-AR-654 transaction-truth T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
