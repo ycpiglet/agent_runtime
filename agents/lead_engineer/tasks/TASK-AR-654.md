@@ -73,6 +73,7 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -197,3 +198,11 @@ independent audits. Windows junction metadata, unreadable enumeration, missing
 intermediate parents, and unbounded entry loops remain open under
 `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md`.
 No earlier W4 or machine pass authorizes closeout.
+
+## Work-close fixture scope amendment
+
+The full-suite-only fixture alignment for `tests/test_work_close.py` is
+authorized by
+`reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md`.
+It may create only the direct Runtime parent already guaranteed by consumer
+templates; it must not weaken missing-parent production validation.

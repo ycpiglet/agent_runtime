@@ -77,6 +77,7 @@ def _write_unit(
 ) -> Path:
     task_id = "TASK-AR-901"
     unit_id = "UNIT-TASK-AR-901-001"
+    (root / "agents" / "runtime").mkdir(parents=True, exist_ok=True)
     _write_task(root, task_id)
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"{unit_id}.md"
     path.parent.mkdir(parents=True, exist_ok=True)

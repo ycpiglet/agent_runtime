@@ -75,6 +75,7 @@ inputs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -99,6 +100,7 @@ target_files:
   - tests/fixtures/host/agent_runtime.lock.json
   - tests/test_closure_gate.py
   - tests/test_compound_records.py
+  - tests/test_work_close.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_runtime_asset_usage.py
   - tests/test_rsi_operating_system_docs.py
@@ -157,6 +159,7 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -204,6 +207,7 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - tests/fixtures/host/agent_runtime.lock.json
 - tests/test_closure_gate.py
 - tests/test_compound_records.py
+- tests/test_work_close.py
 - tests/test_task_claim_dispatcher.py
 - tests/test_runtime_asset_usage.py
 - tests/test_rsi_operating_system_docs.py
@@ -321,3 +325,10 @@ is now part of this unit under
 `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md`.
 It links the task and unit to all six new stable signatures and the fresh
 machine evidence while preserving both prior records unchanged.
+
+## Work-close fixture scope amendment
+
+`tests/test_work_close.py` is now an explicit target under
+`reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md`.
+The only authorized edit is central fixture alignment with the installed-host
+direct Runtime parent contract.
