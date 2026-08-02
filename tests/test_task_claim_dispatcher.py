@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -3950,3 +3952,1399 @@ def test_release_without_completion_phase_emits_no_completion_event(tmp_path: Pa
     event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
     events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
     assert not [event for event in events if event["event"] == "taskset.completed"]
+
+
+# TASK-AR-655: task-claim heartbeat/renewal authority -----------------------
+
+SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _expected_scope_binding(claim: dict[str, object], *, bound_at: str) -> dict[str, object]:
+    """Independent oracle for the immutable renewal scope contract."""
+
+    components = {
+        "task": _canonical_sha256({"task_id": claim.get("task_id") or ""}),
+        "unit": _canonical_sha256(
+            {
+                "unit_id": claim.get("unit_id") or "",
+                "unit_spec": claim.get("unit_spec") or "",
+            }
+        ),
+        "target_files": _canonical_sha256(
+            sorted({str(item) for item in claim.get("target_files", [])})
+        ),
+        "stop_condition": _canonical_sha256(claim.get("stop_condition") or ""),
+    }
+    return {
+        "schema": SCOPE_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def _claim_scope_binding(claim: dict[str, object]) -> dict[str, object]:
+    binding = claim.get("scope_binding")
+    if isinstance(binding, dict) and isinstance(binding.get("digest"), str):
+        return json.loads(json.dumps(binding))
+    return _expected_scope_binding(
+        claim,
+        bound_at=str(claim.get("claimed_at") or ""),
+    )
+
+
+def _claim_scope_digest(claim: dict[str, object]) -> str:
+    return str(_claim_scope_binding(claim)["digest"])
+
+
+def _write_heartbeat_unit(
+    root: Path,
+    *,
+    task_id: str,
+    targets: tuple[str, ...] = ("scripts/claim_worker.py",),
+    stop_condition: str = "stop_after:UNIT:verification",
+) -> str:
+    unit_id = f"UNIT-{task_id}-001"
+    relative = f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        f"unit_id: {unit_id}",
+        f"task_id: {task_id}",
+        "status: worker_ready",
+        "target_files:",
+        *(f"  - {target}" for target in targets),
+        f"stop_condition: {stop_condition}",
+        "---",
+        "",
+        "# Heartbeat fixture unit",
+        "",
+    ]
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return relative
+
+
+def _create_heartbeat_candidate(
+    root: Path,
+    *,
+    task_id: str = "TASK-AR-655-HEARTBEAT",
+    suffix: str = "heartbeat",
+    now: str = "2026-08-03T09:00:00+09:00",
+    worktree_path: str = "",
+) -> dict[str, object]:
+    (root / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n",
+        encoding="utf-8",
+    )
+    if not worktree_path:
+        _write_worktree(root, task_id)
+    stop_condition = f"stop_after:UNIT-{task_id}-001:verification"
+    unit_rel = _write_heartbeat_unit(
+        root,
+        task_id=task_id,
+        stop_condition=stop_condition,
+    )
+    create_args = [
+        "create",
+        "--task-id",
+        task_id,
+        "--task-set-id",
+        "TASKSET-AR-655-HEARTBEAT",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--stop-condition",
+        stop_condition,
+        "--agent-role",
+        "lead-engineer",
+        "--agent-instance-id",
+        f"le-20260803-090000-kst-{suffix}",
+        "--callsite-id",
+        f"terminal:wt-{task_id.lower()}:tab-01",
+        "--lease-minutes",
+        "30",
+        "--now",
+        now,
+        "--suffix",
+        suffix,
+        "--json",
+    ]
+    if worktree_path:
+        create_args.extend(("--worktree-path", worktree_path))
+    created = _run_dispatcher(root, *create_args)
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def _heartbeat_args(
+    claim: dict[str, object],
+    *,
+    now: str = "2026-08-03T09:10:00+09:00",
+    expected_revision: int = 0,
+    agent_instance_id: str | None = None,
+    callsite_id: str | None = None,
+) -> tuple[str, ...]:
+    return (
+        "heartbeat",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--agent-instance-id",
+        agent_instance_id or str(claim["agent_instance_id"]),
+        "--callsite-id",
+        callsite_id or str(claim["callsite_id"]),
+        "--expected-revision",
+        str(expected_revision),
+        "--phase",
+        "implementation",
+        "--progress-pct",
+        "45",
+        "--step-index",
+        "4",
+        "--step-total",
+        "10",
+        "--status-text",
+        "Atomic heartbeat contract under test",
+        "--now",
+        now,
+        "--json",
+    )
+
+
+def _replace_cli_option(args: tuple[str, ...], flag: str, value: str) -> tuple[str, ...]:
+    updated = list(args)
+    index = updated.index(flag)
+    updated[index + 1] = value
+    return tuple(updated)
+
+
+def _without_cli_option(args: tuple[str, ...], flag: str) -> tuple[str, ...]:
+    updated = list(args)
+    index = updated.index(flag)
+    del updated[index : index + 2]
+    return tuple(updated)
+
+
+PROGRESS_OPTIONS = (
+    "--phase",
+    "--progress-pct",
+    "--step-index",
+    "--step-total",
+    "--status-text",
+)
+
+
+def _heartbeat_without_progress_args(claim: dict[str, object]) -> tuple[str, ...]:
+    args = _heartbeat_args(claim)
+    for flag in PROGRESS_OPTIONS:
+        args = _without_cli_option(args, flag)
+    return args
+
+
+def _claim_path(root: Path, created: dict[str, object]) -> Path:
+    return root / str(created["path"])
+
+
+def _read_created_claim(root: Path, created: dict[str, object]) -> dict[str, object]:
+    return json.loads(_claim_path(root, created).read_text(encoding="utf-8"))
+
+
+def test_create_claim_starts_revision_zero_with_component_scope_binding(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="create-binding")
+    claim = created["claim"]
+
+    assert claim["mutation_revision"] == 0
+    assert claim["scope_binding"] == _expected_scope_binding(
+        claim,
+        bound_at="2026-08-03T09:00:00+09:00",
+    )
+    assert _read_created_claim(tmp_path, created)["scope_binding"] == claim["scope_binding"]
+
+
+def test_heartbeat_cli_atomically_advances_timestamps_progress_and_revision(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="cli-success")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["expires_at"] == "2026-08-03T09:40:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert persisted["phase"] == "implementation"
+    assert persisted["progress_pct"] == 45
+    assert persisted["step_index"] == 4
+    assert persisted["step_total"] == 10
+    assert persisted["status_text"] == "Atomic heartbeat contract under test"
+    assert persisted["mutation_revision"] == 1
+    assert response["receipt"]["claim_revision"] == 1
+    assert response["projection"]["claim_revision"] == 1
+    projected_agent = response["projection"]["pointer"]["current_agents"][0]
+    for field in (
+        "phase",
+        "progress_pct",
+        "step_index",
+        "step_total",
+        "status_text",
+        "last_heartbeat",
+        "mutation_revision",
+    ):
+        assert projected_agent[field] == persisted[field]
+
+
+def test_heartbeat_module_api_uses_the_same_atomic_contract(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="api-success")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+    parsed = dispatcher.build_parser().parse_args(
+        ["--root", str(tmp_path), *_heartbeat_args(claim)]
+    )
+
+    rc = parsed.func(parsed)
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["receipt"]["claim_revision"] == 1
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def test_heartbeat_success_reconciles_instance_and_pane_event_receipts(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="receipt-reconcile")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    instance_path = (
+        tmp_path
+        / "agents/runtime/instances"
+        / f"{claim['agent_instance_id']}.json"
+    )
+    instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert instance["updated_at"] == persisted["updated_at"]
+    assert instance["last_heartbeat"] == persisted["last_heartbeat"]
+    assert instance["claim_revision"] == persisted["mutation_revision"]
+    instance_receipt = response["receipt"]["instance"]
+    assert instance_receipt["path"] == instance_path.relative_to(tmp_path).as_posix()
+    assert instance_receipt["updated_at"] == instance["updated_at"]
+    assert instance_receipt["claim_revision"] == instance["claim_revision"]
+
+    event_log = tmp_path / "agents/runtime/pane_events/pane-events.jsonl"
+    events = [
+        json.loads(line)
+        for line in event_log.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    heartbeats = [event for event in events if event.get("event") == "instance_heartbeat"]
+    assert len(heartbeats) == 1
+    event = heartbeats[0]
+    assert event["agent_instance_id"] == claim["agent_instance_id"]
+    assert event["claim_id"] == claim["claim_id"]
+    assert event["ts"] == persisted["last_heartbeat"]
+    event_receipt = response["receipt"]["pane_event"]
+    for field in ("seq", "event", "agent_instance_id", "claim_id", "ts"):
+        assert event_receipt[field] == event[field]
+
+
+@pytest.mark.parametrize(
+    ("case", "mutate", "now", "revision", "owner_suffix", "callsite_suffix", "message"),
+    (
+        (
+            "wrong-owner",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "-other",
+            "",
+            "owner",
+        ),
+        (
+            "wrong-callsite",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            ":other",
+            "callsite",
+        ),
+        (
+            "inactive",
+            lambda claim: claim.update(status="released"),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "active",
+        ),
+        (
+            "overlay",
+            lambda claim: claim.update(overlay=True),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "overlay",
+        ),
+        (
+            "expired",
+            lambda claim: (
+                claim.update(expires_at="2026-08-03T08:59:59+09:00"),
+                claim["lease"].update(expires_at="2026-08-03T08:59:59+09:00"),
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "expired",
+        ),
+        (
+            "timestamp-regression",
+            lambda claim: None,
+            "2026-08-03T08:59:59+09:00",
+            0,
+            "",
+            "",
+            "strictly increasing",
+        ),
+        (
+            "timestamp-equality",
+            lambda claim: None,
+            "2026-08-03T09:00:00+09:00",
+            0,
+            "",
+            "",
+            "strictly increasing",
+        ),
+        (
+            "torn-heartbeat",
+            lambda claim: claim["lease"].update(
+                heartbeat_at="2026-08-03T08:59:59+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "timestamp",
+        ),
+        (
+            "torn-expiry",
+            lambda claim: claim["lease"].update(
+                expires_at="2026-08-03T09:31:00+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "expires",
+        ),
+        (
+            "stale-revision",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            7,
+            "",
+            "",
+            "revision",
+        ),
+    ),
+    ids=lambda value: value if isinstance(value, str) else None,
+)
+def test_heartbeat_refuses_invalid_authority_without_mutation(
+    tmp_path: Path,
+    case: str,
+    mutate,
+    now: str,
+    revision: int,
+    owner_suffix: str,
+    callsite_suffix: str,
+    message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"reject-{case}")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    mutate(claim)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_heartbeat_args(
+            claim,
+            now=now,
+            expected_revision=revision,
+            agent_instance_id=str(claim["agent_instance_id"]) + owner_suffix,
+            callsite_id=str(claim["callsite_id"]) + callsite_suffix,
+        ),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert message in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+def test_heartbeat_accepts_exact_expiry_equality_but_requires_newer_heartbeat(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="expiry-equality")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim["expires_at"] = "2026-08-03T09:10:00+09:00"
+    claim["lease"]["expires_at"] = "2026-08-03T09:10:00+09:00"
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_heartbeat_args(claim, now="2026-08-03T09:10:00+09:00"),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["mutation_revision"] == 1
+    assert persisted["expires_at"] == "2026-08-03T09:20:00+09:00"
+
+
+def test_heartbeat_without_progress_options_preserves_coherent_progress(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="heartbeat-no-progress")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_without_progress_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = _read_created_claim(tmp_path, created)
+    for field in ("phase", "progress_pct", "step_index", "step_total", "status_text"):
+        assert persisted[field] == claim[field]
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+
+
+@pytest.mark.parametrize("missing_flag", PROGRESS_OPTIONS)
+def test_heartbeat_refuses_partial_progress_group_without_mutation(
+    tmp_path: Path,
+    missing_flag: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"partial-{missing_flag.removeprefix('--')}",
+    )
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+    args = _without_cli_option(_heartbeat_args(claim), missing_flag)
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "progress" in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+@pytest.mark.parametrize(
+    ("case", "overrides", "message"),
+    (
+        ("negative-pct", {"--progress-pct": "-1"}, "progress"),
+        ("oversized-pct", {"--progress-pct": "101"}, "progress"),
+        ("zero-step-index", {"--step-index": "0"}, "step"),
+        ("step-past-total", {"--step-index": "11"}, "step"),
+        ("zero-step-total", {"--step-total": "0"}, "step"),
+        (
+            "completion-before-final-step",
+            {
+                "--phase": "completed",
+                "--progress-pct": "100",
+                "--step-index": "9",
+                "--step-total": "10",
+            },
+            "completion",
+        ),
+        (
+            "completion-before-full-progress",
+            {
+                "--phase": "completed",
+                "--progress-pct": "99",
+                "--step-index": "10",
+                "--step-total": "10",
+            },
+            "completion",
+        ),
+    ),
+)
+def test_heartbeat_refuses_incoherent_progress_without_mutation(
+    tmp_path: Path,
+    case: str,
+    overrides: dict[str, str],
+    message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"progress-{case}")
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+    args = _heartbeat_args(claim)
+    for flag, value in overrides.items():
+        args = _replace_cli_option(args, flag, value)
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert message in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+def test_heartbeat_atomic_write_failure_leaves_all_authority_unchanged(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="atomic-failure")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    dispatcher = _load_dispatcher_module()
+
+    def fail_atomic_write(*_args, **_kwargs):
+        raise OSError("forced heartbeat atomic replacement failure")
+
+    monkeypatch.setattr(dispatcher.atomic_io, "write_json_atomic", fail_atomic_write)
+    rc = dispatcher.main(["--root", str(tmp_path), *_heartbeat_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "forced heartbeat atomic replacement failure" in captured.err
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_concurrent_heartbeats_with_same_revision_have_exactly_one_winner(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="concurrent-cas")
+    claim = created["claim"]
+
+    def invoke() -> subprocess.CompletedProcess[str]:
+        return _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _index: invoke(), range(2)))
+
+    assert sorted(result.returncode for result in results) == [0, 1]
+    loser = next(result for result in results if result.returncode == 1)
+    assert "revision" in loser.stderr.lower()
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def _renew_args(
+    claim: dict[str, object],
+    *,
+    expected_revision: int = 0,
+    expected_scope_digest: str | None = None,
+    now: str = "2026-08-03T09:10:00+09:00",
+    replan_ref: str = "",
+    agent_instance_id: str | None = None,
+    callsite_id: str | None = None,
+    lease_minutes: str = "45",
+) -> tuple[str, ...]:
+    args = [
+        "renew",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--agent-instance-id",
+        agent_instance_id or str(claim["agent_instance_id"]),
+        "--callsite-id",
+        callsite_id or str(claim["callsite_id"]),
+        "--expected-revision",
+        str(expected_revision),
+        "--expected-scope-digest",
+        expected_scope_digest or _claim_scope_digest(claim),
+        "--lease-minutes",
+        lease_minutes,
+        "--now",
+        now,
+        "--json",
+    ]
+    if replan_ref:
+        args.extend(("--replan-ref", replan_ref))
+    return tuple(args)
+
+
+@pytest.mark.parametrize("operation", ("heartbeat", "renew"))
+@pytest.mark.parametrize("deadline_case", ("malformed", "partial", "naive"))
+def test_claim_mutation_refuses_indeterminate_deadline_without_mutation(
+    tmp_path: Path,
+    operation: str,
+    deadline_case: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"{operation}-deadline-{deadline_case}",
+    )
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    if deadline_case == "malformed":
+        claim["expires_at"] = "not-an-iso-deadline"
+        claim["lease"]["expires_at"] = "not-an-iso-deadline"
+    elif deadline_case == "partial":
+        claim["lease"].pop("expires_at")
+    else:
+        claim["expires_at"] = "2026-08-03T09:30:00"
+        claim["lease"]["expires_at"] = "2026-08-03T09:30:00"
+    path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = _tree_entry_snapshot(tmp_path)
+    args = _heartbeat_args(claim) if operation == "heartbeat" else _renew_args(claim)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *args,
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    ("case", "mutate", "now", "expected_revision"),
+    (
+        ("inactive", lambda claim: claim.update(status="released"), "2026-08-03T09:10:00+09:00", 0),
+        ("overlay", lambda claim: claim.update(overlay=True), "2026-08-03T09:10:00+09:00", 0),
+        (
+            "expired",
+            lambda claim: (
+                claim.update(expires_at="2026-08-03T08:59:59+09:00"),
+                claim["lease"].update(expires_at="2026-08-03T08:59:59+09:00"),
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        ("heartbeat-regression", lambda claim: None, "2026-08-03T08:59:59+09:00", 0),
+        ("heartbeat-equality", lambda claim: None, "2026-08-03T09:00:00+09:00", 0),
+        (
+            "torn-heartbeat",
+            lambda claim: claim["lease"].update(
+                heartbeat_at="2026-08-03T08:59:59+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        (
+            "torn-expiry",
+            lambda claim: claim["lease"].update(
+                expires_at="2026-08-03T09:31:00+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        ("stale-revision", lambda claim: None, "2026-08-03T09:10:00+09:00", 9),
+    ),
+)
+def test_renew_refuses_invalid_authority_without_any_mutation(
+    tmp_path: Path,
+    case: str,
+    mutate,
+    now: str,
+    expected_revision: int,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-reject-{case}")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    mutate(claim)
+    path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(
+            claim,
+            now=now,
+            expected_revision=expected_revision,
+        ),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_atomic_write_failure_leaves_full_snapshot_unchanged(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-atomic-failure")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    dispatcher = _load_dispatcher_module()
+
+    def fail_atomic_write(*_args, **_kwargs):
+        raise OSError("forced renewal atomic replacement failure")
+
+    monkeypatch.setattr(dispatcher.atomic_io, "write_json_atomic", fail_atomic_write)
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_renew_args(claim)])
+
+    capsys.readouterr()
+    assert rc == 1
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_unchanged_scope_extends_lease_and_returns_equal_scope_digests(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-same")
+    claim = created["claim"]
+    old_digest = _claim_scope_digest(claim)
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["expires_at"] == "2026-08-03T09:55:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert persisted["mutation_revision"] == 1
+    assert response["receipt"]["claim_revision"] == 1
+    scope_change = response["receipt"]["scope_change"]
+    assert scope_change["changed"] is False
+    assert scope_change["old_digest"] == old_digest
+    assert scope_change["new_digest"] == old_digest
+    assert scope_change["replan_ref"] is None
+
+
+def test_renew_success_reconciles_projection_instance_and_single_pane_event(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-receipt-reconcile")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    projection = response["projection"]
+    assert projection["claim_revision"] == persisted["mutation_revision"]
+    projected_agents = projection["pointer"]["current_agents"]
+    assert len(projected_agents) == 1
+    projected = projected_agents[0]
+    assert projected["claim_id"] == claim["claim_id"]
+    assert projected["mutation_revision"] == persisted["mutation_revision"]
+    assert projected["last_heartbeat"] == persisted["last_heartbeat"]
+
+    instance_path = (
+        tmp_path
+        / "agents/runtime/instances"
+        / f"{claim['agent_instance_id']}.json"
+    )
+    instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert instance["updated_at"] == persisted["updated_at"]
+    assert instance["last_heartbeat"] == persisted["last_heartbeat"]
+    assert instance["claim_revision"] == persisted["mutation_revision"]
+    instance_receipt = response["receipt"]["instance"]
+    assert instance_receipt["updated_at"] == instance["updated_at"]
+    assert instance_receipt["claim_revision"] == instance["claim_revision"]
+
+    event_log = tmp_path / "agents/runtime/pane_events/pane-events.jsonl"
+    events = [
+        json.loads(line)
+        for line in event_log.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    renewal_events = [
+        event for event in events if event.get("event") == "instance_heartbeat"
+    ]
+    assert len(renewal_events) == 1
+    event = renewal_events[0]
+    assert event["claim_id"] == claim["claim_id"]
+    assert event["agent_instance_id"] == claim["agent_instance_id"]
+    assert event["ts"] == persisted["last_heartbeat"]
+    event_receipt = response["receipt"]["pane_event"]
+    for field in ("seq", "event", "claim_id", "agent_instance_id", "ts"):
+        assert event_receipt[field] == event[field]
+
+
+def test_renew_refuses_stale_expected_scope_digest_without_mutation(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="stale-scope-digest")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, expected_scope_digest="0" * 64),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "scope" in result.stderr.lower()
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_concurrent_renewals_with_same_revision_have_exactly_one_winner(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-concurrent-cas")
+    claim = created["claim"]
+    args = _renew_args(claim)
+
+    def invoke() -> subprocess.CompletedProcess[str]:
+        return _run_dispatcher(tmp_path, *args)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _index: invoke(), range(2)))
+
+    assert sorted(result.returncode for result in results) == [0, 1]
+    loser = next(result for result in results if result.returncode == 1)
+    assert "revision" in loser.stderr.lower()
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+
+
+@pytest.mark.parametrize(
+    ("identity_field", "expected_message"),
+    (("agent_instance_id", "owner"), ("callsite_id", "callsite")),
+)
+def test_renew_refuses_wrong_owner_or_callsite_without_mutation(
+    tmp_path: Path,
+    identity_field: str,
+    expected_message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-{identity_field}")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    kwargs = {
+        "agent_instance_id": str(claim["agent_instance_id"]),
+        "callsite_id": str(claim["callsite_id"]),
+    }
+    kwargs[identity_field] += "-wrong"
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim, **kwargs))
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert expected_message in result.stderr.lower()
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("lease_minutes", ("0", "-1", str(10**100)))
+def test_renew_refuses_invalid_or_overflowing_lease_without_mutation(
+    tmp_path: Path,
+    lease_minutes: str,
+) -> None:
+    suffix = "overflow" if len(lease_minutes) > 20 else lease_minutes.replace("-", "negative")
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-lease-{suffix}")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, lease_minutes=lease_minutes),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "lease_minutes" in result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("drift_component", ("target_files", "stop_condition"))
+def test_renew_refuses_single_component_drift_without_replan_or_mutation(
+    tmp_path: Path,
+    drift_component: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"single-drift-{drift_component}",
+    )
+    claim = created["claim"]
+    targets = tuple(str(item) for item in claim["target_files"])
+    stop_condition = str(claim["stop_condition"])
+    if drift_component == "target_files":
+        targets = (*targets, "scripts/target_only_replan.py")
+    else:
+        stop_condition = stop_condition + ":stop-only-drift"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=targets,
+        stop_condition=stop_condition,
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("with_unaccepted_replan", (False, True))
+def test_renew_refuses_scope_drift_without_matching_accepted_replan(
+    tmp_path: Path,
+    with_unaccepted_replan: bool,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"drift-{with_unaccepted_replan}")
+    claim = created["claim"]
+    unit_path = tmp_path / str(claim["unit_spec"])
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=("scripts/claim_worker.py", "scripts/silently_broadened.py"),
+        stop_condition="stop_after:UNIT:adjacent-scope",
+    )
+    replan_ref = ""
+    if with_unaccepted_replan:
+        replan_ref = "reviews/REVIEW-2026-08-03-draft-replan.md"
+        review = tmp_path / replan_ref
+        review.parent.mkdir(parents=True, exist_ok=True)
+        review.write_text(
+            "---\nstatus: draft\ntask_id: "
+            + str(claim["task_id"])
+            + "\nunit_id: "
+            + str(claim["unit_id"])
+            + "\n---\n",
+            encoding="utf-8",
+        )
+        _write_plan_design_record(
+            tmp_path,
+            claim=claim,
+            replan_ref=replan_ref,
+            anchor=unit_path,
+        )
+    before = _claim_path(tmp_path, created).read_bytes()
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "replan" in result.stderr.lower()
+    assert _claim_path(tmp_path, created).read_bytes() == before
+
+
+def _write_plan_design_record(
+    root: Path,
+    *,
+    claim: dict[str, object],
+    replan_ref: str,
+    anchor: Path,
+) -> None:
+    anchor_rel = anchor.relative_to(root).as_posix()
+    registry = {
+        "schema": "agent-runtime-plan-assumptions/v1",
+        "updated_at": "2026-08-03T09:09:00+09:00",
+        "assumption_sets": [
+            {
+                "taskset_id": claim["task_set_id"],
+                "design_record": replan_ref,
+                "recorded_at": "2026-08-03T09:09:00+09:00",
+                "revalidation_policy": "block_dispatch_on_drift",
+                "anchors": [
+                    {
+                        "path": anchor_rel,
+                        "kind": "sha256",
+                        "value": hashlib.sha256(anchor.read_bytes()).hexdigest(),
+                    }
+                ],
+            }
+        ],
+    }
+    path = root / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _write_accepted_replan_review(
+    root: Path,
+    *,
+    relative: str,
+    task_id: str,
+    unit_id: str,
+    indirect_ref: str = "",
+) -> None:
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        f"id: {Path(relative).stem}",
+        "status: accepted",
+        "signal: pass",
+        "tier: T3",
+        f"task_id: {task_id}",
+        f"unit_id: {unit_id}",
+    ]
+    if indirect_ref:
+        lines.extend(("evidence:", f"  - {indirect_ref}"))
+    lines.extend(("---", "", "# Accepted renewal replan", ""))
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "invalid_replan",
+    ("wrong-task", "wrong-unit", "design-record-mismatch", "indirect-design-record"),
+)
+def test_renew_refuses_nonmatching_or_indirect_accepted_replan_without_mutation(
+    tmp_path: Path,
+    invalid_replan: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"bad-replan-{invalid_replan}")
+    claim = created["claim"]
+    unit_path = tmp_path / str(claim["unit_spec"])
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=(*tuple(str(item) for item in claim["target_files"]), "scripts/replan_drift.py"),
+        stop_condition=str(claim["stop_condition"]),
+    )
+    requested_ref = f"reviews/REVIEW-2026-08-03-{invalid_replan}-requested.md"
+    review_task_id = str(claim["task_id"])
+    review_unit_id = str(claim["unit_id"])
+    if invalid_replan == "wrong-task":
+        review_task_id = review_task_id + "-OTHER"
+    elif invalid_replan == "wrong-unit":
+        review_unit_id = review_unit_id + "-OTHER"
+    _write_accepted_replan_review(
+        tmp_path,
+        relative=requested_ref,
+        task_id=review_task_id,
+        unit_id=review_unit_id,
+    )
+
+    design_ref = requested_ref
+    if invalid_replan in {"design-record-mismatch", "indirect-design-record"}:
+        design_ref = f"reviews/REVIEW-2026-08-03-{invalid_replan}-design-record.md"
+        _write_accepted_replan_review(
+            tmp_path,
+            relative=design_ref,
+            task_id=str(claim["task_id"]),
+            unit_id=str(claim["unit_id"]),
+            indirect_ref=requested_ref if invalid_replan == "indirect-design-record" else "",
+        )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=design_ref,
+        anchor=unit_path,
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=requested_ref),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_accepts_matching_plan_design_replan_and_receipts_old_new_scope(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="accepted-replan")
+    claim = created["claim"]
+    old_digest = _claim_scope_digest(claim)
+    unit_path = tmp_path / str(claim["unit_spec"])
+    new_targets = ("scripts/claim_worker.py", "scripts/replanned_helper.py")
+    new_stop = "stop_after:UNIT:replanned-verification"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=new_targets,
+        stop_condition=new_stop,
+    )
+    replan_ref = "reviews/REVIEW-2026-08-03-accepted-heartbeat-replan.md"
+    review = tmp_path / replan_ref
+    review.parent.mkdir(parents=True, exist_ok=True)
+    review.write_text(
+        "---\n"
+        "id: REVIEW-2026-08-03-accepted-heartbeat-replan\n"
+        "status: accepted\n"
+        "signal: pass\n"
+        "tier: T3\n"
+        f"task_id: {claim['task_id']}\n"
+        f"unit_id: {claim['unit_id']}\n"
+        "---\n\n# Accepted replan\n",
+        encoding="utf-8",
+    )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=replan_ref,
+        anchor=unit_path,
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    new_digest = persisted["scope_binding"]["digest"]
+    assert new_digest != old_digest
+    assert persisted["target_files"] == list(new_targets)
+    assert persisted["stop_condition"] == new_stop
+    scope_change = response["receipt"]["scope_change"]
+    assert scope_change["changed"] is True
+    assert scope_change["old_digest"] == old_digest
+    assert scope_change["new_digest"] == new_digest
+    assert scope_change["replan_ref"] == replan_ref
+
+
+def test_accepted_renewal_persists_bounded_full_scope_provenance(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="full-scope-provenance")
+    claim = created["claim"]
+    old_binding = _claim_scope_binding(claim)
+    unit_path = tmp_path / str(claim["unit_spec"])
+    new_targets = (*tuple(str(item) for item in claim["target_files"]), "scripts/provenance.py")
+    new_stop = str(claim["stop_condition"]) + ":replanned"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=new_targets,
+        stop_condition=new_stop,
+    )
+    replan_ref = "reviews/REVIEW-2026-08-03-full-scope-provenance.md"
+    _write_accepted_replan_review(
+        tmp_path,
+        relative=replan_ref,
+        task_id=str(claim["task_id"]),
+        unit_id=str(claim["unit_id"]),
+    )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=replan_ref,
+        anchor=unit_path,
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    new_binding = persisted["scope_binding"]
+    assert new_binding == _expected_scope_binding(
+        persisted,
+        bound_at="2026-08-03T09:10:00+09:00",
+    )
+    assert set(old_binding["components"]) == {
+        "task",
+        "unit",
+        "target_files",
+        "stop_condition",
+    }
+    assert set(new_binding["components"]) == set(old_binding["components"])
+    last_renewal = persisted["last_renewal"]
+    assert last_renewal["replan_ref"] == replan_ref
+    assert last_renewal["old_scope_binding"] == old_binding
+    assert last_renewal["new_scope_binding"] == new_binding
+    assert len(json.dumps(last_renewal, ensure_ascii=False)) <= 4096
+    scope_receipt = response["receipt"]["scope_change"]
+    assert scope_receipt["replan_ref"] == replan_ref
+    assert scope_receipt["old_scope_binding"] == old_binding
+    assert scope_receipt["new_scope_binding"] == new_binding
+
+
+def test_heartbeat_never_changes_git_head_index_or_refs(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "heartbeat-no-git")
+    created = _create_heartbeat_candidate(
+        linked,
+        task_id="TASK-AR-655-NO-GIT",
+        suffix="no-git",
+        worktree_path=".",
+    )
+    claim = created["claim"]
+    pointer = linked / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: serial projection owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
+    before = {
+        "head": _git_stdout(linked, "rev-parse", "HEAD"),
+        "index": _git_stdout(linked, "write-tree"),
+        "refs": _git_stdout(linked, "for-each-ref", "--format=%(refname) %(objectname)"),
+    }
+
+    heartbeated = _run_dispatcher(linked, *_heartbeat_args(claim))
+    assert heartbeated.returncode == 0, heartbeated.stderr or heartbeated.stdout
+    persisted = _read_created_claim(linked, created)
+    renewed = _run_dispatcher(
+        linked,
+        *_renew_args(
+            persisted,
+            expected_revision=1,
+            expected_scope_digest=str(persisted["scope_binding"]["digest"]),
+            now="2026-08-03T09:20:00+09:00",
+        ),
+    )
+    assert renewed.returncode == 0, renewed.stderr or renewed.stdout
+
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before["head"]
+    assert _git_stdout(linked, "write-tree") == before["index"]
+    assert _git_stdout(linked, "for-each-ref", "--format=%(refname) %(objectname)") == before["refs"]
+    assert pointer.read_bytes() == pointer_before
+
+
+def test_committed_heartbeat_reports_auxiliary_failures_without_retry_ambiguity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="aux-warning")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+
+    def fail_instance(*_args, **_kwargs):
+        raise OSError("forced instance refresh failure")
+
+    def fail_event(*_args, **_kwargs):
+        raise OSError("forced pane event failure")
+
+    monkeypatch.setattr(dispatcher, "record_claim_instance", fail_instance)
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_heartbeat_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["status"] == "heartbeat_committed_with_warnings"
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    stages = {item["stage"] for item in response["post_commit_warnings"]}
+    assert stages == {"agent-instance-registry", "claim-heartbeat-event"}
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def test_committed_renew_reports_auxiliary_failures_without_losing_claim_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-aux-warning")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+
+    def fail_instance(*_args, **_kwargs):
+        raise OSError("forced renewal instance refresh failure")
+
+    def fail_event(*_args, **_kwargs):
+        raise OSError("forced renewal pane event failure")
+
+    monkeypatch.setattr(dispatcher, "record_claim_instance", fail_instance)
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+    monkeypatch.setattr(
+        dispatcher,
+        "append_census_event",
+        fail_event,
+        raising=False,
+    )
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_renew_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["status"].endswith("committed_with_warnings")
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    assert len(response["post_commit_warnings"]) == 2
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["mutation_revision"] == 1
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+
+
+def test_projection_rejects_expired_claim_and_exposes_live_claim_revision(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="projection-revision")
+    claim = created["claim"]
+    live = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--now",
+        "2026-08-03T09:10:00+09:00",
+        "--json",
+    )
+    assert live.returncode == 0, live.stderr or live.stdout
+    projection = json.loads(live.stdout)
+    assert projection["claim_revision"] == 0
+    assert projection["pointer"]["current_agents"][0]["mutation_revision"] == 0
+
+    path = _claim_path(tmp_path, created)
+    expired = json.loads(path.read_text(encoding="utf-8"))
+    expired["expires_at"] = "2026-08-03T08:59:59+09:00"
+    expired["lease"]["expires_at"] = "2026-08-03T08:59:59+09:00"
+    path.write_text(json.dumps(expired, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    refused = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--now",
+        "2026-08-03T09:10:00+09:00",
+        "--json",
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+    assert refused.returncode == 1
+    assert "expired" in refused.stderr.lower()

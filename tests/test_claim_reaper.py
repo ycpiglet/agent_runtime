@@ -275,6 +275,115 @@ def test_default_grace_preserves_environment_compatibility(
     assert claim_reaper.default_grace() == 0
 
 
+@pytest.mark.parametrize(
+    ("status", "top", "nested", "expected_state", "expected_decision"),
+    (
+        (
+            "claimed",
+            "2026-06-14T12:00:00+09:00",
+            "2026-06-14T12:00:00+09:00",
+            "live",
+            "live",
+        ),
+        (
+            "claimed",
+            "2026-06-14T11:49:59.999999+09:00",
+            "2026-06-14T11:49:59.999999+09:00",
+            "expired",
+            "dead",
+        ),
+        ("claimed", None, None, "indeterminate", "skip"),
+        (
+            "released",
+            "2026-06-14T11:00:00+09:00",
+            "2026-06-14T11:00:00+09:00",
+            "inactive",
+            "skip",
+        ),
+    ),
+)
+def test_ar655_reaper_wrapper_matches_shared_claim_liveness(
+    status: str,
+    top: str | None,
+    nested: str | None,
+    expected_state: str,
+    expected_decision: str,
+) -> None:
+    claim: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-AR655-REAPER-PARITY",
+        "task_id": "TASK-AR-655",
+        "agent_instance_id": "worker-ar655-reaper-parity",
+        "status": status,
+    }
+    if top is not None:
+        claim["expires_at"] = top
+    if nested is not None:
+        claim["lease"] = {"expires_at": nested}
+    now = claim_reaper._parse_now(NOW)
+
+    shared = claim_reaper.claim_store.classify_claim_liveness(
+        claim,
+        now=now,
+        grace_seconds=600,
+    )
+    decision, reason = claim_reaper.classify_claim(claim, now, 600)
+
+    assert shared.state == expected_state
+    assert decision == expected_decision
+    assert isinstance(reason, str) and reason
+    if shared.state == "indeterminate":
+        assert "indeterminate" in reason
+
+
+def test_ar655_reaper_uses_shared_latest_deadline_and_grace_equality() -> None:
+    claim = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-AR655-REAPER-LATEST",
+        "task_id": "TASK-AR-655",
+        "agent_instance_id": "worker-ar655-reaper-latest",
+        "status": "claimed",
+        "expires_at": "2026-06-14T11:00:00+09:00",
+        "lease": {"expires_at": "2026-06-14T11:50:00+09:00"},
+    }
+    now = claim_reaper._parse_now(NOW)
+
+    shared = claim_reaper.claim_store.classify_claim_liveness(
+        claim,
+        now=now,
+        grace_seconds=600,
+    )
+    decision, reason = claim_reaper.classify_claim(claim, now, 600)
+
+    assert shared.state == "live"
+    assert shared.effective_deadline == claim_reaper._parse_now(
+        "2026-06-14T11:50:00+09:00"
+    )
+    assert any("mismatch" in finding for finding in shared.findings)
+    assert (decision, reason) == ("live", "lease-valid")
+
+
+@pytest.mark.parametrize(
+    ("environment", "expected"),
+    (
+        ({}, 600),
+        ({claim_reaper.GRACE_ENV: "malformed"}, 600),
+        ({claim_reaper.GRACE_ENV: "-1"}, 0),
+    ),
+)
+def test_ar655_reaper_default_grace_is_shared_resolver_parity(
+    monkeypatch: pytest.MonkeyPatch,
+    environment: dict[str, str],
+    expected: int,
+) -> None:
+    monkeypatch.delenv(claim_reaper.GRACE_ENV, raising=False)
+    for key, value in environment.items():
+        monkeypatch.setenv(key, value)
+
+    assert claim_reaper.default_grace() == expected
+    assert claim_reaper.default_grace() == claim_reaper.claim_store.resolve_claim_grace()
+
+
 def test_huge_nonnegative_grace_conservatively_retains_live_claim(
     tmp_path: Path,
 ) -> None:

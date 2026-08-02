@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from agent_runtime import ui_console
@@ -120,6 +121,27 @@ def test_selected_helpers_are_not_redefined_inside_ui_console_source():
     assert "function renderSurfaceMeta(content) {" not in source
     assert "ui_design_assets.UI_COMPONENTS_JS" not in source
     assert "ui_design_assets.UI_COMPONENTS_JS" in asset_source
+
+
+def test_home_wip_uses_server_derived_claim_liveness_not_raw_status():
+    source = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")
+
+    render_home = re.search(
+        r"function renderHomeSummary\(\) \{(?P<body>.*?)\n\}\n\nfunction renderDashboard",
+        source,
+        flags=re.DOTALL,
+    )
+    assert render_home is not None
+    claims_filter = re.search(
+        r"const claims = .*?\.filter\((?P<body>.*?)\n\s*\);",
+        render_home.group("body"),
+        flags=re.DOTALL,
+    )
+    assert claims_filter is not None
+
+    assert "claim.authority_active === true" in claims_filter.group("body")
+    assert "claim.status" not in claims_filter.group("body")
+    assert "HOME_ACTIVE_CLAIM_STATUSES" not in source
 
 
 def test_console_serves_assets_from_asset_module_boundary():

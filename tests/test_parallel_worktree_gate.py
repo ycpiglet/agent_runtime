@@ -4,17 +4,20 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
-from scripts.parallel_worktree_gate import ClaimRecord, _continuity_findings
+from scripts.parallel_worktree_gate import ClaimRecord, _continuity_findings, check_root
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 TRANSACTION_ENV = "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION"
 TRANSACTION_SCHEMA = "agent-runtime-claim-commit-transaction/v2"
+AR655_LIVENESS_NOW = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+AR655_FIXTURE_EXPIRY = "2099-01-01T00:00:00+00:00"
 
 
 def _run_gate(
@@ -56,6 +59,10 @@ def _write_claim(root: Path, name: str, **overrides: object) -> Path:
         "branch": "codex/task-ar-246-parallel-runtime",
         "claimed_at": "2026-06-10T12:00:00+09:00",
         "last_heartbeat": "2026-06-10T12:05:00+09:00",
+        # Existing gate fixtures represent healthy status-active authority.
+        # Complete copies avoid silently relying on legacy missing deadlines.
+        "expires_at": AR655_FIXTURE_EXPIRY,
+        "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
         "handoff_path": "STATUS.md",
         "log_path": "reviews/REVIEW-2026-06-10-agent-runtime-parallel-session-protocol.md",
     }
@@ -136,6 +143,8 @@ def _portable_claim(root: Path, claim_id: str = "CLAIM-PORTABLE-1") -> ClaimReco
         "branch": "codex/task-ar-648-portable-continuity",
         "claimed_at": "2026-07-30T00:00:00+09:00",
         "last_heartbeat": "2026-07-30T00:05:00+09:00",
+        "expires_at": AR655_FIXTURE_EXPIRY,
+        "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
         "handoff_path": handoff,
         "log_path": log_path,
     }
@@ -222,6 +231,199 @@ def _write_portable_pointer(
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
+
+
+def _set_ar655_record_deadlines(
+    record: ClaimRecord,
+    *,
+    top: object,
+    nested: object,
+) -> None:
+    if top is None:
+        record.payload.pop("expires_at", None)
+    else:
+        record.payload["expires_at"] = top
+    if nested is None:
+        record.payload.pop("lease", None)
+    else:
+        record.payload["lease"] = {"expires_at": nested}
+    record.path.write_text(
+        json.dumps(record.payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_ar655_parallel_expired_claim_blocks_with_exact_pointer(tmp_path: Path) -> None:
+    record = _portable_claim(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_record_deadlines(record, top=expired, nested=expired)
+    _write_portable_pointer(tmp_path, [record])
+
+    findings = check_root(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert any(
+        "task-claim:liveness-expired:CLAIM-PORTABLE-1" in finding.message
+        for finding in findings
+    )
+
+
+def test_ar655_parallel_expired_claim_blocks_even_when_status_handoff_passes(
+    tmp_path: Path,
+) -> None:
+    _write_status(tmp_path, "STATUS.md", "# STATUS\n\n## Handoff Checklist\n")
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _write_claim(
+        tmp_path,
+        "CLAIM-AR655-STATUS-EXPIRED",
+        expires_at=expired,
+        lease={"expires_at": expired},
+    )
+
+    findings = check_root(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert any(
+        "task-claim:liveness-expired:CLAIM-AR655-STATUS-EXPIRED"
+        in finding.message
+        for finding in findings
+    )
+
+
+def test_ar655_parallel_expired_claim_does_not_cover_dirty_task_worktree(
+    tmp_path: Path,
+) -> None:
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(
+        repo,
+        name="TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+    )
+    (worktree / "wip.txt").write_text("uncommitted work\n", encoding="utf-8")
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _write_claim(
+        repo,
+        "CLAIM-AR655-DIRTY-EXPIRED",
+        task_id="TASK-AR-900",
+        worktree_path=".worktrees/TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+        skip_worktree_marker=True,
+        expires_at=expired,
+        lease={"expires_at": expired},
+        persistence={"mode": "working_tree", "scm_commit_authorized": False},
+    )
+
+    findings = check_root(
+        repo,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert any(
+        "worktree:missing-claim-dirty" in finding.message
+        for finding in findings
+    )
+
+
+def test_ar655_parallel_indeterminate_claim_blocks_but_retains_dirty_worktree_authority(
+    tmp_path: Path,
+) -> None:
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(
+        repo,
+        name="TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+    )
+    (worktree / "wip.txt").write_text(
+        "conservatively authorized uncommitted work\n",
+        encoding="utf-8",
+    )
+    _write_claim(
+        repo,
+        "CLAIM-AR655-DIRTY-INDETERMINATE",
+        task_id="TASK-AR-900",
+        worktree_path=".worktrees/TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+        skip_worktree_marker=True,
+        expires_at=AR655_FIXTURE_EXPIRY,
+        lease=None,
+        persistence={"mode": "working_tree", "scm_commit_authorized": False},
+    )
+
+    findings = check_root(
+        repo,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+    messages = [finding.message for finding in findings]
+
+    assert any(
+        "task-claim:liveness-indeterminate:CLAIM-AR655-DIRTY-INDETERMINATE"
+        in message
+        for message in messages
+    )
+    assert not any(
+        "worktree:missing-claim-dirty" in message
+        for message in messages
+    )
+
+
+@pytest.mark.parametrize(
+    ("top", "nested", "expect_mismatch"),
+    (
+        (
+            (AR655_LIVENESS_NOW - timedelta(seconds=600)).isoformat(),
+            (AR655_LIVENESS_NOW - timedelta(seconds=600)).isoformat(),
+            False,
+        ),
+        (
+            (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat(),
+            (AR655_LIVENESS_NOW + timedelta(seconds=1)).isoformat(),
+            True,
+        ),
+    ),
+)
+def test_ar655_parallel_within_grace_or_latest_deadline_retains_worktree_authority(
+    tmp_path: Path,
+    top: str,
+    nested: str,
+    expect_mismatch: bool,
+) -> None:
+    repo = _init_git_repo(tmp_path)
+    worktree = _add_task_worktree(
+        repo,
+        name="TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+    )
+    (worktree / "wip.txt").write_text("authorized uncommitted work\n", encoding="utf-8")
+    _write_claim(
+        repo,
+        "CLAIM-AR655-DIRTY-LIVE",
+        task_id="TASK-AR-900",
+        worktree_path=".worktrees/TASK-AR-900",
+        branch="claude/task-ar-900-demo",
+        skip_worktree_marker=True,
+        expires_at=top,
+        lease={"expires_at": nested},
+        persistence={"mode": "working_tree", "scm_commit_authorized": False},
+    )
+
+    findings = check_root(
+        repo,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+    messages = [finding.message for finding in findings]
+
+    assert not any("worktree:missing-claim-dirty" in message for message in messages)
+    assert not any("task-claim:liveness-expired" in message for message in messages)
+    assert any("task-claim:liveness-deadline-mismatch" in message for message in messages) is expect_mismatch
 
 
 @pytest.mark.parametrize(

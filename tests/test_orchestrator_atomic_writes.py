@@ -13,6 +13,7 @@ import json
 import sys
 from argparse import Namespace
 from pathlib import Path
+from types import SimpleNamespace
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ORCHESTRATOR = (
@@ -175,3 +176,99 @@ def test_kill_default_stop_does_not_claim_task_completion(tmp_path: Path, monkey
     record = json.loads((tmp_path / f"{agent_id}.json").read_text(encoding="utf-8"))
     assert record["status"] == "stopping"
     assert record["outcome"] == "stopped"
+
+
+def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-20260803-090000-task-ar-655-orchestrator"
+    claim_path = tmp_path / "agents/runtime/task_claims" / f"{claim_id}.json"
+    pointer_path = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+    claim_path.parent.mkdir(parents=True, exist_ok=True)
+    pointer_path.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.write_text('{"sentinel":"serial claim authority"}\n', encoding="utf-8")
+    pointer_path.write_text("sentinel: serial projection owner\n", encoding="utf-8")
+    claim_before = claim_path.read_bytes()
+    pointer_before = pointer_path.read_bytes()
+    calls: list[tuple[list[str], dict[str, object]]] = []
+    dispatcher_response = {
+        "status": "heartbeated",
+        "receipt": {"committed": True, "claim_revision": 4},
+        "projection": {"claim_revision": 4, "operation": "merge"},
+    }
+
+    def fake_run(command, **kwargs):
+        calls.append((list(command), dict(kwargs)))
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps(dispatcher_response),
+            stderr="",
+        )
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(run=fake_run),
+        raising=False,
+    )
+
+    rc = mod.main(
+        [
+            "claim-progress",
+            "--claim-id",
+            claim_id,
+            "--agent-instance-id",
+            "le-20260803-090000-kst-orchestrator",
+            "--callsite-id",
+            "terminal:wt-task-ar-655:tab-01",
+            "--expected-revision",
+            "3",
+            "--phase",
+            "implementation",
+            "--progress-pct",
+            "60",
+            "--step-index",
+            "6",
+            "--step-total",
+            "10",
+            "--status-text",
+            "Delegating progress through claim heartbeat",
+            "--now",
+            "2026-08-03T09:20:00+09:00",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    assert len(calls) == 1
+    command, kwargs = calls[0]
+    assert Path(command[1]).name == "task_claim_dispatcher.py"
+    assert command.count("heartbeat") == 1
+    assert command[command.index("--root") + 1] == str(tmp_path)
+    for flag, value in (
+        ("--claim-id", claim_id),
+        ("--agent-instance-id", "le-20260803-090000-kst-orchestrator"),
+        ("--callsite-id", "terminal:wt-task-ar-655:tab-01"),
+        ("--expected-revision", "3"),
+        ("--phase", "implementation"),
+        ("--progress-pct", "60"),
+        ("--step-index", "6"),
+        ("--step-total", "10"),
+        ("--status-text", "Delegating progress through claim heartbeat"),
+        ("--now", "2026-08-03T09:20:00+09:00"),
+    ):
+        assert command.count(flag) == 1
+        assert command[command.index(flag) + 1] == value
+    assert kwargs["check"] is False
+    assert kwargs["capture_output"] is True
+    assert kwargs["text"] is True
+    rendered = json.loads(captured.out)
+    assert rendered["receipt"]["claim_revision"] == 4
+    assert rendered["projection"]["claim_revision"] == 4
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before

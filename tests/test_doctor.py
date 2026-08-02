@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 from agent_runtime import cli as cli_module
+from agent_runtime import claim_store
 from agent_runtime import doctor
 from agent_runtime import state_projection
 
@@ -81,6 +82,36 @@ def _write_message_file(root: Path, message_id: str, *, status: str = "claimed",
     path = inbox / f"{message_id}.md"
     path.write_text("\n".join([line for line in msg if line != ""]), encoding="utf-8")
     return path
+
+
+def _write_task_claim(
+    root: Path,
+    claim_id: str,
+    *,
+    status: str = "claimed",
+    expires_at: object = "2000-01-01T00:00:00+00:00",
+) -> Path:
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": "TASK-AR-655",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+        "agent_instance_id": f"worker-{claim_id.lower()}",
+        "agent_role": "lead-engineer",
+        "callsite_id": "terminal:doctor-fixture",
+        "status": status,
+    }
+    if expires_at is not None:
+        payload["expires_at"] = expires_at
+        payload["lease"] = {"expires_at": expires_at}
+    path = root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def _initialize_task_claim_store(root: Path, witness_claim_id: str) -> None:
+    claim_store.initialize_store(root, witness_claim_id=witness_claim_id)
 
 
 def test_doctor_check_fails_on_missing_core_template_file(tmp_path):
@@ -658,3 +689,118 @@ def test_doctor_blocks_one_sided_claim_store_and_preserves_evidence(tmp_path):
     )
     assert outer.read_bytes() == before
     assert not (root / "agents/runtime/task_claims/.claim-store").exists()
+
+
+def test_doctor_blocks_grace_exceeded_active_task_claim(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-expired")
+    _initialize_task_claim_store(root, "CLAIM-doctor-expired")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-expired"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-expired" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_full_snapshot_rejects_malformed_non_witness_claim(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-witness", status="released", expires_at=None)
+    _initialize_task_claim_store(root, "CLAIM-doctor-witness")
+    malformed = root / "agents" / "runtime" / "task_claims" / "CLAIM-doctor-malformed.json"
+    malformed.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-doctor-malformed",
+                "task_id": ["TASK-AR-655"],
+                "agent_instance_id": "worker-malformed",
+                "status": "claimed",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-store-integrity-invalid"
+        and finding.severity == "blocker"
+        for finding in plan.findings
+    )
+    assert not any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-store-initialized"
+        and finding.severity == "info"
+        for finding in plan.findings
+    )
+
+
+def test_doctor_surfaces_indeterminate_active_claim_as_blocker(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-indeterminate", expires_at=None)
+    _initialize_task_claim_store(root, "CLAIM-doctor-indeterminate")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-liveness-indeterminate"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-indeterminate" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_status_continuity_shortcut_cannot_hide_expired_claim(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    (root / "STATUS.md").write_text("# Handoff Checklist\n\nTASK-AR-655 active\n", encoding="utf-8")
+    _write_task_claim(root, "CLAIM-doctor-status-expired")
+    _initialize_task_claim_store(root, "CLAIM-doctor-status-expired")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.kind == "claim-expired"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-status-expired" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_uses_latest_deadline_copy_and_reports_mismatch(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    path = _write_task_claim(
+        root,
+        "CLAIM-doctor-latest-deadline",
+        expires_at="2000-01-01T00:00:00+00:00",
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["lease"] = {"expires_at": "2099-01-01T00:00:00+00:00"}
+    path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+    _initialize_task_claim_store(root, "CLAIM-doctor-latest-deadline")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert not any(
+        finding.kind in {"claim-expired", "claim-liveness-indeterminate"}
+        and "CLAIM-doctor-latest-deadline" in finding.detail
+        for finding in plan.findings
+    )
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-liveness-deadline-mismatch"
+        and finding.severity == "warning"
+        and "CLAIM-doctor-latest-deadline" in finding.detail
+        for finding in plan.findings
+    )

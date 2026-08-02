@@ -4,12 +4,17 @@ import importlib.util
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+import pytest
 
 from agent_runtime import state_projection
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "state_sync_gate.py"
+AR655_LIVENESS_NOW = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+AR655_FIXTURE_EXPIRY = "2099-01-01T00:00:00+00:00"
 
 
 def load_module():
@@ -134,6 +139,10 @@ def write_claim(
         "agent_role": "lead-engineer",
         "agent_instance_id": agent_instance_id,
         "status": "claimed",
+        # Existing non-liveness tests model a healthy active claim. Keep that
+        # authority explicit now that missing lease copies are indeterminate.
+        "expires_at": AR655_FIXTURE_EXPIRY,
+        "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
         "worktree_path": f".worktrees/{claim_id}",
         "branch": branch,
     }
@@ -195,6 +204,99 @@ pointers:
 {refs}
 """,
     )
+
+
+def _ar655_state_sync_claim_fixture(tmp_path: Path) -> tuple[object, Path]:
+    gate = load_module()
+    task_id = "TASK-AR-631"
+    unit_id = "UNIT-TASK-AR-631-001"
+    write_task(tmp_path, task_id, "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, task_id, unit_id)
+    claim_ref = write_claim(tmp_path, task_id=task_id, unit_id=unit_id)
+    attach_claim_refs(tmp_path, task_id, unit_id, claim_ref)
+    write_claim_pointer(tmp_path, task_id, claim_ref)
+    write(tmp_path / "BACKLOG-BOARD.md", f"TASKSET-AR-GOVERNANCE-OPS\n{task_id}\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", f"TASKSET-AR-GOVERNANCE-OPS\n{task_id}\n")
+    return gate, tmp_path / claim_ref
+
+
+def _set_ar655_claim_deadlines(
+    path: Path,
+    *,
+    top: object,
+    nested: object,
+) -> None:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if top is None:
+        payload.pop("expires_at", None)
+    else:
+        payload["expires_at"] = top
+    if nested is None:
+        payload.pop("lease", None)
+    else:
+        payload["lease"] = {"expires_at": nested}
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_ar655_state_sync_expired_claim_blocks_with_exact_pointer(tmp_path: Path) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=expired, nested=expired)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert any(
+        finding.severity == "block"
+        and finding.subject == "claim:liveness-expired:CLAIM-TEST-001"
+        for finding in findings
+    )
+
+
+def test_ar655_state_sync_positive_grace_equality_remains_active(tmp_path: Path) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    equality = (AR655_LIVENESS_NOW - timedelta(seconds=600)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=equality, nested=equality)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert not [finding for finding in findings if finding.severity == "block"]
+
+
+@pytest.mark.parametrize(
+    ("top", "nested"),
+    (
+        (None, None),
+        (AR655_FIXTURE_EXPIRY, None),
+        (AR655_FIXTURE_EXPIRY, "not-a-deadline"),
+    ),
+)
+def test_ar655_state_sync_indeterminate_claim_retains_authority_but_blocks(
+    tmp_path: Path,
+    top: object,
+    nested: object,
+) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    _set_ar655_claim_deadlines(claim_path, top=top, nested=nested)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+    subjects = {finding.subject for finding in findings}
+
+    assert "claim:liveness-indeterminate:CLAIM-TEST-001" in subjects
+    assert "pointer:primary-worker-missing:TASK-AR-631" not in subjects
+    assert "pointer:primary-worker-missing-task" not in subjects
 
 
 def test_consistent_active_pointer_passes(tmp_path):
@@ -498,6 +600,8 @@ def test_linked_checkout_resolves_relative_worker_path_from_primary_checkout(tmp
             "agent_role": "lead-engineer",
             "agent_instance_id": "worker-test",
             "status": "claimed",
+            "expires_at": AR655_FIXTURE_EXPIRY,
+            "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
             "worktree_path": ".worktrees/TASK-AR-631",
             "branch": "worker",
         }),
@@ -542,6 +646,8 @@ def test_active_worker_claim_targeting_primary_checkout_blocks_with_portable_git
             "agent_role": "lead-engineer",
             "agent_instance_id": "worker-test",
             "status": "claimed",
+            "expires_at": AR655_FIXTURE_EXPIRY,
+            "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
             "worktree_path": ".",
             "branch": "base",
         }),

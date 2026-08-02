@@ -211,6 +211,229 @@ def test_deadline_within_grace_rejects_invalid_explicit_grace(value: object) -> 
         )
 
 
+def _ar655_liveness_payload(
+    *,
+    status: str = "claimed",
+    top: object = "2026-08-03T00:00:00Z",
+    nested: object = "2026-08-03T00:00:00+00:00",
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": "CLAIM-AR655-LIVENESS",
+        "task_id": "TASK-AR-655",
+        "unit_id": "UNIT-TASK-AR-655-001",
+        "agent_instance_id": "worker-ar655-liveness",
+        "status": status,
+    }
+    if top is not None:
+        payload["expires_at"] = top
+    if nested is not None:
+        payload["lease"] = {"expires_at": nested}
+    return payload
+
+
+def _assert_ar655_bounded_liveness(result: object) -> None:
+    assert isinstance(result, claim_store.ClaimLiveness)
+    assert result.state in {"inactive", "live", "expired", "indeterminate"}
+    assert isinstance(result.status, str)
+    assert isinstance(result.reason, str) and result.reason
+    assert len(result.reason) <= 256
+    assert "\n" not in result.reason
+    assert "Traceback" not in result.reason
+    assert isinstance(result.deadline_sources, tuple)
+    assert isinstance(result.findings, tuple)
+    for finding in result.findings:
+        assert isinstance(finding, str) and finding
+        assert len(finding) <= 256
+        assert "\n" not in finding
+        assert "Traceback" not in finding
+
+
+def test_ar655_liveness_aware_z_equivalence_and_raw_deadline_equality() -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+
+    result = claim_store.classify_claim_liveness(
+        _ar655_liveness_payload(),
+        now=now,
+        grace_seconds=0,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "live"
+    assert result.status == "claimed"
+    assert result.effective_deadline == now
+    assert result.deadline_sources == ("expires_at", "lease.expires_at")
+    assert not any("mismatch" in finding for finding in result.findings)
+
+
+def test_ar655_liveness_positive_grace_equality_is_live_then_one_microsecond_expires() -> None:
+    deadline = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+    payload = _ar655_liveness_payload(
+        top=deadline.isoformat(),
+        nested=deadline.isoformat(),
+    )
+
+    equal = claim_store.classify_claim_liveness(
+        payload,
+        now=deadline + timedelta(seconds=600),
+        grace_seconds=600,
+    )
+    afterward = claim_store.classify_claim_liveness(
+        payload,
+        now=deadline + timedelta(seconds=600, microseconds=1),
+        grace_seconds=600,
+    )
+
+    assert equal.state == "live"
+    assert equal.effective_deadline == deadline
+    assert afterward.state == "expired"
+    assert afterward.effective_deadline == deadline
+
+
+def test_ar655_liveness_uses_latest_valid_deadline_and_exposes_copy_mismatch() -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+    nested_deadline = now + timedelta(seconds=1)
+    payload = _ar655_liveness_payload(
+        top=(now - timedelta(seconds=601)).isoformat(),
+        nested=nested_deadline.isoformat(),
+    )
+
+    result = claim_store.classify_claim_liveness(
+        payload,
+        now=now,
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "live"
+    assert result.effective_deadline == nested_deadline
+    assert result.deadline_sources == ("expires_at", "lease.expires_at")
+    assert any("mismatch" in finding for finding in result.findings)
+
+
+@pytest.mark.parametrize(
+    ("top", "nested", "reason_fragment"),
+    (
+        (None, None, "missing"),
+        ("2026-08-03T00:00:00+00:00", None, "partial"),
+        (None, "2026-08-03T00:00:00+00:00", "partial"),
+        ("2026-08-03T00:00:00+00:00", "not-a-deadline", "invalid"),
+        ("not-a-deadline", "2026-08-03T00:00:00+00:00", "invalid"),
+        ("2026-08-03T00:00:00", "2026-08-03T00:00:00", "timezone"),
+    ),
+)
+def test_ar655_liveness_active_incomplete_deadlines_are_indeterminate(
+    top: object,
+    nested: object,
+    reason_fragment: str,
+) -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+
+    result = claim_store.classify_claim_liveness(
+        _ar655_liveness_payload(top=top, nested=nested),
+        now=now,
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "indeterminate"
+    assert reason_fragment in " ".join((result.reason, *result.findings)).lower()
+
+
+@pytest.mark.parametrize("lease", ("not-a-mapping", [], 7, True))
+def test_ar655_liveness_non_mapping_lease_is_indeterminate(lease: object) -> None:
+    payload = _ar655_liveness_payload(
+        top="2026-08-03T00:00:00+00:00",
+        nested=None,
+    )
+    payload["lease"] = lease
+
+    result = claim_store.classify_claim_liveness(
+        payload,
+        now=datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc),
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "indeterminate"
+    evidence = " ".join((result.reason, *result.findings)).lower()
+    assert "lease" in evidence
+    assert any(word in evidence for word in ("invalid", "malformed", "mapping"))
+
+
+def test_ar655_liveness_malformed_findings_are_bounded() -> None:
+    result = claim_store.classify_claim_liveness(
+        _ar655_liveness_payload(
+            top="not-a-date-" + "x" * 4096,
+            nested="also-not-a-date-" + "y" * 4096,
+        ),
+        now=datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc),
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "indeterminate"
+
+
+def test_ar655_liveness_terminal_status_is_inactive_without_deadline_guessing() -> None:
+    result = claim_store.classify_claim_liveness(
+        _ar655_liveness_payload(status="released", top=None, nested=None),
+        now=datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc),
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "inactive"
+    assert result.status == "released"
+
+
+def test_ar655_liveness_unknown_status_is_indeterminate_even_with_valid_deadlines() -> None:
+    result = claim_store.classify_claim_liveness(
+        _ar655_liveness_payload(status="surprising"),
+        now=datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc),
+        grace_seconds=600,
+    )
+
+    _assert_ar655_bounded_liveness(result)
+    assert result.state == "indeterminate"
+    assert result.status == "surprising"
+    assert "status" in " ".join((result.reason, *result.findings)).lower()
+
+
+@pytest.mark.parametrize(
+    ("environment", "expected"),
+    (
+        ({}, 600),
+        ({"AGENT_RUNTIME_REAPER_GRACE_SECONDS": "malformed"}, 600),
+        ({"AGENT_RUNTIME_REAPER_GRACE_SECONDS": "-1"}, 0),
+        ({"AGENT_RUNTIME_REAPER_GRACE_SECONDS": "0"}, 0),
+    ),
+)
+def test_ar655_resolve_claim_grace_preserves_environment_compatibility(
+    environment: dict[str, str],
+    expected: int,
+) -> None:
+    assert claim_store.resolve_claim_grace(environ=environment) == expected
+
+
+def test_ar655_resolve_claim_grace_explicit_value_has_precedence() -> None:
+    assert claim_store.resolve_claim_grace(
+        17,
+        environ={"AGENT_RUNTIME_REAPER_GRACE_SECONDS": "900"},
+    ) == 17
+
+
+@pytest.mark.parametrize("explicit", (True, False, 1.0, -1))
+def test_ar655_resolve_claim_grace_rejects_invalid_explicit_values(
+    explicit: object,
+) -> None:
+    with pytest.raises(ValueError, match="grace"):
+        claim_store.resolve_claim_grace(
+            explicit,  # type: ignore[arg-type]
+            environ={"AGENT_RUNTIME_REAPER_GRACE_SECONDS": "600"},
+        )
+
+
 @pytest.mark.parametrize("store_state", ("absent", "empty"))
 def test_absent_or_truly_empty_never_used_store_is_pristine(
     tmp_path: Path,

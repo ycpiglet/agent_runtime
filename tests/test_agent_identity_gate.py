@@ -135,3 +135,120 @@ def test_agent_identity_gate_reports_role_only_attribution(tmp_path: Path) -> No
     assert result.returncode == 1
     assert "agent-identity:claim-missing:CLAIM-20260612-145000-task-ar-901-aa11:agent_instance_id" in result.stdout
     assert "agent-identity:role-only-attribution:CLAIM-20260612-145000-task-ar-901-aa11" in result.stdout
+
+
+def test_agent_instance_registry_refreshes_from_committed_claim_heartbeat(
+    tmp_path: Path,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        _claim_payload(
+            claimed_at="2026-06-12T14:50:00+09:00",
+            updated_at="2026-06-12T14:50:00+09:00",
+            last_heartbeat="2026-06-12T14:50:00+09:00",
+            mutation_revision=0,
+        ),
+    )
+    first = _run_registry(
+        tmp_path,
+        "record",
+        "--claim",
+        claim_path.relative_to(tmp_path).as_posix(),
+        "--json",
+    )
+    assert first.returncode == 0, first.stderr or first.stdout
+
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["updated_at"] = "2026-06-12T15:00:00+09:00"
+    claim["last_heartbeat"] = "2026-06-12T15:00:00+09:00"
+    claim["mutation_revision"] = 1
+    claim_path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    refreshed = _run_registry(
+        tmp_path,
+        "record",
+        "--claim",
+        claim_path.relative_to(tmp_path).as_posix(),
+        "--json",
+    )
+
+    assert refreshed.returncode == 0, refreshed.stderr or refreshed.stdout
+    response = json.loads(refreshed.stdout[refreshed.stdout.index("{") :])
+    instance = json.loads((tmp_path / response["path"]).read_text(encoding="utf-8"))
+    assert instance["spawned_at"] == "2026-06-12T14:50:00+09:00"
+    assert instance["created_at"] == "2026-06-12T14:50:00+09:00"
+    assert instance["updated_at"] == "2026-06-12T15:00:00+09:00"
+    assert instance["last_heartbeat"] == "2026-06-12T15:00:00+09:00"
+    assert instance["claim_revision"] == 1
+
+
+def test_agent_instance_registry_never_rolls_back_on_late_claim_revision(
+    tmp_path: Path,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        _claim_payload(
+            claimed_at="2026-06-12T14:50:00+09:00",
+            updated_at="2026-06-12T14:50:00+09:00",
+            last_heartbeat="2026-06-12T14:50:00+09:00",
+            mutation_revision=0,
+        ),
+    )
+    initial = _run_registry(
+        tmp_path,
+        "record",
+        "--claim",
+        claim_path.relative_to(tmp_path).as_posix(),
+        "--json",
+    )
+    assert initial.returncode == 0, initial.stderr or initial.stdout
+    instance_path = tmp_path / json.loads(initial.stdout[initial.stdout.index("{") :])["path"]
+
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim.update(
+        updated_at="2026-06-12T15:20:00+09:00",
+        last_heartbeat="2026-06-12T15:20:00+09:00",
+        mutation_revision=2,
+    )
+    claim_path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    newer = _run_registry(
+        tmp_path,
+        "record",
+        "--claim",
+        claim_path.relative_to(tmp_path).as_posix(),
+        "--json",
+    )
+    assert newer.returncode == 0, newer.stderr or newer.stdout
+    newest_instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert newest_instance["updated_at"] == "2026-06-12T15:20:00+09:00"
+    assert newest_instance["last_heartbeat"] == "2026-06-12T15:20:00+09:00"
+    assert newest_instance["claim_revision"] == 2
+
+    claim.update(
+        updated_at="2026-06-12T15:10:00+09:00",
+        last_heartbeat="2026-06-12T15:10:00+09:00",
+        mutation_revision=1,
+    )
+    claim_path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    late = _run_registry(
+        tmp_path,
+        "record",
+        "--claim",
+        claim_path.relative_to(tmp_path).as_posix(),
+        "--json",
+    )
+
+    assert late.returncode in {0, 1}
+    persisted = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert persisted["updated_at"] == newest_instance["updated_at"]
+    assert persisted["last_heartbeat"] == newest_instance["last_heartbeat"]
+    assert persisted["claim_revision"] == newest_instance["claim_revision"]

@@ -287,6 +287,11 @@ def test_ui_state_exposes_active_task_claims_as_readable_agent_instances(tmp_pat
                 "branch": "codex/task-ar-246-design-01",
                 "claimed_at": "2026-06-10T14:30:12+09:00",
                 "last_heartbeat": "2026-06-10T14:30:12+09:00",
+                "expires_at": "2026-06-10T15:00:12+09:00",
+                "lease": {
+                    "heartbeat_at": "2026-06-10T14:30:12+09:00",
+                    "expires_at": "2026-06-10T15:00:12+09:00",
+                },
                 "handoff_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.handoff.md",
                 "log_path": "agents/runtime/task_claims/CLAIM-20260610-143012-task-ar-246-a7f3.log.md",
                 "tags": ["planning", "no-ssot-write"],
@@ -333,6 +338,11 @@ def test_ui_state_exposes_agent_score_label_from_task_claim(tmp_path):
                 "branch": "codex/task-ar-280-ui",
                 "claimed_at": "2026-06-11T08:42:47+09:00",
                 "last_heartbeat": "2026-06-11T08:50:00+09:00",
+                "expires_at": "2026-06-11T09:20:00+09:00",
+                "lease": {
+                    "heartbeat_at": "2026-06-11T08:50:00+09:00",
+                    "expires_at": "2026-06-11T09:20:00+09:00",
+                },
             }
         ),
     )
@@ -368,6 +378,11 @@ def test_ui_state_exposes_task_set_progress_and_status_text(tmp_path):
                 "branch": "codex/task-ar-248-ui-01",
                 "claimed_at": "2026-06-10T18:00:00+09:00",
                 "last_heartbeat": "2026-06-10T18:05:00+09:00",
+                "expires_at": "2026-06-10T18:35:00+09:00",
+                "lease": {
+                    "heartbeat_at": "2026-06-10T18:05:00+09:00",
+                    "expires_at": "2026-06-10T18:35:00+09:00",
+                },
             }
         ),
     )
@@ -536,6 +551,8 @@ def test_ui_state_cli_emits_task_sets_resource_json(tmp_path, capsys):
                 "step_total": 6,
                 "progress_pct": 48,
                 "status_text": "Rendering task-set progress cards",
+                "expires_at": "2099-01-01T00:00:00+00:00",
+                "lease": {"expires_at": "2099-01-01T00:00:00+00:00"},
             }
         ),
     )
@@ -1383,9 +1400,119 @@ def _write_team_claim(root: Path, claim_id: str, instance_id: str, *, status: st
         "progress_pct": 40,
         "claimed_at": "2026-06-13T10:30:00+09:00",
         "last_heartbeat": "2026-06-13T10:40:00+09:00",
+        "expires_at": "2026-06-13T11:10:00+09:00",
+        "lease": {
+            "heartbeat_at": "2026-06-13T10:40:00+09:00",
+            "expires_at": "2026-06-13T11:10:00+09:00",
+        },
     }
     record.update(overrides)
     _write(root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json", json.dumps(record))
+
+
+def test_ui_state_keeps_expired_claim_history_but_removes_live_presence(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    _write_instance(tmp_path, "inst-expired")
+    _write_team_claim(
+        tmp_path,
+        "CLAIM-expired-ui",
+        "inst-expired",
+        status="working",
+        task_id="TASK-AR-955",
+        expires_at="2026-06-13T10:49:59+09:00",
+        lease={
+            "heartbeat_at": "2026-06-13T10:20:00+09:00",
+            "expires_at": "2026-06-13T10:49:59+09:00",
+        },
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+
+    assert len(state["task_claims"]) == 1
+    claim = state["task_claims"][0]
+    assert claim["liveness_state"] == "expired"
+    assert claim["authority_active"] is False
+    assert claim["liveness_reason"] == "lease-expired"
+    assert state["agents"] == []
+    card = _team_agent_card(state, "inst-expired")
+    assert card["online"] is False
+    assert card["presence"] == "offline"
+    assert card["current_claim"] is None
+    assert not any(row.get("id") == "inst-expired" for row in state["office_map"]["agents"])
+
+
+def test_ui_state_grace_equality_remains_live(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    _write_team_claim(
+        tmp_path,
+        "CLAIM-grace-equality-ui",
+        "inst-grace",
+        status="working",
+        expires_at="2026-06-13T10:50:00+09:00",
+        lease={
+            "heartbeat_at": "2026-06-13T10:20:00+09:00",
+            "expires_at": "2026-06-13T10:50:00+09:00",
+        },
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+
+    claim = state["task_claims"][0]
+    assert claim["liveness_state"] == "live"
+    assert claim["authority_active"] is True
+    assert state["agents"][0]["online"] is True
+
+
+def test_ui_state_uses_latest_deadline_copy_and_exposes_mismatch(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    _write_team_claim(
+        tmp_path,
+        "CLAIM-latest-deadline-ui",
+        "inst-latest-deadline",
+        status="working",
+        expires_at="2026-06-13T10:49:59+09:00",
+        lease={
+            "heartbeat_at": "2026-06-13T10:40:00+09:00",
+            "expires_at": "2026-06-13T11:00:01+09:00",
+        },
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+
+    claim = state["task_claims"][0]
+    assert claim["liveness_state"] == "live"
+    assert claim["authority_active"] is True
+    assert any("mismatch" in finding for finding in claim["liveness_findings"])
+    assert state["agents"][0]["online"] is True
+
+
+def test_ui_state_indeterminate_claim_is_degraded_not_falsely_online(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    _write_team_claim(
+        tmp_path,
+        "CLAIM-indeterminate-ui",
+        "inst-indeterminate",
+        status="working",
+        expires_at="not-a-timestamp",
+        lease={
+            "heartbeat_at": "2026-06-13T10:40:00+09:00",
+            "expires_at": "not-a-timestamp",
+        },
+    )
+
+    state = ui_state.build_state(tmp_path, now="2026-06-13T11:00:00+09:00")
+
+    claim = state["task_claims"][0]
+    assert claim["liveness_state"] == "indeterminate"
+    assert claim["authority_active"] is True
+    assert claim["liveness_findings"]
+    assert state["agents"][0]["online"] is False
+    assert state["agents"][0]["error_state"] == "claim-liveness-indeterminate"
+    assert any(
+        warning["kind"] == "task-claim-liveness-indeterminate"
+        and warning["path"].endswith("CLAIM-indeterminate-ui.json")
+        for warning in state["warnings"]
+    )
 
 
 def _team_agent_card(state: dict, instance_id: str) -> dict:
