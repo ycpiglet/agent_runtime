@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T04:21:00+09:00
+updated_at: 2026-08-03T04:35:00+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
 status: in_progress
@@ -42,6 +42,7 @@ defect_signatures:
   - defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9
   - defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b
   - defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3
+  - defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json
@@ -60,6 +61,8 @@ review_refs:
   - reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
   - reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md
+  - reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
