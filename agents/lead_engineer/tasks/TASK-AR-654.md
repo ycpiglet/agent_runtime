@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T13:28:10+09:00
+updated_at: 2026-08-02T13:35:55+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -44,6 +44,7 @@ defect_signatures:
   - defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824
   - defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660
   - defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4
+  - defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -62,6 +63,9 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -168,3 +172,13 @@ is owned under
 `reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md`.
 It directly links both work IDs and all four new store, type, identity, and
 resolver-key signatures while preserving all earlier records unchanged.
+
+## Reopened broken-parent claim-store repair
+
+The strict-authority candidate is superseded by a fresh skeptic P1: a broken
+`agents/runtime` symlink makes the canonical active-claim store appear absent
+and actual closeout mutates state without its repeated-failure authority. The
+claim remains held under
+`reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` until
+the failure-first repair, new Verify and Compound evidence, and an entirely
+fresh W4 sequence pass.

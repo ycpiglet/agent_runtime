@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T13:29:50+09:00
-record_count: 1262
+generated_at: 2026-08-02T13:40:54+09:00
+record_count: 1265
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1262` review and evidence records under `reviews/`.
+- Summary: indexed `1265` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1262` files |
+| Reviews covered | pass | `1265` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -675,6 +675,7 @@ record_count: 1262
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan` | md | accepted | n/a | TASK-AR-654 broken-parent claim-store T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 canonical authority T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 canonical-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 strict canonical authority T3 replan |
@@ -753,6 +754,7 @@ record_count: 1262
 | `reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md` | `SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout` | md | revise | fail | TASK-AR-654 YAML Conformance Closeout Skeptic Review |
 | `reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md` | `SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Closeout Skeptic Review |
 | `reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final` | md | revise | fail | TASK-AR-654 canonical authority final skeptic review |
+| `reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-strict-authority-final` | md | revise | fail | TASK-AR-654 strict-authority final skeptic review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -1293,6 +1295,7 @@ record_count: 1262
 | `reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md` | `W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Final W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | blocked | fail | TASK-AR-654 Canonical Authority Final Independent W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | blocked | fail | TASK-AR-654 Strict Authority Final Independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

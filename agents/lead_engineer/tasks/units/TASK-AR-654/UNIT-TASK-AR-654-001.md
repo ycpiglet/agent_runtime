@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T13:28:10+09:00
+updated_at: 2026-08-02T13:35:55+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -40,6 +40,7 @@ defect_signatures:
   - defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824
   - defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660
   - defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4
+  - defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -64,6 +65,9 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -140,6 +144,9 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
