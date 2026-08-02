@@ -15,6 +15,8 @@ from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ORCHESTRATOR = (
     REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_orchestrator.py"
@@ -28,6 +30,55 @@ def _load():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _claim_progress_args(
+    claim_id: str,
+    *,
+    expected_revision: int = 3,
+) -> list[str]:
+    return [
+        "claim-progress",
+        "--claim-id",
+        claim_id,
+        "--agent-instance-id",
+        "le-20260803-090000-kst-orchestrator",
+        "--callsite-id",
+        "terminal:wt-task-ar-655:tab-01",
+        "--expected-revision",
+        str(expected_revision),
+        "--phase",
+        "implementation",
+        "--progress-pct",
+        "60",
+        "--step-index",
+        "6",
+        "--step-total",
+        "10",
+        "--status-text",
+        "Delegating progress through claim heartbeat",
+        "--now",
+        "2026-08-03T09:20:00+09:00",
+        "--json",
+    ]
+
+
+def _claim_progress_sentinels(
+    root: Path,
+    claim_id: str,
+) -> tuple[Path, bytes, Path, bytes]:
+    claim_path = root / "agents/runtime/task_claims" / f"{claim_id}.json"
+    pointer_path = root / "agents/project/NEXT-SESSION-POINTER.yml"
+    claim_path.parent.mkdir(parents=True, exist_ok=True)
+    pointer_path.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.write_text('{"sentinel":"serial claim authority"}\n', encoding="utf-8")
+    pointer_path.write_text("sentinel: serial projection owner\n", encoding="utf-8")
+    return (
+        claim_path,
+        claim_path.read_bytes(),
+        pointer_path,
+        pointer_path.read_bytes(),
+    )
 
 
 def test_write_session_json_roundtrip_and_no_temp_residue(tmp_path: Path) -> None:
@@ -197,8 +248,13 @@ def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
     calls: list[tuple[list[str], dict[str, object]]] = []
     dispatcher_response = {
         "status": "heartbeated",
+        "claim": {"claim_id": claim_id, "mutation_revision": 4},
         "receipt": {"committed": True, "claim_revision": 4},
-        "projection": {"claim_revision": 4, "operation": "merge"},
+        "projection": {
+            "claim_id": claim_id,
+            "claim_revision": 4,
+            "operation": "merge",
+        },
     }
 
     def fake_run(command, **kwargs):
@@ -270,5 +326,163 @@ def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
     rendered = json.loads(captured.out)
     assert rendered["receipt"]["claim_revision"] == 4
     assert rendered["projection"]["claim_revision"] == 4
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+@pytest.mark.parametrize(
+    "response_kind",
+    ("malformed", "non-object", "incomplete", "incoherent"),
+)
+def test_claim_progress_zero_exit_with_unverifiable_receipt_is_indeterminate(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    response_kind: str,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-20260803-090000-task-ar-655-indeterminate"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    expected_current = {
+        "claim_id": None,
+        "claim_revision": None,
+        "receipt_revision": None,
+        "projection_claim_id": None,
+        "projection_revision": None,
+    }
+    if response_kind == "malformed":
+        stdout = "{not-json"
+    elif response_kind == "non-object":
+        stdout = "[]"
+    elif response_kind == "incomplete":
+        stdout = json.dumps(
+            {
+                "status": "heartbeated",
+                "claim": {"claim_id": claim_id},
+            }
+        )
+        expected_current["claim_id"] = claim_id
+    else:
+        stdout = json.dumps(
+            {
+                "status": "heartbeated",
+                "claim": {
+                    "claim_id": f"{claim_id}-other",
+                    "mutation_revision": 7,
+                },
+                "receipt": {"committed": True, "claim_revision": 4},
+                "projection": {
+                    "claim_id": claim_id,
+                    "claim_revision": 5,
+                    "operation": "merge",
+                },
+            }
+        )
+        expected_current.update(
+            {
+                "claim_id": f"{claim_id}-other",
+                "claim_revision": 7,
+                "receipt_revision": 4,
+                "projection_claim_id": claim_id,
+                "projection_revision": 5,
+            }
+        )
+    calls: list[list[str]] = []
+
+    def fake_run(command, **_kwargs):
+        calls.append(list(command))
+        return SimpleNamespace(
+            returncode=0,
+            stdout=stdout,
+            stderr="bounded dispatcher stderr",
+        )
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(run=fake_run),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    assert len(calls) == 1
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
+    assert rendered["expected"] == {
+        "claim_id": claim_id,
+        "prior_revision": 3,
+        "committed_revision": 4,
+    }
+    assert rendered["current"] == expected_current
+    assert "receipt" not in rendered
+    assert "Traceback" not in captured.out + captured.err
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+def test_claim_progress_committed_warning_receipt_passes_through_exactly_once(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-20260803-090000-task-ar-655-warning"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    dispatcher_response = {
+        "status": "heartbeat_committed_with_warnings",
+        "path": f"agents/runtime/task_claims/{claim_id}.json",
+        "claim": {"claim_id": claim_id, "mutation_revision": 4},
+        "receipt": {"committed": True, "claim_revision": 4},
+        "projection": {
+            "claim_id": claim_id,
+            "claim_revision": 4,
+            "operation": "merge",
+        },
+        "post_commit_warnings": [
+            {
+                "stage": "agent-instance-registry",
+                "reason": "forced instance refresh failure",
+            },
+            {
+                "stage": "claim-heartbeat-event",
+                "reason": "forced pane event failure",
+            },
+        ],
+    }
+    calls: list[list[str]] = []
+
+    def fake_run(command, **_kwargs):
+        calls.append(list(command))
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps(dispatcher_response),
+            stderr="warning details are carried by the JSON receipt",
+        )
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(run=fake_run),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    assert len(calls) == 1
+    assert json.loads(captured.out) == dispatcher_response
     assert claim_path.read_bytes() == claim_before
     assert pointer_path.read_bytes() == pointer_before

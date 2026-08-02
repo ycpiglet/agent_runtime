@@ -20,6 +20,7 @@ import json
 import os
 import sys
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -246,6 +247,40 @@ def test_first_pristine_review_overlay_initializes_retained_store_witness(
     inspected = claim_store.inspect_store(tmp_path)
     assert inspected.state == "initialized"
     assert inspected.witness_claim_id == claim_id
+
+
+def test_review_overlay_emits_canonical_live_renewable_lease(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    created_at = datetime.fromisoformat("2026-06-22T10:00:00+09:00")
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now=created_at.isoformat(),
+    )
+
+    assert len(result["created"]) == 1
+    overlay = result["created"][0]
+    assert overlay["mutation_revision"] == 0
+    assert overlay["claimed_at"] == overlay["lease"]["claimed_at"]
+    assert overlay["last_heartbeat"] == overlay["lease"]["heartbeat_at"]
+    assert overlay["expires_at"] == overlay["lease"]["expires_at"]
+    assert datetime.fromisoformat(overlay["expires_at"]) - created_at == timedelta(
+        minutes=30
+    )
+    liveness = claim_store.classify_claim_liveness(
+        overlay,
+        now=created_at + timedelta(minutes=1),
+        grace_seconds=0,
+    )
+    assert liveness.state == "live"
+    assert liveness.reason == "lease-valid"
 
 
 @pytest.mark.parametrize(

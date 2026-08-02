@@ -5390,3 +5390,234 @@ def test_projection_rejects_expired_claim_and_exposes_live_claim_revision(
     )
     assert refused.returncode == 1
     assert "expired" in refused.stderr.lower()
+
+
+@pytest.mark.parametrize("deadline_case", ("expired", "indeterminate"))
+def test_projection_without_now_uses_wall_clock_and_refuses_nonlive_claim(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    deadline_case: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"projection-default-{deadline_case}",
+    )
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if deadline_case == "expired":
+        payload["expires_at"] = "2026-08-03T08:59:59+09:00"
+        payload["lease"]["expires_at"] = "2026-08-03T08:59:59+09:00"
+    else:
+        payload["lease"].pop("expires_at")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    dispatcher = _load_dispatcher_module()
+    observed: list[str | None] = []
+
+    def fixed_wall_clock(value: str | None) -> datetime:
+        observed.append(value)
+        return datetime.fromisoformat("2026-08-03T09:10:00+09:00")
+
+    monkeypatch.setattr(dispatcher, "_mutation_now", fixed_wall_clock)
+    monkeypatch.setenv("AGENT_RUNTIME_CLAIM_GRACE_SECONDS", "0")
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert observed == [None]
+    assert rc == 1
+    assert deadline_case in captured.err.lower()
+    assert captured.out == ""
+    assert "Traceback" not in captured.err
+
+
+def test_projection_without_now_emits_current_agent_mutation_revision(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix="projection-default-live-revision",
+    )
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+    observed: list[str | None] = []
+
+    def fixed_wall_clock(value: str | None) -> datetime:
+        observed.append(value)
+        return datetime.fromisoformat("2026-08-03T09:10:00+09:00")
+
+    monkeypatch.setattr(dispatcher, "_mutation_now", fixed_wall_clock)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert observed == [None]
+    assert rc == 0, captured.err or captured.out
+    projection = json.loads(captured.out)
+    assert projection["claim_revision"] == 0
+    assert projection["pointer"]["current_agents"][0]["mutation_revision"] == 0
+
+
+def _canonical_overlay_heartbeat_fixture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> tuple[object, dict[str, object], Path]:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    dispatcher = _load_dispatcher_module()
+    routed = dispatcher.role_routing.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-655-overlay-heartbeat",
+        task_set_id="TASKSET-AR-V080-OPERABILITY-HARDENING",
+        event="closeout",
+        now="2026-08-03T10:00:00+09:00",
+    )
+    assert len(routed["created"]) == 1
+    claim = dict(routed["created"][0])
+    path = (
+        tmp_path
+        / "agents/runtime/task_claims"
+        / f"{claim['claim_id']}.json"
+    )
+    claim.update(
+        {
+            "mutation_revision": 0,
+            "expires_at": "2026-08-03T10:30:00+09:00",
+            "lease": {
+                "claimed_at": "2026-08-03T10:00:00+09:00",
+                "heartbeat_at": "2026-08-03T10:00:00+09:00",
+                "expires_at": "2026-08-03T10:30:00+09:00",
+            },
+        }
+    )
+    dispatcher.atomic_io.write_json_atomic(path, claim)
+    return dispatcher, claim, path
+
+
+def test_overlay_owner_heartbeat_renews_without_primary_pointer_projection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    dispatcher, claim, path = _canonical_overlay_heartbeat_fixture(
+        tmp_path,
+        monkeypatch,
+    )
+    pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: primary projection owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "heartbeat",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--agent-instance-id",
+            str(claim["agent_instance_id"]),
+            "--callsite-id",
+            str(claim["callsite_id"]),
+            "--expected-revision",
+            "0",
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    assert response["projection"]["operation"] == "overlay-no-primary-pointer"
+    assert response["projection"]["claim_id"] == claim["claim_id"]
+    assert response["projection"]["claim_revision"] == 1
+    assert "pointer" not in response["projection"]
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T10:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["expires_at"] == "2026-08-03T10:40:00+09:00"
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert pointer.read_bytes() == pointer_before
+
+
+def test_overlay_scope_renew_and_standalone_projection_remain_refused(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    dispatcher, claim, path = _canonical_overlay_heartbeat_fixture(
+        tmp_path,
+        monkeypatch,
+    )
+    before = path.read_bytes()
+
+    renew_rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "renew",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--agent-instance-id",
+            str(claim["agent_instance_id"]),
+            "--callsite-id",
+            str(claim["callsite_id"]),
+            "--expected-revision",
+            "0",
+            "--expected-scope-digest",
+            "overlay-scope-not-applicable",
+            "--lease-minutes",
+            "30",
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+    renew_output = capsys.readouterr()
+    projection_rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+    projection_output = capsys.readouterr()
+
+    assert renew_rc == 1
+    assert "overlay" in renew_output.err.lower()
+    assert projection_rc == 1
+    assert "overlay" in projection_output.err.lower()
+    assert path.read_bytes() == before

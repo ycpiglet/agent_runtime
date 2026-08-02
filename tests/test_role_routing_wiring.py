@@ -83,9 +83,16 @@ def _run_wave(root: Path, *args: str, env: dict[str, str] | None = None) -> subp
     )
 
 
-def _run_parallel_gate(root: Path) -> subprocess.CompletedProcess[str]:
+def _run_parallel_gate(
+    root: Path,
+    *,
+    now: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, str(PARALLEL_GATE), "--root", str(root), "--check"]
+    if now is not None:
+        command.extend(("--now", now))
     return subprocess.run(
-        [sys.executable, str(PARALLEL_GATE), "--root", str(root), "--check"],
+        command,
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -383,7 +390,10 @@ def test_high_risk_release_dispatches_auditor_and_skeptic(tmp_path: Path) -> Non
         "## Next Steps\n- run the independent closeout passes\n",
         encoding="utf-8",
     )
-    gate = _run_parallel_gate(tmp_path)
+    gate = _run_parallel_gate(
+        tmp_path,
+        now="2026-06-22T10:15:00+09:00",
+    )
     assert gate.returncode == 0, gate.stdout
     assert "block=0" in gate.stdout
 
