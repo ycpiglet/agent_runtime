@@ -16,6 +16,15 @@
     "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
+    "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
     "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
@@ -59,6 +68,9 @@
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
+    "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
     "defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a": [
       "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556"
     ],
@@ -86,6 +98,9 @@
     "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46": [
       "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
     ],
+    "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
     ],
@@ -106,6 +121,9 @@
     ],
     "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552": [
       "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f"
+    ],
+    "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
     ],
     "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824": [
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
@@ -156,6 +174,9 @@
     "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
+    "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
     "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e": [
       "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e"
     ],
@@ -164,6 +185,12 @@
     ],
     "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
     ],
     "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1": [
       "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
@@ -226,7 +253,8 @@
       "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ],
     "TASK-AR-655": [
-      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556"
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -270,10 +298,11 @@
       "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
     ],
     "UNIT-TASK-AR-655-001": [
-      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556"
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
     ]
   },
-  "record_count": 24,
+  "record_count": 25,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -668,8 +697,31 @@
         "TASK-AR-655",
         "UNIT-TASK-AR-655-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T04:17:00+09:00",
+      "defect_signatures": [
+        "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88",
+        "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c",
+        "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9",
+        "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9",
+        "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca",
+        "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9",
+        "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9",
+        "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b",
+        "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3"
+      ],
+      "id": "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json",
+      "recurrence_count": 9,
+      "status": "mitigated",
+      "title": "Bind claim progress to one lease-revision transaction",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:6573e0277472889671f28e5ccac68b702d3fe19fdfa1806323ddf0a7ef3549c5"
+  "source_digest": "sha256:dff5b3cb4364898585427af8a87b591947e023958b1a1a3ab7b46f718ee41238"
 }
