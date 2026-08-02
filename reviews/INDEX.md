@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T13:27:07+09:00
-record_count: 1261
+generated_at: 2026-08-02T13:29:50+09:00
+record_count: 1262
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1261` review and evidence records under `reviews/`.
+- Summary: indexed `1262` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1261` files |
+| Reviews covered | pass | `1262` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1093,6 +1093,7 @@ record_count: 1261
 | `reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair` | md | passed | pass | TASK-AR-654 Fail-Closed Authority Repair W4a |
 | `reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair` | md | passed | pass | TASK-AR-654 Physical-Line Boundary Repair W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | passed | pass | TASK-AR-654 Canonical Authority Final W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
