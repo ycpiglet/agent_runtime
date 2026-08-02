@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T07:07:45+09:00
-record_count: 1318
+generated_at: 2026-08-03T07:22:47+09:00
+record_count: 1319
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1318` review and evidence records under `reviews/`.
+- Summary: indexed `1319` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1318` files |
+| Reviews covered | pass | `1319` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1141,6 +1141,7 @@ record_count: 1318
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | passed | pass | TASK-AR-654 Canonical Authority Final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | passed | pass | TASK-AR-654 claim-transaction final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final` | md | passed | pass | TASK-AR-655 full-pointer and neutral pre-load final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | passed | pass | TASK-AR-655 lease-authority final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | passed | pass | TASK-AR-655 post-repair final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | passed | pass | TASK-AR-655 projection-binding repair final W4a |
