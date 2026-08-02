@@ -13,6 +13,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Iterator
 
@@ -41,6 +42,70 @@ class ClaimStoreError(RuntimeError):
 
 class ClaimStoreLockTimeout(ClaimStoreError, TimeoutError):
     """The checkout-local claim-store transaction lock timed out."""
+
+
+def _duration_error(field: str, detail: str) -> ValueError:
+    label = re.sub(r"\s+", " ", str(field)).strip()[:96] or "duration"
+    return ValueError(f"{label} {detail}"[:256])
+
+
+def require_duration(value: object, *, field: str, minimum: int) -> int:
+    """Return a plain integer duration that satisfies the caller's minimum."""
+
+    if type(minimum) is not int:
+        raise _duration_error(field, "minimum is invalid")
+    if type(value) is not int or value < minimum:
+        raise _duration_error(
+            field,
+            f"must be a plain integer greater than or equal to {minimum}",
+        )
+    return value
+
+
+def expiration_after(
+    now: datetime,
+    value: object,
+    *,
+    unit: str,
+    field: str,
+    minimum: int,
+) -> datetime:
+    """Return an exact expiration while converting time overflow to ValueError."""
+
+    duration = require_duration(value, field=field, minimum=minimum)
+    if unit not in ("seconds", "minutes"):
+        raise _duration_error(field, "unit must be seconds or minutes")
+    try:
+        delta = (
+            timedelta(seconds=duration)
+            if unit == "seconds"
+            else timedelta(minutes=duration)
+        )
+        return now + delta
+    except (OverflowError, TypeError):
+        raise _duration_error(field, "is outside the supported datetime range") from None
+
+
+def deadline_within_grace(
+    deadline: datetime,
+    now: datetime,
+    grace_seconds: object,
+) -> bool:
+    """Return whether a deadline is live, using overflow-safe grace arithmetic."""
+
+    grace = require_duration(
+        grace_seconds,
+        field="grace_seconds",
+        minimum=0,
+    )
+    if deadline >= now:
+        return True
+    elapsed = now - deadline
+    grace_days, grace_remainder = divmod(grace, 86_400)
+    return elapsed.days < grace_days or (
+        elapsed.days == grace_days
+        and (elapsed.seconds, elapsed.microseconds) <= (grace_remainder, 0)
+    )
 
 
 @dataclass(frozen=True)

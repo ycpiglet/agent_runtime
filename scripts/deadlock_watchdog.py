@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -34,6 +35,14 @@ def run_cycle(
     runner: Callable[[list[str], Path], tuple[int, str]] | None = None,
 ) -> dict[str, Any]:
     import claim_reaper
+
+    if grace_seconds is not None:
+        claim_reaper.claim_store.require_duration(
+            grace_seconds,
+            field="grace_seconds",
+            minimum=0,
+        )
+
     import goal_supervisor
 
     report: dict[str, Any] = {"apply": apply}
@@ -78,10 +87,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    report = run_cycle(
-        args.root, apply=args.apply, now=args.now,
-        grace_seconds=args.grace_seconds, max_restarts=args.max_restarts,
-    )
+    try:
+        report = run_cycle(
+            args.root,
+            apply=args.apply,
+            now=args.now,
+            grace_seconds=args.grace_seconds,
+            max_restarts=args.max_restarts,
+        )
+    except ValueError as exc:
+        print(f"deadlock-watchdog: {exc}", file=sys.stderr)
+        return 2
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:

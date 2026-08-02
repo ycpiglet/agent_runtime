@@ -986,6 +986,8 @@ def _build_claim(
     args: argparse.Namespace,
     records: list[tuple[Path, dict[str, Any]]],
     *,
+    now: datetime,
+    expires_at: datetime,
     target_files: list[str],
     escalation_triggers: list[str],
     routing_decision: dict[str, Any],
@@ -993,8 +995,6 @@ def _build_claim(
     defect_signatures: list[str],
     knowledge_matches: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    now = _parse_now(args.now)
-    expires_at = now + timedelta(minutes=args.lease_minutes)
     suffix = _slug(args.suffix or uuid.uuid4().hex[:4])
     task_slug = _slug(args.task_id)
     mode = _slug(args.mode or "work")
@@ -1086,6 +1086,20 @@ def _build_claim(
         "knowledge_matches": knowledge_matches,
         "target_files": list(target_files),
     }
+
+
+def _claim_lease_window(args: argparse.Namespace) -> tuple[datetime, datetime]:
+    """Validate the requested lease before claim-store authority is touched."""
+
+    now = _parse_now(args.now)
+    expires_at = claim_store.expiration_after(
+        now,
+        args.lease_minutes,
+        unit="minutes",
+        field="lease_minutes",
+        minimum=1,
+    )
+    return now, expires_at
 
 
 def _validate_create_args(args: argparse.Namespace) -> list[str]:
@@ -1954,6 +1968,7 @@ def _prepare_create(
 def cmd_create(args: argparse.Namespace) -> int:
     root = args.root.resolve()
     try:
+        claim_now, claim_expires_at = _claim_lease_window(args)
         inspection = claim_store.inspect_store(root)
         if inspection.state not in {"pristine", "initialized"}:
             return _claim_store_refusal("create", inspection)
@@ -1992,6 +2007,8 @@ def cmd_create(args: argparse.Namespace) -> int:
                 args,
                 store_inspection=inspection,
                 preparation=preparation,
+                now=claim_now,
+                expires_at=claim_expires_at,
             )
     except (
         claim_store.ClaimStoreError,
@@ -2020,6 +2037,8 @@ def _cmd_create_locked(
     *,
     store_inspection: Any,
     preparation: _CreatePreparation,
+    now: datetime,
+    expires_at: datetime,
 ) -> int | tuple[dict[str, Any], Path, Path, bool]:
     root = args.root.resolve()
     records = _read_claims(root)
@@ -2037,6 +2056,8 @@ def _cmd_create_locked(
     claim = _build_claim(
         args,
         records,
+        now=now,
+        expires_at=expires_at,
         target_files=list(preparation.target_files),
         escalation_triggers=list(preparation.escalation_triggers),
         routing_decision=preparation.routing_decision,

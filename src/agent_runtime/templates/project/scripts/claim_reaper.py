@@ -37,7 +37,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -138,6 +138,11 @@ def _latest_deadline(claim: dict[str, Any]) -> datetime | None:
 
 def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> tuple[str, str]:
     """Return (decision, reason). decision in {"live", "dead", "skip"}."""
+    grace = claim_store.require_duration(
+        grace_seconds,
+        field="grace_seconds",
+        minimum=0,
+    )
     status = str(claim.get("status") or "").strip().lower()
     if status not in REAPABLE_ACTIVE_STATUSES:
         return "skip", "not-active"
@@ -146,7 +151,7 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
     deadline = _latest_deadline(claim)
     if deadline is None:
         return "skip", "no-lease-info"
-    if now <= deadline + timedelta(seconds=grace_seconds):
+    if claim_store.deadline_within_grace(deadline, now, grace):
         return "live", "lease-valid"
     return "dead", "lease-expired"
 
@@ -412,9 +417,17 @@ def sweep(
     apply: bool = False,
     grace_seconds: int | None = None,
 ) -> dict[str, Any]:
+    grace = (
+        default_grace()
+        if grace_seconds is None
+        else claim_store.require_duration(
+            grace_seconds,
+            field="grace_seconds",
+            minimum=0,
+        )
+    )
     root = Path(root).resolve()
     now_dt = _coerce_now(now)
-    grace = default_grace() if grace_seconds is None else int(grace_seconds)
     report: dict[str, Any] = {
         "now": now_dt.isoformat(timespec="seconds"),
         "grace_seconds": grace,
@@ -480,8 +493,9 @@ def sweep(
             state="integrity-invalid",
             finding=exc,
         )
-    for audit in audit_queue:
-        _record_audit(root, audit)
+    finally:
+        for audit in audit_queue:
+            _record_audit(root, audit)
     return report
 
 
@@ -534,7 +548,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    report = sweep(args.root, now=args.now, apply=args.apply, grace_seconds=args.grace_seconds)
+    try:
+        report = sweep(
+            args.root,
+            now=args.now,
+            apply=args.apply,
+            grace_seconds=args.grace_seconds,
+        )
+    except ValueError as exc:
+        print(_bounded_claim_store_finding(exc), file=sys.stderr)
+        return 2
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
