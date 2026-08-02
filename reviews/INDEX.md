@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T05:06:39+09:00
-record_count: 1310
+generated_at: 2026-08-03T05:18:46+09:00
+record_count: 1312
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1310` review and evidence records under `reviews/`.
+- Summary: indexed `1312` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1310` files |
+| Reviews covered | pass | `1312` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -710,6 +710,7 @@ record_count: 1310
 | `reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan` | md | accepted | pass | TASK-AR-655 owner-governance clock propagation T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan` | md | accepted | pass | TASK-AR-655 post-GREEN authority seams T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment` | md | accepted | pass | TASK-AR-655 shared duration primitives scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b current-agent binding T3 recurrence amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b projection binding T3 amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
@@ -1341,6 +1342,7 @@ record_count: 1310
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | blocked | fail | TASK-AR-654 Strict Authority Final Independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | blocked | fail | TASK-AR-655 Lease Authority Final Independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | blocked | fail | TASK-AR-655 projection-binding repair final independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
