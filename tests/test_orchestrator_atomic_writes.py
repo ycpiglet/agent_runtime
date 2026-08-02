@@ -12,6 +12,7 @@ import importlib.util
 import json
 import sys
 from argparse import Namespace
+from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -21,6 +22,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ORCHESTRATOR = (
     REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "agent_orchestrator.py"
 )
+PRODUCTION_SCRIPTS = REPO_ROOT / "scripts"
+PRODUCTION_DISPATCHER = PRODUCTION_SCRIPTS / "task_claim_dispatcher.py"
+PRODUCTION_POINTER_GATE = PRODUCTION_SCRIPTS / "parallel_worktree_gate.py"
 
 
 def _load():
@@ -30,6 +34,33 @@ def _load():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+@lru_cache(maxsize=None)
+def _load_production_script(path: Path, module_name: str):
+    """Load one live producer/consumer module without copying its contract."""
+
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    scripts_path = str(PRODUCTION_SCRIPTS)
+    inserted = scripts_path not in sys.path
+    if inserted:
+        sys.path.insert(0, scripts_path)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if inserted:
+            sys.path.remove(scripts_path)
+    return module
+
+
+POINTER_AGENT_FIELDS = tuple(
+    _load_production_script(
+        PRODUCTION_POINTER_GATE,
+        "production_parallel_worktree_gate_under_test",
+    ).POINTER_AGENT_FIELDS
+)
 
 
 def _claim_progress_args(
@@ -79,6 +110,72 @@ def _claim_progress_sentinels(
         pointer_path,
         pointer_path.read_bytes(),
     )
+
+
+def _full_merge_dispatcher_response(root: Path, claim_id: str) -> dict[str, object]:
+    """Build the success receipt from the live dispatcher's full projection."""
+
+    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
+    claim_path = root / claim_ref
+    claim = {
+        "claim_id": claim_id,
+        "mutation_revision": 4,
+        "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
+        "agent_instance_id": "le-20260803-090000-kst-orchestrator",
+        "display_name": "lead_engineer@orchestrator-03",
+        "callsite_id": "terminal:wt-task-ar-655:tab-01",
+        "pane_id": "terminal:wt-task-ar-655:tab-01",
+        "task_id": "TASK-AR-655",
+        "unit_id": "UNIT-TASK-AR-655-001",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+        "status": "claimed",
+        "phase": "implementation",
+        "progress_pct": 60,
+        "step_index": 6,
+        "step_total": 10,
+        "status_text": "Delegating progress through claim heartbeat",
+        "worktree_path": ".worktrees/TASK-AR-655",
+        "branch": "codex/task-ar-655-v080-lease-bounds",
+        "handoff_path": f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        "log_path": f"agents/runtime/task_claims/{claim_id}.log.md",
+        "last_heartbeat": "2026-08-03T09:20:00+09:00",
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "planner_high",
+        "routing_policy_id": "task-unit-tier-policy",
+        "routing_escalation_reason": "trigger:data_integrity,repeated_failure",
+        "task_token_budget": 200_000,
+        "claim_token_budget": 100_000,
+    }
+    dispatcher = _load_production_script(
+        PRODUCTION_DISPATCHER,
+        "production_task_claim_dispatcher_under_test",
+    )
+    projection = dispatcher._projection_payload(  # noqa: SLF001
+        root,
+        claim_path,
+        claim,
+        include_revision=True,
+    )
+    return {
+        "status": "heartbeated",
+        "path": claim_ref,
+        "claim": claim,
+        "receipt": {"committed": True, "claim_revision": 4},
+        "projection": projection,
+    }
+
+
+def _conflicting_pointer_agent_value(field: str, current: object) -> object:
+    if type(current) is int:
+        return current + 1
+    if field == "status":
+        return "in_progress"
+    if field == "claim_path":
+        return "agents/runtime/task_claims/CLAIM-AR655-W4B-OTHER.json"
+    if field == "last_heartbeat":
+        return "2026-08-03T09:21:00+09:00"
+    return f"{current}-conflict"
 
 
 def test_write_session_json_roundtrip_and_no_temp_residue(tmp_path: Path) -> None:
@@ -806,6 +903,115 @@ def test_claim_progress_zero_exit_rejects_incomplete_current_agent_authority(
         "receipt": {"committed": True, "claim_revision": 4},
         "projection": projection,
     }
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(
+            run=lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(dispatcher_response),
+                stderr="",
+            )
+        ),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+def test_claim_progress_accepts_full_production_dispatcher_merge_projection(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-FULL-POINTER-SUCCESS"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
+    claim = dispatcher_response["claim"]
+    projection = dispatcher_response["projection"]
+    current_agent = projection["pointer"]["current_agents"][0]
+
+    assert set(POINTER_AGENT_FIELDS).issubset(current_agent)
+    for field in POINTER_AGENT_FIELDS:
+        expected = (
+            dispatcher_response["path"]
+            if field == "claim_path"
+            else claim[field]
+        )
+        assert current_agent[field] == expected
+    for field in (
+        "requested_model_tier",
+        "selected_model_tier",
+        "routing_policy_id",
+        "routing_escalation_reason",
+        "task_token_budget",
+        "claim_token_budget",
+    ):
+        assert current_agent[field] == claim[field]
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(
+            run=lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(dispatcher_response),
+                stderr="",
+            )
+        ),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    assert json.loads(captured.out) == dispatcher_response
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+@pytest.mark.parametrize("mutation", ("missing", "conflicting"))
+@pytest.mark.parametrize("field", POINTER_AGENT_FIELDS)
+def test_claim_progress_rejects_every_unbound_canonical_pointer_agent_field(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    field: str,
+    mutation: str,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-FULL-POINTER-RED"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
+    current_agent = dispatcher_response["projection"]["pointer"][
+        "current_agents"
+    ][0]
+    if mutation == "missing":
+        current_agent.pop(field)
+    else:
+        current_agent[field] = _conflicting_pointer_agent_value(
+            field,
+            current_agent[field],
+        )
+
     monkeypatch.setattr(
         mod,
         "subprocess",
