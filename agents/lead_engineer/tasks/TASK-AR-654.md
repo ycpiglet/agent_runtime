@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T13:35:55+09:00
+updated_at: 2026-08-02T13:57:25+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -45,6 +45,10 @@ defect_signatures:
   - defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660
   - defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4
   - defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb
+  - defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d
+  - defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101
+  - defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77
+  - defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -66,6 +70,9 @@ review_refs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -182,3 +189,11 @@ claim remains held under
 `reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` until
 the failure-first repair, new Verify and Compound evidence, and an entirely
 fresh W4 sequence pass.
+
+## Reopened cross-platform claim-store component repair
+
+The first broken-parent repair passed the full suite but was superseded by two
+independent audits. Windows junction metadata, unreadable enumeration, missing
+intermediate parents, and unbounded entry loops remain open under
+`reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md`.
+No earlier W4 or machine pass authorizes closeout.
