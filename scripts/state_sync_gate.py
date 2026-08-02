@@ -14,10 +14,11 @@ import re
 import subprocess
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from agent_runtime import state_projection
+from agent_runtime import claim_store, state_projection
 
 
 POINTER = Path("agents/project/NEXT-SESSION-POINTER.yml")
@@ -50,6 +51,22 @@ class Finding:
     subject: str
     path: str
     detail: str
+
+
+def _parse_aware_datetime(value: str) -> datetime:
+    raw = value.strip()
+    normalized = raw[:-1] + "+00:00" if raw.endswith(("Z", "z")) else raw
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        )
+    return parsed
 
 
 @dataclass(frozen=True)
@@ -464,8 +481,15 @@ def _validate_active_claim(
     return findings
 
 
-def analyze(root: Path) -> list[Finding]:
+def analyze(
+    root: Path,
+    *,
+    now: datetime | None = None,
+    grace_seconds: object | None = None,
+) -> list[Finding]:
     root = root.resolve()
+    now_dt = now or datetime.now(timezone.utc)
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     pointer_path = root / POINTER
     if not pointer_path.exists():
         return [Finding("block", "pointer:missing", POINTER.as_posix(), "NEXT-SESSION-POINTER.yml is required")]
@@ -512,10 +536,73 @@ def analyze(root: Path) -> list[Finding]:
     findings.extend(claim_findings)
     pointer_claim_refs = _pointer_list(pointer_text, "active_claims")
     pointer_agents = _pointer_agents(pointer_text)
-    for claim_path, claim in records:
-        if _is_active(claim):
-            findings.extend(_validate_active_claim(root, claim_path, claim, by_id, units_by_id, task_set_id, active_task, pointer_claim_refs, pointer_agents))
-    active_workers = [claim for _, claim in records if _is_active(claim) and not _is_explicit_overlay(claim)]
+    classified = [
+        (
+            claim_path,
+            claim,
+            claim_store.classify_claim_liveness(
+                claim,
+                now=now_dt,
+                grace_seconds=grace,
+            ),
+        )
+        for claim_path, claim in records
+    ]
+    for claim_path, claim, liveness in classified:
+        claim_id = str(claim.get("claim_id") or claim_path.stem)
+        rel_claim_path = _rel(root, claim_path)
+        if liveness.state == "expired":
+            findings.append(
+                Finding(
+                    "block",
+                    f"claim:liveness-expired:{claim_id}",
+                    rel_claim_path,
+                    "status-active claim authority expired beyond shared grace",
+                )
+            )
+        elif liveness.state == "indeterminate":
+            findings.append(
+                Finding(
+                    "block",
+                    f"claim:liveness-indeterminate:{claim_id}",
+                    rel_claim_path,
+                    f"claim authority is retained conservatively: {liveness.reason}",
+                )
+            )
+        if any("mismatch" in item for item in liveness.findings):
+            findings.append(
+                Finding(
+                    "watch",
+                    f"claim:liveness-deadline-mismatch:{claim_id}",
+                    rel_claim_path,
+                    "top-level and nested claim deadlines differ; later valid deadline is effective",
+                )
+            )
+
+    authority_records = [
+        (claim_path, claim)
+        for claim_path, claim, liveness in classified
+        if liveness.state in {"live", "indeterminate"}
+    ]
+    for claim_path, claim in authority_records:
+        findings.extend(
+            _validate_active_claim(
+                root,
+                claim_path,
+                claim,
+                by_id,
+                units_by_id,
+                task_set_id,
+                active_task,
+                pointer_claim_refs,
+                pointer_agents,
+            )
+        )
+    active_workers = [
+        claim
+        for _, claim in authority_records
+        if not _is_explicit_overlay(claim)
+    ]
     if active_workers:
         if not task_set_id or task_set_id == "none":
             findings.append(Finding("block", "pointer:primary-worker-missing-taskset", POINTER.as_posix(), "active worker claims require a primary pointer taskset"))
@@ -562,12 +649,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Active state sync gate")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
     parser.add_argument("--check", action="store_true", help="Fail on block findings")
+    parser.add_argument(
+        "--now",
+        type=_parse_aware_datetime,
+        help="Evaluate claim liveness at a timezone-aware ISO-8601 timestamp",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    findings = analyze(args.root)
+    findings = analyze(args.root, now=args.now)
     print(render(args.root, findings))
     return 1 if args.check and any(f.severity == "block" for f in findings) else 0
 

@@ -86,6 +86,7 @@ def _write_claim(
         payload["released_at"] = released_at
     if expires_at is not None:
         payload["expires_at"] = expires_at
+        payload["lease"] = {"expires_at": expires_at}
     if branch:
         payload["branch"] = branch
     if handoff_path:

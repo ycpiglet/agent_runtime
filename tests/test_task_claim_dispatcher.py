@@ -1917,7 +1917,15 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
     pointer.write_text("sentinel: serial-projection-owner\n", encoding="utf-8")
     pointer_before = pointer.read_bytes()
 
-    result = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
+    result = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        claim["claim_id"],
+        "--now",
+        "2026-06-10T14:31:12+09:00",
+        "--json",
+    )
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert pointer.read_bytes() == pointer_before
@@ -1954,6 +1962,7 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
         "handoff_path": claim["handoff_path"],
         "log_path": claim["log_path"],
         "last_heartbeat": "2026-06-10T14:30:12+09:00",
+        "mutation_revision": 0,
     }]
 
 
@@ -4312,15 +4321,6 @@ def test_heartbeat_success_reconciles_instance_and_pane_event_receipts(
             "",
             "",
             "active",
-        ),
-        (
-            "overlay",
-            lambda claim: claim.update(overlay=True),
-            "2026-08-03T09:10:00+09:00",
-            0,
-            "",
-            "",
-            "overlay",
         ),
         (
             "expired",

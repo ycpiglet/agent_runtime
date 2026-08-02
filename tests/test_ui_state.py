@@ -1400,10 +1400,10 @@ def _write_team_claim(root: Path, claim_id: str, instance_id: str, *, status: st
         "progress_pct": 40,
         "claimed_at": "2026-06-13T10:30:00+09:00",
         "last_heartbeat": "2026-06-13T10:40:00+09:00",
-        "expires_at": "2026-06-13T11:10:00+09:00",
+        "expires_at": "2099-01-01T00:00:00+00:00",
         "lease": {
             "heartbeat_at": "2026-06-13T10:40:00+09:00",
-            "expires_at": "2026-06-13T11:10:00+09:00",
+            "expires_at": "2099-01-01T00:00:00+00:00",
         },
     }
     record.update(overrides)

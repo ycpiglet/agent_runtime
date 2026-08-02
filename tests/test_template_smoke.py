@@ -430,6 +430,8 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
             "projection",
             "--claim-id",
             str(claim["claim_id"]),
+            "--now",
+            "2026-07-30T00:06:00+09:00",
             "--json",
         ],
         cwd=runtime_root,

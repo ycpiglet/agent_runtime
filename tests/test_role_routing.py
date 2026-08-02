@@ -499,6 +499,7 @@ def test_initialized_overlay_idempotency_allows_documented_lifecycle_changes(
             "updated_at": "2026-06-22T10:04:00+09:00",
         }
     )
+    payload["lease"]["heartbeat_at"] = "2026-06-22T10:04:00+09:00"
     assert not {
         "released_at",
         "verified_by",
@@ -561,6 +562,7 @@ def test_initialized_released_overlay_refuses_missing_terminal_provenance(
             "verification_evidence": "reviews/VERIFY-TASK-AR-900.json",
         }
     )
+    payload["lease"]["heartbeat_at"] = "2026-06-22T10:04:00+09:00"
     payload.pop(missing_field)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     before = _overlay_mutation_snapshot(tmp_path)
@@ -609,6 +611,7 @@ def test_initialized_released_overlay_allows_complete_terminal_provenance(
             "verification_evidence": "reviews/VERIFY-TASK-AR-900.json",
         }
     )
+    payload["lease"]["heartbeat_at"] = "2026-06-22T10:04:00+09:00"
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     before = _overlay_mutation_snapshot(tmp_path)
 

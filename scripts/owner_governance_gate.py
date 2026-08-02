@@ -5,10 +5,31 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+LIVENESS_CHECKS = {
+    "scripts/parallel_worktree_gate.py",
+    "scripts/state_sync_gate.py",
+}
+
+
+def _parse_aware_datetime(value: str) -> str:
+    raw = value.strip()
+    normalized = raw[:-1] + "+00:00" if raw.endswith(("Z", "z")) else raw
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        )
+    return raw
 
 
 def notify_governance_block(returncode: int) -> None:
@@ -40,10 +61,15 @@ def run(args: list[str]) -> int:
     return rc
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Owner governance gate")
     parser.add_argument("--allow-empty-owner-docs", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--now",
+        type=_parse_aware_datetime,
+        help="Evaluate claim liveness at a timezone-aware ISO-8601 timestamp",
+    )
+    args = parser.parse_args(argv)
 
     owner_doc_args = ["scripts/owner_doc_format_gate.py", "--manifest", "owner-docs.yml"]
     if args.allow_empty_owner_docs:
@@ -93,6 +119,10 @@ def main() -> int:
         ["scripts/knowledge_lint_gate.py", "--check"],
         ["scripts/planning_loop.py", "gate", "--trigger", "hook", "--action", "scan"],
     ]
+    if args.now is not None:
+        for check in checks:
+            if check[0] in LIVENESS_CHECKS:
+                check.extend(("--now", args.now))
 
     failed = 0
     for check in checks:

@@ -30,9 +30,11 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
+
+from agent_runtime import claim_store
 
 
 ACTIVE_STATUSES = {
@@ -155,6 +157,22 @@ class _PointerMalformed(ValueError):
     pass
 
 
+def _parse_aware_datetime(value: str) -> datetime:
+    raw = value.strip()
+    normalized = raw[:-1] + "+00:00" if raw.endswith(("Z", "z")) else raw
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        )
+    return parsed
+
+
 @dataclass(frozen=True)
 class WorktreeInfo:
     path: Path
@@ -260,6 +278,53 @@ def _read_claims(root: Path) -> tuple[list[ClaimRecord], list[str]]:
             continue
         records.append(ClaimRecord(path=path, payload=payload))
     return records, findings
+
+
+def _liveness_authority(
+    root: Path,
+    records: Iterable[ClaimRecord],
+    *,
+    now: datetime,
+    grace_seconds: int,
+) -> tuple[list[ClaimRecord], list[Finding]]:
+    authority: list[ClaimRecord] = []
+    findings: list[Finding] = []
+    for record in records:
+        liveness = claim_store.classify_claim_liveness(
+            record.payload,
+            now=now,
+            grace_seconds=grace_seconds,
+        )
+        claim_id = str(record.payload.get("claim_id") or record.path.stem)
+        rel = _rel(root, record.path)
+        if liveness.state == "expired":
+            findings.append(
+                Finding(
+                    "block",
+                    f"{rel}: task-claim:liveness-expired:{claim_id}: "
+                    "claim authority expired beyond shared grace",
+                )
+            )
+        elif liveness.state == "indeterminate":
+            authority.append(record)
+            findings.append(
+                Finding(
+                    "block",
+                    f"{rel}: task-claim:liveness-indeterminate:{claim_id}: "
+                    f"authority retained conservatively ({liveness.reason})",
+                )
+            )
+        elif liveness.state == "live":
+            authority.append(record)
+        if any("mismatch" in item for item in liveness.findings):
+            findings.append(
+                Finding(
+                    "block",
+                    f"{rel}: task-claim:liveness-deadline-mismatch:{claim_id}: "
+                    "later valid deadline is effective",
+                )
+            )
+    return authority, findings
 
 
 def _git(cwd: Path, *args: str) -> tuple[int, str]:
@@ -845,12 +910,21 @@ def continuity_report(
     active_claims: Iterable[ClaimRecord] | None = None,
     *,
     require_standby_pointer: bool = False,
+    now: datetime | None = None,
+    grace_seconds: object | None = None,
 ) -> ContinuityReport:
     root = root.resolve()
     parse_findings: list[str] = []
     if active_claims is None:
         records, parse_findings = _read_claims(root)
-        active = [record for record in records if record.active]
+        grace = claim_store.resolve_claim_grace(grace_seconds)
+        active, liveness_findings = _liveness_authority(
+            root,
+            records,
+            now=now or datetime.now(timezone.utc),
+            grace_seconds=grace,
+        )
+        parse_findings.extend(finding.message for finding in liveness_findings)
     else:
         active = list(active_claims)
     active_workers = [record for record in active if not record.overlay]
@@ -988,13 +1062,23 @@ def _spike_marker(path: Path) -> bool:
     return any((path / name).exists() for name in SPIKE_MARKER_NAMES)
 
 
-def _claim_first_findings(root: Path, records: list[ClaimRecord], primary_root: Path | None) -> list[Finding]:
+def _claim_first_findings(
+    root: Path,
+    records: list[ClaimRecord],
+    primary_root: Path | None,
+    *,
+    authority_records: list[ClaimRecord] | None = None,
+) -> list[Finding]:
     if not _git_scans_enabled(root):
         return []
     findings: list[Finding] = []
     root_is_primary = primary_root is not None and _norm(primary_root) == _norm(root)
 
-    active = [record for record in records if record.active]
+    active = (
+        [record for record in records if record.active]
+        if authority_records is None
+        else authority_records
+    )
     active_task_ids = {record.task_id.upper() for record in active if record.task_id}
     active_paths = {
         _norm(_resolved_worktree(root, record.worktree_path, primary_root))
@@ -1437,15 +1521,35 @@ def _non_head_claim_findings(root: Path, records: list[ClaimRecord]) -> list[Fin
     return findings
 
 
-def check_root(root: Path) -> list[Finding]:
+def check_root(
+    root: Path,
+    *,
+    now: datetime | None = None,
+    grace_seconds: object | None = None,
+) -> list[Finding]:
     root = root.resolve()
+    now_dt = now or datetime.now(timezone.utc)
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     primary_root = _git_primary_root(root)
     records, parse_findings = _read_claims(root)
     findings = [Finding("block", message) for message in parse_findings]
+    authority, liveness_findings = _liveness_authority(
+        root,
+        records,
+        now=now_dt,
+        grace_seconds=grace,
+    )
+    findings.extend(liveness_findings)
     findings.extend(Finding("block", message) for message in _validate_claims(root, records, primary_root))
-    active = [record for record in records if record.active]
-    findings.extend(Finding("block", message) for message in _continuity_findings(root, active))
-    findings.extend(_claim_first_findings(root, records, primary_root))
+    findings.extend(Finding("block", message) for message in _continuity_findings(root, authority))
+    findings.extend(
+        _claim_first_findings(
+            root,
+            records,
+            primary_root,
+            authority_records=authority,
+        )
+    )
     findings.extend(_non_head_claim_findings(root, records))
     return findings
 
@@ -1464,6 +1568,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Require a structurally usable pointer even when no claim is active",
     )
+    parser.add_argument(
+        "--now",
+        type=_parse_aware_datetime,
+        help="Evaluate claim liveness at a timezone-aware ISO-8601 timestamp",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -1472,6 +1581,7 @@ def main(argv: list[str] | None = None) -> int:
         report = continuity_report(
             root,
             require_standby_pointer=args.require_standby_pointer,
+            now=args.now,
         )
         if args.json:
             print(json.dumps(report.as_dict(), ensure_ascii=False, sort_keys=True))
@@ -1484,7 +1594,7 @@ def main(argv: list[str] | None = None) -> int:
             for finding in report.findings:
                 print(f"- {finding}")
         return 1 if report.findings else 0
-    findings = check_root(root)
+    findings = check_root(root, now=args.now)
     block = [finding for finding in findings if finding.severity == "block"]
     watch = [finding for finding in findings if finding.severity == "watch"]
     status = "fail" if block else "pass"

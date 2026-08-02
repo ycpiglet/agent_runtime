@@ -9047,7 +9047,6 @@ function freshnessClock() {
 // verdict badge + bottom line (from health_snapshot + inbox total), a quiet
 // one-line summary strip, and three flow tiles (WIP / weekly throughput /
 // median cycle time) with real-series sparklines only (honesty rule).
-const HOME_ACTIVE_CLAIM_STATUSES = ["assigned", "claimed", "in_progress", "review", "waiting_review", "working"];
 const HOME_WIP_LIMIT = 3;
 const HOME_DONE_STATUSES = ["completed", "done", "closed"];
 
@@ -9088,7 +9087,7 @@ function renderHomeSummary() {
     (task) => HOME_DONE_STATUSES.indexOf(String(task.status || "").toLowerCase()) < 0
   ).length;
   const claims = (runtimeState.task_claims || []).filter(
-    (claim) => HOME_ACTIVE_CLAIM_STATUSES.indexOf(String(claim.status || "").toLowerCase()) >= 0
+    (claim) => claim.authority_active === true
   );
   const wip = claims.length;
   const activeAgents = new Set(

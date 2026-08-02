@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import notify_routing, ui_commands
+from . import claim_store, notify_routing, ui_commands
 
 RESOURCE_NAMES = (
     "state",
@@ -1765,6 +1765,11 @@ def _score_label(value: Any) -> tuple[int | None, str]:
 
 def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> list[dict[str, Any]]:
     claims: list[dict[str, Any]] = []
+    normalized_now = now[:-1] + "+00:00" if now.endswith("Z") else now
+    now_value = datetime.fromisoformat(normalized_now)
+    if now_value.tzinfo is None or now_value.utcoffset() is None:
+        raise ValueError("ui-state now must include a timezone")
+    grace_seconds = claim_store.resolve_claim_grace(environ=os.environ)
     for path in sorted(root.glob(TASK_CLAIM_GLOB)):
         rel_path = _rel(root, path)
         try:
@@ -1778,6 +1783,11 @@ def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> li
         if not isinstance(payload, dict):
             warnings.append(_warning("task-claim-invalid-record", rel_path, "task claim payload is not an object"))
             continue
+        liveness = claim_store.classify_claim_liveness(
+            payload,
+            now=now_value,
+            grace_seconds=grace_seconds,
+        )
         record = dict(payload)
         record.update(
             {
@@ -1787,8 +1797,26 @@ def load_task_claims(root: Path, now: str, warnings: list[dict[str, str]]) -> li
                 "source": _source_metadata(root, path, "task_claim_json", now),
                 "last_updated": _mtime_iso(path),
                 "freshness": "present",
+                "liveness_state": liveness.state,
+                "liveness_reason": liveness.reason,
+                "liveness_deadline": (
+                    liveness.effective_deadline.isoformat()
+                    if liveness.effective_deadline is not None
+                    else None
+                ),
+                "liveness_deadline_sources": list(liveness.deadline_sources),
+                "liveness_findings": list(liveness.findings),
+                "authority_active": liveness.state in {"live", "indeterminate"},
             }
         )
+        if liveness.state == "indeterminate":
+            warnings.append(
+                _warning(
+                    "task-claim-liveness-indeterminate",
+                    rel_path,
+                    f"{record['id']}: {liveness.reason}",
+                )
+            )
         claims.append(record)
     return claims
 
@@ -1803,8 +1831,9 @@ def load_agents(
     agents: list[dict[str, Any]] = []
     for claim in task_claims or []:
         status = str(claim.get("status") or "")
-        if not _is_active_task_claim(status):
+        if not _is_active_task_claim(status) or claim.get("authority_active") is not True:
             continue
+        liveness_state = str(claim.get("liveness_state") or "indeterminate")
         score, score_label = _score_label(claim.get("score"))
         agents.append(
             {
@@ -1822,10 +1851,17 @@ def load_agents(
                 "display_name": claim.get("display_name") or claim.get("agent_instance_id") or claim.get("agent_role"),
                 "mode": claim.get("mode"),
                 "tags": claim.get("tags") if isinstance(claim.get("tags"), list) else [],
-                "online": status in {"claimed", "in_progress", "review", "waiting_review", "working"},
+                "online": (
+                    liveness_state == "live"
+                    and status in {"claimed", "in_progress", "review", "waiting_review", "working"}
+                ),
                 "last_heartbeat": claim.get("last_heartbeat"),
                 "last_message": None,
-                "error_state": None,
+                "error_state": (
+                    "claim-liveness-indeterminate"
+                    if liveness_state == "indeterminate"
+                    else None
+                ),
                 "worktree_path": claim.get("worktree_path"),
                 "branch": claim.get("branch"),
                 "pane_id": claim.get("pane_id"),
@@ -4640,7 +4676,7 @@ def build_team_agents(
             unit_id = str(claim.get("unit_id") or "").strip()
             if unit_id:
                 completed_units.setdefault(instance_id, set()).add(unit_id)
-        if status in _AGENT_ONLINE_CLAIM_STATES:
+        if status in _AGENT_ONLINE_CLAIM_STATES and claim.get("liveness_state") == "live":
             existing = current_claim_by_instance.get(instance_id)
             ts = str(claim.get("last_heartbeat") or claim.get("claimed_at") or "")
             if existing is None or ts > str(existing.get("_ts") or ""):

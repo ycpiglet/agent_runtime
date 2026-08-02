@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
@@ -195,14 +196,70 @@ def _check_task_claim_store(root: Path, findings: list[DoctorFinding]) -> None:
             kind="claim-store-integrity-invalid",
             detail=result.finding or "claim-store authority is invalid",
         )
+        return
     else:
+        try:
+            claims = _claim_store.read_claims_snapshot(root)
+        except Exception as exc:
+            _findings_append(
+                findings,
+                "blocker",
+                area="task-claim-store",
+                path="agents/runtime/task_claims",
+                kind="claim-store-integrity-invalid",
+                detail=f"full claim snapshot validation failed: {type(exc).__name__}",
+            )
+            return
+
+        now = datetime.now(timezone.utc).astimezone()
+        grace_seconds = _claim_store.resolve_claim_grace(environ=os.environ)
+        for claim in claims:
+            claim_id = str(claim.get("claim_id") or "unknown-claim")
+            liveness = _claim_store.classify_claim_liveness(
+                claim,
+                now=now,
+                grace_seconds=grace_seconds,
+            )
+            if liveness.state == "expired":
+                deadline = (
+                    liveness.effective_deadline.isoformat()
+                    if liveness.effective_deadline is not None
+                    else "unknown"
+                )
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-expired",
+                    detail=f"{claim_id}: active claim lease expired at {deadline}",
+                )
+            elif liveness.state == "indeterminate":
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-liveness-indeterminate",
+                    detail=f"{claim_id}: {liveness.reason}",
+                )
+            if any("mismatch" in finding.lower() for finding in liveness.findings):
+                _findings_append(
+                    findings,
+                    "warning",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-liveness-deadline-mismatch",
+                    detail=f"{claim_id}: top-level and nested lease deadlines differ",
+                )
+
         _findings_append(
             findings,
             "info",
             area="task-claim-store",
             path="agents/runtime/task_claims",
             kind=f"claim-store-{result.state}",
-            detail="task-claim store authority is internally consistent",
+            detail=f"task-claim store authority and {len(claims)} claim records are internally consistent",
         )
 
 

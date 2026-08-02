@@ -15,7 +15,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Mapping
 
 
 MARKER_SCHEMA = "agent-runtime-task-claim-store/v1"
@@ -26,6 +26,9 @@ JSON_MAX_INTEGER_DIGITS = 256
 CLAIM_IDENTITY_MAX_CHARS = 160
 MAX_STORE_ENTRIES = 4096
 LOCK_TIMEOUT_SECONDS = 5.0
+DEFAULT_CLAIM_LEASE_MINUTES = 30
+DEFAULT_CLAIM_GRACE_SECONDS = 600
+CLAIM_GRACE_ENV = "AGENT_RUNTIME_REAPER_GRACE_SECONDS"
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400)
 _CLAIM_ID = re.compile(r"^CLAIM-[A-Za-z0-9][A-Za-z0-9._-]*$")
 ACTIVE_CLAIM_STATUSES = frozenset(
@@ -105,6 +108,164 @@ def deadline_within_grace(
     return elapsed.days < grace_days or (
         elapsed.days == grace_days
         and (elapsed.seconds, elapsed.microseconds) <= (grace_remainder, 0)
+    )
+
+
+@dataclass(frozen=True)
+class ClaimLiveness:
+    """Pure, bounded interpretation of one task claim's lease authority."""
+
+    state: str
+    status: str
+    reason: str
+    effective_deadline: datetime | None
+    deadline_sources: tuple[str, ...]
+    findings: tuple[str, ...]
+
+
+def resolve_claim_grace(
+    explicit: object | None = None,
+    environ: Mapping[str, str] | None = None,
+) -> int:
+    """Resolve shared claim grace while preserving the legacy env contract."""
+
+    if explicit is not None:
+        return require_duration(
+            explicit,
+            field="grace_seconds",
+            minimum=0,
+        )
+    source = os.environ if environ is None else environ
+    raw = source.get(CLAIM_GRACE_ENV)
+    if not raw:
+        return DEFAULT_CLAIM_GRACE_SECONDS
+    try:
+        return max(0, int(raw))
+    except (TypeError, ValueError):
+        return DEFAULT_CLAIM_GRACE_SECONDS
+
+
+def _claim_status(value: object) -> str:
+    return " ".join(str(value or "").split()).strip().lower()[:96]
+
+
+def _claim_deadline(
+    value: object,
+    *,
+    source: str,
+) -> tuple[datetime | None, str, str]:
+    if value is None or value == "":
+        return None, "missing", f"{source} is missing"
+    if not isinstance(value, str):
+        return None, "invalid", f"{source} is invalid: expected an ISO-8601 string"
+    text = value.strip()
+    if not text:
+        return None, "missing", f"{source} is missing"
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except (TypeError, ValueError):
+        return None, "invalid", f"{source} is invalid: expected an ISO-8601 timestamp"
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None, "invalid", f"{source} timezone is missing: expected an aware timestamp"
+    return parsed, "valid", ""
+
+
+def classify_claim_liveness(
+    claim: Mapping[str, object],
+    *,
+    now: datetime,
+    grace_seconds: object | None = None,
+) -> ClaimLiveness:
+    """Classify claim authority consistently across all Runtime consumers."""
+
+    grace = resolve_claim_grace(grace_seconds)
+    if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
+        raise _duration_error("now", "must be a timezone-aware datetime")
+
+    status = _claim_status(claim.get("status"))
+    if status in INACTIVE_CLAIM_STATUSES:
+        return ClaimLiveness(
+            state="inactive",
+            status=status,
+            reason="status-inactive",
+            effective_deadline=None,
+            deadline_sources=(),
+            findings=(),
+        )
+    if status not in ACTIVE_CLAIM_STATUSES:
+        return ClaimLiveness(
+            state="indeterminate",
+            status=status,
+            reason="status-unknown",
+            effective_deadline=None,
+            deadline_sources=(),
+            findings=("status-unknown: claim status is not canonical",),
+        )
+
+    top, top_state, top_finding = _claim_deadline(
+        claim.get("expires_at"),
+        source="expires_at",
+    )
+    lease = claim.get("lease")
+    if "lease" in claim and not isinstance(lease, Mapping):
+        nested = None
+        nested_state = "invalid"
+        nested_finding = "lease is invalid: expected a mapping with expires_at"
+    else:
+        nested, nested_state, nested_finding = _claim_deadline(
+            lease.get("expires_at") if isinstance(lease, Mapping) else None,
+            source="lease.expires_at",
+        )
+
+    parts = (
+        ("expires_at", top, top_state, top_finding),
+        ("lease.expires_at", nested, nested_state, nested_finding),
+    )
+    valid = tuple((source, deadline) for source, deadline, state, _ in parts if state == "valid")
+    findings = tuple(finding for _, _, _, finding in parts if finding)
+    effective_deadline = max((deadline for _, deadline in valid), default=None)
+    deadline_sources = tuple(source for source, _ in valid)
+
+    states = {state for _, _, state, _ in parts}
+    if "invalid" in states:
+        return ClaimLiveness(
+            state="indeterminate",
+            status=status,
+            reason="deadline-invalid",
+            effective_deadline=effective_deadline,
+            deadline_sources=deadline_sources,
+            findings=findings,
+        )
+    if len(valid) != 2:
+        reason = "deadline-missing" if not valid else "deadline-partial"
+        return ClaimLiveness(
+            state="indeterminate",
+            status=status,
+            reason=reason,
+            effective_deadline=effective_deadline,
+            deadline_sources=deadline_sources,
+            findings=findings,
+        )
+
+    assert top is not None and nested is not None and effective_deadline is not None
+    if top != nested:
+        findings = (
+            *findings,
+            "deadline-mismatch: expires_at and lease.expires_at differ",
+        )
+    if deadline_within_grace(effective_deadline, now, grace):
+        state, reason = "live", "lease-valid"
+    else:
+        state, reason = "expired", "lease-expired"
+    return ClaimLiveness(
+        state=state,
+        status=status,
+        reason=reason,
+        effective_deadline=effective_deadline,
+        deadline_sources=deadline_sources,
+        findings=findings,
     )
 
 

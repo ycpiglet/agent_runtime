@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,8 +46,8 @@ import pane_event_log
 import stop_events
 
 REAPED_STATUS = "expired"
-DEFAULT_GRACE_SECONDS = 600
-GRACE_ENV = "AGENT_RUNTIME_REAPER_GRACE_SECONDS"
+DEFAULT_GRACE_SECONDS = claim_store.DEFAULT_CLAIM_GRACE_SECONDS
+GRACE_ENV = claim_store.CLAIM_GRACE_ENV
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
 
 # Use the same closed status vocabulary as closure and dispatch. The reaped
@@ -78,24 +77,8 @@ def _coerce_now(value: str | datetime | None) -> datetime:
     return _parse_now(value)
 
 
-def _try_parse(value: Any) -> datetime | None:
-    text = str(value or "").strip()
-    if not text:
-        return None
-    try:
-        return _parse_now(text)
-    except ValueError:
-        return None
-
-
 def default_grace() -> int:
-    raw = os.environ.get(GRACE_ENV)
-    if raw:
-        try:
-            return max(0, int(raw))
-        except ValueError:
-            pass
-    return DEFAULT_GRACE_SECONDS
+    return claim_store.resolve_claim_grace()
 
 
 def _claim_dir(root: Path) -> Path:
@@ -122,38 +105,22 @@ def _is_orchestrator(claim: dict[str, Any]) -> bool:
     return mode == "orchestrator" or scope == "orchestrator"
 
 
-def _latest_deadline(claim: dict[str, Any]) -> datetime | None:
-    """The furthest-future lease deadline on the claim (refreshed by heartbeat)."""
-    candidates: list[datetime] = []
-    top = _try_parse(claim.get("expires_at"))
-    if top is not None:
-        candidates.append(top)
-    lease = claim.get("lease")
-    if isinstance(lease, dict):
-        leased = _try_parse(lease.get("expires_at"))
-        if leased is not None:
-            candidates.append(leased)
-    return max(candidates) if candidates else None
-
-
 def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> tuple[str, str]:
     """Return (decision, reason). decision in {"live", "dead", "skip"}."""
-    grace = claim_store.require_duration(
-        grace_seconds,
-        field="grace_seconds",
-        minimum=0,
-    )
-    status = str(claim.get("status") or "").strip().lower()
-    if status not in REAPABLE_ACTIVE_STATUSES:
-        return "skip", "not-active"
     if _is_orchestrator(claim):
         return "skip", "orchestrator-claim"
-    deadline = _latest_deadline(claim)
-    if deadline is None:
-        return "skip", "no-lease-info"
-    if claim_store.deadline_within_grace(deadline, now, grace):
+    liveness = claim_store.classify_claim_liveness(
+        claim,
+        now=now,
+        grace_seconds=grace_seconds,
+    )
+    if liveness.state == "live":
         return "live", "lease-valid"
-    return "dead", "lease-expired"
+    if liveness.state == "expired":
+        return "dead", "lease-expired"
+    if liveness.state == "inactive":
+        return "skip", "not-active"
+    return "skip", "lease-indeterminate"
 
 
 try:  # bare import when run as a script (scripts/ on sys.path); package path under pytest
@@ -358,12 +325,21 @@ def _authorized_sweep(
         raise _ClaimStoreAuthorityChanged("claim-store snapshot is missing")
     for path, claim in _read_claims(root):
         decision, reason = classify_claim(claim, now, grace_seconds)
-        entry = _entry(path, claim, reason)
+        entry_reason = reason
+        if reason == "lease-indeterminate":
+            liveness = claim_store.classify_claim_liveness(
+                claim,
+                now=now,
+                grace_seconds=grace_seconds,
+            )
+            if liveness.reason == "deadline-missing":
+                entry_reason = "no-lease-info"
+        entry = _entry(path, claim, entry_reason)
         if decision == "live":
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if apply and reason in ("orchestrator-claim", "no-lease-info"):
+            if apply and entry_reason in ("orchestrator-claim", "no-lease-info"):
                 if not claim_store.verify_snapshot(root, snapshot):
                     raise _ClaimStoreAuthorityChanged(
                         "claim-store authority changed before skip audit"
@@ -417,15 +393,7 @@ def sweep(
     apply: bool = False,
     grace_seconds: int | None = None,
 ) -> dict[str, Any]:
-    grace = (
-        default_grace()
-        if grace_seconds is None
-        else claim_store.require_duration(
-            grace_seconds,
-            field="grace_seconds",
-            minimum=0,
-        )
-    )
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     root = Path(root).resolve()
     now_dt = _coerce_now(now)
     report: dict[str, Any] = {

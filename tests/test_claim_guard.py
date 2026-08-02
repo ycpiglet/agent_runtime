@@ -82,6 +82,14 @@ def _write_runtime_claim(root: Path) -> tuple[Path, Path, Path]:
                 "branch": "test/claim-hook",
                 "claimed_at": "2026-07-29T19:00:00+09:00",
                 "last_heartbeat": "2026-07-29T19:00:00+09:00",
+                "updated_at": "2026-07-29T19:00:00+09:00",
+                "expires_at": "2026-07-29T20:00:00+09:00",
+                "lease": {
+                    "claimed_at": "2026-07-29T19:00:00+09:00",
+                    "heartbeat_at": "2026-07-29T19:00:00+09:00",
+                    "expires_at": "2026-07-29T20:00:00+09:00",
+                },
+                "mutation_revision": 0,
                 "handoff_path": handoff.relative_to(root).as_posix(),
                 "log_path": log.relative_to(root).as_posix(),
                 "persistence": {
@@ -118,7 +126,8 @@ def _install_runtime_gate_hook(
     hook = hooks / "pre-commit"
     hook.write_text(
         "#!/bin/sh\n"
-        "python3 scripts/parallel_worktree_gate.py --check || exit 1\n"
+        "python3 scripts/parallel_worktree_gate.py --check "
+        "--now 2026-07-29T19:30:00+09:00 || exit 1\n"
         "if [ -n \"${AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION:-}\" ]; then\n"
         ":\n"
         f"{mutate_after_gate}"
@@ -408,7 +417,13 @@ def test_explicit_claim_commit_uses_exact_sealed_tree_and_preserves_real_index(
         assert _git(tmp_path, "diff", "--quiet", "HEAD", "--", rel).returncode == 0
     assert _unrelated_state(tmp_path) == before_user_state
     gate = subprocess.run(
-        [sys.executable, "scripts/parallel_worktree_gate.py", "--check"],
+        [
+            sys.executable,
+            "scripts/parallel_worktree_gate.py",
+            "--check",
+            "--now",
+            "2026-07-29T19:30:00+09:00",
+        ],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -480,7 +495,13 @@ def test_runtime_precommit_rejects_artifact_restage_after_successful_gate(
     }.issubset(staged)
     assert _unrelated_state(tmp_path) == before_user_state
     gate = subprocess.run(
-        [sys.executable, "scripts/parallel_worktree_gate.py", "--check"],
+        [
+            sys.executable,
+            "scripts/parallel_worktree_gate.py",
+            "--check",
+            "--now",
+            "2026-07-29T19:30:00+09:00",
+        ],
         cwd=tmp_path,
         capture_output=True,
         text=True,

@@ -92,6 +92,7 @@ def _claim_autocommit_enabled(*, cli_opt_in: bool = False) -> bool:
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
+SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
 SECURITY_SERVICE_GATE_SHA256 = (
     "a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce"
 )
@@ -113,6 +114,14 @@ SECURITY_SERVICE_GATE_BOOTSTRAP = (
 )
 ACTIVE_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
+COMPLETION_PHASES = {"done", "complete", "completed", "released"}
+PROGRESS_FIELDS = (
+    "phase",
+    "progress_pct",
+    "step_index",
+    "step_total",
+    "status_text",
+)
 
 
 class _CreatePreparation(NamedTuple):
@@ -126,6 +135,74 @@ class _CreatePreparation(NamedTuple):
     token_budgets: dict[str, int | None]
     defect_signatures: tuple[str, ...]
     knowledge_matches: tuple[dict[str, Any], ...]
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _scope_binding(
+    *,
+    task_id: object,
+    unit_id: object,
+    unit_spec: object,
+    target_files: object,
+    stop_condition: object,
+    bound_at: str,
+) -> dict[str, Any]:
+    targets = (
+        sorted({str(item) for item in target_files})
+        if isinstance(target_files, (list, tuple, set))
+        else []
+    )
+    components = {
+        "task": _canonical_sha256({"task_id": str(task_id or "")}),
+        "unit": _canonical_sha256(
+            {
+                "unit_id": str(unit_id or ""),
+                "unit_spec": str(unit_spec or ""),
+            }
+        ),
+        "target_files": _canonical_sha256(targets),
+        "stop_condition": _canonical_sha256(str(stop_condition or "")),
+    }
+    return {
+        "schema": SCOPE_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def _binding_for_claim(
+    claim: dict[str, Any],
+    *,
+    bound_at: str,
+    target_files: object | None = None,
+    stop_condition: object | None = None,
+) -> dict[str, Any]:
+    return _scope_binding(
+        task_id=claim.get("task_id"),
+        unit_id=claim.get("unit_id"),
+        unit_spec=claim.get("unit_spec"),
+        target_files=(
+            claim.get("target_files", [])
+            if target_files is None
+            else target_files
+        ),
+        stop_condition=(
+            claim.get("stop_condition", "")
+            if stop_condition is None
+            else stop_condition
+        ),
+        bound_at=bound_at,
+    )
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -704,6 +781,25 @@ def _unit_spec_target_files(root: Path, unit_spec: str) -> list[str]:
     if isinstance(value, str) and value.strip():
         return _normalize_target_files([value])
     return []
+
+
+def _unit_spec_stop_condition(root: Path, unit_spec: str) -> str:
+    spec_value = str(unit_spec or "").strip()
+    if not spec_value:
+        return ""
+    spec_path = Path(spec_value)
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    if not spec_path.is_file():
+        return ""
+    try:
+        meta, _ = backlog_board.parse_frontmatter(
+            spec_path.read_text(encoding="utf-8")
+        )
+    except OSError:
+        return ""
+    value = meta.get("stop_condition")
+    return str(value).strip() if isinstance(value, str) else ""
 
 
 def _normalize_target_files(values: list[object] | tuple[object, ...]) -> list[str]:
@@ -2065,6 +2161,11 @@ def _cmd_create_locked(
         defect_signatures=list(preparation.defect_signatures),
         knowledge_matches=list(preparation.knowledge_matches),
     )
+    claim["mutation_revision"] = 0
+    claim["scope_binding"] = _binding_for_claim(
+        claim,
+        bound_at=str(claim["claimed_at"]),
+    )
     claim["persistence"] = {
         "mode": "scm_commit" if claim_commit_authorized else "working_tree",
         "scm_commit_authorized": claim_commit_authorized,
@@ -2378,36 +2479,222 @@ def _find_claim_in_canonical_snapshot(
     return None
 
 
-def cmd_projection(args: argparse.Namespace) -> int:
-    """Emit the deterministic active-work projection required after dispatch.
-
-    The dispatcher remains claim-only: generated board and canonical work-item
-    writes belong to the serial projection owner.  This command prevents the
-    former scalar-ID workaround by giving that owner the exact task/unit refs
-    and complete ``current_agents`` record to project.
-    """
-    root = args.root.resolve()
+def _parse_aware_timestamp(value: object, label: str) -> datetime:
+    text = str(value or "").strip()
+    if not text:
+        raise ValueError(f"{label} timestamp is missing")
+    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
     try:
-        found = _find_claim_in_canonical_snapshot(root, args.claim_id)
-    except (
-        claim_store.ClaimStoreError,
-        OSError,
-        RuntimeError,
-        ValueError,
-    ) as exc:
-        detail = " ".join(str(exc).split())[:256] or "claim-store unavailable"
-        print(f"claim-store projection refused: {detail}", file=sys.stderr)
-        return 1
-    if found is None:
-        print(f"claim not found: {args.claim_id}", file=sys.stderr)
-        return 1
-    path, claim = found
+        parsed = datetime.fromisoformat(normalized)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{label} timestamp is malformed") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError(f"{label} timestamp must be timezone-aware")
+    return parsed
+
+
+def _mutation_now(value: str | None) -> datetime:
+    if value is None:
+        return datetime.now(timezone.utc).astimezone()
+    return _parse_aware_timestamp(value, "now")
+
+
+def _claim_temporal_fields(
+    claim: dict[str, Any],
+) -> tuple[datetime, datetime]:
+    lease = claim.get("lease")
+    if not isinstance(lease, dict):
+        raise ValueError("claim lease timestamps are missing")
+    heartbeat = _parse_aware_timestamp(
+        claim.get("last_heartbeat"),
+        "last_heartbeat",
+    )
+    nested_heartbeat = _parse_aware_timestamp(
+        lease.get("heartbeat_at"),
+        "lease heartbeat",
+    )
+    if heartbeat != nested_heartbeat:
+        raise ValueError("claim heartbeat timestamp copies do not match")
+    expires = _parse_aware_timestamp(claim.get("expires_at"), "expires_at")
+    nested_expires = _parse_aware_timestamp(
+        lease.get("expires_at"),
+        "lease expires_at",
+    )
+    if expires != nested_expires:
+        raise ValueError("claim expires timestamp copies do not match")
+    return heartbeat, expires
+
+
+def _validate_progress_update(args: argparse.Namespace) -> dict[str, Any] | None:
+    values = {field: getattr(args, field, None) for field in PROGRESS_FIELDS}
+    present = [value is not None for value in values.values()]
+    if any(present) and not all(present):
+        raise ValueError(
+            "progress update requires phase, progress_pct, step_index, "
+            "step_total, and status_text together"
+        )
+    if not any(present):
+        return None
+    phase = str(values["phase"] or "").strip()
+    status_text = str(values["status_text"] or "").strip()
+    progress_pct = values["progress_pct"]
+    step_index = values["step_index"]
+    step_total = values["step_total"]
+    if not phase or not status_text:
+        raise ValueError("progress phase and status_text must be non-empty")
+    if type(progress_pct) is not int or not 0 <= progress_pct <= 100:
+        raise ValueError("progress_pct must be between 0 and 100")
+    if type(step_total) is not int or step_total < 1:
+        raise ValueError("step_total must be at least 1")
+    if type(step_index) is not int or not 1 <= step_index <= step_total:
+        raise ValueError("step_index must be between 1 and step_total")
+    if phase.lower() in COMPLETION_PHASES and (
+        step_index != step_total or progress_pct != 100
+    ):
+        raise ValueError(
+            "completion phase requires final step and 100 percent progress"
+        )
+    return {
+        "phase": phase,
+        "progress_pct": progress_pct,
+        "step_index": step_index,
+        "step_total": step_total,
+        "status_text": status_text,
+    }
+
+
+def _validate_mutation_authority(
+    claim: dict[str, Any],
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    now: datetime,
+) -> tuple[datetime, datetime, int]:
     if not _is_active(claim):
-        print(f"projection requires an active worker claim: {args.claim_id}", file=sys.stderr)
-        return 1
-    if _is_explicit_overlay(claim):
-        print(f"projection does not apply to overlay claim: {args.claim_id}", file=sys.stderr)
-        return 1
+        raise ValueError("claim mutation requires an active claim")
+    if _is_explicit_overlay(claim) and operation != "heartbeat":
+        raise ValueError("claim scope renewal does not apply to an overlay claim")
+    if str(claim.get("agent_instance_id") or "") != args.agent_instance_id:
+        raise ValueError("claim owner does not match agent_instance_id")
+    if str(claim.get("callsite_id") or "") != args.callsite_id:
+        raise ValueError("claim callsite does not match callsite_id")
+    revision = claim.get("mutation_revision")
+    if type(revision) is not int or revision < 0:
+        raise ValueError("claim mutation revision is invalid")
+    if revision != args.expected_revision:
+        raise ValueError(
+            f"claim revision mismatch: expected {args.expected_revision}, "
+            f"observed {revision}"
+        )
+    heartbeat, expires = _claim_temporal_fields(claim)
+    liveness = claim_store.classify_claim_liveness(claim, now=now)
+    if liveness.state == "expired":
+        raise ValueError("claim lease is expired")
+    if liveness.state != "live":
+        raise ValueError(
+            f"claim lease is indeterminate: {liveness.reason}"
+        )
+    if now <= heartbeat:
+        raise ValueError("heartbeat timestamp must be strictly increasing")
+    return heartbeat, expires, revision
+
+
+def _persisted_scope_binding(claim: dict[str, Any]) -> dict[str, Any]:
+    binding = claim.get("scope_binding")
+    if not isinstance(binding, dict):
+        raise ValueError("claim scope binding is missing")
+    bound_at = binding.get("bound_at")
+    if not isinstance(bound_at, str) or not bound_at.strip():
+        raise ValueError("claim scope binding bound_at is invalid")
+    expected = _binding_for_claim(claim, bound_at=bound_at)
+    if binding != expected:
+        raise ValueError("claim scope binding is invalid")
+    return json.loads(json.dumps(binding, ensure_ascii=False))
+
+
+def _current_scope_values(
+    root: Path,
+    claim: dict[str, Any],
+) -> tuple[list[str], str]:
+    unit_spec = str(claim.get("unit_spec") or "").strip()
+    if not unit_spec:
+        return (
+            _normalize_target_files(tuple(claim.get("target_files") or ())),
+            str(claim.get("stop_condition") or ""),
+        )
+    direct_ref = _direct_repo_file_ref(root, unit_spec, "unit_spec")
+    meta = _unit_meta(root, direct_ref)
+    if str(meta.get("task_id") or "").strip() != str(
+        claim.get("task_id") or ""
+    ):
+        raise ValueError("unit_spec task identity changed")
+    if str(meta.get("unit_id") or "").strip() != str(
+        claim.get("unit_id") or ""
+    ):
+        raise ValueError("unit_spec unit identity changed")
+    return (
+        _unit_spec_target_files(root, direct_ref),
+        _unit_spec_stop_condition(root, direct_ref),
+    )
+
+
+def _accepted_replan_ref(
+    root: Path,
+    claim: dict[str, Any],
+    value: str,
+) -> str:
+    replan_ref = _direct_repo_file_ref(root, value, "replan_ref")
+    if not replan_ref:
+        raise ValueError("scope drift requires an accepted direct replan")
+    meta = _work_item_meta(root / replan_ref)
+    if str(meta.get("status") or "").strip().lower() != "accepted":
+        raise ValueError("replan review must have accepted status")
+    if str(meta.get("signal") or "").strip().lower() != "pass":
+        raise ValueError("replan review must have pass signal")
+    if str(meta.get("tier") or "").strip().upper() not in {"T2", "T3"}:
+        raise ValueError("replan review must be tier T2 or T3")
+    if str(meta.get("task_id") or "").strip() != str(
+        claim.get("task_id") or ""
+    ):
+        raise ValueError("replan review task identity does not match claim")
+    if str(meta.get("unit_id") or "").strip() != str(
+        claim.get("unit_id") or ""
+    ):
+        raise ValueError("replan review unit identity does not match claim")
+
+    registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
+    if not isinstance(registry, dict) or registry.get("schema") != plan_assumption_gate.SCHEMA:
+        raise ValueError("replan plan-assumption registry is invalid")
+    task_set_id = str(claim.get("task_set_id") or "").strip()
+    entries = [
+        entry
+        for entry in registry.get("assumption_sets", [])
+        if isinstance(entry, dict)
+        and str(entry.get("taskset_id") or "").strip() == task_set_id
+    ]
+    if len(entries) != 1:
+        raise ValueError("replan plan-assumption entry is missing or duplicated")
+    entry = entries[0]
+    if str(entry.get("design_record") or "").strip() != replan_ref:
+        raise ValueError("replan must be the direct plan design_record")
+    if str(entry.get("revalidation_policy") or "").strip() != "block_dispatch_on_drift":
+        raise ValueError("replan must block dispatch on drift")
+    anchors = entry.get("anchors")
+    if not isinstance(anchors, list) or not anchors:
+        raise ValueError("replan plan-assumption anchors are missing")
+    findings = _strict_plan_assumption_findings(root, task_set_id)
+    if findings:
+        raise ValueError("replan plan-assumption anchors are invalid or drifted")
+    return replan_ref
+
+
+def _projection_payload(
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+    *,
+    include_revision: bool,
+) -> dict[str, Any]:
     rel_path = _rel(root, path)
     agent = {
         key: claim.get(key)
@@ -2446,10 +2733,13 @@ def cmd_projection(args: argparse.Namespace) -> int:
             "last_heartbeat": claim.get("last_heartbeat"),
         }
     )
-    projection = {
+    if include_revision:
+        agent["mutation_revision"] = claim.get("mutation_revision", 0)
+    return {
         "status": "projection",
         "operation": "merge",
         "claim_id": claim.get("claim_id"),
+        "claim_revision": claim.get("mutation_revision", 0),
         "task_claim_ref": rel_path,
         "task_id": claim.get("task_id"),
         "unit_id": claim.get("unit_id"),
@@ -2461,8 +2751,337 @@ def cmd_projection(args: argparse.Namespace) -> int:
             "current_agents": [agent],
         },
     }
+
+
+def cmd_projection(args: argparse.Namespace) -> int:
+    """Emit the deterministic active-work projection required after dispatch.
+
+    The dispatcher remains claim-only: generated board and canonical work-item
+    writes belong to the serial projection owner.  This command prevents the
+    former scalar-ID workaround by giving that owner the exact task/unit refs
+    and complete ``current_agents`` record to project.
+    """
+    root = args.root.resolve()
+    try:
+        found = _find_claim_in_canonical_snapshot(root, args.claim_id)
+        if found is None:
+            raise ValueError(f"claim not found: {args.claim_id}")
+        path, claim = found
+        if not _is_active(claim):
+            raise ValueError(
+                f"projection requires an active worker claim: {args.claim_id}"
+            )
+        if _is_explicit_overlay(claim):
+            raise ValueError(
+                f"projection does not apply to overlay claim: {args.claim_id}"
+            )
+        now = _mutation_now(args.now)
+        liveness = claim_store.classify_claim_liveness(claim, now=now)
+        if liveness.state == "expired":
+            raise ValueError(f"projection claim is expired: {args.claim_id}")
+        if liveness.state != "live":
+            raise ValueError(
+                f"projection claim liveness is indeterminate: {liveness.reason}"
+            )
+        projection = _projection_payload(
+            root,
+            path,
+            claim,
+            include_revision=True,
+        )
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store unavailable"
+        print(f"claim-store projection refused: {detail}", file=sys.stderr)
+        return 1
     _emit(projection, as_json=args.json)
     return 0
+
+
+def _cmd_claim_mutation_locked(
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    now: datetime,
+    progress: dict[str, Any] | None = None,
+    renewal_expires_at: datetime | None = None,
+) -> tuple[Path, dict[str, Any], dict[str, Any] | None]:
+    root = args.root.resolve()
+    inspection = claim_store.inspect_store(root)
+    if inspection.state != "initialized" or inspection.snapshot is None:
+        raise claim_store.ClaimStoreError(
+            inspection.finding or "claim-store authority is not initialized"
+        )
+    found = _find_claim(root, args.claim_id)
+    if found is None:
+        raise ValueError(f"claim not found: {args.claim_id}")
+    path, claim = found
+    heartbeat, expires, revision = _validate_mutation_authority(
+        claim,
+        args,
+        operation=operation,
+        now=now,
+    )
+    now_text = now.isoformat()
+    scope_change: dict[str, Any] | None = None
+    renewed_targets: list[str] | None = None
+    renewed_stop: str | None = None
+
+    if operation == "heartbeat":
+        duration = expires - heartbeat
+        if duration <= timedelta(0):
+            raise ValueError("claim lease duration must be positive")
+        try:
+            new_expires = now + duration
+        except OverflowError:
+            raise ValueError("claim lease duration exceeds datetime bounds") from None
+    elif operation == "renew":
+        if renewal_expires_at is None:
+            raise ValueError("renewal lease expiration is missing")
+        new_expires = renewal_expires_at
+        old_binding = _persisted_scope_binding(claim)
+        old_digest = str(old_binding["digest"])
+        if str(args.expected_scope_digest or "").strip() != old_digest:
+            raise ValueError(
+                "claim scope digest mismatch: expected persisted scope binding"
+            )
+        renewed_targets, renewed_stop = _current_scope_values(root, claim)
+        candidate_binding = _binding_for_claim(
+            claim,
+            bound_at=now_text,
+            target_files=renewed_targets,
+            stop_condition=renewed_stop,
+        )
+        changed = str(candidate_binding["digest"]) != old_digest
+        replan_ref: str | None = None
+        if changed:
+            replan_ref = _accepted_replan_ref(root, claim, args.replan_ref)
+            new_binding = candidate_binding
+        else:
+            new_binding = old_binding
+        scope_change = {
+            "changed": changed,
+            "old_digest": old_digest,
+            "new_digest": str(new_binding["digest"]),
+            "replan_ref": replan_ref,
+            "old_scope_binding": old_binding,
+            "new_scope_binding": new_binding,
+        }
+    else:
+        raise ValueError(f"unknown claim mutation operation: {operation}")
+
+    updated = json.loads(json.dumps(claim, ensure_ascii=False))
+    lease = dict(updated.get("lease") or {})
+    expires_text = new_expires.isoformat()
+    updated["last_heartbeat"] = now_text
+    updated["updated_at"] = now_text
+    updated["expires_at"] = expires_text
+    lease["heartbeat_at"] = now_text
+    lease["expires_at"] = expires_text
+    updated["lease"] = lease
+    updated["mutation_revision"] = revision + 1
+    if progress is not None:
+        updated.update(progress)
+    if scope_change is not None:
+        if scope_change["changed"]:
+            assert renewed_targets is not None and renewed_stop is not None
+            updated["target_files"] = renewed_targets
+            updated["stop_condition"] = renewed_stop
+            updated["scope_binding"] = scope_change["new_scope_binding"]
+        last_renewal = {
+            "renewed_at": now_text,
+            "replan_ref": scope_change["replan_ref"],
+            "old_scope_binding": scope_change["old_scope_binding"],
+            "new_scope_binding": scope_change["new_scope_binding"],
+        }
+        if len(json.dumps(last_renewal, ensure_ascii=False)) > 4096:
+            raise ValueError("renewal scope provenance exceeds the bounded limit")
+        updated["last_renewal"] = last_renewal
+
+    if not claim_store.verify_snapshot(root, inspection.snapshot):
+        raise claim_store.ClaimStoreError(
+            "claim-store authority changed before mutation persistence"
+        )
+    atomic_io.write_json_atomic(path, updated)
+    return path, updated, scope_change
+
+
+def _mutation_projection_payload(
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a receipt projection without inventing overlay pointer authority."""
+
+    if not _is_explicit_overlay(claim):
+        return _projection_payload(root, path, claim, include_revision=True)
+    return {
+        "status": "projection",
+        "operation": "overlay-no-primary-pointer",
+        "claim_id": claim.get("claim_id"),
+        "claim_revision": claim.get("mutation_revision", 0),
+        "task_claim_ref": _rel(root, path),
+        "task_id": claim.get("task_id"),
+        "unit_id": claim.get("unit_id"),
+        "task_set_id": claim.get("task_set_id"),
+    }
+
+
+def _complete_claim_mutation(
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    path: Path,
+    claim: dict[str, Any],
+    scope_change: dict[str, Any] | None,
+) -> int:
+    root = args.root.resolve()
+    warnings: list[dict[str, str]] = []
+    receipt: dict[str, Any] = {
+        "committed": True,
+        "claim_revision": claim["mutation_revision"],
+    }
+    if scope_change is not None:
+        receipt["scope_change"] = scope_change
+    try:
+        instance_path, instance = record_claim_instance(
+            root,
+            claim,
+            claim_path=path,
+            emit_spawn_event=False,
+        )
+        receipt["instance"] = {
+            "path": _rel(root, instance_path),
+            "updated_at": instance.get("updated_at"),
+            "last_heartbeat": instance.get("last_heartbeat"),
+            "claim_revision": instance.get("claim_revision"),
+        }
+    except Exception as exc:  # noqa: BLE001 - claim authority is committed
+        _add_post_commit_warning(
+            warnings,
+            stage="agent-instance-registry",
+            error=exc,
+        )
+    try:
+        pane_event = append_event(
+            root,
+            {
+                "event": "instance_heartbeat",
+                "actor": claim.get("agent_instance_id") or "unknown",
+                "actor_role": claim.get("agent_role"),
+                "agent_instance_id": claim.get("agent_instance_id"),
+                "display_name": claim.get("display_name"),
+                "callsite_id": claim.get("callsite_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": claim.get("task_set_id"),
+                "claim_id": claim.get("claim_id"),
+                "worktree_path": claim.get("worktree_path"),
+                "message": claim.get("status_text"),
+                "ts": claim.get("last_heartbeat"),
+            },
+        )
+        receipt["pane_event"] = pane_event
+    except Exception as exc:  # noqa: BLE001 - claim authority is committed
+        _add_post_commit_warning(
+            warnings,
+            stage=(
+                "claim-heartbeat-event"
+                if operation == "heartbeat"
+                else "claim-renewal-event"
+            ),
+            error=exc,
+        )
+    response = {
+        "status": "heartbeated" if operation == "heartbeat" else "renewed",
+        "path": _rel(root, path),
+        "claim": claim,
+        "receipt": receipt,
+        "projection": _mutation_projection_payload(root, path, claim),
+    }
+    if warnings:
+        response["status"] = f"{operation}_committed_with_warnings"
+        response["post_commit_warnings"] = warnings
+    _emit(response, as_json=args.json)
+    return 0
+
+
+def cmd_heartbeat(args: argparse.Namespace) -> int:
+    try:
+        now = _mutation_now(args.now)
+        progress = _validate_progress_update(args)
+        with claim_store.store_lock(args.root.resolve()):
+            outcome = _cmd_claim_mutation_locked(
+                args,
+                operation="heartbeat",
+                now=now,
+                progress=progress,
+            )
+    except (
+        AttributeError,
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim mutation unavailable"
+        print(f"claim heartbeat refused: {detail}", file=sys.stderr)
+        return 1
+    path, claim, scope_change = outcome
+    return _complete_claim_mutation(
+        args,
+        operation="heartbeat",
+        path=path,
+        claim=claim,
+        scope_change=scope_change,
+    )
+
+
+def cmd_renew(args: argparse.Namespace) -> int:
+    try:
+        now = _mutation_now(args.now)
+        renewal_expires_at = claim_store.expiration_after(
+            now,
+            args.lease_minutes,
+            unit="minutes",
+            field="lease_minutes",
+            minimum=1,
+        )
+        with claim_store.store_lock(args.root.resolve()):
+            outcome = _cmd_claim_mutation_locked(
+                args,
+                operation="renew",
+                now=now,
+                renewal_expires_at=renewal_expires_at,
+            )
+    except (
+        AttributeError,
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim mutation unavailable"
+        print(f"claim renewal refused: {detail}", file=sys.stderr)
+        return 1
+    path, claim, scope_change = outcome
+    return _complete_claim_mutation(
+        args,
+        operation="renew",
+        path=path,
+        claim=claim,
+        scope_change=scope_change,
+    )
 
 
 def _normalize_evidence_ref(root: Path, value: str) -> str:
@@ -2858,7 +3477,11 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--branch")
     create.add_argument("--handoff-path")
     create.add_argument("--log-path")
-    create.add_argument("--lease-minutes", type=int, default=30)
+    create.add_argument(
+        "--lease-minutes",
+        type=int,
+        default=claim_store.DEFAULT_CLAIM_LEASE_MINUTES,
+    )
     create.add_argument("--allow-parallel-task-set", action="store_true")
     create.add_argument(
         "--commit-claim-artifacts",
@@ -2880,8 +3503,41 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
 
+    heartbeat = sub.add_parser(
+        "heartbeat",
+        help="Atomically refresh one owned active claim and optional progress",
+    )
+    heartbeat.add_argument("--claim-id", required=True)
+    heartbeat.add_argument("--agent-instance-id", required=True)
+    heartbeat.add_argument("--callsite-id", required=True)
+    heartbeat.add_argument("--expected-revision", type=int, required=True)
+    heartbeat.add_argument("--phase")
+    heartbeat.add_argument("--progress-pct", type=int)
+    heartbeat.add_argument("--step-index", type=int)
+    heartbeat.add_argument("--step-total", type=int)
+    heartbeat.add_argument("--status-text")
+    heartbeat.add_argument("--now")
+    heartbeat.add_argument("--json", action="store_true")
+    heartbeat.set_defaults(func=cmd_heartbeat)
+
+    renew = sub.add_parser(
+        "renew",
+        help="Atomically renew one owned active claim with scope-drift binding",
+    )
+    renew.add_argument("--claim-id", required=True)
+    renew.add_argument("--agent-instance-id", required=True)
+    renew.add_argument("--callsite-id", required=True)
+    renew.add_argument("--expected-revision", type=int, required=True)
+    renew.add_argument("--expected-scope-digest", required=True)
+    renew.add_argument("--lease-minutes", type=int, required=True)
+    renew.add_argument("--replan-ref", default="")
+    renew.add_argument("--now")
+    renew.add_argument("--json", action="store_true")
+    renew.set_defaults(func=cmd_renew)
+
     projection = sub.add_parser("projection", help="Emit the required active task/unit/pointer projection for a claim")
     projection.add_argument("--claim-id", required=True)
+    projection.add_argument("--now")
     projection.add_argument("--json", action="store_true")
     projection.set_defaults(func=cmd_projection)
 

@@ -80,6 +80,9 @@ OVERLAY_MUTABLE_LIFECYCLE_FIELDS = frozenset(
         "progress_pct",
         "last_heartbeat",
         "updated_at",
+        "expires_at",
+        "lease",
+        "mutation_revision",
         "released_at",
         "verified_by",
         "verifier_role",
@@ -165,6 +168,27 @@ def _now_iso(now: str | None) -> str:
     if now:
         return now
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def _aware_timestamp(value: object, field: str) -> datetime:
+    if not isinstance(value, str) or not value.strip() or len(value) > 128:
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {field} timestamp is invalid"
+        )
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except (TypeError, ValueError):
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {field} timestamp is invalid"
+        ) from None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {field} timestamp must be timezone-aware"
+        )
+    return parsed
 
 
 def _claim_dir(root: Path) -> Path:
@@ -413,6 +437,35 @@ def _existing_overlay_claim(
         raise claim_store.ClaimStoreError(
             "claim-store overlay claimed_at contract is invalid"
         )
+    lease = payload.get("lease")
+    revision = payload.get("mutation_revision")
+    expires_at = payload.get("expires_at")
+    if (
+        not isinstance(lease, dict)
+        or set(lease) != {"claimed_at", "heartbeat_at", "expires_at"}
+        or lease.get("claimed_at") != claimed_at
+        or lease.get("heartbeat_at") != lifecycle["last_heartbeat"]
+        or lease.get("expires_at") != expires_at
+        or type(revision) is not int
+        or revision < 0
+    ):
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay lease contract is invalid"
+        )
+    claimed_time = _aware_timestamp(claimed_at, "claimed_at")
+    heartbeat_time = _aware_timestamp(lifecycle["last_heartbeat"], "last_heartbeat")
+    updated_time = _aware_timestamp(lifecycle["updated_at"], "updated_at")
+    expires_time = _aware_timestamp(expires_at, "expires_at")
+    if not claimed_time <= heartbeat_time <= updated_time:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay lifecycle timestamps are incoherent"
+        )
+    if lifecycle["status"] in claim_store.ACTIVE_CLAIM_STATUSES and not (
+        heartbeat_time < expires_time
+    ):
+        raise claim_store.ClaimStoreError(
+            "claim-store active overlay lease is not live"
+        )
     _require_direct_overlay_artifact(
         handoff_path,
         "handoff",
@@ -580,6 +633,14 @@ def _write_overlay_claim_unlocked(
         raise claim_store.ClaimStoreError(
             "claim-store overlay claim id is invalid"
         )
+    claimed_time = _aware_timestamp(now, "claimed_at")
+    expires_at = claim_store.expiration_after(
+        claimed_time,
+        claim_store.DEFAULT_CLAIM_LEASE_MINUTES,
+        unit="minutes",
+        field="lease_minutes",
+        minimum=1,
+    ).isoformat()
     path = _claim_path(root, claim_id)
     if _existing_overlay_claim(
         root,
@@ -623,6 +684,13 @@ def _write_overlay_claim_unlocked(
         "claimed_at": now,
         "last_heartbeat": now,
         "updated_at": now,
+        "expires_at": expires_at,
+        "lease": {
+            "claimed_at": now,
+            "heartbeat_at": now,
+            "expires_at": expires_at,
+        },
+        "mutation_revision": 0,
         "tags": list(tags or []),
         "overlay": True,  # additive orchestration overlay marker
         "allow_parallel_task_set": True,
