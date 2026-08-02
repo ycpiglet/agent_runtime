@@ -144,6 +144,22 @@ def test_home_wip_uses_server_derived_claim_liveness_not_raw_status():
     assert "HOME_ACTIVE_CLAIM_STATUSES" not in source
 
 
+def test_cockpit_freshness_is_null_safe_before_initial_state_load():
+    js = ui_console.build_response("/app.js", Path(".")).body.decode("utf-8")
+    freshness = re.search(
+        r"function stateFreshness\(\) \{(?P<body>.*?)\n\}",
+        js,
+        flags=re.DOTALL,
+    )
+
+    assert freshness is not None
+    body = freshness.group("body")
+    assert "runtimeState || {}" in body
+    assert "runtimeState.built_at" not in body
+    assert "runtimeState.generated_at" not in body
+    assert "parseIsoDate" in body
+
+
 def test_console_serves_assets_from_asset_module_boundary():
     source = (ROOT / "src" / "agent_runtime" / "ui_console.py").read_text(encoding="utf-8")
     asset_source = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")
