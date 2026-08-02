@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T18:25:27+09:00
+updated_at: 2026-08-02T18:41:09+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -68,6 +68,8 @@ defect_signatures:
   - defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f
   - defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d
   - defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472
+  - defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390
+  - defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -100,6 +102,8 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md
   - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -125,6 +129,9 @@ acceptance:
   - failure-to-regression is included in the consumer core profile and asset registry.
   - A tracked inner marker requires explicit checkout activation without generation rebinding.
   - New authority uses canonical no-clobber publication and identity-bound rollback.
+  - No fallible post-commit cleanup or ownership-capture step can reverse a durable authority result.
+  - Complete snapshots and W0 status use the bounded locked canonical claim reader.
+  - Shared JSON rejects every non-finite number and sync reports its observed committed post-state.
   - Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
   - Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 verification:
@@ -155,6 +162,9 @@ verification:
 - failure-to-regression is included in the consumer core profile and asset registry.
 - A tracked inner marker requires explicit checkout activation without generation rebinding.
 - New authority uses canonical no-clobber publication and identity-bound rollback.
+- No fallible post-commit cleanup or ownership-capture step can reverse a durable authority result.
+- Complete snapshots and W0 status use the bounded locked canonical claim reader.
+- Shared JSON rejects every non-finite number and sync reports its observed committed post-state.
 - Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
 - Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 
@@ -275,3 +285,14 @@ native junction, and truthful partial-sync reporting were also incomplete.
 The exact refinement is accepted under
 `reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md`; no prior
 local suite or W4 result authorizes release.
+
+## Refined transaction-truth repair
+
+The green dirty-tree baseline is superseded by independent preverify races in
+post-commit ownership capture and descriptor cleanup, complete snapshot
+validation, W0 claim enumeration, exponent-overflow JSON, sync post-state, and
+stable role metadata. The bounded repair is accepted under
+`reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md`.
+TASK-AR-654 remains in progress until the new RED matrix, fresh Verify,
+twenty-six-signature Compound coverage, exact-commit W4, and native Windows
+evidence are complete.
