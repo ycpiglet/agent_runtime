@@ -51,6 +51,12 @@ CLAIM_AUTHORITY_FIELDS = (
     "defect_signatures",
     "compound_refs",
 )
+_WINDOWS_REPARSE_POINT_ATTRIBUTE = getattr(
+    stat,
+    "FILE_ATTRIBUTE_REPARSE_POINT",
+    0x0400,
+)
+_WINDOWS_NAME_SURROGATE_TAG = 0x20000000
 
 
 def _parse_now(value: str | None = None) -> datetime:
@@ -264,52 +270,90 @@ def _claim_authority_shape_valid(claim: dict[str, Any]) -> bool:
     return True
 
 
+def _claim_store_component_is_alias(metadata: Any) -> bool:
+    """Reject path aliases and uninspectable Windows reparse metadata."""
+
+    if stat.S_ISLNK(metadata.st_mode):
+        return True
+    attributes = getattr(metadata, "st_file_attributes", 0)
+    reparse_tag = getattr(metadata, "st_reparse_tag", None)
+    if isinstance(reparse_tag, int) and (
+        reparse_tag & _WINDOWS_NAME_SURROGATE_TAG
+    ):
+        return True
+    if not isinstance(attributes, int):
+        return True
+    if not attributes & _WINDOWS_REPARSE_POINT_ATTRIBUTE:
+        return False
+    return not isinstance(reparse_tag, int) or reparse_tag == 0
+
+
 def _active_claims(
     root: Path,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     claims_dir = root / "agents" / "runtime" / "task_claims"
     claims: list[dict[str, Any]] = []
     findings: list[str] = []
-    for component in (
+    components = (
         root / "agents",
         root / "agents" / "runtime",
         claims_dir,
-    ):
+    )
+    for index, component in enumerate(components):
         try:
-            mode = component.lstat().st_mode
+            metadata = component.lstat()
         except FileNotFoundError:
+            if index == len(components) - 1:
+                return claims, findings
+            findings.append("active-claim-store-integrity-invalid")
             return claims, findings
         except OSError:
             findings.append("active-claim-store-integrity-invalid")
             return claims, findings
-        if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
+        if (
+            _claim_store_component_is_alias(metadata)
+            or not stat.S_ISDIR(metadata.st_mode)
+        ):
             findings.append("active-claim-store-integrity-invalid")
             return claims, findings
-    if not claims_dir.exists():
-        findings.append("active-claim-store-integrity-invalid")
-        return claims, findings
     try:
         canonical_claims_dir = claims_dir.absolute()
         resolved_claims_dir = claims_dir.resolve(strict=True)
-    except (FileNotFoundError, OSError):
+    except (FileNotFoundError, OSError, RuntimeError):
         findings.append("active-claim-store-integrity-invalid")
         return claims, findings
     if (
-        claims_dir.is_symlink()
-        or resolved_claims_dir != canonical_claims_dir
+        resolved_claims_dir != canonical_claims_dir
         or not resolved_claims_dir.is_dir()
     ):
         findings.append("active-claim-store-integrity-invalid")
         return claims, findings
-    for path in sorted(claims_dir.glob("CLAIM-*.json")):
+    try:
+        with os.scandir(claims_dir) as entries:
+            claim_paths = sorted(
+                claims_dir / entry.name
+                for entry in entries
+                if entry.name.startswith("CLAIM-")
+                and entry.name.endswith(".json")
+            )
+    except OSError:
+        findings.append("active-claim-store-integrity-invalid")
+        return claims, findings
+    for path in claim_paths:
         try:
+            metadata = path.lstat()
+            if (
+                _claim_store_component_is_alias(metadata)
+                or not stat.S_ISREG(metadata.st_mode)
+            ):
+                findings.append(f"active-claim-integrity-invalid:{path.name}")
+                continue
             resolved_path = path.resolve(strict=True)
-        except (FileNotFoundError, OSError):
+        except (FileNotFoundError, OSError, RuntimeError):
             findings.append(f"active-claim-integrity-invalid:{path.name}")
             continue
         if (
-            path.is_symlink()
-            or resolved_path != path.absolute()
+            resolved_path != path.absolute()
             or resolved_path.parent != resolved_claims_dir
             or not resolved_path.is_file()
         ):

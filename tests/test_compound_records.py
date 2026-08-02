@@ -61,6 +61,7 @@ def _write_closeable_unit(
     *,
     claim_refs: list[str] | None = None,
 ) -> tuple[str, str]:
+    (root / "agents" / "runtime").mkdir(parents=True, exist_ok=True)
     task_id = "TASK-AR-645"
     unit_id = "UNIT-TASK-AR-645-001"
     task = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"

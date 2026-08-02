@@ -25,6 +25,10 @@ _CLAIM_ONLY_SIGNATURE = compound_record.normalize_signature(
 )
 
 
+def _write_direct_runtime(root: Path) -> None:
+    (root / "agents" / "runtime").mkdir(parents=True, exist_ok=True)
+
+
 # --- pure decision logic ---
 
 def test_decide_not_substantial_approves():
@@ -816,6 +820,7 @@ def test_substantial_closeout_blocks_for_configured_source_integrity(
     tmp_path,
     monkeypatch,
 ):
+    _write_direct_runtime(tmp_path)
     source = tmp_path / "state" / "current.json"
     source.parent.mkdir(parents=True)
     source.write_text('{"items":[],"items":[]}\n', encoding="utf-8")
@@ -911,6 +916,7 @@ def test_substantial_closeout_blocks_for_invalid_runtime_config_integrity(
     monkeypatch,
     raw,
 ):
+    _write_direct_runtime(tmp_path)
     (tmp_path / "agent_runtime.yml").write_text(raw, encoding="utf-8")
     monkeypatch.setattr(
         closure_gate,
@@ -940,6 +946,7 @@ def test_substantial_closeout_blocks_for_invalid_runtime_config_integrity(
 # --- closure record detection ---
 
 def test_has_closure_record_detects_today(tmp_path):
+    _write_direct_runtime(tmp_path)
     (tmp_path / "agents" / "lead_engineer").mkdir(parents=True)
     (tmp_path / "agents" / "lead_engineer" / "compound_log.md").write_text(
         f"## COMPOUND-{TODAY}-001: something\n", encoding="utf-8")
@@ -952,6 +959,7 @@ def test_has_closure_record_detects_today(tmp_path):
 
 
 def test_has_closure_record_ignores_other_days(tmp_path):
+    _write_direct_runtime(tmp_path)
     (tmp_path / "agents" / "lead_engineer").mkdir(parents=True)
     (tmp_path / "agents" / "lead_engineer" / "compound_log.md").write_text(
         "## COMPOUND-2026-06-10-001: old\n", encoding="utf-8")
@@ -3146,6 +3154,7 @@ def test_count_substantial_lines_counts_uncommitted(git_repo):
 # --- stop hook wrapper ---
 
 def test_stop_hook_blocks_substantial_without_record(tmp_path, monkeypatch, capsys):
+    _write_direct_runtime(tmp_path)
     monkeypatch.setattr(closure_gate, "count_substantial_lines", lambda *a, **k: 300)
     monkeypatch.setattr(closure_gate, "has_closure_record",
                         lambda *a, **k: {"compound": False, "review": False, "retro": False})
@@ -3172,6 +3181,7 @@ def test_stop_hook_fails_closed_on_unexpected_gate_error(monkeypatch, capsys):
 
 
 def test_stop_hook_disabled_env_approves(tmp_path, monkeypatch, capsys):
+    _write_direct_runtime(tmp_path)
     monkeypatch.setenv("AGENT_RUNTIME_CLOSURE_GATE_DISABLE", "1")
     monkeypatch.setattr(stop_hook_closure_gate.Path, "cwd", staticmethod(lambda: tmp_path))
     rc = stop_hook_closure_gate.main([])
