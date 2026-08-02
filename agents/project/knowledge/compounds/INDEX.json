@@ -28,6 +28,9 @@
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
+    "defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
     "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb": [
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
     ],
@@ -39,6 +42,9 @@
     ],
     "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
       "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+    ],
+    "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
     "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
@@ -61,6 +67,12 @@
     "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
     ],
+    "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
     "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e": [
       "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e"
     ],
@@ -69,6 +81,12 @@
     ],
     "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1": [
       "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+    ],
+    "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ]
   },
   "by_work": {
@@ -100,7 +118,8 @@
       "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
     ],
     "TASK-AR-654": [
-      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -137,10 +156,11 @@
     ],
     "UNIT-TASK-AR-654-001": [
       "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
-      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ]
   },
-  "record_count": 19,
+  "record_count": 20,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -424,8 +444,28 @@
         "TASK-AR-654",
         "UNIT-TASK-AR-654-001"
       ]
+    },
+    {
+      "created_at": "2026-08-02T12:21:58+09:00",
+      "defect_signatures": [
+        "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218",
+        "defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29",
+        "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7",
+        "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df",
+        "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2",
+        "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac"
+      ],
+      "id": "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Bind closure authority to canonical paths, shapes, and bounded parsing",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:11628154f6939d3070d3a725c1fcd8a2cc440b0eb6affd18f523239f27e1728f"
+  "source_digest": "sha256:1c1a7ea8f8b4742371b2756c88ee02d43208262c41c7960dbec1b9203b1a2c02"
 }

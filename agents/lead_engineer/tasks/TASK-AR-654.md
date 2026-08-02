@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T11:14:53+09:00
+updated_at: 2026-08-02T12:22:38+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -51,11 +51,13 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -128,3 +130,12 @@ actual Stop wrapper silently allowed. The claim remains held under
 `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` until
 all six REDs, fresh machine evidence, a new Compound, complete W4b, and fresh
 skeptic approval exist.
+
+## Canonical-authority Compound scope
+
+The fresh machine-backed append-only record at
+`agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json`
+is owned under
+`reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md`.
+It carries both work IDs and the six canonical path, shape, identity, and deep
+JSON signatures without changing either earlier Compound record.

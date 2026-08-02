@@ -1,0 +1,37 @@
+{
+  "cause": "Closure authority was validated field-by-field after path resolution without binding lexical canonical paths, container shapes, and frontmatter identity to one repository-derived identity; JSON byte limits also did not bound parser recursion.",
+  "created_at": "2026-08-02T12:21:58+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218",
+    "defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29",
+    "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7",
+    "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df",
+    "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2",
+    "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac"
+  ],
+  "id": "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+  "prevention": "Require list-shaped authority, direct canonical claim and unit files, primary-root-only relative worktrees, path-derived task and unit identity, bounded JSON recursion handling, and a fail-closed Stop wrapper; preserve each behavior with source and packaged-template regression tests.",
+  "prevention_refs": [
+    "tests/test_compound_records.py",
+    "tests/test_closure_gate.py"
+  ],
+  "recurrence_count": 3,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json",
+    "reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md",
+    "reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md"
+  ],
+  "status": "mitigated",
+  "summary": "Released-claim authority, claim and unit aliases, conflicting work identity, linked-root shadow paths, and deeply nested accepted-watch JSON could cross or escape canonical closure boundaries.",
+  "title": "Bind closure authority to canonical paths, shapes, and bounded parsing",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json"
+  ],
+  "work_ids": [
+    "TASK-AR-654",
+    "UNIT-TASK-AR-654-001"
+  ]
+}
