@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T04:15:55+09:00
-record_count: 1305
+generated_at: 2026-08-03T04:19:55+09:00
+record_count: 1306
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1305` review and evidence records under `reviews/`.
+- Summary: indexed `1306` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1305` files |
+| Reviews covered | pass | `1306` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1134,6 +1134,7 @@ record_count: 1305
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | passed | pass | TASK-AR-654 Canonical Authority Final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | passed | pass | TASK-AR-654 claim-transaction final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | passed | pass | TASK-AR-655 lease-authority final W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |

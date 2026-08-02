@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T04:18:00+09:00
+updated_at: 2026-08-03T04:21:00+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -57,6 +57,7 @@ inputs:
   - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
   - reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
+  - reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
