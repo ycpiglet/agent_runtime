@@ -9033,7 +9033,8 @@ function freshnessAgeText(seconds) {
 }
 
 function stateFreshness() {
-  const built = parseIsoDate(runtimeState.built_at || runtimeState.generated_at);
+  const state = runtimeState || {};
+  const built = parseIsoDate(state.built_at || state.generated_at);
   const ageSec = built ? Math.max(0, (Date.now() - built.getTime()) / 1000) : 0;
   return { built, ageSec, stale: built ? ageSec >= FRESHNESS_STALE_SECONDS : false };
 }
@@ -9062,7 +9063,8 @@ function flowTileHtml(label, value, unit, series, warn) {
 }
 
 function renderHomeSummary() {
-  const ops = (runtimeState && runtimeState.ops_metrics) || {};
+  const state = runtimeState || {};
+  const ops = state.ops_metrics || {};
   const health = ops.health_snapshot || {};
   const verdict = String(health.verdict || "");
   const wrap = $("home-verdict");
@@ -9082,11 +9084,11 @@ function renderHomeSummary() {
       line.textContent = text;
     }
   }
-  const tasks = runtimeState.tasks || [];
+  const tasks = state.tasks || [];
   const openCount = tasks.filter(
     (task) => HOME_DONE_STATUSES.indexOf(String(task.status || "").toLowerCase()) < 0
   ).length;
-  const claims = (runtimeState.task_claims || []).filter(
+  const claims = (state.task_claims || []).filter(
     (claim) => claim.authority_active === true
   );
   const wip = claims.length;
