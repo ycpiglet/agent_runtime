@@ -37,6 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import orchestrator_safety_gate as safety_gate  # noqa: E402
 import cycle_gate  # noqa: E402
 import subagent_dispatch  # noqa: E402
+from agent_runtime import claim_store  # noqa: E402
 
 if sys.platform == "win32":
     try:
@@ -982,11 +983,15 @@ def _claim_progress_identity_value_valid(
 ) -> bool:
     if value is None:
         return not required
-    if not isinstance(value, str) or len(value) > 256:
+    if (
+        not isinstance(value, str)
+        or not value
+        or len(value) > claim_store.CLAIM_IDENTITY_MAX_CHARS
+    ):
         return False
     if "\n" in value or "\r" in value or value != value.strip():
         return False
-    return bool(value) if required else True
+    return True
 
 
 def _claim_progress_identity_matches(
@@ -1015,10 +1020,12 @@ def _claim_progress_projection_valid(
     committed_revision: int,
 ) -> bool:
     claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
+    claim_status = claim.get("status")
     if (
         payload.get("path") != claim_ref
         or projection.get("status") != "projection"
         or projection.get("task_claim_ref") != claim_ref
+        or claim_status not in claim_store.ACTIVE_CLAIM_STATUSES
         or not _claim_progress_identity_matches(projection, claim)
     ):
         return False
@@ -1045,6 +1052,8 @@ def _claim_progress_projection_valid(
     return (
         isinstance(current_agent, dict)
         and current_agent.get("claim_id") == claim_id
+        and current_agent.get("claim_path") == claim_ref
+        and current_agent.get("status") == claim_status
         and _strict_revision(current_agent.get("mutation_revision"))
         == committed_revision
         and _claim_progress_identity_matches(current_agent, claim)
