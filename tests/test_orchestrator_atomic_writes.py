@@ -253,6 +253,7 @@ def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
         "claim": {
             "claim_id": claim_id,
             "mutation_revision": 4,
+            "status": "claimed",
             "task_id": "TASK-AR-655",
             "unit_id": "UNIT-TASK-AR-655-001",
             "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
@@ -275,6 +276,8 @@ def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
                     {
                         "claim_id": claim_id,
                         "mutation_revision": 4,
+                        "claim_path": claim_ref,
+                        "status": "claimed",
                         "task_id": "TASK-AR-655",
                         "unit_id": "UNIT-TASK-AR-655-001",
                         "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
@@ -566,6 +569,7 @@ def test_claim_progress_committed_warning_receipt_passes_through_exactly_once(
         "claim": {
             "claim_id": claim_id,
             "mutation_revision": 4,
+            "status": "claimed",
             "task_id": "TASK-AR-655",
             "unit_id": "UNIT-TASK-AR-655-001",
             "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
@@ -588,6 +592,8 @@ def test_claim_progress_committed_warning_receipt_passes_through_exactly_once(
                     {
                         "claim_id": claim_id,
                         "mutation_revision": 4,
+                        "claim_path": claim_ref,
+                        "status": "claimed",
                         "task_id": "TASK-AR-655",
                         "unit_id": "UNIT-TASK-AR-655-001",
                         "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
@@ -672,6 +678,7 @@ def test_claim_progress_overlay_projection_never_accepts_a_primary_pointer(
         "claim": {
             "claim_id": claim_id,
             "mutation_revision": 4,
+            "status": "claimed",
             "task_id": "TASK-AR-655-OVERLAY",
             "unit_id": None,
             "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
@@ -704,5 +711,122 @@ def test_claim_progress_overlay_projection_never_accepts_a_primary_pointer(
         assert rendered["retry_safe"] is False
     else:
         assert rendered == dispatcher_response
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+@pytest.mark.parametrize(
+    "conflict",
+    (
+        "claim-unit-empty",
+        "claim-taskset-empty",
+        "claim-status-missing",
+        "claim-status-inactive",
+        "agent-claim-path-missing",
+        "agent-claim-path-conflicting",
+        "agent-status-missing",
+        "agent-status-conflicting",
+    ),
+)
+def test_claim_progress_zero_exit_rejects_incomplete_current_agent_authority(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    conflict: str,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-CURRENT-AGENT"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
+    claim = {
+        "claim_id": claim_id,
+        "mutation_revision": 4,
+        "status": "claimed",
+        "task_id": "TASK-AR-655",
+        "unit_id": "UNIT-TASK-AR-655-001",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+    }
+    current_agent = {
+        "claim_id": claim_id,
+        "mutation_revision": 4,
+        "claim_path": claim_ref,
+        "status": "claimed",
+        "task_id": "TASK-AR-655",
+        "unit_id": "UNIT-TASK-AR-655-001",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+    }
+    projection = {
+        "status": "projection",
+        "operation": "merge",
+        "claim_id": claim_id,
+        "claim_revision": 4,
+        "task_claim_ref": claim_ref,
+        "task_id": "TASK-AR-655",
+        "unit_id": "UNIT-TASK-AR-655-001",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+        "pointer": {
+            "active_task": "TASK-AR-655",
+            "active_task_set": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+            "active_claims": [claim_ref],
+            "current_agents": [current_agent],
+        },
+    }
+    if conflict == "claim-unit-empty":
+        claim["unit_id"] = ""
+        projection["unit_id"] = ""
+        current_agent["unit_id"] = ""
+    elif conflict == "claim-taskset-empty":
+        claim["task_set_id"] = ""
+        projection["task_set_id"] = ""
+        projection["pointer"]["active_task_set"] = ""
+        current_agent["task_set_id"] = ""
+    elif conflict == "claim-status-missing":
+        claim.pop("status")
+    elif conflict == "claim-status-inactive":
+        claim["status"] = "released"
+        current_agent["status"] = "released"
+    elif conflict == "agent-claim-path-missing":
+        current_agent.pop("claim_path")
+    elif conflict == "agent-claim-path-conflicting":
+        current_agent["claim_path"] = (
+            "agents/runtime/task_claims/CLAIM-OTHER.json"
+        )
+    elif conflict == "agent-status-missing":
+        current_agent.pop("status")
+    else:
+        current_agent["status"] = "released"
+
+    dispatcher_response = {
+        "status": "heartbeated",
+        "path": claim_ref,
+        "claim": claim,
+        "receipt": {"committed": True, "claim_revision": 4},
+        "projection": projection,
+    }
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(
+            run=lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(dispatcher_response),
+                stderr="",
+            )
+        ),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
     assert claim_path.read_bytes() == claim_before
     assert pointer_path.read_bytes() == pointer_before
