@@ -160,6 +160,22 @@ def test_cockpit_freshness_is_null_safe_before_initial_state_load():
     assert "parseIsoDate" in body
 
 
+def test_cockpit_summary_is_null_safe_before_initial_state_load():
+    js = ui_console.build_response("/app.js", Path(".")).body.decode("utf-8")
+    summary = re.search(
+        r"function renderHomeSummary\(\) \{(?P<body>.*?)\n\}",
+        js,
+        flags=re.DOTALL,
+    )
+
+    assert summary is not None
+    body = summary.group("body")
+    assert "runtimeState || {}" in body
+    assert "runtimeState." not in body
+    assert "state.tasks || []" in body
+    assert "state.task_claims || []" in body
+
+
 def test_console_serves_assets_from_asset_module_boundary():
     source = (ROOT / "src" / "agent_runtime" / "ui_console.py").read_text(encoding="utf-8")
     asset_source = (ROOT / "src" / "agent_runtime" / "ui_console_assets.py").read_text(encoding="utf-8")
