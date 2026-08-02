@@ -1,34 +1,64 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T00:24:13+09:00
-updated_by: codex-root-task-ar-654-orchestrator
+updated_at: 2026-08-03T00:30:23+09:00
+updated_by: le-20260803-001200-kst-ar655lease001
 current_state:
-  summary: "TASK-AR-654 completed its bounded W4 chain without release; TASK-AR-655 is next after the documented task-set revalidation."
+  summary: "TASK-AR-655 is claimed under a bounded T3 amendment for fail-closed lease/grace inputs before atomic heartbeat and renewal implementation."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 4
   step_total: 7
-  progress_pct: 43
-  status_text: "AR-654 is blocked on external and adjacent closure gates; claim AR-655 before lease-bound implementation."
+  progress_pct: 45
+  status_text: "AR-655 scope authority is registered; add and capture RED regressions before changing implementation."
 active_work:
-  current_agents: []
-  current_teams: []
+  current_agents:
+    - claim_id: CLAIM-20260803-002651-task-ar-655-5f27
+      agent_role: lead-engineer
+      team_id: agent-runtime-core
+      agent_instance_id: le-20260803-001200-kst-ar655lease001
+      display_name: "lead_engineer@orchestrator-03"
+      callsite_id: "terminal:wt-task-ar-655:tab-01"
+      pane_id: "terminal:wt-task-ar-655:tab-01"
+      task_id: TASK-AR-655
+      unit_id: UNIT-TASK-AR-655-001
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: claimed
+      phase: lease-grace-scope-amended
+      progress_pct: 15
+      step_index: 2
+      step_total: 10
+      status_text: "Lease/grace defect and bounded RED-first scope registered"
+      worktree_path: .worktrees/TASK-AR-655
+      branch: codex/task-ar-655-v080-lease-bounds
+      requested_model_tier: worker_standard
+      selected_model_tier: planner_high
+      routing_policy_id: task-unit-tier-policy
+      routing_escalation_reason: "trigger:data_integrity,repeated_failure"
+      task_token_budget: null
+      claim_token_budget: null
+      claim_path: agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.log.md
+      last_heartbeat: 2026-08-03T00:26:51+09:00
+  current_teams:
+    - agent-runtime-core
 resume:
-  active_task: TASK-AR-654
+  active_task: TASK-AR-655
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
-  branch_policy: "Continue TASK-AR-654 only in .worktrees/TASK-AR-654; keep consumer primaries and release surfaces read-only."
+  branch_policy: "Continue TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Add failure-first coverage for all Unicode-wide splitlines separators at both accepted-watch delimiters."
-    - "Restrict authority-bearing Markdown to LF/CRLF and reject lone CR and noncanonical line separators."
-    - "Run fresh W4a, independent W4b, and skeptic closeout before claim release and local integration."
-    - "Keep TASK-AR-651, version, tag, package, push, publish, deploy, and release actions blocked."
+    - "Add and run RED regressions for nonpositive/overflowing lease and negative explicit grace."
+    - "Implement root/template fail-closed bounds while preserving zero/environment compatibility."
+    - "Continue atomic heartbeat/renewal and cross-consumer expiry acceptance after the bound repair."
+    - "Keep TASK-AR-654, TASK-AR-657, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

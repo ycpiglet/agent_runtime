@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-31T04:31:32+09:00
+generated_at: 2026-08-03T00:39:19+09:00
 record_count: 550
 ---
 
@@ -581,8 +581,8 @@ record_count: 550
 | 42.1.2.1 | Unit 42.1.2.1 | unit | `UNIT-TASK-AR-653-001` | `TASK-AR-653` | completed | `agents/lead_engineer/tasks/units/TASK-AR-653/UNIT-TASK-AR-653-001.md` | UNIT-TASK-AR-653-001 - Implement active-aware Scribe planning, receipt, and closure semantics |
 | 42.1.3 | Task 42.1.3 | task | `TASK-AR-654` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | in_progress | `agents/lead_engineer/tasks/TASK-AR-654.md` | Prevent a repeated defect from closing with only a generic review or retro and no reu… |
 | 42.1.3.1 | Unit 42.1.3.1 | unit | `UNIT-TASK-AR-654-001` | `TASK-AR-654` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md` | UNIT-TASK-AR-654-001 - Enforce repeated-failure Compound closure and ship its skill |
-| 42.1.4 | Task 42.1.4 | task | `TASK-AR-655` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-655.md` | Keep long-running task claims truthful and make expiry consistent across claim, point… |
-| 42.1.4.1 | Unit 42.1.4.1 | unit | `UNIT-TASK-AR-655-001` | `TASK-AR-655` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md` | UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers |
+| 42.1.4 | Task 42.1.4 | task | `TASK-AR-655` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | in_progress | `agents/lead_engineer/tasks/TASK-AR-655.md` | Keep long-running task claims truthful and make expiry consistent across claim, point… |
+| 42.1.4.1 | Unit 42.1.4.1 | unit | `UNIT-TASK-AR-655-001` | `TASK-AR-655` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md` | UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers |
 | 42.1.5 | Task 42.1.5 | task | `TASK-AR-656` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-656.md` | Let Runtime own its canonical lifecycle while hosts add authority hooks without perma… |
 | 42.1.5.1 | Unit 42.1.5.1 | unit | `UNIT-TASK-AR-656-001` | `TASK-AR-656` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md` | UNIT-TASK-AR-656-001 - Implement a managed Runtime hook core with host extension registry |
 | 42.1.6 | Task 42.1.6 | task | `TASK-AR-657` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-657.md` | Make the safe brownfield procedure discoverable and repeatable in every consumer with… |

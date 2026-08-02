@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-31T04:31:32+09:00",
+  "generated_at": "2026-08-03T00:39:19+09:00",
   "record_count": 550,
   "finding_count": 0,
   "findings": [],
@@ -5976,7 +5976,7 @@
       "title": "Keep long-running task claims truthful and make expiry consistent across claim, point…",
       "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
       "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-      "status": "planned"
+      "status": "in_progress"
     },
     {
       "key": "unit:UNIT-TASK-AR-655-001",
@@ -5987,7 +5987,7 @@
       "title": "UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
       "parent_id": "TASK-AR-655",
-      "status": "worker_ready"
+      "status": "in_progress"
     },
     {
       "key": "task:TASK-AR-656",

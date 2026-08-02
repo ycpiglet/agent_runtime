@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-07-30T12:00:00+09:00
+updated_at: 2026-08-03T00:30:23+09:00
+started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
-status: planned
+status: in_progress
 priority: P1
 difficulty: M
 est_hours: 8
@@ -26,6 +27,19 @@ reservation_id: RES-20260730-112500-842c7890-04
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
 created_by: codex-root-task-ar-650-planner
+escalation_triggers:
+  - repeated_failure
+  - data_integrity
+defect_signatures:
+  - defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424
+  - defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a
+review_refs:
+  - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
+  - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -39,8 +53,17 @@ acceptance:
   - A replan-aware renewal binds the current task, unit, target-file, and stop-boundary digests without silently broadening the prior claim.
   - Doctor, state sync, worktree lifecycle, and UI use one expiry interpretation.
   - Progress updates cannot leave an active pointer paired with an expired claim.
+  - Create refuses non-integer, boolean, zero, negative, and overflowing lease durations before persistence.
+  - Low-level lease acquire and heartbeat reject boolean, nonpositive, and overflowing TTL values before mutation.
+  - Explicit reaper and watchdog grace rejects non-integer, boolean, and negative values before either watchdog step or any claim mutation.
+  - Zero grace, one-minute lease, positive equality, and negative-environment normalization remain backward compatible.
+  - Huge nonnegative grace is overflow-safe and conservatively retains live authority.
+  - Reaper deadline comparison cannot partially mutate a sweep and then lose its queued audit records on datetime overflow.
 verification:
-  - python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q
+  - python -m pytest tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q
+  - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q
+  - python scripts/template_mirror_gate.py --check
+  - python scripts/regen_host_lock_if_needed.py --check
 ---
 
 # TASK-AR-655 - Add atomic heartbeat and renewal to task claims
@@ -52,6 +75,7 @@ verification:
 ## Scope
 
 - Add owner-checked task claim heartbeat/renew, wire progress updates to it, and reconcile expired active claims across every consumer.
+- Fail closed on invalid create lease and explicit reaper/watchdog grace before authority persistence or mutation, while preserving the documented zero and environment compatibility boundaries.
 
 ## Acceptance Criteria
 
@@ -61,7 +85,15 @@ verification:
 - A replan-aware renewal binds the current task, unit, target-file, and stop-boundary digests without silently broadening the prior claim.
 - Doctor, state sync, worktree lifecycle, and UI use one expiry interpretation.
 - Progress updates cannot leave an active pointer paired with an expired claim.
+- Create accepts only a plain integer lease of at least one minute and refuses overflow without residue or traceback.
+- Low-level lease acquire and heartbeat accept only a plain integer TTL of at least one second and refuse overflow before mutation.
+- Reaper and watchdog accept only a plain integer explicit grace of at least zero, validate before watchdog execution, and handle huge nonnegative grace without datetime overflow.
+- Zero grace, one-minute lease, inclusive equality, and negative-environment normalization are locked by regressions.
+- Deadline/grace comparison is overflow-safe before and after earlier claims in the same sweep, preserving its audit trail.
 
 ## Verification
 
-- `python -m pytest tests/test_task_claim_dispatcher.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q`
+- `python -m pytest tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q`
+- `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q`
+- `python scripts/template_mirror_gate.py --check`
+- `python scripts/regen_host_lock_if_needed.py --check`

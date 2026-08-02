@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T00:19:46+09:00
-record_count: 1292
+generated_at: 2026-08-03T00:34:24+09:00
+record_count: 1294
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1292` review and evidence records under `reviews/`.
+- Summary: indexed `1294` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1292` files |
+| Reviews covered | pass | `1294` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -46,6 +46,7 @@ record_count: 1292
 | `reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md` | `AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth` | md | revise | fail | TASK-AR-654 preverify transaction-truth audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md` | `AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final` | md | revise | fail | TASK-AR-654 Windows native-evidence final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md` | `AUDIT-2026-08-02-task-ar-654-windows-reparse-parent` | md | revise | fail | TASK-AR-654 Windows reparse-parent independent audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md` | `AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries` | md | completed | fail | TASK-AR-655 lease and reaper grace boundary audit |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-EXPLORATION-2026-06-24.md` | `BETA-EXPLORATION-2026-06-24` | beta-exploration-bug-catalog | complete | pass | UI Console Beta Exploration — Bug Catalog (2026-06-24) |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
@@ -699,6 +700,7 @@ record_count: 1292
 | `reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan` | md | accepted | n/a | TASK-AR-654 transaction-truth T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md` | `REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction` | md | accepted | correction | TASK-AR-654 W4b evidence and contract correction |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan` | md | accepted | pass | TASK-AR-655 lease and grace bounds T3 scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
