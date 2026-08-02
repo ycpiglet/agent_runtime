@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -193,6 +194,133 @@ def _create_linked_claim(
         *extra_args,
         env_overrides=env_overrides,
     )
+
+
+def _tree_entry_snapshot(root: Path) -> dict[str, bytes]:
+    """Capture files *and* directories so rejected creates leave no residue."""
+
+    if not root.exists():
+        return {}
+    snapshot: dict[str, bytes] = {}
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if relative == ".git" or relative.startswith(".git/"):
+            continue
+        if path.is_symlink():
+            snapshot[relative] = ("symlink:" + os.readlink(path)).encode("utf-8")
+        elif path.is_dir():
+            snapshot[relative] = b"directory"
+        elif path.is_file():
+            snapshot[relative] = path.read_bytes()
+    return snapshot
+
+
+def _claim_create_mutation_snapshot(root: Path) -> tuple[dict[str, bytes], dict[str, bytes]]:
+    """Capture checkout and checkout-admin claim authority surfaces."""
+
+    outer_runtime_dir = _claim_store_outer_anchor(root).parent
+    return _tree_entry_snapshot(root), _tree_entry_snapshot(outer_runtime_dir)
+
+
+@pytest.mark.parametrize("lease_minutes", ("-1", "0"))
+def test_create_cli_refuses_nonpositive_lease_before_any_mutation(
+    tmp_path: Path,
+    lease_minutes: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"create-invalid-lease-{lease_minutes.replace('-', 'negative')}",
+    )
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"655-invalid-{lease_minutes.replace('-', 'negative')}",
+        extra_args=("--lease-minutes", lease_minutes),
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+def test_create_cli_refuses_overflowing_lease_without_traceback_or_residue(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "create-overflowing-lease")
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="655-overflow",
+        extra_args=("--lease-minutes", "100000000000000000000"),
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+@pytest.mark.parametrize("lease_minutes", (True, False))
+def test_create_api_refuses_boolean_lease_before_any_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    lease_minutes: bool,
+) -> None:
+    module = _load_dispatcher_module()
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"create-boolean-lease-{str(lease_minutes).lower()}",
+    )
+    for flag in (
+        "AR_ROLE_ROUTING",
+        "AR_SCOUT_COUNCIL",
+        "AR_BETA_ACTIVATION",
+        "AGENT_RUNTIME_CLAIM_AUTOCOMMIT",
+    ):
+        monkeypatch.delenv(flag, raising=False)
+    args = module.build_parser().parse_args(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-655-bool-{str(lease_minutes).lower()}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:00:00+09:00",
+            "--suffix",
+            f"655-bool-{str(lease_minutes).lower()}",
+            "--json",
+        ]
+    )
+    args.lease_minutes = lease_minutes
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = args.func(args)
+
+    assert result != 0
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+def test_create_one_minute_lease_preserves_exact_boundary(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "create-one-minute-lease")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="655-one-minute",
+        extra_args=("--lease-minutes", "1"),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    claim = json.loads(result.stdout)["claim"]
+    claimed_at = datetime.fromisoformat(claim["claimed_at"])
+    expires_at = datetime.fromisoformat(claim["expires_at"])
+    assert (expires_at - claimed_at).total_seconds() == 60
+    assert claim["lease"]["expires_at"] == claim["expires_at"]
 
 
 def _adversarial_claim_bytes(

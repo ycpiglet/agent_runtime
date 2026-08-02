@@ -9,12 +9,15 @@ Safety invariants under test:
 """
 
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "claim_reaper.py"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import claim_reaper  # noqa: E402
@@ -105,6 +108,248 @@ def _claim(tmp_path: Path, claim_id: str, *, status: str = "claimed",
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _run_reaper_cli(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    source_root = str((ROOT / "src").resolve())
+    ambient_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        os.pathsep.join((source_root, ambient_pythonpath))
+        if ambient_pythonpath
+        else source_root
+    )
+    return subprocess.run(
+        [sys.executable, str(SCRIPT), "--root", str(root), *args],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
+    )
+
+
+def test_negative_explicit_grace_api_is_rejected_before_future_live_mutation(
+    tmp_path: Path,
+) -> None:
+    path = _claim(
+        tmp_path,
+        "CLAIM-future-live-negative-api",
+        expires_at="2026-06-14T12:05:00+09:00",
+    )
+    before = _reaper_mutation_snapshot(tmp_path)
+    error: ValueError | None = None
+
+    try:
+        claim_reaper.sweep(
+            tmp_path,
+            now=NOW,
+            apply=True,
+            grace_seconds=-600,
+        )
+    except ValueError as exc:
+        error = exc
+
+    assert _reaper_mutation_snapshot(tmp_path) == before
+    assert _load(path)["status"] == "claimed"
+    assert error is not None
+
+
+def test_negative_explicit_grace_cli_is_rejected_without_traceback_or_mutation(
+    tmp_path: Path,
+) -> None:
+    path = _claim(
+        tmp_path,
+        "CLAIM-future-live-negative-cli",
+        expires_at="2026-06-14T12:05:00+09:00",
+    )
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    result = _run_reaper_cli(
+        tmp_path,
+        "--now",
+        NOW,
+        "--grace-seconds",
+        "-600",
+        "--apply",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _reaper_mutation_snapshot(tmp_path) == before
+    assert _load(path)["status"] == "claimed"
+
+
+@pytest.mark.parametrize("grace_seconds", (True, False, 0.0, "0"))
+def test_explicit_grace_api_refuses_boolean_and_noninteger_values(
+    tmp_path: Path,
+    grace_seconds: object,
+) -> None:
+    _claim(
+        tmp_path,
+        "CLAIM-live-invalid-grace-api",
+        expires_at="2026-06-14T13:00:00+09:00",
+    )
+    before = _reaper_mutation_snapshot(tmp_path)
+    error: ValueError | None = None
+
+    try:
+        claim_reaper.sweep(
+            tmp_path,
+            now=NOW,
+            apply=True,
+            grace_seconds=grace_seconds,  # type: ignore[arg-type]
+        )
+    except ValueError as exc:
+        error = exc
+
+    assert _reaper_mutation_snapshot(tmp_path) == before
+    assert error is not None
+
+
+def test_zero_grace_keeps_deadline_equality_live_then_reaps_afterward(
+    tmp_path: Path,
+) -> None:
+    path = _claim(tmp_path, "CLAIM-zero-grace", expires_at=NOW)
+
+    equal = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=0,
+    )
+
+    assert equal["reaped"] == []
+    assert [entry["claim_id"] for entry in equal["live"]] == [
+        "CLAIM-zero-grace"
+    ]
+    assert _load(path)["status"] == "claimed"
+
+    afterward = claim_reaper.sweep(
+        tmp_path,
+        now="2026-06-14T12:00:01+09:00",
+        apply=True,
+        grace_seconds=0,
+    )
+
+    assert [entry["claim_id"] for entry in afterward["reaped"]] == [
+        "CLAIM-zero-grace"
+    ]
+    assert _load(path)["status"] == "expired"
+
+
+def test_positive_grace_keeps_equality_live(tmp_path: Path) -> None:
+    path = _claim(
+        tmp_path,
+        "CLAIM-positive-grace-equality",
+        expires_at="2026-06-14T11:50:00+09:00",
+    )
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    assert report["reaped"] == []
+    assert [entry["claim_id"] for entry in report["live"]] == [
+        "CLAIM-positive-grace-equality"
+    ]
+    assert _load(path)["status"] == "claimed"
+
+
+def test_default_grace_preserves_environment_compatibility(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv(claim_reaper.GRACE_ENV, raising=False)
+    assert claim_reaper.default_grace() == 600
+    monkeypatch.setenv(claim_reaper.GRACE_ENV, "malformed")
+    assert claim_reaper.default_grace() == 600
+    monkeypatch.setenv(claim_reaper.GRACE_ENV, "-1")
+    assert claim_reaper.default_grace() == 0
+    monkeypatch.setenv(claim_reaper.GRACE_ENV, "0")
+    assert claim_reaper.default_grace() == 0
+
+
+def test_huge_nonnegative_grace_conservatively_retains_live_claim(
+    tmp_path: Path,
+) -> None:
+    path = _claim(
+        tmp_path,
+        "CLAIM-huge-grace",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=10**100,
+    )
+
+    assert report["reaped"] == []
+    assert [entry["claim_id"] for entry in report["live"]] == [
+        "CLAIM-huge-grace"
+    ]
+    assert _load(path)["status"] == "claimed"
+
+
+def test_dead_then_max_deadline_sweep_completes_and_records_reap_audit(
+    tmp_path: Path,
+) -> None:
+    dead = _claim(
+        tmp_path,
+        "CLAIM-a-dead-before-max",
+        task_id="TASK-AR-dead-before-max",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    maximum = _claim(
+        tmp_path,
+        "CLAIM-z-maximum-deadline",
+        task_id="TASK-AR-maximum-deadline",
+        expires_at="9999-12-31T23:59:59+00:00",
+    )
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    assert [entry["claim_id"] for entry in report["reaped"]] == [
+        "CLAIM-a-dead-before-max"
+    ]
+    assert [entry["claim_id"] for entry in report["live"]] == [
+        "CLAIM-z-maximum-deadline"
+    ]
+    assert report["claim_store"] == {"state": "initialized", "finding": None}
+    assert _load(dead)["status"] == "expired"
+    assert _load(maximum)["status"] == "claimed"
+
+    pane_events_path = (
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    )
+    pane_events = [
+        json.loads(line)
+        for line in pane_events_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert [
+        event["claim_id"]
+        for event in pane_events
+        if event.get("event") == "claim_reaped"
+    ] == ["CLAIM-a-dead-before-max"]
+
+    import stop_events
+
+    summary = stop_events.summarize(tmp_path)
+    assert summary["by_action"].get("reaped") == 1
+    assert summary["by_reason"].get("dead_claim") == 1
 
 
 def test_live_claim_is_never_touched(tmp_path):

@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -123,6 +124,91 @@ def _raw_marker_bytes(witness_claim_id: str) -> bytes:
         )
         + "\n"
     ).encode("utf-8")
+
+
+@pytest.mark.parametrize("value", (True, False, 1.0, "1", None))
+def test_require_duration_rejects_non_plain_integers(value: object) -> None:
+    with pytest.raises(ValueError, match="ttl_seconds"):
+        claim_store.require_duration(value, field="ttl_seconds", minimum=1)
+
+
+@pytest.mark.parametrize("value", (0, -1))
+def test_require_duration_enforces_caller_minimum(value: int) -> None:
+    with pytest.raises(ValueError, match="lease_minutes"):
+        claim_store.require_duration(value, field="lease_minutes", minimum=1)
+
+    if value == 0:
+        assert claim_store.require_duration(value, field="grace_seconds", minimum=0) == 0
+    else:
+        with pytest.raises(ValueError, match="grace_seconds"):
+            claim_store.require_duration(value, field="grace_seconds", minimum=0)
+
+
+def test_expiration_after_is_exact_and_converts_overflow_to_bounded_value_error() -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+
+    assert claim_store.expiration_after(
+        now,
+        1,
+        unit="minutes",
+        field="lease_minutes",
+        minimum=1,
+    ) == now + timedelta(minutes=1)
+    assert claim_store.expiration_after(
+        now,
+        1,
+        unit="seconds",
+        field="ttl_seconds",
+        minimum=1,
+    ) == now + timedelta(seconds=1)
+
+    with pytest.raises(ValueError) as caught:
+        claim_store.expiration_after(
+            now,
+            10**100,
+            unit="seconds",
+            field="ttl_seconds",
+            minimum=1,
+        )
+    message = str(caught.value)
+    assert "ttl_seconds" in message
+    assert len(message) <= 256
+    assert "\n" not in message
+    assert "Traceback" not in message
+
+
+def test_deadline_within_grace_is_exact_and_overflow_safe() -> None:
+    deadline = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+
+    assert claim_store.deadline_within_grace(deadline, deadline, 0) is True
+    assert claim_store.deadline_within_grace(
+        deadline,
+        deadline + timedelta(seconds=600),
+        600,
+    ) is True
+    assert claim_store.deadline_within_grace(
+        deadline,
+        deadline + timedelta(seconds=600, microseconds=1),
+        600,
+    ) is False
+    assert claim_store.deadline_within_grace(deadline, deadline + timedelta(days=1), 10**100) is True
+    assert claim_store.deadline_within_grace(
+        datetime.max.replace(tzinfo=timezone.utc),
+        deadline,
+        600,
+    ) is True
+
+
+@pytest.mark.parametrize("value", (True, 1.0, "1", -1))
+def test_deadline_within_grace_rejects_invalid_explicit_grace(value: object) -> None:
+    deadline = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+
+    with pytest.raises(ValueError, match="grace_seconds"):
+        claim_store.deadline_within_grace(
+            deadline,
+            deadline,
+            value,  # type: ignore[arg-type]
+        )
 
 
 @pytest.mark.parametrize("store_state", ("absent", "empty"))

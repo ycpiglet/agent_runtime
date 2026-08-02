@@ -4,11 +4,15 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from agent_runtime import claim_store  # noqa: E402
+import claim_reaper  # noqa: E402
 import deadlock_watchdog  # noqa: E402
+import goal_supervisor  # noqa: E402
 
 NOW = "2026-06-14T12:00:00+09:00"
 
@@ -34,6 +38,77 @@ def _halted_goal(tmp_path: Path) -> None:
         {"event": "loop_start", "goal": "ship", "mode": "build"},
         {"event": "loop_halt_max_failures", "iteration": 3},
     ]) + "\n", encoding="utf-8")
+
+
+@pytest.mark.parametrize("grace_seconds", (True, False, -1, 0.0, "0"))
+def test_cycle_rejects_invalid_explicit_grace_before_either_watchdog_step(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    grace_seconds: object,
+) -> None:
+    calls: list[str] = []
+
+    def fake_reaper(*_args, **_kwargs):
+        calls.append("reaper")
+        return {"reaped": [], "would_reap": [], "live": [], "skipped": []}
+
+    def fake_supervisor(*_args, **_kwargs):
+        calls.append("supervisor")
+        return {"action": "none"}
+
+    monkeypatch.setattr(claim_reaper, "sweep", fake_reaper)
+    monkeypatch.setattr(goal_supervisor, "supervise", fake_supervisor)
+    error: ValueError | None = None
+
+    try:
+        deadlock_watchdog.run_cycle(
+            tmp_path,
+            now=NOW,
+            apply=True,
+            grace_seconds=grace_seconds,  # type: ignore[arg-type]
+        )
+    except ValueError as exc:
+        error = exc
+
+    assert calls == []
+    assert error is not None
+
+
+def test_cli_rejects_negative_grace_before_reaper_and_supervisor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    calls: list[str] = []
+
+    def fake_reaper(*_args, **_kwargs):
+        calls.append("reaper")
+        return {"reaped": [], "would_reap": [], "live": [], "skipped": []}
+
+    def fake_supervisor(*_args, **_kwargs):
+        calls.append("supervisor")
+        return {"action": "none"}
+
+    monkeypatch.setattr(claim_reaper, "sweep", fake_reaper)
+    monkeypatch.setattr(goal_supervisor, "supervise", fake_supervisor)
+
+    rc = deadlock_watchdog.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--now",
+            NOW,
+            "--grace-seconds",
+            "-1",
+            "--apply",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc != 0
+    assert "Traceback" not in captured.out + captured.err
+    assert calls == []
 
 
 def test_cycle_reaps_and_reports_goal(tmp_path):
