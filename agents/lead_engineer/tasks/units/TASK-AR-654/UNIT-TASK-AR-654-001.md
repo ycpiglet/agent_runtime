@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T02:01:34+09:00
+updated_at: 2026-08-02T11:14:53+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -30,6 +30,12 @@ defect_signatures:
   - defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1
   - defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb
   - defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a
+  - defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218
+  - defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29
+  - defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7
+  - defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df
+  - defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2
+  - defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
 claim_refs:
@@ -44,6 +50,9 @@ inputs:
   - reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -57,6 +66,8 @@ target_files:
   - src/agent_runtime/templates/project/scripts/work.py
   - scripts/closure_gate.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
+  - scripts/stop_hook_closure_gate.py
+  - src/agent_runtime/templates/project/scripts/stop_hook_closure_gate.py
   - src/agent_runtime/templates/project/scripts/compound_record.py
   - skills/failure-to-regression/SKILL.md
   - new:src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
@@ -103,6 +114,9 @@ evidence_refs:
 review_refs:
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -122,6 +136,9 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md
 - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
 - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
+- reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
+- reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
+- reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
 - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
 - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
 - src/agent_runtime/knowledge_records.py
@@ -136,6 +153,8 @@ The claim dispatcher already searches canonical Compound records, but closure_ga
 - src/agent_runtime/templates/project/scripts/work.py
 - scripts/closure_gate.py
 - src/agent_runtime/templates/project/scripts/closure_gate.py
+- scripts/stop_hook_closure_gate.py
+- src/agent_runtime/templates/project/scripts/stop_hook_closure_gate.py
 - src/agent_runtime/templates/project/scripts/compound_record.py
 - skills/failure-to-regression/SKILL.md
 - new:src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md
@@ -225,3 +244,12 @@ is an additive lifecycle target under
 `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md`.
 The earlier physical-line record remains immutable and is retained only as
 source history.
+
+## Reopened after canonical authority probes
+
+The W4a candidate is superseded for release purposes by
+`reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md` and
+`reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md`.
+The unit is failed and reopened under
+`reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` for six
+new failure-first repairs and an entirely fresh W4 sequence.

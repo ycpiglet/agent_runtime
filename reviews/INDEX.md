@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-01T02:02:12+09:00
-record_count: 1250
+generated_at: 2026-08-02T11:18:10+09:00
+record_count: 1253
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1250` review and evidence records under `reviews/`.
+- Summary: indexed `1253` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1250` files |
+| Reviews covered | pass | `1253` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -37,6 +37,7 @@ record_count: 1250
 | `reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json` | `A2A-TRACE-GATE-2026-06-09-task-ar-208` | json | record | n/a | A2A-TRACE-GATE-2026-06-09-task-ar-208 |
 | `reviews/A2A-TRACE-GATE-2026-06-10-task-ar-208-current.json` | `A2A-TRACE-GATE-2026-06-10-task-ar-208-current` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-task-ar-208-current |
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
+| `reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md` | `AUDIT-2026-08-02-task-ar-654-canonical-authority-probe` | md | revise | fail | TASK-AR-654 canonical authority independent probe |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-EXPLORATION-2026-06-24.md` | `BETA-EXPLORATION-2026-06-24` | beta-exploration-bug-catalog | complete | pass | UI Console Beta Exploration — Bug Catalog (2026-06-24) |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
@@ -674,6 +675,7 @@ record_count: 1250
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 canonical authority T3 replan |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -1281,6 +1283,7 @@ record_count: 1250
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final` | md | revise | fail | TASK-AR-654 YAML Semantic-Key Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001.md` | `W4B-2026-07-31-unit-task-ar-654-001` | md | revise | fail | TASK-AR-654 Repeated-Failure Compound Hardening Independent W4b |
 | `reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md` | `W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Final W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-01T02:01:34+09:00
+updated_at: 2026-08-02T11:14:53+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -34,6 +34,12 @@ defect_signatures:
   - defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1
   - defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb
   - defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a
+  - defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218
+  - defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29
+  - defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7
+  - defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df
+  - defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2
+  - defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -42,6 +48,9 @@ review_refs:
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -110,3 +119,12 @@ is owned under
 It binds both task and unit authority, all four stable defect signatures, and
 the regressions that now prevent malformed, oversized, shadowed, or omitted
 claim authority from failing open.
+
+## Reopened canonical authority repair
+
+Independent probing after W4a found five canonical identity/path/type gaps,
+and the interrupted W4b found a deep accepted-watch JSON exception that the
+actual Stop wrapper silently allowed. The claim remains held under
+`reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` until
+all six REDs, fresh machine evidence, a new Compound, complete W4b, and fresh
+skeptic approval exist.
