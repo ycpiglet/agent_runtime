@@ -12,6 +12,9 @@ the operating system's exclusive-create primitive and an unpredictable suffix.
 Concurrent writers therefore never share a sidecar, and a pre-created symlink
 cannot redirect a write outside the target directory.
 
+On POSIX, the default authority boundary is the filesystem root: every lexical
+parent component must be alias-free and openable as a directory handle.
+
 ``write_*_atomic`` deliberately retains its historical overwrite/last-writer-wins
 contract. ``publish_*_atomic`` is the no-clobber counterpart: it atomically
 publishes a new file and raises ``FileExistsError`` if any destination entry wins
@@ -82,14 +85,7 @@ def _absolute_lexical(path: Path) -> Path:
 
 
 def _nearest_existing_parent(parent: Path) -> tuple[Path, list[str]]:
-    """Find a direct existing anchor plus missing descendants, leaf first.
-
-    The nearest existing directory is the trust boundary. We intentionally do
-    not reject stable aliases above that boundary: doing so would reject ordinary
-    macOS paths beneath system aliases such as ``/var``. Its identity is checked
-    again after opening, while every caller-created descendant is opened relative
-    to its verified parent.
-    """
+    """Find an existing anchor plus missing descendants for fallback creation."""
     missing: list[str] = []
     cursor = parent
     while True:
@@ -110,37 +106,40 @@ def _same_file(left: Any, right: Any) -> bool:
 
 
 def _posix_parent_fd(parent: Path) -> int:
-    """Open/create ``parent`` without following its direct or new descendants."""
-    anchor, missing = _nearest_existing_parent(parent)
+    """Open/create ``parent`` through a no-follow walk from the filesystem root."""
+    root = Path(parent.anchor)
     flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_DIRECTORY", 0)
     nofollow = getattr(os, "O_NOFOLLOW", 0)
     if not nofollow:
-        raise _unsafe_parent(anchor, "platform lacks O_NOFOLLOW parent verification")
+        raise _unsafe_parent(parent, "platform lacks O_NOFOLLOW parent verification")
 
-    anchor_before = anchor.lstat()
-    _validate_parent_metadata(anchor, anchor_before)
+    root_before = root.lstat()
+    _validate_parent_metadata(root, root_before)
     try:
-        descriptor = os.open(anchor, flags | nofollow)
+        descriptor = os.open(root, flags | nofollow)
     except OSError as exc:
         if exc.errno in {errno.ELOOP, errno.ENOTDIR}:
-            raise _unsafe_parent(anchor, "directory changed into an alias during open") from exc
+            raise _unsafe_parent(root, "directory changed into an alias during open") from exc
         raise
 
     try:
-        anchor_opened = os.fstat(descriptor)
-        _validate_parent_metadata(anchor, anchor_opened)
-        if not _same_file(anchor_before, anchor_opened):
-            raise _unsafe_parent(anchor, "directory identity changed during open")
+        root_opened = os.fstat(descriptor)
+        _validate_parent_metadata(root, root_opened)
+        if not _same_file(root_before, root_opened):
+            raise _unsafe_parent(root, "directory identity changed during open")
 
-        current = anchor
-        for component in reversed(missing):
+        current = root
+        for component in parent.relative_to(root).parts:
             current = current / component
             try:
-                os.mkdir(component, mode=0o777, dir_fd=descriptor)
-            except FileExistsError:
-                pass
+                metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
+            except FileNotFoundError:
+                try:
+                    os.mkdir(component, mode=0o777, dir_fd=descriptor)
+                except FileExistsError:
+                    pass
+                metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
 
-            metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
             _validate_parent_metadata(current, metadata)
             try:
                 child = os.open(component, flags | nofollow, dir_fd=descriptor)
@@ -159,11 +158,20 @@ def _posix_parent_fd(parent: Path) -> int:
             except BaseException:
                 os.close(child)
                 raise
-            os.close(descriptor)
+            try:
+                os.close(descriptor)
+            except OSError:
+                # The verified child handle is already independent of its
+                # ancestor. As with the final close, retrying after EINTR risks
+                # closing a descriptor that the process has already reused.
+                pass
             descriptor = child
         return descriptor
     except BaseException:
-        os.close(descriptor)
+        try:
+            os.close(descriptor)
+        except OSError:
+            pass
         raise
 
 

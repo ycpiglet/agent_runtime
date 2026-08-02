@@ -90,6 +90,12 @@ OVERLAY_MUTABLE_LIFECYCLE_FIELDS = frozenset(
         "reaped_reason",
     }
 )
+RELEASED_OVERLAY_PROVENANCE_FIELDS = (
+    "released_at",
+    "verified_by",
+    "verifier_role",
+    "verification_evidence",
+)
 
 # Merge-risk escalation signals: when a closeout/merge carries any of these
 # (model_routing.ESCALATION_TRIGGERS members), route an ADDITIVE skeptic
@@ -380,6 +386,13 @@ def _existing_overlay_claim(
     ):
         raise claim_store.ClaimStoreError(
             "claim-store overlay lifecycle metadata is invalid"
+        )
+    if lifecycle["status"] == "released" and any(
+        not isinstance(payload.get(field), str) or not payload[field].strip()
+        for field in RELEASED_OVERLAY_PROVENANCE_FIELDS
+    ):
+        raise claim_store.ClaimStoreError(
+            "claim-store released overlay provenance is incomplete or invalid"
         )
     persistence = payload.get("persistence")
     if persistence != {

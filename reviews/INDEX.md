@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T20:40:07+09:00
-record_count: 1285
+generated_at: 2026-08-02T23:06:33+09:00
+record_count: 1286
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1285` review and evidence records under `reviews/`.
+- Summary: indexed `1286` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1285` files |
+| Reviews covered | pass | `1286` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -696,6 +696,7 @@ record_count: 1285
 | `reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan` | md | accepted | n/a | TASK-AR-654 post-commit and projection T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 strict-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan` | md | accepted | n/a | TASK-AR-654 transaction-truth T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md` | `REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction` | md | accepted | correction | TASK-AR-654 W4b evidence and contract correction |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

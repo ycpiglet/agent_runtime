@@ -22,6 +22,7 @@ WITNESS_SCHEMA = "agent-runtime-task-claim/v1"
 MARKER_MAX_BYTES = 4096
 CLAIM_MAX_BYTES = 256 * 1024
 JSON_MAX_INTEGER_DIGITS = 256
+CLAIM_IDENTITY_MAX_CHARS = 160
 MAX_STORE_ENTRIES = 4096
 LOCK_TIMEOUT_SECONDS = 5.0
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400)
@@ -298,6 +299,31 @@ def _decode_json(payload: bytes, label: str) -> object:
         raise ClaimStoreError(f"claim-store {label} JSON is malformed") from exc
 
 
+def _validate_claim_core_identities(
+    payload: dict[str, object],
+    *,
+    status: str,
+) -> None:
+    if status in ACTIVE_CLAIM_STATUSES and "task_id" not in payload:
+        raise ClaimStoreError("claim-store claim task_id is missing")
+    for field in ("task_id", "task_set_id", "agent_instance_id"):
+        if field not in payload:
+            continue
+        value = payload[field]
+        # The dispatcher historically writes an exact empty task_set_id for
+        # identity-only claims. Keep that one explicit absent-value encoding;
+        # every other present core identity must be a bounded canonical string.
+        if field == "task_set_id" and value == "":
+            continue
+        if (
+            not isinstance(value, str)
+            or not value
+            or value != value.strip()
+            or len(value) > CLAIM_IDENTITY_MAX_CHARS
+        ):
+            raise ClaimStoreError(f"claim-store claim {field} is invalid")
+
+
 def read_claim_payload(path: Path | str) -> dict[str, object]:
     """Read one direct claim with the Runtime's bounded JSON contract."""
 
@@ -321,6 +347,7 @@ def read_claim_payload(path: Path | str) -> dict[str, object]:
     status = raw_status.strip().lower()
     if status not in ACTIVE_CLAIM_STATUSES | INACTIVE_CLAIM_STATUSES:
         raise ClaimStoreError("claim-store claim status is unknown")
+    _validate_claim_core_identities(parsed, status=status)
     parsed["status"] = status
     return parsed
 

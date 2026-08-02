@@ -498,6 +498,70 @@ def test_claim_creation_refuses_unbounded_existing_claim_before_side_effects(
     } == before
 
 
+def test_claim_creation_rejects_container_valued_active_authority_without_mutation(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        "claim-container-valued-active-authority",
+    )
+    first = _create_linked_claim(linked, suffix="654-retained-witness")
+    assert first.returncode == 0, first.stderr or first.stdout
+    claims = linked / "agents" / "runtime" / "task_claims"
+    malformed_id = "CLAIM-malformed-active-shape"
+    malformed_path = claims / f"{malformed_id}.json"
+    malformed_path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": malformed_id,
+                "status": "claimed",
+                "task_id": ["TASK-AR-target"],
+                "task_set_id": {"bad": "shape"},
+                "agent_instance_id": ["bad"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+    outer = _claim_store_outer_anchor(linked)
+    outer_before = outer.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-target",
+        "--agent-role",
+        "orchestrator",
+        "--mode",
+        "orchestrator",
+        "--now",
+        "2026-08-02T11:00:00+09:00",
+        "--suffix",
+        "second-authority",
+        "--json",
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "claim-store create refused" in result.stderr
+    assert "task_id" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+    assert outer.read_bytes() == outer_before
+    assert len(list(claims.glob("CLAIM-*.json"))) == 2
+
+
 @pytest.mark.parametrize(
     "payload_kind",
     (

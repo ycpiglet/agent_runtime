@@ -464,6 +464,116 @@ def test_initialized_overlay_idempotency_allows_documented_lifecycle_changes(
             "updated_at": "2026-06-22T10:04:00+09:00",
         }
     )
+    assert not {
+        "released_at",
+        "verified_by",
+        "verifier_role",
+        "verification_evidence",
+    } & payload.keys()
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    assert second == {"enabled": True, "created": []}
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    "missing_field",
+    (
+        "released_at",
+        "verified_by",
+        "verifier_role",
+        "verification_evidence",
+    ),
+)
+def test_initialized_released_overlay_refuses_missing_terminal_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    missing_field: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    path = _claims_dir(tmp_path) / f"{claim_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "status": "released",
+            "phase": "released",
+            "progress_pct": 100,
+            "last_heartbeat": "2026-06-22T10:04:00+09:00",
+            "updated_at": "2026-06-22T10:04:00+09:00",
+            "released_at": "2026-06-22T10:04:00+09:00",
+            "verified_by": "qa-20260622-100400-kst-w4b1",
+            "verifier_role": "qa-reviewer",
+            "verification_evidence": "reviews/VERIFY-TASK-AR-900.json",
+        }
+    )
+    payload.pop(missing_field)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(second)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+    assert missing_field not in json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_initialized_released_overlay_allows_complete_terminal_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    path = _claims_dir(tmp_path) / f"{claim_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "status": "released",
+            "phase": "released",
+            "progress_pct": 100,
+            "last_heartbeat": "2026-06-22T10:04:00+09:00",
+            "updated_at": "2026-06-22T10:04:00+09:00",
+            "released_at": "2026-06-22T10:04:00+09:00",
+            "verified_by": "qa-20260622-100400-kst-w4b1",
+            "verifier_role": "qa-reviewer",
+            "verification_evidence": "reviews/VERIFY-TASK-AR-900.json",
+        }
+    )
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     before = _overlay_mutation_snapshot(tmp_path)
 

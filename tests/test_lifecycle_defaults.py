@@ -400,6 +400,58 @@ def test_work_status_json_shape(tmp_path: Path) -> None:
     assert payload["inflight"]["summary"].startswith("inflight:")
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        pytest.param("task_id", ["TASK-AR-930"], id="list-task-id"),
+        pytest.param(
+            "task_set_id",
+            {"id": "TASKSET-T-LC"},
+            id="mapping-task-set-id",
+        ),
+        pytest.param("agent_instance_id", True, id="bool-agent-instance-id"),
+        pytest.param("task_id", 930, id="number-task-id"),
+        pytest.param("agent_instance_id", None, id="null-agent-instance-id"),
+        pytest.param("agent_instance_id", "", id="blank-agent-instance-id"),
+    ),
+)
+def test_work_status_rejects_present_malformed_core_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        task_id="TASK-AR-930",
+        status="claimed",
+        suffix=f"malformed-{field}",
+    )
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload[field] = value
+    if field == "agent_instance_id":
+        payload.pop("display_name")
+    claim_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run(WORK, "--root", str(tmp_path), "status", "--json")
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "work-status: fail" in result.stderr
+    assert "active-claim-context-invalid" in result.stderr
+    assert {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    } == before
+
+
 def test_work_status_shares_one_canonical_claim_snapshot_with_inflight(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

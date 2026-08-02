@@ -168,6 +168,58 @@ def test_write_refuses_symlinked_existing_ancestor_of_missing_parent(
     assert not (outside / "new").exists()
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX no-follow ancestry validation required")
+@pytest.mark.parametrize(
+    ("writer_name", "payload"),
+    (
+        ("write_text_atomic", "must not escape\n"),
+        ("write_json_atomic", {"must_not_escape": True}),
+        ("publish_text_atomic", "must not escape\n"),
+        ("publish_text_owned_atomic", "must not escape\n"),
+        ("publish_json_atomic", {"must_not_escape": True}),
+        ("publish_json_owned_atomic", {"must_not_escape": True}),
+    ),
+)
+def test_atomic_writers_refuse_existing_parent_below_symlinked_ancestor(
+    tmp_path: Path,
+    writer_name: str,
+    payload: object,
+) -> None:
+    outside = tmp_path / "outside"
+    direct_parent = outside / "direct-parent"
+    direct_parent.mkdir(parents=True)
+    sentinel = outside / "sentinel.txt"
+    sentinel.write_bytes(b"external owner\n")
+    authority_root = tmp_path / "authority-root"
+    authority_root.mkdir()
+    alias = authority_root / "alias"
+    try:
+        alias.symlink_to(outside, target_is_directory=True)
+    except (NotImplementedError, OSError) as exc:
+        pytest.skip(f"symlinks are unavailable in this environment: {exc}")
+
+    outside_target = direct_parent / "escaped-state"
+    lexical_target = alias / direct_parent.name / outside_target.name
+
+    refusal: Exception | None = None
+    try:
+        getattr(atomic_io, writer_name)(lexical_target, payload)
+    except Exception as exc:
+        refusal = exc
+
+    residue = _tmp_siblings(outside_target)
+    assert isinstance(refusal, atomic_io.UnsafePathError), (
+        f"{writer_name} followed the symlinked ancestor: "
+        f"outcome={'published' if refusal is None else type(refusal).__name__}, "
+        f"outside_target_exists={outside_target.exists()}, residue={residue}"
+    )
+    assert "alias" in str(refusal) or "symlink" in str(refusal) or "reparse" in str(refusal)
+
+    assert sentinel.read_bytes() == b"external owner\n"
+    assert not outside_target.exists()
+    assert residue == []
+
+
 def test_write_refuses_non_directory_parent(tmp_path: Path) -> None:
     parent = tmp_path / "not-a-directory"
     parent.write_text("ordinary file\n", encoding="utf-8")

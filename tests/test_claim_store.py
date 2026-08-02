@@ -232,6 +232,199 @@ def test_initialization_rejects_witness_with_unknown_status_without_markers(
     assert claim_store.inspect_store(root).state == "migration-required"
 
 
+def test_initialization_rejects_malformed_core_identity_witness_without_markers(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-malformed-core-identity")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "task_id": ["TASK-AR-654"],
+            "task_set_id": {"bad": "shape"},
+            "agent_instance_id": ["bad"],
+        }
+    )
+    raw = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    path.write_text(raw, encoding="utf-8")
+    outer, inner = _marker_paths(root)
+
+    with pytest.raises(claim_store.ClaimStoreError, match="task_id"):
+        claim_store.initialize_store(
+            root,
+            witness_claim_id="CLAIM-malformed-core-identity",
+        )
+
+    assert path.read_text(encoding="utf-8") == raw
+    assert not outer.exists()
+    assert not inner.exists()
+    assert claim_store.inspect_store(root).state == "migration-required"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        pytest.param("task_id", ["TASK-AR-654"], id="task-id-list"),
+        pytest.param(
+            "task_id",
+            {"represented_task": "TASK-AR-654"},
+            id="task-id-mapping",
+        ),
+        pytest.param("task_id", True, id="task-id-bool"),
+        pytest.param("task_id", 654, id="task-id-number"),
+        pytest.param("task_id", None, id="task-id-null"),
+        pytest.param("task_id", "", id="task-id-blank"),
+        pytest.param("task_id", " TASK-AR-654", id="task-id-padded"),
+        pytest.param("task_id", "T" * 161, id="task-id-over-bound"),
+        pytest.param("task_set_id", ["TASKSET-AR-654"], id="task-set-id-list"),
+        pytest.param(
+            "task_set_id",
+            {"id": "TASKSET-AR-654"},
+            id="task-set-id-mapping",
+        ),
+        pytest.param("task_set_id", False, id="task-set-id-bool"),
+        pytest.param("task_set_id", 654, id="task-set-id-number"),
+        pytest.param("task_set_id", None, id="task-set-id-null"),
+        pytest.param("task_set_id", " TASKSET-AR-654", id="task-set-id-padded"),
+        pytest.param("task_set_id", "S" * 161, id="task-set-id-over-bound"),
+        pytest.param(
+            "agent_instance_id",
+            ["worker-654"],
+            id="agent-instance-id-list",
+        ),
+        pytest.param(
+            "agent_instance_id",
+            {"id": "worker-654"},
+            id="agent-instance-id-mapping",
+        ),
+        pytest.param("agent_instance_id", True, id="agent-instance-id-bool"),
+        pytest.param("agent_instance_id", 654, id="agent-instance-id-number"),
+        pytest.param("agent_instance_id", None, id="agent-instance-id-null"),
+        pytest.param("agent_instance_id", "", id="agent-instance-id-blank"),
+        pytest.param(
+            "agent_instance_id",
+            " worker-654",
+            id="agent-instance-id-padded",
+        ),
+        pytest.param(
+            "agent_instance_id",
+            "A" * 161,
+            id="agent-instance-id-over-bound",
+        ),
+    ),
+)
+def test_marker_activated_snapshot_rejects_malformed_core_identity(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-core-identity-witness")
+    claim_store.initialize_store(
+        root,
+        witness_claim_id="CLAIM-core-identity-witness",
+    )
+    outer, inner = _marker_paths(root)
+    marker_bytes = (outer.read_bytes(), inner.read_bytes())
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["task_set_id"] = "TASKSET-AR-654"
+    payload[field] = value
+    raw = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    path.write_text(raw, encoding="utf-8")
+
+    finding = _assert_integrity_invalid(claim_store.inspect_store(root))
+    assert field in finding
+    with pytest.raises(claim_store.ClaimStoreError, match=field):
+        claim_store.read_claims_snapshot(root)
+
+    assert path.read_text(encoding="utf-8") == raw
+    assert (outer.read_bytes(), inner.read_bytes()) == marker_bytes
+
+
+def test_shared_claim_reader_preserves_supported_legacy_identity_omissions(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-legacy-identity-omissions")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("agent_instance_id")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    claim_store.initialize_store(
+        root,
+        witness_claim_id="CLAIM-legacy-identity-omissions",
+    )
+
+    assert claim_store.read_claims_snapshot(root) == (payload,)
+
+
+def test_shared_claim_reader_preserves_empty_task_set_legacy_absence(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-empty-task-set")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["task_set_id"] = ""
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    claim_store.initialize_store(root, witness_claim_id="CLAIM-empty-task-set")
+
+    assert claim_store.read_claims_snapshot(root) == (payload,)
+
+
+def test_shared_claim_reader_preserves_inactive_legacy_identity_omissions(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-inactive-identity-omissions", status="released")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    for field in ("task_id", "agent_instance_id"):
+        payload.pop(field)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    claim_store.initialize_store(
+        root,
+        witness_claim_id="CLAIM-inactive-identity-omissions",
+    )
+
+    assert claim_store.read_claims_snapshot(root) == (payload,)
+
+
+def test_shared_claim_reader_accepts_core_identities_at_bounded_limit(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    path = _write_claim(root, "CLAIM-bounded-core-identities")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "task_id": "T" * 160,
+            "task_set_id": "S" * 160,
+            "agent_instance_id": "A" * 160,
+        }
+    )
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    claim_store.initialize_store(
+        root,
+        witness_claim_id="CLAIM-bounded-core-identities",
+    )
+
+    assert claim_store.read_claims_snapshot(root) == (payload,)
+
+
 @pytest.mark.parametrize(
     "raw_claim",
     (
