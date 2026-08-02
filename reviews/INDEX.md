@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T05:58:09+09:00
-record_count: 1314
+generated_at: 2026-08-03T06:11:00+09:00
+record_count: 1315
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1314` review and evidence records under `reviews/`.
+- Summary: indexed `1315` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1314` files |
+| Reviews covered | pass | `1315` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1140,6 +1140,7 @@ record_count: 1314
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | passed | pass | TASK-AR-654 claim-transaction final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | passed | pass | TASK-AR-655 lease-authority final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | passed | pass | TASK-AR-655 post-repair final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | passed | pass | TASK-AR-655 projection-binding repair final W4a |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
