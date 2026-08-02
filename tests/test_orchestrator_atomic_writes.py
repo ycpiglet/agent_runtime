@@ -429,6 +429,98 @@ def test_claim_progress_zero_exit_with_unverifiable_receipt_is_indeterminate(
     assert pointer_path.read_bytes() == pointer_before
 
 
+def test_claim_progress_zero_exit_with_conflicting_projection_authority_is_indeterminate(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-PROJECTION"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    other_ref = "agents/runtime/task_claims/CLAIM-OTHER.json"
+    dispatcher_response = {
+        "status": "heartbeated",
+        "path": other_ref,
+        "claim": {
+            "claim_id": claim_id,
+            "mutation_revision": 4,
+            "task_id": "TASK-AR-655",
+            "unit_id": "UNIT-TASK-AR-655-001",
+            "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+        },
+        "receipt": {"committed": True, "claim_revision": 4},
+        "projection": {
+            "status": "projection",
+            "operation": "merge",
+            "claim_id": claim_id,
+            "claim_revision": 4,
+            "task_claim_ref": other_ref,
+            "task_id": "TASK-OTHER",
+            "unit_id": "UNIT-TASK-OTHER-001",
+            "task_set_id": "TASKSET-OTHER",
+            "pointer": {
+                "active_task": "TASK-OTHER",
+                "active_task_set": "TASKSET-OTHER",
+                "active_claims": [other_ref],
+                "current_agents": [
+                    {
+                        "claim_id": "CLAIM-OTHER",
+                        "task_id": "TASK-OTHER",
+                        "unit_id": "UNIT-TASK-OTHER-001",
+                        "task_set_id": "TASKSET-OTHER",
+                        "mutation_revision": 999,
+                    }
+                ],
+            },
+        },
+    }
+    calls: list[list[str]] = []
+
+    def fake_run(command, **_kwargs):
+        calls.append(list(command))
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps(dispatcher_response),
+            stderr="",
+        )
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(run=fake_run),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    assert len(calls) == 1
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
+    assert rendered["expected"] == {
+        "claim_id": claim_id,
+        "prior_revision": 3,
+        "committed_revision": 4,
+    }
+    assert rendered["current"] == {
+        "claim_id": claim_id,
+        "claim_revision": 4,
+        "receipt_revision": 4,
+        "projection_claim_id": claim_id,
+        "projection_revision": 4,
+    }
+    assert "receipt" not in rendered
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
 def test_claim_progress_committed_warning_receipt_passes_through_exactly_once(
     tmp_path: Path,
     monkeypatch,
