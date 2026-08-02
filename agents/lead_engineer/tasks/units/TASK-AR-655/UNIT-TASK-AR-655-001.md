@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T00:59:54+09:00
+updated_at: 2026-08-03T01:04:35+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -27,6 +27,8 @@ escalation_triggers:
 defect_signatures:
   - defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424
   - defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a
+compound_refs:
+  - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 context: TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispatcher has only create, projection, and release commands. The separate low-level claim lease heartbeat is not connected to task claim JSON.
