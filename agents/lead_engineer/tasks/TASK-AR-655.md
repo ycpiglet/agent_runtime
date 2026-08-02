@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T05:48:09+09:00
+updated_at: 2026-08-03T06:02:04+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
 status: in_progress
@@ -48,6 +48,8 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05.json
 review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
   - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md

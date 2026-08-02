@@ -69,7 +69,8 @@
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
     "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe": [
-      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5"
     ],
     "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9": [
       "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
@@ -201,6 +202,9 @@
     "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
+    "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b": [
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05"
+    ],
     "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
@@ -258,7 +262,9 @@
     "TASK-AR-655": [
       "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
       "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
-      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -304,10 +310,12 @@
     "UNIT-TASK-AR-655-001": [
       "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
       "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
-      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05"
     ]
   },
-  "record_count": 26,
+  "record_count": 28,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -740,8 +748,38 @@
         "TASK-AR-655",
         "UNIT-TASK-AR-655-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T05:58:57+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Bind current-agent projection to canonical claim authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T05:59:06+09:00",
+      "defect_signatures": [
+        "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b"
+      ],
+      "id": "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Keep cockpit rendering null-safe before runtime state load",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:ecc66aa273e69adc3f6b64bb5eaa0ab114cf7063b45751dcb6be9b597dd9257b"
+  "source_digest": "sha256:80a71326331e7b42cc04b5dfa6afa704a13a6ac136a0ebff9f9d9cdaed640259"
 }

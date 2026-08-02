@@ -1,0 +1,32 @@
+{
+  "cause": "Projection validation treated nested current-agent authority as advisory after validating the outer projection, so structurally incomplete or contradictory nested identity could still acknowledge a committed claim revision.",
+  "created_at": "2026-08-03T05:58:57+09:00",
+  "created_by": "le-20260803-001200-kst-ar655lease001",
+  "defect_signatures": [
+    "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+  ],
+  "id": "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+  "prevention": "Require the canonical active claim status, non-empty present optional identities, and exact current-agent claim_path and status before acknowledging progress; lock every recurrence case in orchestrator atomic-write regressions.",
+  "prevention_refs": [
+    "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+    "tests/test_orchestrator_atomic_writes.py"
+  ],
+  "recurrence_count": 2,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md",
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json"
+  ],
+  "status": "mitigated",
+  "summary": "The first projection-binding mitigation constrained outer receipt and pointer fields but a later independent review reproduced acceptance of missing or conflicting current-agent claim_path and status plus present-empty optional unit and task-set identities.",
+  "title": "Bind current-agent projection to canonical claim authority",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803054932.json"
+  ],
+  "work_ids": [
+    "TASK-AR-655",
+    "UNIT-TASK-AR-655-001"
+  ]
+}
