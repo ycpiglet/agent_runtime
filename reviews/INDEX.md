@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T15:01:39+09:00
-record_count: 1272
+generated_at: 2026-08-02T18:09:42+09:00
+record_count: 1274
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1272` review and evidence records under `reviews/`.
+- Summary: indexed `1274` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1272` files |
+| Reviews covered | pass | `1274` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -40,6 +40,7 @@ record_count: 1272
 | `reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md` | `AUDIT-2026-08-02-task-ar-654-canonical-authority-probe` | md | revise | fail | TASK-AR-654 canonical authority independent probe |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final` | md | revise | fail | TASK-AR-654 claim-authority continuity final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-store-component-final` | md | revise | fail | TASK-AR-654 claim-store component final audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md` | `AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary` | md | revise | fail | TASK-AR-654 claim transaction-boundary audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md` | `AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final` | md | revise | fail | TASK-AR-654 Windows native-evidence final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md` | `AUDIT-2026-08-02-task-ar-654-windows-reparse-parent` | md | revise | fail | TASK-AR-654 Windows reparse-parent independent audit |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
@@ -684,6 +685,7 @@ record_count: 1272
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 canonical-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store component integrity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store continuity T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim transaction continuity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 strict canonical authority T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 strict-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |

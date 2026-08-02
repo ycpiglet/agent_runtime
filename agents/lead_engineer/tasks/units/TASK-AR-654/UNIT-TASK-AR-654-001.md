@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T14:52:33+09:00
+updated_at: 2026-08-02T18:04:57+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -48,6 +48,16 @@ defect_signatures:
   - defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087
   - defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f
   - defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce
+  - defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae
+  - defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59
+  - defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161
+  - defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650
+  - defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963
+  - defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016
+  - defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4
+  - defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd
+  - defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2
+  - defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -82,6 +92,8 @@ inputs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -93,6 +105,8 @@ target_files:
   - src/agent_runtime/knowledge_records.py
   - scripts/work.py
   - src/agent_runtime/templates/project/scripts/work.py
+  - scripts/atomic_io.py
+  - src/agent_runtime/templates/project/scripts/atomic_io.py
   - scripts/closure_gate.py
   - src/agent_runtime/templates/project/scripts/closure_gate.py
   - scripts/stop_hook_closure_gate.py
@@ -124,13 +138,24 @@ target_files:
   - src/agent_runtime/adoption.py
   - src/agent_runtime/doctor.py
   - src/agent_runtime/lock.py
+  - scripts/template_mirror_gate.py
   - .github/workflows/test.yml
+  - new:agents/runtime/task_claims/.claim-store
+  - tests/test_atomic_io.py
   - tests/test_claim_store.py
   - tests/test_claim_guard.py
   - tests/test_parallel_worktree_gate.py
   - tests/test_adoption.py
   - tests/test_doctor.py
   - tests/test_task_claim_dispatcher.py
+  - tests/test_role_routing.py
+  - tests/test_claim_reaper.py
+  - tests/test_claim_reaper_concurrency.py
+  - tests/test_claim_reaper_hook.py
+  - tests/test_deadlock_watchdog.py
+  - tests/test_template_mirror_gate.py
+  - tests/host_contracts/test_autofolio_task_claim_dispatcher.py
+  - tests/host_contracts/test_autofolio_wave_dispatcher.py
   - tests/test_runtime_asset_usage.py
   - tests/test_rsi_operating_system_docs.py
   - tests/test_inventory_sync_sanitize.py
@@ -192,6 +217,8 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -374,3 +401,14 @@ unit remains failed under
 `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md`
 until the failure-first witness, status, bounded-input, migration, native
 Windows, machine, Compound, and new W4 sequence is complete.
+
+## Refined after claim transaction-boundary audit
+
+The durable witness work now also owns the create/update transaction boundary
+under
+`reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md`.
+The unit remains failed while canonical claim/evidence paths, explicit
+tracked-inner activation, snapshot-bound marker creation, exclusive
+publication, identity-bound rollback, immutable release provenance, complete
+role-overlay idempotency, native Windows execution, fresh Verify/Compound, and
+the new W4 sequence are incomplete.

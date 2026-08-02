@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T14:52:33+09:00
+updated_at: 2026-08-02T18:04:57+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -52,6 +52,16 @@ defect_signatures:
   - defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087
   - defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f
   - defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce
+  - defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae
+  - defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59
+  - defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161
+  - defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650
+  - defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963
+  - defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016
+  - defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4
+  - defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd
+  - defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2
+  - defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -80,6 +90,8 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -220,3 +232,15 @@ purposes by the status-authority, durable-continuity, bounded-JSON, and native
 Windows findings recorded in two fresh audits. The claim remains held under
 `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md`.
 No earlier test, Verify, Compound, or W4 result authorizes closeout.
+
+## Refined claim transaction-continuity repair
+
+Failure-first contract review expanded the durable-witness plan to include
+canonical artifact/evidence paths, explicit tracked-inner checkout activation,
+snapshot-bound marker transactions, exclusive no-clobber publication,
+identity-bound create rollback, immutable release provenance, and complete role
+overlay idempotency. The exact scope and ten new stable signatures are recorded
+in
+`reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md`.
+The claim remains held; native Windows evidence and an entirely fresh W4
+sequence are still required before release.
