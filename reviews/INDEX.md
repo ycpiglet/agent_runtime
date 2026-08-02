@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T23:30:44+09:00
-record_count: 1289
+generated_at: 2026-08-02T23:50:24+09:00
+record_count: 1290
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1289` review and evidence records under `reviews/`.
+- Summary: indexed `1290` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1289` files |
+| Reviews covered | pass | `1290` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1316,6 +1316,7 @@ record_count: 1289
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final` | md | revise | fail | TASK-AR-654 YAML Semantic-Key Final Independent W4b |
 | `reviews/W4B-2026-07-31-unit-task-ar-654-001.md` | `W4B-2026-07-31-unit-task-ar-654-001` | md | revise | fail | TASK-AR-654 Repeated-Failure Compound Hardening Independent W4b |
 | `reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md` | `W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Final W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final independent W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | blocked | fail | TASK-AR-654 Canonical Authority Final Independent W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | blocked | fail | TASK-AR-654 claim-transaction final independent W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |

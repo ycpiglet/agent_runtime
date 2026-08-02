@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:31:00+09:00
+updated_at: 2026-08-02T23:48:30+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -114,6 +114,7 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -370,3 +371,15 @@ found no current-scope P0/P1/P2 and issued
 `reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md`.
 W4b acceptance remains false and the claim remains held pending a distinct
 no-shared-context review of the post-W4a candidate.
+
+## Adverse-W4b repair independent W4b
+
+Distinct no-shared-context review of exact candidate `8ad05699`, tree
+`e54ef473`, found no current-scope P0/P1/P2 and issued
+`APPROVE_CURRENT_SCOPE_PENDING_NATIVE_WINDOWS_SCRIBE_ADJACENT_BLOCKERS_AND_SKEPTIC`
+in
+`reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md`.
+This sets bounded W4b acceptance true but does not authorize release. The task
+remains in progress and the claim remains held pending a distinct skeptic,
+native Windows evidence, Scribe closure work, and the registered adjacent
+release blockers.
