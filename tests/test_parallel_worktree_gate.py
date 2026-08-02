@@ -24,9 +24,13 @@ def _run_gate(
     root: Path,
     *,
     env: dict[str, str] | None = None,
+    now: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, str(SCRIPT), "--root", str(root), "--check"]
+    if now is not None:
+        command.extend(("--now", now))
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--root", str(root), "--check"],
+        command,
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -269,6 +273,33 @@ def test_ar655_parallel_expired_claim_blocks_with_exact_pointer(tmp_path: Path) 
         "task-claim:liveness-expired:CLAIM-PORTABLE-1" in finding.message
         for finding in findings
     )
+
+
+def test_ar655_parallel_cli_uses_explicit_aware_now_for_liveness(tmp_path: Path) -> None:
+    record = _portable_claim(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_record_deadlines(record, top=expired, nested=expired)
+    _write_portable_pointer(tmp_path, [record])
+
+    result = _run_gate(tmp_path, now=AR655_LIVENESS_NOW.isoformat())
+
+    assert result.returncode == 1, result.stderr or result.stdout
+    assert "task-claim:liveness-expired:CLAIM-PORTABLE-1" in result.stdout
+
+
+@pytest.mark.parametrize("now", ("not-a-timestamp", "2026-08-03T00:00:00"))
+def test_ar655_parallel_cli_refuses_malformed_or_naive_now_without_traceback(
+    tmp_path: Path,
+    now: str,
+) -> None:
+    result = _run_gate(tmp_path, now=now)
+    output = (result.stdout or "") + (result.stderr or "")
+
+    assert result.returncode != 0
+    assert "invalid --now" in output
+    assert "timezone-aware" in output
+    assert "unrecognized arguments" not in output
+    assert "Traceback" not in output
 
 
 def test_ar655_parallel_expired_claim_blocks_even_when_status_handoff_passes(
@@ -623,6 +654,8 @@ def test_continuity_only_json_reports_effective_pointer_path(tmp_path: Path):
             "--root",
             str(tmp_path),
             "--continuity-only",
+            "--now",
+            AR655_LIVENESS_NOW.isoformat(),
             "--json",
         ],
         cwd=REPO_ROOT,

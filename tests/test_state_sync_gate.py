@@ -26,6 +26,25 @@ def load_module():
     return module
 
 
+def _run_gate(root: Path, *, now: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(root),
+            "--check",
+            "--now",
+            now,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
 def write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
@@ -255,6 +274,32 @@ def test_ar655_state_sync_expired_claim_blocks_with_exact_pointer(tmp_path: Path
         and finding.subject == "claim:liveness-expired:CLAIM-TEST-001"
         for finding in findings
     )
+
+
+def test_ar655_state_sync_cli_uses_explicit_aware_now_for_liveness(tmp_path: Path) -> None:
+    _, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=expired, nested=expired)
+
+    result = _run_gate(tmp_path, now=AR655_LIVENESS_NOW.isoformat())
+
+    assert result.returncode == 1, result.stderr or result.stdout
+    assert "claim:liveness-expired:CLAIM-TEST-001" in result.stdout
+
+
+@pytest.mark.parametrize("now", ("not-a-timestamp", "2026-08-03T00:00:00"))
+def test_ar655_state_sync_cli_refuses_malformed_or_naive_now_without_traceback(
+    tmp_path: Path,
+    now: str,
+) -> None:
+    result = _run_gate(tmp_path, now=now)
+    output = (result.stdout or "") + (result.stderr or "")
+
+    assert result.returncode != 0
+    assert "invalid --now" in output
+    assert "timezone-aware" in output
+    assert "unrecognized arguments" not in output
+    assert "Traceback" not in output
 
 
 def test_ar655_state_sync_positive_grace_equality_remains_active(tmp_path: Path) -> None:

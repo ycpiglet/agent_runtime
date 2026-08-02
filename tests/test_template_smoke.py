@@ -479,8 +479,8 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
     )
 
     for command, success in (
-        ([PYTHON, "scripts/parallel_worktree_gate.py", "--root", str(runtime_root), "--check"], "parallel-worktree-gate: pass"),
-        ([PYTHON, "scripts/state_sync_gate.py", "--root", str(runtime_root), "--check"], "state-sync-gate: pass"),
+        ([PYTHON, "scripts/parallel_worktree_gate.py", "--root", str(runtime_root), "--check", "--now", "2026-07-30T00:06:00+09:00"], "parallel-worktree-gate: pass"),
+        ([PYTHON, "scripts/state_sync_gate.py", "--root", str(runtime_root), "--check", "--now", "2026-07-30T00:06:00+09:00"], "state-sync-gate: pass"),
         ([PYTHON, "scripts/rbac_write_gate.py", "--root", str(runtime_root), "--check"], "rbac-write-gate: pass"),
     ):
         result = _run(command, cwd=runtime_root, env=env)

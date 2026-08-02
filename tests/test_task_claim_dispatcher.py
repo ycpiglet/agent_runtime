@@ -84,9 +84,16 @@ def _run_dispatcher(
     )
 
 
-def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
+def _run_gate(
+    root: Path,
+    *,
+    now: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, str(GATE), "--root", str(root), "--check"]
+    if now is not None:
+        command.extend(("--now", now))
     return subprocess.run(
-        [sys.executable, str(GATE), "--root", str(root), "--check"],
+        command,
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -1830,7 +1837,10 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert events[-1]["claim_id"] == claim["claim_id"]
     assert events[-1]["task_id"] == "TASK-AR-246"
 
-    gate = _run_gate(tmp_path)
+    gate = _run_gate(
+        tmp_path,
+        now="2026-06-10T14:31:00+09:00",
+    )
     assert gate.returncode == 0, gate.stdout
     concurrency_gate = _run_concurrency_gate(tmp_path)
     assert concurrency_gate.returncode == 0, concurrency_gate.stdout
