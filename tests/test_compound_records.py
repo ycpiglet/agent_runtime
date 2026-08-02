@@ -1016,6 +1016,7 @@ def test_work_close_preserves_task_level_claim_unit_spec_compatibility(
     if unit_spec_mode == "absent":
         claim = json.loads(claim_path.read_text(encoding="utf-8"))
         claim.pop("unit_spec")
+        claim.pop("unit_id")
         claim_path.write_text(
             json.dumps(claim, indent=2) + "\n",
             encoding="utf-8",
