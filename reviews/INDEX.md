@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T23:25:56+09:00
-record_count: 1288
+generated_at: 2026-08-02T23:30:44+09:00
+record_count: 1289
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1288` review and evidence records under `reviews/`.
+- Summary: indexed `1289` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1288` files |
+| Reviews covered | pass | `1289` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1115,6 +1115,7 @@ record_count: 1288
 | `reviews/W4A-2026-07-31-unit-task-ar-654-001.md` | `W4A-2026-07-31-unit-task-ar-654-001` | md | passed | pass | TASK-AR-654 Repeated-Failure Compound Hardening W4a |
 | `reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair` | md | passed | pass | TASK-AR-654 Fail-Closed Authority Repair W4a |
 | `reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair` | md | passed | pass | TASK-AR-654 Physical-Line Boundary Repair W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | passed | pass | TASK-AR-654 Canonical Authority Final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | passed | pass | TASK-AR-654 claim-transaction final W4a |
 | `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |

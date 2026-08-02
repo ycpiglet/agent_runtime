@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:26:00+09:00
+updated_at: 2026-08-02T23:31:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -117,6 +117,7 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -198,6 +199,7 @@ target_files:
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -239,6 +241,7 @@ evidence_refs:
 review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
@@ -540,3 +543,10 @@ released provenance regressions and makes the linked-record union cover all 41
 declared signatures. The unit intentionally remains `verification_status:
 failed` pending a fresh exact-candidate W4 sequence, native Windows evidence,
 Scribe debt, and adjacent release blockers.
+
+## Adverse-W4b repair W4a
+
+The exact evidence candidate `6c9a7c0f` received a conditional worker W4a pass
+with no current-scope findings. The unit remains failed because W4a is not
+independent acceptance; the next authority is a distinct W4b on the committed
+post-W4a candidate, followed by skeptic only if W4b has no P1 finding.

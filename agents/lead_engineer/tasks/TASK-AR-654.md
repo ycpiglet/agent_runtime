@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:26:00+09:00
+updated_at: 2026-08-02T23:31:00+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -113,6 +113,7 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -360,3 +361,12 @@ All 41 declared signatures are covered by the five linked records. The exact
 scope and immutable-overlap rationale are recorded in
 `reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md`.
 This does not change the failed/in-progress disposition or authorize release.
+
+## Adverse-W4b repair W4a
+
+Worker self-check on exact evidence candidate `6c9a7c0f`, tree `a5ed7e3a`,
+found no current-scope P0/P1/P2 and issued
+`PASS_PENDING_NATIVE_WINDOWS_CI_AND_FRESH_INDEPENDENT_W4B_AND_SKEPTIC` in
+`reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md`.
+W4b acceptance remains false and the claim remains held pending a distinct
+no-shared-context review of the post-W4a candidate.
