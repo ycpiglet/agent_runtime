@@ -975,6 +975,82 @@ def _bounded_claim_id(value: object) -> str | None:
     return value[:256]
 
 
+def _claim_progress_identity_value_valid(
+    value: object,
+    *,
+    required: bool,
+) -> bool:
+    if value is None:
+        return not required
+    if not isinstance(value, str) or len(value) > 256:
+        return False
+    if "\n" in value or "\r" in value or value != value.strip():
+        return False
+    return bool(value) if required else True
+
+
+def _claim_progress_identity_matches(
+    candidate: dict[str, object],
+    claim: dict[str, object],
+) -> bool:
+    for field, required in (
+        ("task_id", True),
+        ("unit_id", False),
+        ("task_set_id", False),
+    ):
+        value = claim.get(field)
+        if not _claim_progress_identity_value_valid(value, required=required):
+            return False
+        if candidate.get(field) != value:
+            return False
+    return True
+
+
+def _claim_progress_projection_valid(
+    payload: dict[str, object],
+    claim: dict[str, object],
+    projection: dict[str, object],
+    *,
+    claim_id: str,
+    committed_revision: int,
+) -> bool:
+    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
+    if (
+        payload.get("path") != claim_ref
+        or projection.get("status") != "projection"
+        or projection.get("task_claim_ref") != claim_ref
+        or not _claim_progress_identity_matches(projection, claim)
+    ):
+        return False
+
+    operation = projection.get("operation")
+    if operation == "overlay-no-primary-pointer":
+        return claim.get("overlay") is True and "pointer" not in projection
+    if operation != "merge" or claim.get("overlay") is True:
+        return False
+
+    pointer = projection.get("pointer")
+    if not isinstance(pointer, dict):
+        return False
+    if (
+        pointer.get("active_task") != claim.get("task_id")
+        or pointer.get("active_task_set") != claim.get("task_set_id")
+        or pointer.get("active_claims") != [claim_ref]
+    ):
+        return False
+    current_agents = pointer.get("current_agents")
+    if not isinstance(current_agents, list) or len(current_agents) != 1:
+        return False
+    current_agent = current_agents[0]
+    return (
+        isinstance(current_agent, dict)
+        and current_agent.get("claim_id") == claim_id
+        and _strict_revision(current_agent.get("mutation_revision"))
+        == committed_revision
+        and _claim_progress_identity_matches(current_agent, claim)
+    )
+
+
 def _claim_progress_current(payload: object) -> dict[str, object]:
     claim = payload.get("claim") if isinstance(payload, dict) else None
     receipt = payload.get("receipt") if isinstance(payload, dict) else None
@@ -1026,7 +1102,7 @@ def _claim_progress_receipt_valid(
     assert isinstance(claim, dict)
     assert isinstance(receipt, dict)
     assert isinstance(projection, dict)
-    return (
+    identity_and_revision_valid = (
         claim.get("claim_id") == claim_id
         and _strict_revision(claim.get("mutation_revision"))
         == committed_revision
@@ -1038,6 +1114,13 @@ def _claim_progress_receipt_valid(
         == committed_revision
         and projection.get("operation")
         in CLAIM_PROGRESS_PROJECTION_OPERATIONS
+    )
+    return identity_and_revision_valid and _claim_progress_projection_valid(
+        payload,
+        claim,
+        projection,
+        claim_id=claim_id,
+        committed_revision=committed_revision,
     )
 
 
