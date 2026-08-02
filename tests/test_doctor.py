@@ -585,3 +585,76 @@ def test_codex_hook_contract_reports_missing_dispatch_target(tmp_path):
         and item.path == "scripts/session_compact_hook.py"
         for item in findings
     )
+
+
+def test_doctor_reports_markerless_claim_store_and_does_not_repair_it(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    claim = root / "agents/runtime/task_claims/CLAIM-existing.json"
+    claim.parent.mkdir(parents=True, exist_ok=True)
+    claim.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-existing",
+                "status": "released",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = claim.read_bytes()
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        item.area == "task-claim-store"
+        and item.kind == "claim-store-migration-required"
+        and item.severity == "blocker"
+        for item in plan.findings
+    )
+
+    updated, _actions = doctor.apply_doctor_repairs(root, plan)
+    assert any(
+        item.kind == "claim-store-migration-required"
+        and item.severity == "blocker"
+        for item in updated.findings
+    )
+    assert claim.read_bytes() == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()
+    assert not (root / ".agent-runtime/task-claim-store").exists()
+
+
+def test_doctor_blocks_one_sided_claim_store_and_preserves_evidence(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    outer = root / ".agent-runtime/task-claim-store"
+    outer.parent.mkdir(parents=True, exist_ok=True)
+    outer.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = outer.read_bytes()
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        item.area == "task-claim-store"
+        and item.kind == "claim-store-integrity-invalid"
+        and item.severity == "blocker"
+        for item in plan.findings
+    )
+
+    updated, _actions = doctor.apply_doctor_repairs(root, plan)
+    assert any(
+        item.kind == "claim-store-integrity-invalid"
+        and item.severity == "blocker"
+        for item in updated.findings
+    )
+    assert outer.read_bytes() == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()

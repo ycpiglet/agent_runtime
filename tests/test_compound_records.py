@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import stat
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -250,6 +251,11 @@ def _write_claim_only_repeat_authority(
     claims.mkdir(parents=True, exist_ok=True)
     path = claims / f"{claim_id}.json"
     path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    if not (claims / ".claim-store").is_file():
+        _write_claim_store_witness_pair(
+            root,
+            witness_claim_id=claim_id,
+        )
     return path
 
 
@@ -328,6 +334,101 @@ def _assert_close_rejected_without_mutation(
     assert expected_finding in result.stderr
     assert "Traceback" not in result.stdout + result.stderr
     assert _tracked_closeout_snapshot(root, unit_path, claim_path) == before
+
+
+def _project_tree_snapshot(root: Path) -> dict[str, tuple[object, ...]]:
+    """Capture fixture state without resolving aliases or omitting generated views."""
+
+    snapshot: dict[str, tuple[object, ...]] = {}
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            snapshot[relative] = ("symlink", os.readlink(path))
+        elif path.is_file():
+            snapshot[relative] = ("file", path.read_bytes())
+        elif path.is_dir():
+            snapshot[relative] = ("directory",)
+        else:
+            snapshot[relative] = ("other",)
+    return snapshot
+
+
+def _assert_close_rejected_with_full_nonmutation(
+    root: Path,
+    *,
+    unit_id: str,
+    expected_finding: str,
+) -> None:
+    before = _project_tree_snapshot(root)
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _project_tree_snapshot(root) == before
+
+
+def _write_claim_store_witness_pair(
+    root: Path,
+    *,
+    witness_claim_id: str,
+) -> tuple[Path, Path]:
+    payload = {
+        "schema": "agent-runtime-task-claim-store/v1",
+        "generation_id": "11111111-1111-4111-8111-111111111111",
+        "witness_claim_id": witness_claim_id,
+    }
+    raw = (
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+    inner = root / "agents" / "runtime" / "task_claims" / ".claim-store"
+    try:
+        git_dir_result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--git-dir"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        git_dir_result = None
+    if git_dir_result is not None and git_dir_result.returncode == 0:
+        raw_git_dir = Path(git_dir_result.stdout.strip())
+        git_dir = raw_git_dir if raw_git_dir.is_absolute() else root / raw_git_dir
+        outer = git_dir / "agent-runtime" / "task-claim-store"
+    else:
+        outer = root / ".agent-runtime" / "task-claim-store"
+    for path in (inner, outer):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_file():
+            path.write_bytes(raw)
+    assert inner.read_bytes() == outer.read_bytes()
+    return inner, outer
+
+
+def _load_source_work_module():
+    module_name = "_source_work_for_claim_store_swap_test"
+    scripts_dir = str(REPO_ROOT / "scripts")
+    spec = importlib.util.spec_from_file_location(module_name, WORK_SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, scripts_dir)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.remove(scripts_dir)
+    return module
 
 
 def test_work_close_honors_claim_only_repeat_authority_without_mutation(
@@ -830,6 +931,178 @@ def test_work_close_rejects_linked_released_claim_symlink_outside_store_without_
         claim_path=claim_path,
     )
     assert shadow_claim.read_bytes() == before_shadow
+
+
+@pytest.mark.parametrize("status", ("Claimed", " CLAIMED "))
+def test_work_close_treats_normalized_active_claim_status_as_authority_without_mutation(
+    tmp_path: Path,
+    status: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"normalized active claim status {status!r}",
+        status=status,
+        claim_id="CLAIM-normalized-active-status",
+    )
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:repeat-defect-current-compound-required",
+    )
+
+
+@pytest.mark.parametrize(
+    "status",
+    (
+        pytest.param("mystery-state", id="unknown"),
+        pytest.param(["claimed"], id="non-string"),
+    ),
+)
+def test_work_close_rejects_unknown_or_non_string_claim_status_without_mutation(
+    tmp_path: Path,
+    status: object,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="invalid claim status must not erase close authority",
+        claim_id="CLAIM-invalid-status",
+    )
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status"] = status
+    claim_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "adversarial_field",
+    ("deep-nesting", "huge-integer", "oversized"),
+)
+def test_work_close_bounds_adversarial_active_claim_json_without_mutation(
+    tmp_path: Path,
+    adversarial_field: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"bounded active claim JSON {adversarial_field}",
+        claim_id=f"CLAIM-bounded-json-{adversarial_field}",
+    )
+    if adversarial_field == "oversized":
+        payload = json.loads(claim_path.read_text(encoding="utf-8"))
+        payload["padding"] = "x" * (256 * 1024)
+        raw = (json.dumps(payload) + "\n").encode("utf-8")
+        assert len(raw) > 256 * 1024
+    else:
+        base = claim_path.read_text(encoding="utf-8").rstrip()
+        assert base.endswith("}")
+        if adversarial_field == "deep-nesting":
+            raw_value = "[" * 1200 + "0" + "]" * 1200
+        else:
+            raw_value = "9" * 5000
+        raw = (
+            base[:-1]
+            + f',\n  "adversarial_{adversarial_field.replace("-", "_")}": '
+            + raw_value
+            + "\n}\n"
+        ).encode("utf-8")
+    claim_path.write_bytes(raw)
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_initialized_claim_store_replaced_with_empty_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="direct claim store replacement hides canonical authority",
+        claim_id="CLAIM-store-replacement",
+    )
+    _write_claim_store_witness_pair(
+        tmp_path,
+        witness_claim_id=claim_path.stem,
+    )
+    claims_dir = claim_path.parent
+    preserved_store = tmp_path / "preserved-claim-store"
+    claims_dir.replace(preserved_store)
+    claims_dir.mkdir()
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_claim_store_swap_at_scandir_without_mutation(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="claim store swap during scan hides canonical authority",
+        claim_id="CLAIM-store-mid-scan-swap",
+    )
+    _write_claim_store_witness_pair(
+        tmp_path,
+        witness_claim_id=claim_path.stem,
+    )
+    claims_dir = claim_path.parent
+    preserved_store = tmp_path / "preserved-mid-scan-claim-store"
+    work_module = _load_source_work_module()
+    original_scandir = work_module.closure_gate.os.scandir
+    swap_state: dict[str, object] = {"performed": False}
+
+    def swapping_scandir(path):
+        if Path(path) == claims_dir and not swap_state["performed"]:
+            swap_state["performed"] = True
+            claims_dir.replace(preserved_store)
+            claims_dir.mkdir()
+            swap_state["expected_snapshot"] = _project_tree_snapshot(tmp_path)
+        return original_scandir(path)
+
+    monkeypatch.setattr(
+        work_module.closure_gate.os,
+        "scandir",
+        swapping_scandir,
+    )
+
+    returncode = work_module.main(
+        [
+            "--root",
+            str(tmp_path),
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert swap_state["performed"] is True
+    assert returncode == 1
+    assert "closeout:active-claim-context-invalid" in captured.err
+    assert "work-close: closed" not in captured.out
+    assert "Traceback" not in captured.out + captured.err
+    assert _project_tree_snapshot(tmp_path) == swap_state["expected_snapshot"]
 
 
 def test_work_close_rejects_active_claim_symlink_outside_store_without_mutation(
@@ -3703,3 +3976,153 @@ def test_root_and_template_cli_create_check_search(script: Path, tmp_path: Path)
     )
     assert searched.returncode == 0, searched.stdout + searched.stderr
     assert json.loads(searched.stdout)[0]["work_ids"] == ["TASK-AR-645"]
+
+
+def _windows_project_snapshot_without_following_runtime_junction(
+    root: Path,
+    runtime_dir: Path,
+) -> dict[str, tuple[object, ...]]:
+    """Snapshot the whole fixture while treating the runtime junction as a leaf."""
+    runtime_rel = runtime_dir.relative_to(root)
+    snapshot: dict[str, tuple[object, ...]] = {}
+    for current_raw, dirnames, filenames in os.walk(
+        root,
+        topdown=True,
+        followlinks=False,
+    ):
+        current = Path(current_raw)
+        current_rel = current.relative_to(root)
+        retained_dirnames: list[str] = []
+        for dirname in sorted(dirnames):
+            path = current / dirname
+            rel = current_rel / dirname
+            entry_stat = os.lstat(path)
+            snapshot[rel.as_posix()] = (
+                "directory",
+                stat.S_IFMT(entry_stat.st_mode),
+                getattr(entry_stat, "st_file_attributes", 0),
+                getattr(entry_stat, "st_reparse_tag", 0),
+            )
+            if rel != runtime_rel:
+                retained_dirnames.append(dirname)
+        dirnames[:] = retained_dirnames
+
+        for filename in sorted(filenames):
+            path = current / filename
+            rel = current_rel / filename
+            entry_stat = os.lstat(path)
+            if stat.S_ISREG(entry_stat.st_mode):
+                snapshot[rel.as_posix()] = (
+                    "file",
+                    stat.S_IFMT(entry_stat.st_mode),
+                    path.read_bytes(),
+                )
+            else:
+                snapshot[rel.as_posix()] = (
+                    "other",
+                    stat.S_IFMT(entry_stat.st_mode),
+                    getattr(entry_stat, "st_file_attributes", 0),
+                    getattr(entry_stat, "st_reparse_tag", 0),
+                )
+    return dict(sorted(snapshot.items()))
+
+
+@pytest.mark.skipif(os.name != "nt", reason="native Windows junction required")
+@pytest.mark.parametrize("junction_state", ("live", "broken"))
+def test_work_close_rejects_windows_runtime_junction_without_mutation(
+    tmp_path: Path,
+    junction_state: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="windows runtime junction hides canonical active claim store",
+        claim_id=f"CLAIM-windows-runtime-junction-{junction_state}",
+    )
+    runtime_dir = claim_path.parent.parent
+    junction_target = tmp_path / f"windows-runtime-target-{junction_state}"
+    runtime_dir.replace(junction_target)
+
+    try:
+        created = subprocess.run(
+            [
+                "cmd.exe",
+                "/d",
+                "/c",
+                "mklink",
+                "/J",
+                str(runtime_dir),
+                str(junction_target),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        assert created.returncode == 0, created.stdout + created.stderr
+
+        storage_dir = junction_target
+        if junction_state == "broken":
+            storage_dir = tmp_path / "windows-runtime-preserved-broken"
+            junction_target.replace(storage_dir)
+
+        junction_stat = os.lstat(runtime_dir)
+        reparse_attribute = getattr(
+            stat,
+            "FILE_ATTRIBUTE_REPARSE_POINT",
+            0x00000400,
+        )
+        mount_point_tag = getattr(
+            stat,
+            "IO_REPARSE_TAG_MOUNT_POINT",
+            0xA0000003,
+        )
+        assert junction_stat.st_file_attributes & reparse_attribute
+        assert junction_stat.st_reparse_tag == mount_point_tag
+
+        hidden_claim = storage_dir / "task_claims" / claim_path.name
+        assert hidden_claim.read_bytes()
+        before = _windows_project_snapshot_without_following_runtime_junction(
+            tmp_path,
+            runtime_dir,
+        )
+
+        result = _run_work(
+            tmp_path,
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        )
+
+        combined_output = result.stdout + result.stderr
+        assert result.returncode == 1
+        assert "closeout:active-claim-context-invalid" in result.stderr
+        assert "work-close: closed" not in combined_output
+        assert "Traceback" not in combined_output
+        assert (
+            _windows_project_snapshot_without_following_runtime_junction(
+                tmp_path,
+                runtime_dir,
+            )
+            == before
+        )
+    finally:
+        try:
+            os.lstat(runtime_dir)
+        except FileNotFoundError:
+            pass
+        else:
+            removed = subprocess.run(
+                ["cmd.exe", "/d", "/c", "rmdir", str(runtime_dir)],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            assert removed.returncode == 0, removed.stdout + removed.stderr

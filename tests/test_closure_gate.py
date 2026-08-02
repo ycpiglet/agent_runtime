@@ -1027,6 +1027,44 @@ def _write_active_unit(
     )
 
 
+def _write_claim_store_witness_pair(root: Path, *, witness_claim_id: str) -> None:
+    raw = (
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "11111111-1111-4111-8111-111111111111",
+                "witness_claim_id": witness_claim_id,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+    inner = root / "agents" / "runtime" / "task_claims" / ".claim-store"
+    try:
+        git_dir_result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--git-dir"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        git_dir_result = None
+    if git_dir_result is not None and git_dir_result.returncode == 0:
+        raw_git_dir = Path(git_dir_result.stdout.strip())
+        git_dir = raw_git_dir if raw_git_dir.is_absolute() else root / raw_git_dir
+        outer = git_dir / "agent-runtime" / "task-claim-store"
+    else:
+        outer = root / ".agent-runtime" / "task-claim-store"
+    for path in (inner, outer):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_file():
+            path.write_bytes(raw)
+    assert inner.read_bytes() == outer.read_bytes()
+
+
 def _write_canonical_active_claim(
     root: Path,
     *,
@@ -1094,6 +1132,11 @@ def _write_canonical_active_claim(
     claims.mkdir(parents=True, exist_ok=True)
     path = claims / f"{claim_id}.json"
     path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    if not (claims / ".claim-store").is_file():
+        _write_claim_store_witness_pair(
+            root,
+            witness_claim_id=claim_id,
+        )
     persisted = json.loads(path.read_text(encoding="utf-8"))
     assert persisted["schema"] == "agent-runtime-task-claim/v1"
     assert persisted["claim_id"] == claim_id
@@ -1120,6 +1163,94 @@ def test_active_claim_store_rejects_windows_name_surrogate_parent_metadata(
         return metadata
 
     monkeypatch.setattr(Path, "lstat", simulated_windows_lstat)
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert claims == []
+    assert findings == ["active-claim-store-integrity-invalid"]
+
+
+@pytest.mark.parametrize("status", ("Claimed", " CLAIMED "))
+def test_active_claim_status_normalization_preserves_active_authority(
+    tmp_path,
+    status,
+):
+    claim_path = _write_canonical_active_claim(tmp_path)
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status"] = status
+    claim_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert [claim["claim_id"] for claim in claims] == ["CLAIM-active"]
+    assert findings == []
+
+
+@pytest.mark.parametrize(
+    "status",
+    (
+        pytest.param("mystery-state", id="unknown"),
+        pytest.param(["claimed"], id="non-string"),
+    ),
+)
+def test_active_claim_rejects_unknown_or_non_string_status_as_integrity_invalid(
+    tmp_path,
+    status,
+):
+    claim_path = _write_canonical_active_claim(tmp_path)
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status"] = status
+    claim_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert claims == []
+    assert findings == ["active-claim-integrity-invalid:CLAIM-active.json"]
+
+
+def test_active_claim_store_rejects_scandir_open_error(
+    tmp_path,
+    monkeypatch,
+):
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True)
+
+    def reject_scandir(_path):
+        raise PermissionError("claim store cannot be opened")
+
+    monkeypatch.setattr(closure_gate.os, "scandir", reject_scandir)
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert claims == []
+    assert findings == ["active-claim-store-integrity-invalid"]
+
+
+def test_active_claim_store_rejects_scandir_iteration_error(
+    tmp_path,
+    monkeypatch,
+):
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True)
+
+    class FailingScandirIterator:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, _exc_type, _exc, _traceback):
+            return False
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            raise OSError("claim store iteration failed")
+
+    monkeypatch.setattr(
+        closure_gate.os,
+        "scandir",
+        lambda _path: FailingScandirIterator(),
+    )
 
     claims, findings = closure_gate._active_claims(tmp_path)
 

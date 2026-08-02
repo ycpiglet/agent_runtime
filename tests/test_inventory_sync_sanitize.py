@@ -37,6 +37,7 @@ from agent_runtime.sync import _template_files
 from agent_runtime.sync import apply_safe_updates
 from agent_runtime.sync import apply_updates
 from agent_runtime.sync import build_sync_plan
+from agent_runtime.sync import default_template_root
 from agent_runtime.sync import run_sync
 from agent_runtime.sync import reconcile_json
 from agent_runtime.sync import render_reconcile
@@ -70,6 +71,34 @@ def _extract_workflow_step(workflow_text: str, step_name: str) -> str:
 def _write(path: Path, text: str = ""):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _git_admin_path(root: Path, relative: str) -> Path:
+    result = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--git-path", relative],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    path = Path(result.stdout.strip())
+    return path if path.is_absolute() else root / path
+
+
+def _write_legacy_claim_store(root: Path, claim_id: str = "CLAIM-legacy") -> Path:
+    path = root / "agents/runtime/task_claims" / f"{claim_id}.json"
+    _write(
+        path,
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": claim_id,
+                "status": "released",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    return path
 
 
 def test_public_inventory_uses_git_ignore_and_generated_boundary(tmp_path):
@@ -2845,3 +2874,90 @@ def test_sanitize_allows_reports_schema_docs_but_blocks_report_records(tmp_path)
     assert (f"{prefix}/README.md", "forbidden-template-path") not in sanitize_findings
     assert (f"{prefix}/INDEX.md", "forbidden-template-path") not in sanitize_findings
     assert (f"{prefix}/BRIEF-2026-07-04-001.md", "forbidden-template-path") in sanitize_findings
+
+
+def test_packaged_sync_check_reports_claim_store_migration_without_mutation(tmp_path, capsys):
+    host = tmp_path / "host"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write_legacy_claim_store(host)
+    inner = host / "agents/runtime/task_claims/.claim-store"
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+
+    plan = build_sync_plan(host, template_root=default_template_root())
+    assert plan.claim_store_state == "migration-required"
+    assert "claim-store-adopt-existing" in plan.runtime_migrations
+    assert run_sync(host, "check", template_root=default_template_root()) == 0
+    capsys.readouterr()
+
+    assert not inner.exists()
+    assert not outer.exists()
+
+
+def test_packaged_sync_apply_migrates_claim_store_before_managed_copy(tmp_path, capsys):
+    host = tmp_path / "host"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    claim = _write_legacy_claim_store(host)
+
+    assert run_sync(host, "apply", template_root=default_template_root()) == 0
+    capsys.readouterr()
+
+    inner = host / "agents/runtime/task_claims/.claim-store"
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+    inner_payload = json.loads(inner.read_text(encoding="utf-8"))
+    outer_payload = json.loads(outer.read_text(encoding="utf-8"))
+    assert inner_payload == outer_payload
+    assert inner_payload["schema"] == "agent-runtime-task-claim-store/v1"
+    assert inner_payload["witness_claim_id"] == claim.stem
+    assert (host / "scripts/closure_gate.py").read_bytes() == (
+        default_template_root() / "scripts/closure_gate.py"
+    ).read_bytes()
+    post = build_sync_plan(host, template_root=default_template_root())
+    assert post.claim_store_state == "initialized"
+    assert post.runtime_migrations == ()
+
+
+def test_packaged_sync_conflict_prevents_claim_store_and_template_mutation(tmp_path, capsys):
+    host = tmp_path / "host"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write_legacy_claim_store(host)
+    conflict = host / "scripts/closure_gate.py"
+    _write(conflict, "# host-owned conflict\n")
+    before = conflict.read_bytes()
+
+    assert run_sync(host, "apply", template_root=default_template_root()) == 1
+    capsys.readouterr()
+
+    assert conflict.read_bytes() == before
+    assert not (host / "agents/runtime/task_claims/.claim-store").exists()
+    assert not _git_admin_path(host, "agent-runtime/task-claim-store").exists()
+
+
+def test_packaged_sync_refuses_one_sided_claim_store_before_any_write(tmp_path, capsys):
+    host = tmp_path / "host"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+    _write(
+        outer,
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    closure_target = host / "scripts/closure_gate.py"
+
+    plan = build_sync_plan(host, template_root=default_template_root())
+    assert plan.claim_store_state == "integrity-invalid"
+    assert run_sync(host, "apply", template_root=default_template_root()) == 1
+    capsys.readouterr()
+
+    assert not closure_target.exists()
+    assert not (host / "agents/runtime/task_claims/.claim-store").exists()

@@ -216,6 +216,52 @@ def test_commit_claim_artifacts_tracks_the_file(tmp_path):
     assert "CLAIM-test.json" in tracked
 
 
+def test_commit_claim_artifacts_allows_only_exact_inner_store_witness(tmp_path):
+    _init_repo(tmp_path)
+    claim = _write_claim(tmp_path)
+    witness = claim.parent / ".claim-store"
+    witness.write_text(
+        '{"generation_id":"12345678-1234-4234-9234-123456789abc",'
+        '"schema":"agent-runtime-task-claim-store/v1",'
+        '"witness_claim_id":"CLAIM-test"}\n',
+        encoding="utf-8",
+    )
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(witness,),
+        claim_id="CLAIM-test",
+    )
+
+    assert result["ok"] is True, result
+    assert result["committed"] is True
+    tracked = set(
+        _git(tmp_path, "ls-files", "agents/runtime/task_claims").stdout.splitlines()
+    )
+    assert tracked == {
+        "agents/runtime/task_claims/.claim-store",
+        "agents/runtime/task_claims/CLAIM-test.json",
+    }
+
+
+def test_commit_claim_artifacts_rejects_lookalike_store_witness(tmp_path):
+    _init_repo(tmp_path)
+    claim = _write_claim(tmp_path)
+    lookalike = claim.parent / ".claim-store-copy"
+    lookalike.write_text("not authorized\n", encoding="utf-8")
+
+    result = claim_guard.commit_claim_artifacts(
+        tmp_path,
+        claim,
+        extra_paths=(lookalike,),
+        claim_id="CLAIM-test",
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "claim-commit-non-artifact-path"
+
+
 def test_committed_claim_survives_reset_and_clean(tmp_path):
     """The actual incident regression: committed claim must outlive reset+clean."""
     _init_repo(tmp_path)

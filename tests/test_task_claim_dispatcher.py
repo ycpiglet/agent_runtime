@@ -132,6 +132,13 @@ def _git_stdout(root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def _claim_store_outer_anchor(root: Path) -> Path:
+    git_dir = Path(_git_stdout(root, "rev-parse", "--git-dir"))
+    if not git_dir.is_absolute():
+        git_dir = root / git_dir
+    return git_dir.resolve() / "agent-runtime" / "task-claim-store"
+
+
 def _init_git_worktree(tmp_path: Path, name: str) -> tuple[Path, Path]:
     primary = tmp_path / name
     primary.mkdir()
@@ -190,6 +197,52 @@ def test_default_claim_creation_persists_files_without_changing_host_head(
     assert _git_stdout(linked, "rev-parse", "HEAD") == before
 
 
+def test_first_claim_initializes_identical_inner_and_checkout_outer_witnesses(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-store-first-claim")
+
+    result = _create_linked_claim(linked, suffix="654-witness")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim_id = json.loads(result.stdout)["claim"]["claim_id"]
+    inner = linked / "agents/runtime/task_claims/.claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    assert inner.read_bytes() == outer.read_bytes()
+    witness = json.loads(inner.read_text(encoding="utf-8"))
+    assert witness == {
+        "schema": "agent-runtime-task-claim-store/v1",
+        "generation_id": witness["generation_id"],
+        "witness_claim_id": claim_id,
+    }
+
+
+def test_claim_creation_refuses_outer_only_store_before_any_claim_side_effect(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-store-outer-only")
+    outer = _claim_store_outer_anchor(linked)
+    outer.parent.mkdir(parents=True, exist_ok=True)
+    outer.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "12345678-1234-4234-9234-123456789abc",
+                "witness_claim_id": "CLAIM-hidden",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = _create_linked_claim(linked, suffix="654-outer-only")
+
+    assert result.returncode == 1
+    assert "claim-store" in result.stderr
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
 def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit")
     unrelated = linked / "unrelated.txt"
@@ -212,6 +265,7 @@ def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> Non
     changed = set(_git_stdout(linked, "diff-tree", "--no-commit-id", "--name-only", "-r", after).splitlines())
     claim_id = json.loads(result.stdout)["claim"]["claim_id"]
     assert changed == {
+        "agents/runtime/task_claims/.claim-store",
         f"agents/runtime/task_claims/{claim_id}.json",
         f"agents/runtime/task_claims/{claim_id}.handoff.md",
         f"agents/runtime/task_claims/{claim_id}.log.md",
@@ -243,6 +297,7 @@ def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
     assert _git_stdout(linked, "rev-parse", "HEAD") == before
     claim_id = payload["claim"]["claim_id"]
     assert set(_git_stdout(linked, "diff", "--cached", "--name-only").splitlines()) == {
+        "agents/runtime/task_claims/.claim-store",
         f"agents/runtime/task_claims/{claim_id}.json",
         f"agents/runtime/task_claims/{claim_id}.handoff.md",
         f"agents/runtime/task_claims/{claim_id}.log.md",
@@ -315,6 +370,7 @@ def test_published_unverified_claim_is_terminal_and_never_reported_as_success(
         ).splitlines()
     )
     assert changed == {
+        "agents/runtime/task_claims/.claim-store",
         f"agents/runtime/task_claims/{claim_id}.json",
         f"agents/runtime/task_claims/{claim_id}.handoff.md",
         f"agents/runtime/task_claims/{claim_id}.log.md",
