@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T02:56:50+09:00
+updated_at: 2026-08-03T03:20:42+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -31,6 +31,11 @@ defect_signatures:
   - defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c
   - defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9
   - defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9
+  - defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca
+  - defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9
+  - defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9
+  - defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b
+  - defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
 claim_refs:
@@ -49,6 +54,8 @@ inputs:
   - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
   - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -62,6 +69,8 @@ target_files:
   - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
   - scripts/agent_instance_registry.py
   - src/agent_runtime/templates/project/scripts/agent_instance_registry.py
+  - scripts/role_routing.py
+  - src/agent_runtime/templates/project/scripts/role_routing.py
   - scripts/claim_lease.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
   - scripts/claim_reaper.py
@@ -96,6 +105,11 @@ target_files:
   - tests/test_doctor.py
   - tests/test_agent_identity_gate.py
   - tests/test_orchestrator_atomic_writes.py
+  - tests/test_role_routing.py
+  - tests/test_role_routing_wiring.py
+  - tests/test_claim_guard.py
+  - tests/test_scm_steward.py
+  - tests/test_ui_console.py
   - tests/test_template_mirror_gate.py
   - tests/test_owner_governance_chain_parity.py
   - tests/test_regen_host_lock_if_needed.py
@@ -111,6 +125,8 @@ target_files:
   - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
   - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
   - reviews/INDEX.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
@@ -124,11 +140,16 @@ acceptance:
   - Explicit reaper/watchdog grace is a plain integer of at least zero and is validated before either watchdog step.
   - Zero and equality boundaries, one-minute lease, environment normalization, and huge nonnegative grace remain safe and compatible.
   - Deadline overflow cannot split a sweep's durable mutations from its audit trail.
+  - Claim-progress validates a committed exact-next-revision receipt and matching projection before returning success; indeterminate receipts are not blind-retry-safe.
+  - Agent-instance publication is serialized and atomic, with revision and both timestamps advancing as one coherent tuple.
+  - Projection without an explicit clock uses the wall clock, accepts only a live claim, and always emits agent mutation revision.
+  - Role-routing overlays carry paired deadlines and revision, and support owner-checked heartbeat without entering the primary pointer.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
+  - python -m pytest -q
 handoff: Attach the atomicity tests, owner mismatch, crash/restart, replan old/new scope digest proof, cross-consumer expiry matrix, and independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, or recovering a claim without owner identity.
 verified_at: 2026-08-03T00:59:54+09:00
@@ -157,6 +178,8 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
 - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
 - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
+- reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
 - reviews/INDEX.md
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -172,6 +195,8 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
 - scripts/agent_instance_registry.py
 - src/agent_runtime/templates/project/scripts/agent_instance_registry.py
+- scripts/role_routing.py
+- src/agent_runtime/templates/project/scripts/role_routing.py
 - scripts/claim_lease.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
 - scripts/claim_reaper.py
@@ -206,6 +231,11 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - tests/test_doctor.py
 - tests/test_agent_identity_gate.py
 - tests/test_orchestrator_atomic_writes.py
+- tests/test_role_routing.py
+- tests/test_role_routing_wiring.py
+- tests/test_claim_guard.py
+- tests/test_scm_steward.py
+- tests/test_ui_console.py
 - tests/test_template_mirror_gate.py
 - tests/test_owner_governance_chain_parity.py
 - tests/test_regen_host_lock_if_needed.py
@@ -220,6 +250,8 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
 - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
 - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
+- reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
 
 ## Scope
 
@@ -234,7 +266,9 @@ Unify local lifecycle timestamps without creating a remote lease service.
 5. Implement atomic owner-checked heartbeat and renewal with revision and scope bindings.
 6. Wire orchestrator progress and instance/pane receipts to the same mutation.
 7. Adopt one expiry classifier in registered read, cleanup, Doctor, and UI consumers.
-8. Verify crash, restart, stale projection, and cross-surface behavior.
+8. Validate claim-progress receipts and serialize atomic instance publication.
+9. Make default projection fail closed and direct overlay producers emit renewable paired leases without entering the primary pointer.
+10. Verify crash, restart, stale projection, full-suite fixtures, and cross-surface behavior.
 
 ## Acceptance Criteria
 
@@ -247,6 +281,10 @@ Unify local lifecycle timestamps without creating a remote lease service.
 - Invalid explicit grace is rejected before either watchdog step or claim mutation.
 - Zero/equality, one-minute, environment, and huge-grace compatibility is regression locked.
 - Near-maximum deadlines cannot leave a partial sweep without its audit records.
+- Claim-progress accepts only a committed exact-next-revision receipt with a matching projection and marks indeterminate responses non-success and unsafe for blind retry.
+- Agent-instance revision plus timestamps publish atomically under serialized authority and cannot roll back or form a torn tuple.
+- Projection uses the wall clock by default, accepts only live authority, and always carries agent mutation revision.
+- Role-routing overlays use paired leases and owner-checked heartbeat while remaining outside the primary pointer and scope-renew paths.
 
 ## Verification
 
@@ -254,6 +292,7 @@ Unify local lifecycle timestamps without creating a remote lease service.
 - `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
+- `python -m pytest -q`
 
 ## Handoff
 

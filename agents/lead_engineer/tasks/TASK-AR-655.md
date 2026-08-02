@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T02:56:50+09:00
+updated_at: 2026-08-03T03:20:42+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
 status: in_progress
@@ -37,6 +37,11 @@ defect_signatures:
   - defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c
   - defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9
   - defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9
+  - defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca
+  - defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9
+  - defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9
+  - defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b
+  - defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
 review_refs:
@@ -51,6 +56,8 @@ review_refs:
   - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
   - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
@@ -72,11 +79,16 @@ acceptance:
   - Zero grace, one-minute lease, positive equality, and negative-environment normalization remain backward compatible.
   - Huge nonnegative grace is overflow-safe and conservatively retains live authority.
   - Reaper deadline comparison cannot partially mutate a sweep and then lose its queued audit records on datetime overflow.
+  - Claim-progress acknowledges success only after validating a committed exact-next-revision receipt and matching projection; indeterminate receipts are non-success and unsafe to retry blindly.
+  - Agent-instance publication is serialized and atomic, and revision plus timestamps advance as one coherent tuple.
+  - Projection without an explicit clock uses the wall clock, accepts only a live claim, and always emits agent mutation revision.
+  - Role-routing overlays and active fixtures carry equal top-level and nested lease deadlines without widening grace.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
+  - python -m pytest -q
 ---
 
 # TASK-AR-655 - Add atomic heartbeat and renewal to task claims
@@ -89,6 +101,7 @@ verification:
 
 - Add owner-checked task claim heartbeat/renew, wire progress updates to it, and reconcile expired active claims across every consumer.
 - Fail closed on invalid create lease and explicit reaper/watchdog grace before authority persistence or mutation, while preserving the documented zero and environment compatibility boundaries.
+- Validate post-commit receipts, serialize instance projections, close default projection liveness, and make direct overlay producers emit the same canonical lease authority.
 
 ## Acceptance Criteria
 
@@ -103,6 +116,10 @@ verification:
 - Reaper and watchdog accept only a plain integer explicit grace of at least zero, validate before watchdog execution, and handle huge nonnegative grace without datetime overflow.
 - Zero grace, one-minute lease, inclusive equality, and negative-environment normalization are locked by regressions.
 - Deadline/grace comparison is overflow-safe before and after earlier claims in the same sweep, preserving its audit trail.
+- Claim-progress returns success only for a committed exact-next-revision receipt with a matching claim projection; an indeterminate zero-exit response is non-success and not blind-retry-safe.
+- Agent-instance revision and timestamps are published atomically under serialized authority and cannot roll back or form a tuple absent from a claim.
+- Projection evaluates the wall clock when `--now` is omitted, accepts only live claims, and always includes the current agent mutation revision.
+- Role-routing overlays and test fixtures use equal top-level and nested lease deadlines; no consumer gets a grace or status bypass.
 
 ## Verification
 
@@ -110,3 +127,4 @@ verification:
 - `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
+- `python -m pytest -q`
