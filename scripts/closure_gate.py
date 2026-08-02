@@ -19,6 +19,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -269,9 +270,23 @@ def _active_claims(
     claims_dir = root / "agents" / "runtime" / "task_claims"
     claims: list[dict[str, Any]] = []
     findings: list[str] = []
-    if not claims_dir.exists():
-        if claims_dir.is_symlink():
+    for component in (
+        root / "agents",
+        root / "agents" / "runtime",
+        claims_dir,
+    ):
+        try:
+            mode = component.lstat().st_mode
+        except FileNotFoundError:
+            return claims, findings
+        except OSError:
             findings.append("active-claim-store-integrity-invalid")
+            return claims, findings
+        if stat.S_ISLNK(mode) or not stat.S_ISDIR(mode):
+            findings.append("active-claim-store-integrity-invalid")
+            return claims, findings
+    if not claims_dir.exists():
+        findings.append("active-claim-store-integrity-invalid")
         return claims, findings
     try:
         canonical_claims_dir = claims_dir.absolute()
