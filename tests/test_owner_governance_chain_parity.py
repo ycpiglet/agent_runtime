@@ -21,6 +21,9 @@ This test parses both ``checks`` lists via ``ast`` and enforces:
 from __future__ import annotations
 
 import ast
+import importlib.util
+import subprocess
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +32,10 @@ TEMPLATE_GATE = (
     REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts" / "owner_governance_gate.py"
 )
 TEMPLATE_SCRIPTS_DIR = REPO_ROOT / "src" / "agent_runtime" / "templates" / "project" / "scripts"
+LIVENESS_CHECKS = {
+    "scripts/parallel_worktree_gate.py",
+    "scripts/state_sync_gate.py",
+}
 
 # Root chain entries intentionally NOT mirrored into the template chain.
 # Adding a new gate to root without wiring it into the template fails this
@@ -109,6 +116,69 @@ def parse_chain(path: Path) -> list[tuple[str, ...]]:
                 checks = node.value
     assert checks is not None, f"no `checks` assignment found in main() of {path}"
     return [_literal_argv(_resolve_entry(element, assignments)) for element in checks.elts]
+
+
+def _load_gate(path: Path, name: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_both_owner_gates_propagate_explicit_now_only_to_liveness_children(
+    monkeypatch,
+) -> None:
+    now = "2026-07-30T00:06:00+09:00"
+    for index, path in enumerate((ROOT_GATE, TEMPLATE_GATE)):
+        gate = _load_gate(path, f"owner_time_gate_{index}")
+        observed: list[list[str]] = []
+        monkeypatch.setattr(
+            gate,
+            "run",
+            lambda args, **_kwargs: observed.append(list(args)) or 0,
+        )
+
+        assert gate.main(["--allow-empty-owner-docs", "--now", now]) == 0
+        assert [
+            "scripts/parallel_worktree_gate.py",
+            "--check",
+            "--now",
+            now,
+        ] in observed
+        assert [
+            "scripts/state_sync_gate.py",
+            "--check",
+            "--now",
+            now,
+        ] in observed
+        assert all(
+            "--now" not in command
+            for command in observed
+            if command[0] not in LIVENESS_CHECKS
+        )
+
+
+def test_both_owner_gate_clis_refuse_malformed_or_naive_now_before_children() -> None:
+    for path in (ROOT_GATE, TEMPLATE_GATE):
+        for now in ("not-a-timestamp", "2026-07-30T00:06:00"):
+            result = subprocess.run(
+                [sys.executable, str(path), "--now", now],
+                cwd=REPO_ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            output = (result.stdout or "") + (result.stderr or "")
+
+            assert result.returncode != 0
+            assert "invalid --now" in output
+            assert "timezone-aware" in output
+            assert "owner-governance: start" not in output
+            assert "unrecognized arguments" not in output
+            assert "Traceback" not in output
 
 
 def test_chains_are_parseable_and_nonempty() -> None:

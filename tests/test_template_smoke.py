@@ -496,7 +496,13 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
     assert "agents/lead_engineer/STATUS.md: missing status board." not in docs_output
 
     governance = _run(
-        [PYTHON, "scripts/owner_governance_gate.py", "--allow-empty-owner-docs"],
+        [
+            PYTHON,
+            "scripts/owner_governance_gate.py",
+            "--allow-empty-owner-docs",
+            "--now",
+            "2026-07-30T00:06:00+09:00",
+        ],
         cwd=runtime_root,
         env=env,
     )
