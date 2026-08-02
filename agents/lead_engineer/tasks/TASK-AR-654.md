@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T19:21:52+09:00
+updated_at: 2026-08-02T20:02:52+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -106,6 +106,7 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
   - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -113,6 +114,9 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json
+evidence_refs:
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -308,3 +312,12 @@ bounded repair is accepted under
 Adjacent W4b authenticity, lease/grace bounds, and portable release cascade
 findings remain explicit blockers routed to TASK-AR-657, TASK-AR-655, and
 TASK-AR-651; they are not claimed as solved by TASK-AR-654.
+
+## Claim-transaction evidence recorded
+
+Implementation commit `19362133d2dffc91647b23beab8f01956a403f7f` passed
+the fresh registered Verify. The fourth append-only Compound now makes all 40
+declared defect signatures collectively covered by linked canonical records.
+TASK-AR-654 remains in progress for exact-commit W4a, independent W4b,
+skeptic review, and native Windows 3.10/3.11/3.12 evidence. This evidence does
+not authorize claim release or any external release action.

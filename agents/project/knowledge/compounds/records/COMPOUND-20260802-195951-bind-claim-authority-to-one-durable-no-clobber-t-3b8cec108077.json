@@ -1,0 +1,71 @@
+{
+  "cause": "Claim creation, discovery, publication, rollback, release provenance, projection, and sync reporting were implemented across independent filesystem reads and fallible post-commit steps without one canonical bounded snapshot and explicit durable transaction boundary.",
+  "created_at": "2026-08-02T19:59:51+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb",
+    "defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d",
+    "defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101",
+    "defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77",
+    "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460",
+    "defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087",
+    "defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f",
+    "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce",
+    "defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae",
+    "defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59",
+    "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161",
+    "defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650",
+    "defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963",
+    "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016",
+    "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+    "defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd",
+    "defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2",
+    "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4",
+    "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0",
+    "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7",
+    "defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9",
+    "defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f",
+    "defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d",
+    "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472",
+    "defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390",
+    "defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23"
+  ],
+  "id": "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+  "prevention": "Use a marker-activated canonical claim store with strict bounded JSON, locked complete snapshots, no-clobber identity-bound publication and rollback, immutable release provenance, witness-preserving recovery, truthful post-commit warnings and sync exits, and one snapshot for each derived projection.",
+  "prevention_refs": [
+    "tests/test_claim_store.py",
+    "tests/test_atomic_io.py",
+    "tests/test_task_claim_dispatcher.py",
+    "tests/test_role_routing.py",
+    "tests/test_claim_reaper.py",
+    "tests/test_claim_reaper_concurrency.py",
+    "tests/test_closure_gate.py",
+    "tests/test_compound_records.py",
+    "tests/test_inventory_sync_sanitize.py",
+    "tests/test_lifecycle_defaults.py",
+    "tests/test_inflight_overlay.py",
+    "tests/test_work_close.py"
+  ],
+  "recurrence_count": 3,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md",
+    "reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md",
+    "reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md",
+    "reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md"
+  ],
+  "status": "mitigated",
+  "summary": "Claim authority could be hidden, aliased, partially published, rolled back after commit, or projected from a different snapshot, allowing repeated failures and false success or failure states.",
+  "title": "Bind claim authority to one durable no-clobber transaction",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json"
+  ],
+  "work_ids": [
+    "TASK-AR-654",
+    "UNIT-TASK-AR-654-001"
+  ]
+}

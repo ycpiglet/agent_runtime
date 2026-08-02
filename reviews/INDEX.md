@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T19:23:46+09:00
-record_count: 1280
+generated_at: 2026-08-02T20:05:40+09:00
+record_count: 1282
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1280` review and evidence records under `reviews/`.
+- Summary: indexed `1282` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1280` files |
+| Reviews covered | pass | `1282` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -689,6 +689,7 @@ record_count: 1280
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 canonical-authority Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store component integrity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store continuity T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 claim-transaction Compound scope amendment |
 | `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim transaction continuity T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 strict canonical authority T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan` | md | accepted | n/a | TASK-AR-654 post-commit and projection T3 replan |
@@ -1050,6 +1051,7 @@ record_count: 1280
 | `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750 |
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023 |
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

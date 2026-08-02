@@ -13,8 +13,23 @@
     "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428": [
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ],
+    "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
+    ],
+    "defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:ci-flaky-temp-git:d1ff9421d45168c6": [
       "COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65"
@@ -25,8 +40,20 @@
     "defect:claim-commit-symbolic-head-race:f2860072798c6ac5": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
+    "defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89": [
       "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
+    ],
+    "defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
@@ -36,6 +63,18 @@
     ],
     "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb": [
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4": [
       "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
@@ -49,8 +88,14 @@
     "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
+    "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
+    ],
+    "defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552": [
       "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f"
@@ -61,6 +106,12 @@
     "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660": [
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ],
+    "defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
@@ -70,11 +121,20 @@
     "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799": [
       "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
     ],
+    "defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c": [
       "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
     ],
+    "defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
       "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+    ],
+    "defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
@@ -82,23 +142,41 @@
     "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
+    "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e": [
       "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e"
     ],
     "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
+    "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1": [
       "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+    ],
+    "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
     ],
+    "defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4": [
       "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ],
+    "defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ]
   },
   "by_work": {
@@ -132,7 +210,8 @@
     "TASK-AR-654": [
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
-      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -171,10 +250,11 @@
       "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
-      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ]
   },
-  "record_count": 21,
+  "record_count": 22,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -496,8 +576,48 @@
         "TASK-AR-654",
         "UNIT-TASK-AR-654-001"
       ]
+    },
+    {
+      "created_at": "2026-08-02T19:59:51+09:00",
+      "defect_signatures": [
+        "defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb",
+        "defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d",
+        "defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101",
+        "defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77",
+        "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460",
+        "defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087",
+        "defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f",
+        "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce",
+        "defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae",
+        "defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59",
+        "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161",
+        "defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650",
+        "defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963",
+        "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016",
+        "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+        "defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd",
+        "defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2",
+        "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4",
+        "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0",
+        "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7",
+        "defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9",
+        "defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f",
+        "defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d",
+        "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472",
+        "defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390",
+        "defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23"
+      ],
+      "id": "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Bind claim authority to one durable no-clobber transaction",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:91384f8314449110851567dc6615a9a13dcbda1bc5d9833e60288eccccf1db64"
+  "source_digest": "sha256:4f5e25a534a7680e7c1b21af923ce303ca4444f9855c7394ae078edd9239a653"
 }

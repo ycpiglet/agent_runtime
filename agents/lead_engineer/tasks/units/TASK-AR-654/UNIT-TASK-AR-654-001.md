@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T19:21:52+09:00
+updated_at: 2026-08-02T20:02:52+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -70,6 +70,7 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
   - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
@@ -108,6 +109,7 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
   - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -207,7 +209,7 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach the failure-first transaction matrix, native Windows evidence state, full-suite Verify, complete Compound coverage proof, template parity, W4a, independent W4b, and skeptic verdict.
 stop_condition: Stop before rewriting legacy Compound history, widening Compound to ordinary work, dispatching CI without Owner approval, or performing version, publish, deployment, consumer, or external release actions.
-verified_at: 2026-08-02T13:22:43+09:00
+verified_at: 2026-08-02T19:50:23+09:00
 verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
@@ -221,6 +223,7 @@ evidence_refs:
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750.json
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json
 review_refs:
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
@@ -488,3 +491,20 @@ until post-close projection warnings, sync exit truth, optional SCM isolation,
 marker-aware witness preservation, and canonical dispatcher/W0 projections
 have failure-first proof. Adjacent release blockers remain assigned to their
 existing planned tasks and do not broaden this unit.
+
+## Fresh local Verify; native Windows still pending
+
+`reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json` records
+the exact post-implementation local candidate passing all five registered
+commands, including `4249 passed, 11 skipped` for the full suite and `1251
+passed, 2 skipped` for the focused governance suite. The evidence, verifier,
+and timestamp remain preserved above, but `verification_status` remains
+`failed` until the native Windows 3.10/3.11/3.12 matrix and fresh exact-commit
+W4a, independent W4b, and skeptic review are available. This is not release
+authorization.
+
+The append-only claim-transaction Compound now covers the remaining 26
+signatures. Together with the three immutable earlier records, linked valid
+Compound coverage is complete for all 40 declared signatures; the unit stays
+failed only for the fresh exact-commit review sequence and native Windows
+execution boundary described above.
