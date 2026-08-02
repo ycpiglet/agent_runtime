@@ -6,6 +6,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -1089,6 +1090,34 @@ def _write_canonical_active_claim(
     assert persisted["schema"] == "agent-runtime-task-claim/v1"
     assert persisted["claim_id"] == claim_id
     return path
+
+
+def test_active_claim_store_rejects_windows_name_surrogate_parent_metadata(
+    tmp_path,
+    monkeypatch,
+):
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True)
+    runtime_dir = claims_dir.parent
+    original_lstat = Path.lstat
+    runtime_stat = original_lstat(runtime_dir)
+
+    def simulated_windows_lstat(path):
+        metadata = original_lstat(path)
+        if path == runtime_dir:
+            return SimpleNamespace(
+                st_mode=runtime_stat.st_mode,
+                st_file_attributes=0x0400,
+                st_reparse_tag=0xA0000003,
+            )
+        return metadata
+
+    monkeypatch.setattr(Path, "lstat", simulated_windows_lstat)
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert claims == []
+    assert findings == ["active-claim-store-integrity-invalid"]
 
 
 def _write_linked_review(root: Path) -> str:

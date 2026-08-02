@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -962,6 +963,167 @@ def test_work_close_rejects_broken_claim_store_parent_without_mutation(
         unit_path,
         shadow_claim,
     ) == before
+
+
+def test_work_close_rejects_missing_claim_store_runtime_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="missing intermediate parent hides canonical active claim store",
+        claim_id="CLAIM-missing-claim-store-runtime",
+    )
+    runtime_dir = claim_path.parent.parent
+    shadow_runtime = tmp_path / "shadow-runtime"
+    runtime_dir.replace(shadow_runtime)
+    shadow_claim = shadow_runtime / "task_claims" / claim_path.name
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert not runtime_dir.exists()
+    assert _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    ) == before
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX permission semantics required")
+def test_work_close_rejects_unreadable_claim_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="unreadable active claim store enumerates as empty",
+        claim_id="CLAIM-unreadable-active-store",
+    )
+    claims_dir = claim_path.parent
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+    original_mode = claims_dir.stat().st_mode & 0o777
+    claims_dir.chmod(0)
+    try:
+        try:
+            with os.scandir(claims_dir) as entries:
+                next(entries, None)
+        except PermissionError:
+            pass
+        else:
+            pytest.skip("directory permissions are not enforced for this test user")
+
+        result = _run_work(
+            tmp_path,
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        )
+    finally:
+        claims_dir.chmod(original_mode)
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
+
+
+def test_work_close_bounds_active_claim_symlink_loop_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True, exist_ok=True)
+    loop_path = claims_dir / "CLAIM-loop.json"
+    try:
+        loop_path.symlink_to(loop_path.name)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, loop_path)
+    before_target = os.readlink(loop_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert loop_path.is_symlink()
+    assert os.readlink(loop_path) == before_target
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, loop_path) == before
+
+
+@pytest.mark.parametrize("claim_store_state", ("absent", "empty"))
+def test_work_close_accepts_direct_absent_or_empty_final_claim_store(
+    tmp_path: Path,
+    claim_store_state: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    runtime_dir = tmp_path / "agents" / "runtime"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    claims_dir = runtime_dir / "task_claims"
+    if claim_store_state == "empty":
+        claims_dir.mkdir()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
 
 
 def test_work_close_rejects_noncanonical_duplicate_work_path_without_mutation(
