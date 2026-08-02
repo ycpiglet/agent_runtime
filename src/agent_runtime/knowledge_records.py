@@ -392,10 +392,15 @@ def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
 
 def _watch_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
-        payload = json.loads(
-            _read_accepted_watch_text(path),
-            object_pairs_hook=_unique_watch_object,
-        )
+        try:
+            payload = json.loads(
+                _read_accepted_watch_text(path),
+                object_pairs_hook=_unique_watch_object,
+            )
+        except RecursionError as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-json-depth"
+            ) from exc
         if not isinstance(payload, dict):
             raise CompoundRecordError("compound:prevention-watch-invalid-root")
         return payload

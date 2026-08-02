@@ -2440,6 +2440,7 @@ def _linked_released_claim_authority(
     claims: list[dict[str, Any]] = []
     findings: list[str] = []
     expected_dir = Path("agents/runtime/task_claims")
+    canonical_claim_dir = (root / expected_dir).resolve()
     for raw_ref in _list_value(meta.get("claim_refs")):
         try:
             ref = compound_record.normalize_ref(raw_ref)
@@ -2467,6 +2468,13 @@ def _linked_released_claim_authority(
         except OSError:
             findings.append(f"{ref}: closeout:claim-ref-unavailable")
             continue
+        if (
+            claim_path.is_symlink()
+            or resolved_claim_path != claim_path.absolute()
+            or resolved_claim_path.parent != canonical_claim_dir
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-noncanonical-path")
+            continue
         if not resolved_claim_path.is_file():
             findings.append(f"{ref}: closeout:claim-ref-not-file")
             continue
@@ -2477,6 +2485,9 @@ def _linked_released_claim_authority(
             continue
         if not isinstance(claim, dict):
             findings.append(f"{ref}: closeout:claim-ref-invalid-root")
+            continue
+        if not closure_gate._claim_authority_shape_valid(claim):
+            findings.append(f"{ref}: closeout:claim-ref-authority-shape-invalid")
             continue
         claim_id = str(claim.get("claim_id") or "").strip()
         if (

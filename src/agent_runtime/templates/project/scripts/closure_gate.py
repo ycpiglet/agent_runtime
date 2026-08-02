@@ -130,10 +130,10 @@ def _resolved_claim_worktree(
         primary_root is not None
         and primary_root.resolve() != root.resolve()
     ):
-        # Protocol-relative paths are anchored at the primary checkout. The
-        # current-worktree fallback is legacy-only and must not let a shadow
-        # path override an existing primary-relative target.
-        candidates = [primary_root / path, root / path]
+        # Protocol-relative paths are anchored only at the primary checkout.
+        # Falling back to the linked root lets a shadow path become authority
+        # whenever the canonical primary-relative target is absent.
+        candidates = [primary_root / path]
     else:
         candidates = [root / path]
     resolved: list[Path] = []
@@ -307,38 +307,87 @@ def _active_claims(
 def _claim_unit_path(root: Path, claim: dict[str, Any]) -> Path | None:
     unit_spec = str(claim.get("unit_spec") or "").strip()
     if unit_spec:
-        candidate = root / unit_spec
         try:
-            resolved = candidate.resolve()
-            resolved.relative_to(root.resolve())
-        except (OSError, ValueError):
+            normalized = compound_record.normalize_ref(unit_spec)
+        except compound_record.CompoundRecordError:
             return None
-        return resolved if resolved.is_file() else None
+        claimed_unit = str(claim.get("unit_id") or "").strip()
+        canonical = _work_item_path(root, claimed_unit) if claimed_unit else None
+        if canonical is None:
+            return None
+        try:
+            expected_ref = canonical.relative_to(root.resolve()).as_posix()
+        except ValueError:
+            return None
+        if normalized != expected_ref:
+            return None
+        candidate = root.resolve() / normalized
+        try:
+            resolved = candidate.resolve(strict=True)
+            resolved.relative_to(root.resolve())
+        except (FileNotFoundError, OSError, ValueError):
+            return None
+        if candidate.is_symlink() or resolved != candidate.absolute():
+            return None
+        return candidate if candidate.is_file() else None
     claimed_work = str(
         claim.get("unit_id") or claim.get("task_id") or ""
     ).strip()
     return _work_item_path(root, claimed_work) if claimed_work else None
 
 
+def _canonical_path_identity(path: Path) -> tuple[str, str, str]:
+    """Derive task/unit/work identity from one canonical work-item path."""
+
+    candidate = path.absolute()
+    stem = candidate.stem
+    unit_match = re.fullmatch(r"UNIT-(TASK-AR-\d+)-\d{3}", stem)
+    if (
+        unit_match
+        and candidate.parent.name == unit_match.group(1)
+        and candidate.parent.parent.name == "units"
+        and candidate.parent.parent.parent.name == "tasks"
+        and candidate.parent.parent.parent.parent.name == "lead_engineer"
+        and candidate.parent.parent.parent.parent.parent.name == "agents"
+    ):
+        return unit_match.group(1), stem, stem
+    if (
+        re.fullmatch(r"TASK-AR-\d+", stem)
+        and candidate.parent.name == "tasks"
+        and candidate.parent.parent.name == "lead_engineer"
+        and candidate.parent.parent.parent.name == "agents"
+    ):
+        return stem, "", stem
+    return "", "", ""
+
+
 def _canonical_identity(
     path: Path,
     meta: dict[str, Any],
 ) -> tuple[str, str, str]:
-    work_id = str(
-        meta.get("work_id")
-        or meta.get("unit_id")
-        or meta.get("id")
-        or ""
-    ).strip()
-    unit_id = str(meta.get("unit_id") or "").strip()
-    task_id = str(
-        meta.get("task_id")
-        or (work_id if work_id.startswith("TASK-") else meta.get("parent_id"))
-    ).strip()
-    if work_id.startswith("UNIT-") and not unit_id:
-        unit_id = work_id
-    if work_id.startswith("TASK-") and not task_id:
-        task_id = work_id
+    task_id, unit_id, work_id = _canonical_path_identity(path)
+    if not work_id:
+        return "", "", ""
+    expected_kind = "unit" if unit_id else "task"
+    kind = str(meta.get("kind") or "").strip()
+    if kind and kind != expected_kind:
+        return "", "", ""
+    for field in ("work_id", "id", "display_id"):
+        declared = str(meta.get(field) or "").strip()
+        if declared and declared != work_id:
+            return "", "", ""
+    declared_task = str(meta.get("task_id") or "").strip()
+    if declared_task and declared_task != task_id:
+        return "", "", ""
+    declared_unit = str(meta.get("unit_id") or "").strip()
+    if unit_id:
+        if declared_unit and declared_unit != unit_id:
+            return "", "", ""
+        declared_parent = str(meta.get("parent_id") or "").strip()
+        if declared_parent and declared_parent != task_id:
+            return "", "", ""
+    elif declared_unit:
+        return "", "", ""
     return task_id, unit_id, work_id
 
 
