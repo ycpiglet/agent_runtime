@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T07:20:44+09:00
+updated_at: 2026-08-03T07:38:03+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -76,6 +76,8 @@ inputs:
   - reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md
+  - reviews/W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -158,6 +160,8 @@ target_files:
   - reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md
+  - reviews/W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md
   - reviews/INDEX.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
@@ -177,6 +181,7 @@ acceptance:
   - Role-routing overlays carry paired deadlines and revision, and support owner-checked heartbeat without entering the primary pointer.
   - Cockpit freshness rendering is null-safe before initial Runtime state load and preserves neutral, non-fabricated output.
   - Claim-progress validates the complete shared canonical pointer-agent tuple against the committed claim.
+  - Canonical pointer-agent validation requires committed response-claim key presence and exact JSON type plus value equality.
   - State-derived cockpit summary and flow facts remain neutral until Runtime state exists, including delayed and failed state requests.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q

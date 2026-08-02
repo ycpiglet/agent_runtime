@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T07:22:47+09:00
-record_count: 1319
+generated_at: 2026-08-03T07:41:04+09:00
+record_count: 1321
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1319` review and evidence records under `reviews/`.
+- Summary: indexed `1321` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1319` files |
+| Reviews covered | pass | `1321` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -714,6 +714,7 @@ record_count: 1319
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b current-agent binding T3 recurrence amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan` | md | accepted | pass | TASK-AR-655 W4b full-pointer and neutral pre-load T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b projection binding T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan` | md | accepted | pass | TASK-AR-655 W4b type-strict pointer authority T3 amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -1347,6 +1348,7 @@ record_count: 1319
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | blocked | fail | TASK-AR-654 claim-transaction final independent W4b |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |
 | `reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | blocked | fail | TASK-AR-654 Strict Authority Final Independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final` | md | blocked | block | TASK-AR-655 full-pointer and neutral pre-load final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | blocked | fail | TASK-AR-655 Lease Authority Final Independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | blocked | fail | TASK-AR-655 post-repair final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | blocked | fail | TASK-AR-655 projection-binding repair final independent W4b |
