@@ -911,6 +911,59 @@ def test_work_close_rejects_claim_directory_symlink_outside_store_without_mutati
     assert shadow_claim.read_bytes() == before_shadow
 
 
+def test_work_close_rejects_broken_claim_store_parent_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="broken ancestor symlink hides canonical active claim store",
+        claim_id="CLAIM-broken-claim-store-parent",
+    )
+    runtime_dir = claim_path.parent.parent
+    shadow_runtime = tmp_path / "shadow-runtime"
+    runtime_dir.replace(shadow_runtime)
+    try:
+        runtime_dir.symlink_to(
+            tmp_path / "missing-runtime",
+            target_is_directory=True,
+        )
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    shadow_claim = shadow_runtime / "task_claims" / claim_path.name
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    ) == before
+
+
 def test_work_close_rejects_noncanonical_duplicate_work_path_without_mutation(
     tmp_path: Path,
 ) -> None:
