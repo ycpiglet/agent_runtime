@@ -166,6 +166,24 @@ def _full_merge_dispatcher_response(root: Path, claim_id: str) -> dict[str, obje
     }
 
 
+def _refresh_full_merge_projection(
+    root: Path,
+    dispatcher_response: dict[str, object],
+) -> None:
+    """Rebuild an adversarial receipt through the live projection producer."""
+
+    dispatcher = _load_production_script(
+        PRODUCTION_DISPATCHER,
+        "production_task_claim_dispatcher_under_test",
+    )
+    dispatcher_response["projection"] = dispatcher._projection_payload(  # noqa: SLF001
+        root,
+        root / dispatcher_response["path"],
+        dispatcher_response["claim"],
+        include_revision=True,
+    )
+
+
 def _conflicting_pointer_agent_value(field: str, current: object) -> object:
     if type(current) is int:
         return current + 1
@@ -904,6 +922,132 @@ def test_claim_progress_accepts_full_production_dispatcher_merge_projection(
     captured = capsys.readouterr()
     assert rc == 0, captured.err or captured.out
     assert json.loads(captured.out) == dispatcher_response
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+@pytest.mark.parametrize(
+    "field",
+    tuple(
+        field
+        for field in POINTER_AGENT_FIELDS
+        if field != "claim_path"
+    ),
+)
+def test_claim_progress_type_strict_pointer_agent_rejects_null_for_omitted_claim_field(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    field: str,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-TYPE-STRICT-NULL"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
+    claim = dispatcher_response["claim"]
+    claim.pop(field)
+    _refresh_full_merge_projection(tmp_path, dispatcher_response)
+    current_agent = dispatcher_response["projection"]["pointer"][
+        "current_agents"
+    ][0]
+
+    assert field not in claim
+    assert field in current_agent
+    assert current_agent[field] is None
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(
+            run=lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(dispatcher_response),
+                stderr="",
+            )
+        ),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
+    assert claim_path.read_bytes() == claim_before
+    assert pointer_path.read_bytes() == pointer_before
+
+
+@pytest.mark.parametrize(
+    ("field", "claim_value", "agent_value"),
+    (
+        pytest.param("progress_pct", 60, 60.0, id="progress-pct-int-float"),
+        pytest.param("step_index", 6, 6.0, id="step-index-int-float"),
+        pytest.param("step_total", 10, 10.0, id="step-total-int-float"),
+        pytest.param("progress_pct", 0, False, id="progress-pct-zero-false"),
+        pytest.param("progress_pct", 1, True, id="progress-pct-one-true"),
+        pytest.param("step_index", 0, False, id="step-index-zero-false"),
+        pytest.param("step_index", 1, True, id="step-index-one-true"),
+        pytest.param("step_total", 0, False, id="step-total-zero-false"),
+        pytest.param("step_total", 1, True, id="step-total-one-true"),
+    ),
+)
+def test_claim_progress_type_strict_pointer_agent_rejects_equal_cross_json_numeric_types(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    field: str,
+    claim_value: int,
+    agent_value: float | bool,
+) -> None:
+    mod = _load()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+    claim_id = "CLAIM-AR655-W4B-TYPE-STRICT-NUMERIC"
+    claim_path, claim_before, pointer_path, pointer_before = (
+        _claim_progress_sentinels(tmp_path, claim_id)
+    )
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
+    claim = dispatcher_response["claim"]
+    claim[field] = claim_value
+    _refresh_full_merge_projection(tmp_path, dispatcher_response)
+    current_agent = dispatcher_response["projection"]["pointer"][
+        "current_agents"
+    ][0]
+    current_agent[field] = agent_value
+
+    assert type(claim[field]) is int
+    assert type(current_agent[field]) in {float, bool}
+    assert type(current_agent[field]) is not type(claim[field])
+    assert current_agent[field] == claim[field]
+
+    monkeypatch.setattr(
+        mod,
+        "subprocess",
+        SimpleNamespace(
+            run=lambda *_args, **_kwargs: SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps(dispatcher_response),
+                stderr="",
+            )
+        ),
+        raising=False,
+    )
+
+    rc = mod.main(_claim_progress_args(claim_id))
+
+    captured = capsys.readouterr()
+    assert rc == 2, captured.err or captured.out
+    rendered = json.loads(captured.out)
+    assert rendered["status"] == "claim_progress_receipt_indeterminate"
+    assert rendered["commit_state"] == "unknown"
+    assert rendered["retry_safe"] is False
+    assert rendered["dispatcher_returncode"] == 0
     assert claim_path.read_bytes() == claim_before
     assert pointer_path.read_bytes() == pointer_before
 
