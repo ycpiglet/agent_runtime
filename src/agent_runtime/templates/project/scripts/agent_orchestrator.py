@@ -1020,8 +1020,14 @@ def _claim_progress_pointer_agent_matches(
     for field in claim_store.POINTER_AGENT_FIELDS:
         if field not in candidate:
             return False
-        expected = claim_ref if field == "claim_path" else claim.get(field)
-        if candidate[field] != expected:
+        if field == "claim_path":
+            expected = claim_ref
+        else:
+            if field not in claim:
+                return False
+            expected = claim[field]
+        value = candidate[field]
+        if type(value) is not type(expected) or value != expected:
             return False
     return True
 

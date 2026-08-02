@@ -99,7 +99,7 @@
       "scripts/agent_live_session.py": "sha256:645a835288bb6428cd60ed927f3a66cbf7c19734519fd67e2501b47a8b296321",
       "scripts/agent_loop.py": "sha256:a4b7b9a17f1a719cb429e2f5377586d078712b711a8940ec1ded9d906999cb6c",
       "scripts/agent_observer.py": "sha256:783d8382e0aab02074d4b78bbb94ce1e739311f15aba5e86aa6b8783495fd8c6",
-      "scripts/agent_orchestrator.py": "sha256:076c07c9924418f94b4d4dab6bb46a50204ea4528d9839be74929a02d0ade9d6",
+      "scripts/agent_orchestrator.py": "sha256:5cf2859f8eec478e612ac4e5a01536a1f2403718f18a38503097ea25d60dab39",
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
       "scripts/agent_runtime/claim_store.py": "sha256:eb31107c3a39beab678532576947e1ff23b039d08739b6bfe63198f688dc66cf",
@@ -519,7 +519,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:fd0489253273ff696fdffd8ded4b0f280c403acd5a2e7ca09e49214989b2139c",
+    "template_digest": "sha256:4fe8ce785913e515f91a92809385d2f53c144be2db79d6b06b7b9c9bf04edf9f",
     "template_files": 254
   },
   "profiles": [
