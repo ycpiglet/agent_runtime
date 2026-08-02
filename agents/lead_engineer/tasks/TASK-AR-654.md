@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T20:11:26+09:00
+updated_at: 2026-08-02T20:38:24+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -70,6 +70,7 @@ defect_signatures:
   - defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472
   - defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390
   - defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23
+  - defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -108,6 +109,8 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -322,3 +325,12 @@ declared defect signatures collectively covered by linked canonical records.
 TASK-AR-654 remains in progress for exact-commit W4a, independent W4b,
 skeptic review, and native Windows 3.10/3.11/3.12 evidence. This evidence does
 not authorize claim release or any external release action.
+
+## Reopened after claim-transaction W4b
+
+Independent W4b rejected candidate `d1300a92` with two P1 and two P2
+findings. The bounded repair is accepted under
+`reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md`.
+The prior W4a is superseded for approval purposes; the task now declares 41
+signatures with one new container-identity signature uncovered until fresh
+prevention and an append-only Compound are recorded.

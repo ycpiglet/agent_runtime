@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T20:11:26+09:00
+updated_at: 2026-08-02T20:38:24+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -66,6 +66,7 @@ defect_signatures:
   - defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472
   - defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390
   - defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23
+  - defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -111,6 +112,8 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
+  - reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -509,3 +512,10 @@ signatures. Together with the three immutable earlier records, linked valid
 Compound coverage is complete for all 40 declared signatures; the unit stays
 failed only for the fresh exact-commit review sequence and native Windows
 execution boundary described above.
+
+The fresh W4b subsequently superseded that W4a with `REVISE`: an existing
+direct parent can hide a symlinked ancestor from POSIX atomic publication,
+container-valued claim identities can activate and permit duplicate authority,
+and released role overlays can omit terminal provenance. The unit remains
+failed under the accepted ancestor/identity/provenance T3 replan; skeptic
+review is paused until both P1 repairs have fresh RED-to-GREEN evidence.
