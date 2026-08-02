@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T04:35:11+09:00
-record_count: 1308
+generated_at: 2026-08-03T05:01:39+09:00
+record_count: 1309
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1308` review and evidence records under `reviews/`.
+- Summary: indexed `1309` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1308` files |
+| Reviews covered | pass | `1309` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1072,6 +1072,7 @@ record_count: 1308
 | `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

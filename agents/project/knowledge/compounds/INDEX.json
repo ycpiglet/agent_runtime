@@ -68,6 +68,9 @@
     "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
       "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
     ],
+    "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe": [
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
+    ],
     "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9": [
       "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
     ],
@@ -254,7 +257,8 @@
     ],
     "TASK-AR-655": [
       "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
-      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -299,10 +303,11 @@
     ],
     "UNIT-TASK-AR-655-001": [
       "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
-      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247"
     ]
   },
-  "record_count": 25,
+  "record_count": 26,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -720,8 +725,23 @@
         "TASK-AR-655",
         "UNIT-TASK-AR-655-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T05:01:59+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Bind claim-progress projection to committed claim authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:dff5b3cb4364898585427af8a87b591947e023958b1a1a3ab7b46f718ee41238"
+  "source_digest": "sha256:ecc66aa273e69adc3f6b64bb5eaa0ab114cf7063b45751dcb6be9b597dd9257b"
 }
