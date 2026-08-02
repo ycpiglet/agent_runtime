@@ -13,7 +13,7 @@ status: in_progress
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T12:22:38+09:00
+updated_at: 2026-08-02T12:26:08+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -121,6 +121,7 @@ review_refs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
