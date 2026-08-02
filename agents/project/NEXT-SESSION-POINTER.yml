@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T02:44:59+09:00
+updated_at: 2026-08-03T02:56:50+09:00
 updated_by: le-20260803-001200-kst-ar655lease001
 current_state:
-  summary: "TASK-AR-655 core RED is committed; deterministic liveness CLI time injection is scope-amended before installed-journey RED."
+  summary: "TASK-AR-655 direct liveness CLI RED is GREEN; nested owner-governance clock propagation is scope-amended before propagation RED."
   status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 5
   step_total: 10
-  progress_pct: 52
-  status_text: "AR-655 deterministic liveness CLI time-seam scope is amended; installed-journey RED is next."
+  progress_pct: 54
+  status_text: "AR-655 nested owner-governance clock propagation scope is amended; propagation RED is next."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260803-002651-task-ar-655-5f27
@@ -23,11 +23,11 @@ active_work:
       unit_id: UNIT-TASK-AR-655-001
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: claimed
-      phase: deterministic-time-seam-scope-amended
-      progress_pct: 52
+      phase: owner-governance-time-seam-scope-amended
+      progress_pct: 54
       step_index: 5
       step_total: 10
-      status_text: "Deterministic liveness CLI time-seam scope amended; installed journey RED is next"
+      status_text: "Nested owner-governance clock propagation scope amended; propagation RED is next"
       worktree_path: .worktrees/TASK-AR-655
       branch: codex/task-ar-655-v080-lease-bounds
       requested_model_tier: worker_standard
@@ -47,7 +47,7 @@ resume:
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
   branch_policy: "Continue TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Commit deterministic root and installed-template CLI time-seam RED before implementing the seam."
+    - "Commit nested owner-governance clock propagation RED before implementing the aggregate seam."
     - "Implement owner/CAS/scope-bound heartbeat and renewal against RED commits 7ccc95b3 and 95d3f987."
     - "Implement one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor."
     - "Drive the exact registered suite from 127 failures to GREEN without weakening the committed regressions."

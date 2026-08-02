@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T02:44:59+09:00
+updated_at: 2026-08-03T02:56:50+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -47,6 +47,8 @@ inputs:
   - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
   - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -70,12 +72,15 @@ target_files:
   - src/agent_runtime/templates/project/scripts/state_sync_gate.py
   - scripts/parallel_worktree_gate.py
   - src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py
+  - scripts/owner_governance_gate.py
+  - src/agent_runtime/templates/project/scripts/owner_governance_gate.py
   - scripts/worktree_lifecycle_gate.py
   - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
   - src/agent_runtime/ui_state.py
   - src/agent_runtime/ui_console_assets.py
   - src/agent_runtime/doctor.py
   - agents/project/NEXT-SESSION-POINTER.yml
+  - agents/project/TEMPLATE-MIRROR-CONTRACT.json
   - tests/test_task_claim_dispatcher.py
   - tests/test_claim_store.py
   - tests/test_claim_lease.py
@@ -92,6 +97,7 @@ target_files:
   - tests/test_agent_identity_gate.py
   - tests/test_orchestrator_atomic_writes.py
   - tests/test_template_mirror_gate.py
+  - tests/test_owner_governance_chain_parity.py
   - tests/test_regen_host_lock_if_needed.py
   - tests/test_lock_merge_driver.py
   - tests/test_template_smoke.py
@@ -103,6 +109,8 @@ target_files:
   - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
   - reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
   - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
   - reviews/INDEX.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
@@ -118,7 +126,7 @@ acceptance:
   - Deadline overflow cannot split a sweep's durable mutations from its audit trail.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
-  - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q
+  - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach the atomicity tests, owner mismatch, crash/restart, replan old/new scope digest proof, cross-consumer expiry matrix, and independent W4b.
@@ -145,6 +153,10 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
 - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
 - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
+- reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
+- reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
 - reviews/INDEX.md
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -170,12 +182,15 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - src/agent_runtime/templates/project/scripts/state_sync_gate.py
 - scripts/parallel_worktree_gate.py
 - src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py
+- scripts/owner_governance_gate.py
+- src/agent_runtime/templates/project/scripts/owner_governance_gate.py
 - scripts/worktree_lifecycle_gate.py
 - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
 - src/agent_runtime/ui_state.py
 - src/agent_runtime/ui_console_assets.py
 - src/agent_runtime/doctor.py
 - agents/project/NEXT-SESSION-POINTER.yml
+- agents/project/TEMPLATE-MIRROR-CONTRACT.json
 - tests/test_task_claim_dispatcher.py
 - tests/test_claim_store.py
 - tests/test_claim_lease.py
@@ -192,6 +207,7 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - tests/test_agent_identity_gate.py
 - tests/test_orchestrator_atomic_writes.py
 - tests/test_template_mirror_gate.py
+- tests/test_owner_governance_chain_parity.py
 - tests/test_regen_host_lock_if_needed.py
 - tests/test_lock_merge_driver.py
 - tests/fixtures/host/agent_runtime.lock.json
@@ -200,6 +216,10 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
 - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
 - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
+- reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
+- reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md
+- reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md
 
 ## Scope
 
@@ -231,7 +251,7 @@ Unify local lifecycle timestamps without creating a remote lease service.
 ## Verification
 
 - `python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q`
-- `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q`
+- `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`
 
