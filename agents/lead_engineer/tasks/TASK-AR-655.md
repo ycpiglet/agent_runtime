@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T06:10:17+09:00
+updated_at: 2026-08-03T06:30:10+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
 status: in_progress
@@ -44,6 +44,7 @@ defect_signatures:
   - defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3
   - defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe
   - defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b
+  - defect:ui-console-pre-load-summary-fabricates-healthy-z:e18e21bcf63e1ade
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json
@@ -72,6 +73,8 @@ review_refs:
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md
   - reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md
+  - reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
@@ -98,6 +101,8 @@ acceptance:
   - Projection without an explicit clock uses the wall clock, accepts only a live claim, and always emits agent mutation revision.
   - Role-routing overlays and active fixtures carry equal top-level and nested lease deadlines without widening grace.
   - Cockpit freshness rendering tolerates a pre-load null Runtime state without fabricating freshness or failing the browser layout flow.
+  - Claim-progress binds the complete shared canonical pointer-agent tuple, not a partial current-agent subset.
+  - Pre-load cockpit summary and flow surfaces remain neutral and never fabricate healthy zero, pass, idle, or WIP facts.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q
@@ -136,6 +141,8 @@ verification:
 - Projection evaluates the wall clock when `--now` is omitted, accepts only live claims, and always includes the current agent mutation revision.
 - Role-routing overlays and test fixtures use equal top-level and nested lease deadlines; no consumer gets a grace or status bypass.
 - Cockpit rendering before the initial Runtime state response remains neutral and null-safe, then preserves built-at freshness semantics after state arrival.
+- Claim-progress validates every field in the shared canonical pointer-agent tuple against the committed claim while preserving pointer-free overlays.
+- Before Runtime state exists, the cockpit hides or marks unavailable every state-derived summary and flow fact; delayed or failed state requests never appear healthy.
 
 ## Verification
 
