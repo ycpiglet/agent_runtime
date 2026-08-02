@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T05:20:40+09:00
+updated_at: 2026-08-03T05:33:16+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -37,6 +37,7 @@ defect_signatures:
   - defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b
   - defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3
   - defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe
+  - defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json
@@ -65,6 +66,7 @@ inputs:
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md
   - reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -119,6 +121,7 @@ target_files:
   - tests/test_claim_guard.py
   - tests/test_scm_steward.py
   - tests/test_ui_console.py
+  - tests/test_ui_console_e2e.py
   - tests/test_template_mirror_gate.py
   - tests/test_owner_governance_chain_parity.py
   - tests/test_regen_host_lock_if_needed.py
@@ -141,6 +144,7 @@ target_files:
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md
   - reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md
   - reviews/INDEX.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
@@ -158,6 +162,7 @@ acceptance:
   - Agent-instance publication is serialized and atomic, with revision and both timestamps advancing as one coherent tuple.
   - Projection without an explicit clock uses the wall clock, accepts only a live claim, and always emits agent mutation revision.
   - Role-routing overlays carry paired deadlines and revision, and support owner-checked heartbeat without entering the primary pointer.
+  - Cockpit freshness rendering is null-safe before initial Runtime state load and preserves neutral, non-fabricated output.
 verification:
   - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py tests/test_doctor.py tests/test_agent_identity_gate.py tests/test_orchestrator_atomic_writes.py tests/test_ui_design_assets.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py tests/test_template_smoke.py tests/test_owner_governance_chain_parity.py -q
@@ -301,6 +306,7 @@ Unify local lifecycle timestamps without creating a remote lease service.
 - Agent-instance revision plus timestamps publish atomically under serialized authority and cannot roll back or form a torn tuple.
 - Projection uses the wall clock by default, accepts only live authority, and always carries agent mutation revision.
 - Role-routing overlays use paired leases and owner-checked heartbeat while remaining outside the primary pointer and scope-renew paths.
+- Cockpit rendering may precede the initial Runtime state response without throwing; the neutral clock remains honest until real state arrives.
 
 ## Verification
 
