@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T06:58:06+09:00
+updated_at: 2026-08-03T07:10:40+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -45,6 +45,8 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 context: TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispatcher has only create, projection, and release commands. The separate low-level claim lease heartbeat is not connected to task claim JSON.
@@ -182,13 +184,14 @@ verification:
   - python -m pytest -q
 handoff: Attach the atomicity tests, owner mismatch, crash/restart, replan old/new scope digest proof, cross-consumer expiry matrix, and independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, or recovering a claim without owner identity.
-verified_at: 2026-08-03T05:49:32+09:00
+verified_at: 2026-08-03T06:59:00+09:00
 verified_by: le-20260803-001200-kst-ar655lease001
 evidence_refs:
   - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954.json
   - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700.json
   - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245.json
   - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803054932.json
+  - reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803065900.json
 ---
 
 # UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers
