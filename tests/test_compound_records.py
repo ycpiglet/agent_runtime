@@ -1123,6 +1123,7 @@ def test_work_close_accepts_direct_absent_or_empty_final_claim_store(
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
+    assert "work-close: closed" in result.stdout
     assert "Traceback" not in result.stdout + result.stderr
 
 

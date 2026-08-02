@@ -1096,9 +1096,8 @@ def test_active_claim_store_rejects_windows_name_surrogate_parent_metadata(
     tmp_path,
     monkeypatch,
 ):
-    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
-    claims_dir.mkdir(parents=True)
-    runtime_dir = claims_dir.parent
+    runtime_dir = tmp_path / "agents" / "runtime"
+    runtime_dir.mkdir(parents=True)
     original_lstat = Path.lstat
     runtime_stat = original_lstat(runtime_dir)
 
