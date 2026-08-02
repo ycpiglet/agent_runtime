@@ -2528,12 +2528,38 @@ def _claim_authority_for_close(
 ) -> tuple[dict[str, Any], list[str]]:
     """Resolve active authority once and retain linked released authority."""
 
+    _task_id, _unit_id, canonical_id = closure_gate._canonical_identity(
+        path, meta
+    )
+    canonical_path = (
+        closure_gate._work_item_path(root, canonical_id)
+        if canonical_id
+        else None
+    )
+    try:
+        canonical_path_valid = bool(
+            canonical_path
+            and not canonical_path.is_symlink()
+            and canonical_path.resolve(strict=True) == canonical_path.absolute()
+            and path.resolve(strict=True) == canonical_path.resolve(strict=True)
+        )
+    except (FileNotFoundError, OSError):
+        canonical_path_valid = False
+    if (
+        not canonical_id
+        or resolved_id != canonical_id
+        or not canonical_path_valid
+    ):
+        return dict(meta), [
+            f"{path.stem or resolved_id}: "
+            "closeout:active-claim-context-invalid"
+        ]
     resolution = closure_gate.resolve_active_work_contexts(
-        root, work_id=resolved_id
+        root, work_id=canonical_id
     )
     reason = str(resolution.get("reason") or "").strip()
     if reason:
-        return dict(meta), [f"{resolved_id}: closeout:{reason}"]
+        return dict(meta), [f"{canonical_id}: closeout:{reason}"]
     contexts = list(resolution.get("contexts") or [])
     merged = dict(contexts[0]) if contexts else dict(meta)
     selected_ids = {
@@ -2922,7 +2948,7 @@ def close_work(
         command_name="work-close",
         reject_unsafe_legacy_scalars=True,
     )
-    resolved_id = _work_id_from_meta(path, meta)
+    resolved_id = path.stem
     meta, claim_authority_findings = _claim_authority_for_close(
         root, path, meta, resolved_id
     )

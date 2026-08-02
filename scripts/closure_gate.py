@@ -269,11 +269,39 @@ def _active_claims(
     claims_dir = root / "agents" / "runtime" / "task_claims"
     claims: list[dict[str, Any]] = []
     findings: list[str] = []
-    if not claims_dir.is_dir():
+    if not claims_dir.exists():
+        if claims_dir.is_symlink():
+            findings.append("active-claim-store-integrity-invalid")
+        return claims, findings
+    try:
+        canonical_claims_dir = claims_dir.absolute()
+        resolved_claims_dir = claims_dir.resolve(strict=True)
+    except (FileNotFoundError, OSError):
+        findings.append("active-claim-store-integrity-invalid")
+        return claims, findings
+    if (
+        claims_dir.is_symlink()
+        or resolved_claims_dir != canonical_claims_dir
+        or not resolved_claims_dir.is_dir()
+    ):
+        findings.append("active-claim-store-integrity-invalid")
         return claims, findings
     for path in sorted(claims_dir.glob("CLAIM-*.json")):
         try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
+            resolved_path = path.resolve(strict=True)
+        except (FileNotFoundError, OSError):
+            findings.append(f"active-claim-integrity-invalid:{path.name}")
+            continue
+        if (
+            path.is_symlink()
+            or resolved_path != path.absolute()
+            or resolved_path.parent != resolved_claims_dir
+            or not resolved_path.is_file()
+        ):
+            findings.append(f"active-claim-integrity-invalid:{path.name}")
+            continue
+        try:
+            payload = json.loads(resolved_path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
             findings.append(f"active-claim-invalid-json:{path.name}")
             continue
@@ -305,14 +333,22 @@ def _active_claims(
 
 
 def _claim_unit_path(root: Path, claim: dict[str, Any]) -> Path | None:
-    unit_spec = str(claim.get("unit_spec") or "").strip()
-    if unit_spec:
+    raw_unit = claim.get("unit_id")
+    if "unit_id" in claim and not isinstance(raw_unit, str):
+        return None
+    claimed_unit = raw_unit.strip() if isinstance(raw_unit, str) else ""
+    raw_unit_spec = claim.get("unit_spec")
+    if claimed_unit:
+        if not isinstance(raw_unit_spec, str):
+            return None
+        unit_spec = raw_unit_spec.strip()
+        if not unit_spec:
+            return None
         try:
             normalized = compound_record.normalize_ref(unit_spec)
         except compound_record.CompoundRecordError:
             return None
-        claimed_unit = str(claim.get("unit_id") or "").strip()
-        canonical = _work_item_path(root, claimed_unit) if claimed_unit else None
+        canonical = _work_item_path(root, claimed_unit)
         if canonical is None:
             return None
         try:
@@ -330,10 +366,14 @@ def _claim_unit_path(root: Path, claim: dict[str, Any]) -> Path | None:
         if candidate.is_symlink() or resolved != candidate.absolute():
             return None
         return candidate if candidate.is_file() else None
-    claimed_work = str(
-        claim.get("unit_id") or claim.get("task_id") or ""
-    ).strip()
-    return _work_item_path(root, claimed_work) if claimed_work else None
+    if "unit_spec" in claim and (
+        not isinstance(raw_unit_spec, str) or raw_unit_spec.strip()
+    ):
+        return None
+    raw_task = claim.get("task_id")
+    if not isinstance(raw_task, str) or not raw_task.strip():
+        return None
+    return _work_item_path(root, raw_task.strip())
 
 
 def _canonical_path_identity(path: Path) -> tuple[str, str, str]:
@@ -368,25 +408,27 @@ def _canonical_identity(
     task_id, unit_id, work_id = _canonical_path_identity(path)
     if not work_id:
         return "", "", ""
+
+    def declared_identity_matches(field: str, expected: str) -> bool:
+        if field not in meta:
+            return True
+        value = meta[field]
+        return isinstance(value, str) and value == expected
+
     expected_kind = "unit" if unit_id else "task"
-    kind = str(meta.get("kind") or "").strip()
-    if kind and kind != expected_kind:
+    if not declared_identity_matches("kind", expected_kind):
         return "", "", ""
     for field in ("work_id", "id", "display_id"):
-        declared = str(meta.get(field) or "").strip()
-        if declared and declared != work_id:
+        if not declared_identity_matches(field, work_id):
             return "", "", ""
-    declared_task = str(meta.get("task_id") or "").strip()
-    if declared_task and declared_task != task_id:
+    if not declared_identity_matches("task_id", task_id):
         return "", "", ""
-    declared_unit = str(meta.get("unit_id") or "").strip()
     if unit_id:
-        if declared_unit and declared_unit != unit_id:
+        if not declared_identity_matches("unit_id", unit_id):
             return "", "", ""
-        declared_parent = str(meta.get("parent_id") or "").strip()
-        if declared_parent and declared_parent != task_id:
+        if not declared_identity_matches("parent_id", task_id):
             return "", "", ""
-    elif declared_unit:
+    elif "unit_id" in meta:
         return "", "", ""
     return task_id, unit_id, work_id
 
@@ -398,8 +440,16 @@ def _claim_matches_canonical(
     meta: dict[str, Any],
 ) -> bool:
     task_id, unit_id, work_id = _canonical_identity(path, meta)
-    claim_task = str(claim.get("task_id") or "").strip()
-    claim_unit = str(claim.get("unit_id") or "").strip()
+    raw_claim_task = claim.get("task_id")
+    raw_claim_unit = claim.get("unit_id")
+    if not isinstance(raw_claim_task, str):
+        return False
+    if "unit_id" in claim and not isinstance(raw_claim_unit, str):
+        return False
+    claim_task = raw_claim_task.strip()
+    claim_unit = (
+        raw_claim_unit.strip() if isinstance(raw_claim_unit, str) else ""
+    )
     if claim_task != task_id:
         return False
     if unit_id:
@@ -424,7 +474,10 @@ def _claim_matches_canonical(
                 claim_path, claim_meta
             )
             return linked_task == task_id and linked_unit == claim_unit
-        return not str(claim.get("unit_spec") or "").strip()
+        if "unit_spec" not in claim:
+            return True
+        raw_unit_spec = claim.get("unit_spec")
+        return isinstance(raw_unit_spec, str) and not raw_unit_spec.strip()
     return False
 
 
