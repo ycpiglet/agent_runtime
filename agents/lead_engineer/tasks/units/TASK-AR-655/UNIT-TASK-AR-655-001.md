@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T02:22:47+09:00
+updated_at: 2026-08-03T02:44:59+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -45,6 +45,8 @@ inputs:
   - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
   - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
   - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
   - reviews/INDEX.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
@@ -92,12 +94,16 @@ target_files:
   - tests/test_template_mirror_gate.py
   - tests/test_regen_host_lock_if_needed.py
   - tests/test_lock_merge_driver.py
+  - tests/test_template_smoke.py
   - tests/fixtures/host/agent_runtime.lock.json
   - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
   - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
   - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
   - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
   - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
+  - reviews/INDEX.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
   - Long tasks can remain legitimately active.

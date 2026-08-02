@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T02:22:47+09:00
+updated_at: 2026-08-03T02:44:59+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
 status: in_progress
@@ -47,6 +47,8 @@ review_refs:
   - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
   - reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md
   - reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md
+  - reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
