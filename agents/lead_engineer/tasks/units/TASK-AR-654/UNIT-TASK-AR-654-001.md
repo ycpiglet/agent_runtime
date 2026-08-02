@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T13:57:25+09:00
+updated_at: 2026-08-02T14:52:33+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -45,6 +45,9 @@ defect_signatures:
   - defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101
   - defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77
   - defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460
+  - defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087
+  - defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f
+  - defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -76,6 +79,9 @@ inputs:
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -101,6 +107,29 @@ target_files:
   - tests/test_closure_gate.py
   - tests/test_compound_records.py
   - tests/test_work_close.py
+  - src/agent_runtime/claim_store.py
+  - scripts/agent_runtime/claim_store.py
+  - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
+  - scripts/task_claim_dispatcher.py
+  - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
+  - scripts/role_routing.py
+  - src/agent_runtime/templates/project/scripts/role_routing.py
+  - scripts/claim_reaper.py
+  - src/agent_runtime/templates/project/scripts/claim_reaper.py
+  - scripts/claim_guard.py
+  - src/agent_runtime/templates/project/scripts/claim_guard.py
+  - scripts/parallel_worktree_gate.py
+  - src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py
+  - src/agent_runtime/sync.py
+  - src/agent_runtime/adoption.py
+  - src/agent_runtime/doctor.py
+  - src/agent_runtime/lock.py
+  - .github/workflows/test.yml
+  - tests/test_claim_store.py
+  - tests/test_claim_guard.py
+  - tests/test_parallel_worktree_gate.py
+  - tests/test_adoption.py
+  - tests/test_doctor.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_runtime_asset_usage.py
   - tests/test_rsi_operating_system_docs.py
@@ -160,6 +189,9 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -332,3 +364,13 @@ machine evidence while preserving both prior records unchanged.
 `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md`.
 The only authorized edit is central fixture alignment with the installed-host
 direct Runtime parent contract.
+
+## Reopened after claim-store continuity audits
+
+The component candidate and its fixture-only follow-up are superseded by
+`reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md` and
+`reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md`. The
+unit remains failed under
+`reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md`
+until the failure-first witness, status, bounded-input, migration, native
+Windows, machine, Compound, and new W4 sequence is complete.
