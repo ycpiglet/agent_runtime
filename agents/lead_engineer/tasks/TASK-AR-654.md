@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T20:02:52+09:00
+updated_at: 2026-08-02T20:11:26+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -107,6 +107,7 @@ review_refs:
   - reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md
   - reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md
+  - reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
