@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T23:50:24+09:00
-record_count: 1290
+generated_at: 2026-08-03T00:10:07+09:00
+record_count: 1291
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1290` review and evidence records under `reviews/`.
+- Summary: indexed `1291` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1290` files |
+| Reviews covered | pass | `1291` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -772,6 +772,7 @@ record_count: 1290
 | `reviews/SKEPTIC-2026-07-30-task-ar-650-closeout.md` | `SKEPTIC-2026-07-30-task-ar-650-closeout` | md | passed | pass | TASK-AR-650 Skeptic Closeout |
 | `reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md` | `SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout` | md | revise | fail | TASK-AR-654 YAML Conformance Closeout Skeptic Review |
 | `reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md` | `SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Closeout Skeptic Review |
+| `reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md` | `SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final skeptic review |
 | `reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final` | md | revise | fail | TASK-AR-654 canonical authority final skeptic review |
 | `reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-strict-authority-final` | md | revise | fail | TASK-AR-654 strict-authority final skeptic review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |

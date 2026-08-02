@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:48:30+09:00
+updated_at: 2026-08-03T00:09:30+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -119,6 +119,7 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -202,6 +203,7 @@ target_files:
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
@@ -245,6 +247,7 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
   - reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md
@@ -562,3 +565,12 @@ the registered gate matrix. The unit intentionally remains
 `verification_status: failed`: a fresh skeptic is still required and native
 Windows, Scribe closure debt, and adjacent release blockers remain open. This
 W4b acceptance is not claim-release or external-release authority.
+
+## Adverse-W4b repair final skeptic
+
+The distinct skeptic accepted only the bounded repair on exact post-W4b
+candidate `83b895ae`, tree `0d407fbc`, with no findings. The current-scope W4
+chain is complete, but the unit remains `verification_status: failed` pending
+native Windows execution, Scribe source-debt and active-coverage closure, and
+the registered adjacent release blockers. Claim release and external release
+remain unauthorized.

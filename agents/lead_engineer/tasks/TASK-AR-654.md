@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T23:48:30+09:00
+updated_at: 2026-08-03T00:09:30+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -115,6 +115,7 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md
   - reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md
+  - reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -383,3 +384,14 @@ This sets bounded W4b acceptance true but does not authorize release. The task
 remains in progress and the claim remains held pending a distinct skeptic,
 native Windows evidence, Scribe closure work, and the registered adjacent
 release blockers.
+
+## Adverse-W4b repair final skeptic
+
+Distinct skeptic review of exact post-W4b candidate `83b895ae`, tree
+`0d407fbc`, issued
+`APPROVE_CURRENT_SCOPE_ONLY_PENDING_NATIVE_WINDOWS_SCRIBE_AND_ADJACENT_BLOCKERS`
+with no P0/P1/P2 findings in
+`reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md`.
+The bounded W4 chain is complete. TASK-AR-654 remains in progress and its
+claim remains held because native Windows execution, Scribe closure debt, and
+TASK-AR-655/TASK-AR-657/TASK-AR-651 are still release blockers.
