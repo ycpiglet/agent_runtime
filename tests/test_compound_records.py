@@ -256,6 +256,7 @@ def _write_supported_repeat_compound(
     *,
     signature: str,
     stem: str,
+    work_id: str = "UNIT-TASK-AR-645-001",
 ) -> str:
     prevention_ref = f"tests/test_{stem}.py"
     prevention = root / prevention_ref
@@ -266,12 +267,27 @@ def _write_supported_repeat_compound(
     )
     record_path, _record = _create(
         root,
-        work_id="UNIT-TASK-AR-645-001",
+        work_id=work_id,
         signature=signature,
         title=f"Reject {stem.replace('_', ' ')} authority bypass",
         prevention_refs=[prevention_ref],
     )
     return records.record_ref(root, record_path)
+
+
+def _set_raw_frontmatter_value(path: Path, field: str, raw_value: str) -> None:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    replacement = f"{field}: {raw_value}"
+    for index in range(1, len(lines)):
+        if lines[index] == "---":
+            lines.insert(index, replacement)
+            break
+        if lines[index].startswith(f"{field}:"):
+            lines[index] = replacement
+            break
+    else:
+        raise AssertionError(f"frontmatter terminator missing: {path}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -814,6 +830,304 @@ def test_work_close_rejects_linked_released_claim_symlink_outside_store_without_
     assert shadow_claim.read_bytes() == before_shadow
 
 
+def test_work_close_rejects_active_claim_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "active claim file symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_claim_file_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-active-file-symlink",
+    )
+    shadow_claim = tmp_path / "shadow-claims" / claim_path.name
+    shadow_claim.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.replace(shadow_claim)
+    try:
+        claim_path.symlink_to(shadow_claim)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_shadow = shadow_claim.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+def test_work_close_rejects_claim_directory_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "active claim directory symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_claim_directory_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-active-directory-symlink",
+    )
+    claims_dir = claim_path.parent
+    shadow_claims = tmp_path / "shadow-claim-store"
+    claims_dir.replace(shadow_claims)
+    try:
+        claims_dir.symlink_to(shadow_claims, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_claim = shadow_claims / claim_path.name
+    before_shadow = shadow_claim.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+def test_work_close_rejects_noncanonical_duplicate_work_path_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    canonical_unit = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_unit = (
+        tmp_path
+        / "shadow-root/agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_unit.parent.mkdir(parents=True, exist_ok=True)
+    shadow_unit.write_bytes(canonical_unit.read_bytes())
+    missing_claim = (
+        tmp_path / "agents/runtime/task_claims/CLAIM-absent.json"
+    )
+    before_canonical = canonical_unit.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=str(shadow_unit),
+        unit_path=shadow_unit,
+        claim_path=missing_claim,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert canonical_unit.read_bytes() == before_canonical
+
+
+@pytest.mark.parametrize(
+    "unit_spec",
+    (
+        pytest.param(None, id="null"),
+        pytest.param(False, id="false"),
+        pytest.param(0, id="zero"),
+        pytest.param([], id="empty-list"),
+        pytest.param({}, id="empty-object"),
+        pytest.param("", id="blank-string"),
+    ),
+)
+def test_work_close_rejects_present_invalid_unit_spec_without_mutation(
+    tmp_path: Path,
+    unit_spec: object,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = f"present invalid unit spec {type(unit_spec).__name__}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_unit_spec_{type(unit_spec).__name__}",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-present-invalid-unit-spec",
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["unit_spec"] = unit_spec
+    claim_path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    assert "unit_spec" in json.loads(claim_path.read_text(encoding="utf-8"))
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "unit_spec_mode",
+    ("absent", "blank", "whitespace"),
+)
+def test_work_close_preserves_task_level_claim_unit_spec_compatibility(
+    tmp_path: Path,
+    unit_spec_mode: str,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    signature = f"task level claim unit spec compatibility {unit_spec_mode}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"task_level_claim_unit_spec_{unit_spec_mode}",
+        work_id=task_id,
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-task-level-unit-spec-{unit_spec_mode}",
+        unit_id="",
+        unit_spec="" if unit_spec_mode != "whitespace" else "   ",
+    )
+    if unit_spec_mode == "absent":
+        claim = json.loads(claim_path.read_text(encoding="utf-8"))
+        claim.pop("unit_spec")
+        claim_path.write_text(
+            json.dumps(claim, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        task_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert records.normalize_signature(signature) in result.stdout
+    assert record_ref in result.stdout
+    assert claim_path.read_bytes() == before_claim
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("kind", "work_id", "id", "display_id", "task_id", "unit_id", "parent_id"),
+)
+@pytest.mark.parametrize(
+    "raw_value",
+    (
+        pytest.param("''", id="blank-scalar"),
+        pytest.param("[]", id="empty-container"),
+    ),
+)
+def test_work_close_rejects_present_blank_or_container_unit_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    raw_value: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = f"present invalid unit identity {field} {raw_value}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_unit_identity_{field}",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-present-invalid-unit-{field}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _set_raw_frontmatter_value(unit_path, field, raw_value)
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("kind", "work_id", "id", "display_id", "task_id"),
+)
+@pytest.mark.parametrize(
+    "raw_value",
+    (
+        pytest.param("''", id="blank-scalar"),
+        pytest.param("[]", id="empty-container"),
+    ),
+)
+def test_work_close_rejects_present_blank_or_container_task_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    raw_value: str,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    signature = f"present invalid task identity {field} {raw_value}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_task_identity_{field}",
+        work_id=task_id,
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-present-invalid-task-{field}",
+    )
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    _set_raw_frontmatter_value(task_path, field, raw_value)
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=task_id,
+        unit_path=task_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
 def test_work_close_rejects_unit_spec_symlink_alias_without_mutation(
     tmp_path: Path,
 ) -> None:
@@ -884,6 +1198,42 @@ def test_work_close_rejects_canonical_unit_task_identity_contradiction_without_m
         claim_path=claim_path,
         expected_finding="closeout:active-claim-context-invalid",
     )
+
+
+def test_wontfix_close_rejects_conflicting_valid_unit_id_without_identity_leak_or_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    conflicting_unit_id = "UNIT-TASK-AR-645-002"
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _set_raw_frontmatter_value(unit_path, "unit_id", conflicting_unit_id)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="conflicting valid unit identity repeat authority",
+        claim_id="CLAIM-conflicting-valid-unit-identity",
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        "wontfix",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" not in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert f'"work_id": "{conflicting_unit_id}"' not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
 
 
 def test_task_work_close_rejects_self_declared_duplicate_unit_spec(
