@@ -10,6 +10,9 @@
     "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a": [
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
     ],
+    "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
     "defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
     ],
@@ -52,6 +55,12 @@
     "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552": [
       "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f"
     ],
+    "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
+    "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
     "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
       "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
     ],
@@ -84,6 +93,9 @@
     ],
     "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ],
     "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2": [
       "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
@@ -119,7 +131,8 @@
     ],
     "TASK-AR-654": [
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
-      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -157,10 +170,11 @@
     "UNIT-TASK-AR-654-001": [
       "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
       "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
-      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
     ]
   },
-  "record_count": 20,
+  "record_count": 21,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -464,8 +478,26 @@
         "TASK-AR-654",
         "UNIT-TASK-AR-654-001"
       ]
+    },
+    {
+      "created_at": "2026-08-02T13:24:33+09:00",
+      "defect_signatures": [
+        "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428",
+        "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824",
+        "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660",
+        "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4"
+      ],
+      "id": "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Bind close authority to direct canonical stores and identities",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:1c1a7ea8f8b4742371b2756c88ee02d43208262c41c7960dbec1b9203b1a2c02"
+  "source_digest": "sha256:91384f8314449110851567dc6615a9a13dcbda1bc5d9833e60288eccccf1db64"
 }

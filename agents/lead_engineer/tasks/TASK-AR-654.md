@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T12:51:20+09:00
+updated_at: 2026-08-02T13:25:26+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -60,12 +60,14 @@ review_refs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
 summary: Prevent a repeated defect from closing with only a generic review or retro and no reusable prevention record.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
@@ -156,3 +158,12 @@ prior W4a is superseded and the claim remains held under
 `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` until
 failure-first repairs, fresh machine evidence, a new append-only Compound, and
 an entirely fresh W4 sequence all pass.
+
+## Strict-authority Compound scope
+
+The fresh Verify-backed append-only record at
+`agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json`
+is owned under
+`reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md`.
+It directly links both work IDs and all four new store, type, identity, and
+resolver-key signatures while preserving all earlier records unchanged.

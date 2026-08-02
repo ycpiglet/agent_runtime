@@ -1,0 +1,36 @@
+{
+  "cause": "Active claim discovery followed filesystem aliases, authority fields used truthiness coercion, and work close selected its resolver key from unvalidated frontmatter instead of the canonical path.",
+  "created_at": "2026-08-02T13:24:33+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428",
+    "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824",
+    "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660",
+    "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4"
+  ],
+  "id": "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+  "prevention": "Require direct lexical and resolved claim-store identity, presence-aware typed unit specs, exact typed frontmatter identities, and path-derived canonical close resolution before any mutation.",
+  "prevention_refs": [
+    "tests/test_compound_records.py",
+    "scripts/closure_gate.py",
+    "scripts/work.py"
+  ],
+  "recurrence_count": 2,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md",
+    "reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json"
+  ],
+  "status": "mitigated",
+  "summary": "Closure accepted redirected active claims, falsey authority fields, and metadata-derived resolver identities before mutation.",
+  "title": "Bind close authority to direct canonical stores and identities",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json"
+  ],
+  "work_ids": [
+    "TASK-AR-654",
+    "UNIT-TASK-AR-654-001"
+  ]
+}

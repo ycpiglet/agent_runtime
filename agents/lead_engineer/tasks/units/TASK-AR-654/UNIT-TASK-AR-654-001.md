@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: failed
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T12:51:20+09:00
+updated_at: 2026-08-02T13:25:26+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -43,6 +43,7 @@ defect_signatures:
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260731-040735-task-ar-654-ar654001.json
   - agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json
@@ -61,6 +62,7 @@ inputs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -94,6 +96,7 @@ target_files:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
+  - agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json
   - agents/project/knowledge/compounds/INDEX.json
   - reviews/INDEX.md
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
@@ -109,7 +112,7 @@ verification:
   - python scripts/regen_host_lock_if_needed.py --check
 handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
 stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
-verified_at: 2026-08-02T12:20:23+09:00
+verified_at: 2026-08-02T13:22:43+09:00
 verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
   - reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json
@@ -122,6 +125,7 @@ evidence_refs:
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json
   - reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750.json
   - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json
+  - reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json
 review_refs:
   - reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md
@@ -133,6 +137,7 @@ review_refs:
   - reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md
   - reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md
   - reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -279,6 +284,15 @@ identity, and path-derived close resolver identity. The unit remains failed
 under `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` until
 the new REDs, implementation, Verify, Compound, W4a, W4b, and skeptic sequence
 is complete.
+
+## Strict-authority Compound scope amendment
+
+The append-only record at
+`agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json`
+is now a current-work authority target under
+`reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md`.
+It binds both work IDs and all four new signatures to the fresh Verify without
+changing the three earlier records.
 
 ## Canonical-authority Compound scope amendment
 
