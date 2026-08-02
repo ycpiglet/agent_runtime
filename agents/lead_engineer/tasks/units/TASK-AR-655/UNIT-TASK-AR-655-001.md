@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-03T00:30:23+09:00
+updated_at: 2026-08-03T00:43:11+09:00
 started_at: 2026-08-03T00:26:51+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -36,10 +36,14 @@ inputs:
   - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
   - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
   - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/claim_lease.py
   - src/agent_runtime/templates/project/scripts/state_sync_gate.py
 target_files:
+  - src/agent_runtime/claim_store.py
+  - scripts/agent_runtime/claim_store.py
+  - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
   - scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
@@ -57,6 +61,7 @@ target_files:
   - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
   - src/agent_runtime/ui_state.py
   - tests/test_task_claim_dispatcher.py
+  - tests/test_claim_store.py
   - tests/test_claim_lease.py
   - tests/test_claim_reaper.py
   - tests/test_deadlock_watchdog.py
@@ -72,6 +77,7 @@ target_files:
   - tests/fixtures/host/agent_runtime.lock.json
   - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
   - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
+  - reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
 scope: Unify local lifecycle timestamps without creating a remote lease service.
 acceptance:
   - Long tasks can remain legitimately active.
@@ -85,7 +91,7 @@ acceptance:
   - Zero and equality boundaries, one-minute lease, environment normalization, and huge nonnegative grace remain safe and compatible.
   - Deadline overflow cannot split a sweep's durable mutations from its audit trail.
 verification:
-  - python -m pytest tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q
+  - python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q
   - python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
@@ -106,12 +112,16 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md
 - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
 - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
+- reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/claim_lease.py
 - src/agent_runtime/templates/project/scripts/state_sync_gate.py
 
 ## Target Files
 
+- src/agent_runtime/claim_store.py
+- scripts/agent_runtime/claim_store.py
+- src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
 - scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/agent_orchestrator.py
@@ -129,6 +139,7 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py
 - src/agent_runtime/ui_state.py
 - tests/test_task_claim_dispatcher.py
+- tests/test_claim_store.py
 - tests/test_claim_lease.py
 - tests/test_claim_reaper.py
 - tests/test_deadlock_watchdog.py
@@ -144,6 +155,7 @@ TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispat
 - tests/fixtures/host/agent_runtime.lock.json
 - reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md
 - reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md
+- reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md
 
 ## Scope
 
@@ -174,7 +186,7 @@ Unify local lifecycle timestamps without creating a remote lease service.
 
 ## Verification
 
-- `python -m pytest tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q`
+- `python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q`
 - `python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q`
 - `python scripts/template_mirror_gate.py --check`
 - `python scripts/regen_host_lock_if_needed.py --check`

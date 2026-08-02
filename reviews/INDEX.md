@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T00:34:24+09:00
-record_count: 1294
+generated_at: 2026-08-03T00:44:42+09:00
+record_count: 1295
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1294` review and evidence records under `reviews/`.
+- Summary: indexed `1295` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1294` files |
+| Reviews covered | pass | `1295` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -701,6 +701,7 @@ record_count: 1294
 | `reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md` | `REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction` | md | accepted | correction | TASK-AR-654 W4b evidence and contract correction |
 | `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan` | md | accepted | pass | TASK-AR-655 lease and grace bounds T3 scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment` | md | accepted | pass | TASK-AR-655 shared duration primitives scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

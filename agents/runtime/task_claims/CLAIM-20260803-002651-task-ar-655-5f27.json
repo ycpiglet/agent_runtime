@@ -41,16 +41,16 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.",
-  "phase": "lease-grace-scope-amended",
-  "progress_pct": 15,
+  "phase": "shared-duration-scope-amended",
+  "progress_pct": 18,
   "step_index": 2,
   "step_total": 10,
-  "status_text": "Lease/grace defect and bounded RED-first scope registered",
+  "status_text": "Shared portable duration primitives registered; RED tests in progress",
   "worktree_path": ".worktrees/TASK-AR-655",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-03T00:26:51+09:00",
   "last_heartbeat": "2026-08-03T00:26:51+09:00",
-  "updated_at": "2026-08-03T00:30:23+09:00",
+  "updated_at": "2026-08-03T00:43:11+09:00",
   "expires_at": "2026-08-03T08:26:51+09:00",
   "lease": {
     "claimed_at": "2026-08-03T00:26:51+09:00",
@@ -77,6 +77,9 @@
   },
   "knowledge_matches": [],
   "target_files": [
+    "src/agent_runtime/claim_store.py",
+    "scripts/agent_runtime/claim_store.py",
+    "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
     "scripts/task_claim_dispatcher.py",
     "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
     "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
@@ -94,6 +97,7 @@
     "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
     "src/agent_runtime/ui_state.py",
     "tests/test_task_claim_dispatcher.py",
+    "tests/test_claim_store.py",
     "tests/test_claim_lease.py",
     "tests/test_claim_reaper.py",
     "tests/test_deadlock_watchdog.py",
@@ -108,7 +112,8 @@
     "tests/test_lock_merge_driver.py",
     "tests/fixtures/host/agent_runtime.lock.json",
     "reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md",
-    "reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md"
+    "reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md"
   ],
   "persistence": {
     "mode": "working_tree",

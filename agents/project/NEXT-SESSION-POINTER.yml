@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T00:30:23+09:00
+updated_at: 2026-08-03T00:43:11+09:00
 updated_by: le-20260803-001200-kst-ar655lease001
 current_state:
   summary: "TASK-AR-655 is claimed under a bounded T3 amendment for fail-closed lease/grace inputs before atomic heartbeat and renewal implementation."
@@ -9,7 +9,7 @@ current_state:
   step_index: 4
   step_total: 7
   progress_pct: 45
-  status_text: "AR-655 scope authority is registered; add and capture RED regressions before changing implementation."
+  status_text: "AR-655 shared duration scope is registered; RED regressions are being added before implementation."
 active_work:
   current_agents:
     - claim_id: CLAIM-20260803-002651-task-ar-655-5f27
@@ -23,11 +23,11 @@ active_work:
       unit_id: UNIT-TASK-AR-655-001
       task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: claimed
-      phase: lease-grace-scope-amended
-      progress_pct: 15
+      phase: shared-duration-scope-amended
+      progress_pct: 18
       step_index: 2
       step_total: 10
-      status_text: "Lease/grace defect and bounded RED-first scope registered"
+      status_text: "Shared portable duration primitives registered; RED tests in progress"
       worktree_path: .worktrees/TASK-AR-655
       branch: codex/task-ar-655-v080-lease-bounds
       requested_model_tier: worker_standard
