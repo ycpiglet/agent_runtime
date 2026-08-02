@@ -12,12 +12,68 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import claim_reaper  # noqa: E402
 
 NOW = "2026-06-14T12:00:00+09:00"
+
+
+def _claim_store_markers(root: Path) -> tuple[Path, Path]:
+    return (
+        root / "agents" / "runtime" / "task_claims" / ".claim-store",
+        claim_reaper.claim_store.outer_marker_path(root),
+    )
+
+
+def _ensure_claim_store(root: Path, witness_claim_id: str) -> None:
+    inner, outer = _claim_store_markers(root)
+    raw = (
+        json.dumps(
+            {
+                "schema": claim_reaper.claim_store.MARKER_SCHEMA,
+                "generation_id": "11111111-1111-4111-8111-111111111111",
+                "witness_claim_id": witness_claim_id,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+    for marker in (inner, outer):
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        if not marker.is_file():
+            marker.write_bytes(raw)
+    assert inner.read_bytes() == outer.read_bytes()
+
+
+def _reaper_mutation_snapshot(root: Path) -> dict[str, bytes | None]:
+    paths = [
+        *_claim_store_markers(root),
+        *sorted((root / "agents/runtime/task_claims").glob("CLAIM-*.json")),
+        root / "agents/runtime/pane_events/pane-events.jsonl",
+        root / "agents/runtime/stop_counters.json",
+        *sorted((root / "agents/runtime/events").glob("*.jsonl")),
+    ]
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes() if path.is_file() else None
+        for path in paths
+    }
+
+
+def _assert_claim_store_failure(report: dict, state: str) -> None:
+    authority = report["claim_store"]
+    assert authority["state"] == state
+    finding = authority["finding"]
+    assert isinstance(finding, str) and finding
+    assert len(finding) <= 256
+    assert "\n" not in finding
+    assert "Traceback" not in finding
+    assert report["reaped"] == []
+    assert report["would_reap"] == []
 
 
 def _claim(tmp_path: Path, claim_id: str, *, status: str = "claimed",
@@ -43,6 +99,7 @@ def _claim(tmp_path: Path, claim_id: str, *, status: str = "claimed",
     payload.update(extra)
     path = claim_dir / f"{claim_id}.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    _ensure_claim_store(tmp_path, claim_id)
     return path
 
 
@@ -69,6 +126,175 @@ def test_provably_dead_claim_is_reaped_on_apply(tmp_path):
     assert reaped["recovered_from_status"] == "claimed"
     assert reaped["reaped_by"] == "claim_reaper"
     assert "reaped_at" in reaped
+    assert report["claim_store"] == {
+        "state": "initialized",
+        "finding": None,
+    }
+
+
+@pytest.mark.parametrize("payload_kind", ("oversized", "deep", "invalid-utf8"))
+def test_apply_refuses_unbounded_non_witness_claim_without_any_mutation(
+    tmp_path,
+    payload_kind,
+):
+    _claim(
+        tmp_path,
+        "CLAIM-retained-witness",
+        expires_at="2026-06-14T13:00:00+09:00",
+    )
+    path = (
+        tmp_path
+        / "agents"
+        / "runtime"
+        / "task_claims"
+        / f"CLAIM-unbounded-{payload_kind}.json"
+    )
+    base = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": f"CLAIM-unbounded-{payload_kind}",
+        "task_id": "TASK-AR-unbounded",
+        "agent_role": "lead-engineer",
+        "status": "claimed",
+        "expires_at": "2026-06-14T11:00:00+09:00",
+        "lease": {"expires_at": "2026-06-14T11:00:00+09:00"},
+    }
+    if payload_kind == "oversized":
+        base["padding"] = "x" * (claim_reaper.claim_store.CLAIM_MAX_BYTES + 1)
+        raw = json.dumps(base).encode("utf-8")
+    elif payload_kind == "deep":
+        prefix = json.dumps(base)[:-1]
+        raw = (
+            prefix + ',"nested":' + "[" * 1100 + "0" + "]" * 1100 + "}"
+        ).encode("utf-8")
+    else:
+        raw = json.dumps(base).encode("utf-8") + b"\xff"
+    path.write_bytes(raw)
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    _assert_claim_store_failure(report, "integrity-invalid")
+    assert path.read_bytes() == raw
+    assert _reaper_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("status", ("mystery", ["claimed"], None))
+def test_apply_refuses_unknown_or_nonstring_claim_status_without_any_mutation(
+    tmp_path,
+    status,
+):
+    path = _claim(
+        tmp_path,
+        "CLAIM-invalid-status",
+        status=status,
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    _assert_claim_store_failure(report, "integrity-invalid")
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == status
+    assert _reaper_mutation_snapshot(tmp_path) == before
+
+
+def test_reap_audit_failure_does_not_misreport_successful_authority_mutation(
+    tmp_path,
+    monkeypatch,
+):
+    path = _claim(
+        tmp_path,
+        "CLAIM-dead-audit-failure",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+
+    def fail_stop_event(*_args, **_kwargs):
+        raise OSError("injected stop-event write failure")
+
+    monkeypatch.setattr(
+        claim_reaper.stop_events,
+        "record_stop_event",
+        fail_stop_event,
+    )
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    assert [entry["claim_id"] for entry in report["reaped"]] == [
+        "CLAIM-dead-audit-failure"
+    ]
+    assert report["claim_store"] == {
+        "state": "initialized",
+        "finding": None,
+    }
+    assert _load(path)["status"] == "expired"
+
+
+def test_apply_refuses_markerless_populated_store_without_any_mutation(tmp_path):
+    path = _claim(
+        tmp_path,
+        "CLAIM-markerless",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    inner, outer = _claim_store_markers(tmp_path)
+    inner.unlink()
+    outer.unlink()
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    _assert_claim_store_failure(report, "migration-required")
+    assert _load(path)["status"] == "claimed"
+    assert _reaper_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    ("missing_side", "expected_state"),
+    (("inner", "integrity-invalid"), ("outer", "migration-required")),
+)
+def test_apply_refuses_one_sided_store_without_any_mutation(
+    tmp_path,
+    missing_side,
+    expected_state,
+):
+    path = _claim(
+        tmp_path,
+        f"CLAIM-one-sided-{missing_side}",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    inner, outer = _claim_store_markers(tmp_path)
+    {"inner": inner, "outer": outer}[missing_side].unlink()
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    _assert_claim_store_failure(report, expected_state)
+    assert _load(path)["status"] == "claimed"
+    assert _reaper_mutation_snapshot(tmp_path) == before
 
 
 def test_reaped_status_outside_all_active_sets(tmp_path):
@@ -90,6 +316,31 @@ def test_dry_run_writes_nothing(tmp_path):
     assert _load(path)["status"] == "claimed"  # untouched
     # no counters file written in dry-run
     assert not (tmp_path / "agents" / "runtime" / "stop_counters.json").exists()
+
+
+def test_dry_run_reports_markerless_migration_without_creating_markers(tmp_path):
+    path = _claim(
+        tmp_path,
+        "CLAIM-dry-run-markerless",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    inner, outer = _claim_store_markers(tmp_path)
+    inner.unlink()
+    outer.unlink()
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=False,
+        grace_seconds=600,
+    )
+
+    _assert_claim_store_failure(report, "migration-required")
+    assert _load(path)["status"] == "claimed"
+    assert not inner.exists()
+    assert not outer.exists()
+    assert _reaper_mutation_snapshot(tmp_path) == before
 
 
 def test_orchestrator_claim_is_skipped(tmp_path):
@@ -169,3 +420,39 @@ def test_cli_dry_run_default_and_apply(tmp_path, capsys):
                             "--grace-seconds", "600", "--apply", "--json"])
     assert rc == 0
     assert _load(path)["status"] == "expired"
+
+
+def test_cli_apply_reports_bounded_store_failure_without_traceback_or_mutation(
+    tmp_path,
+    capsys,
+):
+    path = _claim(
+        tmp_path,
+        "CLAIM-cli-markerless",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    inner, outer = _claim_store_markers(tmp_path)
+    inner.unlink()
+    outer.unlink()
+    before = _reaper_mutation_snapshot(tmp_path)
+
+    rc = claim_reaper.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--now",
+            NOW,
+            "--grace-seconds",
+            "600",
+            "--apply",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc == 1
+    assert "Traceback" not in captured.out + captured.err
+    report = json.loads(captured.out)
+    _assert_claim_store_failure(report, "migration-required")
+    assert _load(path)["status"] == "claimed"
+    assert _reaper_mutation_snapshot(tmp_path) == before

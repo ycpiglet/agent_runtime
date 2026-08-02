@@ -6,6 +6,7 @@
     "agent_loop.py",
     "agent_retro.py",
     "agent_runtime/__init__.py",
+    "agent_runtime/claim_store.py",
     "agent_runtime/config.py",
     "agent_runtime/state_projection.py",
     "atomic_io.py",
@@ -52,6 +53,7 @@
     "release_cadence_trigger.py",
     "requirements_lint_gate.py",
     "response_contract_gate.py",
+    "role_routing.py",
     "runtime_asset_usage.py",
     "scheduled_dispatch_gate.py",
     "scm_steward.py",
@@ -86,6 +88,9 @@
     "work_schema_gate.py",
     "worktree_lifecycle_gate.py"
   ],
+  "package_sources": {
+    "agent_runtime/claim_store.py": "src/agent_runtime/claim_store.py"
+  },
   "intentional_divergences": {
     "compound_record.py": {
       "reason": "The source script is a repository entrypoint wrapper, while the packaged script is a standalone consumer implementation.",

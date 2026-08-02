@@ -141,6 +141,37 @@ def test_overlay_detects_status_divergence_and_claim_join(overlay_repo: Path) ->
     }
 
 
+def test_overlay_uses_supplied_canonical_claim_snapshot_without_disk_reload(
+    overlay_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    supplied = [
+        {
+            "schema": "agent-runtime-task-claim/v1",
+            "claim_id": "CLAIM-SNAPSHOT-TASK-AR-900",
+            "task_id": "TASK-AR-900",
+            "status": "claimed",
+        }
+    ]
+
+    def forbidden_reload(_root: Path) -> dict[str, dict[str, object]]:
+        raise AssertionError("supplied canonical snapshot was reloaded from disk")
+
+    monkeypatch.setattr(inflight_overlay, "load_claim_index", forbidden_reload)
+
+    overlay = inflight_overlay.build_overlay(
+        overlay_repo,
+        claim_snapshot=supplied,
+    )
+    by_task = {record["task_id"]: record for record in overlay["records"]}
+
+    assert by_task["TASK-AR-900"]["claim_status"] == "active"
+    assert by_task["TASK-AR-900"]["claim_id"] == "CLAIM-SNAPSHOT-TASK-AR-900"
+    assert by_task["TASK-AR-900"]["claimless_flag"] is False
+    assert by_task["TASK-AR-901"]["claim_status"] == "none"
+    assert by_task["TASK-AR-901"]["claimless_flag"] is True
+
+
 def test_overlay_summary_line_formats(overlay_repo: Path) -> None:
     overlay = inflight_overlay.build_overlay(overlay_repo)
     line = inflight_overlay.summary_line(overlay)

@@ -17,10 +17,13 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+from agent_runtime import claim_store
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -45,8 +48,13 @@ def _claims_dir(root: Path) -> Path:
     return root / "agents" / "runtime" / "task_claims"
 
 
-def _seed_lead_claim(root: Path, *, task_id: str = "TASK-AR-900",
-                     task_set_id: str = "TASKSET-AR-900") -> dict:
+def _seed_lead_claim(
+    root: Path,
+    *,
+    task_id: str = "TASK-AR-900",
+    task_set_id: str = "TASKSET-AR-900",
+    initialize_authority: bool = True,
+) -> dict:
     """Write a pre-existing lead-engineer claim, as the live loop would."""
     claims = _claims_dir(root)
     claims.mkdir(parents=True, exist_ok=True)
@@ -66,6 +74,8 @@ def _seed_lead_claim(root: Path, *, task_id: str = "TASK-AR-900",
     (claims / f"{claim['claim_id']}.json").write_text(
         json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    if initialize_authority:
+        claim_store.initialize_store(root, witness_claim_id=claim["claim_id"])
     return claim
 
 
@@ -84,6 +94,48 @@ def _events(root: Path) -> list[dict]:
     if not log.exists():
         return []
     return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def _claim_store_marker_bytes(witness_claim_id: str) -> bytes:
+    return (
+        json.dumps(
+            {
+                "schema": claim_store.MARKER_SCHEMA,
+                "generation_id": "12345678-1234-4234-9234-123456789abc",
+                "witness_claim_id": witness_claim_id,
+            },
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+def _overlay_mutation_snapshot(root: Path) -> dict[str, bytes]:
+    paths: list[Path] = []
+    for directory in (
+        _claims_dir(root),
+        root / "agents" / "runtime" / "pane_events",
+    ):
+        if directory.is_dir():
+            paths.extend(path for path in directory.rglob("*") if path.is_file())
+    outer = claim_store.outer_marker_path(root)
+    if outer.is_file():
+        paths.append(outer)
+    return {
+        str(path.resolve()): path.read_bytes()
+        for path in sorted(set(paths), key=lambda item: str(item))
+    }
+
+
+def _assert_bounded_claim_store_refusal(result: dict) -> None:
+    assert result["enabled"] is True
+    assert result["created"] == []
+    finding = result.get("finding")
+    assert isinstance(finding, str)
+    assert 0 < len(finding) <= 256
+    assert "\n" not in finding
+    assert "Traceback" not in finding
+    assert "claim-store" in finding
 
 
 # ---------------------------------------------------------------------------
@@ -169,6 +221,492 @@ def test_explicit_environment_value_overrides_committed_config(
     assert bool(result["created"]) is expected
 
 
+def test_first_pristine_review_overlay_initializes_retained_store_witness(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert len(result["created"]) == 1
+    claim_id = result["created"][0]["claim_id"]
+    inner = _claims_dir(tmp_path) / ".claim-store"
+    outer = claim_store.outer_marker_path(tmp_path)
+    assert inner.read_bytes() == outer.read_bytes()
+    witness = json.loads(inner.read_text(encoding="utf-8"))
+    assert witness["witness_claim_id"] == claim_id
+    inspected = claim_store.inspect_store(tmp_path)
+    assert inspected.state == "initialized"
+    assert inspected.witness_claim_id == claim_id
+
+
+@pytest.mark.parametrize(
+    "store_state",
+    ("markerless-populated", "outer-only", "malformed-pair"),
+)
+def test_review_overlay_refuses_untrusted_store_without_mutating_surfaces(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    store_state: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    lead = _seed_lead_claim(tmp_path, initialize_authority=False)
+    inner = _claims_dir(tmp_path) / ".claim-store"
+    outer = claim_store.outer_marker_path(tmp_path)
+    if store_state == "outer-only":
+        outer.parent.mkdir(parents=True, exist_ok=True)
+        outer.write_bytes(_claim_store_marker_bytes(lead["claim_id"]))
+    elif store_state == "malformed-pair":
+        outer.parent.mkdir(parents=True, exist_ok=True)
+        inner.parent.mkdir(parents=True, exist_ok=True)
+        outer.write_bytes(b"{\n")
+        inner.write_bytes(b"{\n")
+
+    before = _overlay_mutation_snapshot(tmp_path)
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+def test_initialized_overlay_idempotency_runs_under_lock_and_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    before = _overlay_mutation_snapshot(tmp_path)
+    calls = {"lock": 0, "verify_snapshot": 0}
+    original_lock = mod.claim_store.store_lock
+    original_verify = mod.claim_store.verify_snapshot
+
+    @contextmanager
+    def observed_lock(*args, **kwargs):
+        calls["lock"] += 1
+        with original_lock(*args, **kwargs):
+            yield
+
+    def observed_verify(*args, **kwargs):
+        calls["verify_snapshot"] += 1
+        return original_verify(*args, **kwargs)
+
+    monkeypatch.setattr(mod.claim_store, "store_lock", observed_lock)
+    monkeypatch.setattr(mod.claim_store, "verify_snapshot", observed_verify)
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert second["created"] == []
+    assert calls["lock"] >= 1
+    assert calls["verify_snapshot"] >= 1
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("suffix", ("handoff", "log"))
+def test_initialized_overlay_idempotency_refuses_corrupted_regular_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    artifact = _claims_dir(tmp_path) / f"{claim_id}.{suffix}.md"
+    artifact.write_bytes(f"corrupted {suffix} body\n".encode("utf-8"))
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(second)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("suffix", ("handoff", "log"))
+def test_initialized_overlay_idempotency_allows_append_after_required_prefix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    artifact = _claims_dir(tmp_path) / f"{claim_id}.{suffix}.md"
+    appended = b"\n## Progress\n\n- independently appended evidence\n"
+    with artifact.open("ab") as handle:
+        handle.write(appended)
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    assert second == {"enabled": True, "created": []}
+    assert artifact.read_bytes().endswith(appended)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("field", ["team_id", "schema"])
+def test_initialized_overlay_idempotency_refuses_missing_stable_metadata(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    path = _claims_dir(tmp_path) / f"{claim_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop(field)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(second)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+def test_initialized_overlay_idempotency_allows_documented_lifecycle_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    first = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+    assert first["created"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    path = _claims_dir(tmp_path) / f"{claim_id}.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "status": "review",
+            "phase": "independent-review",
+            "progress_pct": 50,
+            "last_heartbeat": "2026-06-22T10:04:00+09:00",
+            "updated_at": "2026-06-22T10:04:00+09:00",
+        }
+    )
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    second = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:05:00+09:00",
+    )
+
+    assert second == {"enabled": True, "created": []}
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    "existing_kind",
+    ("malformed", "symlink", "identity-mismatch", "directory"),
+)
+def test_initialized_overlay_refuses_noncanonical_existing_claim_entry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    existing_kind: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    overlay = (
+        _claims_dir(tmp_path)
+        / "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge.json"
+    )
+    if existing_kind == "malformed":
+        overlay.write_text("{not-json\n", encoding="utf-8")
+    elif existing_kind == "symlink":
+        outside = tmp_path / "outside-overlay.json"
+        outside.write_text("{}\n", encoding="utf-8")
+        try:
+            overlay.symlink_to(outside)
+        except OSError as exc:
+            pytest.skip(f"symlink creation unavailable: {exc}")
+    elif existing_kind == "identity-mismatch":
+        overlay.write_text(
+            json.dumps(
+                {
+                    "schema": "agent-runtime-task-claim/v1",
+                    "claim_id": "CLAIM-REVIEW-DIFFERENT",
+                    "status": "claimed",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    else:
+        overlay.mkdir()
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+def test_initialized_overlay_refuses_incomplete_matching_claim_instead_of_idempotency(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    overlay = _claims_dir(tmp_path) / f"{claim_id}.json"
+    overlay.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": claim_id,
+                "status": "claimed",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("suffix", ("handoff", "log"))
+def test_initialized_overlay_refuses_stale_artifact_without_overwriting(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    suffix: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    _seed_lead_claim(tmp_path)
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    stale = _claims_dir(tmp_path) / f"{claim_id}.{suffix}.md"
+    stale_payload = f"pre-existing {suffix} must survive\n".encode()
+    stale.write_bytes(stale_payload)
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert stale.read_bytes() == stale_payload
+    assert not (_claims_dir(tmp_path) / f"{claim_id}.json").exists()
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
+def test_first_overlay_marker_failure_rolls_back_claim_artifacts_and_marker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    outer = claim_store.outer_marker_path(tmp_path)
+    original_write = mod.claim_store._write_immutable
+
+    def fail_outer(path: Path, payload: bytes) -> claim_store.PathIdentity:
+        if Path(path) == outer:
+            raise claim_store.ClaimStoreError("injected outer marker failure")
+        return original_write(path, payload)
+
+    monkeypatch.setattr(mod.claim_store, "_write_immutable", fail_outer)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    assert not (_claims_dir(tmp_path) / f"{claim_id}.json").exists()
+    assert not (_claims_dir(tmp_path) / f"{claim_id}.handoff.md").exists()
+    assert not (_claims_dir(tmp_path) / f"{claim_id}.log.md").exists()
+    assert not (_claims_dir(tmp_path) / ".claim-store").exists()
+    assert not outer.exists()
+    assert claim_store.inspect_store(tmp_path).state == "pristine"
+
+
+def test_first_overlay_preserves_witness_when_inner_marker_cleanup_is_incomplete(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    outer = claim_store.outer_marker_path(tmp_path)
+    original_write = mod.claim_store._write_immutable
+    original_remove_marker = mod.claim_store._remove_created_marker
+
+    def fail_outer(path: Path, payload: bytes) -> claim_store.PathIdentity:
+        if Path(path) == outer:
+            raise claim_store.ClaimStoreError("injected outer marker failure")
+        return original_write(path, payload)
+
+    def fail_inner_marker_cleanup(
+        path: Path,
+        identity: claim_store.PathIdentity,
+        payload: bytes,
+    ) -> bool:
+        if Path(path).name == ".claim-store":
+            return False
+        return original_remove_marker(path, identity, payload)
+
+    monkeypatch.setattr(mod.claim_store, "_write_immutable", fail_outer)
+    monkeypatch.setattr(
+        mod.claim_store,
+        "_remove_created_marker",
+        fail_inner_marker_cleanup,
+    )
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert "recovery-required" in result["finding"]
+    assert "witness" in result["finding"]
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    claim_dir = _claims_dir(tmp_path)
+    assert (claim_dir / f"{claim_id}.json").is_file()
+    assert (claim_dir / f"{claim_id}.handoff.md").is_file()
+    assert (claim_dir / f"{claim_id}.log.md").is_file()
+    assert (claim_dir / ".claim-store").is_file()
+    assert not outer.exists()
+    inspection = claim_store.inspect_store(tmp_path)
+    assert inspection.state == "migration-required"
+    assert inspection.witness_claim_id == claim_id
+
+
+def test_overlay_writer_refuses_noncanonical_generated_claim_id_without_escape(
+    tmp_path: Path,
+) -> None:
+    mod = _load()
+    before = _overlay_mutation_snapshot(tmp_path)
+
+    claim, finding = mod._try_write_overlay_claim(
+        tmp_path,
+        operation="test overlay",
+        claim_id="../../ESCAPE",
+        task_id="REVIEW-TASK-AR-900",
+        agent_role="independent-auditor",
+        mode="review",
+        status_text="invalid identifier regression",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert claim is None
+    assert isinstance(finding, str) and "claim-store" in finding
+    assert not _claims_dir(tmp_path).exists()
+    assert not (tmp_path / "agents" / "ESCAPE.json").exists()
+    assert _overlay_mutation_snapshot(tmp_path) == before
+
+
 def test_json_publish_failure_rolls_back_overlay_artifacts(tmp_path, monkeypatch):
     monkeypatch.setenv("AR_ROLE_ROUTING", "1")
     mod = _load()
@@ -176,19 +714,184 @@ def test_json_publish_failure_rolls_back_overlay_artifacts(tmp_path, monkeypatch
     def fail_json(*_args, **_kwargs):
         raise OSError("injected claim JSON failure")
 
-    monkeypatch.setattr(mod.atomic_io, "write_json_atomic", fail_json)
+    monkeypatch.setattr(mod.atomic_io, "publish_json_owned_atomic", fail_json)
 
-    with pytest.raises(OSError, match="injected claim JSON failure"):
-        mod.route_review_pass(
-            tmp_path,
-            task_id="TASK-AR-900",
-            task_set_id="TASKSET-AR-900",
-            event="closeout",
-            now="2026-06-22T10:00:00+09:00",
-        )
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="closeout",
+        now="2026-06-22T10:00:00+09:00",
+    )
 
+    _assert_bounded_claim_store_refusal(result)
     claim_dir = _claims_dir(tmp_path)
     assert not list(claim_dir.glob("CLAIM-REVIEW-TASK-AR-900-*"))
+
+
+def test_overlay_creation_has_no_fallible_post_publish_ownership_capture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    capture_calls: list[Path] = []
+
+    def fail_legacy_capture(path: Path, _expected: bytes) -> None:
+        capture_calls.append(Path(path))
+        raise OSError("injected post-publication ownership capture failure")
+
+    monkeypatch.setattr(
+        mod,
+        "_capture_created_overlay_publication",
+        fail_legacy_capture,
+        raising=False,
+    )
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert "finding" not in result
+    assert capture_calls == []
+    assert len(result["created"]) == 1
+    claim = result["created"][0]
+    claim_dir = _claims_dir(tmp_path)
+    assert (claim_dir / f"{claim['claim_id']}.handoff.md").is_file()
+    assert (claim_dir / f"{claim['claim_id']}.log.md").is_file()
+    assert (claim_dir / f"{claim['claim_id']}.json").is_file()
+
+
+@pytest.mark.parametrize("failure_stage", ("claim-publication", "outer-marker"))
+def test_overlay_rollback_preserves_same_bytes_competitor_replacement(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure_stage: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    claim_id = "CLAIM-REVIEW-TASK-AR-900-independent-auditor-merge"
+    claim_dir = _claims_dir(tmp_path)
+    handoff = claim_dir / f"{claim_id}.handoff.md"
+    log = claim_dir / f"{claim_id}.log.md"
+    claim_path = claim_dir / f"{claim_id}.json"
+    replacement_identity: list[tuple[int, int]] = []
+    replacement_payload: list[bytes] = []
+
+    def replace_handoff_with_same_bytes() -> None:
+        payload = handoff.read_bytes()
+        competitor = handoff.with_name(f"{handoff.name}.competitor")
+        competitor.write_bytes(payload)
+        os.replace(competitor, handoff)
+        metadata = handoff.lstat()
+        replacement_identity.append((int(metadata.st_dev), int(metadata.st_ino)))
+        replacement_payload.append(payload)
+
+    if failure_stage == "claim-publication":
+
+        def fail_claim_publication(*_args: object, **_kwargs: object) -> None:
+            replace_handoff_with_same_bytes()
+            raise OSError("injected claim publication failure")
+
+        monkeypatch.setattr(
+            mod.atomic_io,
+            "publish_json_owned_atomic",
+            fail_claim_publication,
+        )
+    else:
+        outer = claim_store.outer_marker_path(tmp_path)
+        original_write = mod.claim_store._write_immutable
+
+        def fail_outer_marker(path: Path, payload: bytes) -> claim_store.PathIdentity:
+            if Path(path) == outer:
+                replace_handoff_with_same_bytes()
+                raise OSError("injected outer marker publication failure")
+            return original_write(path, payload)
+
+        monkeypatch.setattr(mod.claim_store, "_write_immutable", fail_outer_marker)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_claim_store_refusal(result)
+    assert len(replacement_identity) == 1
+    assert handoff.read_bytes() == replacement_payload[0]
+    metadata = handoff.lstat()
+    assert (int(metadata.st_dev), int(metadata.st_ino)) == replacement_identity[0]
+    assert not log.exists()
+    assert not claim_path.exists()
+
+
+def test_event_log_failure_does_not_misreport_persisted_overlay(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+
+    def fail_event(*_args, **_kwargs):
+        raise OSError("injected pane-event write failure")
+
+    monkeypatch.setattr(mod, "append_event", fail_event)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="closeout",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert "finding" not in result
+    assert len(result["created"]) == 1
+    claim = result["created"][0]
+    assert (_claims_dir(tmp_path) / f"{claim['claim_id']}.json").is_file()
+    assert claim_store.inspect_store(tmp_path).state == "initialized"
+
+
+def test_event_log_runs_after_claim_store_lock_is_released(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    lock_depth = {"value": 0}
+    observed_event_depths: list[int] = []
+    real_lock = mod.claim_store.store_lock
+    real_event = mod.append_event
+
+    @contextmanager
+    def observed_lock(*args, **kwargs):
+        with real_lock(*args, **kwargs):
+            lock_depth["value"] += 1
+            try:
+                yield
+            finally:
+                lock_depth["value"] -= 1
+
+    def observed_event(*args, **kwargs):
+        observed_event_depths.append(lock_depth["value"])
+        return real_event(*args, **kwargs)
+
+    monkeypatch.setattr(mod.claim_store, "store_lock", observed_lock)
+    monkeypatch.setattr(mod, "append_event", observed_event)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-900",
+        task_set_id="TASKSET-AR-900",
+        event="closeout",
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    assert len(result["created"]) == 1
+    assert observed_event_depths == [0]
 
 
 def test_review_routing_on_creates_additive_claim_without_touching_lead(tmp_path, monkeypatch):
@@ -510,4 +1213,110 @@ def test_beta_activation_on_and_due_is_idempotent(tmp_path, monkeypatch):
     second = mod.maybe_activate_beta(tmp_path, due_state="overdue", cycle=7,
                                      now="2026-06-22T10:00:00+09:00")
     assert first["created"]
+    assert first["scaffold"]["status"] == "created"
     assert second["created"] == [], "the same cycle's beta round must not be dispatched twice"
+    assert second["scaffold"]["status"] == "existing"
+
+
+def _assert_bounded_beta_scaffold_refusal(result: dict) -> None:
+    finding = result.get("finding")
+    assert isinstance(finding, str) and finding
+    assert len(finding) <= 256
+    assert "traceback" not in finding.casefold()
+    assert result["scaffold"]["status"] == "refused"
+
+
+@pytest.mark.parametrize("unsafe_parent", ["file", "alias"])
+@pytest.mark.parametrize("force_portable", [False, True])
+def test_beta_scaffold_refuses_non_directory_or_alias_parent_without_escape(
+    tmp_path,
+    monkeypatch,
+    unsafe_parent,
+    force_portable,
+):
+    monkeypatch.setenv("AR_BETA_ACTIVATION", "1")
+    mod = _load()
+    if force_portable:
+        monkeypatch.setattr(mod, "_secure_dir_fd_available", lambda: False)
+    beta_root = tmp_path / "agents" / "beta_tester"
+    beta_root.mkdir(parents=True)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    test_cases = beta_root / "test_cases"
+    if unsafe_parent == "file":
+        test_cases.write_text("not a directory", encoding="utf-8")
+    else:
+        test_cases.symlink_to(outside, target_is_directory=True)
+
+    result = mod.maybe_activate_beta(
+        tmp_path,
+        due_state="overdue",
+        cycle=8,
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_beta_scaffold_refusal(result)
+    assert result["created"], "the already-persisted claim must remain truthfully reported"
+    assert not list(outside.iterdir()), "an aliased parent must never receive a BTC file"
+    inspection = claim_store.inspect_store(tmp_path)
+    assert inspection.state == "initialized"
+    assert inspection.witness_claim_id == result["created"][0]["claim_id"]
+
+
+@pytest.mark.parametrize("force_portable", [False, True])
+def test_beta_scaffold_refuses_dangling_final_symlink_without_escape(
+    tmp_path,
+    monkeypatch,
+    force_portable,
+):
+    monkeypatch.setenv("AR_BETA_ACTIVATION", "1")
+    mod = _load()
+    if force_portable:
+        monkeypatch.setattr(mod, "_secure_dir_fd_available", lambda: False)
+    test_cases = tmp_path / "agents" / "beta_tester" / "test_cases"
+    test_cases.mkdir(parents=True)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    escaped = outside / "escaped.md"
+    btc = test_cases / "BTC-CYCLE-009-001.md"
+    btc.symlink_to(escaped)
+
+    result = mod.maybe_activate_beta(
+        tmp_path,
+        due_state="due",
+        cycle=9,
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_beta_scaffold_refusal(result)
+    assert result["created"], "the already-persisted claim must remain truthfully reported"
+    assert btc.is_symlink()
+    assert not escaped.exists(), "a dangling BTC alias must never be followed"
+
+
+def test_beta_scaffold_failure_preserves_created_claim_in_result(tmp_path, monkeypatch):
+    monkeypatch.setenv("AR_BETA_ACTIVATION", "1")
+    mod = _load()
+
+    def fail_scaffold(*_args, **_kwargs):
+        raise OSError("simulated scaffold publication failure")
+
+    # ``raising=False`` keeps this failure-first test red before the dedicated
+    # publication boundary exists; the production path must call the helper.
+    monkeypatch.setattr(mod, "_write_btc_scaffold_atomic", fail_scaffold, raising=False)
+    result = mod.maybe_activate_beta(
+        tmp_path,
+        due_state="overdue",
+        cycle=10,
+        now="2026-06-22T10:00:00+09:00",
+    )
+
+    _assert_bounded_beta_scaffold_refusal(result)
+    assert [item["claim_id"] for item in result["created"]] == [
+        "CLAIM-BETA-CYCLE-010"
+    ]
+    persisted = _load_claims(tmp_path)
+    assert [item["claim_id"] for item in persisted] == ["CLAIM-BETA-CYCLE-010"]
+    inspection = claim_store.inspect_store(tmp_path)
+    assert inspection.state == "initialized"
+    assert inspection.witness_claim_id == "CLAIM-BETA-CYCLE-010"

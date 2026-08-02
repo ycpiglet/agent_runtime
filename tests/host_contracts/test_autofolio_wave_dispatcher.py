@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
+from agent_runtime import claim_store  # noqa: E402
 import wave_dispatcher as dispatcher  # noqa: E402
 
 
@@ -552,6 +553,7 @@ def test_dispatch_refuses_unresolved_external_dependency_before_subprocess_or_mu
 
 def _write_released_claim(root: Path, *, task_id: str, unit_id: str) -> None:
     claim = {
+        "schema": claim_store.WITNESS_SCHEMA,
         "claim_id": "CLAIM-released-external",
         "task_id": task_id,
         "unit_id": unit_id,
@@ -560,6 +562,10 @@ def _write_released_claim(root: Path, *, task_id: str, unit_id: str) -> None:
     _write(
         root / "agents/runtime/task_claims/CLAIM-released-external.json",
         [json.dumps(claim)],
+    )
+    claim_store.initialize_store(
+        root,
+        witness_claim_id="CLAIM-released-external",
     )
 
 

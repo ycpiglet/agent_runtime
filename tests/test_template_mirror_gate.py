@@ -77,6 +77,7 @@ def _write_contract(
     divergences: dict[str, dict[str, str]],
     *,
     expected_common: list[str] | None = None,
+    package_sources: dict[str, str] | None = None,
 ) -> None:
     if expected_common is None:
         source = _eligible(root / "scripts")
@@ -89,6 +90,7 @@ def _write_contract(
         {
             "schema": "agent-runtime-template-mirror-contract/v2",
             "expected_common": expected_common,
+            "package_sources": package_sources or {},
             "intentional_divergences": divergences,
         },
     )
@@ -122,23 +124,55 @@ def test_product_common_script_census_has_only_three_pinned_variants() -> None:
         if root_files[path].read_bytes() != template_files[path].read_bytes()
     }
 
-    assert len(common) == 84
+    assert len(common) == 86
     assert divergent == INTENTIONAL
     assert PORTABLE_REPAIRS.isdisjoint(divergent)
     assert CONTRACT.is_file()
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     assert contract["schema"] == "agent-runtime-template-mirror-contract/v2"
     assert contract["expected_common"] == common
+    assert contract["package_sources"] == {
+        "agent_runtime/claim_store.py": "src/agent_runtime/claim_store.py"
+    }
+    assert (
+        ROOT_SCRIPTS / "agent_runtime" / "claim_store.py"
+    ).read_bytes() == (REPO_ROOT / "src" / "agent_runtime" / "claim_store.py").read_bytes()
 
     result = _run(REPO_ROOT)
     assert result.returncode == 0, result.stdout or result.stderr
     payload = json.loads(result.stdout)
-    assert payload["expected_common"] == 84
-    assert payload["current_common"] == 84
-    assert payload["eligible_common"] == 84
-    assert payload["identical"] == 81
+    assert payload["expected_common"] == 86
+    assert payload["current_common"] == 86
+    assert payload["eligible_common"] == 86
+    assert payload["identical"] == 83
     assert payload["intentional"] == 3
+    assert payload["package_sources"] == 1
     assert payload["findings"] == []
+
+
+def test_package_source_drift_blocks(tmp_path: Path) -> None:
+    _write_pair(
+        tmp_path,
+        "agent_runtime/helper.py",
+        "same\n",
+        "same\n",
+    )
+    package = tmp_path / "src" / "agent_runtime" / "helper.py"
+    package.parent.mkdir(parents=True, exist_ok=True)
+    package.write_text("stale\n", encoding="utf-8")
+    _write_contract(
+        tmp_path,
+        {},
+        package_sources={
+            "agent_runtime/helper.py": "src/agent_runtime/helper.py"
+        },
+    )
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "mirror:package-source-drift:agent_runtime/helper.py" in result.stdout
+    assert "mirror:package-template-drift:agent_runtime/helper.py" in result.stdout
 
 
 def test_expected_source_side_missing_blocks(tmp_path: Path) -> None:

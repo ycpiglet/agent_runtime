@@ -16,6 +16,8 @@ the dispatcher/footprint active sets nor the done set, so the unit becomes
 ``recovered_from_status`` and every reap is audited (pane event + stop event).
 
 Guardrails (safety first):
+  - apply holds the checkout claim-store lock and revalidates durable authority
+    immediately before every atomic claim transition;
   - a claim whose lease is still valid (heartbeating, or within grace) is NEVER touched;
   - orchestrator claims are never reaped;
   - claims with no lease info are skipped (death cannot be proven), not reaped;
@@ -39,6 +41,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from agent_runtime import claim_store
+
 import pane_event_log
 import stop_events
 
@@ -47,19 +51,13 @@ DEFAULT_GRACE_SECONDS = 600
 GRACE_ENV = "AGENT_RUNTIME_REAPER_GRACE_SECONDS"
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
 
-# Union of every "active" status the dispatchers/footprint gate recognize, so a
-# claim that blocks dispatch is a reap candidate. The reaped status (``expired``)
-# is deliberately in none of these.
-REAPABLE_ACTIVE_STATUSES = {
-    "active",
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "running",
-    "waiting_review",
-    "working",
-}
+# Use the same closed status vocabulary as closure and dispatch. The reaped
+# status (``expired``) is deliberately outside this active set.
+REAPABLE_ACTIVE_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
+
+
+class _ClaimStoreAuthorityChanged(RuntimeError):
+    """The inspected store changed before an authorized reap mutation."""
 
 
 def _parse_now(value: str | None = None) -> datetime:
@@ -110,12 +108,8 @@ def _read_claims(root: Path) -> list[tuple[Path, dict[str, Any]]]:
         return []
     records: list[tuple[Path, dict[str, Any]]] = []
     for path in sorted(base.glob("*.json"), key=lambda item: item.name.lower()):
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        if isinstance(payload, dict):
-            records.append((path, payload))
+        payload = claim_store.read_claim_payload(path)
+        records.append((path, payload))
     return records
 
 
@@ -168,89 +162,75 @@ def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
     atomic_io.write_json_atomic(path, payload)
 
 
-LOCK_TIMEOUT_SECONDS = 5.0
-LOCK_POLL_SECONDS = 0.01
+def _read_one(path: Path) -> dict[str, Any]:
+    return claim_store.read_claim_payload(path)
 
 
-def _acquire_lock(path: Path):
-    """Exclusive per-claim lock so concurrent reapers transition a claim once."""
-    import time
+def _reap_locked(
+    root: Path,
+    path: Path,
+    now: datetime,
+    grace_seconds: int,
+    store_snapshot: object,
+    audit_queue: list[dict[str, Any]],
+) -> bool:
+    """Transition one dead claim while the checkout store lock is held."""
 
-    deadline = time.monotonic() + LOCK_TIMEOUT_SECONDS
-    while True:
-        try:
-            return os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        except (FileExistsError, PermissionError):
-            # Windows can raise PermissionError while another thread/process is
-            # mid-unlink of the lock file; treat it like "held" and retry.
-            if time.monotonic() >= deadline:
-                raise TimeoutError(f"reap lock timeout: {path}")
-            import time as _t
-
-            _t.sleep(LOCK_POLL_SECONDS)
-
-
-def _release_lock(path: Path, fd: int) -> None:
-    try:
-        os.close(fd)
-    except OSError:
-        pass
-    try:
-        path.unlink()
-    except OSError:
-        pass
-
-
-def _read_one(path: Path) -> dict[str, Any] | None:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
-    return payload if isinstance(payload, dict) else None
-
-
-def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime, grace_seconds: int) -> bool:
-    """Atomically transition a provably-dead claim to ``expired``.
-
-    Returns True iff THIS call performed the transition. A per-claim lock plus a
-    re-classification under the lock guarantee that, under concurrent reapers, a
-    claim is reaped at most once and is never reaped if a heartbeat resurrected it
-    (re-classified live) in the race window between the initial read and the lock.
-    """
-    lock = path.with_name(f"{path.name}.reap.lock")
-    fd = _acquire_lock(lock)
     audit: dict[str, str] | None = None
-    try:
-        current = _read_one(path)
-        if current is None:
-            return False
-        decision, _reason = classify_claim(current, now, grace_seconds)
-        if decision != "dead":
-            return False  # already reaped, or resurrected by a heartbeat
-        prior = str(current.get("status") or "")
-        now_text = now.isoformat(timespec="seconds")
-        current["status"] = REAPED_STATUS
-        current["recovered_from_status"] = prior
-        current["reaped_at"] = now_text
-        current["reaped_by"] = "claim_reaper"
-        current["reaped_reason"] = "lease-expired"
-        current["updated_at"] = now_text
-        _write_json_atomic(path, current)
-        audit = {
-            "claim_id": current.get("claim_id", ""),
-            "task_id": current.get("task_id", ""),
-            "task_set_id": current.get("task_set_id", ""),
-            "worktree_path": current.get("worktree_path", ""),
-            "prior": prior,
-            "now_text": now_text,
-        }
-    finally:
-        _release_lock(lock, fd)
+    current = _read_one(path)
+    if current is None:
+        return False
+    decision, _reason = classify_claim(current, now, grace_seconds)
+    if decision != "dead":
+        return False  # already reaped, or resurrected by a heartbeat
+    if not claim_store.verify_snapshot(root, store_snapshot):
+        raise _ClaimStoreAuthorityChanged(
+            "claim-store authority changed before reap mutation"
+        )
+    prior = str(current.get("status") or "")
+    now_text = now.isoformat(timespec="seconds")
+    current["status"] = REAPED_STATUS
+    current["recovered_from_status"] = prior
+    current["reaped_at"] = now_text
+    current["reaped_by"] = "claim_reaper"
+    current["reaped_reason"] = "lease-expired"
+    current["updated_at"] = now_text
+    _write_json_atomic(path, current)
+    audit = {
+        "claim_id": current.get("claim_id", ""),
+        "task_id": current.get("task_id", ""),
+        "task_set_id": current.get("task_set_id", ""),
+        "worktree_path": current.get("worktree_path", ""),
+        "prior": prior,
+        "now_text": now_text,
+    }
 
     if audit is None:
         return False
-    # Audit trail is best-effort and runs outside the lock: a logging failure must
-    # never block recovery, and only the winning reaper records (no double audit).
+    audit_queue.append({"kind": "reaped", **audit, "now": now})
+    return True
+
+
+def _record_audit(root: Path, audit: dict[str, Any]) -> None:
+    """Record one completed decision after releasing claim-store authority."""
+
+    if audit["kind"] == "skipped":
+        try:
+            stop_events.record_stop_event(
+                root,
+                source="claim_reaper",
+                reason_code="dead_claim",
+                action="skipped",
+                klass="recoverable",
+                claim_id=audit["claim_id"],
+                task_id=audit["task_id"],
+                message=f"skipped: {audit['reason']}",
+                now=audit["now"],
+            )
+        except Exception:  # noqa: BLE001 - audit is best-effort
+            pass
+        return
+
     try:
         pane_event_log.append_event(
             root,
@@ -271,18 +251,63 @@ def _reap(root: Path, path: Path, claim: dict[str, Any], now: datetime, grace_se
         )
     except Exception:  # noqa: BLE001
         pass
-    stop_events.record_stop_event(
-        root,
-        source="claim_reaper",
-        reason_code="dead_claim",
-        action="reaped",
-        klass="recoverable",
-        claim_id=audit["claim_id"],
-        task_id=audit["task_id"],
-        message=f"was {audit['prior']}",
-        now=now,
-    )
-    return True
+    try:
+        stop_events.record_stop_event(
+            root,
+            source="claim_reaper",
+            reason_code="dead_claim",
+            action="reaped",
+            klass="recoverable",
+            claim_id=audit["claim_id"],
+            task_id=audit["task_id"],
+            message=f"was {audit['prior']}",
+            now=audit["now"],
+        )
+    except Exception:  # noqa: BLE001 - authority mutation already succeeded
+        pass
+
+
+def _reap(
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+    now: datetime,
+    grace_seconds: int,
+    _store_snapshot: object | None = None,
+    _audit_queue: list[dict[str, Any]] | None = None,
+) -> bool:
+    """Compatibility entrypoint that always establishes store authority."""
+
+    root = Path(root).resolve()
+    if _store_snapshot is not None:
+        return _reap_locked(
+            root,
+            path,
+            now,
+            grace_seconds,
+            _store_snapshot,
+            _audit_queue if _audit_queue is not None else [],
+        )
+    audit_queue: list[dict[str, Any]] = []
+    with claim_store.store_lock(root):
+        inspection = claim_store.inspect_store(root)
+        if (
+            inspection.state not in {"initialized", "pristine"}
+            or inspection.snapshot is None
+        ):
+            reaped = False
+        else:
+            reaped = _reap_locked(
+                root,
+                path,
+                now,
+                grace_seconds,
+                inspection.snapshot,
+                audit_queue,
+            )
+    for audit in audit_queue:
+        _record_audit(root, audit)
+    return reaped
 
 
 def _entry(path: Path, claim: dict[str, Any], reason: str) -> dict[str, Any]:
@@ -292,6 +317,92 @@ def _entry(path: Path, claim: dict[str, Any], reason: str) -> dict[str, Any]:
         "reason": reason,
         "worktree_path": claim.get("worktree_path", ""),
     }
+
+
+def _bounded_claim_store_finding(value: object) -> str:
+    text = " ".join(str(value or "claim-store authority is invalid").split())
+    return text[:256] or "claim-store authority is invalid"
+
+
+def _set_claim_store_report(
+    report: dict[str, Any],
+    *,
+    state: str,
+    finding: object = None,
+) -> None:
+    report["claim_store"] = {
+        "state": state,
+        "finding": (
+            None if finding is None else _bounded_claim_store_finding(finding)
+        ),
+    }
+
+
+def _authorized_sweep(
+    root: Path,
+    *,
+    report: dict[str, Any],
+    inspection: object,
+    now: datetime,
+    grace_seconds: int,
+    apply: bool,
+    audit_queue: list[dict[str, Any]],
+) -> None:
+    snapshot = inspection.snapshot
+    if snapshot is None:
+        raise _ClaimStoreAuthorityChanged("claim-store snapshot is missing")
+    for path, claim in _read_claims(root):
+        decision, reason = classify_claim(claim, now, grace_seconds)
+        entry = _entry(path, claim, reason)
+        if decision == "live":
+            report["live"].append(entry)
+        elif decision == "skip":
+            report["skipped"].append(entry)
+            if apply and reason in ("orchestrator-claim", "no-lease-info"):
+                if not claim_store.verify_snapshot(root, snapshot):
+                    raise _ClaimStoreAuthorityChanged(
+                        "claim-store authority changed before skip audit"
+                    )
+                audit_queue.append(
+                    {
+                        "kind": "skipped",
+                        "claim_id": entry["claim_id"],
+                        "task_id": entry["task_id"],
+                        "reason": reason,
+                        "now": now,
+                    }
+                )
+        elif apply:
+            if _reap(
+                root,
+                path,
+                claim,
+                now,
+                grace_seconds,
+                _store_snapshot=snapshot,
+                _audit_queue=audit_queue,
+            ):
+                report["reaped"].append(entry)
+                refreshed = claim_store.inspect_store(root)
+                if (
+                    refreshed.state not in {"initialized", "pristine"}
+                    or refreshed.snapshot is None
+                ):
+                    raise _ClaimStoreAuthorityChanged(
+                        refreshed.finding
+                        or "claim-store authority changed after reap mutation"
+                    )
+                snapshot = refreshed.snapshot
+            else:
+                report["skipped"].append(
+                    {**entry, "reason": "reap-superseded"}
+                )
+        else:
+            report["would_reap"].append(entry)
+    if not claim_store.verify_snapshot(root, snapshot):
+        raise _ClaimStoreAuthorityChanged(
+            "claim-store authority changed during reap sweep"
+        )
 
 
 def sweep(
@@ -312,37 +423,65 @@ def sweep(
         "would_reap": [],
         "live": [],
         "skipped": [],
+        "claim_store": {
+            "state": "integrity-invalid",
+            "finding": "claim-store inspection was not completed",
+        },
     }
-    for path, claim in _read_claims(root):
-        decision, reason = classify_claim(claim, now_dt, grace)
-        entry = _entry(path, claim, reason)
-        if decision == "live":
-            report["live"].append(entry)
-        elif decision == "skip":
-            report["skipped"].append(entry)
-            # Surface active claims we declined to reap (not terminal ones).
-            if apply and reason in ("orchestrator-claim", "no-lease-info"):
-                stop_events.record_stop_event(
-                    root,
-                    source="claim_reaper",
-                    reason_code="dead_claim",
-                    action="skipped",
-                    klass="recoverable",
-                    claim_id=entry["claim_id"],
-                    task_id=entry["task_id"],
-                    message=f"skipped: {reason}",
-                    now=now_dt,
+    audit_queue: list[dict[str, Any]] = []
+    try:
+        if apply:
+            with claim_store.store_lock(root):
+                inspection = claim_store.inspect_store(root)
+                _set_claim_store_report(
+                    report,
+                    state=inspection.state,
+                    finding=inspection.finding,
                 )
-        else:  # dead
-            if apply:
-                if _reap(root, path, claim, now_dt, grace):
-                    report["reaped"].append(entry)
-                else:
-                    # Another concurrent reaper won the race, or a heartbeat
-                    # resurrected the claim under the lock.
-                    report["skipped"].append({**entry, "reason": "reap-superseded"})
-            else:
-                report["would_reap"].append(entry)
+                if inspection.state not in {"initialized", "pristine"}:
+                    return report
+                _authorized_sweep(
+                    root,
+                    report=report,
+                    inspection=inspection,
+                    now=now_dt,
+                    grace_seconds=grace,
+                    apply=True,
+                    audit_queue=audit_queue,
+                )
+        else:
+            inspection = claim_store.inspect_store(root)
+            _set_claim_store_report(
+                report,
+                state=inspection.state,
+                finding=inspection.finding,
+            )
+            if inspection.state not in {"initialized", "pristine"}:
+                return report
+            _authorized_sweep(
+                root,
+                report=report,
+                inspection=inspection,
+                now=now_dt,
+                grace_seconds=grace,
+                apply=False,
+                audit_queue=audit_queue,
+            )
+    except (
+        _ClaimStoreAuthorityChanged,
+        claim_store.ClaimStoreError,
+        OSError,
+        RuntimeError,
+        TimeoutError,
+        ValueError,
+    ) as exc:
+        _set_claim_store_report(
+            report,
+            state="integrity-invalid",
+            finding=exc,
+        )
+    for audit in audit_queue:
+        _record_audit(root, audit)
     return report
 
 
@@ -354,6 +493,16 @@ def _render_human(report: dict[str, Any]) -> str:
         "claim-reaper: " + ("apply" if report["apply"] else "dry-run"),
         f"now={report['now']} grace_seconds={report['grace_seconds']}",
     ]
+    authority = report.get("claim_store") or {}
+    lines.append(
+        "claim_store="
+        + str(authority.get("state") or "integrity-invalid")
+        + (
+            f" finding={authority['finding']}"
+            if authority.get("finding")
+            else ""
+        )
+    )
     reaped = report["reaped"] if report["apply"] else report["would_reap"]
     verb = "reaped" if report["apply"] else "would-reap"
     lines.append(f"{verb}={len(reaped)} live={len(report['live'])} skipped={len(report['skipped'])}")
@@ -390,6 +539,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
         print(_render_human(report))
+    authority_state = str((report.get("claim_store") or {}).get("state") or "")
+    if args.apply and authority_state not in {"initialized", "pristine"}:
+        return 1
     return 0
 
 

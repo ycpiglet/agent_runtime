@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from agent_runtime import state_projection
+from agent_runtime import claim_store, state_projection
 
 try:
     import backlog_board
@@ -38,14 +38,8 @@ DEFAULT_THRESHOLD = 80
 DEFAULT_WINDOW_HOURS = 12
 CODE_PATHS = ("src", "scripts", "tests")
 RECORD_KINDS = ("compound", "review", "retro")
-ACTIVE_CLAIM_STATUSES = {
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "waiting_review",
-    "working",
-}
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
+INACTIVE_CLAIM_STATUSES = claim_store.INACTIVE_CLAIM_STATUSES
 CLAIM_AUTHORITY_FIELDS = (
     "escalation_triggers",
     "defect_signatures",
@@ -57,6 +51,8 @@ _WINDOWS_REPARSE_POINT_ATTRIBUTE = getattr(
     0x0400,
 )
 _WINDOWS_NAME_SURROGATE_TAG = 0x20000000
+_ACTIVE_CLAIM_MAX_BYTES = claim_store.CLAIM_MAX_BYTES
+_ACTIVE_CLAIM_MAX_INTEGER_DIGITS = claim_store.JSON_MAX_INTEGER_DIGITS
 
 
 def _parse_now(value: str | None = None) -> datetime:
@@ -288,7 +284,18 @@ def _claim_store_component_is_alias(metadata: Any) -> bool:
     return not isinstance(reparse_tag, int) or reparse_tag == 0
 
 
-def _active_claims(
+def _bounded_claim_json_int(value: str) -> int:
+    digits = value[1:] if value.startswith("-") else value
+    if len(digits) > _ACTIVE_CLAIM_MAX_INTEGER_DIGITS:
+        raise ValueError("active claim integer exceeds the bounded digit limit")
+    return int(value)
+
+
+def _load_bounded_claim_json(path: Path) -> Any:
+    return claim_store.read_claim_payload(path)
+
+
+def _active_claims_unlocked(
     root: Path,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     claims_dir = root / "agents" / "runtime" / "task_claims"
@@ -360,20 +367,21 @@ def _active_claims(
             findings.append(f"active-claim-integrity-invalid:{path.name}")
             continue
         try:
-            payload = json.loads(resolved_path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError):
-            findings.append(f"active-claim-invalid-json:{path.name}")
+            payload = _load_bounded_claim_json(resolved_path)
+        except claim_store.ClaimStoreError:
+            findings.append(f"active-claim-integrity-invalid:{path.name}")
             continue
         if not isinstance(payload, dict):
             findings.append(f"active-claim-invalid-root:{path.name}")
             continue
-        status = str(payload.get("status") or "").strip()
+        status = str(payload["status"])
         if status not in ACTIVE_CLAIM_STATUSES or _claim_is_overlay(payload):
             continue
+        payload["status"] = status
         claim_id = str(payload.get("claim_id") or "").strip()
         if (
             payload.get("schema") != "agent-runtime-task-claim/v1"
-            or not claim_id
+            or not claim_store.valid_claim_id(claim_id)
             or path.name != f"{claim_id}.json"
             or not _claim_authority_shape_valid(payload)
         ):
@@ -389,6 +397,33 @@ def _active_claims(
         reverse=True,
     )
     return ordered, findings
+
+
+def _active_claims(
+    root: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Read one locked, durable claim-store authority snapshot."""
+
+    try:
+        with claim_store.store_lock(root):
+            inspection = claim_store.inspect_store(root)
+            if inspection.state not in {"initialized", "pristine"}:
+                return [], ["active-claim-store-integrity-invalid"]
+            claims, findings = _active_claims_unlocked(root)
+            if inspection.snapshot is None or not claim_store.verify_snapshot(
+                root,
+                inspection.snapshot,
+            ):
+                return [], ["active-claim-store-integrity-invalid"]
+            return claims, findings
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        RuntimeError,
+        TimeoutError,
+        ValueError,
+    ):
+        return [], ["active-claim-store-integrity-invalid"]
 
 
 def _claim_unit_path(root: Path, claim: dict[str, Any]) -> Path | None:
@@ -798,6 +833,7 @@ def repeated_failure_requirement(
     )
     required = bool(raw_signatures or "repeated_failure" in triggers)
     valid_refs: list[str] = []
+    covered_signatures: set[str] = set()
     if required:
         for ref in compound_refs:
             try:
@@ -820,8 +856,22 @@ def repeated_failure_requirement(
             )
             if not prevention_findings:
                 valid_refs.append(ref)
+                covered_signatures.update(
+                    set(record["defect_signatures"]).intersection(signatures)
+                )
         if not valid_refs:
             findings.append("compound:current-work-record-required")
+        uncovered_signatures = [
+            signature
+            for signature in signatures
+            if signature not in covered_signatures
+        ]
+        findings.extend(
+            f"compound:defect-signature-uncovered:{signature}"
+            for signature in uncovered_signatures
+        )
+    else:
+        uncovered_signatures = []
 
     findings = list(dict.fromkeys(findings))
     return {
@@ -831,6 +881,10 @@ def repeated_failure_requirement(
         "escalation_triggers": triggers,
         "compound_refs": compound_refs,
         "valid_compound_refs": valid_refs,
+        "covered_defect_signatures": [
+            signature for signature in signatures if signature in covered_signatures
+        ],
+        "uncovered_defect_signatures": uncovered_signatures,
         "findings": findings,
     }
 
@@ -996,7 +1050,8 @@ def decide(
                 "missing": ["compound"],
                 "message": (
                     "Declared repeated-failure work requires a canonical "
-                    "Compound linked to the current task or unit, and every "
+                    "Compound linked to the current task or unit, every "
+                    "declared defect signature must be covered, and every "
                     "prevention ref must stay inside the repository and exist. "
                     "At least one prevention destination must be a regression "
                     "fixture, executable *_gate.py, task proposal, or accepted "

@@ -1025,6 +1025,8 @@ def _write_active_unit(
         ),
         encoding="utf-8",
     )
+    if not (claims / ".claim-store").is_file():
+        _write_claim_store_witness_pair(root, witness_claim_id="CLAIM-active")
 
 
 def _write_claim_store_witness_pair(root: Path, *, witness_claim_id: str) -> None:
@@ -1062,6 +1064,9 @@ def _write_claim_store_witness_pair(root: Path, *, witness_claim_id: str) -> Non
         path.parent.mkdir(parents=True, exist_ok=True)
         if not path.is_file():
             path.write_bytes(raw)
+    lock_path = outer.with_name(outer.name + ".lock")
+    if not lock_path.is_file():
+        lock_path.write_bytes(b"\0")
     assert inner.read_bytes() == outer.read_bytes()
 
 
@@ -1205,7 +1210,29 @@ def test_active_claim_rejects_unknown_or_non_string_status_as_integrity_invalid(
     claims, findings = closure_gate._active_claims(tmp_path)
 
     assert claims == []
-    assert findings == ["active-claim-integrity-invalid:CLAIM-active.json"]
+    assert findings == ["active-claim-store-integrity-invalid"]
+
+
+def test_active_claim_rejects_noncanonical_claim_id_before_authority_merge(
+    tmp_path,
+):
+    _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-witness",
+        overlay=True,
+    )
+    invalid_path = _write_canonical_active_claim(
+        tmp_path,
+        claim_id="CLAIM-bad!",
+        defect_signatures=["defect:forged-authority:0123456789abcdef"],
+    )
+
+    claims, findings = closure_gate._active_claims(tmp_path)
+
+    assert claims == []
+    assert findings == [
+        f"active-claim-integrity-invalid:{invalid_path.name}"
+    ]
 
 
 def test_active_claim_store_rejects_scandir_open_error(
@@ -2061,6 +2088,63 @@ def test_declared_repeat_accepts_current_compound_with_supported_prevention(
     assert result["decision"] == "approve"
     assert result["reason"] == "repeated-failure-compound-present"
     assert result["repeat_failure"]["satisfied"] is True
+
+
+def test_declared_repeat_requires_compound_coverage_for_every_signature(
+    tmp_path,
+    monkeypatch,
+):
+    covered = compound_record.normalize_signature("covered repeated failure")
+    uncovered = compound_record.normalize_signature("uncovered repeated failure")
+    prevention = tmp_path / "tests" / "test_covered_repeat.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text(
+        "def test_covered_repeat():\n    assert True\n",
+        encoding="utf-8",
+    )
+    record_path, _record = compound_record.create_record(
+        tmp_path,
+        work_ids=["UNIT-TASK-AR-645-001", "TASK-AR-645"],
+        defect_signatures=[covered],
+        title="Prevent one repeated failure",
+        summary="One of two declared failures has prevention.",
+        cause="Coverage was previously evaluated at record granularity.",
+        prevention="Require signature-union coverage before closure.",
+        source_refs=["reviews/source.md"],
+        prevention_refs=["tests/test_covered_repeat.py"],
+        verification_refs=["reviews/VERIFY-unit.json"],
+        created_at="2026-06-14T11:41:00+09:00",
+    )
+    _write_active_unit(
+        tmp_path,
+        compound_refs=[compound_record.record_ref(tmp_path, record_path)],
+        signatures=[covered, uncovered],
+    )
+    monkeypatch.setattr(
+        closure_gate, "count_substantial_lines", lambda *args, **kwargs: 10
+    )
+    monkeypatch.setattr(
+        closure_gate.state_projection,
+        "evaluate_state",
+        lambda _root: _scribe_evaluation(
+            state="ok", projection="fresh", blocking=False
+        ),
+    )
+
+    result = closure_gate.assess(
+        tmp_path,
+        work_id="UNIT-TASK-AR-645-001",
+        threshold=80,
+        disabled=False,
+    )
+
+    assert result["decision"] == "block"
+    assert result["repeat_failure"]["satisfied"] is False
+    assert result["repeat_failure"]["covered_defect_signatures"] == [covered]
+    assert result["repeat_failure"]["uncovered_defect_signatures"] == [uncovered]
+    assert f"compound:defect-signature-uncovered:{uncovered}" in result[
+        "repeat_failure"
+    ]["findings"]
 
 
 @pytest.mark.parametrize(

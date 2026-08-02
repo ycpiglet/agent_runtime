@@ -28,6 +28,8 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from agent_runtime import claim_store
+
 import backlog_board
 import closure_gate
 import compound_record
@@ -70,7 +72,7 @@ CLOSEOUT_START = "<!-- work-close:start -->"
 CLOSEOUT_END = "<!-- work-close:end -->"
 PLANNING_OUTBOX_DIR = Path("agents/planning/outbox")
 PLANNING_DRAFTS_DIR = Path("agents/planning/drafts")
-ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
 RELEASED_CLAIM_AUTHORITY_STATUSES = {"released", "completed", "done", "closed"}
 ASSIGNMENT_RULES: list[tuple[str, str, tuple[str, ...]]] = [
     (
@@ -1747,27 +1749,37 @@ def _recommend_assignment(root: Path, meta: dict[str, Any], body: str) -> tuple[
     return "planning-office", team_leads.get("planning-office", "planning-coordinator"), "defaulted to planning-office"
 
 
+def _canonical_claim_snapshot(root: Path, *, surface: str) -> list[dict[str, Any]]:
+    try:
+        claims = claim_store.read_claims_snapshot(root)
+    except (claim_store.ClaimStoreError, OSError, RuntimeError, TimeoutError) as exc:
+        raise WorkRegistrationError(
+            [f"{surface}:active-claim-context-invalid"]
+        ) from exc
+    invalid = [
+        str(claim.get("claim_id") or "missing")
+        for claim in claims
+        if not closure_gate._claim_authority_shape_valid(claim)
+    ]
+    if invalid:
+        raise WorkRegistrationError(
+            [f"{surface}:active-claim-context-invalid:{claim_id}" for claim_id in invalid]
+        )
+    return [dict(claim) for claim in claims]
+
+
 def _active_claim_workload(root: Path) -> dict[str, Any]:
-    claims_dir = root / "agents" / "runtime" / "task_claims"
     by_team: dict[str, int] = {}
     by_role: dict[str, int] = {}
     total = 0
-    if claims_dir.is_dir():
-        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(payload, dict):
-                continue
-            status = str(payload.get("status") or "").strip().lower()
-            if status not in ACTIVE_CLAIM_STATUSES:
-                continue
-            total += 1
-            team = str(payload.get("team_id") or "unassigned").strip() or "unassigned"
-            role = str(payload.get("agent_role") or "unassigned").strip() or "unassigned"
-            by_team[team] = by_team.get(team, 0) + 1
-            by_role[role] = by_role.get(role, 0) + 1
+    for payload in _canonical_claim_snapshot(root, surface="work-assign"):
+        if payload["status"] not in ACTIVE_CLAIM_STATUSES:
+            continue
+        total += 1
+        team = str(payload.get("team_id") or "unassigned").strip() or "unassigned"
+        role = str(payload.get("agent_role") or "unassigned").strip() or "unassigned"
+        by_team[team] = by_team.get(team, 0) + 1
+        by_role[role] = by_role.get(role, 0) + 1
     return {
         "active_claim_count": total,
         "by_team": dict(sorted(by_team.items())),
@@ -2479,9 +2491,9 @@ def _linked_released_claim_authority(
             findings.append(f"{ref}: closeout:claim-ref-not-file")
             continue
         try:
-            claim = json.loads(resolved_claim_path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError):
-            findings.append(f"{ref}: closeout:claim-ref-invalid-json")
+            claim = closure_gate._load_bounded_claim_json(resolved_claim_path)
+        except claim_store.ClaimStoreError:
+            findings.append(f"{ref}: closeout:claim-ref-identity-invalid")
             continue
         if not isinstance(claim, dict):
             findings.append(f"{ref}: closeout:claim-ref-invalid-root")
@@ -2492,7 +2504,7 @@ def _linked_released_claim_authority(
         claim_id = str(claim.get("claim_id") or "").strip()
         if (
             claim.get("schema") != "agent-runtime-task-claim/v1"
-            or not claim_id
+            or not claim_store.valid_claim_id(claim_id)
             or relative.name != f"{claim_id}.json"
         ):
             findings.append(f"{ref}: closeout:claim-ref-identity-invalid")
@@ -2500,7 +2512,11 @@ def _linked_released_claim_authority(
         if closure_gate._claim_is_overlay(claim):
             findings.append(f"{ref}: closeout:claim-ref-overlay")
             continue
-        status = str(claim.get("status") or "").strip()
+        raw_status = claim.get("status")
+        if not isinstance(raw_status, str):
+            findings.append(f"{ref}: closeout:claim-ref-status-invalid:missing")
+            continue
+        status = raw_status.strip().lower()
         if status in ACTIVE_CLAIM_STATUSES:
             if claim_id not in selected_active_claim_ids:
                 findings.append(f"{ref}: closeout:claim-ref-active-not-selected")
@@ -2669,6 +2685,7 @@ def _validate_linked_closeout_refs(
             findings.append(f"{normalized}: closeout:review-work-mismatch:{resolved_id}")
 
     valid_current_compounds = 0
+    covered_defect_signatures: set[str] = set()
     for ref in compound_refs:
         try:
             _path, record = compound_record.load_record_ref(root, ref)
@@ -2697,10 +2714,19 @@ def _validate_linked_closeout_refs(
         )
         if not prevention_findings:
             valid_current_compounds += 1
+            covered_defect_signatures.update(
+                set(record["defect_signatures"]).intersection(defect_signatures)
+            )
 
     if compound_required and valid_current_compounds == 0:
         findings.append(
             f"{resolved_id}: closeout:repeat-defect-current-compound-required"
+        )
+    if compound_required:
+        findings.extend(
+            f"{resolved_id}: closeout:defect-signature-uncovered:{signature}"
+            for signature in defect_signatures
+            if signature not in covered_defect_signatures
         )
     return findings
 
@@ -2923,7 +2949,7 @@ def criteria_work(
     return result
 
 
-def close_work(
+def _close_work_locked(
     root: Path,
     work_id: str,
     *,
@@ -2937,6 +2963,7 @@ def close_work(
     compound_refs: list[str] | None = None,
     defect_signatures: list[str] | None = None,
     now: str | None = None,
+    _claim_store_snapshot: object | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
     now_text = _now_text(now)
@@ -3059,9 +3086,30 @@ def close_work(
         review_refs=review_ref_values,
         compound_refs=compound_ref_values,
     )
+    if _claim_store_snapshot is None or not claim_store.verify_snapshot(
+        root,
+        _claim_store_snapshot,
+    ):
+        raise WorkRegistrationError(
+            [f"{resolved_id}: closeout:active-claim-context-invalid"]
+        )
     _rewrite_frontmatter(path, meta, _replace_closeout_block(body, closeout))
-    _refresh_generated_views(root)
-    return {
+    post_commit_warnings: list[dict[str, str]] = []
+    try:
+        _refresh_generated_views(root)
+    except Exception as exc:  # noqa: BLE001 - closeout authority is committed
+        reason = " ".join(str(exc).split())[:256] or type(exc).__name__
+        post_commit_warnings.append(
+            {
+                "stage": "generated-view-projection",
+                "reason": reason,
+                "retry_guidance": (
+                    "Closeout is committed; retry generated-view refresh separately "
+                    "before relying on projections."
+                ),
+            }
+        )
+    result = {
         "status": "closed",
         "work_id": resolved_id,
         "work_path": _rel(root, path),
@@ -3076,6 +3124,59 @@ def close_work(
         "actual_cost": actual_cost_text,
         "measurement_unavailable_reason": measurement_unavailable_reason_text,
     }
+    if post_commit_warnings:
+        result["authority_committed"] = True
+        result["post_commit_warnings"] = post_commit_warnings
+    return result
+
+
+def close_work(
+    root: Path,
+    work_id: str,
+    *,
+    actor: str,
+    resolution: str = "done",
+    actual_hours: str | None = None,
+    actual_tokens: int | None = None,
+    actual_cost: str | None = None,
+    measurement_unavailable_reason: str | None = None,
+    review_refs: list[str] | None = None,
+    compound_refs: list[str] | None = None,
+    defect_signatures: list[str] | None = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Close work while one claim-store lock protects authority and mutation."""
+
+    root = root.resolve()
+    try:
+        with claim_store.store_lock(root):
+            inspection = claim_store.inspect_store(root)
+            snapshot = (
+                inspection.snapshot
+                if inspection.state in {"initialized", "pristine"}
+                else None
+            )
+            return _close_work_locked(
+                root,
+                work_id,
+                actor=actor,
+                resolution=resolution,
+                actual_hours=actual_hours,
+                actual_tokens=actual_tokens,
+                actual_cost=actual_cost,
+                measurement_unavailable_reason=measurement_unavailable_reason,
+                review_refs=review_refs,
+                compound_refs=compound_refs,
+                defect_signatures=defect_signatures,
+                now=now,
+                _claim_store_snapshot=snapshot,
+            )
+    except WorkRegistrationError:
+        raise
+    except (claim_store.ClaimStoreError, OSError, RuntimeError, TimeoutError) as exc:
+        raise WorkRegistrationError(
+            [f"{work_id}: closeout:active-claim-context-invalid"]
+        ) from exc
 
 
 def _iter_work_item_records(root: Path) -> list[tuple[Path, dict[str, Any]]]:
@@ -3728,30 +3829,32 @@ def _git_worktrees(root: Path) -> list[dict[str, str]] | None:
     return worktrees
 
 
-def _active_claim_rows(root: Path) -> list[dict[str, Any]]:
-    claims_dir = root / "agents" / "runtime" / "task_claims"
+def _active_claim_rows(
+    root: Path,
+    *,
+    claim_snapshot: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    if claims_dir.is_dir():
-        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(payload, dict):
-                continue
-            if str(payload.get("status") or "").strip().lower() not in ACTIVE_CLAIM_STATUSES:
-                continue
-            rows.append(
-                {
-                    "task_id": str(payload.get("task_id") or ""),
-                    "task_set_id": str(payload.get("task_set_id") or ""),
-                    "claim_id": str(payload.get("claim_id") or path.stem),
-                    "status": str(payload.get("status") or ""),
-                    "agent": str(payload.get("display_name") or payload.get("agent_instance_id") or ""),
-                    "worktree_path": str(payload.get("worktree_path") or ""),
-                    "path": _rel(root, path),
-                }
-            )
+    claims = (
+        _canonical_claim_snapshot(root, surface="work-status")
+        if claim_snapshot is None
+        else claim_snapshot
+    )
+    for payload in claims:
+        if payload["status"] not in ACTIVE_CLAIM_STATUSES:
+            continue
+        claim_id = str(payload["claim_id"])
+        rows.append(
+            {
+                "task_id": str(payload.get("task_id") or ""),
+                "task_set_id": str(payload.get("task_set_id") or ""),
+                "claim_id": claim_id,
+                "status": str(payload["status"]),
+                "agent": str(payload.get("display_name") or payload.get("agent_instance_id") or ""),
+                "worktree_path": str(payload.get("worktree_path") or ""),
+                "path": f"agents/runtime/task_claims/{claim_id}.json",
+            }
+        )
     rows.sort(key=lambda row: (row["task_id"], row["claim_id"]))
     return rows
 
@@ -3762,11 +3865,16 @@ def status_work(root: Path) -> dict[str, Any]:
     Read-only. This is the lifecycle entrypoint: never start on a problem
     that already has an active claim here.
     """
-    overlay = inflight_overlay.build_overlay(root)
+    claim_snapshot = _canonical_claim_snapshot(root, surface="work-status")
+    active_claims = _active_claim_rows(root, claim_snapshot=claim_snapshot)
+    overlay = inflight_overlay.build_overlay(
+        root,
+        claim_snapshot=claim_snapshot,
+    )
     return {
         "status": "ok",
         "root": str(root),
-        "active_claims": _active_claim_rows(root),
+        "active_claims": active_claims,
         "worktrees": _git_worktrees(root),
         "inflight": {
             "summary": inflight_overlay.summary_line(overlay),
@@ -3776,7 +3884,14 @@ def status_work(root: Path) -> dict[str, Any]:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
-    result = status_work(args.root)
+    try:
+        result = status_work(args.root)
+    except WorkRegistrationError as exc:
+        print("work-status: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
     if args.json:
         print(json.dumps(result, ensure_ascii=True, indent=2))
         return 0

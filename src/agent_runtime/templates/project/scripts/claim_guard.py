@@ -379,7 +379,12 @@ def _transaction_artifact_path(rel: str) -> bool:
         and bool(name)
         and all(character.isalnum() or character in "._-" for character in name)
         and (
-            path.suffix == ".json"
+            not name.casefold().startswith(".claim-store")
+            or rel == f"{CLAIMS_REL}/.claim-store"
+        )
+        and (
+            rel == f"{CLAIMS_REL}/.claim-store"
+            or path.suffix == ".json"
             or name.endswith(".handoff.md")
             or name.endswith(".log.md")
         )

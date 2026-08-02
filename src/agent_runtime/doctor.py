@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from . import claim_store as _claim_store
 from . import config as _config
 from . import adoption as _adoption
 from . import allimbot as _allimbot_policy
@@ -54,6 +55,7 @@ class DoctorPlan:
 
 
 REQUIRED_TEMPLATE_FILES = (
+    "scripts/agent_runtime/claim_store.py",
     "scripts/agent_orchestrator.py",
     "scripts/agent_worker.py",
     "scripts/auto_runner.py",
@@ -160,6 +162,48 @@ def _rel(root: Path, path: Path) -> str:
 
 def _findings_append(findings: list[DoctorFinding], severity: str, *, area: str, path: str, kind: str, detail: str) -> None:
     findings.append(DoctorFinding(severity=severity, area=area, path=path, kind=kind, detail=detail))
+
+
+def _check_task_claim_store(root: Path, findings: list[DoctorFinding]) -> None:
+    try:
+        result = _claim_store.inspect_store(root)
+    except Exception as exc:
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=f"claim-store inspection failed: {type(exc).__name__}",
+        )
+        return
+    if result.state == "migration-required":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-migration-required",
+            detail=result.finding or "existing task claims require explicit sync migration",
+        )
+    elif result.state == "integrity-invalid":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=result.finding or "claim-store authority is invalid",
+        )
+    else:
+        _findings_append(
+            findings,
+            "info",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind=f"claim-store-{result.state}",
+            detail="task-claim store authority is internally consistent",
+        )
 
 
 def _json_matches(path: Path, expected: dict[str, object]) -> bool:
@@ -994,6 +1038,7 @@ def _routing_matrix_plan(
 def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     findings: list[DoctorFinding] = []
     root = root.resolve()
+    _check_task_claim_store(root, findings)
     _check_codex_hooks(root, findings)
 
     for rel in REQUIRED_TEMPLATE_FILES:
@@ -1263,6 +1308,25 @@ def build_pre_adoption_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]
         _findings_append(findings, "blocker", area="adoption", path=".", kind="adoption-plan-failed", detail=str(exc))
         return DoctorPlan(root=root, findings=tuple(findings)), findings
     _findings_append(findings, "info", area="adoption", path=".", kind="adoption-plan-ready", detail=f"scan={plan.scan_strategy} source_paths={len(plan.source_paths)}")
+    if plan.claim_store_state == "migration-required":
+        _findings_append(
+            findings,
+            "warning",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-migration-required",
+            detail=plan.claim_store_finding
+            or "sync --apply must adopt the existing task-claim store before runtime activation",
+        )
+    elif plan.claim_store_state == "integrity-invalid":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=plan.claim_store_finding or "claim-store authority is invalid",
+        )
     for warning in plan.scan_warnings:
         _findings_append(findings, "warning", area="adoption", path=".", kind="scan-fallback", detail=warning)
     for asset in plan.assets:

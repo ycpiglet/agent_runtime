@@ -74,13 +74,27 @@ def _safe_script_path(value: object) -> str | None:
     return value
 
 
+def _safe_repo_script_path(value: object) -> str | None:
+    if not isinstance(value, str) or not value or "\\" in value:
+        return None
+    candidate = PurePosixPath(value)
+    if (
+        candidate.is_absolute()
+        or candidate.as_posix() != value
+        or any(part in {"", ".", ".."} for part in candidate.parts)
+        or candidate.suffix not in ELIGIBLE_SUFFIXES
+    ):
+        return None
+    return value
+
+
 def _load_contract(
     path: Path,
     findings: list[str],
-) -> tuple[list[str], dict[str, Any]]:
+) -> tuple[list[str], dict[str, Any], dict[str, str]]:
     if not path.is_file():
         findings.append(f"mirror:missing-contract:{CONTRACT_REL.as_posix()}")
-        return [], {}
+        return [], {}, {}
     try:
         payload = json.loads(
             path.read_text(encoding="utf-8"),
@@ -88,13 +102,13 @@ def _load_contract(
         )
     except DuplicateContractKey as exc:
         findings.append(f"mirror:duplicate-contract-key:{exc.key}")
-        return [], {}
+        return [], {}, {}
     except (OSError, json.JSONDecodeError) as exc:
         findings.append(f"mirror:invalid-contract-json:{CONTRACT_REL.as_posix()}:{exc}")
-        return [], {}
+        return [], {}, {}
     if not isinstance(payload, dict):
         findings.append(f"mirror:invalid-contract-root:{CONTRACT_REL.as_posix()}")
-        return [], {}
+        return [], {}, {}
     if payload.get("schema") != SCHEMA:
         findings.append(f"mirror:invalid-contract-schema:{CONTRACT_REL.as_posix()}")
 
@@ -121,8 +135,31 @@ def _load_contract(
     divergences = payload.get("intentional_divergences")
     if not isinstance(divergences, dict):
         findings.append(f"mirror:invalid-divergence-map:{CONTRACT_REL.as_posix()}")
-        return expected, {}
-    return expected, divergences
+        divergences = {}
+
+    package_sources_raw = payload.get("package_sources", {})
+    package_sources: dict[str, str] = {}
+    if not isinstance(package_sources_raw, dict):
+        findings.append("mirror:invalid-package-source-map")
+    else:
+        for raw_common, raw_package in sorted(
+            package_sources_raw.items(), key=lambda item: str(item[0])
+        ):
+            common_path = _safe_script_path(raw_common)
+            package_path = _safe_repo_script_path(raw_package)
+            if common_path is None:
+                findings.append(f"mirror:invalid-package-common-path:{raw_common}")
+                continue
+            if common_path not in set(expected):
+                findings.append(f"mirror:package-source-not-expected:{common_path}")
+                continue
+            if package_path is None:
+                findings.append(
+                    f"mirror:invalid-package-source-path:{common_path}:{raw_package}"
+                )
+                continue
+            package_sources[common_path] = package_path
+    return expected, divergences, package_sources
 
 
 def analyze(root: Path) -> dict[str, object]:
@@ -138,7 +175,10 @@ def analyze(root: Path) -> dict[str, object]:
     source = _eligible(source_dir)
     template = _eligible(template_dir)
     common = sorted(source.keys() & template.keys())
-    expected, contract = _load_contract(root / CONTRACT_REL, findings)
+    expected, contract, package_sources = _load_contract(
+        root / CONTRACT_REL,
+        findings,
+    )
     expected_set = set(expected)
     common_set = set(common)
 
@@ -216,6 +256,21 @@ def analyze(root: Path) -> dict[str, object]:
         if entry_valid:
             intentional += 1
 
+    for common_path, package_relative in sorted(package_sources.items()):
+        if common_path not in source or common_path not in template:
+            continue
+        package_path = root / package_relative
+        if not package_path.is_file():
+            findings.append(
+                f"mirror:package-source-missing:{common_path}:{package_relative}"
+            )
+            continue
+        package_digest = _digest(package_path)
+        if package_digest != _digest(source[common_path]):
+            findings.append(f"mirror:package-source-drift:{common_path}")
+        if package_digest != _digest(template[common_path]):
+            findings.append(f"mirror:package-template-drift:{common_path}")
+
     return {
         "schema": SCHEMA,
         "expected_common": len(expected),
@@ -223,6 +278,7 @@ def analyze(root: Path) -> dict[str, object]:
         "eligible_common": len(common),
         "identical": identical,
         "intentional": intentional,
+        "package_sources": len(package_sources),
         "findings": findings,
     }
 

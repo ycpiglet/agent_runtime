@@ -1143,8 +1143,14 @@ def _valid_transaction_artifact_path(value: object) -> bool:
     name = path.name
     if not name or not all(character.isalnum() or character in "._-" for character in name):
         return False
+    if (
+        name.casefold().startswith(".claim-store")
+        and value != "agents/runtime/task_claims/.claim-store"
+    ):
+        return False
     return (
-        path.suffix == ".json"
+        value == "agents/runtime/task_claims/.claim-store"
+        or path.suffix == ".json"
         or name.endswith(".handoff.md")
         or name.endswith(".log.md")
     )

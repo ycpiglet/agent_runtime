@@ -413,6 +413,9 @@ def _write_claim_store_witness_pair(
         path.parent.mkdir(parents=True, exist_ok=True)
         if not path.is_file():
             path.write_bytes(raw)
+    lock_path = outer.with_name(outer.name + ".lock")
+    if not lock_path.is_file():
+        lock_path.write_bytes(b"\0")
     assert inner.read_bytes() == outer.read_bytes()
     return inner, outer
 
@@ -849,6 +852,81 @@ def test_work_close_fails_closed_for_invalid_linked_released_claim(
     assert "Traceback" not in result.stdout + result.stderr
     assert unit_path.read_bytes() == before_unit
     assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_rejects_noncanonical_linked_released_claim_id_without_mutation(
+    tmp_path: Path,
+) -> None:
+    _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="canonical witness authority",
+        status="released",
+        claim_id="CLAIM-witness",
+    )
+    signature = "noncanonical linked released claim identity"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="noncanonical_linked_released_claim_identity",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-bad!",
+    )
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+
+
+def test_work_close_rejects_partial_compound_signature_coverage_without_mutation(
+    tmp_path: Path,
+) -> None:
+    covered = records.normalize_signature("covered claim close authority")
+    uncovered = records.normalize_signature("uncovered claim close authority")
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=covered,
+        stem="covered_claim_close_authority",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=covered,
+        compound_refs=[record_ref],
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["defect_signatures"] = [covered, uncovered]
+    claim_path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding=f"closeout:defect-signature-uncovered:{uncovered}",
+    )
 
 
 def test_work_close_rejects_scalar_authority_in_linked_released_claim_without_mutation(

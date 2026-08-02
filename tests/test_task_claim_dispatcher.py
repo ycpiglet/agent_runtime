@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -16,6 +18,20 @@ SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
+
+
+def _load_dispatcher_module():
+    scripts_dir = str(REPO_ROOT / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    spec = importlib.util.spec_from_file_location(
+        "task_claim_dispatcher_transaction_test",
+        SCRIPT,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _routing_off_env() -> dict[str, str]:
@@ -179,6 +195,46 @@ def _create_linked_claim(
     )
 
 
+def _adversarial_claim_bytes(
+    payload_kind: str,
+    *,
+    claim_id: str,
+    task_id: str,
+) -> bytes:
+    base: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": task_id,
+        "agent_role": "lead-engineer",
+        "status": "claimed",
+    }
+    if payload_kind == "oversized-malformed":
+        return json.dumps(base).encode("utf-8") + b"x" * (256 * 1024 + 1)
+    if payload_kind == "deep":
+        return (
+            json.dumps(base)[:-1]
+            + ',"nested":'
+            + "[" * 1100
+            + "0"
+            + "]" * 1100
+            + "}"
+        ).encode("utf-8")
+    if payload_kind == "invalid-utf8":
+        return json.dumps(base).encode("utf-8") + b"\xff"
+    if payload_kind == "unknown-status":
+        base["status"] = "mystery"
+        return json.dumps(base).encode("utf-8")
+    if payload_kind == "nonstring-status":
+        base["status"] = ["claimed"]
+        return json.dumps(base).encode("utf-8")
+    return (
+        json.dumps(base)[:-1]
+        + ',"integer":'
+        + "9" * 1000
+        + "}"
+    ).encode("utf-8")
+
+
 def test_default_claim_creation_persists_files_without_changing_host_head(
     tmp_path: Path,
 ) -> None:
@@ -243,6 +299,846 @@ def test_claim_creation_refuses_outer_only_store_before_any_claim_side_effect(
     assert not (linked / "agents/runtime/task_claims").exists()
 
 
+@pytest.mark.parametrize(
+    "claim_id",
+    ("../../ESCAPE", "CLAIM-valid/../../ESCAPE", "CLAIM-"),
+)
+def test_claim_creation_refuses_noncanonical_claim_id_without_mutation(
+    tmp_path: Path,
+    claim_id: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-id-boundary")
+    seeded = _create_linked_claim(linked, suffix="654-claim-id-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-claim-id-boundary",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--claim-id",
+        claim_id,
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        "654-claim-id-boundary",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim_id" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    ("path_flag", "outside_name"),
+    (
+        ("--handoff-path", "escaped-claim-handoff.md"),
+        ("--log-path", "escaped-claim-log.md"),
+    ),
+)
+def test_claim_creation_refuses_artifact_path_escape_without_mutation(
+    tmp_path: Path,
+    path_flag: str,
+    outside_name: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"artifact-{outside_name}")
+    seeded = _create_linked_claim(linked, suffix=f"654-{outside_name}-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    outside = linked.parent / outside_name
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        f"TASK-AR-{outside_name}",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--claim-id",
+        f"CLAIM-{outside_name}",
+        path_flag,
+        f"../{outside_name}",
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        f"654-{outside_name}",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert path_flag.removeprefix("--").replace("-", "_") in result.stderr
+    assert not outside.exists()
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    ("path_flag", "artifact_name"),
+    (
+        ("--handoff-path", "retained.handoff.md"),
+        ("--log-path", "retained.log.md"),
+    ),
+)
+def test_claim_creation_refuses_existing_artifact_without_mutation(
+    tmp_path: Path,
+    path_flag: str,
+    artifact_name: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"artifact-collision-{artifact_name}")
+    seeded = _create_linked_claim(linked, suffix=f"654-{artifact_name}-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    artifact = linked / "agents/runtime/task_claims" / artifact_name
+    artifact.write_text("retained artifact\n", encoding="utf-8")
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"654-{artifact_name}-collision",
+        extra_args=(
+            path_flag,
+            f"agents/runtime/task_claims/{artifact_name}",
+        ),
+    )
+
+    assert result.returncode == 1
+    assert "already exists" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    "payload_kind",
+    (
+        "oversized-malformed",
+        "deep",
+        "invalid-utf8",
+        "huge-integer",
+        "unknown-status",
+        "nonstring-status",
+    ),
+)
+def test_claim_creation_refuses_unbounded_existing_claim_before_side_effects(
+    tmp_path: Path,
+    payload_kind: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-store-bounded-{payload_kind}",
+    )
+    first = _create_linked_claim(linked, suffix="654-retained-witness")
+    assert first.returncode == 0, first.stderr or first.stdout
+    claims = linked / "agents" / "runtime" / "task_claims"
+    path = claims / f"CLAIM-adversarial-{payload_kind}.json"
+    raw = _adversarial_claim_bytes(
+        payload_kind,
+        claim_id=f"CLAIM-adversarial-{payload_kind}",
+        task_id="TASK-AR-adversarial",
+    )
+    path.write_bytes(raw)
+    before = {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-adversarial",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        "654-bounded-refusal",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store create refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert path.read_bytes() == raw
+    assert {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    "payload_kind",
+    (
+        "oversized-malformed",
+        "deep",
+        "invalid-utf8",
+        "huge-integer",
+        "unknown-status",
+        "nonstring-status",
+    ),
+)
+def test_claim_release_refuses_unbounded_existing_claim_before_side_effects(
+    tmp_path: Path,
+    payload_kind: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-release-bounded-{payload_kind}",
+    )
+    created = _create_linked_claim(
+        linked,
+        suffix=f"654-release-retained-{payload_kind}",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    created_payload = json.loads(created.stdout)
+    claim = created_payload["claim"]
+    claims = linked / "agents" / "runtime" / "task_claims"
+    adversarial_id = f"CLAIM-release-adversarial-{payload_kind}"
+    adversarial_path = claims / f"{adversarial_id}.json"
+    raw = _adversarial_claim_bytes(
+        payload_kind,
+        claim_id=adversarial_id,
+        task_id="TASK-AR-release-adversarial",
+    )
+    adversarial_path.write_bytes(raw)
+    before = {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260729-080600-kst-bounded-release",
+        "--verifier-role",
+        "qa-reviewer",
+        "--allow-missing-evidence",
+        "--now",
+        "2026-07-29T08:06:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store release refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert adversarial_path.read_bytes() == raw
+    assert {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    } == before
+    persisted = json.loads((linked / created_payload["path"]).read_text(encoding="utf-8"))
+    assert persisted["status"] == "claimed"
+
+
+@pytest.mark.parametrize(
+    ("failure_stage", "warning_stage"),
+    (
+        ("registry", "agent-instance-registry"),
+        ("event", "claim-created-event"),
+    ),
+)
+def test_claim_creation_reports_truthful_success_after_post_commit_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure_stage: str,
+    warning_stage: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-post-commit-{failure_stage}",
+    )
+    dispatcher = _load_dispatcher_module()
+    lock_depth = {"value": 0}
+    original_store_lock = dispatcher.claim_store.store_lock
+
+    @contextmanager
+    def observed_store_lock(*args, **kwargs):
+        with original_store_lock(*args, **kwargs):
+            lock_depth["value"] += 1
+            try:
+                yield
+            finally:
+                lock_depth["value"] -= 1
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "store_lock",
+        observed_store_lock,
+    )
+
+    def fail_post_commit(*_args, **_kwargs):
+        assert lock_depth["value"] == 0
+        raise OSError(f"injected {failure_stage} failure")
+
+    if failure_stage == "registry":
+        monkeypatch.setattr(dispatcher, "record_claim_instance", fail_post_commit)
+    else:
+        monkeypatch.setattr(dispatcher, "append_event", fail_post_commit)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-post-commit-{failure_stage}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            f"654-post-commit-{failure_stage}",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "claim-store create refused" not in captured.err
+    payload = json.loads(captured.out)
+    assert payload["status"] == "created"
+    assert payload["post_commit_warnings"] == [
+        {
+            "stage": warning_stage,
+            "reason": f"injected {failure_stage} failure",
+        }
+    ]
+    claim_path = linked / payload["path"]
+    assert claim_path.is_file()
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "claimed"
+    assert (
+        linked / "agents" / "runtime" / "task_claims" / ".claim-store"
+    ).is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
+
+
+def test_claim_creation_has_no_fallible_post_publish_ownership_capture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-owned-publication")
+    dispatcher = _load_dispatcher_module()
+    capture_calls: list[Path] = []
+
+    def fail_legacy_capture(path: Path, _expected: bytes) -> None:
+        capture_calls.append(Path(path))
+        raise OSError("injected post-publication ownership capture failure")
+
+    monkeypatch.setattr(
+        dispatcher,
+        "_capture_created_publication",
+        fail_legacy_capture,
+        raising=False,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-owned-publication",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-owned-publication",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err
+    assert capture_calls == []
+    response = json.loads(captured.out)
+    claim = response["claim"]
+    assert (linked / response["path"]).is_file()
+    assert (linked / claim["handoff_path"]).is_file()
+    assert (linked / claim["log_path"]).is_file()
+    assert (linked / "agents/runtime/task_claims/.claim-store").is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
+
+
+@pytest.mark.parametrize(
+    "failure_stage",
+    ("second-artifact", "claim-publication", "outer-marker"),
+)
+def test_first_claim_creation_rolls_back_authority_on_publication_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure_stage: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-create-rollback-{failure_stage}",
+    )
+    dispatcher = _load_dispatcher_module()
+    suffix = f"654-rollback-{failure_stage}"
+
+    if failure_stage == "second-artifact":
+        original = dispatcher._ensure_text_file
+        calls = {"count": 0}
+
+        def fail_second_artifact(*args, **kwargs):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise OSError("injected second artifact publication failure")
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(dispatcher, "_ensure_text_file", fail_second_artifact)
+    elif failure_stage == "claim-publication":
+        original = dispatcher.atomic_io.publish_json_owned_atomic
+
+        def fail_claim_publication(path, payload, **kwargs):
+            if Path(path).name.startswith("CLAIM-"):
+                raise OSError("injected claim publication failure")
+            return original(path, payload, **kwargs)
+
+        monkeypatch.setattr(
+            dispatcher.atomic_io,
+            "publish_json_owned_atomic",
+            fail_claim_publication,
+        )
+    else:
+        original = dispatcher.claim_store._write_immutable
+        calls = {"count": 0}
+
+        def fail_outer_marker(path, payload):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise OSError("injected outer marker publication failure")
+            return original(path, payload)
+
+        monkeypatch.setattr(
+            dispatcher.claim_store,
+            "_write_immutable",
+            fail_outer_marker,
+        )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-{suffix}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            suffix,
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "claim-store create refused" in captured.err
+    claim_dir = linked / "agents/runtime/task_claims"
+    assert not list(claim_dir.glob("CLAIM-*"))
+    assert not (claim_dir / ".claim-store").exists()
+    assert not _claim_store_outer_anchor(linked).exists()
+    assert not (linked / "agents").exists()
+
+    retried = _create_linked_claim(linked, suffix=suffix)
+    assert retried.returncode == 0, retried.stderr or retried.stdout
+
+
+def test_failed_claim_creation_preserves_initialized_marker_pair(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-create-marker-preservation")
+    seeded = _create_linked_claim(linked, suffix="654-marker-seed")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    inner = linked / "agents/runtime/task_claims/.claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    marker_bytes = (inner.read_bytes(), outer.read_bytes())
+    dispatcher = _load_dispatcher_module()
+    original = dispatcher._ensure_text_file
+    calls = {"count": 0}
+
+    def fail_second_artifact(*args, **kwargs):
+        calls["count"] += 1
+        if calls["count"] == 2:
+            raise OSError("injected initialized-store artifact failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(dispatcher, "_ensure_text_file", fail_second_artifact)
+    suffix = "654-marker-preserved-retry"
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-{suffix}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            suffix,
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "claim-store create refused" in captured.err
+    assert (inner.read_bytes(), outer.read_bytes()) == marker_bytes
+    assert not list((linked / "agents/runtime/task_claims").glob(f"*{suffix}*"))
+
+    retried = _create_linked_claim(linked, suffix=suffix)
+    assert retried.returncode == 0, retried.stderr or retried.stdout
+
+
+def test_first_claim_preserves_witness_when_inner_marker_cleanup_is_incomplete(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        "claim-create-incomplete-marker-recovery",
+    )
+    dispatcher = _load_dispatcher_module()
+    outer = _claim_store_outer_anchor(linked)
+    original_write = dispatcher.claim_store._write_immutable
+    original_remove_marker = dispatcher.claim_store._remove_created_marker
+    original_remove_publication = dispatcher._remove_owned_publication
+
+    def fail_outer_marker(path, payload):
+        if Path(path) == outer:
+            raise OSError("injected outer marker publication failure")
+        return original_write(path, payload)
+
+    def fail_inner_marker_cleanup(path, identity, payload):
+        if Path(path).name == ".claim-store":
+            return False
+        return original_remove_marker(path, identity, payload)
+
+    def keep_inner_marker(path, *, expected, identity=None):
+        if Path(path).name == ".claim-store":
+            return "injected inner marker cleanup remained unavailable"
+        return original_remove_publication(
+            path,
+            expected=expected,
+            identity=identity,
+        )
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "_write_immutable",
+        fail_outer_marker,
+    )
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "_remove_created_marker",
+        fail_inner_marker_cleanup,
+    )
+    monkeypatch.setattr(
+        dispatcher,
+        "_remove_owned_publication",
+        keep_inner_marker,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-incomplete-marker-recovery",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-incomplete-marker-recovery",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "recovery-required" in captured.err
+    claim_dir = linked / "agents/runtime/task_claims"
+    claims = sorted(claim_dir.glob("CLAIM-*.json"))
+    assert len(claims) == 1
+    claim = json.loads(claims[0].read_text(encoding="utf-8"))
+    claim_id = claim["claim_id"]
+    assert (claim_dir / f"{claim_id}.handoff.md").is_file()
+    assert (claim_dir / f"{claim_id}.log.md").is_file()
+    assert (claim_dir / ".claim-store").is_file()
+    assert not outer.exists()
+    inspection = dispatcher.claim_store.inspect_store(linked)
+    assert inspection.state == "migration-required"
+    assert inspection.witness_claim_id == claim_id
+
+
+def test_claim_creation_uses_exclusive_publication_for_new_authority_files(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-exclusive-publication")
+    dispatcher = _load_dispatcher_module()
+    published_text: list[Path] = []
+    published_json: list[Path] = []
+    original_publish_text = dispatcher.atomic_io.publish_text_owned_atomic
+    original_publish_json = dispatcher.atomic_io.publish_json_owned_atomic
+    original_write_text = dispatcher.atomic_io.write_text_atomic
+    original_write_json = dispatcher.atomic_io.write_json_atomic
+
+    def observe_publish_text(path, text, **kwargs):
+        published_text.append(Path(path))
+        return original_publish_text(path, text, **kwargs)
+
+    def observe_publish_json(path, payload, **kwargs):
+        published_json.append(Path(path))
+        return original_publish_json(path, payload, **kwargs)
+
+    def refuse_claim_overwrite_text(path, text, **kwargs):
+        if Path(path).name.endswith((".handoff.md", ".log.md")):
+            raise AssertionError("claim artifacts must use exclusive publication")
+        return original_write_text(path, text, **kwargs)
+
+    def refuse_claim_overwrite_json(path, payload, **kwargs):
+        if Path(path).name.startswith("CLAIM-"):
+            raise AssertionError("claim authority must use exclusive publication")
+        return original_write_json(path, payload, **kwargs)
+
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "publish_text_owned_atomic",
+        observe_publish_text,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "publish_json_owned_atomic",
+        observe_publish_json,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "write_text_atomic",
+        refuse_claim_overwrite_text,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "write_json_atomic",
+        refuse_claim_overwrite_json,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-exclusive-publication",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-exclusive-publication",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err
+    artifact_publications = [
+        path
+        for path in published_text
+        if path.name.endswith((".handoff.md", ".log.md"))
+    ]
+    assert sorted(path.suffixes[-2:] for path in artifact_publications) == [
+        [".handoff", ".md"],
+        [".log", ".md"],
+    ]
+    assert len(published_json) == 1
+    assert published_json[0].name.startswith("CLAIM-")
+
+
+def test_claim_create_revalidates_preflight_after_lock_acquisition(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-revalidation")
+    dispatcher = _load_dispatcher_module()
+    original_prepare = dispatcher._prepare_create
+    calls: list[bool] = []
+
+    def mutate_between_preflights(args, *, emit_success=True):
+        calls.append(emit_success)
+        result = original_prepare(args, emit_success=emit_success)
+        if len(calls) == 1 and not isinstance(result, int):
+            args.progress_pct = 101
+        return result
+
+    monkeypatch.setattr(dispatcher, "_prepare_create", mutate_between_preflights)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-preflight-revalidation",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-preflight-revalidation",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert calls == [False, True]
+    assert "progress_pct must be between 0 and 100" in captured.err
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
+def test_create_preflight_does_not_mutate_inferred_taskset(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    args = dispatcher.build_parser().parse_args(
+        [
+            "--root",
+            str(tmp_path),
+            "create",
+            "--task-id",
+            "TASK-AR-inferred-taskset",
+            "--agent-role",
+            "lead-engineer",
+        ]
+    )
+    monkeypatch.setattr(
+        dispatcher,
+        "_effective_taskset_id",
+        lambda *_args, **_kwargs: ("TASKSET-INFERRED", []),
+    )
+
+    preparation = dispatcher._prepare_create(args, emit_success=False)
+
+    assert not isinstance(preparation, int)
+    assert preparation.task_set_id == "TASKSET-INFERRED"
+    assert args.task_set_id == ""
+
+
+def test_claim_create_refuses_preflight_authority_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-authority")
+    dispatcher = _load_dispatcher_module()
+    original_prepare = dispatcher._prepare_create
+    calls = {"count": 0}
+
+    def change_first_authority(args, *, emit_success=True):
+        calls["count"] += 1
+        result = original_prepare(args, emit_success=emit_success)
+        if calls["count"] == 1 and not isinstance(result, int):
+            return result._replace(
+                task_set_id="TASKSET-REMOVED-WHILE-LOCKING",
+                strict_claim_preflight=True,
+            )
+        return result
+
+    monkeypatch.setattr(dispatcher, "_prepare_create", change_first_authority)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-preflight-authority",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-preflight-authority",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert calls["count"] == 2
+    assert "authority-changed-while-locking" in captured.err
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
 def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit")
     unrelated = linked / "unrelated.txt"
@@ -271,6 +1167,74 @@ def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> Non
         f"agents/runtime/task_claims/{claim_id}.log.md",
     }
     assert "?? unrelated.txt" in _git_stdout(linked, "status", "--porcelain")
+
+
+def test_opt_in_scm_helper_exception_reports_committed_claim_truth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-commit-helper-exception")
+    dispatcher = _load_dispatcher_module()
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    calls = {"count": 0}
+
+    def fail_commit_helper(*_args, **_kwargs):
+        calls["count"] += 1
+        raise RuntimeError(
+            "injected opt-in SCM helper failure\n" + "x" * 400
+        )
+
+    monkeypatch.setattr(
+        dispatcher.claim_guard,
+        "commit_claim_artifacts",
+        fail_commit_helper,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-scm-helper-exception",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-scm-helper-exception",
+            "--commit-claim-artifacts",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert calls["count"] == 1
+    response = json.loads(captured.out)
+    assert response["status"] == "created"
+    assert response["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    assert len(response["post_commit_warnings"]) == 1
+    warning = response["post_commit_warnings"][0]
+    assert warning["stage"] == "claim-artifact-scm-persistence"
+    reason = warning["reason"]
+    assert reason.startswith("injected opt-in SCM helper failure")
+    assert 0 < len(reason) <= 256
+    assert "\n" not in reason and "\r" not in reason
+    assert "claim-store create refused" not in captured.err
+    assert "claim authority persisted" in captured.err
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+    claim_path = linked / response["path"]
+    assert claim_path.is_file()
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "claimed"
+    assert (linked / "agents/runtime/task_claims/.claim-store").is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
 
 
 def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
@@ -787,6 +1751,79 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
         "log_path": claim["log_path"],
         "last_heartbeat": "2026-06-10T14:30:12+09:00",
     }]
+
+
+def test_projection_reads_release_committed_before_its_canonical_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id="TASK-AR-projection-snapshot",
+        suffix="projection-snapshot",
+    )
+    claim = payload["claim"]
+    claim_path = tmp_path / payload["path"]
+    dispatcher = _load_dispatcher_module()
+    original_snapshot = dispatcher.claim_store.read_claims_snapshot
+    calls = {"count": 0}
+
+    def release_then_read_snapshot(root):
+        calls["count"] += 1
+        with dispatcher.claim_store.store_lock(root):
+            current = dispatcher.claim_store.read_claim_payload(claim_path)
+            current["status"] = "released"
+            dispatcher.atomic_io.write_json_atomic(claim_path, current)
+        return original_snapshot(root)
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "read_claims_snapshot",
+        release_then_read_snapshot,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            claim["claim_id"],
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert calls["count"] == 1
+    assert rc == 1
+    assert "projection requires an active worker claim" in captured.err
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "released"
+
+
+def test_projection_reports_bounded_claim_store_failure_without_traceback(
+    tmp_path: Path,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id="TASK-AR-246",
+        suffix="projection-invalid-store",
+    )
+    claim = payload["claim"]
+    malformed = tmp_path / "agents/runtime/task_claims/CLAIM-000-invalid.json"
+    malformed.write_bytes(b"{\xff")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        claim["claim_id"],
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store projection refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
 
 
 def test_projection_rejects_released_or_overlay_claims(tmp_path: Path):
@@ -2211,6 +3248,129 @@ def test_release_with_distinct_verifier_records_fields_and_pane_event(tmp_path: 
     assert release_event["verifier_role"] == "qa-reviewer"
 
 
+@pytest.mark.parametrize("inactive_status", ("released", "blocked"))
+def test_release_refuses_to_rebind_inactive_claim_verification(
+    tmp_path: Path,
+    inactive_status: str,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id=f"TASK-AR-inactive-{inactive_status}",
+        suffix=f"inactive-{inactive_status}",
+    )
+    claim_path = tmp_path / payload["path"]
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    original_evidence = _write_evidence(
+        tmp_path,
+        "agents/runtime/task_claims/evidence/ORIGINAL-W4B.md",
+    )
+    claim.update(
+        {
+            "status": inactive_status,
+            "released_at": "2026-06-13T09:30:00+09:00",
+            "verified_by": "qa-original-verifier",
+            "verifier_role": "qa-reviewer",
+            "verification_evidence": original_evidence,
+        }
+    )
+    claim_path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = claim_path.read_bytes()
+    replacement_evidence = _write_evidence(
+        tmp_path,
+        "agents/runtime/task_claims/evidence/REPLACEMENT-W4B.md",
+    )
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-replacement-verifier",
+        "--verifier-role",
+        "release-manager",
+        "--verification-evidence",
+        replacement_evidence,
+        "--now",
+        "2026-06-13T11:00:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "active claim" in refused.stderr
+    assert claim_path.read_bytes() == before
+
+
+def test_release_reports_truthful_success_after_post_commit_event_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    payload = _create_release_candidate(tmp_path, suffix="post-release-event")
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+    dispatcher = _load_dispatcher_module()
+    lock_depth = {"value": 0}
+    original_store_lock = dispatcher.claim_store.store_lock
+
+    @contextmanager
+    def observed_store_lock(*args, **kwargs):
+        with original_store_lock(*args, **kwargs):
+            lock_depth["value"] += 1
+            try:
+                yield
+            finally:
+                lock_depth["value"] -= 1
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "store_lock",
+        observed_store_lock,
+    )
+
+    def fail_event(*_args, **_kwargs):
+        assert lock_depth["value"] == 0
+        raise OSError("injected release event failure")
+
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "release",
+            "--claim-id",
+            claim["claim_id"],
+            "--verified-by",
+            "qa-20260613-101500-kst-w4b-post-event",
+            "--verifier-role",
+            "qa-reviewer",
+            "--verification-evidence",
+            evidence_rel,
+            "--now",
+            "2026-06-13T10:15:00+09:00",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "claim-store release refused" not in captured.err
+    released = json.loads(captured.out)
+    assert released["status"] == "released"
+    assert released["post_commit_warnings"] == [
+        {
+            "stage": "claim-released-event",
+            "reason": "injected release event failure",
+        }
+    ]
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "released"
+    assert saved["verified_by"] == "qa-20260613-101500-kst-w4b-post-event"
+
+
 def test_release_requires_evidence_ref_by_default(tmp_path: Path):
     payload = _create_release_candidate(tmp_path)
     claim = payload["claim"]
@@ -2257,6 +3417,110 @@ def test_release_refuses_nonexistent_evidence_ref(tmp_path: Path):
 
     assert refused.returncode == 1
     assert "verification evidence not found" in refused.stderr
+
+
+@pytest.mark.parametrize(
+    "evidence_mode",
+    ("absolute-outside", "relative-escape", "directory", "symlink"),
+)
+def test_release_refuses_noncanonical_evidence_without_mutating_claim(
+    tmp_path: Path,
+    evidence_mode: str,
+) -> None:
+    payload = _create_release_candidate(tmp_path, suffix=f"evidence-{evidence_mode}")
+    claim = payload["claim"]
+    outside = tmp_path.parent / f"outside-{evidence_mode}.md"
+    outside.write_text("# Not repository evidence\n", encoding="utf-8")
+    if evidence_mode == "absolute-outside":
+        evidence_ref = str(outside.resolve())
+    elif evidence_mode == "relative-escape":
+        evidence_ref = f"../{outside.name}"
+    elif evidence_mode == "directory":
+        evidence_dir = tmp_path / "reviews/evidence-directory"
+        evidence_dir.mkdir(parents=True)
+        evidence_ref = evidence_dir.relative_to(tmp_path).as_posix()
+    else:
+        target = tmp_path / "reviews/direct-evidence.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("# Direct evidence\n", encoding="utf-8")
+        alias = tmp_path / "reviews/evidence-alias.md"
+        try:
+            alias.symlink_to(target)
+        except OSError as exc:
+            pytest.skip(f"symlink creation unavailable: {exc}")
+        evidence_ref = alias.relative_to(tmp_path).as_posix()
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b-evidence-boundary",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_ref,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "verification evidence" in refused.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+    assert "verification_evidence" not in saved
+
+
+@pytest.mark.parametrize("pointer_mode", ("outside", "symlink"))
+def test_release_refuses_noncanonical_handoff_pointer_without_mutating_claim(
+    tmp_path: Path,
+    pointer_mode: str,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        suffix=f"handoff-pointer-{pointer_mode}",
+    )
+    claim_path = tmp_path / payload["path"]
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    if pointer_mode == "outside":
+        outside = tmp_path.parent / "outside-handoff.md"
+        outside.write_text("# Outside handoff\n", encoding="utf-8")
+        claim["handoff_path"] = f"../{outside.name}"
+    else:
+        direct = tmp_path / "agents/runtime/task_claims/direct-handoff.md"
+        direct.write_text("# Direct handoff\n", encoding="utf-8")
+        alias = tmp_path / "agents/runtime/task_claims/alias.handoff.md"
+        try:
+            alias.symlink_to(direct)
+        except OSError as exc:
+            pytest.skip(f"symlink creation unavailable: {exc}")
+        claim["handoff_path"] = alias.relative_to(tmp_path).as_posix()
+    claim_path.write_text(json.dumps(claim), encoding="utf-8")
+    evidence_ref = _write_evidence(tmp_path)
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b-pointer-boundary",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_ref,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "handoff_path" in refused.stderr
+    saved = json.loads(claim_path.read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+    assert "verification_evidence" not in saved
 
 
 def test_release_allow_missing_evidence_escape_prints_loud_warning(tmp_path: Path):

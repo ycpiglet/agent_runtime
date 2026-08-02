@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from agent_runtime import __version__
+from agent_runtime import claim_store
 from agent_runtime import cli as cli_module
 from agent_runtime.cli import main
 from agent_runtime.config import load_config
@@ -2918,6 +2919,548 @@ def test_packaged_sync_apply_migrates_claim_store_before_managed_copy(tmp_path, 
     assert post.runtime_migrations == ()
 
 
+def test_sync_apply_reports_committed_migration_and_partial_template_writes(
+    tmp_path,
+    capsys,
+    monkeypatch,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write_legacy_claim_store(host)
+    _write(templates / "scripts" / "a.py", "a\n")
+    _write(templates / "scripts" / "b.py", "b\n")
+    plan = build_sync_plan(host, template_root=templates)
+    assert plan.claim_store_state == "migration-required"
+    assert len(plan.updates) == 2
+
+    original_write_text = Path.write_text
+    update_targets = {update.target for update in plan.updates}
+    writes = 0
+
+    def fail_second_template_write(path, *args, **kwargs):
+        nonlocal writes
+        if path in update_targets:
+            writes += 1
+            if writes == 2:
+                raise OSError("second managed template write failed")
+        return original_write_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_second_template_write)
+
+    assert apply_updates(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "ERROR: sync apply failed" in output
+    assert "claim_store_migration=applied" in output
+    assert "template_application=partial" in output
+    assert "applied=1" in output
+    assert "applied=0" not in output
+    assert claim_store.inspect_store(host).state == "initialized"
+    assert (host / "scripts/a.py").read_text(encoding="utf-8") == "a\n"
+    assert not (host / "scripts/b.py").exists()
+
+
+def test_sync_apply_migration_only_reports_initialized_post_state(
+    tmp_path,
+    capsys,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write_legacy_claim_store(host)
+    templates.mkdir()
+    plan = build_sync_plan(host, template_root=templates)
+    assert plan.claim_store_state == "migration-required"
+    assert plan.updates == ()
+
+    assert apply_updates(plan) == 0
+    output = capsys.readouterr().out
+
+    assert "claim_store_state=initialized" in output
+    assert "runtime_migrations=0" in output
+    assert "claim_store_migration=applied" in output
+    assert "template_application=not-required" in output
+    assert "applied=0" in output
+
+
+def test_sync_apply_safe_renders_the_post_apply_plan(tmp_path, capsys):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write_legacy_claim_store(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+    assert plan.claim_store_state == "migration-required"
+    assert len(plan.updates) == 1
+
+    assert apply_safe_updates(plan) == 0
+    output = capsys.readouterr().out
+
+    assert "safe_updates=0" in output
+    assert "claim_store_state=initialized" in output
+    assert "runtime_migrations=0" in output
+    assert "claim_store_migration=applied" in output
+    assert "template_application=committed" in output
+    assert "applied=1" in output
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method"),
+    [
+        pytest.param(apply_updates, "write_text", id="apply"),
+        pytest.param(apply_safe_updates, "write_bytes", id="apply-safe"),
+    ],
+)
+def test_sync_apply_observes_committed_write_then_error(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+    target = plan.updates[0].target
+    original_write = getattr(Path, write_method)
+
+    def commit_then_raise(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            raise OSError("managed template write reported failure after commit")
+        return result
+
+    monkeypatch.setattr(Path, write_method, commit_then_raise)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=committed" in output
+    assert "applied=1" in output
+    assert "applied=0" not in output
+    assert target.read_text(encoding="utf-8") == "runtime\n"
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method"),
+    [
+        pytest.param(apply_updates, "write_text", id="apply"),
+        pytest.param(apply_safe_updates, "write_bytes", id="apply-safe"),
+    ],
+)
+def test_sync_apply_observes_partial_state_after_later_write_error(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "a.py", "a\n")
+    _write(templates / "scripts" / "b.py", "b\n")
+    plan = build_sync_plan(host, template_root=templates)
+    first, second = plan.updates
+    original_write = getattr(Path, write_method)
+
+    def fail_before_second_write(path, *args, **kwargs):
+        if path == second.target:
+            raise OSError("second managed template write failed before commit")
+        return original_write(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, write_method, fail_before_second_write)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=partial" in output
+    assert "applied=1" in output
+    assert first.target.exists()
+    assert not second.target.exists()
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method"),
+    [
+        pytest.param(apply_updates, "write_text", id="apply"),
+        pytest.param(apply_safe_updates, "write_bytes", id="apply-safe"),
+    ],
+)
+def test_sync_apply_reports_unknown_when_post_write_state_cannot_be_read(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+    target = plan.updates[0].target
+    original_write = getattr(Path, write_method)
+    original_read_text = Path.read_text
+    original_read_bytes = Path.read_bytes
+
+    def commit_then_raise(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            raise OSError("managed template write reported failure after commit")
+        return result
+
+    def fail_target_read_text(path, *args, **kwargs):
+        if path == target and path.exists():
+            raise OSError("post-write text observation failed")
+        return original_read_text(path, *args, **kwargs)
+
+    def fail_target_read_bytes(path, *args, **kwargs):
+        if path == target and path.exists():
+            raise OSError("post-write byte observation failed")
+        return original_read_bytes(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, write_method, commit_then_raise)
+    monkeypatch.setattr(Path, "read_text", fail_target_read_text)
+    monkeypatch.setattr(Path, "read_bytes", fail_target_read_bytes)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=unknown" in output
+    assert "applied=unknown" in output
+    assert "observed_applied=0" in output
+    assert "post_apply_plan=unavailable" in output
+    assert target.exists()
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method", "remaining_field"),
+    [
+        pytest.param(apply_updates, "write_text", "updates", id="apply"),
+        pytest.param(
+            apply_safe_updates,
+            "write_bytes",
+            "safe_updates",
+            id="apply-safe",
+        ),
+    ],
+)
+def test_sync_apply_returns_nonzero_when_written_target_is_removed(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+    remaining_field,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+    target = plan.updates[0].target
+    original_write = getattr(Path, write_method)
+
+    def write_then_remove(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            path.unlink()
+        return result
+
+    monkeypatch.setattr(Path, write_method, write_then_remove)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=not-applied" in output
+    assert "applied=0" in output
+    assert f"{remaining_field}=1" in output
+    assert not target.exists()
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method", "remaining_field"),
+    [
+        pytest.param(apply_updates, "write_text", "updates", id="apply"),
+        pytest.param(
+            apply_safe_updates,
+            "write_bytes",
+            "safe_updates",
+            id="apply-safe",
+        ),
+    ],
+)
+def test_sync_apply_returns_nonzero_when_written_target_is_replaced(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+    remaining_field,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    old = "old\n"
+    new = "new\n"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    target = host / "scripts" / "runtime.py"
+    _write(target, old)
+    _write(templates / "scripts" / "runtime.py", new)
+    _write(
+        host / "agent_runtime.lock.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-lock/v1",
+                "installed": {
+                    "managed_files": {"scripts/runtime.py": _digest(old)},
+                },
+            }
+        )
+        + "\n",
+    )
+    plan = build_sync_plan(host, template_root=templates)
+    assert len(plan.updates) == 1
+    original_write = getattr(Path, write_method)
+
+    def write_then_restore_old_target(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            if write_method == "write_text":
+                original_write(path, old, encoding="utf-8")
+            else:
+                original_write(path, old.encode("utf-8"))
+        return result
+
+    monkeypatch.setattr(Path, write_method, write_then_restore_old_target)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=not-applied" in output
+    assert "applied=0" in output
+    assert f"{remaining_field}=1" in output
+    assert target.read_text(encoding="utf-8") == old
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method", "remaining_field"),
+    [
+        pytest.param(apply_updates, "write_text", "updates", id="apply"),
+        pytest.param(
+            apply_safe_updates,
+            "write_bytes",
+            "safe_updates",
+            id="apply-safe",
+        ),
+    ],
+)
+def test_sync_apply_returns_nonzero_for_observed_partial_success(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+    remaining_field,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "a.py", "a\n")
+    _write(templates / "scripts" / "b.py", "b\n")
+    plan = build_sync_plan(host, template_root=templates)
+    first, second = plan.updates
+    original_write = getattr(Path, write_method)
+
+    def write_then_remove_second(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == second.target:
+            path.unlink()
+        return result
+
+    monkeypatch.setattr(Path, write_method, write_then_remove_second)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=partial" in output
+    assert "applied=1" in output
+    assert f"{remaining_field}=1" in output
+    assert first.target.exists()
+    assert not second.target.exists()
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method"),
+    [
+        pytest.param(apply_updates, "write_text", id="apply"),
+        pytest.param(apply_safe_updates, "write_bytes", id="apply-safe"),
+    ],
+)
+def test_sync_apply_returns_nonzero_for_unknown_observed_state(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+    target = plan.updates[0].target
+    original_write = getattr(Path, write_method)
+    original_read_bytes = Path.read_bytes
+    committed = False
+
+    def write_then_hide_byte_state(path, *args, **kwargs):
+        nonlocal committed
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            committed = True
+        return result
+
+    def fail_committed_target_byte_read(path, *args, **kwargs):
+        if committed and path == target:
+            raise OSError("post-write byte observation failed")
+        return original_read_bytes(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, write_method, write_then_hide_byte_state)
+    monkeypatch.setattr(Path, "read_bytes", fail_committed_target_byte_read)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=unknown" in output
+    assert "applied=unknown" in output
+    assert "observed_applied=0" in output
+    assert "post_apply_plan=unavailable" not in output
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "write_method", "remaining_field"),
+    [
+        pytest.param(apply_updates, "write_text", "updates", id="apply"),
+        pytest.param(
+            apply_safe_updates,
+            "write_bytes",
+            "safe_updates",
+            id="apply-safe",
+        ),
+    ],
+)
+def test_sync_apply_returns_nonzero_when_post_plan_discovers_new_update(
+    tmp_path,
+    capsys,
+    monkeypatch,
+    apply_fn,
+    write_method,
+    remaining_field,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "a.py", "a\n")
+    plan = build_sync_plan(host, template_root=templates)
+    target = plan.updates[0].target
+    new_template = templates / "scripts" / "b.py"
+    original_write = getattr(Path, write_method)
+    original_write_text = Path.write_text
+
+    def write_then_add_template(path, *args, **kwargs):
+        result = original_write(path, *args, **kwargs)
+        if path == target:
+            original_write_text(new_template, "b\n", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(Path, write_method, write_then_add_template)
+
+    assert apply_fn(plan) == 1
+    output = capsys.readouterr().out
+
+    assert "template_application=committed" in output
+    assert "applied=1" in output
+    assert f"{remaining_field}=1" in output
+    assert not (host / "scripts" / "b.py").exists()
+
+
+@pytest.mark.parametrize(
+    ("apply_fn", "post_count_field"),
+    [
+        pytest.param(apply_updates, "updates", id="apply"),
+        pytest.param(
+            apply_safe_updates,
+            "safe_updates",
+            id="apply-safe",
+        ),
+    ],
+)
+def test_sync_apply_fully_committed_update_remains_exit_zero(
+    tmp_path,
+    capsys,
+    apply_fn,
+    post_count_field,
+):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts" / "runtime.py", "runtime\n")
+    plan = build_sync_plan(host, template_root=templates)
+
+    assert apply_fn(plan) == 0
+    output = capsys.readouterr().out
+
+    assert "template_application=committed" in output
+    assert "applied=1" in output
+    assert f"{post_count_field}=0" in output
+
+
+def test_packaged_sync_apply_activates_checkout_from_tracked_inner_marker(
+    tmp_path,
+    capsys,
+):
+    host = tmp_path / "host"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    claim = _write_legacy_claim_store(host)
+    claim_store.initialize_store(host, witness_claim_id=claim.stem)
+    inner = host / "agents/runtime/task_claims/.claim-store"
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+    marker_bytes = inner.read_bytes()
+    outer.unlink()
+
+    plan = build_sync_plan(host, template_root=default_template_root())
+
+    assert plan.claim_store_state == "migration-required"
+    assert "claim-store-adopt-existing" in plan.runtime_migrations
+    assert not outer.exists()
+
+    assert run_sync(host, "apply", template_root=default_template_root()) == 0
+    capsys.readouterr()
+
+    assert inner.read_bytes() == marker_bytes
+    assert outer.read_bytes() == marker_bytes
+    post = build_sync_plan(host, template_root=default_template_root())
+    assert post.claim_store_state == "initialized"
+    assert post.runtime_migrations == ()
+
+
 def test_packaged_sync_conflict_prevents_claim_store_and_template_mutation(tmp_path, capsys):
     host = tmp_path / "host"
     subprocess.run(["git", "init", "-q", str(host)], check=True)
@@ -2960,4 +3503,77 @@ def test_packaged_sync_refuses_one_sided_claim_store_before_any_write(tmp_path, 
     capsys.readouterr()
 
     assert not closure_target.exists()
+    assert not (host / "agents/runtime/task_claims/.claim-store").exists()
+
+
+def test_packaged_sync_diff_reports_and_fails_on_invalid_claim_store(tmp_path, capsys):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+    _write(
+        outer,
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+
+    assert run_sync(host, "diff", template_root=templates) == 1
+    output = capsys.readouterr().out
+
+    assert "claim_store_state=integrity-invalid" in output
+    assert "claim-store-integrity-invalid" in output
+
+
+def test_lock_write_refuses_markerless_claim_store_without_mutation(tmp_path, capsys):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts/runtime.py", "# managed\n")
+    claim = _write_legacy_claim_store(host)
+    before = claim.read_bytes()
+
+    assert run_lock(host, mode="write", template_root=templates) == 1
+    capsys.readouterr()
+
+    assert claim.read_bytes() == before
+    assert not (host / "agent_runtime.lock.json").exists()
+    assert not (host / "agents/runtime/task_claims/.claim-store").exists()
+    assert not _git_admin_path(host, "agent-runtime/task-claim-store").exists()
+
+
+def test_lock_write_refuses_integrity_invalid_claim_store_without_mutation(tmp_path, capsys):
+    host = tmp_path / "host"
+    templates = tmp_path / "templates"
+    subprocess.run(["git", "init", "-q", str(host)], check=True)
+    _write_host_config(host)
+    _write(templates / "scripts/runtime.py", "# managed\n")
+    outer = _git_admin_path(host, "agent-runtime/task-claim-store")
+    _write(
+        outer,
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    before = outer.read_bytes()
+
+    assert run_lock(host, mode="write", template_root=templates) == 1
+    capsys.readouterr()
+
+    assert outer.read_bytes() == before
+    assert not (host / "agent_runtime.lock.json").exists()
     assert not (host / "agents/runtime/task_claims/.claim-store").exists()

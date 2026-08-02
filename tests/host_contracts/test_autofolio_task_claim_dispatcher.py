@@ -408,6 +408,18 @@ def test_create_refuses_drifted_t0_without_any_mutation(tmp_path: Path) -> None:
     )
 
 
+def test_create_emits_skip_plan_warning_once_on_authoritative_pass(
+    tmp_path: Path,
+) -> None:
+    unit_path = _fixture(tmp_path)
+    _write(tmp_path / "README.md", "drifted\n")
+
+    result = _run_create(tmp_path, unit_path, skip_plan_check=True)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert result.stderr.count("WARNING: --skip-plan-check used") == 1
+
+
 @pytest.mark.parametrize("status", ["planned", "blocked"])
 def test_create_refuses_non_ready_unit_without_any_mutation(
     tmp_path: Path,
@@ -526,6 +538,7 @@ def test_create_preserves_valid_ready_path(
     result = _run_create(tmp_path, unit_path)
 
     assert result.returncode == 0, result.stderr or result.stdout
+    assert result.stderr.count(f"plan-assumption-gate: pass ({TASKSET_ID})") == 1
     envelope = json.loads(result.stdout)
     assert envelope["status"] == "created"
     claim = envelope["claim"]
