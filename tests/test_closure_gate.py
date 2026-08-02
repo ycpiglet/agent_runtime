@@ -2984,6 +2984,99 @@ def test_multiple_active_claims_fail_closed_without_explicit_work_id(tmp_path):
     assert explicit == {"compound": False, "review": True, "retro": False}
 
 
+def _deep_accepted_watch_json(depth: int = 1200) -> bytes:
+    return ("[" * depth + "0" + "]" * depth).encode("utf-8")
+
+
+def test_direct_repeat_requirement_bounds_deep_json_recursion(tmp_path):
+    unit_id, watch_ref = _write_repeat_watch_context(
+        tmp_path,
+        watch_format="json",
+        raw_watch=_deep_accepted_watch_json(),
+        signature="deep accepted watch JSON recursion direct stop",
+    )
+
+    requirement = closure_gate.repeated_failure_requirement(
+        tmp_path,
+        closure_gate._active_work_contexts(tmp_path, work_id=unit_id),
+    )
+
+    assert requirement["required"] is True
+    assert requirement["satisfied"] is False
+    assert any(
+        f"compound:prevention-watch-invalid:{watch_ref}" in finding
+        for finding in requirement["findings"]
+    )
+
+
+def test_actual_stop_hook_blocks_deep_json_recursion(tmp_path):
+    _write_repeat_watch_context(
+        tmp_path,
+        watch_format="json",
+        raw_watch=_deep_accepted_watch_json(),
+        signature="deep accepted watch JSON recursion actual stop",
+    )
+
+    result = _run_actual_stop_hook(tmp_path)
+
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert "Traceback" not in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["decision"] == "block"
+    assert payload["reason"] == "repeated-failure-compound-required"
+
+
+def test_missing_primary_relative_worktree_never_uses_linked_root_shadow(
+    tmp_path,
+    monkeypatch,
+):
+    primary = tmp_path / "primary"
+    primary.mkdir()
+    assert _git(primary, "init").returncode == 0
+    assert _git(primary, "config", "user.email", "test@example.invalid").returncode == 0
+    assert _git(primary, "config", "user.name", "Test User").returncode == 0
+    (primary / "seed.txt").write_text("seed\n", encoding="utf-8")
+    assert _git(primary, "add", "seed.txt").returncode == 0
+    assert _git(primary, "commit", "-m", "seed").returncode == 0
+
+    local_worktree = primary / ".worktrees" / "TASK-AR-645"
+    assert _git(
+        primary,
+        "worktree",
+        "add",
+        "-b",
+        "test/missing-primary-relative",
+        str(local_worktree),
+        "HEAD",
+    ).returncode == 0
+    _write_active_unit(local_worktree)
+    _write_canonical_active_claim(
+        local_worktree,
+        claim_id="CLAIM-shadow-relative",
+        worktree_path=".worktrees/TASK-AR-MISSING",
+        defect_signatures=[_CLAIM_ONLY_SIGNATURE],
+        escalation_triggers=["repeated_failure"],
+    )
+    shadow = local_worktree / ".worktrees" / "TASK-AR-MISSING"
+    shadow.parent.mkdir(parents=True)
+    shadow.symlink_to(local_worktree, target_is_directory=True)
+    assert not (primary / ".worktrees" / "TASK-AR-MISSING").exists()
+    assert shadow.resolve() == local_worktree.resolve()
+    monkeypatch.chdir(local_worktree)
+
+    resolution = closure_gate.resolve_active_work_contexts(local_worktree)
+
+    assert resolution["reason"] is None
+    assert [context["kind"] for context in resolution["contexts"]] == ["unit"]
+    assert all(
+        _CLAIM_ONLY_SIGNATURE not in context["defect_signatures"]
+        for context in resolution["contexts"]
+    )
+    assert resolution["selected_claim_ids"] == ["CLAIM-active"]
+    assert "CLAIM-shadow-relative" not in resolution["selected_claim_ids"]
+
+
 # --- substantial line counting via git ---
 
 def _git(root, *args):
@@ -3037,11 +3130,17 @@ def test_stop_hook_blocks_substantial_without_record(tmp_path, monkeypatch, caps
     assert out["systemMessage"]
 
 
-def test_stop_hook_best_effort_on_error(monkeypatch, capsys):
+def test_stop_hook_fails_closed_on_unexpected_gate_error(monkeypatch, capsys):
     monkeypatch.setattr(closure_gate, "assess", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     rc = stop_hook_closure_gate.main([])
     assert rc == 0
-    assert capsys.readouterr().out == ""  # never block on gate error
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["decision"] == "block"
+    assert payload["reason"] == "closure-gate-error"
+    assert payload["systemMessage"] == (
+        "Closure validation failed unexpectedly. Repair or explicitly bypass "
+        "the gate before stopping."
+    )
 
 
 def test_stop_hook_disabled_env_approves(tmp_path, monkeypatch, capsys):

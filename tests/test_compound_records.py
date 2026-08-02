@@ -251,6 +251,29 @@ def _write_claim_only_repeat_authority(
     return path
 
 
+def _write_supported_repeat_compound(
+    root: Path,
+    *,
+    signature: str,
+    stem: str,
+) -> str:
+    prevention_ref = f"tests/test_{stem}.py"
+    prevention = root / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text(
+        "def test_repeat_prevention():\n    assert True\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        root,
+        work_id="UNIT-TASK-AR-645-001",
+        signature=signature,
+        title=f"Reject {stem.replace('_', ' ')} authority bypass",
+        prevention_refs=[prevention_ref],
+    )
+    return records.record_ref(root, record_path)
+
+
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(WORK_SCRIPT), "--root", str(root), *args],
@@ -261,6 +284,32 @@ def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         errors="replace",
     )
+
+
+def _assert_close_rejected_without_mutation(
+    root: Path,
+    *,
+    unit_id: str,
+    unit_path: Path,
+    claim_path: Path,
+    expected_finding: str = "closeout:",
+) -> None:
+    before = _tracked_closeout_snapshot(root, unit_path, claim_path)
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(root, unit_path, claim_path) == before
 
 
 def test_work_close_honors_claim_only_repeat_authority_without_mutation(
@@ -681,6 +730,160 @@ def test_work_close_fails_closed_for_invalid_linked_released_claim(
     assert "Traceback" not in result.stdout + result.stderr
     assert unit_path.read_bytes() == before_unit
     assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_rejects_scalar_authority_in_linked_released_claim_without_mutation(
+    tmp_path: Path,
+) -> None:
+    signature = "released scalar authority shape bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="released_scalar_authority_shape",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-scalar-authority",
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["escalation_triggers"] = claim["escalation_triggers"][0]
+    claim["defect_signatures"] = claim["defect_signatures"][0]
+    claim["compound_refs"] = claim["compound_refs"][0]
+    claim_path.write_text(json.dumps(claim) + "\n", encoding="utf-8")
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+
+
+def test_work_close_rejects_linked_released_claim_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    signature = "released claim store symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="released_claim_store_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-store-symlink",
+    )
+    shadow_claim = tmp_path / "shadow-claims" / claim_path.name
+    shadow_claim.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.replace(shadow_claim)
+    try:
+        claim_path.symlink_to(shadow_claim)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_shadow = shadow_claim.read_bytes()
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+def test_work_close_rejects_unit_spec_symlink_alias_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    alias = unit_path.with_name("UNIT-TASK-AR-645-ALIAS.md")
+    try:
+        alias.symlink_to(unit_path.name)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    signature = "active unit spec symlink alias bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_unit_spec_symlink_alias",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        unit_spec=alias.relative_to(tmp_path).as_posix(),
+        claim_id="CLAIM-active-unit-spec-symlink-alias",
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_canonical_unit_task_identity_contradiction_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    unit_path.write_text(
+        unit_text.replace("task_id: TASK-AR-645", "task_id: TASK-AR-999", 1),
+        encoding="utf-8",
+    )
+    signature = "canonical unit task identity contradiction"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="canonical_unit_task_identity_contradiction",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        task_id="TASK-AR-999",
+        claim_id="CLAIM-canonical-unit-task-contradiction",
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
 
 
 def test_task_work_close_rejects_self_declared_duplicate_unit_spec(
@@ -2640,6 +2843,27 @@ def test_accepted_watch_helpers_enforce_raw_size_bound(
         if expected_accepted
         else [f"compound:prevention-watch-invalid:{watch_ref}"]
     )
+
+
+def test_accepted_watch_helpers_bound_deeply_nested_json(
+    tmp_path: Path,
+    _accepted_watch_helper,
+) -> None:
+    watch_ref = "reviews/REVIEW-2026-07-29-deeply-nested-helper.json"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    raw_watch = ("[" * 1200 + "0" + "]" * 1200).encode("utf-8")
+    assert len(raw_watch) == 2401
+    watch.write_bytes(raw_watch)
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={"UNIT-TASK-AR-645-001"},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
 
 
 def _run_work_close_with_raw_watch(
