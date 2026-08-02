@@ -343,46 +343,7 @@ def test_claim_progress_delegates_once_and_never_writes_claim_or_pointer(
     claim_before = claim_path.read_bytes()
     pointer_before = pointer_path.read_bytes()
     calls: list[tuple[list[str], dict[str, object]]] = []
-    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
-    dispatcher_response = {
-        "status": "heartbeated",
-        "path": claim_ref,
-        "claim": {
-            "claim_id": claim_id,
-            "mutation_revision": 4,
-            "status": "claimed",
-            "task_id": "TASK-AR-655",
-            "unit_id": "UNIT-TASK-AR-655-001",
-            "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-        },
-        "receipt": {"committed": True, "claim_revision": 4},
-        "projection": {
-            "status": "projection",
-            "claim_id": claim_id,
-            "claim_revision": 4,
-            "operation": "merge",
-            "task_claim_ref": claim_ref,
-            "task_id": "TASK-AR-655",
-            "unit_id": "UNIT-TASK-AR-655-001",
-            "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-            "pointer": {
-                "active_task": "TASK-AR-655",
-                "active_task_set": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-                "active_claims": [claim_ref],
-                "current_agents": [
-                    {
-                        "claim_id": claim_id,
-                        "mutation_revision": 4,
-                        "claim_path": claim_ref,
-                        "status": "claimed",
-                        "task_id": "TASK-AR-655",
-                        "unit_id": "UNIT-TASK-AR-655-001",
-                        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-                    }
-                ],
-            },
-        },
-    }
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
 
     def fake_run(command, **kwargs):
         calls.append((list(command), dict(kwargs)))
@@ -659,56 +620,18 @@ def test_claim_progress_committed_warning_receipt_passes_through_exactly_once(
     claim_path, claim_before, pointer_path, pointer_before = (
         _claim_progress_sentinels(tmp_path, claim_id)
     )
-    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
-    dispatcher_response = {
-        "status": "heartbeat_committed_with_warnings",
-        "path": claim_ref,
-        "claim": {
-            "claim_id": claim_id,
-            "mutation_revision": 4,
-            "status": "claimed",
-            "task_id": "TASK-AR-655",
-            "unit_id": "UNIT-TASK-AR-655-001",
-            "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+    dispatcher_response = _full_merge_dispatcher_response(tmp_path, claim_id)
+    dispatcher_response["status"] = "heartbeat_committed_with_warnings"
+    dispatcher_response["post_commit_warnings"] = [
+        {
+            "stage": "agent-instance-registry",
+            "reason": "forced instance refresh failure",
         },
-        "receipt": {"committed": True, "claim_revision": 4},
-        "projection": {
-            "status": "projection",
-            "claim_id": claim_id,
-            "claim_revision": 4,
-            "operation": "merge",
-            "task_claim_ref": claim_ref,
-            "task_id": "TASK-AR-655",
-            "unit_id": "UNIT-TASK-AR-655-001",
-            "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-            "pointer": {
-                "active_task": "TASK-AR-655",
-                "active_task_set": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-                "active_claims": [claim_ref],
-                "current_agents": [
-                    {
-                        "claim_id": claim_id,
-                        "mutation_revision": 4,
-                        "claim_path": claim_ref,
-                        "status": "claimed",
-                        "task_id": "TASK-AR-655",
-                        "unit_id": "UNIT-TASK-AR-655-001",
-                        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
-                    }
-                ],
-            },
+        {
+            "stage": "claim-heartbeat-event",
+            "reason": "forced pane event failure",
         },
-        "post_commit_warnings": [
-            {
-                "stage": "agent-instance-registry",
-                "reason": "forced instance refresh failure",
-            },
-            {
-                "stage": "claim-heartbeat-event",
-                "reason": "forced pane event failure",
-            },
-        ],
-    }
+    ]
     calls: list[list[str]] = []
 
     def fake_run(command, **_kwargs):

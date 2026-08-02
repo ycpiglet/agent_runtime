@@ -87,30 +87,7 @@ POINTER_PLACEHOLDER_RE = re.compile(
     r"(?:YYYY-MM-DD|TASK-NNN|CLAIM-example|role-or-agent-id|"
     r"Replace this|replace this|<[^>\n]+>|\bTBD\b)"
 )
-POINTER_AGENT_FIELDS = (
-    "claim_id",
-    "agent_role",
-    "team_id",
-    "agent_instance_id",
-    "display_name",
-    "callsite_id",
-    "pane_id",
-    "task_id",
-    "unit_id",
-    "task_set_id",
-    "status",
-    "phase",
-    "progress_pct",
-    "step_index",
-    "step_total",
-    "status_text",
-    "worktree_path",
-    "branch",
-    "claim_path",
-    "handoff_path",
-    "log_path",
-    "last_heartbeat",
-)
+POINTER_AGENT_FIELDS = claim_store.POINTER_AGENT_FIELDS
 NULL_POINTER_SCALARS = {"", "null", "none", "~"}
 HANDOFF_MARKERS = (
     "Handoff Checklist",

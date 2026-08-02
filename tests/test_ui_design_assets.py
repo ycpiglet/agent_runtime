@@ -170,7 +170,11 @@ def test_cockpit_summary_is_null_safe_before_initial_state_load():
 
     assert summary is not None
     body = summary.group("body")
-    assert "runtimeState || {}" in body
+    assert "if (!runtimeState)" in body
+    assert 'stripEl.textContent = ""' in body
+    assert 'tiles.innerHTML = ""' in body
+    assert "return;" in body
+    assert "const state = runtimeState;" in body
     assert "runtimeState." not in body
     assert "state.tasks || []" in body
     assert "state.task_claims || []" in body

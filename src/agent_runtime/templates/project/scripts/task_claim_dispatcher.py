@@ -2696,27 +2696,15 @@ def _projection_payload(
     include_revision: bool,
 ) -> dict[str, Any]:
     rel_path = _rel(root, path)
+    pointer_agent_fields = tuple(
+        field
+        for field in claim_store.POINTER_AGENT_FIELDS
+        if field not in {"claim_path", "handoff_path", "log_path", "last_heartbeat"}
+    )
     agent = {
         key: claim.get(key)
-        for key in (
-            "claim_id",
-            "agent_role",
-            "team_id",
-            "agent_instance_id",
-            "display_name",
-            "callsite_id",
-            "pane_id",
-            "task_id",
-            "unit_id",
-            "task_set_id",
-            "status",
-            "phase",
-            "progress_pct",
-            "step_index",
-            "step_total",
-            "status_text",
-            "worktree_path",
-            "branch",
+        for key in pointer_agent_fields
+        + (
             "requested_model_tier",
             "selected_model_tier",
             "routing_policy_id",

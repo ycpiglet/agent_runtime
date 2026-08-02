@@ -37,6 +37,30 @@ ACTIVE_CLAIM_STATUSES = frozenset(
 INACTIVE_CLAIM_STATUSES = frozenset(
     {"blocked", "closed", "completed", "done", "expired", "released"}
 )
+POINTER_AGENT_FIELDS = (
+    "claim_id",
+    "agent_role",
+    "team_id",
+    "agent_instance_id",
+    "display_name",
+    "callsite_id",
+    "pane_id",
+    "task_id",
+    "unit_id",
+    "task_set_id",
+    "status",
+    "phase",
+    "progress_pct",
+    "step_index",
+    "step_total",
+    "status_text",
+    "worktree_path",
+    "branch",
+    "claim_path",
+    "handoff_path",
+    "log_path",
+    "last_heartbeat",
+)
 
 
 class ClaimStoreError(RuntimeError):

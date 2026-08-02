@@ -1011,6 +1011,21 @@ def _claim_progress_identity_matches(
     return True
 
 
+def _claim_progress_pointer_agent_matches(
+    candidate: dict[str, object],
+    claim: dict[str, object],
+    *,
+    claim_ref: str,
+) -> bool:
+    for field in claim_store.POINTER_AGENT_FIELDS:
+        if field not in candidate:
+            return False
+        expected = claim_ref if field == "claim_path" else claim.get(field)
+        if candidate[field] != expected:
+            return False
+    return True
+
+
 def _claim_progress_projection_valid(
     payload: dict[str, object],
     claim: dict[str, object],
@@ -1051,12 +1066,13 @@ def _claim_progress_projection_valid(
     current_agent = current_agents[0]
     return (
         isinstance(current_agent, dict)
-        and current_agent.get("claim_id") == claim_id
-        and current_agent.get("claim_path") == claim_ref
-        and current_agent.get("status") == claim_status
+        and _claim_progress_pointer_agent_matches(
+            current_agent,
+            claim,
+            claim_ref=claim_ref,
+        )
         and _strict_revision(current_agent.get("mutation_revision"))
         == committed_revision
-        and _claim_progress_identity_matches(current_agent, claim)
     )
 
 

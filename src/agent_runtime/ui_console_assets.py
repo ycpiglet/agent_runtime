@@ -9063,13 +9063,26 @@ function flowTileHtml(label, value, unit, series, warn) {
 }
 
 function renderHomeSummary() {
-  const state = runtimeState || {};
-  const ops = state.ops_metrics || {};
-  const health = ops.health_snapshot || {};
-  const verdict = String(health.verdict || "");
   const wrap = $("home-verdict");
   const badge = $("verdict-badge");
   const line = $("verdict-line");
+  const stripEl = $("strip-line");
+  const tiles = $("flow-tiles");
+  if (!runtimeState) {
+    if (wrap) wrap.hidden = true;
+    if (badge) {
+      badge.textContent = "";
+      badge.removeAttribute("data-verdict");
+    }
+    if (line) line.textContent = "";
+    if (stripEl) stripEl.textContent = "";
+    if (tiles) tiles.innerHTML = "";
+    return;
+  }
+  const state = runtimeState;
+  const ops = state.ops_metrics || {};
+  const health = ops.health_snapshot || {};
+  const verdict = String(health.verdict || "");
   const inboxTotal = cockpitData && typeof cockpitData.total === "number" ? cockpitData.total : null;
   if (wrap) {
     wrap.hidden = !verdict;
@@ -9096,7 +9109,6 @@ function renderHomeSummary() {
     claims.map((claim) => String(claim.agent_instance_id || claim.agent || "")).filter(Boolean)
   ).size;
   const gateCounts = (ops.gates && ops.gates.counts) || {};
-  const stripEl = $("strip-line");
   if (stripEl) {
     const gatesText = Number(gateCounts.block || 0) > 0
       ? "block " + gateCounts.block
@@ -9111,7 +9123,6 @@ function renderHomeSummary() {
       dot + t("strip.gates") + " " + gatesText +
       dot + t("strip.agents") + " " + agentsText;
   }
-  const tiles = $("flow-tiles");
   if (tiles) {
     const weeks = ((ops.velocity || {}).weeks || []).map((week) => Number(week.done || 0));
     const throughput = weeks.length ? weeks[weeks.length - 1] : null;
