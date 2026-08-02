@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-02T18:09:42+09:00
-record_count: 1274
+generated_at: 2026-08-02T18:27:54+09:00
+record_count: 1276
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1274` review and evidence records under `reviews/`.
+- Summary: indexed `1276` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1274` files |
+| Reviews covered | pass | `1276` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -41,6 +41,7 @@ record_count: 1274
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final` | md | revise | fail | TASK-AR-654 claim-authority continuity final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-store-component-final` | md | revise | fail | TASK-AR-654 claim-store component final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md` | `AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary` | md | revise | fail | TASK-AR-654 claim transaction-boundary audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md` | `AUDIT-2026-08-02-task-ar-654-precommit-authority-seams` | md | revise | fail | TASK-AR-654 precommit authority-seam audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md` | `AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final` | md | revise | fail | TASK-AR-654 Windows native-evidence final audit |
 | `reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md` | `AUDIT-2026-08-02-task-ar-654-windows-reparse-parent` | md | revise | fail | TASK-AR-654 Windows reparse-parent independent audit |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
@@ -680,6 +681,7 @@ record_count: 1274
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
 | `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
 | `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan` | md | accepted | n/a | TASK-AR-654 authority-seam T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan` | md | accepted | n/a | TASK-AR-654 broken-parent claim-store T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 canonical authority T3 replan |
 | `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 canonical-authority Compound scope amendment |

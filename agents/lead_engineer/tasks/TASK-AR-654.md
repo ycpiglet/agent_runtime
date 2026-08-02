@@ -9,7 +9,7 @@ kind: task
 parent_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 registered_at: 2026-07-30T11:25:00+09:00
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T18:04:57+09:00
+updated_at: 2026-08-02T18:25:27+09:00
 started_at: 2026-07-31T04:07:35+09:00
 title: Require Compound for declared repeated failures
 status: in_progress
@@ -62,6 +62,12 @@ defect_signatures:
   - defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd
   - defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2
   - defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4
+  - defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0
+  - defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7
+  - defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9
+  - defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f
+  - defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d
+  - defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472
 review_refs:
   - reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md
   - reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md
@@ -92,6 +98,8 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
@@ -111,10 +119,16 @@ claim_refs:
 acceptance:
   - Claim-time knowledge lookup remains before persistence.
   - A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.
+  - Valid linked Compounds collectively cover every declared defect signature.
   - The Compound prevention record links to a regression, gate, task proposal, or accepted watch state.
   - Generic substantial work may still close with an appropriate linked review or retro.
   - failure-to-regression is included in the consumer core profile and asset registry.
+  - A tracked inner marker requires explicit checkout activation without generation rebinding.
+  - New authority uses canonical no-clobber publication and identity-bound rollback.
+  - Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
+  - Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 verification:
+  - python -m pytest -q
   - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
   - python scripts/runtime_asset_usage.py --check
   - python scripts/template_mirror_gate.py --check
@@ -135,12 +149,18 @@ verification:
 
 - Claim-time knowledge lookup remains before persistence.
 - A task with repeated_failure or defect signatures cannot close without a linked canonical Compound record.
+- Valid linked Compounds collectively cover every declared defect signature.
 - The Compound prevention record links to a regression, gate, task proposal, or accepted watch state.
 - Generic substantial work may still close with an appropriate linked review or retro.
 - failure-to-regression is included in the consumer core profile and asset registry.
+- A tracked inner marker requires explicit checkout activation without generation rebinding.
+- New authority uses canonical no-clobber publication and identity-bound rollback.
+- Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
+- Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 
 ## Verification
 
+- `python -m pytest -q`
 - `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`
@@ -244,3 +264,14 @@ in
 `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md`.
 The claim remains held; native Windows evidence and an entirely fresh W4
 sequence are still required before release.
+
+## Reopened authority-seam repair
+
+Independent precommit review found that a locally green continuity candidate
+still misreported post-commit publication, could delete a competing role
+artifact, bypassed the canonical reader at closeout/witness seams, and allowed
+partial Compound signature coverage. Strict JSON, deterministic overlay seed,
+native junction, and truthful partial-sync reporting were also incomplete.
+The exact refinement is accepted under
+`reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md`; no prior
+local suite or W4 result authorizes release.

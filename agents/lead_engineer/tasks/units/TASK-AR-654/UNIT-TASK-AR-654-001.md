@@ -13,7 +13,7 @@ status: in_progress
 verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-30T11:25:00+09:00
-updated_at: 2026-08-02T18:04:57+09:00
+updated_at: 2026-08-02T18:25:27+09:00
 started_at: 2026-07-31T04:07:35+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md
@@ -58,6 +58,12 @@ defect_signatures:
   - defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd
   - defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2
   - defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4
+  - defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0
+  - defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7
+  - defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9
+  - defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f
+  - defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d
+  - defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472
 compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json
@@ -94,6 +100,8 @@ inputs:
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
   - reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
@@ -170,16 +178,22 @@ target_files:
 scope: Tighten only the repeated-failure lane and preserve ordinary review/retro closure compatibility.
 acceptance:
   - Repeated failures cannot bypass Compound.
+  - Valid linked Compounds collectively cover every declared defect signature.
   - Compound dedupe and lookup remain deterministic.
   - The skill is discoverable in a freshly adopted host.
   - No legacy Compound log is rewritten.
+  - A tracked inner marker requires explicit checkout activation without generation rebinding.
+  - New authority uses canonical no-clobber publication and identity-bound rollback.
+  - Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
+  - Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 verification:
+  - python -m pytest -q
   - python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q
   - python scripts/runtime_asset_usage.py --check
   - python scripts/template_mirror_gate.py --check
   - python scripts/regen_host_lock_if_needed.py --check
-handoff: Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
-stop_condition: Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
+handoff: Attach the failure-first transaction matrix, native Windows evidence state, full-suite Verify, complete Compound coverage proof, template parity, W4a, independent W4b, and skeptic verdict.
+stop_condition: Stop before rewriting legacy Compound history, widening Compound to ordinary work, dispatching CI without Owner approval, or performing version, publish, deployment, consumer, or external release actions.
 verified_at: 2026-08-02T13:22:43+09:00
 verified_by: le-20260801-000005-kst-ar654repair001
 evidence_refs:
@@ -219,6 +233,8 @@ review_refs:
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md
   - reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md
   - reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md
+  - reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md
+  - reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md
   - reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md
   - reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md
   - reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md
@@ -294,12 +310,18 @@ Tighten only the repeated-failure lane and preserve ordinary review/retro closur
 ## Acceptance Criteria
 
 - Repeated failures cannot bypass Compound.
+- Valid linked Compounds collectively cover every declared defect signature.
 - Compound dedupe and lookup remain deterministic.
 - The skill is discoverable in a freshly adopted host.
 - No legacy Compound log is rewritten.
+- A tracked inner marker requires explicit checkout activation without generation rebinding.
+- New authority uses canonical no-clobber publication and identity-bound rollback.
+- Inactive re-release preserves verification provenance and role idempotency validates the complete deterministic contract.
+- Native Windows Python 3.10, 3.11, and 3.12 evidence is required before release.
 
 ## Verification
 
+- `python -m pytest -q`
 - `python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_rsi_operating_system_docs.py tests/test_inventory_sync_sanitize.py tests/test_lock_merge_driver.py tests/test_regen_host_lock_if_needed.py -q`
 - `python scripts/runtime_asset_usage.py --check`
 - `python scripts/template_mirror_gate.py --check`
@@ -307,11 +329,15 @@ Tighten only the repeated-failure lane and preserve ordinary review/retro closur
 
 ## Handoff
 
-Attach failure-first closure evidence, skill packaging proof, backward compatibility, template parity, and independent W4b.
+Attach the failure-first transaction matrix, native Windows evidence state,
+full-suite Verify, complete Compound coverage proof, template parity, W4a,
+independent W4b, and skeptic verdict.
 
 ## Stop Boundary
 
-Stop before rewriting legacy Compound history or turning all reviews into mandatory Compound records.
+Stop before rewriting legacy Compound history, widening Compound to ordinary
+work, dispatching CI without Owner approval, or performing version, publish,
+deployment, consumer, or external release actions.
 
 ## Reopened after skeptic closeout
 
@@ -412,3 +438,12 @@ tracked-inner activation, snapshot-bound marker creation, exclusive
 publication, identity-bound rollback, immutable release provenance, complete
 role-overlay idempotency, native Windows execution, fresh Verify/Compound, and
 the new W4 sequence are incomplete.
+
+## Reopened after authority-seam audit
+
+The candidate remains failed under
+`reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md` until
+publication truth, identity-bound rollback, canonical active/released/witness
+reading, full declared-signature coverage, strict JSON, deterministic overlay
+seed validation, native junction selection, and truthful sync partial-state
+reporting pass fresh machine and independent review.
