@@ -71,7 +71,8 @@
     "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe": [
       "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
       "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
-      "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d"
+      "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ],
     "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9": [
       "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
@@ -270,7 +271,8 @@
       "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
       "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
       "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
-      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d"
+      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -320,10 +322,11 @@
       "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
       "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
       "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
-      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d"
+      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ]
   },
-  "record_count": 30,
+  "record_count": 31,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -816,8 +819,23 @@
         "TASK-AR-655",
         "UNIT-TASK-AR-655-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T08:08:31+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Require type-strict complete pointer authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:40c834fbf615b0af276926e1dbeaa3c83a1ba8ef500279aacdc3a73578fca419"
+  "source_digest": "sha256:e9d62c23b0fb1a4b6f1a64c960283b479c779acc5a8e07f591372bb23e9460d0"
 }
