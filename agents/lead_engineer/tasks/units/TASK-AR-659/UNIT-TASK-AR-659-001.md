@@ -15,7 +15,7 @@ claim_refs:
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-08-03T14:21:57+09:00
-updated_at: 2026-08-03T15:30:38+09:00
+updated_at: 2026-08-03T15:51:06+09:00
 origin_type: defect
 origin_ref: reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
 created_by: owner-manual-recovery
@@ -62,12 +62,13 @@ verification:
   - python scripts/rbac_write_gate.py --check
 handoff: Attach the RED commits, the owner-identity refusal proof, the live-claim refusal proof, before/after digests, the template mirror diff, the Compound record, and an independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating unregistered consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.
-verified_at: 2026-08-03T15:30:38+09:00
+verified_at: 2026-08-03T15:51:06+09:00
 verified_by: le-20260803-143123-kst-cfc8
 evidence_refs:
   - reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038.json
   - reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906.json
   - reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038.json
+  - reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106.json
 ---
 
 # UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first

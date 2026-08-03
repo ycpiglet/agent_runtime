@@ -126,11 +126,13 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
         # 5.4h while it deadlocked its own taskset.
         if liveness.state == "expired":
             return "skip", ORCHESTRATOR_EXPIRED_REASON
-        if liveness.state == "indeterminate" and liveness.reason == "deadline-missing":
-            # Strictly worse than an expired claim: it has no deadline at all,
-            # so it can never expire, never be reaped, and never be proven
-            # live. Without surfacing it here it is an invisible permanent
-            # deadlock. Do not let the orchestrator branch mask it.
+        if liveness.state == "indeterminate":
+            # Strictly worse than an expired claim: liveness can never be
+            # settled, so it can never expire, never be reaped, and never be
+            # proven live. Every indeterminate shape counts - `deadline-partial`
+            # (the pre-`lease`-nesting legacy claim, the most likely real-world
+            # case) and `deadline-invalid` just as much as `deadline-missing`.
+            # Do not let the orchestrator branch mask any of them.
             return "skip", "no-lease-info"
         return "skip", "orchestrator-claim"
     if liveness.state == "live":
@@ -351,8 +353,10 @@ def _authorized_sweep(
                 now=now,
                 grace_seconds=grace_seconds,
             )
-            if liveness.reason == "deadline-missing":
-                entry_reason = "no-lease-info"
+            # Every indeterminate shape is exit-less, not just the one with no
+            # deadline at all: `deadline-partial` and `deadline-invalid` are
+            # equally unreachable by any automated path.
+            entry_reason = "no-lease-info"
         entry = _entry(path, claim, entry_reason)
         if decision == "live":
             report["live"].append(entry)

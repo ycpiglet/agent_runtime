@@ -1114,12 +1114,12 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "a198cfda57546d499cc453a82653d90ea7cb70acb7889d4aef5d2da0da489cfe"
+          "value": "f4cf98926181f8d6737780d440df09b763cbf8ab1df4a3119eaa4e1cd7732a3c"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "a198cfda57546d499cc453a82653d90ea7cb70acb7889d4aef5d2da0da489cfe"
+          "value": "f4cf98926181f8d6737780d440df09b763cbf8ab1df4a3119eaa4e1cd7732a3c"
         },
         {
           "kind": "sha256",
@@ -1149,12 +1149,12 @@
         {
           "kind": "sha256",
           "path": "scripts/claim_reaper.py",
-          "value": "4feb5d187842a989fd44947c76ebdd81bddda7041c0464f329dc9b5f50634052"
+          "value": "8d5a6091c518a73571492aa368cac80fa845cb8cd33dc5755ef8180dcfdc2904"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
-          "value": "4feb5d187842a989fd44947c76ebdd81bddda7041c0464f329dc9b5f50634052"
+          "value": "8d5a6091c518a73571492aa368cac80fa845cb8cd33dc5755ef8180dcfdc2904"
         },
         {
           "kind": "sha256",
@@ -1234,7 +1234,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "9d96f30affbc53c79a029232296ae6a6402512098dfa1ddfe32b8052f95217f0"
+          "value": "7adcf797b062f789ce889699e49498bfe615fe702cd6140cace7f54e4b2facf4"
         },
         {
           "kind": "sha256",
@@ -1244,7 +1244,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_claim_reaper.py",
-          "value": "e947e6f7fdb3feeac0c6c4e55a09e92387ac116a873e957735a21479a3706d72"
+          "value": "0c6688a3ca1a0b7efdaa3104c6d7ecdb85d2955bcc0918909788d9d5837915cc"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "c0b135c790b12696f0e3a4069e02c33024bbf457b745f06ddb62bf958fc7a6b2"
+          "value": "15a9e76a280ede2cc98f7ae91861fe12a3684691f2b889585ea4f4a9b7693af6"
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md",
-      "recorded_at": "2026-08-03T15:30:27+09:00",
+      "recorded_at": "2026-08-03T15:52:49+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-03T15:30:27+09:00"
+  "updated_at": "2026-08-03T15:52:49+09:00"
 }

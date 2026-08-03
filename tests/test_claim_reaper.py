@@ -955,3 +955,37 @@ def test_owner_recovery_signal_reaches_the_session_start_hook(tmp_path, capsys):
         "supervisor": {"action": "none"},
     }
     assert "needs_owner_recovery=1" in deadlock_watchdog._summary_line(report)
+
+
+@pytest.mark.parametrize(
+    "label, mutate",
+    [
+        # The pre-`lease`-nesting legacy claim: top-level deadline only. This is
+        # the most likely real-world member of the AR-655 family.
+        ("legacy-top-only", lambda c: c.pop("lease", None)),
+        ("malformed-top", lambda c: c.update({"expires_at": "not-a-timestamp"})),
+        ("lease-deadline-removed", lambda c: c["lease"].pop("expires_at", None)),
+        ("no-deadline-at-all", lambda c: (c.pop("lease", None), c.pop("expires_at", None))),
+    ],
+)
+def test_every_indeterminate_lease_shape_surfaces_for_owner_recovery(
+    tmp_path, label, mutate
+):
+    """Fixing only the wholly-absent case would leave the common shapes hidden."""
+    path = _claim(
+        tmp_path,
+        f"CLAIM-orch-{label}",
+        mode="orchestrator",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    payload = _load(path)
+    mutate(payload)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    assert report["reaped"] == []
+    reasons = {entry["claim_id"]: entry["reason"] for entry in report["skipped"]}
+    assert reasons[f"CLAIM-orch-{label}"] == "no-lease-info", label
+    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    assert f"CLAIM-orch-{label}" in surfaced, label

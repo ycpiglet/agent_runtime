@@ -6019,10 +6019,10 @@ def test_deadline_missing_claim_needs_explicit_opt_in_to_terminalize(
 
     refused = _run_dispatcher(linked, *args, "--json")
     assert refused.returncode != 0
-    assert "allow-missing-deadline" in (refused.stdout + refused.stderr)
+    assert "allow-indeterminate-lease" in (refused.stdout + refused.stderr)
     assert path.read_bytes() == before
 
-    allowed = _run_dispatcher(linked, *args, "--allow-missing-deadline", "--json")
+    allowed = _run_dispatcher(linked, *args, "--allow-indeterminate-lease", "--json")
     assert allowed.returncode == 0, allowed.stderr or allowed.stdout
     after = json.loads(path.read_text(encoding="utf-8"))
     assert after["status"] == "expired"
@@ -6078,6 +6078,7 @@ def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
     ]
     path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    before = path.read_bytes()
     result = _run_dispatcher(
         linked,
         "adopt",
@@ -6089,21 +6090,99 @@ def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
         "attempting to mint a binding over chosen scope",
         "--json",
     )
-    assert result.returncode == 0, result.stderr or result.stdout
 
-    dispatcher = _load_dispatcher_module()
-    adopted = json.loads(path.read_text(encoding="utf-8"))
-    minted = adopted["scope_binding"]
-    spec_anchored = dispatcher._binding_for_claim(
-        adopted,
-        bound_at=minted["bound_at"],
-        target_files=spec_files,
-        stop_condition=dispatcher._unit_spec_stop_condition(linked, unit_rel),
+    # Widened scope must be refused outright, not quietly re-anchored: adopt
+    # holds the same bar as renew, which demands an accepted T2/T3 replan on
+    # any scope change.
+    assert result.returncode != 0, (
+        "adopt accepted caller-widened scope without a replan: " + result.stdout
     )
-    assert (
-        minted["components"]["target_files"]
-        == spec_anchored["components"]["target_files"]
-    ), "adopt minted a binding over caller-controlled target_files"
+    assert "replan" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+def test_adopt_leaves_the_claim_renewable(tmp_path: Path) -> None:
+    """Adoption exists so heartbeat and renew can reach the claim again.
+
+    _persisted_scope_binding recomputes the expected binding from the claim's
+    OWN target_files/stop_condition, so writing a spec-anchored binding without
+    also writing those fields leaves the two permanently irreconcilable and
+    makes renew refuse forever.
+    """
+    task_id = "TASK-AR-659renewable"
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-renewable")
+    unit_rel = _write_routing_work(linked, task_id)
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--lease-minutes",
+        "600",
+        "--suffix",
+        "renewable",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+
+    # Reproduce a legacy claim: drop the mutation fields entirely.
+    claim.pop("mutation_revision", None)
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "legacy claim predates the mutation fields",
+        "--now",
+        "2026-07-29T09:00:00+09:00",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+
+    # The whole point: renew must now work against the adopted claim.
+    result = _run_dispatcher(
+        linked,
+        "renew",
+        "--claim-id",
+        adopted["claim_id"],
+        "--agent-instance-id",
+        adopted["agent_instance_id"],
+        "--callsite-id",
+        adopted["callsite_id"],
+        "--expected-revision",
+        str(adopted["mutation_revision"]),
+        "--expected-scope-digest",
+        adopted["scope_binding"]["digest"],
+        "--lease-minutes",
+        "60",
+        "--now",
+        "2026-07-29T10:00:00+09:00",
+        "--json",
+    )
+    assert result.returncode == 0, (
+        "adopt left the claim un-renewable: " + (result.stderr or result.stdout)
+    )
 
 
 def test_adopt_refuses_a_present_but_invalid_mutation_revision(tmp_path: Path) -> None:
@@ -6156,3 +6235,63 @@ def test_owner_identity_is_length_bounded(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert path.read_bytes() == before
+
+
+def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
+    """Owner id and reason land in the same record; capping one is half a fix."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-reason-len")
+    path, claim = _legacy_claim(linked, "659-reasonlen")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "y" * 20000,
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert path.read_bytes() == before
+
+
+def test_activation_audit_loss_is_reported(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The pane event is the only durable attribution for a store activation."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-audit-loss")
+    result = _create_linked_claim(linked, suffix="659-auditloss")
+    assert result.returncode == 0, result.stderr or result.stdout
+    _claim_store_outer_anchor(linked).unlink()
+
+    dispatcher = _load_dispatcher_module()
+
+    def _broken_sink(*_a, **_k):
+        raise OSError("pane event sink is unavailable")
+
+    monkeypatch.setattr(dispatcher, "append_event", _broken_sink)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "audit sink is broken",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc == 0  # activation must not roll back
+    assert _claim_store_outer_anchor(linked).is_file()
+    assert json.loads(captured.out)["audit"] == "lost"
+    assert "not durable" in captured.err

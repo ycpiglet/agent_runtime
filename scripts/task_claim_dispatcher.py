@@ -3394,6 +3394,8 @@ RECOVERY_AUTHORITY = "owner-explicit-approval"
 
 
 OWNER_IDENTITY_MAX = 256
+# Both provenance fields land in the same claim record; capping one is half a fix.
+RECOVERY_REASON_MAX = 1024
 
 
 def _recovery_now(value: str | None) -> datetime:
@@ -3431,6 +3433,8 @@ def _recovery_reason(value: object) -> str:
     reason = " ".join(str(value or "").split())
     if not reason:
         raise ValueError("a recovery reason is required")
+    if len(reason) > RECOVERY_REASON_MAX:
+        raise ValueError(f"recovery reason exceeds {RECOVERY_REASON_MAX} characters")
     return reason
 
 
@@ -3477,8 +3481,14 @@ def _stamp_recovery(
     now_text: str,
     operation: str,
 ) -> None:
-    claim["updated_at"] = now_text
-    claim["recovered_at"] = now_text
+    # Provenance records when the recovery actually happened. `--now` is a
+    # liveness seam and must not backdate the audit trail of an explicitly
+    # owner-attributed command; it is kept alongside for replayability.
+    wall_text = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    if wall_text != now_text:
+        claim["recovery_evaluated_at"] = now_text
+    claim["updated_at"] = wall_text
+    claim["recovered_at"] = wall_text
     claim["recovered_by"] = owner
     claim["recovery_authority"] = RECOVERY_AUTHORITY
     claim["recovery_operation"] = operation
@@ -3504,9 +3514,11 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             raw_revision = claim.get("mutation_revision")
             has_revision = type(raw_revision) is int and raw_revision >= 0
             has_binding = isinstance(claim.get("scope_binding"), dict)
-            if raw_revision is not None and not has_revision:
-                # Present but unusable (e.g. "7", -1, True). Rewriting it to 0
-                # would destroy CAS history rather than adopt a legacy claim.
+            if "mutation_revision" in claim and not has_revision:
+                # Present but unusable (e.g. "7", -1, True, null). Rewriting it
+                # to 0 would destroy CAS history rather than adopt a legacy
+                # claim, so refuse and make a human look. An explicit null is
+                # ambiguous, not absent, and takes the same path.
                 raise ValueError(
                     f"claim mutation_revision is present but invalid ({raw_revision!r}); "
                     "adopt will not overwrite it"
@@ -3520,12 +3532,28 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             if not has_revision:
                 claim["mutation_revision"] = 0
             if not has_binding:
-                # Anchor the binding to the unit spec, exactly as renew does.
-                # Deriving it from the claim's own mutable target_files /
+                # Anchor to the unit spec, exactly as renew does. Deriving the
+                # binding from the claim's own mutable target_files /
                 # stop_condition would let a caller delete scope_binding, edit
-                # those fields, and have adopt mint a "valid" binding over
-                # scope of their own choosing.
+                # those fields, and have adopt bless scope of their choosing.
                 target_files, stop_condition = _current_scope_values(root, claim)
+                drifted = (
+                    _normalize_target_files(tuple(claim.get("target_files") or ()))
+                    != _normalize_target_files(tuple(target_files))
+                ) or (str(claim.get("stop_condition") or "") != str(stop_condition))
+                if drifted:
+                    # Same bar as renew: a scope change needs an accepted T2/T3
+                    # replan. Without this, adopt would be a scope-change path
+                    # with no gate at all for claims whose unit_spec is empty.
+                    replan_ref = _accepted_replan_ref(root, claim, args.replan_ref)
+                    claim["adopted_replan_ref"] = replan_ref
+                # Write the fields and the binding together. _persisted_scope_binding
+                # recomputes the expected binding from the claim's OWN fields, so
+                # writing the binding alone would leave the two permanently
+                # irreconcilable and make renew refuse forever - defeating the
+                # whole point of adoption.
+                claim["target_files"] = target_files
+                claim["stop_condition"] = stop_condition
                 claim["scope_binding"] = _binding_for_claim(
                     claim,
                     bound_at=now_text,
@@ -3585,20 +3613,22 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
         with claim_store.store_lock(root):
             path, claim, inspection = _recovery_target(root, args.claim_id)
             liveness = claim_store.classify_claim_liveness(claim, now=now)
-            deadline_missing = (
-                liveness.state == "indeterminate"
-                and liveness.reason == "deadline-missing"
-            )
-            if deadline_missing and not args.allow_missing_deadline:
-                # A claim with no deadline can never expire, never be reaped,
-                # and never be proven live either. It needs an exit, but ending
-                # it is a judgement rather than a provable fact, so it has to be
-                # opted into explicitly instead of riding the expired path.
+            # Every indeterminate shape is exit-less, not just a wholly absent
+            # deadline. `deadline-partial` is the pre-`lease`-nesting legacy
+            # claim and is the most likely real-world instance of this family.
+            indeterminate = liveness.state == "indeterminate"
+            if indeterminate and not args.allow_indeterminate_lease:
+                # Liveness can never be settled for such a claim, so it can
+                # never expire, never be reaped, and never be proven live. It
+                # needs an exit, but ending it is a judgement rather than a
+                # provable fact, so it must be opted into explicitly instead of
+                # riding the expired path.
                 raise ValueError(
-                    "claim has no lease deadline, so death cannot be proven; "
-                    "re-run with --allow-missing-deadline to end it deliberately"
+                    f"claim lease is indeterminate ({liveness.reason}), so death "
+                    "cannot be proven; re-run with --allow-indeterminate-lease to "
+                    "end it deliberately"
                 )
-            if not deadline_missing and liveness.state != "expired":
+            if not indeterminate and liveness.state != "expired":
                 raise ValueError(
                     f"claim lease is {liveness.state} ({liveness.reason}); "
                     "terminalize refuses a live claim and only ends an expired one"
@@ -3671,6 +3701,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         detail = " ".join(str(exc).split())[:256] or "claim-store activation unavailable"
         print(f"claim-store activation refused: {detail}", file=sys.stderr)
         return 1
+    audit = "recorded"
     try:
         append_event(
             root,
@@ -3684,12 +3715,21 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                 ),
             },
         )
-    except Exception:  # noqa: BLE001 - activation succeeded; audit is best-effort
-        pass
+    except Exception as exc:  # noqa: BLE001 - activation already succeeded
+        # Do not roll back a successful activation, but never swallow the loss:
+        # this event is the only durable attribution artifact for the store.
+        audit = "lost"
+        print(
+            "claim-store activation WARNING: activation succeeded but the audit "
+            f"event was not recorded ({exc!r}); attribution for this activation "
+            "is not durable",
+            file=sys.stderr,
+        )
     _emit(
         {
             "status": "activated",
             "activated_by": owner,
+            "audit": audit,
             "claim_store_state_before": before_state,
             "claim_store_state": inspection.state,
             "witness_claim_id": inspection.witness_claim_id,
@@ -3857,6 +3897,14 @@ def build_parser() -> argparse.ArgumentParser:
     adopt.add_argument("--claim-id", required=True)
     adopt.add_argument("--owner-id", required=True)
     adopt.add_argument("--reason", required=True)
+    adopt.add_argument(
+        "--replan-ref",
+        default="",
+        help=(
+            "Accepted T2/T3 replan review. Required when the unit spec's scope "
+            "no longer matches the claim's recorded scope, same bar as renew."
+        ),
+    )
     adopt.add_argument("--now")
     adopt.add_argument("--json", action="store_true")
     adopt.set_defaults(func=cmd_adopt)
@@ -3873,11 +3921,12 @@ def build_parser() -> argparse.ArgumentParser:
     terminalize.add_argument("--owner-id", required=True)
     terminalize.add_argument("--reason", required=True)
     terminalize.add_argument(
-        "--allow-missing-deadline",
+        "--allow-indeterminate-lease",
         action="store_true",
         help=(
-            "End a claim that carries no lease deadline at all. Death cannot be "
-            "proven for such a claim, so this is a deliberate owner judgement."
+            "End a claim whose lease state can never be settled (missing, "
+            "partial, or invalid deadline). Death cannot be proven for such a "
+            "claim, so this is a deliberate owner judgement."
         ),
     )
     terminalize.add_argument("--now")

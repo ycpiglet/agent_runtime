@@ -3,7 +3,8 @@ schema_version: agent-runtime-review/v1
 id: REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment
 title: TASK-AR-659 W4b Consumer Wiring Scope Amendment
 date: 2026-08-03
-created_at: 2026-08-03T15:35:00+09:00
+created_at: 2026-08-03T15:29:00+09:00
+amended_at: 2026-08-03T15:30:10+09:00
 task_id: TASK-AR-659
 unit_id: UNIT-TASK-AR-659-001
 claim_id: CLAIM-20260803-143123-task-ar-659-cfc8
@@ -67,6 +68,16 @@ Every plan assumption recorded in
 holds. No network or distributed lease dependency, recovery stays owner-bound,
 no release or acceptance authority is added, and the reaper still never
 auto-reaps an orchestrator claim.
+
+## Record sequence
+
+This record was authored, then `renew` refused it for a missing `tier` field,
+then `tier: T3` was added, then `renew` succeeded at `15:30:27` and the anchors
+were re-recorded at the same second. An earlier revision of this file carried a
+hand-written `created_at` of `15:35:00`, which post-dated the very `renew` it
+authorized. `_accepted_replan_ref` validates status, signal, tier, task, and
+unit but not ordering, so nothing caught it. Corrected here rather than left as
+a self-consistent-looking but false timestamp.
 
 ## Tier
 
