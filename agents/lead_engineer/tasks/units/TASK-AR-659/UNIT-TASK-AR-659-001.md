@@ -52,7 +52,8 @@ acceptance:
   - No new command grants release, acceptance, or external-release authority.
   - A new worktree can activate its claim store through a registered command without a consumer agent_runtime.yml.
 verification:
-  - python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q
+  - PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q
+  - PYTHONPATH=src python -m pytest tests/test_claim_guard.py -q
 handoff: Attach the RED commits, the owner-identity refusal proof, the live-claim refusal proof, before/after digests, the template mirror diff, the Compound record, and an independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating unregistered consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.
 ---
@@ -119,7 +120,22 @@ touch consumer projects.
 
 ## Verification
 
-- `python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q`
+- `PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q`
+- `PYTHONPATH=src python -m pytest tests/test_claim_guard.py -q`
+
+### Environment (mandatory)
+
+`PYTHONPATH=src` is required. The editable install resolves `agent_runtime`
+to `.worktrees/TASK-AR-655/src`, so an unqualified `pytest` run in this
+worktree silently exercises **another worktree's source**.
+
+### Pre-existing baseline (not owned by this unit)
+
+`tests/test_claim_guard.py` is **21 failed / 15 passed** on this clone's
+`main`, verified in a throwaway detached worktree. It predates TASK-AR-655
+and this unit: the blocking rule `task-claim:authorized-commit-not-persisted`
+was introduced by TASK-AR-648 (commit `31b1a146`, already on `main`). This
+unit must not worsen that count and does not own fixing it.
 
 ## Handoff
 

@@ -5621,3 +5621,212 @@ def test_overlay_scope_renew_and_standalone_projection_remain_refused(
     assert projection_rc == 1
     assert "overlay" in projection_output.err.lower()
     assert path.read_bytes() == before
+
+
+# ===========================================================================
+# TASK-AR-659 RED — a claim that no automated path can reach must still have a
+# registered, owner-bound recovery command.
+#
+# Regression source: CLAIM-20260803-002651-task-ar-655-5f27 expired and stayed
+# `status: claimed` with four paths closed at once — claim_reaper skips
+# mode=orchestrator before testing liveness, heartbeat/renew reject a claim that
+# predates mutation_revision/scope_binding, task and task-set exclusivity refuse
+# a replacement claim, and no expire/terminalize/bootstrap subcommand exists.
+# One stale claim blocked both its own task and the task needed to fix it.
+# ===========================================================================
+
+_OWNER = "ycpiglet <68498184+ycpiglet@users.noreply.github.com>"
+
+
+def _legacy_claim(linked: Path, suffix: str) -> tuple[Path, dict]:
+    """Create a claim, then strip the mutation fields to reproduce a legacy claim."""
+    result = _create_linked_claim(linked, suffix=suffix)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("mutation_revision", None)
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path, claim
+
+
+def test_red_legacy_claim_is_adoptable_by_owner_bound_command(tmp_path: Path) -> None:
+    """A pre-mutation-field claim must be adoptable instead of unrecoverable."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt")
+    path, claim = _legacy_claim(linked, "659-adopt")
+    assert "mutation_revision" not in claim
+    assert "scope_binding" not in claim
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "legacy claim predates the mutation fields",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+    assert adopted["mutation_revision"] == 0
+    assert isinstance(adopted["scope_binding"], dict)
+    assert adopted["status"] == "claimed"          # adoption is not a lifecycle change
+    assert adopted["recovered_by"] == _OWNER
+
+
+def test_red_adopt_refuses_a_caller_without_owner_identity(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt-anon")
+    path, claim = _legacy_claim(linked, "659-adopt-anon")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        "   ",
+        "--reason",
+        "no identity",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+    # Must be refused for a *stated* reason, not merely because argparse does not
+    # know the subcommand — otherwise this passes vacuously pre-implementation.
+    combined = (result.stdout + result.stderr).lower()
+    assert "owner" in combined
+    assert "invalid choice" not in combined
+
+
+def test_red_expired_claim_is_terminalizable_by_owner_bound_command(
+    tmp_path: Path,
+) -> None:
+    """An expired claim must reach a terminal state without delete/release/complete."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-terminalize")
+    result = _create_linked_claim(
+        linked, suffix="659-term", extra_args=("--lease-minutes", "1")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim_id = payload["claim"]["claim_id"]
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim_id,
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "lease expired with no reachable command",
+        "--now",
+        "2026-07-29T18:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert path.is_file()                          # not deleted
+    after = json.loads(path.read_text(encoding="utf-8"))
+    assert after["status"] == "expired"            # not released, not completed
+    assert after["recovered_from_status"] == "claimed"
+    assert after["recovered_by"] == _OWNER
+    assert after["recovery_reason"]
+
+
+def test_red_terminalize_refuses_a_live_claim(tmp_path: Path) -> None:
+    """A live claim must never be terminalizable, whatever the owner asks."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-live")
+    result = _create_linked_claim(
+        linked, suffix="659-live", extra_args=("--lease-minutes", "120")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "attempting to kill a live claim",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+    combined = (result.stdout + result.stderr).lower()
+    assert "live" in combined or "not expired" in combined
+    assert "invalid choice" not in combined
+
+
+def test_red_terminalize_reaches_an_orchestrator_claim_the_reaper_skips(
+    tmp_path: Path,
+) -> None:
+    """Mode must not decide reachability: the reaper skips orchestrator claims."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-orch")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-orch",
+        extra_args=("--lease-minutes", "1", "--mode", "orchestrator"),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "orchestrator claim the reaper will never reach",
+        "--now",
+        "2026-07-29T18:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "expired"
+
+
+def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
+    """A fresh worktree must have a registered claim-store activation command.
+
+    The outer marker lives in the per-worktree git admin dir, so every new
+    worktree starts `migration-required`. The only caller of
+    adopt_legacy_store() is sync.py, which needs a consumer agent_runtime.yml
+    that the runtime repository itself does not have.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-activate")
+    result = _create_linked_claim(linked, suffix="659-activate")
+    assert result.returncode == 0, result.stderr or result.stdout
+
+    outer = _claim_store_outer_anchor(linked)
+    assert outer.is_file()
+    outer.unlink()                                  # reproduce a fresh checkout
+
+    result = _run_dispatcher(linked, "activate-store", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert outer.is_file()

@@ -810,3 +810,82 @@ def test_cli_apply_reports_bounded_store_failure_without_traceback_or_mutation(
     _assert_claim_store_failure(report, "migration-required")
     assert _load(path)["status"] == "claimed"
     assert _reaper_mutation_snapshot(tmp_path) == before
+
+
+# --- TASK-AR-659 RED: an expired orchestrator claim must not be an invisible skip ---
+#
+# Regression source: CLAIM-20260803-002651-task-ar-655-5f27 sat expired for 5.4h
+# while every reaper report filed it as a plain `orchestrator-claim` skip, i.e.
+# indistinguishable from a healthy orchestrator claim. Nothing surfaced that the
+# taskset was deadlocked. The safety invariant (orchestrator claims are never
+# auto-reaped) stays intact; only the blind spot is removed.
+
+
+def test_red_expired_orchestrator_claim_is_surfaced_for_owner_recovery(tmp_path):
+    _claim(
+        tmp_path,
+        "CLAIM-orch-dead",
+        mode="orchestrator",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    # Safety invariant preserved: still never a reap candidate.
+    assert report["reaped"] == []
+    assert report["would_reap"] == []
+    # Blind spot removed: the dead claim is explicitly surfaced.
+    surfaced = {entry["claim_id"] for entry in report.get("needs_owner_recovery", [])}
+    assert "CLAIM-orch-dead" in surfaced
+
+
+def test_red_live_orchestrator_claim_is_not_flagged_for_owner_recovery(tmp_path):
+    _claim(
+        tmp_path,
+        "CLAIM-orch-live",
+        mode="orchestrator",
+        expires_at="2026-06-14T12:30:00+09:00",
+    )
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    surfaced = {entry["claim_id"] for entry in report.get("needs_owner_recovery", [])}
+    assert "CLAIM-orch-live" not in surfaced
+
+
+def test_red_expired_orchestrator_skip_reason_differs_from_healthy_one(tmp_path):
+    _claim(
+        tmp_path,
+        "CLAIM-orch-dead-reason",
+        mode="orchestrator",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    _claim(
+        tmp_path,
+        "CLAIM-orch-live-reason",
+        task_id="TASK-AR-2",
+        mode="orchestrator",
+        expires_at="2026-06-14T12:30:00+09:00",
+    )
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+    reasons = {entry["claim_id"]: entry["reason"] for entry in report["skipped"]}
+
+    assert reasons["CLAIM-orch-live-reason"] == "orchestrator-claim"
+    assert reasons["CLAIM-orch-dead-reason"] == "orchestrator-claim-expired"
+
+
+def test_red_terminal_orchestrator_claim_is_not_flagged_for_owner_recovery(tmp_path):
+    """A claim already terminalized to `expired` is resolved, not outstanding."""
+    _claim(
+        tmp_path,
+        "CLAIM-orch-terminal",
+        mode="orchestrator",
+        status="expired",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    surfaced = {entry["claim_id"] for entry in report.get("needs_owner_recovery", [])}
+    assert "CLAIM-orch-terminal" not in surfaced
