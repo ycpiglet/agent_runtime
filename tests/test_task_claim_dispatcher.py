@@ -5639,8 +5639,34 @@ _OWNER = "ycpiglet <68498184+ycpiglet@users.noreply.github.com>"
 
 
 def _legacy_claim(linked: Path, suffix: str) -> tuple[Path, dict]:
-    """Create a claim, then strip the mutation fields to reproduce a legacy claim."""
-    result = _create_linked_claim(linked, suffix=suffix)
+    """Create a spec-backed claim, then strip the mutation fields.
+
+    Spec-backed on purpose: every real claim carries a unit_spec, and that is
+    the scope authority adoption anchors to. A spec-less claim has no authority
+    to diff against and is deliberately handled by a separate, stricter path
+    (see test_adopt_refuses_a_spec_less_claim_without_a_replan).
+    """
+    task_id = f"TASK-AR-{suffix}"
+    unit_rel = _write_routing_work(linked, task_id)
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        suffix.replace("-", "")[-8:],
+        "--json",
+    )
     assert result.returncode == 0, result.stderr or result.stdout
     payload = json.loads(result.stdout)
     path = linked / payload["path"]
@@ -6144,6 +6170,58 @@ def test_adopt_leaves_the_claim_renewable(tmp_path: Path) -> None:
     claim.pop("scope_binding", None)
     path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # The spec must actually drift, otherwise spec-anchored and claim-anchored
+    # scope are identical and the regression cannot reproduce. Spec drift after
+    # claim creation is the normal case for a legacy claim.
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - scripts/routing_target.py\n  - scripts/routing_extra.py",
+        ),
+        encoding="utf-8",
+    )
+    replan_rel = "reviews/REVIEW-adopt-renewable-replan.md"
+    replan_path = linked / replan_rel
+    replan_path.parent.mkdir(parents=True, exist_ok=True)
+    replan_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "id: REVIEW-adopt-renewable-replan",
+                f"task_id: {task_id}",
+                f"unit_id: UNIT-{task_id}-001",
+                "review_kind: scope-amendment",
+                "tier: T3",
+                "status: accepted",
+                "signal: pass",
+                "---",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    # The replan must be the taskset's registered design_record with live
+    # anchors, exactly as renew demands.
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "plan_assumption_gate.py"),
+            "--root",
+            str(linked),
+            "record",
+            "--taskset",
+            str(claim["task_set_id"]),
+            "--design-record",
+            replan_rel,
+            "--anchor",
+            unit_rel,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
     result = _run_dispatcher(
         linked,
         "adopt",
@@ -6153,12 +6231,17 @@ def test_adopt_leaves_the_claim_renewable(tmp_path: Path) -> None:
         _OWNER,
         "--reason",
         "legacy claim predates the mutation fields",
+        "--replan-ref",
+        replan_rel,
         "--now",
         "2026-07-29T09:00:00+09:00",
         "--json",
     )
     assert result.returncode == 0, result.stderr or result.stdout
     adopted = json.loads(path.read_text(encoding="utf-8"))
+    # The regression: binding written from the spec while target_files kept the
+    # old value leaves the two permanently irreconcilable.
+    assert "scripts/routing_extra.py" in adopted["target_files"]
 
     # The whole point: renew must now work against the adopted claim.
     result = _run_dispatcher(
@@ -6295,3 +6378,93 @@ def test_activation_audit_loss_is_reported(
     assert _claim_store_outer_anchor(linked).is_file()
     assert json.loads(captured.out)["audit"] == "lost"
     assert "not durable" in captured.err
+
+
+def test_indeterminate_flag_cannot_end_a_claim_with_a_future_deadline(
+    tmp_path: Path,
+) -> None:
+    """Indeterminate does not mean "no evidence".
+
+    The pre-`lease`-nesting legacy shape carries a readable, valid, future
+    top-level expires_at. That is positive evidence of liveness, and no flag
+    may discard it -- this is the exact shape the flag exists to serve, so an
+    owner reasonably believes it only ends provably-dead claims.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-indet-live")
+    wall_now = datetime.now().astimezone().isoformat(timespec="seconds")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-indetlive",
+        extra_args=("--lease-minutes", "600", "--now", wall_now),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("lease", None)  # legacy shape: top-level deadline only
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "flag must not override readable liveness",
+        "--allow-indeterminate-lease",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "the flag ended a claim whose readable deadline is still in the future: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "claimed"
+
+
+def test_adopt_refuses_a_spec_less_claim_without_a_replan(tmp_path: Path) -> None:
+    """With no unit_spec there is no authority to diff against.
+
+    _current_scope_values echoes the claim's own fields back, so a diff-based
+    gate compares the claim to itself and can never fire. Such a claim must
+    require an explicit replan instead of having its contents blessed.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-specless")
+    result = _create_linked_claim(linked, suffix="659-specless")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    assert not str(claim.get("unit_spec") or "").strip()
+
+    claim.pop("scope_binding", None)
+    claim["target_files"] = [
+        "src/agent_runtime/claim_store.py",
+        "scripts/claim_reaper.py",
+    ]
+    claim["stop_condition"] = "attacker chosen"
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "spec-less claim must not self-bless its scope",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "adopt blessed caller-chosen scope on a spec-less claim: " + result.stdout
+    )
+    assert "replan" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before

@@ -3480,12 +3480,16 @@ def _stamp_recovery(
     reason: str,
     now_text: str,
     operation: str,
+    supplied_clock: bool,
 ) -> None:
     # Provenance records when the recovery actually happened. `--now` is a
     # liveness seam and must not backdate the audit trail of an explicitly
     # owner-attributed command; it is kept alongside for replayability.
+    # Emitted only when the caller actually supplied a clock. Comparing two
+    # independent wall-clock reads would emit it on any run straddling a second
+    # boundary, falsely asserting an override the operator never passed.
     wall_text = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
-    if wall_text != now_text:
+    if supplied_clock and wall_text != now_text:
         claim["recovery_evaluated_at"] = now_text
     claim["updated_at"] = wall_text
     claim["recovered_at"] = wall_text
@@ -3537,16 +3541,27 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 # stop_condition would let a caller delete scope_binding, edit
                 # those fields, and have adopt bless scope of their choosing.
                 target_files, stop_condition = _current_scope_values(root, claim)
-                drifted = (
-                    _normalize_target_files(tuple(claim.get("target_files") or ()))
-                    != _normalize_target_files(tuple(target_files))
-                ) or (str(claim.get("stop_condition") or "") != str(stop_condition))
-                if drifted:
-                    # Same bar as renew: a scope change needs an accepted T2/T3
-                    # replan. Without this, adopt would be a scope-change path
-                    # with no gate at all for claims whose unit_spec is empty.
-                    replan_ref = _accepted_replan_ref(root, claim, args.replan_ref)
-                    claim["adopted_replan_ref"] = replan_ref
+                if not str(claim.get("unit_spec") or "").strip():
+                    # No unit spec means no authority to anchor to:
+                    # _current_scope_values echoes the claim's own fields back,
+                    # so a diff-based gate would compare the claim to itself and
+                    # never fire, blessing whatever is in the file with a valid
+                    # digest. Require an explicit replan unconditionally instead
+                    # of pretending a comparison happened.
+                    claim["adopted_replan_ref"] = _accepted_replan_ref(
+                        root, claim, args.replan_ref
+                    )
+                else:
+                    drifted = (
+                        _normalize_target_files(tuple(claim.get("target_files") or ()))
+                        != _normalize_target_files(tuple(target_files))
+                    ) or (str(claim.get("stop_condition") or "") != str(stop_condition))
+                    if drifted:
+                        # Same bar as renew: a scope change needs an accepted
+                        # T2/T3 replan.
+                        claim["adopted_replan_ref"] = _accepted_replan_ref(
+                            root, claim, args.replan_ref
+                        )
                 # Write the fields and the binding together. _persisted_scope_binding
                 # recomputes the expected binding from the claim's OWN fields, so
                 # writing the binding alone would leave the two permanently
@@ -3566,6 +3581,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 reason=reason,
                 now_text=now_text,
                 operation="adopt",
+                supplied_clock=args.now is not None,
             )
             claim["adopted_at"] = now_text
             _assert_recovery_authority(root, inspection, "adopt")
@@ -3617,6 +3633,21 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
             # deadline. `deadline-partial` is the pre-`lease`-nesting legacy
             # claim and is the most likely real-world instance of this family.
             indeterminate = liveness.state == "indeterminate"
+            if indeterminate and liveness.effective_deadline is not None:
+                # Indeterminate does not mean "no evidence". When at least one
+                # deadline parses, an effective deadline is still computed; if
+                # it has not passed the claim is demonstrably live and no flag
+                # may end it. The pre-`lease`-nesting legacy shape - the very
+                # case this flag serves - is exactly the one carrying readable
+                # positive evidence of liveness.
+                grace = claim_store.resolve_claim_grace(None)
+                if liveness.effective_deadline > now - timedelta(seconds=grace):
+                    raise ValueError(
+                        f"claim lease is indeterminate ({liveness.reason}) but its "
+                        f"readable deadline {liveness.effective_deadline.isoformat()} "
+                        "has not passed; terminalize never ends a claim with "
+                        "positive evidence of liveness"
+                    )
             if indeterminate and not args.allow_indeterminate_lease:
                 # Liveness can never be settled for such a claim, so it can
                 # never expire, never be reaped, and never be proven live. It
@@ -3646,6 +3677,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 reason=reason,
                 now_text=now_text,
                 operation="terminalize",
+                supplied_clock=args.now is not None,
             )
             _assert_recovery_authority(root, inspection, "terminalize")
             atomic_io.write_json_atomic(path, claim)
