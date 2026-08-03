@@ -6809,3 +6809,54 @@ def test_role_routing_binds_overlay_claims_at_birth(tmp_path: Path) -> None:
         "role_routing no longer mints a binding at overlay birth; the "
         "unconditional heartbeat check would strand every new overlay"
     )
+
+
+def test_heartbeat_still_works_for_a_claim_whose_spec_declares_a_stop_condition(
+    tmp_path: Path,
+) -> None:
+    """The anchor must not reject the ordinary, untampered path.
+
+    `create` does not copy the spec's stop_condition into the claim, so a
+    spec-derived comparison that includes it reports drift on every real claim
+    from the moment it is created. Fixtures hide this because their generated
+    unit specs declare no stop_condition.
+    """
+    task_id = "TASK-AR-655stopcond"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-stopcond")
+    unit_rel = _write_routing_work(linked, task_id)
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "escalation_triggers:",
+            "stop_condition: Stop before anything irreversible\nescalation_triggers:",
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run_dispatcher(
+        linked, "create",
+        "--task-id", task_id,
+        "--agent-role", "lead-engineer",
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--worktree-path", ".",
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", "stopcnd",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode == 0, (
+        "the spec anchor rejected an ordinary untampered claim: "
+        + (result.stderr or result.stdout)
+    )

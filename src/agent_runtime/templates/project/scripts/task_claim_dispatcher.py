@@ -2623,17 +2623,23 @@ def _validate_mutation_authority(
     # a difference in what the two commands are FOR, not a predicate read out
     # of the claim being validated.
     if operation == "heartbeat":
-        target_files, stop_condition = _current_scope_values(root, claim)
-        expected = _binding_for_claim(
+        # Compare the target_files component only. `create` does not copy the
+        # spec's stop_condition into the claim, so comparing whole digests
+        # reports drift on every real claim from the moment it is created -
+        # fixtures hide that because their generated specs declare none.
+        # target_files is also the component that actually matters: it is the
+        # enforced footprint that refuses sibling creates and bounds
+        # undeclared-write checking.
+        target_files, _stop_condition = _current_scope_values(root, claim)
+        spec_targets = _binding_for_claim(
             claim,
             bound_at=str(persisted.get("bound_at") or ""),
             target_files=target_files,
-            stop_condition=stop_condition,
-        )
-        if expected["digest"] != persisted["digest"]:
+        )["components"]["target_files"]
+        if spec_targets != persisted.get("components", {}).get("target_files"):
             raise ValueError(
-                "claim scope no longer matches its unit spec; run renew with "
-                "an accepted replan instead of heartbeat"
+                "claim footprint no longer matches its unit spec; run renew "
+                "with an accepted replan instead of heartbeat"
             )
     return heartbeat, expires, revision
 

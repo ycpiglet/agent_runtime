@@ -41,21 +41,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-round4-structural",
+  "phase": "w4b-round5-false-positive-fixed",
   "progress_pct": 99,
   "step_index": 12,
   "step_total": 12,
-  "status_text": "Removed the overlay exemption and split the torn-lease bucket",
+  "status_text": "Narrowed the heartbeat anchor to the enforced footprint",
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-03T16:34:41+09:00",
-  "last_heartbeat": "2026-08-03T17:36:27.738955+09:00",
-  "updated_at": "2026-08-03T17:36:27.738955+09:00",
-  "expires_at": "2026-08-03T19:36:27.738955+09:00",
+  "last_heartbeat": "2026-08-03T17:53:32.489880+09:00",
+  "updated_at": "2026-08-03T17:53:32.489880+09:00",
+  "expires_at": "2026-08-03T19:53:32.489880+09:00",
   "lease": {
     "claimed_at": "2026-08-03T16:34:41+09:00",
-    "heartbeat_at": "2026-08-03T17:36:27.738955+09:00",
-    "expires_at": "2026-08-03T19:36:27.738955+09:00"
+    "heartbeat_at": "2026-08-03T17:53:32.489880+09:00",
+    "expires_at": "2026-08-03T19:53:32.489880+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.log.md",
@@ -291,7 +291,7 @@
     "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
     "reviews/INDEX.md"
   ],
-  "mutation_revision": 3,
+  "mutation_revision": 4,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
