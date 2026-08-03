@@ -1044,12 +1044,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
-          "value": "c8163adc0e0f97416987f65601e18d454c576f99fcc58d163a4ddcd37610db5d"
+          "value": "e73f28316457bb6586dce00d80cca0623d8464d549336a5f0d8c44c66734c14b"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
-          "value": "ffc1ec74be79abd310ace4b51dab9942bcd6f3711ef95a111ee8a79b22a3e649"
+          "value": "faf52cb5eeff4cde7a958d041f11ec6358305a418fcea43dfd369c8fe1929210"
         },
         {
           "kind": "sha256",
@@ -1114,12 +1114,12 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "5c33f9d83298a0265db5c824b1e5ce764325b6a721d04ec34426e8fa45938277"
+          "value": "9b681c75174bf9dfa7de0ee419f924e90077aa2fbf79e1dfb9c3012e31d11089"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "5c33f9d83298a0265db5c824b1e5ce764325b6a721d04ec34426e8fa45938277"
+          "value": "9b681c75174bf9dfa7de0ee419f924e90077aa2fbf79e1dfb9c3012e31d11089"
         },
         {
           "kind": "sha256",
@@ -1149,12 +1149,12 @@
         {
           "kind": "sha256",
           "path": "scripts/claim_reaper.py",
-          "value": "8d5a6091c518a73571492aa368cac80fa845cb8cd33dc5755ef8180dcfdc2904"
+          "value": "ff376b2c36645cd997a86a848ff4d00c74b127dcd8464062a1444da753f6ee98"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
-          "value": "8d5a6091c518a73571492aa368cac80fa845cb8cd33dc5755ef8180dcfdc2904"
+          "value": "ff376b2c36645cd997a86a848ff4d00c74b127dcd8464062a1444da753f6ee98"
         },
         {
           "kind": "sha256",
@@ -1174,22 +1174,22 @@
         {
           "kind": "sha256",
           "path": "scripts/state_sync_gate.py",
-          "value": "8cae8e8cde705ee63f72da04498c6befdadfec76fcb65cfc1361cd029c7f055e"
+          "value": "3e60df9973a7fab66fd2a9e49a5d9fa2a1fbb9af392e0c1b942fdcd1ce3f6ba4"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
-          "value": "8cae8e8cde705ee63f72da04498c6befdadfec76fcb65cfc1361cd029c7f055e"
+          "value": "3e60df9973a7fab66fd2a9e49a5d9fa2a1fbb9af392e0c1b942fdcd1ce3f6ba4"
         },
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
-          "value": "6d120a5ca44bb448c50f2ea642b6079d50b442d94f04228c84400b11ae0ff7ef"
+          "value": "d99aea22ee73e0e042cdf7ece0a355dd82a69668fdd2768e030d0b1246ace40b"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
-          "value": "6d120a5ca44bb448c50f2ea642b6079d50b442d94f04228c84400b11ae0ff7ef"
+          "value": "d99aea22ee73e0e042cdf7ece0a355dd82a69668fdd2768e030d0b1246ace40b"
         },
         {
           "kind": "sha256",
@@ -1204,7 +1204,7 @@
         {
           "kind": "sha256",
           "path": "src/agent_runtime/ui_state.py",
-          "value": "9eb45578ffeb52124f5a551a51797a579e0ccf6ef9c842cd81ce95de1c00f873"
+          "value": "4b6c947b58daa99524f3127dbac2421b50f3833d56e572a88827aaae926580ff"
         },
         {
           "kind": "sha256",
@@ -1234,7 +1234,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "e33bb343ede407aa87057f76adbb3c8c2e95abb586fcf7e7f3037e60646940b0"
+          "value": "4db12c7e862273020cbad9c140667fb821c6544b99afe22b65665ef83c9359c1"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "6d06c87818343cb34a8e372de7751043b044b8e0c71322f6307207b4c9b4171f"
+          "value": "14a7a3ff4330efda4c4e4fbbe95ab2c2caaab9c06bd33f71ab22bbaa5ad80cdc"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md",
-      "recorded_at": "2026-08-03T16:10:52+09:00",
+      "design_record": "reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md",
+      "recorded_at": "2026-08-03T17:05:10+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-03T16:10:52+09:00"
+  "updated_at": "2026-08-03T17:05:10+09:00"
 }

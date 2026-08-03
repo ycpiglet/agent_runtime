@@ -180,3 +180,20 @@ Stop before introducing a network lease dependency, auto-committing host state,
 recovering a claim without owner identity, mutating unregistered consumers,
 dispatching CI, or performing version, tag, push, publish, deploy,
 claim-release, or external-release actions.
+
+### Correction, 2026-08-03 (TASK-AR-655 W4b re-review)
+
+The baseline recorded above is **wrong as characterised**. `tests/test_claim_guard.py`
+is not permanently red: it is `36 passed` under `umask 0077` and `21 failed /
+15 passed` under the common `umask 0002`. The cause is a real production defect
+in the claim-commit transaction, not an accepted given.
+
+`scripts/claim_guard.py` chmods its private index to `0600` (~line 932) and then
+runs `git add` (~line 940), which rewrites the file with `0666 & ~umask`.
+`scripts/parallel_worktree_gate.py:1340` then rejects the marker via
+`st_mode & 0o077`, so the gate never recognises the live transaction. Confirmed
+by direct probe: `chmod 600` -> mode 600, `git add` -> mode 664.
+
+Owned by TASK-AR-648 (the origin of both the check and the ordering), not by
+this unit. Recorded here because treating it as an immovable baseline is what
+let it survive unexamined.

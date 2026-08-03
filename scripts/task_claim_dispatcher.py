@@ -2494,9 +2494,21 @@ def _parse_aware_timestamp(value: object, label: str) -> datetime:
 
 
 def _mutation_now(value: str | None) -> datetime:
+    """Resolve the mutation clock, clamped so it can never run ahead of reality.
+
+    ``--now`` is a determinism seam for tests, not an authority seam. Unclamped,
+    a caller can pass a ``now`` just short of the deadline and each heartbeat
+    advances the lease by a full window - unbounded, in constant real time -
+    while every consumer believes the fabricated deadline, because nothing
+    compares a persisted lease field to the wall clock. That is precisely the
+    "worker outlives its lease with no surface noticing" failure this task
+    exists to close. ``_recovery_now`` already applies this rule.
+    """
+
+    wall = datetime.now(timezone.utc).astimezone()
     if value is None:
-        return datetime.now(timezone.utc).astimezone()
-    return _parse_aware_timestamp(value, "now")
+        return wall
+    return min(_parse_aware_timestamp(value, "now"), wall)
 
 
 def _claim_temporal_fields(
@@ -2596,6 +2608,17 @@ def _validate_mutation_authority(
         )
     if now <= heartbeat:
         raise ValueError("heartbeat timestamp must be strictly increasing")
+    # Every scope-bearing mutation revalidates the persisted binding, not just
+    # renew. target_files is the enforced footprint - _footprint_conflict_errors
+    # reads it to refuse sibling creates and footprint_conflict_gate blocks
+    # writes outside it - so an out-of-band edit followed by a heartbeat would
+    # launder a scope broadening past the replan bar and keep re-authorizing it.
+    #
+    # Overlay claims are exempt because they carry no scope_binding by design:
+    # scope renewal does not apply to them at all (guarded above), so there is
+    # no binding to hold them to.
+    if not _is_explicit_overlay(claim):
+        _persisted_scope_binding(claim)
     return heartbeat, expires, revision
 
 

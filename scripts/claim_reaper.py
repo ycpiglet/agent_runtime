@@ -111,6 +111,21 @@ def _is_orchestrator(claim: dict[str, Any]) -> bool:
     return mode == "orchestrator" or scope == "orchestrator"
 
 
+def _deadline_mismatch(claim: dict[str, Any], now: datetime, grace_seconds: int) -> bool:
+    """True when the claim's two deadline copies disagree.
+
+    classify_claim_liveness resolves such a claim with max(), so it reads as
+    live until the later deadline passes while the earlier one says it is dead.
+    That is the safe resolution, but silence is not: the claim blocks gates and
+    an operator has no way to see why. Surfacing it does not make it reapable.
+    """
+
+    liveness = claim_store.classify_claim_liveness(
+        claim, now=now, grace_seconds=grace_seconds
+    )
+    return any("deadline-mismatch" in str(f) for f in (liveness.findings or ()))
+
+
 def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> tuple[str, str]:
     """Return (decision, reason). decision in {"live", "dead", "skip"}."""
     liveness = claim_store.classify_claim_liveness(
@@ -362,7 +377,9 @@ def _authorized_sweep(
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if entry_reason in OWNER_RECOVERY_REASONS:
+            if entry_reason in OWNER_RECOVERY_REASONS or _deadline_mismatch(
+                claim, now, grace_seconds
+            ):
                 # Never reaped, but never silent either: an owner-bound
                 # `task_claim_dispatcher.py terminalize` is the registered exit.
                 # `no-lease-info` belongs here too - a claim with no deadline

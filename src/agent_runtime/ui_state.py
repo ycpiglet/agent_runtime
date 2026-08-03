@@ -1752,7 +1752,8 @@ def load_roadmap(root: Path, now: str) -> dict[str, Any]:
 
 
 def _is_active_task_claim(status: str) -> bool:
-    return status in {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+    # Canonical set, not a hand copy: see claim_store.ACTIVE_CLAIM_STATUSES.
+    return status in claim_store.ACTIVE_CLAIM_STATUSES
 
 
 def _score_label(value: Any) -> tuple[int | None, str]:

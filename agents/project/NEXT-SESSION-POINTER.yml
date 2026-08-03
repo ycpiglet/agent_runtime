@@ -3,7 +3,7 @@ updated_at: 2026-08-03T16:38:00+09:00
 updated_by: le-20260803-143123-kst-cfc8
 current_state:
   summary: "TASK-AR-659 is done and released after an independent 4-round W4b ACCEPT; unreachable claims now have registered owner-bound exits. TASK-AR-655 remains parked unaccepted and is next: its W4b P1 is the defect AR-659 closed."
-  status: unclaimed
+  status: active
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
   step_index: 11
@@ -11,7 +11,37 @@ current_state:
   progress_pct: 100
   status_text: "AR-659 closed. Next: re-run the independent W4b for UNIT-TASK-AR-655-001 against a live claim."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260803-163441-task-ar-655-f9b6
+      agent_role: lead-engineer
+      team_id: agent-runtime-core
+      agent_instance_id: le-20260803-163441-kst-f9b6
+      display_name: lead_engineer@worker-01
+      callsite_id: terminal:wt-task-ar-655:tab-01
+      pane_id: terminal:wt-task-ar-655:tab-01
+      task_id: TASK-AR-655
+      unit_id: UNIT-TASK-AR-655-001
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: claimed
+      phase: re-w4b-after-ar659
+      progress_pct: 99
+      step_index: 12
+      step_total: 12
+      status_text: Re-running the independent W4b now that AR-659 closed the blocking
+        P1
+      worktree_path: .
+      branch: codex/task-ar-655-v080-lease-bounds
+      requested_model_tier: worker_standard
+      selected_model_tier: planner_high
+      routing_policy_id: task-unit-tier-policy
+      routing_escalation_reason: trigger:data_integrity,repeated_failure
+      task_token_budget: null
+      claim_token_budget: null
+      claim_path: agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.log.md
+      last_heartbeat: '2026-08-03T16:34:41+09:00'
+      mutation_revision: 0
   current_teams:
     - agent-runtime-core
 resume:
@@ -29,7 +59,8 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

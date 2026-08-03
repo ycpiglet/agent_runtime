@@ -83,7 +83,7 @@ review_refs:
   - reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md
   - reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md
 claim_refs:
-  - agents/runtime/task_claims/CLAIM-20260803-002651-task-ar-655-5f27.json
+  - agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.json
 summary: Keep long-running task claims truthful and make expiry consistent across claim, pointer, Doctor, state sync, and UI.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard

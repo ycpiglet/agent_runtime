@@ -6533,3 +6533,133 @@ def test_indeterminate_flag_respects_the_liveness_evidence_boundary(
     else:
         assert result.returncode != 0, f"{label}: ended a claim that may be alive"
         assert final == "claimed"
+
+
+# ===========================================================================
+# TASK-AR-655 W4b round 2 — the mutation commands must hold the same bar as
+# their recovery siblings. Both defects below let a claim outlive or outgrow
+# what its own record authorizes, which is exactly what this unit exists to
+# prevent.
+# ===========================================================================
+
+
+def _spec_backed_claim(linked: Path, task_id: str, suffix: str, minutes: str = "30"):
+    unit_rel = _write_routing_work(linked, task_id)
+    result = _run_dispatcher(
+        linked, "create",
+        "--task-id", task_id,
+        "--agent-role", "lead-engineer",
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--worktree-path", ".",
+        "--lease-minutes", minutes,
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", suffix,
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    return linked / payload["path"], payload["claim"]
+
+
+def test_heartbeat_refuses_a_claim_whose_scope_binding_no_longer_matches(
+    tmp_path: Path,
+) -> None:
+    """renew validates the persisted binding; heartbeat must too.
+
+    target_files is the enforced footprint: _footprint_conflict_errors reads it
+    to refuse sibling creates, and footprint_conflict_gate --enforce-undeclared
+    blocks on writes outside it. Editing it out of band and then heartbeating
+    launders a scope broadening past the replan bar and keeps re-authorizing it
+    on an indefinitely extendable lease.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-hb-scope")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655hbscope", "hbscope")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = list(tampered["target_files"]) + [
+        "scripts/anything_i_want.py"
+    ]
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "heartbeat",
+        "--claim-id",
+        claim["claim_id"],
+        "--agent-instance-id",
+        claim["agent_instance_id"],
+        "--callsite-id",
+        claim["callsite_id"],
+        "--expected-revision",
+        "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "heartbeat accepted a claim whose target_files no longer match its "
+        "scope_binding: " + result.stdout
+    )
+    assert "scope binding" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("operation", ["heartbeat", "renew"])
+def test_mutation_now_cannot_push_a_lease_past_the_wall_clock(
+    tmp_path: Path, operation: str
+) -> None:
+    """`--now` is a determinism seam, not an authority seam.
+
+    _recovery_now already clamps for adopt/terminalize. _mutation_now does not,
+    so passing a `now` just short of the deadline advances the lease by a full
+    window per call, unbounded and in constant real time. Every consumer then
+    believes the fabricated deadline: the reaper reports the claim live and no
+    surface compares a persisted lease field to the wall clock.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-clock-{operation}")
+    path, claim = _spec_backed_claim(
+        linked, f"TASK-AR-655clock{operation}", f"clk{operation[:3]}"
+    )
+
+    deadline = datetime.fromisoformat(
+        json.loads(path.read_text(encoding="utf-8"))["expires_at"]
+    )
+    forged = (deadline - timedelta(seconds=1)).isoformat(timespec="seconds")
+
+    args = [
+        operation,
+        "--claim-id",
+        claim["claim_id"],
+        "--agent-instance-id",
+        claim["agent_instance_id"],
+        "--callsite-id",
+        claim["callsite_id"],
+        "--expected-revision",
+        "0",
+        "--now",
+        forged,
+    ]
+    if operation == "renew":
+        args += [
+            "--expected-scope-digest",
+            claim["scope_binding"]["digest"],
+            "--lease-minutes",
+            "30",
+        ]
+    args.append("--json")
+
+    result = _run_dispatcher(linked, *args)
+
+    after = json.loads(path.read_text(encoding="utf-8"))
+    wall = datetime.now().astimezone()
+    persisted = datetime.fromisoformat(after["expires_at"])
+    original = datetime.fromisoformat(claim["expires_at"])
+
+    assert persisted <= max(original, wall) + timedelta(minutes=31), (
+        f"{operation} pushed the lease to {persisted.isoformat()} using a forged "
+        f"--now while the wall clock is {wall.isoformat()}; rc={result.returncode}"
+    )
+    assert datetime.fromisoformat(after["last_heartbeat"]) <= wall + timedelta(
+        seconds=5
+    ), f"{operation} recorded a future last_heartbeat: {after['last_heartbeat']}"

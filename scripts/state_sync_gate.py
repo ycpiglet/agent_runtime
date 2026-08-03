@@ -32,7 +32,9 @@ try:
 except ImportError:  # imported as scripts.<name> (namespace package)
     from scripts import status_alias
 DONE_STATUSES = status_alias.DONE_STATUSES
-ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+# Canonical set, imported rather than re-typed: "every surface agrees on
+# active versus expired" must hold by construction, not by coincidence.
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
 STATE_PROJECTION_BLOCKING_CODES = {
     "config-invalid",
     "source-missing",

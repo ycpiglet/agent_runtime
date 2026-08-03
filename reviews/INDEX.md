@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T16:32:57+09:00
-record_count: 1336
+generated_at: 2026-08-03T17:04:57+09:00
+record_count: 1337
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1336` review and evidence records under `reviews/`.
+- Summary: indexed `1337` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1336` files |
+| Reviews covered | pass | `1337` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -710,6 +710,7 @@ record_count: 1336
 | `reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan` | md | accepted | pass | TASK-AR-655 lease and grace bounds T3 scope amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan` | md | accepted | pass | TASK-AR-655 owner-governance clock propagation T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan` | md | accepted | pass | TASK-AR-655 post-GREEN authority seams T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan` | md | accepted | pass | TASK-AR-655 re-W4b dispatch T3 replan |
 | `reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment` | md | accepted | pass | TASK-AR-655 shared duration primitives scope amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan` | md | accepted | pass | TASK-AR-655 UI initial-state race T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b current-agent binding T3 recurrence amendment |

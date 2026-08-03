@@ -37,14 +37,9 @@ from typing import Iterable
 from agent_runtime import claim_store
 
 
-ACTIVE_STATUSES = {
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "waiting_review",
-    "working",
-}
+# Canonical set, imported rather than re-typed: "every surface agrees on
+# active versus expired" must hold by construction, not by coincidence.
+ACTIVE_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
 
 REQUIRED_ACTIVE_FIELDS = (
     "schema",
