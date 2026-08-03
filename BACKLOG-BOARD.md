@@ -7,7 +7,7 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-08-03T00:34:23+09:00
+generated_at: 2026-08-03T14:17:22+09:00
 task_count: 322
 open_count: 21
 completed_count: 301
@@ -86,7 +86,7 @@ completed_task_set_count: 63
 
 - Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
 - Progress: `2/7` done; `5` open or active.
-- WIP: active `1/3`; oldest `0.1h`; stale `0`.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-654` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md | in_progress | Action | P1 | High | Medium | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prevent a repeated defect from closing with only a generic review or retro and no reu… |

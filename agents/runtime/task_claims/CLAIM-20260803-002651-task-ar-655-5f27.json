@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-655:tab-01",
   "pane_id": "terminal:wt-task-ar-655:tab-01",
   "mode": "orchestrator",
-  "status": "claimed",
+  "status": "expired",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -50,7 +50,7 @@
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-03T00:26:51+09:00",
   "last_heartbeat": "2026-08-03T00:26:51+09:00",
-  "updated_at": "2026-08-03T08:21:50+09:00",
+  "updated_at": "2026-08-03T13:49:49+09:00",
   "expires_at": "2026-08-03T08:26:51+09:00",
   "lease": {
     "claimed_at": "2026-08-03T00:26:51+09:00",
@@ -184,5 +184,17 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  }
+  },
+  "recovered_from_status": "claimed",
+  "reaped_at": "2026-08-03T13:49:49+09:00",
+  "reaped_by": "owner-manual-recovery",
+  "reaped_reason": "lease-expired",
+  "recovered_at": "2026-08-03T13:49:49+09:00",
+  "recovered_by": "ycpiglet <68498184+ycpiglet@users.noreply.github.com>",
+  "recovery_authority": "owner-explicit-approval",
+  "recovery_reason": "Lease expired at 2026-08-03T08:26:51+09:00 and no automated path could terminalize it (19378s overdue at recovery). claim_reaper skips mode=orchestrator claims unconditionally (claim_reaper.py:110); heartbeat and renew both reject the claim because it predates the mutation_revision/scope_binding fields (task_claim_dispatcher.py:2581); no expire/terminalize/bootstrap command exists in claim_lease.py or task_claim_dispatcher.py. The stale active claim simultaneously blocked re-claiming TASK-AR-655 and claiming any sibling task in TASKSET-AR-V080-OPERABILITY-HARDENING. Terminalized to expired only - not deleted, not released, not completed. No unit acceptance, no W4b approval, and no release authorization is implied or granted.",
+  "recovery_independent_evidence_refs": [
+    "reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md"
+  ],
+  "recovery_scope": "single-claim"
 }
