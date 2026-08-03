@@ -5826,10 +5826,25 @@ def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
     assert outer.is_file()
     outer.unlink()                                  # reproduce a fresh checkout
 
-    result = _run_dispatcher(linked, "activate-store", "--json")
+    # Unattributed activation must be refused: this lifts the whole store out
+    # of the fail-closed migration-required state.
+    anon = _run_dispatcher(linked, "activate-store", "--json")
+    assert anon.returncode != 0
+    assert not outer.is_file()
+
+    result = _run_dispatcher(
+        linked,
+        "activate-store",
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "fresh checkout needs its claim store",
+        "--json",
+    )
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert outer.is_file()
+    assert json.loads(result.stdout)["activated_by"] == _OWNER
 
 
 def test_red_recovery_refuses_when_claim_store_authority_changes(
@@ -5887,4 +5902,257 @@ def test_red_recovery_refuses_when_claim_store_authority_changes(
     assert rc == 1
     assert "authority changed" in (captured.out + captured.err)
     assert "Traceback" not in (captured.out + captured.err)
+    assert path.read_bytes() == before
+
+
+# --- TASK-AR-659 W4b P0: a caller-supplied clock must not defeat liveness ---
+
+
+def test_red_terminalize_cannot_use_a_future_now_to_kill_a_live_claim(
+    tmp_path: Path,
+) -> None:
+    """`--now` is a determinism seam, not an authority seam.
+
+    Judging liveness against a caller-supplied clock makes "a live claim is
+    never terminalizable" false: any caller can pass a future timestamp and
+    end a healthy claim, then create their own claim on the freed task.
+    claim_reaper --apply --now 2099 refuses the same claim, so this would be
+    the only path in the runtime that can end a live one.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-future-now")
+    # The claim must be live against the WALL clock, so this trailing --now
+    # overrides the fixture's pinned past timestamp. The property under test is
+    # about real time by nature and cannot be pinned to a fixed instant.
+    wall_now = datetime.now().astimezone().isoformat(timespec="seconds")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-future",
+        extra_args=("--lease-minutes", "600", "--now", wall_now),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "future clock must not grant authority",
+        "--now",
+        "2099-01-01T00:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a future --now terminalized a live claim: "
+        + (result.stdout + result.stderr)
+    )
+    assert path.read_bytes() == before
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "claimed"
+
+
+def test_red_adopt_cannot_use_a_future_now_to_bypass_liveness(tmp_path: Path) -> None:
+    """Adoption must not become reachable on a claim a future clock 'expires'."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt-future")
+    path, claim = _legacy_claim(linked, "659-adopt-future")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "adoption under a future clock",
+        "--now",
+        "2099-01-01T00:00:00+09:00",
+        "--json",
+    )
+
+    if result.returncode == 0:
+        adopted = json.loads(path.read_text(encoding="utf-8"))
+        assert adopted["recovered_at"] < "2099", (
+            "a future --now was recorded as the recovery timestamp: "
+            f"{adopted['recovered_at']}"
+        )
+    else:
+        assert path.read_bytes() == before
+
+
+def test_deadline_missing_claim_needs_explicit_opt_in_to_terminalize(
+    tmp_path: Path,
+) -> None:
+    """A claim with no deadline needs an exit, but ending it is a judgement.
+
+    It must not ride the expired path silently, and it must not stay
+    exit-less the way CLAIM-20260803-002651-task-ar-655-5f27 did.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-nodeadline")
+    result = _create_linked_claim(linked, suffix="659-nodeadline")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim_id = payload["claim"]["claim_id"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("expires_at", None)
+    claim.pop("lease", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    args = (
+        "terminalize",
+        "--claim-id",
+        claim_id,
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "claim carries no deadline at all",
+    )
+
+    refused = _run_dispatcher(linked, *args, "--json")
+    assert refused.returncode != 0
+    assert "allow-missing-deadline" in (refused.stdout + refused.stderr)
+    assert path.read_bytes() == before
+
+    allowed = _run_dispatcher(linked, *args, "--allow-missing-deadline", "--json")
+    assert allowed.returncode == 0, allowed.stderr or allowed.stdout
+    after = json.loads(path.read_text(encoding="utf-8"))
+    assert after["status"] == "expired"
+    assert after["recovered_by"] == _OWNER
+
+
+def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
+    tmp_path: Path,
+) -> None:
+    """Deleting scope_binding must not let a caller choose their own scope.
+
+    renew derives the binding from _current_scope_values (unit-spec anchored).
+    If adopt derived it from the claim's own mutable target_files, a caller
+    could drop the binding, widen target_files, and have adopt mint a valid
+    binding over the widened scope.
+    """
+    task_id = "TASK-AR-659anchor"
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-scope-anchor")
+    unit_rel = _write_routing_work(linked, task_id)
+    # The unit spec declares exactly one target file; that is the honest scope.
+    spec_files = ["scripts/routing_target.py"]
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        "anchor",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    assert claim["target_files"] == spec_files
+
+    # Tamper: drop the binding and widen scope inside the claim file itself.
+    claim.pop("scope_binding", None)
+    claim["target_files"] = [
+        "src/agent_runtime/claim_store.py",
+        "scripts/claim_reaper.py",
+    ]
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "attempting to mint a binding over chosen scope",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+
+    dispatcher = _load_dispatcher_module()
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+    minted = adopted["scope_binding"]
+    spec_anchored = dispatcher._binding_for_claim(
+        adopted,
+        bound_at=minted["bound_at"],
+        target_files=spec_files,
+        stop_condition=dispatcher._unit_spec_stop_condition(linked, unit_rel),
+    )
+    assert (
+        minted["components"]["target_files"]
+        == spec_anchored["components"]["target_files"]
+    ), "adopt minted a binding over caller-controlled target_files"
+
+
+def test_adopt_refuses_a_present_but_invalid_mutation_revision(tmp_path: Path) -> None:
+    """`type(x) is int` treats "7" as absent; resetting it to 0 loses CAS history."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-bad-rev")
+    result = _create_linked_claim(linked, suffix="659-badrev")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim["mutation_revision"] = "7"
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "string revision must not be silently reset",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "mutation_revision" in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+
+
+def test_owner_identity_is_length_bounded(tmp_path: Path) -> None:
+    """Every neighbouring provenance field is capped; this one must be too."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-owner-len")
+    path, claim = _legacy_claim(linked, "659-ownerlen")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        "x" * 5050,
+        "--reason",
+        "unbounded owner identity",
+        "--json",
+    )
+
+    assert result.returncode != 0
     assert path.read_bytes() == before

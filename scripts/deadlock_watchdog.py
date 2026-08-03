@@ -70,6 +70,9 @@ def _summary_line(report: dict[str, Any]) -> str:
         + ("apply" if report.get("apply") else "dry-run")
         + f" | claims {'reaped' if report.get('apply') else 'would-reap'}={len(reaped or [])}"
         + f" live={len(reaper.get('live', []))} skipped={len(reaper.get('skipped', []))}"
+        # Claims no automated path can end. This watchdog exists to break wave
+        # deadlocks, so it is the one place that must not stay quiet about them.
+        + f" needs_owner_recovery={len(reaper.get('needs_owner_recovery', []))}"
         + f" | goal action={supervisor.get('action')}"
     )
 

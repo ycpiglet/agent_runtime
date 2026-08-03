@@ -52,6 +52,9 @@ ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
 # Skip reason for an orchestrator claim whose lease is provably dead. It stays a
 # skip (never auto-reaped) but is surfaced separately so the deadlock is visible.
 ORCHESTRATOR_EXPIRED_REASON = "orchestrator-claim-expired"
+# Skip reasons that describe a claim no automated path can ever end. Each one
+# needs an owner-bound `task_claim_dispatcher.py terminalize` to clear.
+OWNER_RECOVERY_REASONS = frozenset({ORCHESTRATOR_EXPIRED_REASON, "no-lease-info"})
 
 # Use the same closed status vocabulary as closure and dispatch. The reaped
 # status (``expired``) is deliberately outside this active set.
@@ -123,6 +126,12 @@ def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> 
         # 5.4h while it deadlocked its own taskset.
         if liveness.state == "expired":
             return "skip", ORCHESTRATOR_EXPIRED_REASON
+        if liveness.state == "indeterminate" and liveness.reason == "deadline-missing":
+            # Strictly worse than an expired claim: it has no deadline at all,
+            # so it can never expire, never be reaped, and never be proven
+            # live. Without surfacing it here it is an invisible permanent
+            # deadlock. Do not let the orchestrator branch mask it.
+            return "skip", "no-lease-info"
         return "skip", "orchestrator-claim"
     if liveness.state == "live":
         return "live", "lease-valid"
@@ -349,9 +358,12 @@ def _authorized_sweep(
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if entry_reason == ORCHESTRATOR_EXPIRED_REASON:
+            if entry_reason in OWNER_RECOVERY_REASONS:
                 # Never reaped, but never silent either: an owner-bound
                 # `task_claim_dispatcher.py terminalize` is the registered exit.
+                # `no-lease-info` belongs here too - a claim with no deadline
+                # can never expire, so it is a permanent deadlock, not a
+                # transient unknown.
                 report["needs_owner_recovery"].append(entry)
             if apply and entry_reason in (
                 "orchestrator-claim",

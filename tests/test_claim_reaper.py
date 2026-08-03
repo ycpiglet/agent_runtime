@@ -889,3 +889,69 @@ def test_red_terminal_orchestrator_claim_is_not_flagged_for_owner_recovery(tmp_p
 
     surfaced = {entry["claim_id"] for entry in report.get("needs_owner_recovery", [])}
     assert "CLAIM-orch-terminal" not in surfaced
+
+
+# --- TASK-AR-659 W4b P1: a claim with no deadline is worse than an expired one ---
+
+
+def test_deadline_missing_orchestrator_claim_surfaces_for_owner_recovery(tmp_path):
+    """No deadline means it can never expire, never be reaped, never be proven
+    live. Reporting it as a plain `orchestrator-claim` hides a permanent
+    deadlock that is strictly worse than the AR-655 case.
+    """
+    _claim(
+        tmp_path,
+        "CLAIM-orch-nolease",
+        mode="orchestrator",
+        expires_at=None,
+    )
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    assert report["reaped"] == []
+    assert report["would_reap"] == []
+    reasons = {entry["claim_id"]: entry["reason"] for entry in report["skipped"]}
+    assert reasons["CLAIM-orch-nolease"] == "no-lease-info"
+    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    assert "CLAIM-orch-nolease" in surfaced
+
+
+def test_deadline_missing_worker_claim_surfaces_for_owner_recovery(tmp_path):
+    """The same hole exists for a non-orchestrator claim with no lease info."""
+    _claim(tmp_path, "CLAIM-worker-nolease", expires_at=None)
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    assert report["reaped"] == []
+    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    assert "CLAIM-worker-nolease" in surfaced
+
+
+def test_owner_recovery_signal_reaches_the_session_start_hook(tmp_path, capsys):
+    """The visibility fix must reach the automated consumers, not just the CLI.
+
+    deadlock_watchdog is documented as the component that breaks wave
+    deadlocks, and the hook is what an owner actually sees at session start.
+    """
+    import claim_reaper_hook
+    import deadlock_watchdog
+
+    _claim(
+        tmp_path,
+        "CLAIM-orch-hook",
+        mode="orchestrator",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+
+    claim_reaper_hook.main(["--root", str(tmp_path)])
+    hook_out = capsys.readouterr().out
+    assert "need owner recovery" in hook_out
+    assert "CLAIM-orch-hook" in hook_out
+    assert "terminalize" in hook_out
+
+    report = {
+        "apply": False,
+        "reaper": claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600),
+        "supervisor": {"action": "none"},
+    }
+    assert "needs_owner_recovery=1" in deadlock_watchdog._summary_line(report)

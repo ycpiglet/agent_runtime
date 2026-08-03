@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T15:10:51+09:00
-record_count: 1329
+generated_at: 2026-08-03T15:32:21+09:00
+record_count: 1331
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1329` review and evidence records under `reviews/`.
+- Summary: indexed `1331` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1329` files |
+| Reviews covered | pass | `1331` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -717,6 +717,7 @@ record_count: 1329
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b projection binding T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan` | md | accepted | pass | TASK-AR-655 W4b type-strict pointer authority T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md` | `REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan` | md | accepted | pass | TASK-AR-659 legacy claim bootstrap dispatch T3 replan |
+| `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
@@ -1084,6 +1085,7 @@ record_count: 1329
 | `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

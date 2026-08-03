@@ -3393,12 +3393,36 @@ def _complete_release(
 RECOVERY_AUTHORITY = "owner-explicit-approval"
 
 
+OWNER_IDENTITY_MAX = 256
+
+
+def _recovery_now(value: str | None) -> datetime:
+    """Resolve the recovery clock, clamped so it can never run ahead of reality.
+
+    ``--now`` is a determinism seam for tests, not an authority seam. Judging
+    liveness against an unclamped caller-supplied clock makes "a live claim is
+    never terminalizable" false: any caller could pass a future timestamp, end
+    a healthy claim, and then create their own claim on the freed task.
+    Clamping to the wall clock keeps replayable past timestamps working while
+    removing the ability to fast-forward a lease.
+    """
+
+    wall = datetime.now(timezone.utc).astimezone()
+    if value is None:
+        return wall
+    return min(_parse_aware_timestamp(value, "now"), wall)
+
+
 def _owner_identity(value: object) -> str:
     owner = " ".join(str(value or "").split())
     if not owner:
         raise ValueError(
             "owner identity is required: claim recovery is owner-bound and "
             "refuses an unidentified caller"
+        )
+    if len(owner) > OWNER_IDENTITY_MAX:
+        raise ValueError(
+            f"owner identity exceeds {OWNER_IDENTITY_MAX} characters"
         )
     return owner
 
@@ -3472,13 +3496,21 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
-        now = _mutation_now(args.now)
+        now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
         root = args.root.resolve()
         with claim_store.store_lock(root):
             path, claim, inspection = _recovery_target(root, args.claim_id)
-            has_revision = type(claim.get("mutation_revision")) is int
+            raw_revision = claim.get("mutation_revision")
+            has_revision = type(raw_revision) is int and raw_revision >= 0
             has_binding = isinstance(claim.get("scope_binding"), dict)
+            if raw_revision is not None and not has_revision:
+                # Present but unusable (e.g. "7", -1, True). Rewriting it to 0
+                # would destroy CAS history rather than adopt a legacy claim.
+                raise ValueError(
+                    f"claim mutation_revision is present but invalid ({raw_revision!r}); "
+                    "adopt will not overwrite it"
+                )
             if has_revision and has_binding:
                 raise ValueError(
                     "claim already carries mutation_revision and scope_binding; "
@@ -3488,7 +3520,18 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             if not has_revision:
                 claim["mutation_revision"] = 0
             if not has_binding:
-                claim["scope_binding"] = _binding_for_claim(claim, bound_at=now_text)
+                # Anchor the binding to the unit spec, exactly as renew does.
+                # Deriving it from the claim's own mutable target_files /
+                # stop_condition would let a caller delete scope_binding, edit
+                # those fields, and have adopt mint a "valid" binding over
+                # scope of their own choosing.
+                target_files, stop_condition = _current_scope_values(root, claim)
+                claim["scope_binding"] = _binding_for_claim(
+                    claim,
+                    bound_at=now_text,
+                    target_files=target_files,
+                    stop_condition=stop_condition,
+                )
             _stamp_recovery(
                 claim,
                 owner=owner,
@@ -3536,13 +3579,26 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
-        now = _mutation_now(args.now)
+        now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
         root = args.root.resolve()
         with claim_store.store_lock(root):
             path, claim, inspection = _recovery_target(root, args.claim_id)
             liveness = claim_store.classify_claim_liveness(claim, now=now)
-            if liveness.state != "expired":
+            deadline_missing = (
+                liveness.state == "indeterminate"
+                and liveness.reason == "deadline-missing"
+            )
+            if deadline_missing and not args.allow_missing_deadline:
+                # A claim with no deadline can never expire, never be reaped,
+                # and never be proven live either. It needs an exit, but ending
+                # it is a judgement rather than a provable fact, so it has to be
+                # opted into explicitly instead of riding the expired path.
+                raise ValueError(
+                    "claim has no lease deadline, so death cannot be proven; "
+                    "re-run with --allow-missing-deadline to end it deliberately"
+                )
+            if not deadline_missing and liveness.state != "expired":
                 raise ValueError(
                     f"claim lease is {liveness.state} ({liveness.reason}); "
                     "terminalize refuses a live claim and only ends an expired one"
@@ -3601,15 +3657,40 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
     agent_runtime.yml the runtime repository itself does not have.
     """
     try:
+        # This is the third mutating recovery command, so it is owner-bound
+        # like the other two. It lifts the whole store out of the fail-closed
+        # `migration-required` state that claim_reaper, release, and every
+        # mutation path refuse on; an unattributed actor must not be able to
+        # do that silently.
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
         root = args.root.resolve()
+        before_state = claim_store.inspect_store(root).state
         inspection = claim_store.adopt_legacy_store(root)
     except (claim_store.ClaimStoreError, OSError, TimeoutError, ValueError) as exc:
         detail = " ".join(str(exc).split())[:256] or "claim-store activation unavailable"
         print(f"claim-store activation refused: {detail}", file=sys.stderr)
         return 1
+    try:
+        append_event(
+            root,
+            {
+                "event": "claim_store_activated",
+                "actor": owner,
+                "actor_role": "owner",
+                "message": (
+                    f"claim store activated by owner ({before_state} -> "
+                    f"{inspection.state}); reason: {reason}"
+                ),
+            },
+        )
+    except Exception:  # noqa: BLE001 - activation succeeded; audit is best-effort
+        pass
     _emit(
         {
             "status": "activated",
+            "activated_by": owner,
+            "claim_store_state_before": before_state,
             "claim_store_state": inspection.state,
             "witness_claim_id": inspection.witness_claim_id,
             "marker": _rel(root, claim_store.outer_marker_path(root)),
@@ -3791,6 +3872,14 @@ def build_parser() -> argparse.ArgumentParser:
     terminalize.add_argument("--claim-id", required=True)
     terminalize.add_argument("--owner-id", required=True)
     terminalize.add_argument("--reason", required=True)
+    terminalize.add_argument(
+        "--allow-missing-deadline",
+        action="store_true",
+        help=(
+            "End a claim that carries no lease deadline at all. Death cannot be "
+            "proven for such a claim, so this is a deliberate owner judgement."
+        ),
+    )
     terminalize.add_argument("--now")
     terminalize.add_argument("--json", action="store_true")
     terminalize.set_defaults(func=cmd_terminalize)
@@ -3799,6 +3888,8 @@ def build_parser() -> argparse.ArgumentParser:
         "activate-store",
         help="Activate this checkout's claim store (a fresh worktree starts migration-required)",
     )
+    activate_store.add_argument("--owner-id", required=True)
+    activate_store.add_argument("--reason", required=True)
     activate_store.add_argument("--json", action="store_true")
     activate_store.set_defaults(func=cmd_activate_store)
 
