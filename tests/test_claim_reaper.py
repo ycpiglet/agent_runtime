@@ -1065,3 +1065,21 @@ def test_a_reaped_claim_is_not_also_reported_as_needing_owner_action(tmp_path):
     rendered = claim_reaper._render_human(report)
     assert "needs-owner-recovery: CLAIM-worker-torn-dead" not in rendered
     assert "torn-lease: CLAIM-worker-torn-dead" not in rendered
+
+
+def test_torn_lease_reaches_the_scheduled_watchdog_summary(tmp_path):
+    """Splitting the bucket must not drop it from the scheduled entry point."""
+    import deadlock_watchdog
+
+    path = _claim(tmp_path, "CLAIM-worker-torn-wd", expires_at="2026-06-14T13:00:00+09:00")
+    payload = _load(path)
+    payload["lease"]["expires_at"] = "2026-06-14T10:00:00+09:00"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    report = {
+        "apply": False,
+        "reaper": claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600),
+        "supervisor": {"action": "none"},
+    }
+    assert report["reaper"]["torn_lease"], "fixture did not produce a torn lease"
+    assert "torn_lease=1" in deadlock_watchdog._summary_line(report)

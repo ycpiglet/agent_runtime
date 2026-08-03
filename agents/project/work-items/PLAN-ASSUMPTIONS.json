@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
-          "value": "faf52cb5eeff4cde7a958d041f11ec6358305a418fcea43dfd369c8fe1929210"
+          "value": "c9372c9406ad3184f73e0731535168dd8a127fd57e9d7e7c1913b6f4a2fdc522"
         },
         {
           "kind": "sha256",
@@ -1114,12 +1114,12 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "f6091e869e8b11b51f582017f4e2897d9403ed88a876164c9a5cd028f40a7d83"
+          "value": "1006f786d6c087a42028d0ce2a95fcb453ba1b25c74759f9331efbee57c95880"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "f6091e869e8b11b51f582017f4e2897d9403ed88a876164c9a5cd028f40a7d83"
+          "value": "1006f786d6c087a42028d0ce2a95fcb453ba1b25c74759f9331efbee57c95880"
         },
         {
           "kind": "sha256",
@@ -1159,12 +1159,12 @@
         {
           "kind": "sha256",
           "path": "scripts/deadlock_watchdog.py",
-          "value": "10d9c75548ae28b81886760ed3cea6477014372e985518734f135e89fb534ef2"
+          "value": "1439ef631e8151727a711ee256b3a6f35c87682247a6e4dd9405628586644640"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/deadlock_watchdog.py",
-          "value": "10d9c75548ae28b81886760ed3cea6477014372e985518734f135e89fb534ef2"
+          "value": "1439ef631e8151727a711ee256b3a6f35c87682247a6e4dd9405628586644640"
         },
         {
           "kind": "sha256",
@@ -1234,7 +1234,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "8db8585904e54e4978712b3306eb671f9bad76c81b54d48bdd681e4c0a93218b"
+          "value": "7a4574adc93270664a227042367ae22af744a8315e3f5c3255857b10b76fcc70"
         },
         {
           "kind": "sha256",
@@ -1244,7 +1244,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_claim_reaper.py",
-          "value": "e3b69c604468ac04d8f3149a5a2b6288b358d898c64e26d55638c90004eba313"
+          "value": "ad81a8695926c87cc47a302874fb12bb85fc05aa5561ee596cd9858a8c70dc0d"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "6e70bda1de315b7dbae42dfda99f256d6d1da3f561263d160ac3127f80a6fa31"
+          "value": "3e3c44b29c79f82c171e4740fe41b06f109ff4f1a6e887161c34726e69b89151"
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md",
-      "recorded_at": "2026-08-03T17:35:20+09:00",
+      "recorded_at": "2026-08-03T17:51:38+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-03T17:35:20+09:00"
+  "updated_at": "2026-08-03T17:51:38+09:00"
 }

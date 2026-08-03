@@ -73,6 +73,11 @@ def _summary_line(report: dict[str, Any]) -> str:
         # Claims no automated path can end. This watchdog exists to break wave
         # deadlocks, so it is the one place that must not stay quiet about them.
         + f" needs_owner_recovery={len(reaper.get('needs_owner_recovery', []))}"
+        # A torn lease is the same class: never reapable, and not terminalizable
+        # while the later deadline stands. Splitting it out of
+        # needs_owner_recovery silently dropped it from this line, which is the
+        # one place a scheduled run surfaces anything.
+        + f" torn_lease={len(reaper.get('torn_lease', []))}"
         + f" | goal action={supervisor.get('action')}"
     )
 

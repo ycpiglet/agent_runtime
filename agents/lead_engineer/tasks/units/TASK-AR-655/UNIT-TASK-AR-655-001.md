@@ -351,3 +351,30 @@ Attach the atomicity tests, owner mismatch, crash/restart, cross-consumer expiry
 ## Stop Boundary
 
 Stop before introducing a network lease dependency, auto-committing host state, or recovering a claim without owner identity.
+
+
+## Accepted migration cost (2026-08-03, W4b round 4)
+
+Two consequences were accepted deliberately rather than discovered later.
+
+**Heartbeat now reads the unit spec on every beat.** Editing a unit's
+`target_files` mid-flight starts refusing heartbeats until a replan-backed
+`renew` lands. That is what "the lease tracks the approved scope" means: a
+self-consistent claim is not an authorized claim, and heartbeat is the command
+that keeps a claim alive indefinitely, so it must be anchored the same way
+`renew` already is.
+
+**A live pre-existing overlay claim is stranded, one time only.** An overlay
+created before overlays carried a `scope_binding` can no longer heartbeat
+(`claim scope binding is missing`). `adopt` does **not** repair it - not
+because of the overlay guard, but because the spec-less branch demands an
+accepted replan whose `unit_id` matches the claim, and an overlay has no
+`unit_id`. `role_routing` re-dispatch will not heal it either: the idempotency
+path treats a missing field as "not unexpected", matches, and no-ops. Such a
+claim can only be ended once its lease expires.
+
+Accepted rather than fixed because overlays are 30-minute, additive, and
+idempotently re-created, so the window is bounded and self-clearing - and
+because adding an overlay special case to `adopt` is the exact pattern that
+produced two P1s in this unit. Written down here so it is a known cost rather
+than a belief that `adopt` handles it.

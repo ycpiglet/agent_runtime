@@ -6728,3 +6728,84 @@ def test_heartbeat_refuses_a_non_overlay_claim_with_no_scope_binding(
         + result.stdout
     )
     assert path.read_bytes() == before
+
+
+def test_heartbeat_is_anchored_to_the_unit_spec_like_renew(tmp_path: Path) -> None:
+    """A self-consistent claim is not an authorized claim.
+
+    The binding is an unkeyed digest over the claim's own fields, so widening
+    target_files AND recomputing the binding yields a claim that passes an
+    internal-consistency check. renew re-derives scope from unit_spec via
+    _current_scope_values and refuses; heartbeat did not, and heartbeat is the
+    command that keeps a claim alive indefinitely.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-hb-anchor")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655hbanchor", "hbanch")
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = ["src/agent_runtime/**"]
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"],
+        unit_id=tampered["unit_id"],
+        unit_spec=tampered["unit_spec"],
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "heartbeat accepted a self-consistent but unauthorized scope widening: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+def test_scope_binding_digest_layout_is_frozen(tmp_path: Path) -> None:
+    """A silent reorder of `components` would invalidate every stored binding.
+
+    Pinned against a fixed input so relocating or refactoring the minter cannot
+    change the wire format unnoticed.
+    """
+    dispatcher = _load_dispatcher_module()
+    binding = dispatcher.claim_store.scope_binding(
+        task_id="TASK-AR-000",
+        unit_id="UNIT-TASK-AR-000-001",
+        unit_spec="agents/lead_engineer/tasks/units/TASK-AR-000/UNIT-TASK-AR-000-001.md",
+        target_files=["b.py", "a.py", "b.py"],
+        stop_condition="stop before anything irreversible",
+        bound_at="2026-01-01T00:00:00+09:00",
+    )
+    assert binding["schema"] == "agent-runtime-claim-scope-binding/v1"
+    assert list(binding["components"]) == ["task", "unit", "target_files", "stop_condition"]
+    assert binding["digest"] == (
+        "88bf816ce577633be95215800beec4365ccf2b519b6e47b8effcc5a3686769c4"
+    )
+
+
+def test_role_routing_binds_overlay_claims_at_birth(tmp_path: Path) -> None:
+    """Overlays must carry a binding so the mutation path needs no exemption."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "role_routing_probe", REPO_ROOT / "scripts" / "role_routing.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["role_routing_probe"] = module
+    spec.loader.exec_module(module)
+    source = (REPO_ROOT / "scripts" / "role_routing.py").read_text(encoding="utf-8")
+    assert '"scope_binding": claim_store.scope_binding(' in source, (
+        "role_routing no longer mints a binding at overlay birth; the "
+        "unconditional heartbeat check would strand every new overlay"
+    )

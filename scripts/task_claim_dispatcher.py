@@ -2565,6 +2565,7 @@ def _validate_progress_update(args: argparse.Namespace) -> dict[str, Any] | None
 
 
 def _validate_mutation_authority(
+    root: Path,
     claim: dict[str, Any],
     args: argparse.Namespace,
     *,
@@ -2604,13 +2605,36 @@ def _validate_mutation_authority(
     # launder a scope broadening past the replan bar and keep re-authorizing it.
     #
     # Unconditional. There is no exemption and therefore no predicate to
-    # attack. Two P1s came from computing the skip from claim content -
-    # `overlay`, then `overlay` plus a deleted binding - because every such
-    # field lives in the same file whose integrity is in question and none is
-    # covered by the digest. Overlays are bound at birth in role_routing, and
-    # a legacy claim with no binding is repaired by `adopt`, which is what
-    # that command exists for.
-    _persisted_scope_binding(claim)
+    # attack: every such field lives in the same file whose integrity is in
+    # question. Overlays are bound at birth in role_routing.
+    persisted = _persisted_scope_binding(claim)
+    # Internal consistency is not authority. The binding is an unkeyed digest
+    # over the claim's own fields, so widening target_files and recomputing the
+    # binding yields a self-consistent claim. renew re-derives scope from the
+    # unit spec and refuses on drift; heartbeat did not, and heartbeat is the
+    # command that keeps a claim alive indefinitely. Removing that asymmetry is
+    # the fix - not another predicate.
+    #
+    # Consequence, accepted deliberately: editing a unit's target_files
+    # mid-flight starts refusing heartbeats until a replan-backed renew lands.
+    # That is what "the lease tracks the approved scope" means.
+    # Scoped to heartbeat because renew owns the drift path: it re-derives the
+    # same values and reconciles them against an accepted T2/T3 replan. This is
+    # a difference in what the two commands are FOR, not a predicate read out
+    # of the claim being validated.
+    if operation == "heartbeat":
+        target_files, stop_condition = _current_scope_values(root, claim)
+        expected = _binding_for_claim(
+            claim,
+            bound_at=str(persisted.get("bound_at") or ""),
+            target_files=target_files,
+            stop_condition=stop_condition,
+        )
+        if expected["digest"] != persisted["digest"]:
+            raise ValueError(
+                "claim scope no longer matches its unit spec; run renew with "
+                "an accepted replan instead of heartbeat"
+            )
     return heartbeat, expires, revision
 
 
@@ -2825,6 +2849,7 @@ def _cmd_claim_mutation_locked(
         raise ValueError(f"claim not found: {args.claim_id}")
     path, claim = found
     heartbeat, expires, revision = _validate_mutation_authority(
+        root,
         claim,
         args,
         operation=operation,
