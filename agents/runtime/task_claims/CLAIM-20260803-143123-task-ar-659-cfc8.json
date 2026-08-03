@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-659:tab-01",
   "pane_id": "terminal:wt-task-ar-659:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -49,12 +49,12 @@
   "worktree_path": ".",
   "branch": "codex/task-ar-659-legacy-claim-bootstrap",
   "claimed_at": "2026-08-03T14:31:23+09:00",
-  "last_heartbeat": "2026-08-03T16:27:26.185249+09:00",
-  "updated_at": "2026-08-03T16:27:26.185249+09:00",
+  "last_heartbeat": "2026-08-03T16:29:28+09:00",
+  "updated_at": "2026-08-03T16:29:28+09:00",
   "expires_at": "2026-08-03T18:27:26.185249+09:00",
   "lease": {
     "claimed_at": "2026-08-03T14:31:23+09:00",
-    "heartbeat_at": "2026-08-03T16:27:26.185249+09:00",
+    "heartbeat_at": "2026-08-03T16:29:28+09:00",
     "expires_at": "2026-08-03T18:27:26.185249+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.handoff.md",
@@ -132,5 +132,9 @@
       },
       "bound_at": "2026-08-03T15:30:27.963396+09:00"
     }
-  }
+  },
+  "released_at": "2026-08-03T16:29:28+09:00",
+  "verified_by": "independent-context-isolated-auditor-task-ar-659",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md"
 }

@@ -1,0 +1,47 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-659-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-659-independent-auditor",
+  "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-659-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "callsite_id": "role-routing:review_pass_dispatched:TASK-AR-659:independent-auditor",
+  "pane_id": "overlay:CLAIM-REVIEW-TASK-AR-659-independent-auditor-closeout",
+  "mode": "review",
+  "status": "released",
+  "phase": "claim-created",
+  "progress_pct": 0,
+  "status_text": "Additive independent-auditor review pass for TASK-AR-659 (closeout)",
+  "claimed_at": "2026-08-03T16:29:28+09:00",
+  "last_heartbeat": "2026-08-03T16:31:44+09:00",
+  "updated_at": "2026-08-03T16:31:44+09:00",
+  "expires_at": "2026-08-03T16:59:28+09:00",
+  "lease": {
+    "claimed_at": "2026-08-03T16:29:28+09:00",
+    "heartbeat_at": "2026-08-03T16:31:44+09:00",
+    "expires_at": "2026-08-03T16:59:28+09:00"
+  },
+  "mutation_revision": 0,
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "allow_parallel_task_set": true,
+  "parent_task_id": "TASK-AR-659",
+  "parent_task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-659-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-659-independent-auditor-closeout.log.md",
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "released_at": "2026-08-03T16:31:44+09:00",
+  "verified_by": "le-20260803-143123-kst-cfc8",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-INDEPENDENT-AUDITOR.md"
+}

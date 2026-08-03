@@ -1,57 +1,27 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T14:31:23+09:00
+updated_at: 2026-08-03T16:38:00+09:00
 updated_by: le-20260803-143123-kst-cfc8
 current_state:
-  summary: "TASK-AR-655 is parked unaccepted (W4b REVISE, P1 1) after its claim was terminalized under Owner authority; TASK-AR-659 is claimed to give legacy and orchestrator claims a registered recovery path."
-  status: active
+  summary: "TASK-AR-659 is done and released after an independent 4-round W4b ACCEPT; unreachable claims now have registered owner-bound exits. TASK-AR-655 remains parked unaccepted and is next: its W4b P1 is the defect AR-659 closed."
+  status: unclaimed
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 1
+  step_index: 11
   step_total: 11
-  progress_pct: 0
-  status_text: "AR-659 RED comes first: prove a legacy claim is unreachable, an orchestrator claim is never reaped, and a new worktree has no claim-store activation command."
+  progress_pct: 100
+  status_text: "AR-659 closed. Next: re-run the independent W4b for UNIT-TASK-AR-655-001 against a live claim."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260803-143123-task-ar-659-cfc8
-      agent_role: lead-engineer
-      team_id: agent-runtime-core
-      agent_instance_id: le-20260803-143123-kst-cfc8
-      display_name: "lead_engineer@worker-01"
-      callsite_id: "terminal:wt-task-ar-659:tab-01"
-      pane_id: "terminal:wt-task-ar-659:tab-01"
-      task_id: TASK-AR-659
-      unit_id: UNIT-TASK-AR-659-001
-      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
-      status: claimed
-      phase: red-legacy-claim-unreachable
-      progress_pct: 0
-      step_index: 1
-      step_total: 11
-      status_text: "Registering RED for unreachable legacy/orchestrator claims"
-      worktree_path: .
-      branch: codex/task-ar-659-legacy-claim-bootstrap
-      requested_model_tier: worker_standard
-      selected_model_tier: planner_high
-      routing_policy_id: task-unit-tier-policy
-      routing_escalation_reason: "trigger:data_integrity,repeated_failure"
-      task_token_budget: null
-      claim_token_budget: null
-      claim_path: agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.handoff.md
-      log_path: agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.log.md
-      last_heartbeat: 2026-08-03T14:31:23+09:00
-      mutation_revision: 0
+  current_agents: []
   current_teams:
     - agent-runtime-core
 resume:
-  active_task: TASK-AR-659
+  active_task: TASK-AR-655
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
-  branch_policy: "Continue TASK-AR-659 only in .worktrees/TASK-AR-659; TASK-AR-655 stays parked in its own worktree; keep consumer primaries and release surfaces read-only."
+  branch_policy: "TASK-AR-659 is closed; resume TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Implement owner-bound legacy claim bootstrap/rotation RED-first so a pre-mutation-field claim can be adopted or terminalized by a registered command."
-    - "Give claim_reaper a status/liveness check that is not short-circuited by mode=orchestrator (claim_reaper.py:110)."
-    - "Record a Compound for the 4x-recurring claim-authority defect family before closing TASK-AR-659."
-    - "Re-run the independent W4b for UNIT-TASK-AR-655-001 only after TASK-AR-659 clears its P1 finding."
+    - "Claim TASK-AR-655 from its own worktree; the task set is free and the AR-659 exits now exist."
+    - "Re-run the independent W4b for UNIT-TASK-AR-655-001 against a LIVE claim; the prior verdict was REVISE (P1 1) and its finding is what AR-659 closed."
+    - "Do not reuse the expired CLAIM-20260803-002651-task-ar-655-5f27; it is terminalized. Create a fresh mode=worker claim."
     - "Keep TASK-AR-654, TASK-AR-657, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
@@ -59,8 +29,7 @@ roles:
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
