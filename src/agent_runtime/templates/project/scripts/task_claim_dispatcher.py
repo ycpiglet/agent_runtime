@@ -3377,6 +3377,231 @@ def _complete_release(
     return 0
 
 
+# ---------------------------------------------------------------------------
+# Owner-bound recovery (TASK-AR-659)
+#
+# A claim can end up reachable by no automated path: the reaper never
+# auto-reaps an orchestrator claim, and heartbeat/renew reject any claim that
+# predates the mutation_revision/scope_binding fields. Without the commands
+# below, the only exit is hand-editing the JSON -- which is how
+# CLAIM-20260803-002651-task-ar-655-5f27 had to be cleared.
+#
+# These are recovery primitives, not lifecycle shortcuts. They never release,
+# complete, delete, or accept a claim, and they never touch a live one.
+# ---------------------------------------------------------------------------
+
+RECOVERY_AUTHORITY = "owner-explicit-approval"
+
+
+def _owner_identity(value: object) -> str:
+    owner = " ".join(str(value or "").split())
+    if not owner:
+        raise ValueError(
+            "owner identity is required: claim recovery is owner-bound and "
+            "refuses an unidentified caller"
+        )
+    return owner
+
+
+def _recovery_reason(value: object) -> str:
+    reason = " ".join(str(value or "").split())
+    if not reason:
+        raise ValueError("a recovery reason is required")
+    return reason
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _recovery_target(
+    root: Path,
+    claim_id: str,
+) -> tuple[Path, dict[str, Any]]:
+    found = _find_claim_in_canonical_snapshot(root, claim_id)
+    if found is None:
+        raise ValueError(f"claim not found: {claim_id}")
+    path, claim = found
+    if not _is_active(claim):
+        raise ValueError(
+            f"claim is already terminal ({claim.get('status')!r}); "
+            "recovery applies only to a claim still presenting as active"
+        )
+    return path, claim
+
+
+def _stamp_recovery(
+    claim: dict[str, Any],
+    *,
+    owner: str,
+    reason: str,
+    now_text: str,
+    operation: str,
+) -> None:
+    claim["updated_at"] = now_text
+    claim["recovered_at"] = now_text
+    claim["recovered_by"] = owner
+    claim["recovery_authority"] = RECOVERY_AUTHORITY
+    claim["recovery_operation"] = operation
+    claim["recovery_reason"] = reason
+    claim["recovery_scope"] = "single-claim"
+
+
+def cmd_adopt(args: argparse.Namespace) -> int:
+    """Bring a pre-mutation-field claim under the current mutation contract.
+
+    Adoption is not a lifecycle change: status, progress, and lease are left
+    exactly as found. It only supplies the missing fields so heartbeat and
+    renew can reach the claim again.
+    """
+    try:
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
+        now = _mutation_now(args.now)
+        now_text = now.isoformat(timespec="seconds")
+        root = args.root.resolve()
+        with claim_store.store_lock(root):
+            path, claim = _recovery_target(root, args.claim_id)
+            has_revision = type(claim.get("mutation_revision")) is int
+            has_binding = isinstance(claim.get("scope_binding"), dict)
+            if has_revision and has_binding:
+                raise ValueError(
+                    "claim already carries mutation_revision and scope_binding; "
+                    "adopt is only for legacy claims and must not reset scope"
+                )
+            before = _digest(path)
+            if not has_revision:
+                claim["mutation_revision"] = 0
+            if not has_binding:
+                claim["scope_binding"] = _binding_for_claim(claim, bound_at=now_text)
+            _stamp_recovery(
+                claim,
+                owner=owner,
+                reason=reason,
+                now_text=now_text,
+                operation="adopt",
+            )
+            claim["adopted_at"] = now_text
+            atomic_io.write_json_atomic(path, claim)
+            after = _digest(path)
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim adoption unavailable"
+        print(f"claim adoption refused: {detail}", file=sys.stderr)
+        return 1
+    _emit(
+        {
+            "status": "adopted",
+            "path": _rel(args.root.resolve(), path),
+            "claim_id": claim.get("claim_id"),
+            "before_sha256": before,
+            "after_sha256": after,
+            "recovered_by": owner,
+            "claim": claim,
+        },
+        as_json=args.json,
+    )
+    return 0
+
+
+def cmd_terminalize(args: argparse.Namespace) -> int:
+    """End a claim whose lease is provably dead and that nothing else can reach.
+
+    The claim file is preserved. This is not a release, not a completion, and
+    grants no unit acceptance or release authority.
+    """
+    try:
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
+        now = _mutation_now(args.now)
+        now_text = now.isoformat(timespec="seconds")
+        root = args.root.resolve()
+        with claim_store.store_lock(root):
+            path, claim = _recovery_target(root, args.claim_id)
+            liveness = claim_store.classify_claim_liveness(claim, now=now)
+            if liveness.state != "expired":
+                raise ValueError(
+                    f"claim lease is {liveness.state} ({liveness.reason}); "
+                    "terminalize refuses a live claim and only ends an expired one"
+                )
+            before = _digest(path)
+            prior = str(claim.get("status") or "")
+            claim["status"] = "expired"
+            claim["recovered_from_status"] = prior
+            claim["reaped_at"] = now_text
+            claim["reaped_by"] = "owner-manual-recovery"
+            claim["reaped_reason"] = "lease-expired"
+            _stamp_recovery(
+                claim,
+                owner=owner,
+                reason=reason,
+                now_text=now_text,
+                operation="terminalize",
+            )
+            atomic_io.write_json_atomic(path, claim)
+            after = _digest(path)
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim terminalization unavailable"
+        print(f"claim terminalization refused: {detail}", file=sys.stderr)
+        return 1
+    _emit(
+        {
+            "status": "terminalized",
+            "path": _rel(args.root.resolve(), path),
+            "claim_id": claim.get("claim_id"),
+            "recovered_from_status": claim["recovered_from_status"],
+            "before_sha256": before,
+            "after_sha256": after,
+            "recovered_by": owner,
+            "claim": claim,
+        },
+        as_json=args.json,
+    )
+    return 0
+
+
+def cmd_activate_store(args: argparse.Namespace) -> int:
+    """Activate this checkout's claim store.
+
+    The outer marker lives in the per-worktree git admin directory, so a fresh
+    worktree starts `migration-required`. The only other caller of
+    adopt_legacy_store() is the consumer sync path, which needs an
+    agent_runtime.yml the runtime repository itself does not have.
+    """
+    try:
+        root = args.root.resolve()
+        inspection = claim_store.adopt_legacy_store(root)
+    except (claim_store.ClaimStoreError, OSError, TimeoutError, ValueError) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store activation unavailable"
+        print(f"claim-store activation refused: {detail}", file=sys.stderr)
+        return 1
+    _emit(
+        {
+            "status": "activated",
+            "claim_store_state": inspection.state,
+            "witness_claim_id": inspection.witness_claim_id,
+            "marker": _rel(root, claim_store.outer_marker_path(root)),
+        },
+        as_json=args.json,
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Create/release parallel agent task claims")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository or host root")
@@ -3522,6 +3747,43 @@ def build_parser() -> argparse.ArgumentParser:
     renew.add_argument("--now")
     renew.add_argument("--json", action="store_true")
     renew.set_defaults(func=cmd_renew)
+
+    adopt = sub.add_parser(
+        "adopt",
+        help=(
+            "Owner-bound: bring a legacy claim missing mutation_revision/"
+            "scope_binding under the current contract so heartbeat and renew "
+            "can reach it again. Does not change status, progress, or lease."
+        ),
+    )
+    adopt.add_argument("--claim-id", required=True)
+    adopt.add_argument("--owner-id", required=True)
+    adopt.add_argument("--reason", required=True)
+    adopt.add_argument("--now")
+    adopt.add_argument("--json", action="store_true")
+    adopt.set_defaults(func=cmd_adopt)
+
+    terminalize = sub.add_parser(
+        "terminalize",
+        help=(
+            "Owner-bound: end a claim whose lease is provably dead and that no "
+            "automated path can reach. Never deletes, releases, or completes a "
+            "claim, never touches a live one, and grants no acceptance."
+        ),
+    )
+    terminalize.add_argument("--claim-id", required=True)
+    terminalize.add_argument("--owner-id", required=True)
+    terminalize.add_argument("--reason", required=True)
+    terminalize.add_argument("--now")
+    terminalize.add_argument("--json", action="store_true")
+    terminalize.set_defaults(func=cmd_terminalize)
+
+    activate_store = sub.add_parser(
+        "activate-store",
+        help="Activate this checkout's claim store (a fresh worktree starts migration-required)",
+    )
+    activate_store.add_argument("--json", action="store_true")
+    activate_store.set_defaults(func=cmd_activate_store)
 
     projection = sub.add_parser("projection", help="Emit the required active task/unit/pointer projection for a claim")
     projection.add_argument("--claim-id", required=True)

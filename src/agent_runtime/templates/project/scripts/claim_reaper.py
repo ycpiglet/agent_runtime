@@ -49,6 +49,9 @@ REAPED_STATUS = "expired"
 DEFAULT_GRACE_SECONDS = claim_store.DEFAULT_CLAIM_GRACE_SECONDS
 GRACE_ENV = claim_store.CLAIM_GRACE_ENV
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
+# Skip reason for an orchestrator claim whose lease is provably dead. It stays a
+# skip (never auto-reaped) but is surfaced separately so the deadlock is visible.
+ORCHESTRATOR_EXPIRED_REASON = "orchestrator-claim-expired"
 
 # Use the same closed status vocabulary as closure and dispatch. The reaped
 # status (``expired``) is deliberately outside this active set.
@@ -107,13 +110,20 @@ def _is_orchestrator(claim: dict[str, Any]) -> bool:
 
 def classify_claim(claim: dict[str, Any], now: datetime, grace_seconds: int) -> tuple[str, str]:
     """Return (decision, reason). decision in {"live", "dead", "skip"}."""
-    if _is_orchestrator(claim):
-        return "skip", "orchestrator-claim"
     liveness = claim_store.classify_claim_liveness(
         claim,
         now=now,
         grace_seconds=grace_seconds,
     )
+    if _is_orchestrator(claim):
+        # Orchestrator claims are never auto-reaped: only a human owner may end
+        # one. But mode must not hide the lease state. Reporting a dead
+        # orchestrator claim with the same reason as a healthy one is what let
+        # CLAIM-20260803-002651-task-ar-655-5f27 sit expired and invisible for
+        # 5.4h while it deadlocked its own taskset.
+        if liveness.state == "expired":
+            return "skip", ORCHESTRATOR_EXPIRED_REASON
+        return "skip", "orchestrator-claim"
     if liveness.state == "live":
         return "live", "lease-valid"
     if liveness.state == "expired":
@@ -339,7 +349,15 @@ def _authorized_sweep(
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if apply and entry_reason in ("orchestrator-claim", "no-lease-info"):
+            if entry_reason == ORCHESTRATOR_EXPIRED_REASON:
+                # Never reaped, but never silent either: an owner-bound
+                # `task_claim_dispatcher.py terminalize` is the registered exit.
+                report["needs_owner_recovery"].append(entry)
+            if apply and entry_reason in (
+                "orchestrator-claim",
+                ORCHESTRATOR_EXPIRED_REASON,
+                "no-lease-info",
+            ):
                 if not claim_store.verify_snapshot(root, snapshot):
                     raise _ClaimStoreAuthorityChanged(
                         "claim-store authority changed before skip audit"
@@ -404,6 +422,7 @@ def sweep(
         "would_reap": [],
         "live": [],
         "skipped": [],
+        "needs_owner_recovery": [],
         "claim_store": {
             "state": "integrity-invalid",
             "finding": "claim-store inspection was not completed",
@@ -487,11 +506,22 @@ def _render_human(report: dict[str, Any]) -> str:
     )
     reaped = report["reaped"] if report["apply"] else report["would_reap"]
     verb = "reaped" if report["apply"] else "would-reap"
-    lines.append(f"{verb}={len(reaped)} live={len(report['live'])} skipped={len(report['skipped'])}")
+    outstanding = report.get("needs_owner_recovery") or []
+    lines.append(
+        f"{verb}={len(reaped)} live={len(report['live'])} "
+        f"skipped={len(report['skipped'])} needs_owner_recovery={len(outstanding)}"
+    )
     for entry in reaped:
         lines.append(f"  {verb}: {entry['claim_id']} task={entry['task_id']} ({entry['reason']})")
     for entry in report["skipped"]:
         lines.append(f"  skipped: {entry['claim_id']} ({entry['reason']})")
+    for entry in outstanding:
+        lines.append(
+            f"  needs-owner-recovery: {entry['claim_id']} task={entry['task_id']}; "
+            "lease is dead and this claim is never auto-reaped -- run: "
+            "task_claim_dispatcher.py terminalize --claim-id "
+            f"{entry['claim_id']} --owner-id <owner> --reason <why>"
+        )
     if not report["apply"] and reaped:
         lines.append("re-run with --apply to recover the claims above")
     return "\n".join(lines)
