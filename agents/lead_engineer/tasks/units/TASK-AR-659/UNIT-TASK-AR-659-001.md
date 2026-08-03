@@ -9,10 +9,12 @@ task_id: TASK-AR-659
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: review
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json
 verification_status: passed
+w4b_acceptance: true
+w4b_ref: reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md
 owner: lead-engineer
 created_at: 2026-08-03T14:21:57+09:00
 updated_at: 2026-08-03T16:09:06+09:00

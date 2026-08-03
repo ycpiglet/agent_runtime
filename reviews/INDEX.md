@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T16:10:53+09:00
-record_count: 1333
+generated_at: 2026-08-03T16:27:05+09:00
+record_count: 1334
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1333` review and evidence records under `reviews/`.
+- Summary: indexed `1334` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1333` files |
+| Reviews covered | pass | `1334` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1364,6 +1364,7 @@ record_count: 1333
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | blocked | fail | TASK-AR-655 post-repair final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | blocked | fail | TASK-AR-655 projection-binding repair final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | blocked | block | TASK-AR-655 type-strict pointer final independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md` | `W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final` | md | accepted | pass | TASK-AR-659 owner-bound recovery commands final independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

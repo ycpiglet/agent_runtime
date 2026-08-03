@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-08-03T16:10:53+09:00
+generated_at: 2026-08-03T16:27:04+09:00
 record_count: 552
 ---
 
@@ -589,8 +589,8 @@ record_count: 552
 | 42.1.6.1 | Unit 42.1.6.1 | unit | `UNIT-TASK-AR-657-001` | `TASK-AR-657` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md` | UNIT-TASK-AR-657-001 - Package the reusable consumer-adoption operating procedure |
 | 42.1.7 | Task 42.1.7 | task | `TASK-AR-658` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-658.md` | Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage… |
 | 42.1.7.1 | Unit 42.1.7.1 | unit | `UNIT-TASK-AR-658-001` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md` | UNIT-TASK-AR-658-001 - Build the secret-free Runtime health resource and console surface |
-| 42.1.8 | Task 42.1.8 | task | `TASK-AR-659` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | in_progress | `agents/lead_engineer/tasks/TASK-AR-659.md` | Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom… |
-| 42.1.8.1 | Unit 42.1.8.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
+| 42.1.8 | Task 42.1.8 | task | `TASK-AR-659` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | review | `agents/lead_engineer/tasks/TASK-AR-659.md` | Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom… |
+| 42.1.8.1 | Unit 42.1.8.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | review | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

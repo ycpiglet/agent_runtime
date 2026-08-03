@@ -41,21 +41,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating unregistered consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.",
-  "phase": "w4b-round3-repaired",
-  "progress_pct": 99,
+  "phase": "w4b-accepted-awaiting-release",
+  "progress_pct": 100,
   "step_index": 11,
   "step_total": 11,
-  "status_text": "W4b round-3 repaired: unreachable replan gate and flag overriding liveness evidence",
+  "status_text": "Independent W4b ACCEPT after 4 rounds; closeout blocked on claim-release which the stop_condition bars",
   "worktree_path": ".",
   "branch": "codex/task-ar-659-legacy-claim-bootstrap",
   "claimed_at": "2026-08-03T14:31:23+09:00",
-  "last_heartbeat": "2026-08-03T16:11:16.415073+09:00",
-  "updated_at": "2026-08-03T16:11:16.415073+09:00",
-  "expires_at": "2026-08-03T18:11:16.415073+09:00",
+  "last_heartbeat": "2026-08-03T16:27:26.185249+09:00",
+  "updated_at": "2026-08-03T16:27:26.185249+09:00",
+  "expires_at": "2026-08-03T18:27:26.185249+09:00",
   "lease": {
     "claimed_at": "2026-08-03T14:31:23+09:00",
-    "heartbeat_at": "2026-08-03T16:11:16.415073+09:00",
-    "expires_at": "2026-08-03T18:11:16.415073+09:00"
+    "heartbeat_at": "2026-08-03T16:27:26.185249+09:00",
+    "expires_at": "2026-08-03T18:27:26.185249+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.log.md",
@@ -91,7 +91,7 @@
     "scripts/claim_reaper_hook.py",
     "src/agent_runtime/templates/project/scripts/claim_reaper_hook.py"
   ],
-  "mutation_revision": 8,
+  "mutation_revision": 9,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "d3f073ede4f9ff44c5503cd513668fa2c17db5209dd73a9869594825039d4170",

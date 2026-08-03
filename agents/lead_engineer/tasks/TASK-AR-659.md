@@ -11,7 +11,7 @@ registered_at: 2026-08-03T14:21:57+09:00
 created_at: 2026-08-03T14:21:57+09:00
 updated_at: 2026-08-03T14:21:57+09:00
 title: Give legacy and orchestrator claims a registered recovery path
-status: in_progress
+status: review
 started_at: 2026-08-03T14:31:23+09:00
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json

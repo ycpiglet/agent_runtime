@@ -6318,6 +6318,9 @@ def test_owner_identity_is_length_bounded(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert path.read_bytes() == before
+    # Pin the reason, not just the exit code: otherwise a future refusal for an
+    # unrelated cause would keep this green while the cap silently disappears.
+    assert "owner identity exceeds" in (result.stdout + result.stderr)
 
 
 def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
@@ -6340,6 +6343,7 @@ def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert path.read_bytes() == before
+    assert "recovery reason exceeds" in (result.stdout + result.stderr)
 
 
 def test_activation_audit_loss_is_reported(

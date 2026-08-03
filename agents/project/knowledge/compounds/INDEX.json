@@ -122,6 +122,9 @@
     "defect:defect-expired-claim-has-no-registered-recovery:2ea5474ca846c52d": [
       "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
     ],
+    "defect:defect-guard-added-without-verifying-the-opposit:3de54e9a16081874": [
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
+    ],
     "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
     ],
@@ -278,7 +281,8 @@
       "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ],
     "TASK-AR-659": [
-      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
     ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
@@ -332,10 +336,11 @@
       "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ],
     "UNIT-TASK-AR-659-001": [
-      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
     ]
   },
-  "record_count": 32,
+  "record_count": 33,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -858,8 +863,23 @@
         "TASK-AR-659",
         "UNIT-TASK-AR-659-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T16:26:10+09:00",
+      "defect_signatures": [
+        "defect:defect-guard-added-without-verifying-the-opposit:3de54e9a16081874"
+      ],
+      "id": "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Test both directions of every guard, and never let the author be the last reviewer",
+      "work_ids": [
+        "TASK-AR-659",
+        "UNIT-TASK-AR-659-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:eb743f002560a1a1893e32d28202c93608c5a7aa0091e2866bc303492e05db3c"
+  "source_digest": "sha256:55800456b1f5e2b1160027696c6bcb625178dfd774d65f2130be15ed39e11983"
 }
