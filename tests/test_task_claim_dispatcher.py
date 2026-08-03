@@ -8,7 +8,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -6468,3 +6468,64 @@ def test_adopt_refuses_a_spec_less_claim_without_a_replan(tmp_path: Path) -> Non
     )
     assert "replan" in (result.stdout + result.stderr).lower()
     assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    "label, offset_seconds, expect_ended",
+    [
+        ("future-deadline-live", 36000, False),
+        ("just-past-expiry-within-grace", -60, False),
+        ("at-grace-boundary", -600, True),
+        ("well-past-grace-truly-dead", -18000, True),
+    ],
+)
+def test_indeterminate_flag_respects_the_liveness_evidence_boundary(
+    tmp_path: Path, label: str, offset_seconds: int, expect_ended: bool
+) -> None:
+    """The evidence refusal must not make --allow-indeterminate-lease useless.
+
+    A `deadline-partial` claim still carries a readable deadline. Refuse while
+    that deadline says the claim may be alive; end it once it is provably dead.
+    Without the dead cases pinned, tightening the guard could silently turn the
+    flag into a no-op and re-open the exit-less deadlock this unit closes.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, f"ar659-bound-{label}")
+    now = datetime.now().astimezone()
+    result = _create_linked_claim(
+        linked,
+        suffix="659-bound",
+        extra_args=("--lease-minutes", "600", "--now", now.isoformat(timespec="seconds")),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    path = linked / json.loads(result.stdout)["path"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("lease", None)  # legacy shape: readable top-level deadline only
+    claim["expires_at"] = (
+        now + timedelta(seconds=offset_seconds)
+    ).isoformat(timespec="seconds")
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        f"boundary case {label}",
+        "--allow-indeterminate-lease",
+        "--json",
+    )
+
+    final = json.loads(path.read_text(encoding="utf-8"))["status"]
+    if expect_ended:
+        assert result.returncode == 0, (
+            f"{label}: a provably dead legacy claim was not endable — the flag "
+            "has become useless: " + (result.stderr or result.stdout)
+        )
+        assert final == "expired"
+    else:
+        assert result.returncode != 0, f"{label}: ended a claim that may be alive"
+        assert final == "claimed"
