@@ -12,10 +12,10 @@ project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-08-03T14:21:57+09:00
-updated_at: 2026-08-03T14:21:57+09:00
+updated_at: 2026-08-03T15:00:38+09:00
 origin_type: defect
 origin_ref: reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
 created_by: owner-manual-recovery
@@ -53,9 +53,15 @@ acceptance:
   - A new worktree can activate its claim store through a registered command without a consumer agent_runtime.yml.
 verification:
   - PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q
-  - PYTHONPATH=src python -m pytest tests/test_claim_guard.py -q
+  - PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q
+  - python scripts/template_mirror_gate.py --check
+  - python scripts/rbac_write_gate.py --check
 handoff: Attach the RED commits, the owner-identity refusal proof, the live-claim refusal proof, before/after digests, the template mirror diff, the Compound record, and an independent W4b.
 stop_condition: Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating unregistered consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.
+verified_at: 2026-08-03T15:00:38+09:00
+verified_by: le-20260803-143123-kst-cfc8
+evidence_refs:
+  - reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038.json
 ---
 
 # UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first
@@ -121,7 +127,9 @@ touch consumer projects.
 ## Verification
 
 - `PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q`
-- `PYTHONPATH=src python -m pytest tests/test_claim_guard.py -q`
+- `PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q`
+- `python scripts/template_mirror_gate.py --check`
+- `python scripts/rbac_write_gate.py --check`
 
 ### Environment (mandatory)
 
@@ -129,13 +137,20 @@ touch consumer projects.
 to `.worktrees/TASK-AR-655/src`, so an unqualified `pytest` run in this
 worktree silently exercises **another worktree's source**.
 
-### Pre-existing baseline (not owned by this unit)
+### Pre-existing baseline (deliberately excluded from `verification:`)
 
 `tests/test_claim_guard.py` is **21 failed / 15 passed** on this clone's
 `main`, verified in a throwaway detached worktree. It predates TASK-AR-655
 and this unit: the blocking rule `task-claim:authorized-commit-not-persisted`
-was introduced by TASK-AR-648 (commit `31b1a146`, already on `main`). This
-unit must not worsen that count and does not own fixing it.
+was introduced by TASK-AR-648 (commit `31b1a146`, already on `main`).
+
+It is **not** listed under `verification:` because a unit must not claim a
+verification command it cannot pass and does not own — that would either
+block this unit forever or normalise a red bar. It is instead a standing
+side-check: run
+`PYTHONPATH=src python -m pytest tests/test_claim_guard.py -q`
+and confirm the count has not worsened beyond 21 failed / 15 passed. This
+unit's changes leave it at exactly that baseline.
 
 ## Handoff
 

@@ -119,6 +119,9 @@
     "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce": [
       "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
+    "defect:defect-expired-claim-has-no-registered-recovery:2ea5474ca846c52d": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
+    ],
     "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
       "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
     ],
@@ -274,6 +277,9 @@
       "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
       "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
     ],
+    "TASK-AR-659": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -324,9 +330,12 @@
       "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
       "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
       "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
+    ],
+    "UNIT-TASK-AR-659-001": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
     ]
   },
-  "record_count": 31,
+  "record_count": 32,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -834,8 +843,23 @@
         "TASK-AR-655",
         "UNIT-TASK-AR-655-001"
       ]
+    },
+    {
+      "created_at": "2026-08-03T15:02:41+09:00",
+      "defect_signatures": [
+        "defect:defect-expired-claim-has-no-registered-recovery:2ea5474ca846c52d"
+      ],
+      "id": "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Give every claim state a registered exit before adding guards",
+      "work_ids": [
+        "TASK-AR-659",
+        "UNIT-TASK-AR-659-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:e9d62c23b0fb1a4b6f1a64c960283b479c779acc5a8e07f591372bb23e9460d0"
+  "source_digest": "sha256:eb743f002560a1a1893e32d28202c93608c5a7aa0091e2866bc303492e05db3c"
 }

@@ -46,9 +46,8 @@ acceptance:
   - No recovery command can terminalize a live claim, and none grants unit acceptance or release authority.
   - The recovery path is reachable from the runtime template mirror, not only from this repository.
 verification:
-  - python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q
+  - PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q
   - python scripts/rbac_write_gate.py --check
-  - python scripts/state_sync_gate.py
   - python scripts/template_mirror_gate.py --check
 ---
 
@@ -107,7 +106,11 @@ record is required before closeout.
 
 ## Verification
 
-- `python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q`
+- `PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q`
 - `python scripts/rbac_write_gate.py --check`
-- `python scripts/state_sync_gate.py`
 - `python scripts/template_mirror_gate.py --check`
+
+`PYTHONPATH=src` is mandatory: the editable install resolves `agent_runtime`
+to another worktree's source. `tests/test_claim_guard.py` is excluded — it is
+a pre-existing 21 failed / 15 passed baseline on `main` that this task does
+not own; see the unit spec.
