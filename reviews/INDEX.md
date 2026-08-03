@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T13:51:32+09:00
-record_count: 1325
+generated_at: 2026-08-03T14:32:55+09:00
+record_count: 1326
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1325` review and evidence records under `reviews/`.
+- Summary: indexed `1326` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1325` files |
+| Reviews covered | pass | `1326` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -716,6 +716,7 @@ record_count: 1325
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan` | md | accepted | pass | TASK-AR-655 W4b full-pointer and neutral pre-load T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b projection binding T3 amendment |
 | `reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan` | md | accepted | pass | TASK-AR-655 W4b type-strict pointer authority T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md` | `REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan` | md | accepted | pass | TASK-AR-659 legacy claim bootstrap dispatch T3 replan |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |

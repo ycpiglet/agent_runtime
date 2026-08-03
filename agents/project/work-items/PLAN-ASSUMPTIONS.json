@@ -1044,12 +1044,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
-          "value": "0f95300fb40707422f78a9ff11ad32d046aad045495ae9d89c9d05f05e7c28a6"
+          "value": "c8163adc0e0f97416987f65601e18d454c576f99fcc58d163a4ddcd37610db5d"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
-          "value": "3a891879839b6b47f3a5dfa20be2185a525fe262008437903335b55bfcd19e6a"
+          "value": "ffc1ec74be79abd310ace4b51dab9942bcd6f3711ef95a111ee8a79b22a3e649"
         },
         {
           "kind": "sha256",
@@ -1109,102 +1109,102 @@
         {
           "kind": "sha256",
           "path": "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
-          "value": "ae56051d37cb0f4b2af319071d1d3fc724dfd120fbf35911df8507ed86c94d0f"
+          "value": "cafdc8829a291b16ad46c92e3e27f09169c9205a4a830da2bc396fe94beb5872"
         },
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "de7961dcb650df46613ed77af3703e81c4d0a179fa7d057fd7ba302813ccb6a6"
+          "value": "f8a0a25206f988c37024fce0ed5927c7ff0d2dce7477f3f78dabd4bd8168ea9f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "de7961dcb650df46613ed77af3703e81c4d0a179fa7d057fd7ba302813ccb6a6"
+          "value": "f8a0a25206f988c37024fce0ed5927c7ff0d2dce7477f3f78dabd4bd8168ea9f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/claim_store.py",
-          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+          "value": "eb31107c3a39beab678532576947e1ff23b039d08739b6bfe63198f688dc66cf"
         },
         {
           "kind": "sha256",
           "path": "scripts/agent_runtime/claim_store.py",
-          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+          "value": "eb31107c3a39beab678532576947e1ff23b039d08739b6bfe63198f688dc66cf"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
-          "value": "851d624502da642d1be4ec550d9b229fbfff7ba3f1ab8ce50cfee3397f0a1ecb"
+          "value": "eb31107c3a39beab678532576947e1ff23b039d08739b6bfe63198f688dc66cf"
         },
         {
           "kind": "sha256",
           "path": "scripts/claim_lease.py",
-          "value": "b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e"
+          "value": "90b61722e758da1a772919a7fea7450a52ea7f2c7aa4bb48c95b431ed76fd307"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/claim_lease.py",
-          "value": "b341daa84911af2643e377684a888b58362c6a7f4e694a73ac76d9922a4db64e"
+          "value": "90b61722e758da1a772919a7fea7450a52ea7f2c7aa4bb48c95b431ed76fd307"
         },
         {
           "kind": "sha256",
           "path": "scripts/claim_reaper.py",
-          "value": "91d4cbd6905ddc5e2a11854db05edab6cded6b5768cdbc0de26fe987cba2a64c"
+          "value": "aa1ad726d443b432f64cf2099d5d93625d051313b237288e9d7da27a62657515"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
-          "value": "91d4cbd6905ddc5e2a11854db05edab6cded6b5768cdbc0de26fe987cba2a64c"
+          "value": "aa1ad726d443b432f64cf2099d5d93625d051313b237288e9d7da27a62657515"
         },
         {
           "kind": "sha256",
           "path": "scripts/deadlock_watchdog.py",
-          "value": "93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5"
+          "value": "b901d859d7a5244beefcee56ea9f87eaedff8130b35009b7f8b98f575a3d3d7f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/deadlock_watchdog.py",
-          "value": "93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5"
+          "value": "b901d859d7a5244beefcee56ea9f87eaedff8130b35009b7f8b98f575a3d3d7f"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
-          "value": "4cdf74188e7c7d1818ad40d6e0a17a96504d5783da5904c154d3fa0b44c1bd6e"
+          "value": "5cf2859f8eec478e612ac4e5a01536a1f2403718f18a38503097ea25d60dab39"
         },
         {
           "kind": "sha256",
           "path": "scripts/state_sync_gate.py",
-          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
+          "value": "8cae8e8cde705ee63f72da04498c6befdadfec76fcb65cfc1361cd029c7f055e"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
-          "value": "8ceba8b58876e792ada4492a36bdd379e4db1fa4174cd13e6a6f73329cacf17b"
+          "value": "8cae8e8cde705ee63f72da04498c6befdadfec76fcb65cfc1361cd029c7f055e"
         },
         {
           "kind": "sha256",
           "path": "scripts/parallel_worktree_gate.py",
-          "value": "8b98b6f72a38a63843399686719346b5d9bedce05e3eaef94074e3f19a3153c8"
+          "value": "6d120a5ca44bb448c50f2ea642b6079d50b442d94f04228c84400b11ae0ff7ef"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
-          "value": "8b98b6f72a38a63843399686719346b5d9bedce05e3eaef94074e3f19a3153c8"
+          "value": "6d120a5ca44bb448c50f2ea642b6079d50b442d94f04228c84400b11ae0ff7ef"
         },
         {
           "kind": "sha256",
           "path": "scripts/worktree_lifecycle_gate.py",
-          "value": "a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143"
+          "value": "1a122859cd54e179891c8212b6f3753c177f73beaeeaccb4cd70ced48f25e511"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
-          "value": "a86313971b469113582b7e06064bd528867270ea741a66b46396059277e09143"
+          "value": "1a122859cd54e179891c8212b6f3753c177f73beaeeaccb4cd70ced48f25e511"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/ui_state.py",
-          "value": "93d32e5da2392105283a9bff851dad6277b34f606016538a1feec8d9921fb7a2"
+          "value": "9eb45578ffeb52124f5a551a51797a579e0ccf6ef9c842cd81ce95de1c00f873"
         },
         {
           "kind": "sha256",
@@ -1234,17 +1234,17 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "603a4257d586835198a7e32e008e200323c563cc074d5440dd50abc939aabd90"
+          "value": "6e736d8b01be6cac3240e65511727a6c4b81a7229d7bbff4446cedbdae76b095"
         },
         {
           "kind": "sha256",
           "path": "tests/test_claim_store.py",
-          "value": "cbcd1a05e8914e5dabf7994c7a877c2f27750f4650edc557e746637a839c2858"
+          "value": "233d005e3c21bda036008618a5474c985bb17083c9244983d2d88ba779b81067"
         },
         {
           "kind": "sha256",
           "path": "tests/test_claim_reaper.py",
-          "value": "f9fcb7fdcf7546f7287bd6bb8b08f3a0620aaafc686437a0c04424c3feb4c8ce"
+          "value": "3b87616448f78196c1b08faf548f370bbaf8645e0aa9be9e675c9bf9584e806e"
         },
         {
           "kind": "sha256",
@@ -1259,27 +1259,27 @@
         {
           "kind": "sha256",
           "path": "tests/test_deadlock_watchdog.py",
-          "value": "f85a936f38d3de2bcdeb238b0f0b9cbb45180d87e3e609d30181e0ffe9d16207"
+          "value": "23fd8b807d8173461c4abaab519e4c3d751c25ebe813de617b94dec9fbd399d0"
         },
         {
           "kind": "sha256",
           "path": "tests/test_state_sync_gate.py",
-          "value": "1545e9be210b426ea85f9fe3464179e41fe2ea0fe337af47a9d21d836ab9a8ab"
+          "value": "46a4aa72bb605074738a6c7a704742a3b69215b30ba7d930bc1863db2863e026"
         },
         {
           "kind": "sha256",
           "path": "tests/test_parallel_worktree_gate.py",
-          "value": "ea768f6d7a017008e397791fe8585e932bac05406ce791e5535d81a10e68dc66"
+          "value": "e0e36285a6971d0bf22442f4232ebbc7a2b0b957c8fa4d0310c786a5043e2f4e"
         },
         {
           "kind": "sha256",
           "path": "tests/test_worktree_lifecycle_gate.py",
-          "value": "a509623fae6585bc9b79d53d4a51f93d6fcf5a332f3bdcc66835fefb1c0aabcd"
+          "value": "7e27362a7586cceed08a359e8ac4b6a1f7984f58e881a3037133c4499d7d48c8"
         },
         {
           "kind": "sha256",
           "path": "tests/test_ui_state.py",
-          "value": "4feb9e6980f689089a3a90ed7d3b034062b3706c6c91d462d1de97c01e5942e5"
+          "value": "2638616cdf4fdcdad7e3a6f1012627b252054f00d2fe3c3c87c2a48fb4e8b695"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "4d9724724501d10f97d1833be4948f9dad4b795e6ea1e77c5d62098fe9cf0ddc"
+          "value": "ac3782bbd7ece841f8e48ea868e49446ea8dad50b5cc2bed575ef9f9b37fc91b"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md",
-      "recorded_at": "2026-08-03T00:19:46+09:00",
+      "design_record": "reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md",
+      "recorded_at": "2026-08-03T14:28:02+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-03T00:19:46+09:00"
+  "updated_at": "2026-08-03T14:28:02+09:00"
 }

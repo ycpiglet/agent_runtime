@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-08-03T00:39:19+09:00",
-  "record_count": 550,
+  "generated_at": "2026-08-03T14:34:23+09:00",
+  "record_count": 552,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -6054,6 +6054,28 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md",
       "parent_id": "TASK-AR-658",
       "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-659",
+      "level": "task",
+      "number": "42.1.8",
+      "label": "Task 42.1.8",
+      "id": "TASK-AR-659",
+      "title": "Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-659.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "in_progress"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-659-001",
+      "level": "unit",
+      "number": "42.1.8.1",
+      "label": "Unit 42.1.8.1",
+      "id": "UNIT-TASK-AR-659-001",
+      "title": "UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
+      "parent_id": "TASK-AR-659",
+      "status": "in_progress"
     }
   ]
 }

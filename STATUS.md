@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-08-03 - Stale claim deadlock cleared; TASK-AR-659 active
+
+- Active: `TASK-AR-659` (`UNIT-TASK-AR-659-001`, claim `CLAIM-20260803-143123-task-ar-659-cfc8`) gives legacy and orchestrator claims a registered recovery path. RED first.
+- Recovery: `CLAIM-20260803-002651-task-ar-655-5f27` expired at 08:26:51 and was reachable by no registered command — the reaper skips `mode=orchestrator` before testing liveness, `heartbeat`/`renew` reject claims predating `mutation_revision`/`scope_binding`, and no `expire`/`terminalize` subcommand exists. One stale claim blocked both resuming AR-655 and claiming its own fix. Terminalized to `expired` under explicit Owner authority; see `reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md`.
+- Parked: `TASK-AR-655` stays `in_progress` and unaccepted. Its W4b verdict is `REVISE — P1 1`; re-verification waits on AR-659.
+- Boundary: this is the 4th recurrence in the claim-authority defect family, so a Compound record is mandatory before AR-659 closeout. No version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-07-30 - Autofolio migration closed; operability hardening next
 
 - Completed: `TASK-AR-650` passed the exact Autofolio attempt-3 isolation and acceptance contracts, 207 migration/work tests, 182 adoption/config/template tests, independent W4b, and additive independent-auditor plus skeptic closeout.

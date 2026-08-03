@@ -1,0 +1,135 @@
+---
+schema_version: agent-runtime-work-item/v1
+work_id: UNIT-TASK-AR-659-001
+work_uid: 4eac3cc2-e0b7-4e0d-80d2-c0e3102053ff
+kind: unit
+parent_id: TASK-AR-659
+unit_id: UNIT-TASK-AR-659-001
+task_id: TASK-AR-659
+task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
+project_id: PROJECT-AGENT-RUNTIME
+status: in_progress
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.json
+verification_status: pending
+owner: lead-engineer
+created_at: 2026-08-03T14:21:57+09:00
+updated_at: 2026-08-03T14:21:57+09:00
+origin_type: defect
+origin_ref: reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
+created_by: owner-manual-recovery
+summary: Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first
+horizon: unit
+model_tier: worker_standard
+escalation_triggers:
+  - data_integrity
+  - repeated_failure
+context: A claim that expires while missing mutation_revision/scope_binding is unreachable by every registered command, and claim_reaper skips orchestrator-mode claims before it ever tests liveness. On 2026-08-03 this deadlocked TASK-AR-655 against its own task set and required an Owner-authorized manual JSON mutation to clear. This is the 4th recurrence in the claim-authority defect family.
+inputs:
+  - reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
+  - reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md
+  - scripts/claim_reaper.py
+  - scripts/task_claim_dispatcher.py
+  - scripts/claim_lease.py
+target_files:
+  - scripts/claim_lease.py
+  - src/agent_runtime/templates/project/scripts/claim_lease.py
+  - scripts/claim_reaper.py
+  - src/agent_runtime/templates/project/scripts/claim_reaper.py
+  - scripts/task_claim_dispatcher.py
+  - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
+  - tests/test_claim_lease.py
+  - tests/test_claim_reaper.py
+  - tests/test_task_claim_dispatcher.py
+  - tests/test_claim_store.py
+scope: Local claim-store authority only. Do not introduce a network or distributed lease dependency, do not add a claim-release or acceptance path, and do not touch consumer projects.
+acceptance:
+  - A pre-mutation-field claim is adoptable by an owner-bound command; the same command refuses an unidentified caller.
+  - An expired claim is terminalizable regardless of mode, and a live claim is never terminalizable.
+  - claim_reaper classifies orchestrator claims by status and liveness rather than skipping on mode.
+  - Every mutation records owner identity, before/after digest, and reason.
+  - No new command grants release, acceptance, or external-release authority.
+  - A new worktree can activate its claim store through a registered command without a consumer agent_runtime.yml.
+verification:
+  - python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q
+handoff: Attach the RED commits, the owner-identity refusal proof, the live-claim refusal proof, before/after digests, the template mirror diff, the Compound record, and an independent W4b.
+stop_condition: Stop before introducing a network lease dependency, auto-committing host state, recovering a claim without owner identity, mutating unregistered consumers, dispatching CI, or performing version, tag, push, publish, deploy, claim-release, or external-release actions.
+---
+
+# UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first
+
+## Context
+
+A claim that expires while missing `mutation_revision` / `scope_binding` is
+unreachable by every registered command, and `claim_reaper` skips
+orchestrator-mode claims before it ever tests liveness. On 2026-08-03 this
+deadlocked TASK-AR-655 against its own task set and required an
+Owner-authorized manual JSON mutation to clear. This is the 4th recurrence in
+the claim-authority defect family.
+
+## Inputs
+
+- reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
+- reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md
+- scripts/claim_reaper.py
+- scripts/task_claim_dispatcher.py
+- scripts/claim_lease.py
+
+## Target Files
+
+- scripts/claim_lease.py
+- src/agent_runtime/templates/project/scripts/claim_lease.py
+- scripts/claim_reaper.py
+- src/agent_runtime/templates/project/scripts/claim_reaper.py
+- scripts/task_claim_dispatcher.py
+- src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
+- tests/test_claim_lease.py
+- tests/test_claim_reaper.py
+- tests/test_task_claim_dispatcher.py
+- tests/test_claim_store.py
+
+## Scope
+
+Local claim-store authority only. Do not introduce a network or distributed
+lease dependency, do not add a claim-release or acceptance path, and do not
+touch consumer projects.
+
+## Steps
+
+1. RED: a pre-mutation-field claim cannot be adopted by any registered command.
+2. RED: an expired orchestrator-mode claim is never a reap candidate.
+3. RED: no registered command terminalizes an unreachable expired claim.
+4. RED: a recovery attempt without owner identity must be refused.
+5. RED: a recovery attempt against a live claim must be refused.
+6. RED: a freshly created worktree has an unusable claim store and no registered activation command in this repository.
+7. Implement owner-bound bootstrap (adopt), rotate, and terminalize.
+8. Replace the reaper's mode short-circuit with status/liveness classification.
+9. Expose claim-store checkout activation without requiring a consumer `agent_runtime.yml`.
+10. Mirror the surface into the runtime template and regenerate the host lock.
+11. Record the Compound for the 4x-recurring defect family.
+
+## Acceptance Criteria
+
+- A pre-mutation-field claim is adoptable by an owner-bound command; the same command refuses an unidentified caller.
+- An expired claim is terminalizable regardless of mode, and a live claim is never terminalizable.
+- `claim_reaper` classifies orchestrator claims by status and liveness rather than skipping on mode.
+- Every mutation records owner identity, before/after digest, and reason.
+- No new command grants release, acceptance, or external-release authority.
+
+## Verification
+
+- `python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py tests/test_claim_guard.py -q`
+
+## Handoff
+
+Attach the RED commits, the owner-identity refusal proof, the live-claim
+refusal proof, before/after digests, the template mirror diff, the Compound
+record, and an independent W4b.
+
+## Stop Boundary
+
+Stop before introducing a network lease dependency, auto-committing host state,
+recovering a claim without owner identity, mutating unregistered consumers,
+dispatching CI, or performing version, tag, push, publish, deploy,
+claim-release, or external-release actions.

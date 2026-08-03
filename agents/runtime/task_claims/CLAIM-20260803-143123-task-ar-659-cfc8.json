@@ -1,0 +1,106 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260803-143123-task-ar-659-cfc8",
+  "task_id": "TASK-AR-659",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "le-20260803-143123-kst-cfc8",
+  "display_name": "lead_engineer@worker-01",
+  "callsite_id": "terminal:wt-task-ar-659:tab-01",
+  "pane_id": "terminal:wt-task-ar-659:tab-01",
+  "mode": "worker",
+  "status": "claimed",
+  "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-659-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
+  "requested_model_tier": "worker_standard",
+  "selected_model_tier": "planner_high",
+  "model_tier": "planner_high",
+  "provider_tier": "opus",
+  "routing_status": "escalated",
+  "routing_reason": "escalated to planner_high by task/unit trigger",
+  "routing_policy_id": "task-unit-tier-policy",
+  "routing_policy_reason": "unit tier overrides task tier; registered high-risk triggers gate worker escalation",
+  "routing_high_tier_authorized": true,
+  "routing_escalation_reason": "trigger:data_integrity,repeated_failure",
+  "routing_registered_triggers": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "routing_signals": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "routing_unknown_triggers": [],
+  "task_token_budget": null,
+  "claim_token_budget": null,
+  "actual_model": null,
+  "actual_model_status": "unverified",
+  "wip_slot": 0,
+  "stop_condition": "",
+  "phase": "red-legacy-claim-unreachable",
+  "progress_pct": 0,
+  "step_index": 1,
+  "step_total": 11,
+  "status_text": "Registering RED for unreachable legacy/orchestrator claims",
+  "worktree_path": ".",
+  "branch": "codex/task-ar-659-legacy-claim-bootstrap",
+  "claimed_at": "2026-08-03T14:31:23+09:00",
+  "last_heartbeat": "2026-08-03T14:31:23+09:00",
+  "updated_at": "2026-08-03T14:31:23+09:00",
+  "expires_at": "2026-08-03T16:31:23+09:00",
+  "lease": {
+    "claimed_at": "2026-08-03T14:31:23+09:00",
+    "heartbeat_at": "2026-08-03T14:31:23+09:00",
+    "expires_at": "2026-08-03T16:31:23+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260803-143123-task-ar-659-cfc8.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [
+    "legacy-claim",
+    "claim-authority",
+    "recovery"
+  ],
+  "escalation_triggers": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "defect_signatures": [],
+  "knowledge_lookup": {
+    "status": "clear",
+    "match_count": 0
+  },
+  "knowledge_matches": [],
+  "target_files": [
+    "scripts/claim_lease.py",
+    "src/agent_runtime/templates/project/scripts/claim_lease.py",
+    "scripts/claim_reaper.py",
+    "src/agent_runtime/templates/project/scripts/claim_reaper.py",
+    "scripts/task_claim_dispatcher.py",
+    "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+    "tests/test_claim_lease.py",
+    "tests/test_claim_reaper.py",
+    "tests/test_task_claim_dispatcher.py",
+    "tests/test_claim_store.py"
+  ],
+  "mutation_revision": 0,
+  "scope_binding": {
+    "schema": "agent-runtime-claim-scope-binding/v1",
+    "digest": "2a7b65ec9a9e1ab2a0bc3155b7c16e20642236b1dcb73d1063da6b55f09520c1",
+    "components": {
+      "task": "cc2bb22b6b5ab0bb6f59c15c769d7796bfae1311c7bc73729ee2cbf8e70b5b06",
+      "unit": "e96561e88353e64b0384c11bc758248b1f301e0b9b49a82449dbbf28d774593b",
+      "target_files": "6f74f782bf02b98a8e77b1d1a7dd04d91a71694746d1a8482338ee77117a2595",
+      "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    "bound_at": "2026-08-03T14:31:23+09:00"
+  },
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  }
+}

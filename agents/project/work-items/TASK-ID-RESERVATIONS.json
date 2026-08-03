@@ -1823,8 +1823,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-659",
+      "expires_at": "2026-08-04T14:21:50+09:00",
+      "fulfilled_at": "2026-08-03T14:21:57+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-659.md",
+      "fulfilled_task_id": "TASK-AR-659",
+      "fulfilled_task_uid": "019fc612-529b-7ee9-9234-9f60a41b5163",
+      "initiative_id": "INIT-AR-V080-OPERABILITY-HARDENING",
+      "kind": "task",
+      "owner_id": "le-20260803-142500-kst-ar659bootstrap",
+      "reason": "Owner-bound legacy claim bootstrap/rotation; recovery follow-up to the TASK-AR-655 stale-claim deadlock",
+      "reservation_group_id": "RES-20260803-142150-4521fd55",
+      "reservation_id": "RES-20260803-142150-4521fd55-01",
+      "reserved_at": "2026-08-03T14:21:50+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-30T11:25:00+09:00"
+  "updated_at": "2026-08-03T14:21:57+09:00"
 }
