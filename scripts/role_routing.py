@@ -374,7 +374,11 @@ def _existing_overlay_claim(
         )
     unexpected_fields = set(payload) - (
         set(expected)
-        | {"schema", "claimed_at", "persistence"}
+        # scope_binding is tolerated rather than equality-checked because its
+        # bound_at is the creation instant, like claimed_at. Its integrity is
+        # enforced where it matters - every mutation revalidates it against the
+        # claim's own fields, so a widened footprint is refused.
+        | {"schema", "claimed_at", "persistence", "scope_binding"}
         | OVERLAY_MUTABLE_LIFECYCLE_FIELDS
     )
     if unexpected_fields:
@@ -691,6 +695,18 @@ def _write_overlay_claim_unlocked(
             "expires_at": expires_at,
         },
         "mutation_revision": 0,
+        # Overlays carry a scope binding from birth so the mutation path can
+        # validate one unconditionally. Exempting them on the `overlay` flag -
+        # a value the claim asserts about itself and which the digest does not
+        # cover - produced two separate scope-laundering P1s.
+        "scope_binding": claim_store.scope_binding(
+            task_id=task_id,
+            unit_id=None,
+            unit_spec=None,
+            target_files=[],
+            stop_condition=None,
+            bound_at=now,
+        ),
         "tags": list(tags or []),
         "overlay": True,  # additive orchestration overlay marker
         "allow_parallel_task_set": True,

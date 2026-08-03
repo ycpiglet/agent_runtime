@@ -102,7 +102,7 @@
       "scripts/agent_orchestrator.py": "sha256:5cf2859f8eec478e612ac4e5a01536a1f2403718f18a38503097ea25d60dab39",
       "scripts/agent_retro.py": "sha256:f363eeacfa49ba49fd55cd97ceacbcdeb2272ce3f77c43a142d9fd004e3267c6",
       "scripts/agent_runtime/__init__.py": "sha256:f7fee2559f803cdbb3ef03ffa7ebef2fd5558f87738e5c71103924f7699ab436",
-      "scripts/agent_runtime/claim_store.py": "sha256:eb31107c3a39beab678532576947e1ff23b039d08739b6bfe63198f688dc66cf",
+      "scripts/agent_runtime/claim_store.py": "sha256:f372bb76bbb16f330eeb51409ff516130faf93939e3ef37d4ee41f47d1823630",
       "scripts/agent_runtime/config.py": "sha256:ad6a7f5e7d5c356802897889976a5e3148cb9f67e72d11141069b79c51df758c",
       "scripts/agent_runtime/state_projection.py": "sha256:ad9a1072600e31b7c7612a19d3088c1586cba5a5626b5dcda6d71c23eedfbc9b",
       "scripts/agent_runtime_migration_inventory.py": "sha256:e6f6006c00ad7d858df9e43437641d54cfcc3febb219c785a2ee8f01d633d992",
@@ -128,7 +128,7 @@
       "scripts/check_skill_structure.py": "sha256:b7b2626a713a0689b0b94a3875c65dcf844f4d636710305b4d3ad4e325f09aea",
       "scripts/claim_guard.py": "sha256:b00fabfed89072fa1f447a90f2cc7a85b400723ece6a9dedf1347d021460dcc7",
       "scripts/claim_lease.py": "sha256:90b61722e758da1a772919a7fea7450a52ea7f2c7aa4bb48c95b431ed76fd307",
-      "scripts/claim_reaper.py": "sha256:242b1aefa9dcdbbb7066f781be168bf3add86a338cdd57f7c063154b7e20008c",
+      "scripts/claim_reaper.py": "sha256:9b1a2b200020d5ae263d3a1cb3504c4b843777a0001bfb0f6844f00923289bd0",
       "scripts/claim_reaper_hook.py": "sha256:49d538e75b138553155fa5472ff8dea02501799b3a16d8a228fc09fe99a55393",
       "scripts/claude_cli_probe.py": "sha256:857eebf768b715805eff01545b5c2bbb4fa97decda597b9c2ec0ab1bd3fb891e",
       "scripts/closure_gate.py": "sha256:c765949a0ad332cc3d385b16715ba6bbc0ef9db51e62684b300cd2c656351584",
@@ -201,7 +201,7 @@
       "scripts/requirements_lint_gate.py": "sha256:3f81b027af83d2ec7d3a686e37996e8e4a824dd1da985e0a891e2e6951ef0525",
       "scripts/response_contract_gate.py": "sha256:2cdba6444f8797906fa9b0299b2d6e970ebeb8bc4d7a5918103af4cbb0faae0d",
       "scripts/role_mentions.py": "sha256:d5f0488c514f7e6c43c0291f9bb46c4ebf7971b59ec8f01e197ccfda4c81738d",
-      "scripts/role_routing.py": "sha256:a6f9f582071e9b50f41dcd896e8dd2ca8671d7d8bc8f1797afc7ac0ade707728",
+      "scripts/role_routing.py": "sha256:d8d3cfc49930de7dce6aee6d160382179e3f470faaeed6a1b3f9837ca1ab7cc9",
       "scripts/runtime_asset_usage.py": "sha256:e1d1d9c690943dd1f5c867af66e9547fb20bc2f056b463440a551b26b75d7966",
       "scripts/save_report.py": "sha256:bdb4891c6f105cd27f959cff107f26e2809d3167e057c927c8c58f7226205261",
       "scripts/schedule.py": "sha256:8cb476e4ab4e4b04dd38104f7311e84fbee503e5c12526ca0d604cc26c9ce767",
@@ -228,7 +228,7 @@
       "scripts/subagent_dispatch.py": "sha256:3dc1bbc89b75027a5f29e814d3a5ca8493ebf713a787d3a30c3d9c6309c47b17",
       "scripts/summarize_warning_summary_gate_report.py": "sha256:1c77c2d444b3d732dd2aff431317f4468dfed1fa3fad8b18fbefd1294b2b5c53",
       "scripts/task_api.py": "sha256:423a76253d47d195901dd836bd6edc08c4011338263ee0abc4b382b1f53f0540",
-      "scripts/task_claim_dispatcher.py": "sha256:20f422b0b3c20e691f71be52b326858c89dc2bd9b1e2ca841a4d1468a412e0b1",
+      "scripts/task_claim_dispatcher.py": "sha256:f6091e869e8b11b51f582017f4e2897d9403ed88a876164c9a5cd028f40a7d83",
       "scripts/task_events.py": "sha256:3b1d74eb84591a651e1afaca07613f6ac261438335fb8d9760211afac2c37d6a",
       "scripts/task_id_contract.py": "sha256:6b78813ba4da71f33b19e558ad9dac5524748cbdbda5c1b20eba4b9337a87dc8",
       "scripts/task_identity.py": "sha256:b91a07348e7a513a348509a68d08e0a56a12efa599945576dfaea5aebe6892bb",
@@ -519,7 +519,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:7c5ac7b1f49d2ca44ead58428fa3e81cafccdfa2f28e9f8abcfb367bf77705a8",
+    "template_digest": "sha256:b09da52eb8660f8f4326232884ae30d00fc5437702fa166ee8a1024af91598cd",
     "template_files": 254
   },
   "profiles": [

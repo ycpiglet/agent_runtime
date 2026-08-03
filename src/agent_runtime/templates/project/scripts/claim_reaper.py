@@ -373,23 +373,28 @@ def _authorized_sweep(
             # equally unreachable by any automated path.
             entry_reason = "no-lease-info"
         entry = _entry(path, claim, entry_reason)
-        if _deadline_mismatch(claim, now, grace_seconds):
-            # Checked before the decision dispatch, not inside a branch. A
-            # worker claim whose two deadline copies disagree resolves to
-            # `live` via max(), so anything wired under `skip` can never see
-            # the case this exists for.
+        # Exactly one owner-facing bucket per claim, decided here rather than
+        # in the branches below. Folding a torn lease into needs_owner_recovery
+        # produced a double count for orchestrator claims, advice to terminalize
+        # a claim the same sweep had just reaped, and a remediation that
+        # refuses - three symptoms of one cause: two conditions sharing a bucket
+        # whose renderer states a single diagnosis and a single remedy.
+        #
+        # Precedence: "dead and never auto-reaped" outranks "torn lease",
+        # because terminalize is the actionable instruction. A claim being
+        # reaped automatically needs no owner instruction at all.
+        needs_recovery = decision == "skip" and entry_reason in OWNER_RECOVERY_REASONS
+        if needs_recovery:
             report["needs_owner_recovery"].append(entry)
+        elif decision != "dead" and _deadline_mismatch(claim, now, grace_seconds):
+            # Checked outside the skip branch on purpose: the reported shape is
+            # a worker claim, which resolves to `live` via max() and never
+            # reaches skip at all.
+            report["torn_lease"].append(entry)
         if decision == "live":
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if entry_reason in OWNER_RECOVERY_REASONS:
-                # Never reaped, but never silent either: an owner-bound
-                # `task_claim_dispatcher.py terminalize` is the registered exit.
-                # `no-lease-info` belongs here too - a claim with no deadline
-                # can never expire, so it is a permanent deadlock, not a
-                # transient unknown.
-                report["needs_owner_recovery"].append(entry)
             if apply and entry_reason in (
                 "orchestrator-claim",
                 ORCHESTRATOR_EXPIRED_REASON,
@@ -460,6 +465,7 @@ def sweep(
         "live": [],
         "skipped": [],
         "needs_owner_recovery": [],
+        "torn_lease": [],
         "claim_store": {
             "state": "integrity-invalid",
             "finding": "claim-store inspection was not completed",
@@ -546,7 +552,8 @@ def _render_human(report: dict[str, Any]) -> str:
     outstanding = report.get("needs_owner_recovery") or []
     lines.append(
         f"{verb}={len(reaped)} live={len(report['live'])} "
-        f"skipped={len(report['skipped'])} needs_owner_recovery={len(outstanding)}"
+        f"skipped={len(report['skipped'])} needs_owner_recovery={len(outstanding)} "
+        f"torn_lease={len(report.get('torn_lease') or [])}"
     )
     for entry in reaped:
         lines.append(f"  {verb}: {entry['claim_id']} task={entry['task_id']} ({entry['reason']})")
@@ -558,6 +565,13 @@ def _render_human(report: dict[str, Any]) -> str:
             "lease is dead and this claim is never auto-reaped -- run: "
             "task_claim_dispatcher.py terminalize --claim-id "
             f"{entry['claim_id']} --owner-id <owner> --reason <why>"
+        )
+    for entry in report.get("torn_lease") or []:
+        lines.append(
+            f"  torn-lease: {entry['claim_id']} task={entry['task_id']}; "
+            "expires_at and lease.expires_at disagree, so liveness resolves to "
+            "the later one and the claim blocks gates until it passes -- "
+            "reconcile the two deadlines in the claim record"
         )
     if not report["apply"] and reaped:
         lines.append("re-run with --apply to recover the claims above")

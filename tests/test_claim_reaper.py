@@ -1012,8 +1012,11 @@ def test_worker_claim_with_disagreeing_deadlines_surfaces_for_owner_recovery(tmp
 
     assert report["reaped"] == []
     assert report["would_reap"] == []
-    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    surfaced = {entry["claim_id"] for entry in report["torn_lease"]}
     assert "CLAIM-worker-mismatch" in surfaced
+    # A torn lease is not the "dead and never reaped" condition, so it must not
+    # be filed under the bucket whose remedy is terminalize - which refuses it.
+    assert report["needs_owner_recovery"] == []
 
 
 def test_agreeing_deadlines_are_not_flagged_for_owner_recovery(tmp_path):
@@ -1021,5 +1024,44 @@ def test_agreeing_deadlines_are_not_flagged_for_owner_recovery(tmp_path):
 
     report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
 
+    assert report["torn_lease"] == []
     surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
     assert "CLAIM-worker-agree" not in surfaced
+
+
+def test_torn_lease_on_an_orchestrator_claim_is_not_double_counted(tmp_path):
+    """An orchestrator claim can satisfy both conditions; it must be filed once."""
+    path = _claim(
+        tmp_path,
+        "CLAIM-orch-torn",
+        mode="orchestrator",
+        expires_at="2026-06-14T11:00:00+09:00",
+    )
+    payload = _load(path)
+    payload["lease"]["expires_at"] = "2026-06-14T09:00:00+09:00"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    ids = [e["claim_id"] for e in report["needs_owner_recovery"]] + [
+        e["claim_id"] for e in report["torn_lease"]
+    ]
+    assert ids.count("CLAIM-orch-torn") == 1, ids
+
+
+def test_a_reaped_claim_is_not_also_reported_as_needing_owner_action(tmp_path):
+    """Advising terminalize on a claim the same sweep just reaped is false advice."""
+    path = _claim(tmp_path, "CLAIM-worker-torn-dead", expires_at="2026-06-14T10:00:00+09:00")
+    payload = _load(path)
+    payload["lease"]["expires_at"] = "2026-06-14T09:00:00+09:00"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=True, grace_seconds=600)
+
+    assert [e["claim_id"] for e in report["reaped"]] == ["CLAIM-worker-torn-dead"]
+    assert report["torn_lease"] == []
+    assert report["needs_owner_recovery"] == []
+    assert _load(path)["status"] == "expired"
+    rendered = claim_reaper._render_human(report)
+    assert "needs-owner-recovery: CLAIM-worker-torn-dead" not in rendered
+    assert "torn-lease: CLAIM-worker-torn-dead" not in rendered

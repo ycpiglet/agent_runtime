@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import math
 import os
@@ -15,7 +16,65 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterator, Mapping
+from typing import Any, Iterator, Mapping
+
+
+SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def scope_binding(
+    *,
+    task_id: object,
+    unit_id: object,
+    unit_spec: object,
+    target_files: object,
+    stop_condition: object,
+    bound_at: str,
+) -> dict[str, Any]:
+    """Compute a claim's scope binding.
+
+    Lives here, not in the dispatcher, because role_routing also has to mint
+    one and cannot import the dispatcher (the dependency runs the other way).
+    Every claim carries a binding from birth so the mutation path can validate
+    it unconditionally, with no exemption computed from claim content - two
+    P1s came from exempting overlays on a self-asserted flag.
+
+    The component layout is byte-compatible with the original dispatcher
+    implementation; existing persisted digests must keep validating.
+    """
+
+    targets = (
+        sorted({str(item) for item in target_files})
+        if isinstance(target_files, (list, tuple, set))
+        else []
+    )
+    components = {
+        "task": _canonical_sha256({"task_id": str(task_id or "")}),
+        "unit": _canonical_sha256(
+            {
+                "unit_id": str(unit_id or ""),
+                "unit_spec": str(unit_spec or ""),
+            }
+        ),
+        "target_files": _canonical_sha256(targets),
+        "stop_condition": _canonical_sha256(str(stop_condition or "")),
+    }
+    return {
+        "schema": SCOPE_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
 
 
 MARKER_SCHEMA = "agent-runtime-task-claim-store/v1"

@@ -156,28 +156,17 @@ def _scope_binding(
     stop_condition: object,
     bound_at: str,
 ) -> dict[str, Any]:
-    targets = (
-        sorted({str(item) for item in target_files})
-        if isinstance(target_files, (list, tuple, set))
-        else []
+    # Delegates to claim_store so role_routing can mint the same binding for
+    # overlay claims; role_routing cannot import this module (the dependency
+    # runs the other way).
+    return claim_store.scope_binding(
+        task_id=task_id,
+        unit_id=unit_id,
+        unit_spec=unit_spec,
+        target_files=target_files,
+        stop_condition=stop_condition,
+        bound_at=bound_at,
     )
-    components = {
-        "task": _canonical_sha256({"task_id": str(task_id or "")}),
-        "unit": _canonical_sha256(
-            {
-                "unit_id": str(unit_id or ""),
-                "unit_spec": str(unit_spec or ""),
-            }
-        ),
-        "target_files": _canonical_sha256(targets),
-        "stop_condition": _canonical_sha256(str(stop_condition or "")),
-    }
-    return {
-        "schema": SCOPE_BINDING_SCHEMA,
-        "digest": _canonical_sha256(components),
-        "components": components,
-        "bound_at": bound_at,
-    }
 
 
 def _binding_for_claim(
@@ -2614,17 +2603,14 @@ def _validate_mutation_authority(
     # writes outside it - so an out-of-band edit followed by a heartbeat would
     # launder a scope broadening past the replan bar and keep re-authorizing it.
     #
-    # The exemption keys on the *presence of a binding*, never on a flag the
-    # claim asserts about itself. `overlay` lives in the same file whose
-    # integrity is being checked and is not covered by the scope digest, so
-    # keying the skip on it let one extra key launder a widened footprint.
-    # Genuine overlays carry no scope_binding at all, which is not forgeable
-    # the same way - and deleting the binding is refused outright, so dropping
-    # it is not an easier bypass than forging it.
-    if isinstance(claim.get("scope_binding"), dict):
-        _persisted_scope_binding(claim)
-    elif not _is_explicit_overlay(claim):
-        raise ValueError("claim scope binding is missing")
+    # Unconditional. There is no exemption and therefore no predicate to
+    # attack. Two P1s came from computing the skip from claim content -
+    # `overlay`, then `overlay` plus a deleted binding - because every such
+    # field lives in the same file whose integrity is in question and none is
+    # covered by the digest. Overlays are bound at birth in role_routing, and
+    # a legacy claim with no binding is repaired by `adopt`, which is what
+    # that command exists for.
+    _persisted_scope_binding(claim)
     return heartbeat, expires, revision
 
 
