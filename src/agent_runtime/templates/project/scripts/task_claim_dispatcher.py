@@ -3417,7 +3417,15 @@ def _digest(path: Path) -> str:
 def _recovery_target(
     root: Path,
     claim_id: str,
-) -> tuple[Path, dict[str, Any]]:
+) -> tuple[Path, dict[str, Any], Any]:
+    """Resolve a recovery target and the store authority it was read under.
+
+    The caller must re-verify that authority immediately before writing. The
+    store lock proves exclusion; it does not prove the store is still the
+    same store, which is what verify_snapshot asserts.
+    """
+
+    inspection = claim_store.inspect_store(root)
     found = _find_claim_in_canonical_snapshot(root, claim_id)
     if found is None:
         raise ValueError(f"claim not found: {claim_id}")
@@ -3427,7 +3435,14 @@ def _recovery_target(
             f"claim is already terminal ({claim.get('status')!r}); "
             "recovery applies only to a claim still presenting as active"
         )
-    return path, claim
+    return path, claim, inspection
+
+
+def _assert_recovery_authority(root: Path, inspection: Any, operation: str) -> None:
+    if not claim_store.verify_snapshot(root, inspection.snapshot):
+        raise ValueError(
+            f"claim-store authority changed before {operation} persistence"
+        )
 
 
 def _stamp_recovery(
@@ -3461,7 +3476,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         now_text = now.isoformat(timespec="seconds")
         root = args.root.resolve()
         with claim_store.store_lock(root):
-            path, claim = _recovery_target(root, args.claim_id)
+            path, claim, inspection = _recovery_target(root, args.claim_id)
             has_revision = type(claim.get("mutation_revision")) is int
             has_binding = isinstance(claim.get("scope_binding"), dict)
             if has_revision and has_binding:
@@ -3482,6 +3497,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 operation="adopt",
             )
             claim["adopted_at"] = now_text
+            _assert_recovery_authority(root, inspection, "adopt")
             atomic_io.write_json_atomic(path, claim)
             after = _digest(path)
     except (
@@ -3524,7 +3540,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
         now_text = now.isoformat(timespec="seconds")
         root = args.root.resolve()
         with claim_store.store_lock(root):
-            path, claim = _recovery_target(root, args.claim_id)
+            path, claim, inspection = _recovery_target(root, args.claim_id)
             liveness = claim_store.classify_claim_liveness(claim, now=now)
             if liveness.state != "expired":
                 raise ValueError(
@@ -3545,6 +3561,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 now_text=now_text,
                 operation="terminalize",
             )
+            _assert_recovery_authority(root, inspection, "terminalize")
             atomic_io.write_json_atomic(path, claim)
             after = _digest(path)
     except (

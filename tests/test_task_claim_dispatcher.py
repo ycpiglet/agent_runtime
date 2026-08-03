@@ -5830,3 +5830,61 @@ def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert outer.is_file()
+
+
+def test_red_recovery_refuses_when_claim_store_authority_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The store lock proves exclusion, not that the store is the same store.
+
+    Every other mutating path pairs store_lock with verify_snapshot (create
+    2083/2203, projection 2894, release 3128/3223) and claim_reaper does the
+    same. Recovery commands run when the system is already degraded, so they
+    are the last place that may skip the authority check.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-authority")
+    result = _create_linked_claim(
+        linked, suffix="659-authority", extra_args=("--lease-minutes", "1")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    dispatcher = _load_dispatcher_module()
+    real_verify = dispatcher.claim_store.verify_snapshot
+    calls = {"n": 0}
+
+    def _verify_then_fail(*probe_args, **probe_kwargs):
+        # Let the read path verify normally, then fail the pre-write check.
+        # This isolates the read->write window rather than the read itself.
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return real_verify(*probe_args, **probe_kwargs)
+        return False
+
+    monkeypatch.setattr(dispatcher.claim_store, "verify_snapshot", _verify_then_fail)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "terminalize",
+            "--claim-id",
+            payload["claim"]["claim_id"],
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "authority changed mid-flight",
+            "--now",
+            "2026-07-29T18:00:00+09:00",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc == 1
+    assert "authority changed" in (captured.out + captured.err)
+    assert "Traceback" not in (captured.out + captured.err)
+    assert path.read_bytes() == before
