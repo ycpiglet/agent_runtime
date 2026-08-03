@@ -2614,11 +2614,17 @@ def _validate_mutation_authority(
     # writes outside it - so an out-of-band edit followed by a heartbeat would
     # launder a scope broadening past the replan bar and keep re-authorizing it.
     #
-    # Overlay claims are exempt because they carry no scope_binding by design:
-    # scope renewal does not apply to them at all (guarded above), so there is
-    # no binding to hold them to.
-    if not _is_explicit_overlay(claim):
+    # The exemption keys on the *presence of a binding*, never on a flag the
+    # claim asserts about itself. `overlay` lives in the same file whose
+    # integrity is being checked and is not covered by the scope digest, so
+    # keying the skip on it let one extra key launder a widened footprint.
+    # Genuine overlays carry no scope_binding at all, which is not forgeable
+    # the same way - and deleting the binding is refused outright, so dropping
+    # it is not an easier bypass than forging it.
+    if isinstance(claim.get("scope_binding"), dict):
         _persisted_scope_binding(claim)
+    elif not _is_explicit_overlay(claim):
+        raise ValueError("claim scope binding is missing")
     return heartbeat, expires, revision
 
 

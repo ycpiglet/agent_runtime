@@ -1114,12 +1114,12 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "9b681c75174bf9dfa7de0ee419f924e90077aa2fbf79e1dfb9c3012e31d11089"
+          "value": "20f422b0b3c20e691f71be52b326858c89dc2bd9b1e2ca841a4d1468a412e0b1"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "9b681c75174bf9dfa7de0ee419f924e90077aa2fbf79e1dfb9c3012e31d11089"
+          "value": "20f422b0b3c20e691f71be52b326858c89dc2bd9b1e2ca841a4d1468a412e0b1"
         },
         {
           "kind": "sha256",
@@ -1149,12 +1149,12 @@
         {
           "kind": "sha256",
           "path": "scripts/claim_reaper.py",
-          "value": "ff376b2c36645cd997a86a848ff4d00c74b127dcd8464062a1444da753f6ee98"
+          "value": "242b1aefa9dcdbbb7066f781be168bf3add86a338cdd57f7c063154b7e20008c"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
-          "value": "ff376b2c36645cd997a86a848ff4d00c74b127dcd8464062a1444da753f6ee98"
+          "value": "242b1aefa9dcdbbb7066f781be168bf3add86a338cdd57f7c063154b7e20008c"
         },
         {
           "kind": "sha256",
@@ -1194,12 +1194,12 @@
         {
           "kind": "sha256",
           "path": "scripts/worktree_lifecycle_gate.py",
-          "value": "1a122859cd54e179891c8212b6f3753c177f73beaeeaccb4cd70ced48f25e511"
+          "value": "b55c5de84781dcda11bfc9c77bf87b828537b084432dd09f0be56abb27c12977"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
-          "value": "1a122859cd54e179891c8212b6f3753c177f73beaeeaccb4cd70ced48f25e511"
+          "value": "b55c5de84781dcda11bfc9c77bf87b828537b084432dd09f0be56abb27c12977"
         },
         {
           "kind": "sha256",
@@ -1234,7 +1234,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_task_claim_dispatcher.py",
-          "value": "4db12c7e862273020cbad9c140667fb821c6544b99afe22b65665ef83c9359c1"
+          "value": "8db8585904e54e4978712b3306eb671f9bad76c81b54d48bdd681e4c0a93218b"
         },
         {
           "kind": "sha256",
@@ -1244,7 +1244,7 @@
         {
           "kind": "sha256",
           "path": "tests/test_claim_reaper.py",
-          "value": "0c6688a3ca1a0b7efdaa3104c6d7ecdb85d2955bcc0918909788d9d5837915cc"
+          "value": "92ea04c0df5744839eca24dd0216ce5a9136dead67d737d8f6e59fcb2b6caf27"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "14a7a3ff4330efda4c4e4fbbe95ab2c2caaab9c06bd33f71ab22bbaa5ad80cdc"
+          "value": "8ce61065ced1046d5330858b6937cbe6725201f78d509f065304b14e3f52d922"
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md",
-      "recorded_at": "2026-08-03T17:05:10+09:00",
+      "recorded_at": "2026-08-03T17:19:13+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-03T17:05:10+09:00"
+  "updated_at": "2026-08-03T17:19:13+09:00"
 }

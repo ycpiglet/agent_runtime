@@ -989,3 +989,37 @@ def test_every_indeterminate_lease_shape_surfaces_for_owner_recovery(
     assert reasons[f"CLAIM-orch-{label}"] == "no-lease-info", label
     surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
     assert f"CLAIM-orch-{label}" in surfaced, label
+
+
+def test_worker_claim_with_disagreeing_deadlines_surfaces_for_owner_recovery(tmp_path):
+    """The reported shape is a plain WORKER claim, which never reaches `skip`.
+
+    classify_claim_liveness resolves the two copies with max(), so a future
+    `expires_at` with a past `lease.expires_at` reads `live`: never reaped,
+    never surfaced, and terminalize refuses it as live. Wiring the mismatch
+    check into the skip branch cannot see this case at all.
+    """
+    path = _claim(
+        tmp_path,
+        "CLAIM-worker-mismatch",
+        expires_at="2026-06-14T13:00:00+09:00",
+    )
+    payload = _load(path)
+    payload["lease"]["expires_at"] = "2026-06-14T10:00:00+09:00"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    assert report["reaped"] == []
+    assert report["would_reap"] == []
+    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    assert "CLAIM-worker-mismatch" in surfaced
+
+
+def test_agreeing_deadlines_are_not_flagged_for_owner_recovery(tmp_path):
+    _claim(tmp_path, "CLAIM-worker-agree", expires_at="2026-06-14T13:00:00+09:00")
+
+    report = claim_reaper.sweep(tmp_path, now=NOW, apply=False, grace_seconds=600)
+
+    surfaced = {entry["claim_id"] for entry in report["needs_owner_recovery"]}
+    assert "CLAIM-worker-agree" not in surfaced

@@ -6663,3 +6663,68 @@ def test_mutation_now_cannot_push_a_lease_past_the_wall_clock(
     assert datetime.fromisoformat(after["last_heartbeat"]) <= wall + timedelta(
         seconds=5
     ), f"{operation} recorded a future last_heartbeat: {after['last_heartbeat']}"
+
+
+def test_heartbeat_scope_check_cannot_be_skipped_by_self_declared_overlay(
+    tmp_path: Path,
+) -> None:
+    """The exemption must not key on a flag the claim asserts about itself.
+
+    `overlay` lives in the same file whose integrity is being checked and is
+    not covered by the scope digest, so keying the skip on it lets one extra
+    key launder a widened footprint. A genuine overlay is recognisable by
+    carrying no scope_binding at all, which is not forgeable in the same way.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-overlay-bypass")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655ovl", "ovlbyp")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = list(tampered["target_files"]) + ["src/agent_runtime/**"]
+    tampered["overlay"] = True
+    tampered["allow_parallel_task_set"] = True
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a self-declared overlay flag skipped the scope-binding check: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+def test_heartbeat_refuses_a_non_overlay_claim_with_no_scope_binding(
+    tmp_path: Path,
+) -> None:
+    """Deleting the binding must not be an easier bypass than forging it."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-binding-deleted")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655nobind", "nobind")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered.pop("scope_binding", None)
+    tampered["target_files"] = list(tampered["target_files"]) + ["src/agent_runtime/**"]
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a non-overlay claim heartbeat with its scope_binding deleted: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before

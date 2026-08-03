@@ -51,16 +51,12 @@ PRESERVE_MARKER = "PRESERVE"
 DEFAULT_RETENTION_DAYS = 7.0
 BASE_REF_CANDIDATES = ("origin/main", "origin/master", "main", "master")
 
-ACTIVE_CLAIM_STATUSES = {
-    "active",
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "running",
-    "waiting_review",
-    "working",
-}
+# Deliberately a SUPERSET of the canonical set, derived from it rather than
+# re-typed. "active" and "running" are not canonical claim statuses - they
+# classify as `indeterminate`, which every consumer treats as authority
+# retained - so counting them as active keeps this lifecycle gate fail-safe.
+# Deriving means a future addition to the canonical set lands here too.
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES | {"active", "running"}
 RELEASED_CLAIM_STATUSES = {"released", "completed", "done", "closed"}
 
 

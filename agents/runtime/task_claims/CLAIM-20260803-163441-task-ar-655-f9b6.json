@@ -41,21 +41,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-round2-repaired",
+  "phase": "w4b-round3-repaired",
   "progress_pct": 99,
   "step_index": 12,
   "step_total": 12,
-  "status_text": "Re-W4b P1x2 repaired; umask defect found and routed to its owner",
+  "status_text": "Re-W4b round-3: overlay bypass and unreachable mismatch branch repaired",
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-03T16:34:41+09:00",
-  "last_heartbeat": "2026-08-03T17:05:36.164265+09:00",
-  "updated_at": "2026-08-03T17:05:36.164265+09:00",
-  "expires_at": "2026-08-03T19:05:36.164265+09:00",
+  "last_heartbeat": "2026-08-03T17:19:36.029053+09:00",
+  "updated_at": "2026-08-03T17:19:36.029053+09:00",
+  "expires_at": "2026-08-03T19:19:36.029053+09:00",
   "lease": {
     "claimed_at": "2026-08-03T16:34:41+09:00",
-    "heartbeat_at": "2026-08-03T17:05:36.164265+09:00",
-    "expires_at": "2026-08-03T19:05:36.164265+09:00"
+    "heartbeat_at": "2026-08-03T17:19:36.029053+09:00",
+    "expires_at": "2026-08-03T19:19:36.029053+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.log.md",
@@ -291,7 +291,7 @@
     "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
     "reviews/INDEX.md"
   ],
-  "mutation_revision": 1,
+  "mutation_revision": 2,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",

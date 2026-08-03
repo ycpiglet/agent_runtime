@@ -373,13 +373,17 @@ def _authorized_sweep(
             # equally unreachable by any automated path.
             entry_reason = "no-lease-info"
         entry = _entry(path, claim, entry_reason)
+        if _deadline_mismatch(claim, now, grace_seconds):
+            # Checked before the decision dispatch, not inside a branch. A
+            # worker claim whose two deadline copies disagree resolves to
+            # `live` via max(), so anything wired under `skip` can never see
+            # the case this exists for.
+            report["needs_owner_recovery"].append(entry)
         if decision == "live":
             report["live"].append(entry)
         elif decision == "skip":
             report["skipped"].append(entry)
-            if entry_reason in OWNER_RECOVERY_REASONS or _deadline_mismatch(
-                claim, now, grace_seconds
-            ):
+            if entry_reason in OWNER_RECOVERY_REASONS:
                 # Never reaped, but never silent either: an owner-bound
                 # `task_claim_dispatcher.py terminalize` is the registered exit.
                 # `no-lease-info` belongs here too - a claim with no deadline
