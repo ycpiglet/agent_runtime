@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-03T15:02:59+09:00
-record_count: 1327
+generated_at: 2026-08-03T15:05:22+09:00
+record_count: 1328
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1327` review and evidence records under `reviews/`.
+- Summary: indexed `1328` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1327` files |
+| Reviews covered | pass | `1328` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1151,6 +1151,7 @@ record_count: 1327
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | passed | pass | TASK-AR-655 post-repair final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | passed | pass | TASK-AR-655 projection-binding repair final W4a |
 | `reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | passed | pass | TASK-AR-655 type-strict pointer authority final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-659-001-recovery-commands.md` | `W4A-2026-08-03-unit-task-ar-659-001-recovery-commands` | md | revise | block | TASK-AR-659 owner-bound recovery commands W4a self-review |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
