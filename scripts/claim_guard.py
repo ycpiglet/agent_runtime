@@ -142,10 +142,31 @@ def _prepared_error(raw, *, env, root, expected_ref, old_oid, new_oid, expected_
         return "sealed HEAD or Git-owned lock unavailable"
 
     lines = raw.decode("utf-8", "replace").splitlines()
-    expected_lines = {
+    # Git changed what it reports for the symbolic HEAD in a
+    # reference-transaction payload. Measured directly:
+    #   git 2.34.1 -> "<old> <new> HEAD"
+    #   git 2.47.3 -> "<zeros> <new> HEAD"
+    # while the branch ref keeps the real old oid in both. Pinning the 2.34
+    # shape made every claim-commit transaction fail on any modern git, which
+    # is why this passed locally and failed in CI.
+    #
+    # Only HEAD's old field is relaxed. The branch-ref line still requires the
+    # exact old oid, and that line is what carries the compare-and-swap
+    # guarantee, so the sealing property is unchanged.
+    zero_oid = "0" * len(old_oid)
+    expected_ref_line = f"{old_oid} {new_oid} {expected_ref}"
+    accepted_head_lines = {
         f"{old_oid} {new_oid} HEAD",
-        f"{old_oid} {new_oid} {expected_ref}",
+        f"{zero_oid} {new_oid} HEAD",
     }
+    head_lines = [line for line in lines if line.endswith(" HEAD")]
+    ref_lines = [line for line in lines if line == expected_ref_line]
+    payload_ok = (
+        len(lines) == 2
+        and len(head_lines) == 1
+        and len(ref_lines) == 1
+        and head_lines[0] in accepted_head_lines
+    )
     if (
         symbolic.returncode != 0
         or symbolic.stdout.decode("utf-8", "replace").strip() != expected_ref
@@ -159,8 +180,7 @@ def _prepared_error(raw, *, env, root, expected_ref, old_oid, new_oid, expected_
         or head_stat.st_nlink != 1
         or (head_stat.st_dev, head_stat.st_ino) != expected_token
         or head_content != f"ref: {expected_ref}\n".encode()
-        or len(lines) != 2
-        or set(lines) != expected_lines
+        or not payload_ok
     ):
         return "sealed HEAD/ref mismatch"
     return ""
