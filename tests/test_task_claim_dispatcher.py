@@ -1714,8 +1714,16 @@ def _write_routing_work(
         f"unit_id: {unit_id}",
         f"task_id: {task_id}",
         f"model_tier: {worker_tier}",
+        # Deliberately NON-degenerate. This helper generates the spec behind
+        # nearly every claim test, and while it emitted one target file and no
+        # stop_condition, every claim-to-spec comparison was evaluated where
+        # both sides were trivially equal. That is why a whole-digest heartbeat
+        # anchor which would have refused every production heartbeat passed 219
+        # tests, and why renew and adopt shipped the same break undetected.
         "target_files:",
         "  - scripts/routing_target.py",
+        "  - scripts/routing_second.py",
+        "stop_condition: Stop before anything irreversible",
         "escalation_triggers:",
     ]
     lines.extend(f"  - {trigger}" for trigger in (triggers or []))
@@ -3196,9 +3204,17 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
     assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
 
 
-def test_explicit_target_files_are_unioned_with_registered_unit_footprint(
+def test_explicit_target_files_outside_the_unit_spec_are_refused(
     tmp_path: Path,
 ) -> None:
+    """The spec is the authority when there is one.
+
+    Unioning an out-of-spec file made the claim's footprint a strict superset
+    of the spec's from birth, so every claim-to-spec comparison downstream
+    started from a divergence - the single root of the heartbeat, renew, and
+    adopt false positives. Explicit entries that ARE in the spec still work and
+    still order first; see the companion test below.
+    """
     (tmp_path / "STATUS.md").write_text(
         "## Handoff Checklist\n- continue here\n", encoding="utf-8"
     )
@@ -3226,9 +3242,39 @@ def test_explicit_target_files_are_unioned_with_registered_unit_footprint(
         "--json",
     )
 
+    assert result.returncode != 0
+    assert "outside the unit spec" in (result.stdout + result.stderr)
+
+
+def test_explicit_target_files_inside_the_unit_spec_are_ordered_first(
+    tmp_path: Path,
+) -> None:
+    """The explicit-first ordering contract survives the narrowing."""
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-504b"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path, "create",
+        "--task-id", task_id,
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--agent-role", "lead-engineer",
+        "--target-file", "scripts/routing_second.py",
+        "--now", "2026-07-29T07:06:00+09:00",
+        "--suffix", "orderfirst",
+        "--json",
+    )
+
     assert result.returncode == 0, result.stderr or result.stdout
     claim = json.loads(result.stdout)["claim"]
-    assert claim["target_files"] == ["README.md", "scripts/routing_target.py"]
+    assert claim["target_files"] == [
+        "scripts/routing_second.py",
+        "scripts/routing_target.py",
+    ]
 
 
 def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(
@@ -6069,7 +6115,7 @@ def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
     _primary, linked = _init_git_worktree(tmp_path, "ar659-scope-anchor")
     unit_rel = _write_routing_work(linked, task_id)
     # The unit spec declares exactly one target file; that is the honest scope.
-    spec_files = ["scripts/routing_target.py"]
+    spec_files = ["scripts/routing_target.py", "scripts/routing_second.py"]
 
     result = _run_dispatcher(
         linked,
@@ -6858,5 +6904,109 @@ def test_heartbeat_still_works_for_a_claim_whose_spec_declares_a_stop_condition(
 
     assert result.returncode == 0, (
         "the spec anchor rejected an ordinary untampered claim: "
+        + (result.stderr or result.stdout)
+    )
+
+
+def test_heartbeat_refuses_a_claim_repointed_at_an_alternate_unit_spec(
+    tmp_path: Path,
+) -> None:
+    """Door 5: the anchor must not read its own reference out of the claim.
+
+    _current_scope_values re-reads claim["unit_spec"] and only checks that the
+    spec's task_id/unit_id match. A second spec file carrying the same ids and
+    a wider footprint is therefore accepted as the authority - the overlay-flag
+    mistake again, one level up.
+    """
+    task_id = "TASK-AR-655altspec"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-altspec")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "altspec")
+
+    alt_rel = f"agents/lead_engineer/tasks/units/{task_id}/UNIT-{task_id}-001-alt.md"
+    alt_path = linked / alt_rel
+    alt_path.write_text(
+        (linked / unit_rel).read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py\n  - scripts/routing_second.py",
+            "  - src/agent_runtime/**",
+        ),
+        encoding="utf-8",
+    )
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["unit_spec"] = alt_rel
+    tampered["target_files"] = ["src/agent_runtime/**"]
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"],
+        unit_id=tampered["unit_id"],
+        unit_spec=alt_rel,
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a claim repointed at an alternate spec was accepted: " + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("operation", ["renew", "adopt"])
+def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted(
+    tmp_path: Path, operation: str
+) -> None:
+    """Every claim in the store predates `create` copying the spec's boundary.
+
+    Those claims carry stop_condition '' while the spec declares text, so a
+    naive comparison reports drift and refuses renew and adopt for all of them.
+    An unrecorded boundary is "not overridden", not "changed".
+    """
+    task_id = f"TASK-AR-655legacy{operation}"
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-legacy-{operation}")
+    path, claim = _spec_backed_claim(linked, task_id, f"lg{operation[:3]}", minutes="120")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["stop_condition"] = ""          # the pre-fix shape
+    if operation == "adopt":
+        payload.pop("mutation_revision", None)
+        payload.pop("scope_binding", None)
+    else:
+        payload["scope_binding"] = _load_dispatcher_module().claim_store.scope_binding(
+            task_id=payload["task_id"],
+            unit_id=payload["unit_id"],
+            unit_spec=payload["unit_spec"],
+            target_files=payload["target_files"],
+            stop_condition="",
+            bound_at=payload["scope_binding"]["bound_at"],
+        )
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if operation == "adopt":
+        args = ["adopt", "--claim-id", claim["claim_id"],
+                "--owner-id", _OWNER, "--reason", "legacy claim repair"]
+    else:
+        args = ["renew", "--claim-id", claim["claim_id"],
+                "--agent-instance-id", claim["agent_instance_id"],
+                "--callsite-id", claim["callsite_id"],
+                "--expected-revision", "0",
+                "--expected-scope-digest", payload["scope_binding"]["digest"],
+                "--lease-minutes", "60"]
+
+    result = _run_dispatcher(linked, *args, "--json")
+
+    assert result.returncode == 0, (
+        f"{operation} refused an ordinary pre-fix claim as drifted: "
         + (result.stderr or result.stdout)
     )

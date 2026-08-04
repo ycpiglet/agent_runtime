@@ -41,21 +41,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-round5",
+  "phase": "w4b-round5-root-cause-fixed",
   "progress_pct": 99,
   "step_index": 12,
   "step_total": 12,
-  "status_text": "Fifth independent W4b after the heartbeat-anchor false positive",
+  "status_text": "Root cause fixed at creation; fixture de-degenerated",
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-04T12:10:45+09:00",
-  "last_heartbeat": "2026-08-04T12:10:45+09:00",
-  "updated_at": "2026-08-04T12:10:45+09:00",
-  "expires_at": "2026-08-04T15:10:45+09:00",
+  "last_heartbeat": "2026-08-04T12:35:21.618981+09:00",
+  "updated_at": "2026-08-04T12:35:21.618981+09:00",
+  "expires_at": "2026-08-04T15:35:21.618981+09:00",
   "lease": {
     "claimed_at": "2026-08-04T12:10:45+09:00",
-    "heartbeat_at": "2026-08-04T12:10:45+09:00",
-    "expires_at": "2026-08-04T15:10:45+09:00"
+    "heartbeat_at": "2026-08-04T12:35:21.618981+09:00",
+    "expires_at": "2026-08-04T15:35:21.618981+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.log.md",
@@ -291,7 +291,7 @@
     "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
     "reviews/INDEX.md"
   ],
-  "mutation_revision": 0,
+  "mutation_revision": 2,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
@@ -306,5 +306,31 @@
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
+  },
+  "last_renewal": {
+    "renewed_at": "2026-08-04T12:31:56.789396+09:00",
+    "replan_ref": null,
+    "old_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
+      "components": {
+        "task": "b47821b7a2ef25ef475dcc726716ac48399c38073d792ec8b2b69378e4ca89f2",
+        "unit": "969aad353c09ed369723e8f579b25ef0a692ebc40897d2dc241fcc55aa5afd36",
+        "target_files": "f12799ff83e55bea90a935d31e0d72332f4d74fea8dd443985d3fb6a375d9d61",
+        "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "bound_at": "2026-08-04T12:10:45+09:00"
+    },
+    "new_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
+      "components": {
+        "task": "b47821b7a2ef25ef475dcc726716ac48399c38073d792ec8b2b69378e4ca89f2",
+        "unit": "969aad353c09ed369723e8f579b25ef0a692ebc40897d2dc241fcc55aa5afd36",
+        "target_files": "f12799ff83e55bea90a935d31e0d72332f4d74fea8dd443985d3fb6a375d9d61",
+        "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "bound_at": "2026-08-04T12:10:45+09:00"
+    }
   }
 }

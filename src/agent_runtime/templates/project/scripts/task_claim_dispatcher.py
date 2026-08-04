@@ -130,6 +130,7 @@ class _CreatePreparation(NamedTuple):
     task_set_id: str
     strict_claim_preflight: bool
     target_files: tuple[str, ...]
+    stop_condition: str
     escalation_triggers: tuple[str, ...]
     routing_decision: dict[str, Any]
     token_budgets: dict[str, int | None]
@@ -920,7 +921,42 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
     explicit = _normalize_target_files(tuple(args.target_file or ()))
     registered = _unit_spec_target_files(root, args.unit_spec)
+    if registered:
+        # The spec is the authority when there is one. Accepting an explicit
+        # file outside it made the claim's footprint a strict superset of the
+        # spec's from birth, so every claim-to-spec comparison downstream
+        # started from a divergence - which is the single root of the
+        # heartbeat, renew, and adopt false positives. Ordering still puts
+        # explicit entries first; only out-of-spec entries are refused.
+        stray = [item for item in explicit if item not in set(registered)]
+        if stray:
+            raise ValueError(
+                "target files outside the unit spec: "
+                + ", ".join(sorted(stray))
+                + "; amend the unit spec instead of widening the claim"
+            )
     return list(dict.fromkeys((*explicit, *registered)))
+
+
+def _resolve_stop_condition(root: Path, args: argparse.Namespace) -> str:
+    """Take the stop boundary from the unit spec when there is one.
+
+    `create` used to store only ``--stop-condition`` (default ""), while every
+    mutation-time comparison read the spec's text, so a claim diverged from its
+    own spec at the instant of creation. renew and adopt have been refusing
+    real claims for that reason since the binding was introduced.
+    """
+
+    registered = _unit_spec_stop_condition(root, args.unit_spec)
+    explicit = str(getattr(args, "stop_condition", "") or "")
+    if not registered:
+        return explicit
+    if explicit and explicit != registered:
+        raise ValueError(
+            "explicit --stop-condition conflicts with the unit spec; "
+            "amend the unit spec instead of overriding it on the claim"
+        )
+    return registered
 
 
 def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
@@ -1074,6 +1110,7 @@ def _build_claim(
     now: datetime,
     expires_at: datetime,
     target_files: list[str],
+    stop_condition: str,
     escalation_triggers: list[str],
     routing_decision: dict[str, Any],
     token_budgets: dict[str, int | None],
@@ -1141,7 +1178,7 @@ def _build_claim(
         "actual_model": None,
         "actual_model_status": "unverified",
         "wip_slot": args.wip_slot,
-        "stop_condition": args.stop_condition,
+        "stop_condition": stop_condition,
         "phase": args.phase,
         "progress_pct": args.progress_pct,
         "step_index": args.step_index,
@@ -2031,6 +2068,7 @@ def _prepare_create(
         return 1
     escalation_triggers = _resolve_escalation_triggers(root, args)
     target_files = _resolve_target_files(root, args)
+    stop_condition = _resolve_stop_condition(root, args)
     try:
         token_budgets = _resolve_token_budgets(root, args)
     except ValueError as exc:
@@ -2040,6 +2078,7 @@ def _prepare_create(
         task_set_id=task_set_id,
         strict_claim_preflight=strict_claim_preflight,
         target_files=tuple(target_files),
+        stop_condition=stop_condition,
         escalation_triggers=tuple(escalation_triggers),
         routing_decision=_resolve_claim_routing(
             root, args, escalation_triggers
@@ -2144,6 +2183,7 @@ def _cmd_create_locked(
         now=now,
         expires_at=expires_at,
         target_files=list(preparation.target_files),
+        stop_condition=preparation.stop_condition,
         escalation_triggers=list(preparation.escalation_triggers),
         routing_decision=preparation.routing_decision,
         token_budgets=preparation.token_budgets,
@@ -2623,6 +2663,20 @@ def _validate_mutation_authority(
     # a difference in what the two commands are FOR, not a predicate read out
     # of the claim being validated.
     if operation == "heartbeat":
+        # The spec pointer is itself claim content, so trusting it lets a
+        # second file with matching ids stand in as the authority - the same
+        # mistake as the overlay flag, one level up. Pin it to the canonical
+        # location instead of believing the claim's own pointer.
+        canonical = (
+            f"agents/lead_engineer/tasks/units/{claim.get('task_id')}/"
+            f"{claim.get('unit_id')}.md"
+        )
+        declared = str(claim.get("unit_spec") or "").strip()
+        if declared and declared != canonical:
+            raise ValueError(
+                f"claim unit_spec {declared} is not the canonical spec for "
+                f"{claim.get('unit_id')}; expected {canonical}"
+            )
         # Compare the target_files component only. `create` does not copy the
         # spec's stop_condition into the claim, so comparing whole digests
         # reports drift on every real claim from the moment it is created -
@@ -2655,6 +2709,24 @@ def _persisted_scope_binding(claim: dict[str, Any]) -> dict[str, Any]:
     if binding != expected:
         raise ValueError("claim scope binding is invalid")
     return json.loads(json.dumps(binding, ensure_ascii=False))
+
+
+def _comparable_stop_condition(claim: dict[str, Any], spec_stop: object) -> str:
+    """Treat an unrecorded stop boundary as inheriting the spec's, not as drift.
+
+    `create` did not copy the spec's stop_condition into the claim until this
+    task fixed it, so every claim already in the store carries "" while its
+    spec declares text. Comparing those directly reports drift on every one of
+    them and refuses renew and adopt across the board. An empty value means
+    "not overridden", not "changed".
+
+    Safe to tolerate: stop_condition is governance text with no mechanical
+    enforcement anywhere in the tree - unlike target_files, which bounds the
+    footprint gate - so an attacker gains nothing by clearing it.
+    """
+
+    recorded = str(claim.get("stop_condition") or "")
+    return recorded if not recorded else str(spec_stop or "")
 
 
 def _current_scope_values(
@@ -2885,6 +2957,7 @@ def _cmd_claim_mutation_locked(
                 "claim scope digest mismatch: expected persisted scope binding"
             )
         renewed_targets, renewed_stop = _current_scope_values(root, claim)
+        renewed_stop = _comparable_stop_condition(claim, renewed_stop)
         candidate_binding = _binding_for_claim(
             claim,
             bound_at=now_text,
@@ -3587,6 +3660,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 # stop_condition would let a caller delete scope_binding, edit
                 # those fields, and have adopt bless scope of their choosing.
                 target_files, stop_condition = _current_scope_values(root, claim)
+                stop_condition = _comparable_stop_condition(claim, stop_condition)
                 if not str(claim.get("unit_spec") or "").strip():
                     # No unit spec means no authority to anchor to:
                     # _current_scope_values echoes the claim's own fields back,
