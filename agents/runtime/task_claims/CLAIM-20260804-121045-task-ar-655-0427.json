@@ -41,21 +41,21 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-round9-whole-contract-shared",
+  "phase": "w4b-round10-canonical-on-renew",
   "progress_pct": 99,
   "step_index": 12,
   "step_total": 12,
-  "status_text": "Whole scope contract shared by create and heartbeat",
+  "status_text": "Canonical clause shared with renew; footprint clause deliberately not",
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-04T12:10:45+09:00",
-  "last_heartbeat": "2026-08-04T13:47:28.290152+09:00",
-  "updated_at": "2026-08-04T13:47:28.290152+09:00",
-  "expires_at": "2026-08-04T16:47:28.290152+09:00",
+  "last_heartbeat": "2026-08-04T13:59:21.596199+09:00",
+  "updated_at": "2026-08-04T13:59:21.596199+09:00",
+  "expires_at": "2026-08-04T16:59:21.596199+09:00",
   "lease": {
     "claimed_at": "2026-08-04T12:10:45+09:00",
-    "heartbeat_at": "2026-08-04T13:47:28.290152+09:00",
-    "expires_at": "2026-08-04T16:47:28.290152+09:00"
+    "heartbeat_at": "2026-08-04T13:59:21.596199+09:00",
+    "expires_at": "2026-08-04T16:59:21.596199+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.log.md",
@@ -291,7 +291,7 @@
     "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
     "reviews/INDEX.md"
   ],
-  "mutation_revision": 6,
+  "mutation_revision": 7,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",

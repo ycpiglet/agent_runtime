@@ -7209,3 +7209,112 @@ def test_the_stop_condition_tolerance_extinguishes_itself(tmp_path: Path) -> Non
         "--json",
     )
     assert again.returncode != 0, "a rewritten stop boundary was tolerated"
+
+
+def test_renew_refuses_a_claim_repointed_at_a_non_canonical_spec(tmp_path: Path) -> None:
+    """The canonical pin belongs on every path that trusts claim["unit_spec"].
+
+    Enforcing it only on heartbeat leaves the inverse of the born-unusable
+    state: a claim anchored to an unregistered spec file cannot beat but can be
+    renewed indefinitely. The footprint clause must NOT run here - renew owns
+    the drift path and reconciles it against an accepted replan.
+    """
+    task_id = "TASK-AR-655renewpin"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-renewpin")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "rnwpin", minutes="120")
+
+    alt_rel = (
+        f"agents/lead_engineer/tasks/units/{task_id}/nested/UNIT-{task_id}-001.md"
+    )
+    alt = linked / alt_rel
+    alt.parent.mkdir(parents=True, exist_ok=True)
+    alt.write_text((linked / unit_rel).read_text(encoding="utf-8"), encoding="utf-8")
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["unit_spec"] = alt_rel
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"], unit_id=tampered["unit_id"], unit_spec=alt_rel,
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--expected-scope-digest", tampered["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "renew accepted a claim anchored to an unregistered spec: " + result.stdout
+    )
+    assert "canonical" in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+
+
+def test_renew_still_reconciles_ordinary_scope_drift(tmp_path: Path) -> None:
+    """Guard the other direction: the footprint clause must not leak into renew.
+
+    Renew exists to reconcile drift against an accepted replan. Sharing the
+    whole contract here would break that, so this pins the permitted case.
+    """
+    task_id = "TASK-AR-655renewdrift"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-renewdrift")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "rnwdft", minutes="120")
+
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_second.py",
+            "  - scripts/routing_second.py\n  - scripts/routing_third.py",
+        ),
+        encoding="utf-8",
+    )
+    replan_rel = "reviews/REVIEW-renew-drift-replan.md"
+    (linked / replan_rel).parent.mkdir(parents=True, exist_ok=True)
+    (linked / replan_rel).write_text(
+        "\n".join([
+            "---", "id: REVIEW-renew-drift-replan", f"task_id: {task_id}",
+            f"unit_id: UNIT-{task_id}-001", "review_kind: t3-replan", "tier: T3",
+            "status: accepted", "signal: pass", "---", "",
+        ]),
+        encoding="utf-8",
+    )
+    subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "plan_assumption_gate.py"),
+         "--root", str(linked), "record",
+         "--taskset", str(claim["task_set_id"]),
+         "--design-record", replan_rel, "--anchor", unit_rel],
+        check=True, capture_output=True, text=True,
+    )
+
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", str(persisted["mutation_revision"]),
+        "--expected-scope-digest", persisted["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--replan-ref", replan_rel,
+        "--json",
+    )
+
+    assert result.returncode == 0, (
+        "renew refused legitimate drift with an accepted replan: "
+        + (result.stderr or result.stdout)
+    )
+    assert "scripts/routing_third.py" in json.loads(
+        path.read_text(encoding="utf-8")
+    )["target_files"]

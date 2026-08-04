@@ -701,11 +701,15 @@ def _unresolvable_scope_remedy(claim: dict[str, Any], detail: str) -> str:
     )
 
 
+_UNSET_TARGET_COMPONENT = object()
+
+
 def _scope_contract_error(
     root: Path,
     claim: dict[str, Any],
     *,
-    recorded_target_component: str | None = None,
+    recorded_target_component: object = _UNSET_TARGET_COMPONENT,
+    check_footprint: bool = True,
 ) -> str | None:
     """The complete scope contract, enforced identically at birth and at beat.
 
@@ -723,6 +727,12 @@ def _scope_contract_error(
     ``recorded_target_component`` is the component already persisted on the
     claim's binding; omit it at creation, where the claim's own declared
     footprint is the thing being validated.
+
+    ``check_footprint`` is False on the renew path. Renew OWNS scope drift - it
+    reconciles exactly that case against an accepted T2/T3 replan - so applying
+    the footprint clause there would break the command's purpose. The canonical
+    clause still applies, because renew also trusts ``claim["unit_spec"]`` and
+    that pointer is precisely what the pin exists to distrust.
     """
 
     spec_error = _non_canonical_unit_spec_error(claim)
@@ -732,13 +742,15 @@ def _scope_contract_error(
         spec_targets, _stop_condition = _current_scope_values(root, claim)
     except (ValueError, OSError) as exc:
         return _unresolvable_scope_remedy(claim, exc)
+    if not check_footprint:
+        return None
     spec_component = _binding_for_claim(
         claim, bound_at="", target_files=spec_targets
     )["components"]["target_files"]
     recorded = (
-        recorded_target_component
-        if recorded_target_component is not None
-        else _binding_for_claim(claim, bound_at="")["components"]["target_files"]
+        _binding_for_claim(claim, bound_at="")["components"]["target_files"]
+        if recorded_target_component is _UNSET_TARGET_COMPONENT
+        else recorded_target_component
     )
     if spec_component != recorded:
         return (
@@ -3049,6 +3061,11 @@ def _cmd_claim_mutation_locked(
             raise ValueError(
                 "claim scope digest mismatch: expected persisted scope binding"
             )
+        renew_scope_error = _scope_contract_error(
+            root, claim, check_footprint=False
+        )
+        if renew_scope_error:
+            raise ValueError(renew_scope_error)
         try:
             renewed_targets, renewed_stop = _current_scope_values(root, claim)
         except (ValueError, OSError) as exc:
