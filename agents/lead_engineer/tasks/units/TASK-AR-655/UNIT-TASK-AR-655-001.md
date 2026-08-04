@@ -49,7 +49,7 @@ compound_refs:
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d.json
   - agents/project/knowledge/compounds/records/COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9.json
 claim_refs:
-  - agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.json
+  - agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.json
 context: TASK-AR-650 continued well beyond its 30-minute lease, but the task claim dispatcher has only create, projection, and release commands. The separate low-level claim lease heartbeat is not connected to task claim JSON.
 inputs:
   - reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md

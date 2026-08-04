@@ -1,15 +1,15 @@
 {
   "schema": "agent-runtime-task-claim/v1",
-  "claim_id": "CLAIM-20260803-163441-task-ar-655-f9b6",
+  "claim_id": "CLAIM-20260804-121045-task-ar-655-0427",
   "task_id": "TASK-AR-655",
   "agent_role": "lead-engineer",
   "team_id": "agent-runtime-core",
-  "agent_instance_id": "le-20260803-163441-kst-f9b6",
+  "agent_instance_id": "le-20260804-121045-kst-0427",
   "display_name": "lead_engineer@worker-01",
   "callsite_id": "terminal:wt-task-ar-655:tab-01",
   "pane_id": "terminal:wt-task-ar-655:tab-01",
   "mode": "worker",
-  "status": "expired",
+  "status": "claimed",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -41,24 +41,24 @@
   "actual_model_status": "unverified",
   "wip_slot": 0,
   "stop_condition": "",
-  "phase": "w4b-round5-false-positive-fixed",
+  "phase": "w4b-round5",
   "progress_pct": 99,
   "step_index": 12,
   "step_total": 12,
-  "status_text": "Narrowed the heartbeat anchor to the enforced footprint",
+  "status_text": "Fifth independent W4b after the heartbeat-anchor false positive",
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
-  "claimed_at": "2026-08-03T16:34:41+09:00",
-  "last_heartbeat": "2026-08-03T17:53:32.489880+09:00",
-  "updated_at": "2026-08-04T12:10:29+09:00",
-  "expires_at": "2026-08-03T19:53:32.489880+09:00",
+  "claimed_at": "2026-08-04T12:10:45+09:00",
+  "last_heartbeat": "2026-08-04T12:10:45+09:00",
+  "updated_at": "2026-08-04T12:10:45+09:00",
+  "expires_at": "2026-08-04T15:10:45+09:00",
   "lease": {
-    "claimed_at": "2026-08-03T16:34:41+09:00",
-    "heartbeat_at": "2026-08-03T17:53:32.489880+09:00",
-    "expires_at": "2026-08-03T19:53:32.489880+09:00"
+    "claimed_at": "2026-08-04T12:10:45+09:00",
+    "heartbeat_at": "2026-08-04T12:10:45+09:00",
+    "expires_at": "2026-08-04T15:10:45+09:00"
   },
-  "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.handoff.md",
-  "log_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.log.md",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.log.md",
   "allow_parallel_task_set": false,
   "tags": [],
   "escalation_triggers": [
@@ -291,7 +291,7 @@
     "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
     "reviews/INDEX.md"
   ],
-  "mutation_revision": 4,
+  "mutation_revision": 0,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
@@ -301,14 +301,10 @@
       "target_files": "f12799ff83e55bea90a935d31e0d72332f4d74fea8dd443985d3fb6a375d9d61",
       "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
     },
-    "bound_at": "2026-08-03T16:34:41+09:00"
+    "bound_at": "2026-08-04T12:10:45+09:00"
   },
   "persistence": {
     "mode": "working_tree",
     "scm_commit_authorized": false
-  },
-  "recovered_from_status": "claimed",
-  "reaped_at": "2026-08-04T12:10:29+09:00",
-  "reaped_by": "claim_reaper",
-  "reaped_reason": "lease-expired"
+  }
 }
