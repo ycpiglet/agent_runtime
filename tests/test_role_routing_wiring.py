@@ -446,32 +446,152 @@ def test_non_high_risk_release_is_auditor_only(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _write_unit_spec(root: Path, *, name: str, escalation_triggers: list[str]) -> Path:
+def _write_unit_spec(
+    root: Path, *, name: str, escalation_triggers: list[str], task_id: str = "TASK-AR-INH"
+) -> Path:
     """Write a unit definition .md whose frontmatter carries escalation_triggers."""
-    path = root / "agents" / "lead_engineer" / "tasks" / "units" / name
+    # Canonical location. A spec pointer with no unit identity, or one outside
+    # agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md, now produces a
+    # claim that cannot heartbeat - so the fixture writes where real specs live.
+    path = (
+        root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / name
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     triggers = "[" + ", ".join(escalation_triggers) + "]"
     path.write_text(
         f"""---
 unit_id: {name.removesuffix(".md")}
-task_id: TASK-AR-INH
+task_id: {task_id}
 task_set_id: {TASKSET}
 status: worker_ready
 horizon: unit
 target_files:
   - scripts/inh.py
 escalation_triggers: {triggers}
+context: Wiring fixture for role-routing dispatch on release.
+inputs:
+  - scripts/inh_input.py
+scope: Role-routing dispatch only.
+project_id: PROJECT-AGENT-RUNTIME
+model_tier: worker_standard
+acceptance:
+  - Release dispatches the roles the unit's triggers select.
+verification:
+  - python -m pytest tests/test_role_routing_wiring.py -q
+handoff: Attach the dispatched overlay claims.
+stop_condition: Stop before any external release action.
 ---
 
 # {name}
+
+## Context
+
+Wiring fixture for role-routing dispatch on release.
+
+## Inputs
+
+- scripts/inh_input.py
+
+## Target Files
+
+- scripts/inh.py
+
+## Scope
+
+Role-routing dispatch only.
+
+## Steps
+
+1. Create the claim from this spec.
+2. Release it and observe the dispatched overlays.
+
+## Acceptance Criteria
+
+- Release dispatches the roles the unit's triggers select.
+
+## Verification
+
+- `python -m pytest tests/test_role_routing_wiring.py -q`
+
+## Handoff
+
+Attach the dispatched overlay claims.
+
+## Stop Boundary
+
+Stop before any external release action.
+""",
+        encoding="utf-8",
+    )
+    # A canonical unit record implies a canonical task record; the stricter
+    # preflight this fixture now meets is the same one real dispatch honours.
+    for declared in ("scripts/inh.py", "scripts/inh_input.py"):
+        stub = root / declared
+        stub.parent.mkdir(parents=True, exist_ok=True)
+        stub.write_text("# wiring fixture stub\n", encoding="utf-8")
+    task_path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        f"""---
+work_id: {task_id}
+id: {task_id}
+kind: task
+status: in_progress
+task_set_id: {TASKSET}
+unit_spec: {path.relative_to(root).as_posix()}
+worker_model_tier: worker_standard
+---
+
+# {task_id}
 """,
         encoding="utf-8",
     )
     return path
 
 
+def _register_plan_assumptions(root: Path, unit: Path) -> None:
+    """Satisfy the T0/T2 dispatch gate the way real dispatch does.
+
+    Writing the unit spec at its canonical location makes this host a
+    canonical-records adopter, which correctly turns on the stricter preflight.
+    Registering a real snapshot keeps the fixture honest rather than routing
+    around the gate.
+    """
+    replan = root / "reviews" / "REVIEW-wire-test-replan.md"
+    replan.parent.mkdir(parents=True, exist_ok=True)
+    replan.write_text(
+        "\n".join(
+            [
+                "---",
+                "id: REVIEW-wire-test-replan",
+                "task_id: TASK-AR-INH",
+                f"unit_id: {unit.stem}",
+                "review_kind: t3-replan",
+                "tier: T3",
+                "status: accepted",
+                "signal: pass",
+                "---",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "plan_assumption_gate.py"),
+            "--root", str(root), "record",
+            "--taskset", TASKSET,
+            "--design-record", replan.relative_to(root).as_posix(),
+            "--anchor", unit.relative_to(root).as_posix(),
+        ],
+        check=True, capture_output=True, text=True,
+    )
+
+
 def _create_via_unit_spec(root: Path, *, task_id: str, unit: Path, suffix: str) -> dict:
     _write_worktree(root, task_id)
+    _register_plan_assumptions(root, unit)
     created = _run_claim(
         root,
         "create",
@@ -479,7 +599,8 @@ def _create_via_unit_spec(root: Path, *, task_id: str, unit: Path, suffix: str) 
         "--task-set-id", TASKSET,
         "--agent-role", "lead-engineer",
         "--mode", "implement",
-        "--unit-spec", str(unit),
+        "--unit-id", unit.stem,
+        "--unit-spec", unit.relative_to(root).as_posix(),
         "--now", "2026-06-22T09:00:00+09:00",
         "--suffix", suffix,
         "--json",
@@ -506,7 +627,10 @@ def test_high_risk_unit_spec_release_dispatches_auditor_and_skeptic(tmp_path: Pa
 
 def test_ambiguity_only_unit_spec_release_is_auditor_only(tmp_path: Path) -> None:
     """A unit whose only trigger is ``ambiguity`` (NOT high-risk) -> auditor only."""
-    unit = _write_unit_spec(tmp_path, name="UNIT-AMB.md", escalation_triggers=["ambiguity"])
+    unit = _write_unit_spec(
+        tmp_path, name="UNIT-AMB.md", escalation_triggers=["ambiguity"],
+        task_id="TASK-AR-AMB",
+    )
     payload = _create_via_unit_spec(tmp_path, task_id="TASK-AR-AMB", unit=unit, suffix="amb1")
     claim = payload["claim"]
     # The trigger is inherited verbatim (no pre-filter); release intersects it.

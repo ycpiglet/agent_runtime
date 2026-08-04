@@ -2305,6 +2305,8 @@ def test_create_claim_records_durable_task_and_claim_budgets(
         "create",
         "--task-id",
         task_id,
+        "--unit-id",
+        f"UNIT-TASK-AR-652-001",
         "--unit-spec",
         unit_rel,
         "--agent-role",
@@ -2914,6 +2916,8 @@ def test_create_claim_keeps_unknown_routing_signal_visible(
         "create",
         "--task-id",
         task_id,
+        "--unit-id",
+        f"UNIT-TASK-AR-648-001",
         "--unit-spec",
         unit_rel,
         "--agent-role",
@@ -3190,6 +3194,8 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
         "TASK-AR-503",
         "--agent-role",
         "lead-engineer",
+        "--unit-id",
+        f"UNIT-TASK-AR-503-001",
         "--unit-spec",
         unit_rel,
         "--now",
@@ -7027,6 +7033,13 @@ def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted
         ("plain", (), False),
         ("explicit-target-inside-spec", ("--target-file", "scripts/routing_second.py"), False),
         ("nested-unit-spec", (), True),
+        # A spec pointer with no unit identity: `create` accepted it and
+        # `_current_scope_values` then refused every beat with "unit_spec unit
+        # identity changed" - born unusable, and a fourth instance of the
+        # create-versus-mutate disagreement independent of the canonical guard.
+        ("unit-spec-without-unit-id", (), False),
+        ("spec-less", (), False),
+        ("orchestrator-mode", ("--mode", "orchestrator"), False),
     ],
 )
 def test_every_claim_create_accepts_can_immediately_heartbeat(
@@ -7045,12 +7058,15 @@ def test_every_claim_create_accepts_can_immediately_heartbeat(
         nested.write_text((linked / unit_rel).read_text(encoding="utf-8"), encoding="utf-8")
         unit_rel = nested_rel
 
+    create_args = ["--task-id", task_id, "--agent-role", "lead-engineer"]
+    if label == "unit-spec-without-unit-id":
+        create_args += ["--unit-spec", unit_rel]          # deliberately no --unit-id
+    elif label != "spec-less":
+        create_args += ["--unit-id", f"UNIT-{task_id}-001", "--unit-spec", unit_rel]
+
     result = _run_dispatcher(
         linked, "create",
-        "--task-id", task_id,
-        "--agent-role", "lead-engineer",
-        "--unit-id", f"UNIT-{task_id}-001",
-        "--unit-spec", unit_rel,
+        *create_args,
         "--worktree-path", ".",
         "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
         "--suffix", f"sym{label[:6].replace('-','')}",

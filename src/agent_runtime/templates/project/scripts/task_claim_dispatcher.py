@@ -2723,13 +2723,24 @@ def _canonical_unit_spec(task_id: object, unit_id: object) -> str:
 
 def _non_canonical_unit_spec_error(claim: dict[str, Any]) -> str | None:
     declared = str(claim.get("unit_spec") or "").strip()
+    if not declared:
+        # No spec pointer, nothing to anchor. Spec-less claims are a supported
+        # shape handled by their own stricter path.
+        return None
     task_id = str(claim.get("task_id") or "").strip()
     unit_id = str(claim.get("unit_id") or "").strip()
-    if not declared or not task_id or not unit_id:
-        # No canonical name can be computed without both ids, and a claim may
-        # legitimately carry a unit_spec without a unit_id. Refusing here would
-        # be a false positive of exactly the kind this predicate exists to stop.
-        return None
+    if not task_id or not unit_id:
+        # A spec pointer with no unit identity has no authority to anchor to.
+        # Returning None here was an escape hatch precisely for the attack this
+        # predicate exists to stop: with unit_id blank, _current_scope_values'
+        # identity check also passes ("" == ""), so an arbitrary spec file
+        # becomes the authority. Such claims were already born unusable -
+        # heartbeat refused them with "unit_spec unit identity changed" - so
+        # this refuses them at birth instead.
+        return (
+            f"claim unit_spec {declared} has no unit identity to anchor to; "
+            "declare unit_id alongside unit_spec"
+        )
     canonical = _canonical_unit_spec(task_id, unit_id)
     if declared == canonical:
         return None
