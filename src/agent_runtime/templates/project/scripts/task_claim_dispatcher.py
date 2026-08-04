@@ -684,6 +684,23 @@ def _is_orchestrator_claim(payload: dict[str, Any]) -> bool:
     return mode == "orchestrator" or scope == "orchestrator"
 
 
+def _unresolvable_scope_remedy(claim: dict[str, Any], detail: str) -> str:
+    """Refusal text that names the way out.
+
+    A spec moved or renamed mid-flight disables heartbeat, renew and adopt at
+    once. That is fail-closed rather than exit-less - release with a verifier
+    identity still works, and terminalize opens once the lease expires - but an
+    operator correcting a spec path should not have to rediscover that.
+    """
+
+    return (
+        f"claim scope cannot be resolved from its unit spec: {detail}; "
+        "restore the spec at "
+        f"{_canonical_unit_spec(claim.get('task_id'), claim.get('unit_id'))} "
+        "to resume, or release the claim with a verifier identity"
+    )
+
+
 def _claim_creation_errors(
     root: Path,
     claim: dict[str, Any],
@@ -692,11 +709,23 @@ def _claim_creation_errors(
     errors: list[str] = []
     # Enforced at birth as well as at every mutation. A claim that create
     # accepts but heartbeat refuses is born unusable, and nothing says so until
-    # the first beat - the same create-versus-mutate disagreement that produced
-    # the stop_condition and out-of-spec --target-file defects.
+    # the first beat.
     spec_error = _non_canonical_unit_spec_error(claim)
     if spec_error:
         errors.append(spec_error)
+    # Run the mutation path's OWN spec resolution here rather than enumerating
+    # the fields it happens to check. Five separate defects came from create
+    # and the mutation path disagreeing about validity - stop_condition,
+    # out-of-spec --target-file, non-canonical unit_spec, blank unit_id, and
+    # frontmatter ids that disagree with the claim - and each was found one at
+    # a time. Calling the same function makes the symmetry hold by
+    # construction, so a sixth field cannot repeat it: whatever
+    # _current_scope_values refuses at heartbeat, create refuses at birth.
+    try:
+        _current_scope_values(root, claim)
+    except (ValueError, OSError) as exc:
+        errors.append(f"claim scope cannot be resolved from its unit spec: {exc}")
+
     if not _is_orchestrator_claim(claim):
         worktree_value = str(claim.get("worktree_path") or "").strip()
         if not worktree_value:
@@ -2683,7 +2712,10 @@ def _validate_mutation_authority(
         # target_files is also the component that actually matters: it is the
         # enforced footprint that refuses sibling creates and bounds
         # undeclared-write checking.
-        target_files, _stop_condition = _current_scope_values(root, claim)
+        try:
+            target_files, _stop_condition = _current_scope_values(root, claim)
+        except (ValueError, OSError) as exc:
+            raise ValueError(_unresolvable_scope_remedy(claim, exc)) from exc
         spec_targets = _binding_for_claim(
             claim,
             bound_at=str(persisted.get("bound_at") or ""),

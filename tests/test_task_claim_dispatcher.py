@@ -2163,6 +2163,25 @@ def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
 def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
     _write_worktree(tmp_path, "TASK-AR-344")
+    # The spec must exist and declare this claim's ids: create now runs the
+    # same resolution heartbeat does, so a claim pointing at a missing or
+    # mismatched spec would be born unusable. Written inline rather than via
+    # _write_routing_work because this test supplies its own --stop-condition
+    # and must not also inherit one from the spec.
+    spec = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md"
+    )
+    spec.parent.mkdir(parents=True, exist_ok=True)
+    spec.write_text(
+        "---\n"
+        "unit_id: UNIT-TASK-AR-344-001\n"
+        "task_id: TASK-AR-344\n"
+        "target_files:\n"
+        "  - scripts/pm_scope.py\n"
+        "---\n\n# UNIT-TASK-AR-344-001\n",
+        encoding="utf-8",
+    )
 
     result = _run_dispatcher(
         tmp_path,
@@ -7040,6 +7059,10 @@ def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted
         ("unit-spec-without-unit-id", (), False),
         ("spec-less", (), False),
         ("orchestrator-mode", ("--mode", "orchestrator"), False),
+        # Frontmatter ids disagreeing with the claim: create validated only
+        # that the spec file exists, so these were born unusable too.
+        ("spec-frontmatter-task-id-mismatch", (), False),
+        ("spec-frontmatter-unit-id-mismatch", (), False),
     ],
 )
 def test_every_claim_create_accepts_can_immediately_heartbeat(
@@ -7049,6 +7072,22 @@ def test_every_claim_create_accepts_can_immediately_heartbeat(
     _primary, linked = _init_git_worktree(tmp_path, f"ar655-sym-{label}")
     unit_rel = _write_routing_work(linked, task_id)
 
+    if label == "spec-frontmatter-task-id-mismatch":
+        spec = linked / unit_rel
+        spec.write_text(
+            spec.read_text(encoding="utf-8").replace(
+                f"task_id: {task_id}", "task_id: TASK-AR-OTHER"
+            ),
+            encoding="utf-8",
+        )
+    if label == "spec-frontmatter-unit-id-mismatch":
+        spec = linked / unit_rel
+        spec.write_text(
+            spec.read_text(encoding="utf-8").replace(
+                f"unit_id: UNIT-{task_id}-001", "unit_id: UNIT-SOMETHING-ELSE-001"
+            ),
+            encoding="utf-8",
+        )
     if mutate_spec:
         nested_rel = (
             f"agents/lead_engineer/tasks/units/{task_id}/nested/UNIT-{task_id}-001.md"
