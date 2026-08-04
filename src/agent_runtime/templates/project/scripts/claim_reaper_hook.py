@@ -41,6 +41,17 @@ def main(argv: list[str] | None = None) -> int:
             verb = "reaped" if apply else "would-reap (set AGENT_RUNTIME_REAPER_AUTO_APPLY=1 to recover)"
             ids = ", ".join(entry["claim_id"] for entry in acted)
             print(f"claim-reaper: {verb} {len(acted)} dead claim(s): {ids}")
+        outstanding = report.get("needs_owner_recovery") or []
+        if outstanding:
+            # No automated path can end these, so silence makes them permanent.
+            # Session start is exactly when the owner should learn about it.
+            ids = ", ".join(entry["claim_id"] for entry in outstanding)
+            print(
+                f"claim-reaper: {len(outstanding)} claim(s) need owner recovery "
+                f"and will never be reaped: {ids}; run "
+                "task_claim_dispatcher.py terminalize --claim-id <id> "
+                "--owner-id <owner> --reason <why>"
+            )
         # Silent when there is nothing to do, to avoid SessionStart noise.
     except Exception as exc:  # noqa: BLE001 - best-effort: never block session start
         print(f"claim-reaper: skipped ({exc!r})", file=sys.stderr)

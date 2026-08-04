@@ -178,17 +178,41 @@ def test_task_ar_303_c_mode_latent_boundary_is_declared():
 def test_task_ar_304_skill_layer_is_packaged():
     rsi_skill = (ROOT / "skills" / "rsi-planning-loop" / "SKILL.md").read_text(encoding="utf-8")
     failure_skill = (ROOT / "skills" / "failure-to-regression" / "SKILL.md").read_text(encoding="utf-8")
+    consumer_failure_skill = (
+        ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "skills"
+        / "failure-to-regression"
+        / "SKILL.md"
+    ).read_text(encoding="utf-8")
     session_skill = (ROOT / "skills" / "session-closeout" / "SKILL.md").read_text(encoding="utf-8")
-    combined = "\n".join([rsi_skill, failure_skill, session_skill])
+    operating_system_skills = "\n".join([rsi_skill, session_skill])
 
     for token in [
         "agents/project/evidence/inbox/README.md",
         "agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md",
         "agents/project/DIVERSITY-COUNCIL-PROTOCOL.md",
         "agents/project/C-MODE-LATENT-ROADMAP.md",
-        "agents/project/casebooks/failure-and-compound-casebook.md",
-        "reproduction command",
-        "explicit non-repro reason",
-        "task proposal",
     ]:
-        assert token in combined
+        assert token in operating_system_skills
+
+    assert failure_skill == consumer_failure_skill
+    for token in [
+        "python scripts/compound_record.py",
+        "python scripts/work.py close",
+        "prevention destination",
+        "accepted_watch",
+        "task proposal",
+        "current work",
+    ]:
+        assert token in consumer_failure_skill
+
+    for root_only_path in [
+        "agents/project/casebooks/failure-and-compound-casebook.md",
+        "agents/project/evidence/inbox/README.md",
+        "agents/project/EVIDENCE-TO-PROPOSAL-CONTRACT.md",
+    ]:
+        assert root_only_path not in consumer_failure_skill

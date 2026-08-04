@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-07-30T09:29:29+09:00",
-  "record_count": 528,
+  "generated_at": "2026-08-04T14:28:19+09:00",
+  "record_count": 556,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -5635,7 +5635,7 @@
       "title": "Determine, with replayable evidence, whether reversible Agent Runtime adoption preser…",
       "path": "agents/lead_engineer/tasks/TASK-AR-648.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-648-001",
@@ -5657,7 +5657,161 @@
       "title": "UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md",
       "parent_id": "TASK-AR-648",
-      "status": "worker_ready"
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-003",
+      "level": "unit",
+      "number": "41.1.10.3",
+      "label": "Unit 41.1.10.3",
+      "id": "UNIT-TASK-AR-648-003",
+      "title": "UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-004",
+      "level": "unit",
+      "number": "41.1.10.4",
+      "label": "Unit 41.1.10.4",
+      "id": "UNIT-TASK-AR-648-004",
+      "title": "UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-005",
+      "level": "unit",
+      "number": "41.1.10.5",
+      "label": "Unit 41.1.10.5",
+      "id": "UNIT-TASK-AR-648-005",
+      "title": "UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-006",
+      "level": "unit",
+      "number": "41.1.10.6",
+      "label": "Unit 41.1.10.6",
+      "id": "UNIT-TASK-AR-648-006",
+      "title": "UNIT-TASK-AR-648-006 - Bean Wiki Green Replay Attempt 2",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-007",
+      "level": "unit",
+      "number": "41.1.10.7",
+      "label": "Unit 41.1.10.7",
+      "id": "UNIT-TASK-AR-648-007",
+      "title": "UNIT-TASK-AR-648-007 - Blocked Unit Redispatch Guard",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-008",
+      "level": "unit",
+      "number": "41.1.10.8",
+      "label": "Unit 41.1.10.8",
+      "id": "UNIT-TASK-AR-648-008",
+      "title": "UNIT-TASK-AR-648-008 - Portable Continuity Contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-009",
+      "level": "unit",
+      "number": "41.1.10.9",
+      "label": "Unit 41.1.10.9",
+      "id": "UNIT-TASK-AR-648-009",
+      "title": "UNIT-TASK-AR-648-009 - Bean Wiki Green Replay Attempt 3",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-010",
+      "level": "unit",
+      "number": "41.1.10.10",
+      "label": "Unit 41.1.10.10",
+      "id": "UNIT-TASK-AR-648-010",
+      "title": "UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-011",
+      "level": "unit",
+      "number": "41.1.10.11",
+      "label": "Unit 41.1.10.11",
+      "id": "UNIT-TASK-AR-648-011",
+      "title": "UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-012",
+      "level": "unit",
+      "number": "41.1.10.12",
+      "label": "Unit 41.1.10.12",
+      "id": "UNIT-TASK-AR-648-012",
+      "title": "UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-013",
+      "level": "unit",
+      "number": "41.1.10.13",
+      "label": "Unit 41.1.10.13",
+      "id": "UNIT-TASK-AR-648-013",
+      "title": "UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-014",
+      "level": "unit",
+      "number": "41.1.10.14",
+      "label": "Unit 41.1.10.14",
+      "id": "UNIT-TASK-AR-648-014",
+      "title": "UNIT-TASK-AR-648-014 - Bean Wiki Green Replay Attempt 5",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md",
+      "parent_id": "TASK-AR-648",
+      "status": "blocked"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-015",
+      "level": "unit",
+      "number": "41.1.10.15",
+      "label": "Unit 41.1.10.15",
+      "id": "UNIT-TASK-AR-648-015",
+      "title": "UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-648-016",
+      "level": "unit",
+      "number": "41.1.10.16",
+      "label": "Unit 41.1.10.16",
+      "id": "UNIT-TASK-AR-648-016",
+      "title": "UNIT-TASK-AR-648-016 - Bean Wiki Green Replay Attempt 6",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
+      "parent_id": "TASK-AR-648",
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-649",
@@ -5668,7 +5822,7 @@
       "title": "Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi…",
       "path": "agents/lead_engineer/tasks/TASK-AR-649.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-649-001",
@@ -5679,7 +5833,7 @@
       "title": "UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md",
       "parent_id": "TASK-AR-649",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-650",
@@ -5690,7 +5844,7 @@
       "title": "Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams…",
       "path": "agents/lead_engineer/tasks/TASK-AR-650.md",
       "parent_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
-      "status": "planned"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-650-001",
@@ -5701,7 +5855,7 @@
       "title": "UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md",
       "parent_id": "TASK-AR-650",
-      "status": "worker_ready"
+      "status": "completed"
     },
     {
       "key": "task:TASK-AR-651",
@@ -5812,6 +5966,160 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
       "parent_id": "TASK-AR-654",
       "status": "worker_ready"
+    },
+    {
+      "key": "initiative:INIT-AR-V080-OPERABILITY-HARDENING",
+      "level": "initiative",
+      "number": "44",
+      "label": "Initiative 44",
+      "id": "INIT-AR-V080-OPERABILITY-HARDENING",
+      "title": "Agent Runtime v0.8 Operability Hardening",
+      "path": "agents/project/initiatives/INIT-AR-V080-OPERABILITY-HARDENING.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "level": "taskset",
+      "number": "44.1",
+      "label": "Taskset 44.1",
+      "id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "title": "v0.8 Operability Hardening",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-V080-OPERABILITY-HARDENING",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-652",
+      "level": "task",
+      "number": "44.1.1",
+      "label": "Task 44.1.1",
+      "id": "TASK-AR-652",
+      "title": "Make selective subagent routing materially change execution and produce trustworthy t…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-652.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-652-001",
+      "level": "unit",
+      "number": "44.1.1.1",
+      "label": "Unit 44.1.1.1",
+      "id": "UNIT-TASK-AR-652-001",
+      "title": "UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
+      "parent_id": "TASK-AR-652",
+      "status": "completed"
+    },
+    {
+      "key": "task:TASK-AR-655",
+      "level": "task",
+      "number": "44.1.2",
+      "label": "Task 44.1.2",
+      "id": "TASK-AR-655",
+      "title": "Keep long-running task claims truthful and make expiry consistent across claim, point…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "done"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-655-001",
+      "level": "unit",
+      "number": "44.1.2.1",
+      "label": "Unit 44.1.2.1",
+      "id": "UNIT-TASK-AR-655-001",
+      "title": "UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
+      "parent_id": "TASK-AR-655",
+      "status": "done"
+    },
+    {
+      "key": "task:TASK-AR-656",
+      "level": "task",
+      "number": "44.1.3",
+      "label": "Task 44.1.3",
+      "id": "TASK-AR-656",
+      "title": "Let Runtime own its canonical lifecycle while hosts add authority hooks without perma…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-656.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-656-001",
+      "level": "unit",
+      "number": "44.1.3.1",
+      "label": "Unit 44.1.3.1",
+      "id": "UNIT-TASK-AR-656-001",
+      "title": "UNIT-TASK-AR-656-001 - Implement a managed Runtime hook core with host extension registry",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md",
+      "parent_id": "TASK-AR-656",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-657",
+      "level": "task",
+      "number": "44.1.4",
+      "label": "Task 44.1.4",
+      "id": "TASK-AR-657",
+      "title": "Make the safe brownfield procedure discoverable and repeatable in every consumer with…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-657.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-657-001",
+      "level": "unit",
+      "number": "44.1.4.1",
+      "label": "Unit 44.1.4.1",
+      "id": "UNIT-TASK-AR-657-001",
+      "title": "UNIT-TASK-AR-657-001 - Package the reusable consumer-adoption operating procedure",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md",
+      "parent_id": "TASK-AR-657",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-658",
+      "level": "task",
+      "number": "44.1.5",
+      "label": "Task 44.1.5",
+      "id": "TASK-AR-658",
+      "title": "Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-658.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-658-001",
+      "level": "unit",
+      "number": "44.1.5.1",
+      "label": "Unit 44.1.5.1",
+      "id": "UNIT-TASK-AR-658-001",
+      "title": "UNIT-TASK-AR-658-001 - Build the secret-free Runtime health resource and console surface",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md",
+      "parent_id": "TASK-AR-658",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-659",
+      "level": "task",
+      "number": "44.1.6",
+      "label": "Task 44.1.6",
+      "id": "TASK-AR-659",
+      "title": "Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-659.md",
+      "parent_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "status": "done"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-659-001",
+      "level": "unit",
+      "number": "44.1.6.1",
+      "label": "Unit 44.1.6.1",
+      "id": "UNIT-TASK-AR-659-001",
+      "title": "UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
+      "parent_id": "TASK-AR-659",
+      "status": "done"
     }
   ]
 }

@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 from agent_runtime import cli as cli_module
+from agent_runtime import claim_store
 from agent_runtime import doctor
 from agent_runtime import state_projection
 
@@ -83,6 +84,36 @@ def _write_message_file(root: Path, message_id: str, *, status: str = "claimed",
     return path
 
 
+def _write_task_claim(
+    root: Path,
+    claim_id: str,
+    *,
+    status: str = "claimed",
+    expires_at: object = "2000-01-01T00:00:00+00:00",
+) -> Path:
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": "TASK-AR-655",
+        "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+        "agent_instance_id": f"worker-{claim_id.lower()}",
+        "agent_role": "lead-engineer",
+        "callsite_id": "terminal:doctor-fixture",
+        "status": status,
+    }
+    if expires_at is not None:
+        payload["expires_at"] = expires_at
+        payload["lease"] = {"expires_at": expires_at}
+    path = root / "agents" / "runtime" / "task_claims" / f"{claim_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def _initialize_task_claim_store(root: Path, witness_claim_id: str) -> None:
+    claim_store.initialize_store(root, witness_claim_id=witness_claim_id)
+
+
 def test_doctor_check_fails_on_missing_core_template_file(tmp_path):
     root = _prepare_host_root(tmp_path, with_lock=True)
     (root / "scripts" / "orchestrator_safety_gate.py").unlink()
@@ -147,6 +178,69 @@ def test_doctor_success_for_synced_host(tmp_path):
     plan, _ = doctor.build_doctor_plan(root)
     assert not any(
         f.kind == "toolrunner-audit-missing" for f in plan.findings
+    )
+
+
+def test_doctor_reports_effective_standby_pointer_continuity_path(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+
+    plan, _ = doctor.build_doctor_plan(root)
+    payload = json.loads(doctor.render_json(plan))
+
+    assert plan.continuity == {
+        "status": "pass",
+        "mode": "pointer+sidecars",
+        "pointer": "agents/project/NEXT-SESSION-POINTER.yml",
+        "active_claims": 0,
+        "findings": [],
+    }
+    assert payload["continuity"] == plan.continuity
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "effective-path"
+        and finding.severity == "info"
+        and "pointer+sidecars" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_blocks_missing_or_placeholder_standby_pointer(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    pointer = root / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.unlink()
+
+    missing, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "pointer-missing"
+        and finding.severity == "blocker"
+        for finding in missing.findings
+    )
+
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(
+        "schema: agent-runtime-next-session-pointer/v1\n"
+        "updated_at: YYYY-MM-DDTHH:MM:SS+09:00\n"
+        "active_work:\n"
+        "  current_agents: []\n"
+        "resume:\n"
+        "  active_task: TASK-NNN\n"
+        "  active_task_set: TASKSET-AR-EXAMPLE\n"
+        "  next_actions:\n"
+        "    - Replace this placeholder.\n"
+        "pointers:\n"
+        "  active_claims: []\n",
+        encoding="utf-8",
+    )
+
+    placeholder, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "continuity"
+        and finding.kind == "pointer-placeholder"
+        and finding.severity == "blocker"
+        for finding in placeholder.findings
     )
 
 
@@ -304,7 +398,12 @@ def test_doctor_reports_scribe_missing_overdue_and_fresh_without_writing(tmp_pat
         finding.area == "scribe" and finding.kind == "projection-fresh"
         for finding in fresh.findings
     )
-    assert fresh.scribe and fresh.scribe["closure_blocking"] is False
+    assert fresh.scribe and fresh.scribe["closure_blocking"] is True
+    assert fresh.scribe["source_debt"]["status"] == "overdue"
+    assert fresh.scribe["active_coverage"]["status"] == "complete"
+    assert fresh.scribe["cleanup_plan"]["status"] == "available"
+    assert fresh.scribe["cleanup_outcome"]["status"] == "none"
+    assert "source-debt-overdue" in fresh.scribe["closure_reasons"]
     assert source.stat().st_mtime_ns == source_mtime
     assert projection.stat().st_mtime_ns == projection_mtime
 
@@ -450,6 +549,46 @@ def test_codex_hook_contract_reports_missing_windows_command(tmp_path):
     assert any(item.kind == "missing-command-windows" for item in findings)
 
 
+def test_codex_hook_contract_accepts_python_alias_for_migration(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    hook = payload["hooks"]["SessionStart"][0]["hooks"][0]
+    hook["command"] = "python -m agent_runtime.hook_runtime session-start"
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert not any(item.severity == "blocker" for item in findings)
+    assert any(item.kind == "compatible-python-alias" for item in findings)
+
+
+def test_codex_hook_contract_preserves_legacy_hook_only_beside_dispatcher(tmp_path):
+    root = _prepare_host_root(tmp_path)
+    payload = _hook_payload(root)
+    payload["hooks"]["UserPromptSubmit"][0]["hooks"].append(
+        {
+            "type": "command",
+            "command": "python scripts/taskset_prompt_hook.py",
+            "timeout": 20,
+        }
+    )
+    _write_hook_payload(root, payload)
+
+    findings = _codex_hook_findings(root)
+
+    assert not any(item.severity == "blocker" for item in findings)
+    assert any(
+        item.kind == "legacy-hook-command-preserved"
+        and "taskset_prompt_hook.py" in item.detail
+        for item in findings
+    )
+    assert not any(
+        item.kind == "missing-command-windows"
+        and "prompt-submit" in item.detail
+        for item in findings
+    )
+
+
 def test_codex_hook_contract_reports_stale_posix_and_windows_commands(tmp_path):
     root = _prepare_host_root(tmp_path)
     payload = _hook_payload(root)
@@ -476,4 +615,192 @@ def test_codex_hook_contract_reports_missing_dispatch_target(tmp_path):
         item.kind == "missing-hook-target"
         and item.path == "scripts/session_compact_hook.py"
         for item in findings
+    )
+
+
+def test_doctor_reports_markerless_claim_store_and_does_not_repair_it(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    claim = root / "agents/runtime/task_claims/CLAIM-existing.json"
+    claim.parent.mkdir(parents=True, exist_ok=True)
+    claim.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-existing",
+                "status": "released",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = claim.read_bytes()
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        item.area == "task-claim-store"
+        and item.kind == "claim-store-migration-required"
+        and item.severity == "blocker"
+        for item in plan.findings
+    )
+
+    updated, _actions = doctor.apply_doctor_repairs(root, plan)
+    assert any(
+        item.kind == "claim-store-migration-required"
+        and item.severity == "blocker"
+        for item in updated.findings
+    )
+    assert claim.read_bytes() == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()
+    assert not (root / ".agent-runtime/task-claim-store").exists()
+
+
+def test_doctor_blocks_one_sided_claim_store_and_preserves_evidence(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    outer = root / ".agent-runtime/task-claim-store"
+    outer.parent.mkdir(parents=True, exist_ok=True)
+    outer.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = outer.read_bytes()
+
+    plan, _ = doctor.build_doctor_plan(root)
+    assert any(
+        item.area == "task-claim-store"
+        and item.kind == "claim-store-integrity-invalid"
+        and item.severity == "blocker"
+        for item in plan.findings
+    )
+
+    updated, _actions = doctor.apply_doctor_repairs(root, plan)
+    assert any(
+        item.kind == "claim-store-integrity-invalid"
+        and item.severity == "blocker"
+        for item in updated.findings
+    )
+    assert outer.read_bytes() == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()
+
+
+def test_doctor_blocks_grace_exceeded_active_task_claim(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-expired")
+    _initialize_task_claim_store(root, "CLAIM-doctor-expired")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-expired"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-expired" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_full_snapshot_rejects_malformed_non_witness_claim(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-witness", status="released", expires_at=None)
+    _initialize_task_claim_store(root, "CLAIM-doctor-witness")
+    malformed = root / "agents" / "runtime" / "task_claims" / "CLAIM-doctor-malformed.json"
+    malformed.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-doctor-malformed",
+                "task_id": ["TASK-AR-655"],
+                "agent_instance_id": "worker-malformed",
+                "status": "claimed",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-store-integrity-invalid"
+        and finding.severity == "blocker"
+        for finding in plan.findings
+    )
+    assert not any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-store-initialized"
+        and finding.severity == "info"
+        for finding in plan.findings
+    )
+
+
+def test_doctor_surfaces_indeterminate_active_claim_as_blocker(tmp_path):
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    _write_task_claim(root, "CLAIM-doctor-indeterminate", expires_at=None)
+    _initialize_task_claim_store(root, "CLAIM-doctor-indeterminate")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-liveness-indeterminate"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-indeterminate" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_status_continuity_shortcut_cannot_hide_expired_claim(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    (root / "STATUS.md").write_text("# Handoff Checklist\n\nTASK-AR-655 active\n", encoding="utf-8")
+    _write_task_claim(root, "CLAIM-doctor-status-expired")
+    _initialize_task_claim_store(root, "CLAIM-doctor-status-expired")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert any(
+        finding.kind == "claim-expired"
+        and finding.severity == "blocker"
+        and "CLAIM-doctor-status-expired" in finding.detail
+        for finding in plan.findings
+    )
+
+
+def test_doctor_uses_latest_deadline_copy_and_reports_mismatch(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENT_RUNTIME_REAPER_GRACE_SECONDS", "600")
+    root = _prepare_host_root(tmp_path, with_lock=True)
+    path = _write_task_claim(
+        root,
+        "CLAIM-doctor-latest-deadline",
+        expires_at="2000-01-01T00:00:00+00:00",
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["lease"] = {"expires_at": "2099-01-01T00:00:00+00:00"}
+    path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+    _initialize_task_claim_store(root, "CLAIM-doctor-latest-deadline")
+
+    plan, _ = doctor.build_doctor_plan(root)
+
+    assert not any(
+        finding.kind in {"claim-expired", "claim-liveness-indeterminate"}
+        and "CLAIM-doctor-latest-deadline" in finding.detail
+        for finding in plan.findings
+    )
+    assert any(
+        finding.area == "task-claim-store"
+        and finding.kind == "claim-liveness-deadline-mismatch"
+        and finding.severity == "warning"
+        and "CLAIM-doctor-latest-deadline" in finding.detail
+        for finding in plan.findings
     )

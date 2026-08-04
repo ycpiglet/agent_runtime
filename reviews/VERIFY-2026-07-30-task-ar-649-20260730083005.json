@@ -1,0 +1,70 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-task-ar-649-20260730083005",
+  "work_id": "TASK-AR-649",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-649.md",
+  "kind": "task",
+  "task_id": "TASK-AR-649",
+  "unit_id": "",
+  "status": "failed",
+  "signal": "fail",
+  "verified_at": "2026-07-30T08:30:05+09:00",
+  "verified_by": "codex-root-task-ar-649",
+  "command_count": 6,
+  "commands": [
+    {
+      "command": "Exact-product pilot isolation and Allimbot acceptance checks",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: Exact-product: not found\n"
+    },
+    {
+      "command": "Runtime acceptance, native-event, security-service, adoption, and continuity",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: Runtime: not found\n"
+    },
+    {
+      "command": "focused tests",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: focused: not found\n"
+    },
+    {
+      "command": "Clean-target Allimbot Python and web/security tests using existing local",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: Clean-target: not found\n"
+    },
+    {
+      "command": "dependencies only; unavailable suites are reported rather than installed",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: dependencies: not found\n/bin/sh: 1: unavailable: not found\n"
+    },
+    {
+      "command": "W4a plus fresh independent W4b with no Runtime P0/P1",
+      "status": "failed",
+      "returncode": 127,
+      "started_at": "2026-07-30T08:16:20+09:00",
+      "finished_at": "2026-07-30T08:16:20+09:00",
+      "stdout": "",
+      "stderr": "/bin/sh: 1: W4a: not found\n"
+    }
+  ]
+}

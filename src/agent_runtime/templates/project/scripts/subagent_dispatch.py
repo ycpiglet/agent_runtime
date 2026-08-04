@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Subagent dispatch helper (TASK-116).
 
-Standardizes session-layer Agent tool invocation for 6 subagent roles.
+Standardizes session-layer Agent tool invocation for 7 subagent roles.
 TASK-109/113 used ad-hoc subagent calls; this module formalizes the
 pattern: pick a role, render a deterministic prompt, optionally emit a
 `subagent_call` message and an event log line. The actual provider/native
@@ -9,7 +9,8 @@ subagent invocation stays in the parent session — this helper produces the
 standardized prompt + audit trail so different execution surfaces produce
 the same observable dispatch contract.
 
-6 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+7 subagent roles (orthogonal to worker roles like backend/qa/ci-cd):
+  - scribe       — low-cost bounded archival and state projection
   - explorer     — read-only repository inspection and bounded evidence lookup
   - implementer  — write the code/files for the task spec
   - reviewer     — check implementation vs spec, surface issues
@@ -97,9 +98,19 @@ def routing_event_fields(
         "resolved_model": route.get("resolved_model"),
         "model_source": route.get("model_source") or "unverified",
         "reasoning_effort": route.get("reasoning_effort"),
+        "reasoning_source": route.get("reasoning_source") or "unverified",
         "route_status": route.get("route_status") or "unverified",
         "equivalence_status": route.get("equivalence_status") or "unverified",
         "application_status": route.get("application_status") or "unverified",
+        "model_changed": route.get("model_changed"),
+        "route_changed": route.get("route_changed"),
+        "role_policy_id": route.get("role_policy_id"),
+        "role_policy_status": route.get("role_policy_status"),
+        "role_policy_reason": route.get("role_policy_reason"),
+        "high_tier_authorized": route.get("high_tier_authorized"),
+        "registered_escalation_reason": route.get(
+            "registered_escalation_reason"
+        ),
         "model_observation_status": "unverified",
         "token_usage_status": "unavailable",
         "tokens_in": None,
@@ -173,6 +184,21 @@ class SubagentRole:
 
 
 SUBAGENT_ROLES: dict[str, SubagentRole] = {
+    "scribe": SubagentRole(
+        role_id="scribe",
+        description="Low-cost bounded archival and runtime-state projection.",
+        system_prompt=(
+            "You are the SCRIBE subagent. Preserve bounded, already-established "
+            "facts in the project record. Read only the evidence named by the "
+            "parent, update only the requested archival or status artifacts when "
+            "edits are authorized, and never invent decisions, completion, or "
+            "verification. Do not expand into implementation or architecture."
+        ),
+        output_contract=(
+            "Produce: facts archived, exact evidence references, files changed "
+            "(if any), and unresolved items explicitly left open."
+        ),
+    ),
     "explorer": SubagentRole(
         role_id="explorer",
         description="Read-only repository inspection and bounded evidence lookup.",
@@ -380,6 +406,125 @@ def get_default_subagents(worker_role: str) -> list[str]:
 # ---------- prompt rendering ----------
 
 
+_TIER_ASSERTION_FIELDS = (
+    "role",
+    "canonical_role",
+    "role_policy_id",
+    "role_policy_status",
+    "default_tier",
+    "requested_tier",
+    "selected_tier",
+    "provider_tier",
+    "escalation_triggers",
+    "registered_escalation_triggers",
+    "unknown_triggers",
+    "high_tier_requested",
+    "high_tier_authorized",
+    "registered_escalation_reason",
+    "denied_requested_tier",
+)
+_PROVIDER_ASSERTION_FIELDS = (
+    "provider",
+    "execution_surface",
+    "requested_tier",
+    "selected_tier",
+    "provider_tier",
+    "resolved_model",
+    "model_source",
+    "reasoning_effort",
+    "reasoning_source",
+    "availability_status",
+    "equivalence_status",
+    "route_status",
+    "economic_claim_status",
+)
+_LIST_ASSERTION_FIELDS = {
+    "escalation_triggers",
+    "registered_escalation_triggers",
+    "unknown_triggers",
+}
+
+
+def _assert_route_matches(
+    label: str,
+    supplied: dict | None,
+    authoritative: dict,
+    fields: tuple[str, ...],
+) -> None:
+    """Treat a pre-resolved route as an assertion, never as authority."""
+    if supplied is None:
+        return
+    mismatches: list[str] = []
+    for field in fields:
+        if field not in supplied:
+            continue
+        supplied_value = supplied.get(field)
+        authoritative_value = authoritative.get(field)
+        if field in _LIST_ASSERTION_FIELDS:
+            supplied_value = sorted(
+                str(item).strip()
+                for item in (supplied_value or [])
+                if str(item).strip()
+            )
+            authoritative_value = sorted(
+                str(item).strip()
+                for item in (authoritative_value or [])
+                if str(item).strip()
+            )
+        if supplied_value != authoritative_value:
+            mismatches.append(
+                f"{field}={supplied_value!r} expected "
+                f"{authoritative_value!r}"
+            )
+    if mismatches:
+        raise ValueError(
+            f"{label} route assertion mismatch: " + "; ".join(mismatches)
+        )
+
+
+def _resolve_role_bound_routes(
+    role_id: str,
+    *,
+    requested_tier: str | None = None,
+    escalation_triggers: list[str] | None = None,
+    provider: str | None = None,
+    tier_route: dict | None = None,
+    provider_route: dict | None = None,
+) -> tuple[dict, dict]:
+    """Resolve final executable authority and validate caller assertions."""
+    requested = (
+        str(requested_tier or "").strip()
+        or "auto"
+    )
+    authoritative_tier = model_routing.resolve_subagent_tier(
+        role_id,
+        requested_tier=requested,
+        escalation_triggers=list(escalation_triggers or []),
+    )
+    provider_name = (
+        str(provider or "").strip()
+        or "native-codex"
+    )
+    authoritative_provider = model_routing.resolve_provider_route(
+        provider_name,
+        authoritative_tier["selected_tier"],
+        requested_tier=authoritative_tier["requested_tier"],
+    )
+    _assert_route_matches(
+        "tier",
+        tier_route,
+        authoritative_tier,
+        _TIER_ASSERTION_FIELDS,
+    )
+    _assert_route_matches(
+        "provider",
+        provider_route,
+        authoritative_provider,
+        _PROVIDER_ASSERTION_FIELDS,
+    )
+    return authoritative_tier, authoritative_provider
+
+
 def render_prompt(
     role_id: str,
     task_id: str,
@@ -392,19 +537,23 @@ def render_prompt(
     diff_lines: int = 0,
     tier_route: dict | None = None,
     provider_route: dict | None = None,
+    requested_tier: str | None = None,
+    escalation_triggers: list[str] | None = None,
+    provider: str | None = None,
 ) -> str:
     """Render the full dispatch prompt the parent invokes Agent tool with."""
     role = get_role(role_id)
-    routing = (
-        None
-        if provider_route
-        else resolve_model_decision(
-            model,
-            grade=grade,
-            intent=intent,
-            changed_files=changed_files,
-            diff_lines=diff_lines,
-        )
+    # Every executable prompt is role-bound.  The legacy grade/prompt resolver
+    # remains available as a compatibility helper, but it may not select the
+    # model used by an actual dispatch because it accepts arbitrary raw model
+    # names and does not know the role's economic policy.
+    tier, route = _resolve_role_bound_routes(
+        role_id,
+        requested_tier=requested_tier or model,
+        escalation_triggers=escalation_triggers,
+        provider=provider,
+        tier_route=tier_route,
+        provider_route=provider_route,
     )
     parts: list[str] = [
         f"# Subagent dispatch — role={role.role_id} task={task_id}",
@@ -419,48 +568,33 @@ def render_prompt(
         role.output_contract,
         "",
     ]
-    if provider_route:
-        tier = dict(tier_route or {})
-        route = dict(provider_route)
-        triggers = ",".join(tier.get("escalation_triggers") or []) or "-"
-        parts.extend([
-            "## Model routing",
-            (
-                f"provider={route.get('provider') or 'unverified'} "
-                f"surface={route.get('execution_surface') or 'unverified'}"
-            ),
-            (
-                f"requested_pm_tier={route.get('requested_tier')} "
-                f"selected_pm_tier={route.get('selected_tier')} "
-                f"provider_tier={route.get('provider_tier')}"
-            ),
-            (
-                f"resolved_request_model={route.get('resolved_model')} "
-                f"reasoning_effort={route.get('reasoning_effort')} "
-                f"route_status={route.get('route_status')}"
-            ),
-            (
-                f"escalation_triggers={triggers} "
-                f"reason={tier.get('reason') or 'provider-aware route'}"
-            ),
-            (
-                "The resolved request model is configuration intent; the "
-                "observed model remains unverified until completion."
-            ),
-            "",
-        ])
-    elif routing:
-        signals = ",".join(routing["signals"]) or "-"
-        parts.extend([
-            "## Model routing",
-            f"Agent tool model: {routing['selected_tier']}",
-            (
-                f"grade={routing['grade']} policy_tier={routing['policy_tier']} "
-                f"selected_tier={routing['selected_tier']} signals={signals} "
-                f"reason={routing['reason']}"
-            ),
-            "",
-        ])
+    triggers = ",".join(tier.get("escalation_triggers") or []) or "-"
+    parts.extend([
+        "## Model routing",
+        (
+            f"provider={route.get('provider') or 'unverified'} "
+            f"surface={route.get('execution_surface') or 'unverified'}"
+        ),
+        (
+            f"requested_pm_tier={route.get('requested_tier')} "
+            f"selected_pm_tier={route.get('selected_tier')} "
+            f"provider_tier={route.get('provider_tier')}"
+        ),
+        (
+            f"resolved_request_model={route.get('resolved_model')} "
+            f"reasoning_effort={route.get('reasoning_effort')} "
+            f"route_status={route.get('route_status')}"
+        ),
+        (
+            f"escalation_triggers={triggers} "
+            f"reason={tier.get('reason') or 'provider-aware route'}"
+        ),
+        (
+            "The resolved request model is configuration intent; the "
+            "observed model remains unverified until completion."
+        ),
+        "",
+    ])
     if context_packet_path:
         parts.append("## Context packet")
         parts.append(f"Read this file first: `{context_packet_path}`")
@@ -502,10 +636,31 @@ def emit_call_message(
     routing: dict | None = None,
     tier_route: dict | None = None,
     provider_route: dict | None = None,
+    requested_tier: str | None = None,
+    escalation_triggers: list[str] | None = None,
+    provider: str | None = None,
+    dispatch_id: str | None = None,
+    claim_id: str | None = None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+    workload_id: str | None = None,
+    baseline_receipt_id: str | None = None,
     dry_run: bool = False,
 ) -> Path:
     """Write a subagent_call message to agents/messages/inbox/."""
     get_role(role_id)  # validates role_id early
+    effective_tier, effective_provider = _resolve_role_bound_routes(
+        role_id,
+        requested_tier=(
+            requested_tier
+            or (routing or {}).get("selected_tier")
+            or "auto"
+        ),
+        escalation_triggers=escalation_triggers,
+        provider=provider,
+        tier_route=tier_route,
+        provider_route=provider_route,
+    )
     msg_id = _new_msg_id()
     ts = _now_iso()
     front = [
@@ -519,7 +674,30 @@ def emit_call_message(
         "status: open",
         f"ts: {ts}",
         "in_reply_to:",
+        f"dispatch_id: {str(dispatch_id or '').strip() or msg_id}",
     ]
+    normalized_claim = str(claim_id or "").strip()
+    if normalized_claim:
+        front.append(f"claim_id: {normalized_claim}")
+    for key, value in (
+        ("task_token_budget", task_token_budget),
+        ("claim_token_budget", claim_token_budget),
+    ):
+        if value in (None, ""):
+            continue
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{key} must be a non-negative integer") from exc
+        if parsed < 0:
+            raise ValueError(f"{key} must be a non-negative integer")
+        front.append(f"{key}: {parsed}")
+    normalized_workload = str(workload_id or "").strip()
+    if normalized_workload:
+        front.append(f"eval_workload_id: {normalized_workload}")
+    normalized_baseline = str(baseline_receipt_id or "").strip()
+    if normalized_baseline:
+        front.append(f"eval_baseline_receipt_id: {normalized_baseline}")
     ev = evidence or []
     if ev:
         front.append("evidence:")
@@ -534,9 +712,9 @@ def emit_call_message(
             front.append(f"  - {item}")
     else:
         front.append("next: []")
-    if provider_route:
-        route = dict(provider_route)
-        tier = dict(tier_route or {})
+    if effective_provider:
+        route = effective_provider
+        tier = effective_tier
         front.append(f"provider: {route.get('provider') or 'unverified'}")
         front.append(
             f"execution_surface: {route.get('execution_surface') or 'unverified'}"
@@ -553,17 +731,38 @@ def emit_call_message(
         front.append(
             f"routing_status: {route.get('route_status') or 'unverified'}"
         )
-        triggers = ", ".join(
-            str(item) for item in (tier.get("escalation_triggers") or [])
+        front.append(
+            f"reasoning_effort: {route.get('reasoning_effort') or 'unverified'}"
         )
-        front.append(f"escalation_triggers: [{triggers}]")
-    elif routing:
-        front.append(f"routing_grade: {routing['grade']}")
-        front.append(f"policy_model: {routing['policy_tier']}")
-        front.append(f"selected_model: {routing['selected_tier']}")
-        signals = ", ".join(str(item) for item in (routing.get("signals") or []))
-        front.append(f"routing_signals: [{signals}]")
-        front.append(f"routing_reason: {routing.get('reason', '')}")
+        front.append(
+            f"reasoning_source: {route.get('reasoning_source') or 'unverified'}"
+        )
+        front.append(
+            f"role_policy_id: {tier.get('role_policy_id') or 'unverified'}"
+        )
+        front.append(
+            "role_policy_status: "
+            f"{tier.get('role_policy_status') or 'unverified'}"
+        )
+        front.append(
+            "high_tier_authorized: "
+            f"{str(tier.get('high_tier_authorized')).lower()}"
+        )
+        front.append(
+            "registered_escalation_reason: "
+            f"{tier.get('registered_escalation_reason') or 'none'}"
+        )
+        triggers = [
+            str(item).strip()
+            for item in (tier.get("escalation_triggers") or [])
+            if str(item).strip()
+        ]
+        if triggers:
+            front.append("escalation_triggers:")
+            for trigger in triggers:
+                front.append(f"  - {trigger}")
+        else:
+            front.append("escalation_triggers: []")
     front.append("---")
     body = (
         f"\nSubagent role: **{role_id}** — {SUBAGENT_ROLES[role_id].description}\n"
@@ -703,26 +902,17 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 2
-    routing_decision = resolve_model_decision(
-        args.model,
-        grade=args.grade,
-        intent=args.intent,
-        changed_files=args.changed_file,
-        diff_lines=args.diff_lines,
-    )
-    role_route = model_routing.resolve_subagent_tier(
-        args.role,
-        requested_tier=args.pm_tier,
-        escalation_triggers=args.escalation_trigger,
-    )
-    provider_route = None
-    if args.provider:
+    try:
+        role_route = model_routing.resolve_subagent_tier(
+            args.role,
+            requested_tier=args.pm_tier or args.model,
+            escalation_triggers=args.escalation_trigger,
+        )
         provider_route = model_routing.resolve_provider_route(
-            args.provider,
+            args.provider or "native-codex",
             role_route["selected_tier"],
             requested_tier=role_route["requested_tier"],
         )
-    try:
         prompt = render_prompt(
             role_id=args.role,
             task_id=args.task_id,
@@ -735,10 +925,14 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             diff_lines=args.diff_lines,
             tier_route=role_route,
             provider_route=provider_route,
+            requested_tier=args.pm_tier or args.model,
+            escalation_triggers=args.escalation_trigger,
+            provider=args.provider or "native-codex",
         )
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
+    routing_decision = role_route
     print(prompt)
     if args.emit_call:
         # Cap check (TASK-143, RETRO §5 / STAGE-7 §7) — runs before write.
@@ -767,8 +961,18 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             routing=routing_decision,
             tier_route=role_route,
             provider_route=provider_route,
+            requested_tier=args.pm_tier or args.model,
+            escalation_triggers=args.escalation_trigger,
+            provider=args.provider or "native-codex",
+            dispatch_id=args.dispatch_id,
+            claim_id=args.claim_id,
+            task_token_budget=args.task_token_budget,
+            claim_token_budget=args.claim_token_budget,
+            workload_id=args.workload_id,
+            baseline_receipt_id=args.baseline_receipt_id,
             dry_run=args.dry_run,
         )
+        effective_dispatch_id = args.dispatch_id or msg_path.stem
         evt_path = emit_event(
             role_id=args.role,
             task_id=args.task_id,
@@ -778,9 +982,9 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
                 "intent": args.intent,
                 **routing_event_fields(
                     routing_decision,
-                    dispatch_id=msg_path.stem,
+                    dispatch_id=effective_dispatch_id,
                     provider=args.provider,
-                    route=provider_route,
+                    route={**role_route, **dict(provider_route or {})},
                     preflight=preflight,
                 ),
             },
@@ -800,7 +1004,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--role",
         choices=list_roles(),
-        help="Subagent role to dispatch (6 standard roles).",
+        help="Subagent role to dispatch (7 standard roles).",
     )
     p.add_argument("--task-id", help="Related TASK id, e.g. TASK-116.")
     p.add_argument("--intent", help="One-line dispatch intent.")
@@ -811,11 +1015,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--model",
         default="auto",
-        help="Agent tool model tier: auto, haiku, sonnet, or opus (default: auto).",
+        choices=sorted(
+            {"auto", "haiku", "sonnet", "opus"}
+            | set(model_routing.ALLOWED_PM_TIERS)
+        ),
+        help="Role-bound PM/compatibility tier (default: auto); raw model names are rejected.",
     )
     p.add_argument(
         "--provider",
-        default="",
+        default="native-codex",
         help="Execution provider/surface for auditable resolution (for example native-codex)",
     )
     p.add_argument(
@@ -862,6 +1070,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Worker role that owns the dispatch (default: lead-engineer).",
     )
     p.add_argument(
+        "--dispatch-id",
+        help="Stable dispatch identity; defaults to the emitted message id.",
+    )
+    p.add_argument(
+        "--claim-id",
+        help="Canonical task-claim identity carried into the inbox contract.",
+    )
+    p.add_argument(
+        "--task-token-budget",
+        type=int,
+        help="Optional non-negative task token budget carried into the message.",
+    )
+    p.add_argument(
+        "--claim-token-budget",
+        type=int,
+        help="Optional non-negative claim token budget carried into the message.",
+    )
+    p.add_argument(
+        "--workload-id",
+        help="Comparable evaluation workload identity.",
+    )
+    p.add_argument(
+        "--baseline-receipt-id",
+        help="Immutable baseline execution receipt identity.",
+    )
+    p.add_argument(
         "--evidence",
         action="append",
         help="Path or URL referenced as evidence (repeatable).",
@@ -879,7 +1113,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--list-roles",
         action="store_true",
-        help="List the 6 standard subagent roles.",
+        help="List the 7 standard subagent roles.",
     )
     p.add_argument(
         "--for-worker",

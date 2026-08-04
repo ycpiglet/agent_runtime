@@ -1,7 +1,8 @@
 """Stop hook: block closure when substantial work lacks compound/review/retro.
 
-Emits Stop-hook JSON only for block paths. Non-blocking and best-effort approve
-paths stay silent. Honors AGENT_RUNTIME_CLOSURE_GATE_DISABLE via closure_gate.
+Emits Stop-hook JSON only for block paths. Non-blocking and explicit bypass
+paths stay silent. Unexpected gate errors fail closed with a bounded message.
+Honors AGENT_RUNTIME_CLOSURE_GATE_DISABLE via closure_gate.
 """
 
 from __future__ import annotations
@@ -39,8 +40,17 @@ def main(argv: list[str] | None = None) -> int:
             "reason": result["reason"],
             "systemMessage": result["message"] if result["decision"] == "block" else "",
         }
-    except Exception:  # noqa: BLE001 - never block a stop on a gate error
-        _emit_stop_payload({"decision": "approve", "reason": "closure gate best-effort error bypass"})
+    except Exception:  # noqa: BLE001 - emit only a bounded fail-closed result
+        _emit_stop_payload(
+            {
+                "decision": "block",
+                "reason": "closure-gate-error",
+                "systemMessage": (
+                    "Closure validation failed unexpectedly. Repair or explicitly "
+                    "bypass the gate before stopping."
+                ),
+            }
+        )
         return 0
     _emit_stop_payload(payload)
     return 0

@@ -1,0 +1,27 @@
+{
+  "cause": "Executable mirrors have no complete declared parity contract. The root taskset gate gained ISO timestamp and attention masking while the packaged copy remained stale, and the existing test exercised only the root date-only path.",
+  "created_at": "2026-07-30T03:31:00+09:00",
+  "created_by": "codex-root-task-ar-648-011",
+  "defect_signatures": [
+    "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c"
+  ],
+  "id": "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25",
+  "prevention": "Declare intentional mirror relationships, enforce byte parity for identical executables, test packaged copies with real ISO-second board output, and require a fresh consumer replay before promotion.",
+  "prevention_refs": [
+    "tests/test_taskset_work_gate.py"
+  ],
+  "recurrence_count": 2,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md"
+  ],
+  "status": "active",
+  "summary": "Bean attempt 4 proved that a repaired root taskset gate can diverge from its packaged project-template copy, causing a deterministic consumer completion false failure after one second.",
+  "title": "Packaged runtime mirrors must preserve root wall-clock semantics",
+  "verification_refs": [
+    "reviews/W4B-2026-07-30-unit-task-ar-648-011.md"
+  ],
+  "work_ids": [
+    "UNIT-TASK-AR-648-011"
+  ]
+}

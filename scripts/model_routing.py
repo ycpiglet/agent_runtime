@@ -108,13 +108,106 @@ HIGH_TIER_TRIGGERS = {
     "repeated_failure",
 }
 
+HIGH_PM_TIERS = {"planner_high", "reviewer_high"}
+
+# Explicit economic policy for every role family used by the Runtime.  Aliases
+# intentionally live here instead of falling through to ``worker_standard`` so
+# a Scribe or research call cannot silently become a generic, more expensive
+# worker.  A high default is itself a registered policy reason; a low/standard
+# role may reach a high tier only through a registered escalation trigger.
+ROLE_TIER_POLICIES = {
+    "scribe": {
+        "tier": "worker_low",
+        "aliases": (
+            "scribe",
+            "archivist",
+            "documentation",
+            "doc-steward",
+            "doc_steward",
+        ),
+        "reason": "bounded documentation and state projection policy",
+    },
+    "exploration": {
+        "tier": "worker_low",
+        "aliases": (
+            "explorer",
+            "exploration",
+            "research",
+            "researcher",
+            "scout",
+            "timeline",
+            "timeline-agent",
+            "progress-scout",
+            "progress_scout",
+        ),
+        "reason": "read-only exploration and deterministic-first research policy",
+    },
+    "implementation": {
+        "tier": "worker_low",
+        "aliases": (
+            "implementer",
+            "implementation",
+            "backend",
+            "ci-cd",
+            "cicd",
+            "frontend",
+            "uiux",
+        ),
+        "reason": "bounded implementation unit policy",
+    },
+    "review": {
+        "tier": "reviewer_standard",
+        "aliases": (
+            "reviewer",
+            "review",
+            "qa",
+            "qa-reviewer",
+            "qa_reviewer",
+            "beta-tester",
+        ),
+        "reason": "independent review policy",
+    },
+    "audit": {
+        "tier": "reviewer_high",
+        "aliases": (
+            "auditor",
+            "audit",
+            "independent-auditor",
+            "independent_auditor",
+            "skeptic",
+        ),
+        "reason": "registered adversarial audit policy",
+    },
+    "planning": {
+        "tier": "planner_high",
+        "aliases": (
+            "strategist",
+            "planner",
+            "architect",
+        ),
+        "reason": "registered architecture and planning policy",
+    },
+}
+
+
+def _role_key(value: str) -> str:
+    return str(value or "").strip().lower().replace("_", "-")
+
+
+ROLE_POLICY_BY_ALIAS = {
+    _role_key(alias): {
+        "policy_id": policy_id,
+        "canonical_role": policy_id,
+        "tier": str(policy["tier"]),
+        "reason": str(policy["reason"]),
+    }
+    for policy_id, policy in ROLE_TIER_POLICIES.items()
+    for alias in policy["aliases"]
+}
+
+# Compatibility surface used by older callers/tests.
 SUBAGENT_ROLE_PM_TIER = {
-    "explorer": "worker_low",
-    "implementer": "worker_low",
-    "strategist": "planner_high",
-    "reviewer": "reviewer_standard",
-    "auditor": "reviewer_high",
-    "skeptic": "reviewer_high",
+    alias: str(policy["tier"]) for alias, policy in ROLE_POLICY_BY_ALIAS.items()
 }
 
 PREFLIGHT_STATUSES = {
@@ -294,17 +387,36 @@ def resolve_work_item_tier(
     requested_tier = normalize_pm_tier(str(requested or "worker_standard"))
     triggers = sorted(set(_as_list(task.get("escalation_triggers")) + _as_list(unit.get("escalation_triggers"))))
     unknown_triggers = [trigger for trigger in triggers if trigger not in ESCALATION_TRIGGERS]
+    registered_triggers = sorted(set(triggers) & HIGH_TIER_TRIGGERS)
     selected_tier = requested_tier
-    escalated = bool(set(triggers) & HIGH_TIER_TRIGGERS)
+    escalated = bool(registered_triggers)
     if escalated and requested_tier.startswith("worker_"):
         selected_tier = "planner_high"
     provider_tier = PM_TIER_TO_PROVIDER_TIER[selected_tier]
+    registered_reason = None
+    if selected_tier in HIGH_PM_TIERS:
+        registered_reason = (
+            "trigger:" + ",".join(registered_triggers)
+            if selected_tier != requested_tier
+            else f"task_unit_declared_tier:{requested_tier}"
+        )
     return {
+        "routing_policy_id": "task-unit-tier-policy",
+        "routing_policy_reason": (
+            "unit tier overrides task tier; registered high-risk triggers gate "
+            "worker escalation"
+        ),
         "requested_tier": requested_tier,
         "selected_tier": selected_tier,
         "provider_tier": provider_tier,
         "escalation_triggers": triggers,
+        "registered_escalation_triggers": registered_triggers,
         "unknown_triggers": unknown_triggers,
+        "high_tier_requested": requested_tier in HIGH_PM_TIERS,
+        "high_tier_authorized": (
+            selected_tier not in HIGH_PM_TIERS or registered_reason is not None
+        ),
+        "registered_escalation_reason": registered_reason,
         "reason": (
             "escalated to planner_high by task/unit trigger"
             if selected_tier != requested_tier
@@ -320,37 +432,95 @@ def resolve_subagent_tier(
     escalation_triggers: Iterable[str] | None = None,
 ) -> dict[str, Any]:
     """Resolve a subagent role into a PM tier without naming a provider model."""
-    role = str(role_id or "").strip().lower()
-    default = SUBAGENT_ROLE_PM_TIER.get(role, "worker_standard")
-    requested = normalize_pm_tier(requested_tier, default=default)
+    role = _role_key(role_id)
+    policy = ROLE_POLICY_BY_ALIAS.get(
+        role,
+        {
+            "policy_id": "generic-worker",
+            "canonical_role": "generic-worker",
+            "tier": "worker_standard",
+            "reason": "generic worker fallback",
+        },
+    )
+    default = str(policy["tier"])
+    raw_requested = str(requested_tier or "").strip().lower()
+    if raw_requested in {"", "auto"}:
+        requested = default
+    else:
+        compatible = _tier_from_compatibility(raw_requested)
+        if compatible is None:
+            raise ValueError(
+                "role-bound dispatch requires a PM tier or "
+                "haiku/sonnet/opus compatibility tier"
+            )
+        if compatible == "planner_high" and default.startswith("reviewer_"):
+            compatible = "reviewer_high"
+        requested = normalize_pm_tier(compatible, default=default)
     triggers = sorted(set(_as_list(escalation_triggers)))
     unknown = [trigger for trigger in triggers if trigger not in ESCALATION_TRIGGERS]
+    matched = sorted(set(triggers) & HIGH_TIER_TRIGGERS)
     selected = requested
-    if set(triggers) & HIGH_TIER_TRIGGERS:
+    high_request_denied = False
+    if (
+        requested in HIGH_PM_TIERS
+        and default not in HIGH_PM_TIERS
+        and not matched
+    ):
+        selected = default
+        high_request_denied = True
+    if matched:
         if requested.startswith("worker_"):
             selected = "planner_high"
         elif requested == "reviewer_standard":
             selected = "reviewer_high"
+    registered_reason = None
+    if selected in HIGH_PM_TIERS:
+        if default in HIGH_PM_TIERS:
+            registered_reason = f"role_policy:{policy['policy_id']}"
+        elif matched:
+            registered_reason = "trigger:" + ",".join(matched)
+    routing_status = (
+        "unverified"
+        if unknown
+        else "high_tier_denied"
+        if high_request_denied
+        else "escalated"
+        if selected != requested
+        else "selected"
+    )
     return {
         "role": role,
+        "canonical_role": policy["canonical_role"],
+        "role_policy_id": policy["policy_id"],
+        "role_policy_status": (
+            "explicit" if role in ROLE_POLICY_BY_ALIAS else "generic_fallback"
+        ),
+        "role_policy_reason": policy["reason"],
+        "grade": "RolePolicy",
+        "policy_tier": default,
+        "signals": triggers,
+        "default_tier": default,
         "requested_tier": requested,
         "selected_tier": selected,
         "provider_tier": PM_TIER_TO_PROVIDER_TIER[selected],
         "escalation_triggers": triggers,
+        "registered_escalation_triggers": matched,
         "unknown_triggers": unknown,
-        "routing_status": (
-            "unverified"
-            if unknown
-            else "escalated"
-            if selected != requested
-            else "selected"
+        "routing_status": routing_status,
+        "high_tier_requested": requested in HIGH_PM_TIERS,
+        "high_tier_authorized": (
+            selected not in HIGH_PM_TIERS or registered_reason is not None
         ),
+        "registered_escalation_reason": registered_reason,
+        "denied_requested_tier": requested if high_request_denied else None,
         "reason": (
             "unknown escalation trigger requires review"
             if unknown
+            else "high tier denied without a registered role policy or escalation trigger"
+            if high_request_denied
             else "escalated by registered high-risk trigger"
             if selected != requested
-            else f"default tier for {role or 'unregistered'} role"
+            else str(policy["reason"])
         ),
     }
 
@@ -464,6 +634,34 @@ def _provider_mapping(
     }
 
 
+def canonical_provider_identity(provider_name: str) -> str | None:
+    """Return a stable identity only for registered provider names."""
+    provider = str(provider_name or "").strip().lower()
+    if provider in {"native-codex", "codex-session", "codex-native"}:
+        return "native-codex"
+    if provider in {"codex-agent", "codex"}:
+        return "codex-agent"
+    if provider in PROVIDER_MODEL_ENV:
+        return provider
+    return None
+
+
+def provider_reasoning_capability(provider_name: str) -> str:
+    """Return the canonical reasoning-observation contract for a provider."""
+    identity = canonical_provider_identity(provider_name)
+    if identity is None:
+        return "unknown"
+    mapping = _provider_mapping(identity, "worker_low")
+    if mapping is None:
+        return "unknown"
+    if (
+        mapping.get("reasoning_effort") is None
+        and mapping.get("reasoning_source") == "unsupported"
+    ):
+        return "unsupported"
+    return "required"
+
+
 def _tier_from_compatibility(value: str | None) -> str | None:
     text = str(value or "").strip().lower()
     if text in ALLOWED_PM_TIERS:
@@ -478,23 +676,42 @@ def _tier_from_compatibility(value: str | None) -> str | None:
 def provider_routing_matrix(provider_name: str) -> dict[str, Any]:
     """Describe configured tier mappings without making a provider call."""
     rows: list[dict[str, Any]] = []
-    groups: dict[str, list[str]] = {}
+    groups: dict[tuple[str, str | None], list[str]] = {}
     for tier in PM_TIER_TO_PROVIDER_TIER:
         resolved = _provider_mapping(provider_name, tier)
         if resolved is None:
             continue
-        model = str(resolved["resolved_model"])
-        groups.setdefault(model, []).append(tier)
+        identity = (
+            str(resolved["resolved_model"]),
+            (
+                str(resolved["reasoning_effort"])
+                if resolved.get("reasoning_effort") is not None
+                else None
+            ),
+        )
+        groups.setdefault(identity, []).append(tier)
         rows.append(
             {
                 "pm_tier": tier,
                 "provider_tier": PM_TIER_TO_PROVIDER_TIER[tier],
                 **resolved,
+                "resolved_route_identity": {
+                    "model": identity[0],
+                    "reasoning_effort": identity[1],
+                },
                 "availability_status": "configured_unverified",
             }
         )
     for row in rows:
-        equivalent = groups[str(row["resolved_model"])]
+        identity = (
+            str(row["resolved_model"]),
+            (
+                str(row["reasoning_effort"])
+                if row.get("reasoning_effort") is not None
+                else None
+            ),
+        )
+        equivalent = groups[identity]
         row["equivalent_tiers"] = list(equivalent)
         row["equivalence_status"] = (
             "equivalent" if len(equivalent) > 1 else "distinct"
@@ -514,8 +731,18 @@ def provider_routing_matrix(provider_name: str) -> dict[str, Any]:
         "status": "configured_unverified" if rows else "unsupported",
         "rows": rows,
         "equivalence_groups": [
-            {"resolved_model": model, "tiers": tiers}
-            for model, tiers in sorted(groups.items())
+            {
+                "resolved_model": identity[0],
+                "reasoning_effort": identity[1],
+                "route_identity": {
+                    "model": identity[0],
+                    "reasoning_effort": identity[1],
+                },
+                "tiers": tiers,
+            }
+            for identity, tiers in sorted(
+                groups.items(), key=lambda item: (item[0][0], item[0][1] or "")
+            )
             if len(tiers) > 1
         ],
     }
@@ -528,6 +755,7 @@ def resolve_provider_route(
     requested_tier: str | None = None,
     baseline_tier: str | None = None,
     baseline_model: str | None = None,
+    baseline_reasoning_effort: str | None = None,
     observed_model: str | None = None,
     observed_reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
@@ -551,6 +779,7 @@ def resolve_provider_route(
                 "resolved_model": None,
                 "model_source": "unsupported",
                 "reasoning_effort": None,
+                "reasoning_source": "unsupported",
                 "availability_status": "unsupported",
                 "route_status": "unsupported",
                 "application_status": "not_applied",
@@ -561,6 +790,11 @@ def resolve_provider_route(
                     "observed" if observed_model else "unverified"
                 ),
                 "model_changed": None,
+                "route_changed": None,
+                "resolved_route_identity": None,
+                "baseline_route_identity": None,
+                "observed_route_identity": None,
+                "route_observation_status": "unverified",
             }
         env_var_name, _tier_map = mapping
         raw_model = str(selected_tier).strip()
@@ -574,6 +808,7 @@ def resolve_provider_route(
             "model_source": "explicit_model",
             "provider_env": {env_var_name: raw_model},
             "reasoning_effort": None,
+            "reasoning_source": "unsupported",
             "availability_status": "configured_unverified",
             "route_status": "unverified",
             "application_status": (
@@ -585,6 +820,23 @@ def resolve_provider_route(
             "observed_reasoning_effort": observed_reasoning_effort,
             "model_observation_status": "observed" if observed_model else "unverified",
             "model_changed": None,
+            "route_changed": None,
+            "resolved_route_identity": {
+                "model": raw_model,
+                "reasoning_effort": None,
+            },
+            "baseline_route_identity": None,
+            "observed_route_identity": (
+                {
+                    "model": observed_model,
+                    "reasoning_effort": observed_reasoning_effort,
+                }
+                if observed_model
+                else None
+            ),
+            "route_observation_status": (
+                "observed" if observed_model else "unverified"
+            ),
         }
 
     resolved = _provider_mapping(provider_name, selected_pm)
@@ -593,46 +845,100 @@ def resolve_provider_route(
             provider_name,
             "__unsupported__",
             requested_tier=requested_tier,
+            baseline_reasoning_effort=baseline_reasoning_effort,
             observed_model=observed_model,
             observed_reasoning_effort=observed_reasoning_effort,
         )
     matrix = provider_routing_matrix(provider_name)
     row = next(item for item in matrix["rows"] if item["pm_tier"] == selected_pm)
     comparison_model = str(baseline_model or "").strip() or None
+    comparison_reasoning = (
+        str(baseline_reasoning_effort or "").strip() or None
+    )
     comparison_source = "explicit_baseline_model" if comparison_model else None
     if comparison_model is None and baseline_tier:
         baseline_pm = _tier_from_compatibility(baseline_tier)
         baseline = _provider_mapping(provider_name, baseline_pm) if baseline_pm else None
         if baseline:
             comparison_model = str(baseline["resolved_model"])
+            comparison_reasoning = (
+                str(baseline["reasoning_effort"])
+                if baseline.get("reasoning_effort") is not None
+                else None
+            )
             comparison_source = f"baseline_tier:{baseline_pm}"
     if comparison_model is None and requested_pm and requested_pm != selected_pm:
         requested = _provider_mapping(provider_name, requested_pm)
         if requested:
             comparison_model = str(requested["resolved_model"])
+            comparison_reasoning = (
+                str(requested["reasoning_effort"])
+                if requested.get("reasoning_effort") is not None
+                else None
+            )
             comparison_source = f"requested_tier:{requested_pm}"
+    reasoning_required = resolved.get("reasoning_source") != "unsupported"
+    resolved_identity = {
+        "model": str(resolved["resolved_model"]),
+        "reasoning_effort": (
+            str(resolved["reasoning_effort"])
+            if resolved.get("reasoning_effort") is not None
+            else None
+        ),
+    }
+    baseline_identity = (
+        {
+            "model": comparison_model,
+            "reasoning_effort": comparison_reasoning,
+        }
+        if comparison_model is not None
+        else None
+    )
+    baseline_complete = bool(comparison_model) and (
+        not reasoning_required or comparison_reasoning is not None
+    )
+    observed_identity = (
+        {
+            "model": str(observed_model),
+            "reasoning_effort": (
+                str(observed_reasoning_effort)
+                if observed_reasoning_effort is not None
+                else None
+            ),
+        }
+        if observed_model
+        else None
+    )
+    observation_complete = bool(observed_model) and (
+        not reasoning_required or observed_reasoning_effort is not None
+    )
     model_changed = (
         None
         if comparison_model is None
         else comparison_model != str(resolved["resolved_model"])
     )
-    if model_changed is True:
+    route_changed = (
+        None
+        if not baseline_complete
+        else baseline_identity != resolved_identity
+    )
+    if route_changed is True:
         route_status = "effective"
-    elif model_changed is False or row["equivalence_status"] == "equivalent":
+    elif route_changed is False or row["equivalence_status"] == "equivalent":
         route_status = "ineffective_equivalent"
     else:
         route_status = "unverified"
     application_status = "configured_unverified"
-    if observed_model:
+    if observation_complete:
         application_status = (
             "applied"
-            if observed_model == resolved["resolved_model"]
+            if observed_identity == resolved_identity
             else "not_applied"
         )
     economic_status = "unverified"
-    if model_changed is False or row["equivalence_status"] == "equivalent":
+    if route_changed is False or row["equivalence_status"] == "equivalent":
         economic_status = "ineligible_equivalent"
-    elif application_status == "applied" and model_changed is True:
+    elif application_status == "applied" and route_changed is True:
         economic_status = "needs_usage_evidence"
     elif application_status == "not_applied":
         economic_status = "ineligible_not_applied"
@@ -653,10 +959,15 @@ def resolve_provider_route(
         "reasoning_effort": resolved["reasoning_effort"],
         "reasoning_source": resolved["reasoning_source"],
         "baseline_model": comparison_model,
+        "baseline_reasoning_effort": comparison_reasoning,
         "baseline_model_source": comparison_source,
+        "resolved_route_identity": resolved_identity,
+        "baseline_route_identity": baseline_identity,
+        "observed_route_identity": observed_identity,
         "equivalent_tiers": row["equivalent_tiers"],
         "equivalence_status": row["equivalence_status"],
         "model_changed": model_changed,
+        "route_changed": route_changed,
         "availability_status": "configured_unverified",
         "route_status": route_status,
         "application_status": application_status,
@@ -664,6 +975,13 @@ def resolve_provider_route(
         "observed_model": observed_model,
         "observed_reasoning_effort": observed_reasoning_effort,
         "model_observation_status": "observed" if observed_model else "unverified",
+        "route_observation_status": (
+            "observed"
+            if observation_complete
+            else "partial"
+            if observed_model
+            else "unverified"
+        ),
     }
 
 

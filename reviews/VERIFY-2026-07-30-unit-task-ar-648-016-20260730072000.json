@@ -1,0 +1,106 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000",
+  "work_id": "UNIT-TASK-AR-648-016",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-648",
+  "unit_id": "UNIT-TASK-AR-648-016",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T07:20:00+09:00",
+  "verified_by": "codex-root-v080-planner",
+  "command_count": 10,
+  "commands": [
+    {
+      "command": "python scripts/pilot_isolation_gate.py --evidence tests/fixtures/pilots/bean-wiki/isolation-green-attempt-6.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:52+09:00",
+      "finished_at": "2026-07-30T07:14:52+09:00",
+      "stdout": "{\n  \"block_count\": 0,\n  \"findings\": [],\n  \"schema\": \"agent-runtime-pilot-isolation/v1\",\n  \"status\": \"pass\",\n  \"watch_count\": 0\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/pilot_acceptance.py --host bean-wiki --fixture tests/fixtures/pilots/bean-wiki/evidence-green-attempt-6.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:52+09:00",
+      "finished_at": "2026-07-30T07:14:52+09:00",
+      "stdout": "{\n  \"contract_id\": \"bean-wiki:bean-wiki-v080-green-attempt-6\",\n  \"finding_count\": 0,\n  \"findings\": [],\n  \"fixture\": \"tests/fixtures/pilots/bean-wiki/evidence-green-attempt-6.json\",\n  \"host\": \"bean-wiki\",\n  \"schema\": \"agent-runtime-pilot-acceptance-result/v1\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/pilot_acceptance.py --host bean-wiki --fixture tests/fixtures/pilots/bean-wiki/evidence.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:52+09:00",
+      "finished_at": "2026-07-30T07:14:52+09:00",
+      "stdout": "{\n  \"contract_id\": \"bean-wiki:bean-wiki-v080-red-pilot\",\n  \"finding_count\": 0,\n  \"findings\": [],\n  \"fixture\": \"tests/fixtures/pilots/bean-wiki/evidence.json\",\n  \"host\": \"bean-wiki\",\n  \"schema\": \"agent-runtime-pilot-acceptance-result/v1\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/pilot_acceptance.py --host bean-wiki --fixture tests/fixtures/pilots/bean-wiki/evidence-green-attempt-5.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:52+09:00",
+      "finished_at": "2026-07-30T07:14:52+09:00",
+      "stdout": "{\n  \"contract_id\": \"bean-wiki:bean-wiki-v080-green-attempt-5\",\n  \"finding_count\": 0,\n  \"findings\": [],\n  \"fixture\": \"tests/fixtures/pilots/bean-wiki/evidence-green-attempt-5.json\",\n  \"host\": \"bean-wiki\",\n  \"schema\": \"agent-runtime-pilot-acceptance-result/v1\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_pilot_isolation_gate.py tests/test_pilot_acceptance.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:52+09:00",
+      "finished_at": "2026-07-30T07:14:53+09:00",
+      "stdout": ".........................................                                [100%]\n41 passed in 0.53s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_work_item_classifier.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_continuity_contract_gate.py tests/test_owner_governance_consumer_host.py tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:14:53+09:00",
+      "finished_at": "2026-07-30T07:15:10+09:00",
+      "stdout": "........................................................................ [ 15%]\n........................................................................ [ 30%]\n........................................................................ [ 45%]\n........................................................................ [ 60%]\n........................................................................ [ 75%]\n........................................................................ [ 90%]\n................................................                         [100%]\n480 passed in 16.98s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:15:10+09:00",
+      "finished_at": "2026-07-30T07:15:10+09:00",
+      "stdout": "template-mirror: expected=84 common=84 identical=81 intentional=3 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/runtime_asset_usage.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:15:10+09:00",
+      "finished_at": "2026-07-30T07:15:11+09:00",
+      "stdout": "ge=6 reuse=2\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.template_mirror kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.pilot_isolation kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=3 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=3 usage=6 reuse=2\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=62 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric gate.footprint_conflict kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.worktree_lifecycle kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric gate.attribution kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric gate.verification_freshness kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.release_cadence kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric gate.conversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.compound_record kind=script status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:15:11+09:00",
+      "finished_at": "2026-07-30T07:15:16+09:00",
+      "stdout": " usage=17 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.8.0\nrelease-cadence: baseline tag=v0.7.0 commits=344 feat=13 fix=59 breaking=0 days=6 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 344); feat>=5 (actual 13)\nrelease-cadence: minor bump reasons: template-deleted-or-renamed:src/agent_runtime/templates/project/scripts/allimbot_stop_hook.cmd; schema-changed:schemas/task-unit.schema.json\nrelease-cadence: current version=0.7.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nplanning_records=37\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=92>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl\nreviews=406\ncompounds=17\nretros=12\ncompound_retro_total=29\nratio=14.0\nthreshold=20\nwatch=0\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 0\n",
+      "stderr": ""
+    },
+    {
+      "command": "PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T07:15:16+09:00",
+      "finished_at": "2026-07-30T07:15:17+09:00",
+      "stdout": "# Agent Runtime Public Sanitization\n\nfindings=0\n\n| Path | Kind | Detail |\n|------|------|--------|\n| - | ok | No forbidden public package content found. |\n",
+      "stderr": ""
+    }
+  ]
+}

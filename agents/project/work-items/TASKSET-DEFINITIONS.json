@@ -215,7 +215,37 @@
       "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
       "display_name": "v0.8 Adoption and Enforcement",
       "summary": "Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.",
-      "order": 640
+      "order": 640,
+      "tasks": [
+        "TASK-AR-639",
+        "TASK-AR-640",
+        "TASK-AR-641",
+        "TASK-AR-642",
+        "TASK-AR-643",
+        "TASK-AR-644",
+        "TASK-AR-645",
+        "TASK-AR-646",
+        "TASK-AR-647",
+        "TASK-AR-648",
+        "TASK-AR-649",
+        "TASK-AR-650",
+        "TASK-AR-651"
+      ]
+    },
+    {
+      "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+      "display_name": "v0.8 Operability Hardening",
+      "summary": "Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.",
+      "order": 645,
+      "tasks": [
+        "TASK-AR-652",
+        "TASK-AR-653",
+        "TASK-AR-654",
+        "TASK-AR-655",
+        "TASK-AR-656",
+        "TASK-AR-657",
+        "TASK-AR-658"
+      ]
     },
     {
       "task_set_id": "TASKSET-AR-MERGE-QUEUE-SAFETY",

@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-07-30T09:29:29+09:00
-record_count: 528
+generated_at: 2026-08-04T14:28:19+09:00
+record_count: 556
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `528` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `556` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `44` records |
-| Tasksets | pass | `68` records |
-| Tasks | pass | `317` records |
-| Units | pass | `99` records |
+| Initiatives | pass | `45` records |
+| Tasksets | pass | `69` records |
+| Tasks | pass | `323` records |
+| Units | pass | `119` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -550,13 +550,27 @@ record_count: 528
 | 41.1.8.1 | Unit 41.1.8.1 | unit | `UNIT-TASK-AR-646-001` | `TASK-AR-646` | completed | `agents/lead_engineer/tasks/units/TASK-AR-646/UNIT-TASK-AR-646-001.md` | UNIT-TASK-AR-646-001 - Add provider-aware routing and dispatch telemetry |
 | 41.1.9 | Task 41.1.9 | task | `TASK-AR-647` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-647.md` | Use Allimbot's current durable, allowlisted project-event boundary and make the `secu… |
 | 41.1.9.1 | Unit 41.1.9.1 | unit | `UNIT-TASK-AR-647-001` | `TASK-AR-647` | completed | `agents/lead_engineer/tasks/units/TASK-AR-647/UNIT-TASK-AR-647-001.md` | UNIT-TASK-AR-647-001 - Add native events and security-service guardrails |
-| 41.1.10 | Task 41.1.10 | task | `TASK-AR-648` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | in_progress | `agents/lead_engineer/tasks/TASK-AR-648.md` | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
+| 41.1.10 | Task 41.1.10 | task | `TASK-AR-648` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-648.md` | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
 | 41.1.10.1 | Unit 41.1.10.1 | unit | `UNIT-TASK-AR-648-001` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-001.md` | UNIT-TASK-AR-648-001 - Adopt and exercise core plus web-content in Bean Wiki |
-| 41.1.10.2 | Unit 41.1.10.2 | unit | `UNIT-TASK-AR-648-002` | `TASK-AR-648` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md` | UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green |
-| 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
-| 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
-| 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
-| 41.1.12.1 | Unit 41.1.12.1 | unit | `UNIT-TASK-AR-650-001` | `TASK-AR-650` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md` | UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal |
+| 41.1.10.2 | Unit 41.1.10.2 | unit | `UNIT-TASK-AR-648-002` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md` | UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green |
+| 41.1.10.3 | Unit 41.1.10.3 | unit | `UNIT-TASK-AR-648-003` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md` | UNIT-TASK-AR-648-003 - Repair Claim SCM and Portable State Runtime |
+| 41.1.10.4 | Unit 41.1.10.4 | unit | `UNIT-TASK-AR-648-004` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-004.md` | UNIT-TASK-AR-648-004 - Repair Auto-review Overlay Claim Contract |
+| 41.1.10.5 | Unit 41.1.10.5 | unit | `UNIT-TASK-AR-648-005` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-005.md` | UNIT-TASK-AR-648-005 - Seal Explicit Claim Commit Trees |
+| 41.1.10.6 | Unit 41.1.10.6 | unit | `UNIT-TASK-AR-648-006` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-006.md` | UNIT-TASK-AR-648-006 - Bean Wiki Green Replay Attempt 2 |
+| 41.1.10.7 | Unit 41.1.10.7 | unit | `UNIT-TASK-AR-648-007` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-007.md` | UNIT-TASK-AR-648-007 - Blocked Unit Redispatch Guard |
+| 41.1.10.8 | Unit 41.1.10.8 | unit | `UNIT-TASK-AR-648-008` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-008.md` | UNIT-TASK-AR-648-008 - Portable Continuity Contract |
+| 41.1.10.9 | Unit 41.1.10.9 | unit | `UNIT-TASK-AR-648-009` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-009.md` | UNIT-TASK-AR-648-009 - Bean Wiki Green Replay Attempt 3 |
+| 41.1.10.10 | Unit 41.1.10.10 | unit | `UNIT-TASK-AR-648-010` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-010.md` | UNIT-TASK-AR-648-010 - Ownership-aware Consumer Continuity Contract |
+| 41.1.10.11 | Unit 41.1.10.11 | unit | `UNIT-TASK-AR-648-011` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-011.md` | UNIT-TASK-AR-648-011 - Bean Wiki Green Replay Attempt 4 |
+| 41.1.10.12 | Unit 41.1.10.12 | unit | `UNIT-TASK-AR-648-012` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-012.md` | UNIT-TASK-AR-648-012 - Packaged Mirror Parity and Causal Pilot Isolation |
+| 41.1.10.13 | Unit 41.1.10.13 | unit | `UNIT-TASK-AR-648-013` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md` | UNIT-TASK-AR-648-013 - Expected Common Mirror Inventory Enforcement |
+| 41.1.10.14 | Unit 41.1.10.14 | unit | `UNIT-TASK-AR-648-014` | `TASK-AR-648` | blocked | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-014.md` | UNIT-TASK-AR-648-014 - Bean Wiki Green Replay Attempt 5 |
+| 41.1.10.15 | Unit 41.1.10.15 | unit | `UNIT-TASK-AR-648-015` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-015.md` | UNIT-TASK-AR-648-015 - Versioned Pilot Evidence Contracts |
+| 41.1.10.16 | Unit 41.1.10.16 | unit | `UNIT-TASK-AR-648-016` | `TASK-AR-648` | completed | `agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md` | UNIT-TASK-AR-648-016 - Bean Wiki Green Replay Attempt 6 |
+| 41.1.11 | Task 41.1.11 | task | `TASK-AR-649` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-649.md` | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
+| 41.1.11.1 | Unit 41.1.11.1 | unit | `UNIT-TASK-AR-649-001` | `TASK-AR-649` | completed | `agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md` | UNIT-TASK-AR-649-001 - Adopt and exercise core plus security-service in Allimbot |
+| 41.1.12 | Task 41.1.12 | task | `TASK-AR-650` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | completed | `agents/lead_engineer/tasks/TASK-AR-650.md` | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
+| 41.1.12.1 | Unit 41.1.12.1 | unit | `UNIT-TASK-AR-650-001` | `TASK-AR-650` | completed | `agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md` | UNIT-TASK-AR-650-001 - Execute and document the Autofolio migration rehearsal |
 | 41.1.13 | Task 41.1.13 | task | `TASK-AR-651` | `TASKSET-AR-V080-ADOPTION-ENFORCEMENT` | planned | `agents/lead_engineer/tasks/TASK-AR-651.md` | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
 | 41.1.13.1 | Unit 41.1.13.1 | unit | `UNIT-TASK-AR-651-001` | `TASK-AR-651` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md` | UNIT-TASK-AR-651-001 - Assemble and verify the v0.8.0-rc.1 release candidate |
 | 42 | Initiative 42 | initiative | `INIT-AR-PARALLEL-INTEGRATION-INTEGRITY` | - | active | `agents/project/initiatives/INIT-AR-PARALLEL-INTEGRATION-INTEGRITY.md` | Parallel Integration Integrity |
@@ -567,6 +581,20 @@ record_count: 528
 | 43.1 | Taskset 43.1 | taskset | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | `INIT-AR-PROJECT-MERGE-GOVERNANCE` | active | `BACKLOG-BOARD.md` | Host Required Merge Gates |
 | 43.1.1 | Task 43.1.1 | task | `TASK-AR-654` | `TASKSET-AR-HOST-REQUIRED-MERGE-GATES` | planned | `agents/lead_engineer/tasks/TASK-AR-654.md` | Prevent worker branches from bypassing project contract, ownership, and visual gates… |
 | 43.1.1.1 | Unit 43.1.1.1 | unit | `UNIT-TASK-AR-654-001` | `TASK-AR-654` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md` | UNIT-TASK-AR-654-001 - Bind and execute host-required merge gates |
+| 44 | Initiative 44 | initiative | `INIT-AR-V080-OPERABILITY-HARDENING` | - | active | `agents/project/initiatives/INIT-AR-V080-OPERABILITY-HARDENING.md` | Agent Runtime v0.8 Operability Hardening |
+| 44.1 | Taskset 44.1 | taskset | `TASKSET-AR-V080-OPERABILITY-HARDENING` | `INIT-AR-V080-OPERABILITY-HARDENING` | active | `BACKLOG-BOARD.md` | v0.8 Operability Hardening |
+| 44.1.1 | Task 44.1.1 | task | `TASK-AR-652` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | completed | `agents/lead_engineer/tasks/TASK-AR-652.md` | Make selective subagent routing materially change execution and produce trustworthy t… |
+| 44.1.1.1 | Unit 44.1.1.1 | unit | `UNIT-TASK-AR-652-001` | `TASK-AR-652` | completed | `agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md` | UNIT-TASK-AR-652-001 - Implement role-aware economic routing receipts and budget enforcement |
+| 44.1.2 | Task 44.1.2 | task | `TASK-AR-655` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | done | `agents/lead_engineer/tasks/TASK-AR-655.md` | Keep long-running task claims truthful and make expiry consistent across claim, point… |
+| 44.1.2.1 | Unit 44.1.2.1 | unit | `UNIT-TASK-AR-655-001` | `TASK-AR-655` | done | `agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md` | UNIT-TASK-AR-655-001 - Unify task-claim renewal and expiry consumers |
+| 44.1.3 | Task 44.1.3 | task | `TASK-AR-656` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-656.md` | Let Runtime own its canonical lifecycle while hosts add authority hooks without perma… |
+| 44.1.3.1 | Unit 44.1.3.1 | unit | `UNIT-TASK-AR-656-001` | `TASK-AR-656` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md` | UNIT-TASK-AR-656-001 - Implement a managed Runtime hook core with host extension registry |
+| 44.1.4 | Task 44.1.4 | task | `TASK-AR-657` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-657.md` | Make the safe brownfield procedure discoverable and repeatable in every consumer with… |
+| 44.1.4.1 | Unit 44.1.4.1 | unit | `UNIT-TASK-AR-657-001` | `TASK-AR-657` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md` | UNIT-TASK-AR-657-001 - Package the reusable consumer-adoption operating procedure |
+| 44.1.5 | Task 44.1.5 | task | `TASK-AR-658` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | planned | `agents/lead_engineer/tasks/TASK-AR-658.md` | Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage… |
+| 44.1.5.1 | Unit 44.1.5.1 | unit | `UNIT-TASK-AR-658-001` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md` | UNIT-TASK-AR-658-001 - Build the secret-free Runtime health resource and console surface |
+| 44.1.6 | Task 44.1.6 | task | `TASK-AR-659` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | done | `agents/lead_engineer/tasks/TASK-AR-659.md` | Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom… |
+| 44.1.6.1 | Unit 44.1.6.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | done | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

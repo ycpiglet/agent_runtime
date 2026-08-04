@@ -8,9 +8,11 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from agent_runtime import claim_store
 
 
 SCHEMA = "agent-runtime-claim-lease/v1"
@@ -118,11 +120,11 @@ def _build_lease(
     resource_id: str,
     owner_id: str,
     now: datetime,
+    expires_at: datetime,
     ttl_seconds: int,
     source_path: str | None,
     recovered_from: str | None = None,
 ) -> dict[str, Any]:
-    expires_at = now + timedelta(seconds=ttl_seconds)
     payload: dict[str, Any] = {
         "schema": SCHEMA,
         "resource_id": resource_id,
@@ -148,8 +150,15 @@ def acquire_claim(
     recover_stale: bool = False,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    root = root.resolve()
     now = now or _parse_now()
+    expires_at = claim_store.expiration_after(
+        now,
+        ttl_seconds,
+        unit="seconds",
+        field="ttl_seconds",
+        minimum=1,
+    )
+    root = root.resolve()
     lease_path = _lease_path(root, resource_id)
     lock = _lock_path(lease_path)
     fd = _acquire_lock(lock)
@@ -192,6 +201,7 @@ def acquire_claim(
             resource_id=resource_id,
             owner_id=owner_id,
             now=now,
+            expires_at=expires_at,
             ttl_seconds=ttl_seconds,
             source_path=source_path or (str(existing.get("source_path") or "") if existing else None),
             recovered_from=recovered_from,
@@ -239,8 +249,15 @@ def heartbeat_claim(
     ttl_seconds: int = 1800,
     now: datetime | None = None,
 ) -> dict[str, Any]:
-    root = root.resolve()
     now = now or _parse_now()
+    expires_at = claim_store.expiration_after(
+        now,
+        ttl_seconds,
+        unit="seconds",
+        field="ttl_seconds",
+        minimum=1,
+    )
+    root = root.resolve()
     lease_path = _lease_path(root, resource_id)
     lock = _lock_path(lease_path)
     fd = _acquire_lock(lock)
@@ -257,7 +274,7 @@ def heartbeat_claim(
                 "owner_id": lease.get("owner_id", ""),
             }
         lease["heartbeat_at"] = now.isoformat(timespec="seconds")
-        lease["expires_at"] = (now + timedelta(seconds=ttl_seconds)).isoformat(timespec="seconds")
+        lease["expires_at"] = expires_at.isoformat(timespec="seconds")
         lease["ttl_seconds"] = ttl_seconds
         _write_json_atomic(lease_path, lease)
         return {"status": "updated", "updated": True, "lease_path": _rel(root, lease_path), "lease": lease}
@@ -319,8 +336,9 @@ def main(argv: list[str] | None = None) -> int:
                     now=_parse_now(args.now),
                 )
             )
-    except TimeoutError as exc:
-        print(f"error: {exc}", file=sys.stderr)
+    except (TimeoutError, ValueError) as exc:
+        detail = " ".join(str(exc).split())[:256] or type(exc).__name__
+        print(f"error: {detail}", file=sys.stderr)
         return 2
     return 1
 

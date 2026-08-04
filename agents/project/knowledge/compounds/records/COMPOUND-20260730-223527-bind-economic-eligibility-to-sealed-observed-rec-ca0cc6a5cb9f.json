@@ -1,0 +1,27 @@
+{
+  "cause": "Validation authority and economic reporting were initially distributed across caller-owned configuration, mutable row objects, and mutable collection structure instead of one canonical observed terminal receipt boundary.",
+  "created_at": "2026-07-30T22:35:27+09:00",
+  "created_by": "codex-root-task-ar-652-orchestrator",
+  "defect_signatures": [
+    "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552"
+  ],
+  "id": "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f",
+  "prevention": "Require successful observed terminal identity, canonical receipt digests, immutable provenance snapshots, exact ordered object membership, sealed report authority, and fail-closed reporting for every copied, mutated, duplicated, detached, reinitialized, or subclass-forged view.",
+  "prevention_refs": [
+    "src/agent_runtime/templates/project/scripts/eval_harness.py"
+  ],
+  "recurrence_count": 6,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md"
+  ],
+  "status": "resolved",
+  "summary": "TASK-AR-652 independent reviews repeatedly found adjacent ways for request intent, receipt values, replaceable provenance, or mutable container membership to masquerade as observed savings evidence.",
+  "title": "Bind economic eligibility to sealed observed receipts",
+  "verification_refs": [
+    "src/agent_runtime/templates/project/scripts/test_eval_harness.py"
+  ],
+  "work_ids": [
+    "TASK-AR-652"
+  ]
+}

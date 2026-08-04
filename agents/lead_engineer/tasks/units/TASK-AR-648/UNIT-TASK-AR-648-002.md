@@ -9,17 +9,21 @@ task_id: TASK-AR-648
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
-verification_status: pending
+status: blocked
+verification_status: failed
 owner: lead-engineer
 created_at: 2026-07-29T16:57:16+09:00
-updated_at: 2026-07-29T16:57:16+09:00
+updated_at: 2026-07-29T18:34:22+09:00
+blocked_at: 2026-07-29T18:34:22+09:00
+started_at: 2026-07-29T17:14:04+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
 created_by: codex-root-v080-planner
 summary: Repair the five Bean Wiki pilot P0 defects and prove a fresh green adoption replay
 horizon: unit
 model_tier: worker_standard
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260729-171404-task-ar-648-648002.json
 escalation_triggers:
   - ambiguity
   - data_integrity
@@ -49,10 +53,21 @@ target_files:
   - src/agent_runtime/config.py
   - tests/test_config_v2.py
   - tests/test_inventory_sync_sanitize.py
+  - tests/fixtures/host/agent_runtime.lock.json
+  - tests/fixtures/host/owner-docs.yml
+  - tests/test_lock_merge_driver.py
   - scripts/pilot_acceptance.py
   - tests/fixtures/pilots/bean-wiki/evidence.json
+  - tests/fixtures/pilots/bean-wiki/evidence-green.json
   - tests/test_pilot_acceptance.py
   - reviews/PILOT-BEAN-WIKI-v080.md
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN.md
+  - reviews/W4B-2026-07-29-unit-task-ar-648-002.md
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md
+  - agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-003.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md
+  - reviews/INDEX.md
 scope: Implement one focused repair per observed P0, with source/template parity and adversarial regression tests. Replay the exact adoption path in a newly created clean Bean Wiki worktree, update only sanitized Runtime evidence, and preserve the original red observations. Do not implement profile thinning, host-context or role-overlay execution, first-run UX expansion, or provider token/cost telemetry in this unit.
 acceptance:
   - A taskset created through work.py new is discovered and planned by taskset_dispatcher from the canonical TASKSET-DEFINITIONS registry, with explicit legacy fallback behavior retained.
@@ -73,6 +88,11 @@ verification:
   - python -m pytest -q
 handoff: Report each P0's failing reproducer, repair, negative guard, source/template parity, fresh Bean replay SHA and counts, preserved digests, external-effect counters, updated sanitized fixture digest, independent W4b verdict, and exact-main CI result.
 stop_condition: Stop on any live publish, deploy, origin push, Bean host commit, credential access, network delivery, content mutation, primary-checkout mutation, weakened ownership boundary, unsupported green/cost claim, or newly observed P0. Keep P1 product work out of scope.
+review_refs:
+  - reviews/W4B-2026-07-29-unit-task-ar-648-002.md
+blocker_refs:
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md
+  - reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md
 ---
 
 # UNIT-TASK-AR-648-002 - Repair Bean pilot P0s and replay green
@@ -111,6 +131,11 @@ systems.
   installed-example tests.
 - State: `scripts/state_sync_gate.py`, its packaged copy, configuration
   ownership, and state/sync tests.
+- Lock fixture: `tests/fixtures/host/agent_runtime.lock.json`, regenerated
+  mechanically after the ownership-default change, plus the canonical
+  `tests/fixtures/host/owner-docs.yml` seed required to make the installed-host
+  fixture self-contained and `tests/test_lock_merge_driver.py` to copy that
+  complete fixture during stale-lock recovery.
 - Evidence: the Bean pilot validator, fixture, tests, and report.
 
 ## Scope
@@ -172,3 +197,23 @@ CI URL.
 No publish, deploy, origin push, Bean commit, credential access, event
 delivery, article mutation, primary-checkout mutation, weakened fail-closed
 guard, or unsupported model/cost claim. P1 work remains separate.
+
+## First Green Replay Outcome
+
+The five original repairs passed focused, full-suite, source/template, and
+independent integrated review. The fresh consumer replay then stopped on two
+new release-blocking defects:
+
+1. default claim creation committed three claim artifacts in the Bean Wiki
+   branch despite the pilot's explicit zero-host-commit boundary; and
+2. the installed `state_sync_gate.py` could not import
+   `agent_runtime.state_projection` from an ordinary consumer process.
+
+The classifier snapshot was also stale after the task/claim projection changed
+state. That is a replay sequencing failure that must be checked after final
+projection, but it is not being used to inflate the new product P0 count.
+
+Per the registered stop rule, this unit is `blocked`; it is not released or
+relabeled green. The failed worktree and commit remain untouched evidence.
+Remediation continues only through separately claimed
+`UNIT-TASK-AR-648-003`.

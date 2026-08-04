@@ -1,0 +1,65 @@
+{
+  "schema": "agent-runtime-pilot-contract/v1",
+  "host": "bean-wiki",
+  "pilot_id": "bean-wiki-v080-red-pilot",
+  "evidence_semantic_sha256": "e8a6119f3c6cef815c352600188f57c48e669e9d650b3e4e1b67f751a1d8582e",
+  "result": "blocked",
+  "baselines": {
+    "host_commit": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+    "runtime_commit": "4ab35b89023f23c032fc574a12a8679f1ea57d33"
+  },
+  "selected_template_files": 243,
+  "web_content_incremental_files": 0,
+  "content_file_count": 125,
+  "post_registration_conflicts": [
+    "owner-docs.yml"
+  ],
+  "expected_task_count": 3,
+  "tasks": {
+    "TASK-AR-001": {
+      "unit_id": "UNIT-TASK-AR-001-001",
+      "claim_id": "CLAIM-20260729-154746-task-ar-001-bean001",
+      "task_status": "blocked",
+      "claim_status": "blocked"
+    },
+    "TASK-AR-002": {
+      "unit_id": "UNIT-TASK-AR-002-001",
+      "claim_id": "CLAIM-20260729-155712-task-ar-002-bean002",
+      "task_status": "completed",
+      "claim_status": "released"
+    },
+    "TASK-AR-003": {
+      "unit_id": "UNIT-TASK-AR-003-001",
+      "claim_id": "CLAIM-20260729-160224-task-ar-003-bean003",
+      "task_status": "completed",
+      "claim_status": "released"
+    }
+  },
+  "findings": {
+    "registered-taskset-undispatchable": "P0",
+    "linked-worktree-self-claim-refused": "P0",
+    "template-example-classified-as-orphan": "P0",
+    "host-state-runtime-taskset-collision": "P0",
+    "managed-file-mutated-by-runtime-producer": "P0",
+    "web-content-profile-empty": "P1",
+    "role-overlay-not-executed": "P1"
+  },
+  "verification": {
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "check_content_returncode": 0,
+    "check_editorial_returncode": 0,
+    "state_sync_blockers": 2,
+    "work_item_classifier_findings": 2
+  },
+  "required_external_effects": [
+    "publish",
+    "deploy",
+    "origin_push",
+    "host_commit",
+    "credential_read",
+    "network_delivery",
+    "content_mutation"
+  ],
+  "artifact_bindings": []
+}

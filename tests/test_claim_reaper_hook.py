@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from agent_runtime import claim_store  # noqa: E402
 import claim_reaper_hook  # noqa: E402
 
 # A deadline far in the past so the claim is provably dead regardless of wall clock.
@@ -18,10 +19,12 @@ def _dead_claim(tmp_path: Path) -> Path:
     claim_dir.mkdir(parents=True, exist_ok=True)
     path = claim_dir / "CLAIM-dead.json"
     path.write_text(json.dumps({
+        "schema": claim_store.WITNESS_SCHEMA,
         "claim_id": "CLAIM-dead", "task_id": "TASK-AR-1", "agent_role": "lead-engineer",
         "status": "claimed", "expires_at": DEAD_EXPIRES,
         "lease": {"expires_at": DEAD_EXPIRES},
     }), encoding="utf-8")
+    claim_store.initialize_store(tmp_path, witness_claim_id="CLAIM-dead")
     return path
 
 

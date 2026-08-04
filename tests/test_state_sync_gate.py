@@ -4,10 +4,17 @@ import importlib.util
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+import pytest
+
+from agent_runtime import state_projection
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "state_sync_gate.py"
+AR655_LIVENESS_NOW = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+AR655_FIXTURE_EXPIRY = "2099-01-01T00:00:00+00:00"
 
 
 def load_module():
@@ -17,6 +24,25 @@ def load_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _run_gate(root: Path, *, now: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--root",
+            str(root),
+            "--check",
+            "--now",
+            now,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def write(path: Path, text: str) -> None:
@@ -55,6 +81,26 @@ resume:
     write(root / "BACKLOG-BOARD.md", f"# Board\n\n{task_set_id}\n{active_task}\n")
     write(root / "BACKLOG.md", f"# Backlog\n\n{task_set_id}\n")
     write(root / "STATUS.md", f"# Status\n\n{task_set_id}\n{active_task}\n")
+
+
+def write_v2_state_adapter(root: Path, *, source: str = "BACKLOG.md") -> None:
+    write(
+        root / "agent_runtime.yml",
+        f"""schema: agent-runtime-config/v2
+project: state-sync-test
+upstream:
+  package: agent-runtime
+  ref: test
+sync:
+  mode: preserve-local
+  allow_silent_overwrite: false
+profiles:
+  - core
+host:
+  state_adapters:
+    host-state: {source}
+""",
+    )
 
 
 def write_unit(root: Path, task_id: str, unit_id: str, *, task_set_id: str = "TASKSET-AR-GOVERNANCE-OPS", status: str = "review", verified: bool = False, recovery: str = "") -> None:
@@ -112,6 +158,10 @@ def write_claim(
         "agent_role": "lead-engineer",
         "agent_instance_id": agent_instance_id,
         "status": "claimed",
+        # Existing non-liveness tests model a healthy active claim. Keep that
+        # authority explicit now that missing lease copies are indeterminate.
+        "expires_at": AR655_FIXTURE_EXPIRY,
+        "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
         "worktree_path": f".worktrees/{claim_id}",
         "branch": branch,
     }
@@ -175,6 +225,125 @@ pointers:
     )
 
 
+def _ar655_state_sync_claim_fixture(tmp_path: Path) -> tuple[object, Path]:
+    gate = load_module()
+    task_id = "TASK-AR-631"
+    unit_id = "UNIT-TASK-AR-631-001"
+    write_task(tmp_path, task_id, "TASKSET-AR-GOVERNANCE-OPS")
+    write_unit(tmp_path, task_id, unit_id)
+    claim_ref = write_claim(tmp_path, task_id=task_id, unit_id=unit_id)
+    attach_claim_refs(tmp_path, task_id, unit_id, claim_ref)
+    write_claim_pointer(tmp_path, task_id, claim_ref)
+    write(tmp_path / "BACKLOG-BOARD.md", f"TASKSET-AR-GOVERNANCE-OPS\n{task_id}\n")
+    write(tmp_path / "BACKLOG.md", "TASKSET-AR-GOVERNANCE-OPS\n")
+    write(tmp_path / "STATUS.md", f"TASKSET-AR-GOVERNANCE-OPS\n{task_id}\n")
+    return gate, tmp_path / claim_ref
+
+
+def _set_ar655_claim_deadlines(
+    path: Path,
+    *,
+    top: object,
+    nested: object,
+) -> None:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if top is None:
+        payload.pop("expires_at", None)
+    else:
+        payload["expires_at"] = top
+    if nested is None:
+        payload.pop("lease", None)
+    else:
+        payload["lease"] = {"expires_at": nested}
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_ar655_state_sync_expired_claim_blocks_with_exact_pointer(tmp_path: Path) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=expired, nested=expired)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert any(
+        finding.severity == "block"
+        and finding.subject == "claim:liveness-expired:CLAIM-TEST-001"
+        for finding in findings
+    )
+
+
+def test_ar655_state_sync_cli_uses_explicit_aware_now_for_liveness(tmp_path: Path) -> None:
+    _, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    expired = (AR655_LIVENESS_NOW - timedelta(seconds=601)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=expired, nested=expired)
+
+    result = _run_gate(tmp_path, now=AR655_LIVENESS_NOW.isoformat())
+
+    assert result.returncode == 1, result.stderr or result.stdout
+    assert "claim:liveness-expired:CLAIM-TEST-001" in result.stdout
+
+
+@pytest.mark.parametrize("now", ("not-a-timestamp", "2026-08-03T00:00:00"))
+def test_ar655_state_sync_cli_refuses_malformed_or_naive_now_without_traceback(
+    tmp_path: Path,
+    now: str,
+) -> None:
+    result = _run_gate(tmp_path, now=now)
+    output = (result.stdout or "") + (result.stderr or "")
+
+    assert result.returncode != 0
+    assert "invalid --now" in output
+    assert "timezone-aware" in output
+    assert "unrecognized arguments" not in output
+    assert "Traceback" not in output
+
+
+def test_ar655_state_sync_positive_grace_equality_remains_active(tmp_path: Path) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    equality = (AR655_LIVENESS_NOW - timedelta(seconds=600)).isoformat()
+    _set_ar655_claim_deadlines(claim_path, top=equality, nested=equality)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+
+    assert not [finding for finding in findings if finding.severity == "block"]
+
+
+@pytest.mark.parametrize(
+    ("top", "nested"),
+    (
+        (None, None),
+        (AR655_FIXTURE_EXPIRY, None),
+        (AR655_FIXTURE_EXPIRY, "not-a-deadline"),
+    ),
+)
+def test_ar655_state_sync_indeterminate_claim_retains_authority_but_blocks(
+    tmp_path: Path,
+    top: object,
+    nested: object,
+) -> None:
+    gate, claim_path = _ar655_state_sync_claim_fixture(tmp_path)
+    _set_ar655_claim_deadlines(claim_path, top=top, nested=nested)
+
+    findings = gate.analyze(
+        tmp_path,
+        now=AR655_LIVENESS_NOW,
+        grace_seconds=600,
+    )
+    subjects = {finding.subject for finding in findings}
+
+    assert "claim:liveness-indeterminate:CLAIM-TEST-001" in subjects
+    assert "pointer:primary-worker-missing:TASK-AR-631" not in subjects
+    assert "pointer:primary-worker-missing-task" not in subjects
+
+
 def test_consistent_active_pointer_passes(tmp_path):
     gate = load_module()
     write_task(tmp_path, "TASK-AR-260", "TASKSET-AR-GOVERNANCE-OPS")
@@ -204,6 +373,92 @@ def test_board_missing_active_taskset_blocks(tmp_path):
     findings = gate.analyze(tmp_path)
 
     assert any(finding.subject == "surface:missing-taskset:BACKLOG-BOARD.md" for finding in findings)
+
+
+def test_configured_v2_adapter_uses_fresh_projection_without_runtime_ids_or_status(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Editorial queue\n")
+    (tmp_path / "STATUS.md").unlink()
+    write_v2_state_adapter(tmp_path)
+    state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T08:00:00+00:00",
+    )
+
+    findings = gate.analyze(tmp_path)
+
+    assert not [finding for finding in findings if finding.severity == "block"]
+    assert not any(finding.path in {"BACKLOG.md", "STATUS.md"} for finding in findings)
+
+
+def test_configured_v2_adapter_blocks_missing_or_stale_projection(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Initial item\n")
+    write_v2_state_adapter(tmp_path)
+
+    missing = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:projection-missing"
+        and finding.severity == "block"
+        for finding in missing
+    )
+
+    state_projection.write_projection(
+        tmp_path,
+        now="2026-07-29T08:00:00+00:00",
+    )
+    write(tmp_path / "BACKLOG.md", "# Host backlog\n\n- Changed after projection\n")
+
+    stale = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:projection-stale"
+        and finding.severity == "block"
+        for finding in stale
+    )
+
+
+def test_configured_v2_adapter_blocks_invalid_configuration(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    write(tmp_path / "docs/HOST-STATE.md", "# Host state\n")
+    write_v2_state_adapter(tmp_path, source="docs/HOST-STATE.md")
+
+    findings = gate.analyze(tmp_path)
+
+    assert any(
+        finding.subject == "state-projection:config-invalid"
+        and finding.severity == "block"
+        for finding in findings
+    )
+
+
+def test_legacy_state_contract_still_requires_backlog_and_status(tmp_path):
+    gate = load_module()
+    task_id = "TASK-AR-260"
+    task_set_id = "TASKSET-AR-GOVERNANCE-OPS"
+    write_task(tmp_path, task_id, task_set_id)
+    write_surfaces(tmp_path, task_set_id, task_id)
+    (tmp_path / "BACKLOG.md").unlink()
+    (tmp_path / "STATUS.md").unlink()
+
+    findings = gate.analyze(tmp_path)
+
+    subjects = {finding.subject for finding in findings}
+    assert "surface:missing:BACKLOG.md" in subjects
+    assert "surface:missing:STATUS.md" in subjects
 
 
 def test_pointer_active_but_all_tasks_done_blocks(tmp_path):
@@ -390,6 +645,8 @@ def test_linked_checkout_resolves_relative_worker_path_from_primary_checkout(tmp
             "agent_role": "lead-engineer",
             "agent_instance_id": "worker-test",
             "status": "claimed",
+            "expires_at": AR655_FIXTURE_EXPIRY,
+            "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
             "worktree_path": ".worktrees/TASK-AR-631",
             "branch": "worker",
         }),
@@ -434,6 +691,8 @@ def test_active_worker_claim_targeting_primary_checkout_blocks_with_portable_git
             "agent_role": "lead-engineer",
             "agent_instance_id": "worker-test",
             "status": "claimed",
+            "expires_at": AR655_FIXTURE_EXPIRY,
+            "lease": {"expires_at": AR655_FIXTURE_EXPIRY},
             "worktree_path": ".",
             "branch": "base",
         }),

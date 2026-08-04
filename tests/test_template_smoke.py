@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
+import re
 import shutil
 import subprocess
 import sys
-import json
 import time
 from pathlib import Path
 
@@ -42,6 +44,43 @@ def _host_from_fixture(tmp_path: Path) -> Path:
     return host
 
 
+def _canonical_digest(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _write_plan_snapshot(host: Path, taskset_id: str) -> None:
+    path = host / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-plan-assumptions/v1",
+                "assumption_sets": [
+                    {
+                        "taskset_id": taskset_id,
+                        "anchors": [
+                            {
+                                "path": "reviews/portable-core-plan.md",
+                                "kind": "absent",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _parse_frontmatter(path: Path) -> dict[str, str]:
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---"):
@@ -59,6 +98,74 @@ def _parse_frontmatter(path: Path) -> dict[str, str]:
         key, sep, value = line.partition(":")
         out[key.strip()] = (value[1:] if sep else "").strip()
     return out
+
+
+def _yaml_scalar(value: object) -> str:
+    if value is None or value == "":
+        return "null"
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def _write_live_pointer_from_projection(
+    host: Path,
+    projection: dict[str, object],
+    claim: dict[str, object],
+) -> None:
+    pointer = projection["pointer"]
+    assert isinstance(pointer, dict)
+    agents = pointer["current_agents"]
+    assert isinstance(agents, list) and len(agents) == 1
+    agent = agents[0]
+    assert isinstance(agent, dict)
+    lines = [
+        "schema: agent-runtime-next-session-pointer/v1",
+        f"updated_at: {_yaml_scalar(claim['last_heartbeat'])}",
+        "updated_by: serial-projection-owner",
+        "current_state:",
+        "  status: active",
+        f"  task_set_id: {_yaml_scalar(pointer['active_task_set'])}",
+        f"  step_index: {_yaml_scalar(agent['step_index'])}",
+        f"  step_total: {_yaml_scalar(agent['step_total'])}",
+        f"  status_text: {_yaml_scalar(agent['status_text'])}",
+        "active_work:",
+        "  current_agents:",
+    ]
+    for index, (field, value) in enumerate(agent.items()):
+        lines.append(
+            f"{'    - ' if index == 0 else '      '}{field}: {_yaml_scalar(value)}"
+        )
+    lines.extend(
+        [
+            "  current_teams: []",
+            "resume:",
+            f"  active_task: {_yaml_scalar(pointer['active_task'])}",
+            f"  active_task_set: {_yaml_scalar(pointer['active_task_set'])}",
+            "  next_actions:",
+            "    - Run the claim governance gates.",
+            "roles:",
+            "  accountable: Lead Engineer",
+            "  reviewers: []",
+            "pointers:",
+            "  active_claims:",
+        ]
+    )
+    lines.extend(
+        f"    - {_yaml_scalar(ref)}" for ref in pointer["active_claims"]
+    )
+    lines.extend(
+        [
+            "rules:",
+            "  present_status_precedence: A present STATUS candidate remains strict.",
+            "  pointer_fallback: Without STATUS, require the exact live claim projection.",
+            "verification:",
+            "  required:",
+            "    - python scripts/parallel_worktree_gate.py --check",
+            "  last_known:",
+            "    status: not-run",
+        ]
+    )
+    path = host / "agents/project/NEXT-SESSION-POINTER.yml"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _write_message(inbox: Path, message_id: str, *, status: str = "open") -> Path:
@@ -112,6 +219,298 @@ def test_sync_and_smoke_runtime_scripts(tmp_path):
         assert result.returncode == 0
 
 
+def test_clean_installed_core_claim_to_governance_journey_without_status(
+    tmp_path: Path,
+) -> None:
+    host = _host_from_fixture(tmp_path)
+    (host / "agent_runtime.yml").write_text(
+        "\n".join(
+            [
+                "schema: agent-runtime-config/v2",
+                "project: portable-core-host",
+                "upstream:",
+                "  package: agent_runtime",
+                "  remote_url: https://github.com/ycpiglet/agent_runtime.git",
+                "  ref: v0.8.0",
+                "sync:",
+                "  mode: check-diff-apply",
+                "  allow_silent_overwrite: false",
+                "profiles:",
+                "  - core",
+                "host:",
+                "  state_adapters:",
+                "    backlog: BACKLOG.md",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "lock", "--root", str(host), "--write"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+    assert not (host / "STATUS.md").exists()
+    assert not (host / "agents/lead_engineer/STATUS.md").exists()
+
+    task_id = "TASK-AR-990"
+    unit_id = "UNIT-TASK-AR-990-001"
+    task_set_id = "TASKSET-PORTABLE-CORE"
+    target = host / "portable_probe.py"
+    target.write_text("print('portable core')\n", encoding="utf-8")
+    task = host / f"agents/lead_engineer/tasks/{task_id}.md"
+    unit = host / f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    unit.parent.mkdir(parents=True, exist_ok=True)
+    (host / "README.md").write_text(
+        "# Portable Core Host\n\n"
+        "## 한국어\n\n"
+        "AGENTS.md, CLAUDE.md, agents/project/NEXT-SESSION-POINTER.yml을 먼저 읽습니다.\n\n"
+        "## English\n\n"
+        "Read AGENTS.md, CLAUDE.md, and agents/project/NEXT-SESSION-POINTER.yml first.\n",
+        encoding="utf-8",
+    )
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        f"id: {task_id}\n"
+        f"work_id: {task_id}\n"
+        "work_uid: 71e29977-1fd8-4563-bb89-735e03b8ebd1\n"
+        f"task_id: {task_id}\n"
+        "task_uid: 71e29977-1fd8-4563-bb89-735e03b8ebd1\n"
+        "kind: task\n"
+        f"parent_id: {task_set_id}\n"
+        f"task_set_id: {task_set_id}\n"
+        "status: in_progress\n"
+        "verification_status: pending\n"
+        "owner: lead-engineer\n"
+        "registered_at: 2026-07-30T00:00:00+09:00\n"
+        "created_at: 2026-07-30T00:00:00+09:00\n"
+        "updated_at: 2026-07-30T00:00:00+09:00\n"
+        "started_at: 2026-07-30T00:00:00+09:00\n"
+        "origin_type: owner_request\n"
+        "origin_ref: tests/test_template_smoke.py\n"
+        "created_by: test\n"
+        "---\n\n# Portable core task\n",
+        encoding="utf-8",
+    )
+    unit.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        f"work_id: {unit_id}\n"
+        "work_uid: f7228336-9c01-4f8f-8f1a-309bfe729112\n"
+        f"unit_id: {unit_id}\n"
+        f"task_id: {task_id}\n"
+        f"parent_id: {task_id}\n"
+        f"task_set_id: {task_set_id}\n"
+        "project_id: PROJECT-PORTABLE-CORE\n"
+        "kind: unit\n"
+        "status: in_progress\n"
+        "verification_status: pending\n"
+        "owner: lead-engineer\n"
+        "created_at: 2026-07-30T00:00:00+09:00\n"
+        "updated_at: 2026-07-30T00:00:00+09:00\n"
+        "origin_type: owner_request\n"
+        "origin_ref: tests/test_template_smoke.py\n"
+        "created_by: test\n"
+        "model_tier: worker_standard\n"
+        "context: Exercise the portable core claim journey.\n"
+        "inputs:\n"
+        f"  - agents/lead_engineer/tasks/{task_id}.md\n"
+        "target_files:\n"
+        "  - portable_probe.py\n"
+        "scope: Only the synthetic portable core fixture.\n"
+        "acceptance:\n"
+        "  - The claim journey completes without STATUS.md.\n"
+        "verification:\n"
+        "  - python -m pytest tests/test_template_smoke.py -q\n"
+        "handoff: Report the portable continuity result.\n"
+        f"stop_condition: stop_after:{unit_id}:portable_core\n"
+        "---\n\n"
+        "# Portable continuity unit\n\n"
+        "## Context\n\n"
+        "Exercise the portable core claim journey.\n\n"
+        "## Inputs\n\n"
+        f"- agents/lead_engineer/tasks/{task_id}.md\n\n"
+        "## Target Files\n\n"
+        "- portable_probe.py\n\n"
+        "## Scope\n\n"
+        "Only the synthetic portable core fixture.\n\n"
+        "## Steps\n\n"
+        "1. Create and project the claim.\n"
+        "2. Run governance checks.\n\n"
+        "## Acceptance Criteria\n\n"
+        "- The claim journey completes without STATUS.md.\n\n"
+        "## Verification\n\n"
+        "- python -m pytest tests/test_template_smoke.py -q\n\n"
+        "## Handoff\n\n"
+        "Report the portable continuity result.\n\n"
+        "## Stop Boundary\n\n"
+        "Stop after this portable core unit.\n",
+        encoding="utf-8",
+    )
+    (host / "BACKLOG-BOARD.md").write_text(
+        f"# Board\n\n{task_set_id}\n{task_id}\n{unit_id}\n",
+        encoding="utf-8",
+    )
+    (host / "BACKLOG.md").write_text(
+        f"# Backlog\n\n{task_set_id}\n{task_id}\n",
+        encoding="utf-8",
+    )
+    _write_plan_snapshot(host, task_set_id)
+    _run(["git", "init", "-q", "-b", "main"], cwd=host)
+    _run(["git", "config", "user.email", "test@example.com"], cwd=host)
+    _run(["git", "config", "user.name", "Test"], cwd=host)
+    _run(["git", "add", "."], cwd=host)
+    _run(["git", "commit", "-qm", "portable core baseline"], cwd=host)
+    worktree = host / ".worktrees" / task_id
+    branch = "codex/task-ar-990-portable-core"
+    _run(
+        ["git", "worktree", "add", "-q", "-b", branch, str(worktree)],
+        cwd=host,
+    )
+    runtime_root = worktree
+    task = runtime_root / task.relative_to(host)
+    unit = runtime_root / unit.relative_to(host)
+
+    head_before_claim = _run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=runtime_root,
+    ).stdout.strip()
+    pointer_path = runtime_root / "agents/project/NEXT-SESSION-POINTER.yml"
+    standby_pointer = pointer_path.read_bytes()
+    created = _run(
+        [
+            PYTHON,
+            "scripts/task_claim_dispatcher.py",
+            "--root",
+            str(runtime_root),
+            "create",
+            "--task-id",
+            task_id,
+            "--task-set-id",
+            task_set_id,
+            "--unit-id",
+            unit_id,
+            "--unit-spec",
+            unit.relative_to(runtime_root).as_posix(),
+            "--agent-role",
+            "lead-engineer",
+            "--worktree-path",
+            ".",
+            "--branch",
+            branch,
+            "--scope-transition-approved",
+            "--skip-plan-check",
+            "--now",
+            "2026-07-30T00:05:00+09:00",
+            "--suffix",
+            "portable-core",
+            "--json",
+        ],
+        cwd=runtime_root,
+        env=env,
+    )
+    claim = json.loads(created.stdout)["claim"]
+    assert _run(["git", "rev-parse", "HEAD"], cwd=runtime_root).stdout.strip() == head_before_claim
+    assert pointer_path.read_bytes() == standby_pointer
+
+    projected = _run(
+        [
+            PYTHON,
+            "scripts/task_claim_dispatcher.py",
+            "--root",
+            str(runtime_root),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--now",
+            "2026-07-30T00:06:00+09:00",
+            "--json",
+        ],
+        cwd=runtime_root,
+        env=env,
+    )
+    projection = json.loads(projected.stdout)
+    assert pointer_path.read_bytes() == standby_pointer
+    claim_ref = str(projection["task_claim_ref"])
+    task.write_text(
+        task.read_text(encoding="utf-8").replace(
+            "verification_status: pending\n",
+            f"verification_status: pending\nclaim_refs:\n  - {claim_ref}\n",
+        ),
+        encoding="utf-8",
+    )
+    unit.write_text(
+        unit.read_text(encoding="utf-8").replace(
+            "verification_status: pending\n",
+            f"verification_status: pending\nclaim_refs:\n  - {claim_ref}\n",
+        ),
+        encoding="utf-8",
+    )
+    _write_live_pointer_from_projection(runtime_root, projection, claim)
+    _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(runtime_root),
+            "--write-projection",
+            "--now",
+            "2026-07-30T00:05:00+09:00",
+            "--json",
+        ],
+        cwd=runtime_root,
+        env=env,
+    )
+    _run(
+        [PYTHON, "scripts/work_item_classifier.py", "--root", str(runtime_root), "--write"],
+        cwd=runtime_root,
+        env=env,
+    )
+    _run(
+        [PYTHON, "scripts/evidence_index_generator.py", "--root", str(runtime_root), "--write"],
+        cwd=runtime_root,
+        env=env,
+    )
+
+    for command, success in (
+        ([PYTHON, "scripts/parallel_worktree_gate.py", "--root", str(runtime_root), "--check", "--now", "2026-07-30T00:06:00+09:00"], "parallel-worktree-gate: pass"),
+        ([PYTHON, "scripts/state_sync_gate.py", "--root", str(runtime_root), "--check", "--now", "2026-07-30T00:06:00+09:00"], "state-sync-gate: pass"),
+        ([PYTHON, "scripts/rbac_write_gate.py", "--root", str(runtime_root), "--check"], "rbac-write-gate: pass"),
+    ):
+        result = _run(command, cwd=runtime_root, env=env)
+        assert success in result.stdout
+
+    docs = _run(
+        [PYTHON, "scripts/check_agent_docs.py"],
+        cwd=runtime_root,
+        env=env,
+        expect_zero=False,
+    )
+    docs_output = (docs.stdout or "") + (docs.stderr or "")
+    assert "agents/lead_engineer/STATUS.md: missing status board." not in docs_output
+
+    governance = _run(
+        [
+            PYTHON,
+            "scripts/owner_governance_gate.py",
+            "--allow-empty-owner-docs",
+            "--now",
+            "2026-07-30T00:06:00+09:00",
+        ],
+        cwd=runtime_root,
+        env=env,
+    )
+    assert governance.returncode == 0
+
+
 def test_synced_host_scribe_projection_is_explicit_and_bounded(tmp_path):
     host = _host_from_fixture(tmp_path)
     env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
@@ -150,9 +549,227 @@ def test_synced_host_scribe_projection_is_explicit_and_bounded(tmp_path):
         cwd=host,
         env=env,
     )
-    assert json.loads(written.stdout)["projection"]["status"] == "fresh"
+    written_payload = json.loads(written.stdout)
+    assert written_payload["projection"]["status"] == "fresh"
+    assert written_payload["source_debt"]["status"] == "overdue"
+    assert written_payload["closure_blocking"] is True
     assert projection.stat().st_size <= 32 * 1024
     assert source.stat().st_mtime_ns == source_mtime
+
+
+def test_synced_host_records_a_bounded_cleanup_receipt(tmp_path):
+    host = _host_from_fixture(tmp_path)
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=env,
+    )
+    source = host / "STATUS.md"
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(16)),
+        encoding="utf-8",
+    )
+    authorization = host / "agents/lead_engineer/tasks/TASK-SCRIBE.md"
+    authorization.parent.mkdir(parents=True, exist_ok=True)
+    authorization_template = (
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-SCRIBE\n"
+        "work_id: TASK-SCRIBE\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "scribe_authorization: cleanup\n"
+        "scribe_authorized_by: lead-engineer-fixture\n"
+        "scribe_authorized_role: lead-engineer\n"
+        "scribe_source_binding_digest: {source_digest}\n"
+        "scribe_cleanup_plan_digest: {plan_digest}\n"
+        "---\n\n"
+        "# Authorized Scribe cleanup\n"
+    )
+    authorization.write_text(
+        authorization_template.format(
+            source_digest="0" * 64,
+            plan_digest="0" * 64,
+        ),
+        encoding="utf-8",
+    )
+    _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--write-projection",
+            "--now",
+            "2026-07-29T00:00:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=env,
+    )
+    projection_path = host / "agents/project/state/SCRIBE-PROJECTION.json"
+    baseline = json.loads(projection_path.read_text(encoding="utf-8"))
+    before_sources = [
+        {
+            "adapter": item["adapter"],
+            "path": item["path"],
+            "present": item["present"],
+            "digest": item["digest"],
+            "hot_count": item["hot_count"],
+        }
+        for item in baseline["sources"]
+    ]
+    authorization.write_text(
+        authorization_template.format(
+            source_digest=_canonical_digest(before_sources),
+            plan_digest=baseline["cleanup_plan"]["plan_digest"],
+        ),
+        encoding="utf-8",
+    )
+    _run(["git", "init", "-q"], cwd=host)
+    _run(
+        ["git", "config", "user.email", "scribe-smoke@example.invalid"],
+        cwd=host,
+    )
+    _run(["git", "config", "user.name", "Scribe Smoke"], cwd=host)
+    _run(["git", "config", "commit.gpgsign", "false"], cwd=host)
+    _run(["git", "add", "-A"], cwd=host)
+    _run(
+        ["git", "commit", "-q", "-m", "anchor Scribe cleanup baseline"],
+        cwd=host,
+    )
+    source.write_text(
+        "# State\n" + "".join(f"- active {index}\n" for index in range(5, 16)),
+        encoding="utf-8",
+    )
+
+    recorded = _run(
+        [
+            PYTHON,
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--record-cleanup",
+            "--authorization-ref",
+            "agents/lead_engineer/tasks/TASK-SCRIBE.md",
+            "--now",
+            "2026-07-29T00:10:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=env,
+    )
+    payload = json.loads(recorded.stdout)
+    projection = json.loads(
+        projection_path.read_text(encoding="utf-8")
+    )
+
+    assert payload["cleanup_outcome"]["status"] == "verified_reduction"
+    assert payload["closure_blocking"] is False
+    assert projection["cleanup_receipt"]["schema"] == (
+        "agent-runtime-scribe-cleanup-receipt/v1"
+    )
+    assert projection["cleanup_receipt"]["resulting_hot_count"] == 11
+
+
+def test_synced_host_state_scripts_run_without_source_package_or_pythonpath(
+    tmp_path: Path,
+) -> None:
+    host = _host_from_fixture(tmp_path)
+    sync_env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "src"))
+    _run(
+        [PYTHON, "-m", "agent_runtime.cli", "sync", "--root", str(host), "--apply"],
+        cwd=REPO_ROOT,
+        env=sync_env,
+    )
+
+    task_id = "TASK-AR-648"
+    task_set_id = "TASKSET-PORTABLE-STATE"
+    task = host / "agents/lead_engineer/tasks" / f"{task_id}.md"
+    task.parent.mkdir(parents=True, exist_ok=True)
+    task.write_text(
+        "\n".join(
+            [
+                "---",
+                f"id: {task_id}",
+                "status: in_progress",
+                f"task_set_id: {task_set_id}",
+                "verification_status: pending",
+                "---",
+                "",
+                "# Portable state task",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (host / "BACKLOG-BOARD.md").write_text(
+        f"# Board\n\n{task_set_id}\n{task_id}\n",
+        encoding="utf-8",
+    )
+    (host / "BACKLOG.md").write_text(
+        f"# Backlog\n\n{task_set_id}\n",
+        encoding="utf-8",
+    )
+    (host / "STATUS.md").write_text(
+        f"# Status\n\n{task_set_id}\n{task_id}\n" + "".join(
+            f"- active {index}\n" for index in range(16)
+        ),
+        encoding="utf-8",
+    )
+    pointer = host / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text(
+        "\n".join(
+            [
+                "current_state:",
+                "  status: active",
+                f"  task_set_id: {task_set_id}",
+                "resume:",
+                f"  active_task: {task_id}",
+                f"  active_task_set: {task_set_id}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    isolated_env = dict(os.environ)
+    isolated_env.pop("PYTHONPATH", None)
+    isolated_env["PYTHONNOUSERSITE"] = "1"
+    isolated_env["PYTHONIOENCODING"] = "utf-8"
+
+    written = _run(
+        [
+            PYTHON,
+            "-S",
+            "scripts/scribe_due.py",
+            "--root",
+            str(host),
+            "--write-projection",
+            "--now",
+            "2026-07-29T00:00:00+09:00",
+            "--json",
+        ],
+        cwd=host,
+        env=isolated_env,
+    )
+    assert json.loads(written.stdout)["projection"]["status"] == "fresh"
+
+    checked = _run(
+        [
+            PYTHON,
+            "-S",
+            "scripts/state_sync_gate.py",
+            "--root",
+            str(host),
+            "--check",
+        ],
+        cwd=host,
+        env=isolated_env,
+    )
+    assert "state-sync-gate: pass" in checked.stdout
 
 
 def test_synced_host_creates_and_searches_canonical_compound_record(tmp_path):
@@ -280,6 +897,11 @@ def test_clean_host_runs_work_session_report_and_dependency_lifecycle(tmp_path):
     payload = {"schema_version":"agent-runtime-work-registration/v1","project_id":"PROJECT-TEMPLATE-SMOKE","origin_type":"owner_request","origin_ref":"tests","created_by":"test","now":"2026-07-29T00:00:00+09:00","initiative":{"id":"INIT-TEMPLATE-SMOKE","title":"Smoke","summary":"Smoke","owner":"lead_engineer"},"taskset":{"id":"TASKSET-TEMPLATE-SMOKE","display_name":"Smoke","summary":"Smoke","order":990,"plan_slug":"smoke"},"tasks":[{"display_id":"TASK-AR-990","title":"Smoke","goal":"Smoke","acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"units":[{"title":"Unit","context":"Smoke","inputs":["scripts/verification_probe.py"],"target_files":["scripts/verification_probe.py"],"scope":"Smoke","steps":["Run probe"],"acceptance":["probe"],"verification":["python scripts/verification_probe.py"],"handoff":"done","stop_condition":"done"}]}]}
     registration = host / "registration.json"; registration.write_text(json.dumps(payload), encoding="utf-8")
     work = host / "scripts/work.py"
+    now = _run([PYTHON, str(work), "--root", str(host), "now"], cwd=host)
+    assert re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}\n?",
+        now.stdout,
+    )
     _run([PYTHON, str(work), "--root", str(host), "new", "--input", str(registration), "--json"], cwd=host)
     _run([PYTHON, str(work), "--root", str(host), "status", "--json"], cwd=host)
     _run([PYTHON, str(work), "--root", str(host), "verify", "UNIT-TASK-AR-990-001", "--json"], cwd=host)

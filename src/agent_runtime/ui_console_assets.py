@@ -9033,7 +9033,8 @@ function freshnessAgeText(seconds) {
 }
 
 function stateFreshness() {
-  const built = parseIsoDate(runtimeState.built_at || runtimeState.generated_at);
+  const state = runtimeState || {};
+  const built = parseIsoDate(state.built_at || state.generated_at);
   const ageSec = built ? Math.max(0, (Date.now() - built.getTime()) / 1000) : 0;
   return { built, ageSec, stale: built ? ageSec >= FRESHNESS_STALE_SECONDS : false };
 }
@@ -9047,7 +9048,6 @@ function freshnessClock() {
 // verdict badge + bottom line (from health_snapshot + inbox total), a quiet
 // one-line summary strip, and three flow tiles (WIP / weekly throughput /
 // median cycle time) with real-series sparklines only (honesty rule).
-const HOME_ACTIVE_CLAIM_STATUSES = ["assigned", "claimed", "in_progress", "review", "waiting_review", "working"];
 const HOME_WIP_LIMIT = 3;
 const HOME_DONE_STATUSES = ["completed", "done", "closed"];
 
@@ -9063,12 +9063,26 @@ function flowTileHtml(label, value, unit, series, warn) {
 }
 
 function renderHomeSummary() {
-  const ops = (runtimeState && runtimeState.ops_metrics) || {};
-  const health = ops.health_snapshot || {};
-  const verdict = String(health.verdict || "");
   const wrap = $("home-verdict");
   const badge = $("verdict-badge");
   const line = $("verdict-line");
+  const stripEl = $("strip-line");
+  const tiles = $("flow-tiles");
+  if (!runtimeState) {
+    if (wrap) wrap.hidden = true;
+    if (badge) {
+      badge.textContent = "";
+      badge.removeAttribute("data-verdict");
+    }
+    if (line) line.textContent = "";
+    if (stripEl) stripEl.textContent = "";
+    if (tiles) tiles.innerHTML = "";
+    return;
+  }
+  const state = runtimeState;
+  const ops = state.ops_metrics || {};
+  const health = ops.health_snapshot || {};
+  const verdict = String(health.verdict || "");
   const inboxTotal = cockpitData && typeof cockpitData.total === "number" ? cockpitData.total : null;
   if (wrap) {
     wrap.hidden = !verdict;
@@ -9083,19 +9097,18 @@ function renderHomeSummary() {
       line.textContent = text;
     }
   }
-  const tasks = runtimeState.tasks || [];
+  const tasks = state.tasks || [];
   const openCount = tasks.filter(
     (task) => HOME_DONE_STATUSES.indexOf(String(task.status || "").toLowerCase()) < 0
   ).length;
-  const claims = (runtimeState.task_claims || []).filter(
-    (claim) => HOME_ACTIVE_CLAIM_STATUSES.indexOf(String(claim.status || "").toLowerCase()) >= 0
+  const claims = (state.task_claims || []).filter(
+    (claim) => claim.authority_active === true
   );
   const wip = claims.length;
   const activeAgents = new Set(
     claims.map((claim) => String(claim.agent_instance_id || claim.agent || "")).filter(Boolean)
   ).size;
   const gateCounts = (ops.gates && ops.gates.counts) || {};
-  const stripEl = $("strip-line");
   if (stripEl) {
     const gatesText = Number(gateCounts.block || 0) > 0
       ? "block " + gateCounts.block
@@ -9110,7 +9123,6 @@ function renderHomeSummary() {
       dot + t("strip.gates") + " " + gatesText +
       dot + t("strip.agents") + " " + agentsText;
   }
-  const tiles = $("flow-tiles");
   if (tiles) {
     const weeks = ((ops.velocity || {}).weeks || []).map((week) => Number(week.done || 0));
     const throughput = weeks.length ? weeks[weeks.length - 1] : null;

@@ -10,6 +10,15 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "taskset_work_gate.py"
+PACKAGED_SCRIPT = (
+    REPO_ROOT
+    / "src"
+    / "agent_runtime"
+    / "templates"
+    / "project"
+    / "scripts"
+    / "taskset_work_gate.py"
+)
 
 TASK_TEMPLATE = """---
 id: {task_id}
@@ -27,9 +36,11 @@ tags: []
 """
 
 
-def _run(root: Path) -> subprocess.CompletedProcess[str]:
+def _run(
+    root: Path, script: Path = SCRIPT
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--root", str(root), "--check"],
+        [sys.executable, str(script), "--root", str(root), "--check"],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -111,6 +122,50 @@ def test_gate_accepts_board_with_only_wall_clock_drift(tmp_path: Path) -> None:
 
     assert "stale:content-mismatch" not in result.stdout
     assert result.returncode == 0
+
+
+def test_packaged_gate_masks_iso_second_and_attention_wall_clock_drift(
+    tmp_path: Path,
+) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    board = _write_rendered_board(tmp_path)
+    aged = re.sub(
+        r"(?m)^generated_at: .*$",
+        "generated_at: 2026-07-30T00:00:01+09:00",
+        board,
+    )
+    aged = re.sub(
+        r"(?m)^- Needs attention: .*$",
+        "- Needs attention: `999` — stale `999` (wall-clock simulation).",
+        aged,
+    )
+    assert aged != board
+    (tmp_path / "BACKLOG-BOARD.md").write_text(aged, encoding="utf-8")
+
+    result = _run(tmp_path, PACKAGED_SCRIPT)
+
+    assert result.returncode == 0, result.stdout or result.stderr
+    assert "stale:content-mismatch" not in result.stdout
+
+
+def test_root_and_packaged_gates_mask_rolling_throughput_drift(
+    tmp_path: Path,
+) -> None:
+    _write_task(tmp_path, "TASK-AR-901", "planned")
+    board = _write_rendered_board(tmp_path)
+    aged = re.sub(
+        r"(?m)^- Throughput \(7d\): .*$",
+        "- Throughput (7d): `999` tasks completed in the last 7 days "
+        "(TASK-AR-627).",
+        board,
+    )
+    assert aged != board
+    (tmp_path / "BACKLOG-BOARD.md").write_text(aged, encoding="utf-8")
+
+    for script in (SCRIPT, PACKAGED_SCRIPT):
+        result = _run(tmp_path, script)
+        assert result.returncode == 0, result.stdout or result.stderr
+        assert "stale:content-mismatch" not in result.stdout
 
 
 def test_gate_flags_stale_board_after_task_status_change(tmp_path: Path) -> None:

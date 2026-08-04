@@ -1,0 +1,78 @@
+{
+  "checkouts": [
+    {
+      "after": {
+        "head": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none",
+      "id": "runtime-product",
+      "role": "live_observation"
+    },
+    {
+      "after": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "c58630d953bb1427cee063c614ca7964a121db4fdb9b788e75301a888ec9e16c",
+        "tracked_diff_sha256": "f13da65bdb623015d7afc075525e060ce5c992f016bc1d5cd1466fbb3be3066b"
+      },
+      "before": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "authorized_target",
+      "id": "autofolio-target",
+      "role": "disposable_target"
+    },
+    {
+      "after": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "before": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "change_attribution": "none",
+      "id": "autofolio-control",
+      "role": "frozen_control"
+    },
+    {
+      "after": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "b4409298f3af07c0924dbd0da148a53f0fd0d35e1f64bdb1480507c15efbda2a",
+        "tracked_diff_sha256": "beb38c6dae562f72bc076b649ddef6533815b8b22df717f1070c63a54508c9c0"
+      },
+      "before": {
+        "head": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+        "status_sha256": "b4409298f3af07c0924dbd0da148a53f0fd0d35e1f64bdb1480507c15efbda2a",
+        "tracked_diff_sha256": "beb38c6dae562f72bc076b649ddef6533815b8b22df717f1070c63a54508c9c0"
+      },
+      "change_attribution": "none",
+      "id": "autofolio-primary",
+      "role": "live_observation"
+    }
+  ],
+  "evidence_mode": "sanitized_projection",
+  "observed_write_checkout_ids": [
+    "autofolio-target"
+  ],
+  "pilot_id": "autofolio-v080-green-attempt-3",
+  "raw_proof": {
+    "block_count": 0,
+    "evidence_sha256": "09a4dbc39b62a48e2d299c6d79722cdf5b547776310806ef05e452553d219a27",
+    "finding_codes": [],
+    "schema": "agent-runtime-pilot-isolation-raw-proof/v1",
+    "status": "pass",
+    "watch_count": 0
+  },
+  "schema": "agent-runtime-pilot-isolation/v2"
+}

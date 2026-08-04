@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import importlib.util
 import json
+import os
+import stat
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -8,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from agent_runtime import knowledge_records as records
+from agent_runtime import claim_store, knowledge_records as records
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +35,7 @@ def _create(
     signature: str = "same-day closeout accepted unrelated review",
     title: str = "Link closure evidence",
     created_at: str = "2026-07-29T04:00:00+09:00",
+    prevention_refs: list[str] | None = None,
     update_index: bool = True,
 ) -> tuple[Path, dict]:
     return records.create_record(
@@ -43,7 +47,7 @@ def _create(
         cause="The gate searched by date instead of work identity.",
         prevention="Validate explicit review and compound references against work IDs.",
         source_refs=["reviews/REVIEW-2026-07-29-source.md"],
-        prevention_refs=["scripts/closure_gate.py"],
+        prevention_refs=prevention_refs or ["scripts/closure_gate.py"],
         verification_refs=["reviews/VERIFY-2026-07-29-unit.json"],
         recurrence_count=2,
         status="mitigated",
@@ -53,7 +57,12 @@ def _create(
     )
 
 
-def _write_closeable_unit(root: Path) -> tuple[str, str]:
+def _write_closeable_unit(
+    root: Path,
+    *,
+    claim_refs: list[str] | None = None,
+) -> tuple[str, str]:
+    (root / "agents" / "runtime").mkdir(parents=True, exist_ok=True)
     task_id = "TASK-AR-645"
     unit_id = "UNIT-TASK-AR-645-001"
     task = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
@@ -84,6 +93,11 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
         / f"{unit_id}.md"
     )
     unit.parent.mkdir(parents=True, exist_ok=True)
+    claim_ref_lines = ""
+    if claim_refs:
+        claim_ref_lines = "claim_refs:\n" + "".join(
+            f"  - {claim_ref}\n" for claim_ref in claim_refs
+        )
     unit.write_text(
         "---\n"
         "schema_version: agent-runtime-work-item/v1\n"
@@ -97,6 +111,7 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
         "owner: lead_engineer\n"
         "evidence_refs:\n"
         f"  - {evidence_ref}\n"
+        f"{claim_ref_lines}"
         "---\n\n# Compound closeout fixture\n",
         encoding="utf-8",
     )
@@ -119,6 +134,170 @@ def _write_closeable_unit(root: Path) -> tuple[str, str]:
     return unit_id, evidence_ref
 
 
+def _write_closeable_task_with_unit(root: Path) -> tuple[str, str]:
+    _write_closeable_unit(root)
+    task_id = "TASK-AR-645"
+    evidence_ref = "reviews/VERIFY-2026-07-29-task-ar-645.json"
+    task = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        f"id: {task_id}\n"
+        f"display_id: {task_id}\n"
+        f"work_id: {task_id}\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "verification_status: passed\n"
+        "title: Compound task closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "evidence_refs:\n"
+        f"  - {evidence_ref}\n"
+        "---\n\n# Compound task closeout fixture\n",
+        encoding="utf-8",
+    )
+    evidence = root / evidence_ref
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-work-verification/v1",
+                "work_id": task_id,
+                "task_id": task_id,
+                "status": "passed",
+                "signal": "pass",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return task_id, evidence_ref
+
+
+def _write_self_declared_duplicate_unit_spec(root: Path) -> str:
+    ref = "reviews/REVIEW-2026-07-29-self-declared-duplicate-unit.md"
+    path = root / ref
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: UNIT-TASK-AR-645-001\n"
+        "kind: unit\n"
+        "parent_id: TASK-AR-645\n"
+        "task_id: TASK-AR-645\n"
+        "unit_id: UNIT-TASK-AR-645-001\n"
+        "---\n\n# Non-canonical duplicate unit\n",
+        encoding="utf-8",
+    )
+    return ref
+
+
+def _tracked_closeout_snapshot(root: Path, work_path: Path, claim_path: Path) -> dict[Path, bytes | None]:
+    paths = (
+        work_path,
+        claim_path,
+        root / "BACKLOG-BOARD.md",
+        root / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        root / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        root / "reviews/INDEX.md",
+    )
+    return {path: path.read_bytes() if path.is_file() else None for path in paths}
+
+
+def _write_claim_only_repeat_authority(
+    root: Path,
+    *,
+    signature: str,
+    compound_refs: list[str] | None = None,
+    status: str = "claimed",
+    claim_id: str = "CLAIM-claim-only-repeat-close",
+    task_id: str = "TASK-AR-645",
+    unit_id: str = "UNIT-TASK-AR-645-001",
+    unit_spec: str | None = None,
+    overlay: bool = False,
+) -> Path:
+    if unit_spec is None:
+        unit_spec = (
+            "agents/lead_engineer/tasks/units/TASK-AR-645/"
+            "UNIT-TASK-AR-645-001.md"
+        )
+    claim = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": task_id,
+        "unit_id": unit_id,
+        "unit_spec": unit_spec,
+        "agent_role": "lead-engineer",
+        "agent_instance_id": "le-claim-only-repeat-close",
+        "status": status,
+        "worktree_path": str(root.resolve()),
+        "claimed_at": "2026-07-29T03:00:00+09:00",
+        "last_heartbeat": "2026-07-29T03:00:00+09:00",
+        "updated_at": "2026-07-29T03:00:00+09:00",
+        "expires_at": "2099-07-29T03:30:00+09:00",
+        "lease": {
+            "claimed_at": "2026-07-29T03:00:00+09:00",
+            "heartbeat_at": "2026-07-29T03:00:00+09:00",
+            "expires_at": "2099-07-29T03:30:00+09:00",
+        },
+        "escalation_triggers": ["repeated_failure"],
+        "defect_signatures": [records.normalize_signature(signature)],
+        "compound_refs": compound_refs or [],
+    }
+    if overlay:
+        claim["overlay"] = True
+    claims = root / "agents" / "runtime" / "task_claims"
+    claims.mkdir(parents=True, exist_ok=True)
+    path = claims / f"{claim_id}.json"
+    path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    if not (claims / ".claim-store").is_file():
+        _write_claim_store_witness_pair(
+            root,
+            witness_claim_id=claim_id,
+        )
+    return path
+
+
+def _write_supported_repeat_compound(
+    root: Path,
+    *,
+    signature: str,
+    stem: str,
+    work_id: str = "UNIT-TASK-AR-645-001",
+) -> str:
+    prevention_ref = f"tests/test_{stem}.py"
+    prevention = root / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text(
+        "def test_repeat_prevention():\n    assert True\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        root,
+        work_id=work_id,
+        signature=signature,
+        title=f"Reject {stem.replace('_', ' ')} authority bypass",
+        prevention_refs=[prevention_ref],
+    )
+    return records.record_ref(root, record_path)
+
+
+def _set_raw_frontmatter_value(path: Path, field: str, raw_value: str) -> None:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    replacement = f"{field}: {raw_value}"
+    for index in range(1, len(lines)):
+        if lines[index] == "---":
+            lines.insert(index, replacement)
+            break
+        if lines[index].startswith(f"{field}:"):
+            lines[index] = replacement
+            break
+    else:
+        raise AssertionError(f"frontmatter terminator missing: {path}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(WORK_SCRIPT), "--root", str(root), *args],
@@ -129,6 +308,2246 @@ def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         errors="replace",
     )
+
+
+def _assert_close_rejected_without_mutation(
+    root: Path,
+    *,
+    unit_id: str,
+    unit_path: Path,
+    claim_path: Path,
+    expected_finding: str = "closeout:",
+) -> None:
+    before = _tracked_closeout_snapshot(root, unit_path, claim_path)
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(root, unit_path, claim_path) == before
+
+
+def _project_tree_snapshot(root: Path) -> dict[str, tuple[object, ...]]:
+    """Capture fixture state without resolving aliases or omitting generated views."""
+
+    snapshot: dict[str, tuple[object, ...]] = {}
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            snapshot[relative] = ("symlink", os.readlink(path))
+        elif path.is_file():
+            snapshot[relative] = ("file", path.read_bytes())
+        elif path.is_dir():
+            snapshot[relative] = ("directory",)
+        else:
+            snapshot[relative] = ("other",)
+    return snapshot
+
+
+def _assert_close_rejected_with_full_nonmutation(
+    root: Path,
+    *,
+    unit_id: str,
+    expected_finding: str,
+) -> None:
+    before = _project_tree_snapshot(root)
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _project_tree_snapshot(root) == before
+
+
+def _write_claim_store_witness_pair(
+    root: Path,
+    *,
+    witness_claim_id: str,
+) -> tuple[Path, Path]:
+    payload = {
+        "schema": "agent-runtime-task-claim-store/v1",
+        "generation_id": "11111111-1111-4111-8111-111111111111",
+        "witness_claim_id": witness_claim_id,
+    }
+    raw = (
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+    inner = root / "agents" / "runtime" / "task_claims" / ".claim-store"
+    try:
+        git_dir_result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--git-dir"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        git_dir_result = None
+    if git_dir_result is not None and git_dir_result.returncode == 0:
+        raw_git_dir = Path(git_dir_result.stdout.strip())
+        git_dir = raw_git_dir if raw_git_dir.is_absolute() else root / raw_git_dir
+        outer = git_dir / "agent-runtime" / "task-claim-store"
+    else:
+        outer = root / ".agent-runtime" / "task-claim-store"
+    for path in (inner, outer):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_file():
+            path.write_bytes(raw)
+    lock_path = outer.with_name(outer.name + ".lock")
+    if not lock_path.is_file():
+        lock_path.write_bytes(b"\0")
+    assert inner.read_bytes() == outer.read_bytes()
+    return inner, outer
+
+
+def _load_source_work_module():
+    module_name = "_source_work_for_claim_store_swap_test"
+    scripts_dir = str(REPO_ROOT / "scripts")
+    spec = importlib.util.spec_from_file_location(module_name, WORK_SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, scripts_dir)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.remove(scripts_dir)
+    return module
+
+
+def test_work_close_honors_claim_only_repeat_authority_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "claim only repeated failure close authority"
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+    generated_paths = (
+        tmp_path / "BACKLOG-BOARD.md",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        tmp_path / "reviews/INDEX.md",
+    )
+    before_generated = {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    }
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before
+    assert claim_path.read_bytes() == before_claim
+    assert {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    } == before_generated
+
+
+@pytest.mark.parametrize(
+    "resolution",
+    ("wontfix", "duplicate", "superseded", "moved_to_vault"),
+)
+def test_non_done_work_close_still_requires_claim_repeat_compound_without_mutation(
+    tmp_path: Path,
+    resolution: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"claim repeat non-done resolution {resolution}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    generated_paths = (
+        tmp_path / "BACKLOG-BOARD.md",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json",
+        tmp_path / "agents/project/work-items/WORK-ITEM-CLASSIFICATION.md",
+        tmp_path / "reviews/INDEX.md",
+    )
+    before_unit = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+    before_generated = {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    }
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        resolution,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before_unit
+    assert claim_path.read_bytes() == before_claim
+    assert {
+        path: path.read_bytes() if path.is_file() else None
+        for path in generated_paths
+    } == before_generated
+
+
+def test_work_close_persists_valid_claim_only_repeat_authority(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "claim only repeated failure close authority"
+    prevention_ref = "tests/test_claim_repeat_authority.py"
+    prevention = tmp_path / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text("def test_claim_repeat_authority():\n    assert True\n", encoding="utf-8")
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Persist claim-only repeat authority",
+        prevention_refs=[prevention_ref],
+    )
+    record_ref = records.record_ref(tmp_path, record_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+    )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert payload["defect_signatures"] == [records.normalize_signature(signature)]
+    assert payload["compound_refs"] == [record_ref]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    assert f"  - {records.normalize_signature(signature)}" in unit_text
+    assert f"  - {record_ref}" in unit_text
+    assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_consumes_only_linked_released_claim_and_persists_authority(
+    tmp_path: Path,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    signature = "released claim repeated failure close authority"
+    prevention_ref = "tests/test_released_claim_repeat_authority.py"
+    prevention = tmp_path / prevention_ref
+    prevention.parent.mkdir(parents=True, exist_ok=True)
+    prevention.write_text(
+        "def test_released_claim_repeat_authority():\n    assert True\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Persist released claim repeat authority",
+        prevention_refs=[prevention_ref],
+    )
+    record_ref = records.record_ref(tmp_path, record_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-repeat-close",
+    )
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    _write_closeable_unit(tmp_path, claim_refs=[claim_ref])
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    normalized_signature = records.normalize_signature(signature)
+    assert payload["defect_signatures"] == [normalized_signature]
+    assert payload["compound_refs"] == [record_ref]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    assert f"  - {normalized_signature}" in unit_text
+    assert f"  - {record_ref}" in unit_text
+    assert f"  - {claim_ref}" in unit_text
+    assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_unions_multiple_linked_released_claim_authorities(
+    tmp_path: Path,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    claim_refs: list[str] = []
+    compound_refs: list[str] = []
+    signatures: list[str] = []
+    claim_snapshots: dict[Path, bytes] = {}
+    for index in (1, 2):
+        signature = f"released linked claim union authority {index}"
+        normalized_signature = records.normalize_signature(signature)
+        prevention_ref = f"tests/test_released_claim_union_{index}.py"
+        prevention = tmp_path / prevention_ref
+        prevention.parent.mkdir(parents=True, exist_ok=True)
+        prevention.write_text(
+            f"def test_released_claim_union_{index}():\n    assert True\n",
+            encoding="utf-8",
+        )
+        record_path, _record = _create(
+            tmp_path,
+            work_id=unit_id,
+            signature=signature,
+            title=f"Persist released claim union authority {index}",
+            prevention_refs=[prevention_ref],
+        )
+        record_ref = records.record_ref(tmp_path, record_path)
+        claim_path = _write_claim_only_repeat_authority(
+            tmp_path,
+            signature=normalized_signature,
+            compound_refs=[record_ref],
+            status="released",
+            claim_id=f"CLAIM-released-repeat-union-{index}",
+        )
+        claim_refs.append(claim_path.relative_to(tmp_path).as_posix())
+        compound_refs.append(record_ref)
+        signatures.append(normalized_signature)
+        claim_snapshots[claim_path] = claim_path.read_bytes()
+    _write_closeable_unit(tmp_path, claim_refs=claim_refs)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert set(payload["defect_signatures"]) == set(signatures)
+    assert set(payload["compound_refs"]) == set(compound_refs)
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    for value in (*claim_refs, *compound_refs, *signatures):
+        assert f"  - {value}" in unit_text
+    assert {
+        path: path.read_bytes() for path in claim_snapshots
+    } == claim_snapshots
+
+
+def test_work_close_does_not_scan_unlinked_released_claims(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "unlinked released claim must stay out of closeout"
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        status="released",
+        claim_id="CLAIM-unlinked-released-repeat-close",
+    )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    _status_line, json_output = result.stdout.split("\n", 1)
+    payload = json.loads(json_output)
+    assert payload["defect_signatures"] == []
+    assert payload["compound_refs"] == []
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    assert records.normalize_signature(signature) not in unit_path.read_text(
+        encoding="utf-8"
+    )
+    assert claim_path.read_bytes() == before_claim
+
+
+@pytest.mark.parametrize(
+    "invalid_kind",
+    (
+        "overlay",
+        "expired-status",
+        "wrong-task",
+        "wrong-unit",
+        "wrong-unit-spec",
+        "malformed-json",
+    ),
+)
+def test_work_close_fails_closed_for_invalid_linked_released_claim(
+    tmp_path: Path,
+    invalid_kind: str,
+) -> None:
+    signature = f"invalid linked released claim {invalid_kind}"
+    kwargs: dict[str, object] = {
+        "status": "released",
+        "claim_id": f"CLAIM-invalid-linked-{invalid_kind}",
+    }
+    if invalid_kind == "overlay":
+        kwargs["overlay"] = True
+    elif invalid_kind == "expired-status":
+        # Explicit lifecycle state only. Wall-clock lease expiry belongs to
+        # TASK-AR-655 and is deliberately not inferred in this test.
+        kwargs["status"] = "expired"
+    elif invalid_kind == "wrong-task":
+        kwargs["task_id"] = "TASK-AR-999"
+    elif invalid_kind == "wrong-unit":
+        kwargs["unit_id"] = "UNIT-TASK-AR-999-001"
+    elif invalid_kind == "wrong-unit-spec":
+        kwargs["unit_spec"] = (
+            "agents/lead_engineer/tasks/units/TASK-AR-999/"
+            "UNIT-TASK-AR-999-001.md"
+        )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        **kwargs,
+    )
+    if invalid_kind == "malformed-json":
+        claim_path.write_bytes(b'{"status":"released",')
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_unit = unit_path.read_bytes()
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert unit_path.read_bytes() == before_unit
+    assert claim_path.read_bytes() == before_claim
+
+
+def test_work_close_rejects_noncanonical_linked_released_claim_id_without_mutation(
+    tmp_path: Path,
+) -> None:
+    _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="canonical witness authority",
+        status="released",
+        claim_id="CLAIM-witness",
+    )
+    signature = "noncanonical linked released claim identity"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="noncanonical_linked_released_claim_identity",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-bad!",
+    )
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+
+
+def test_work_close_rejects_partial_compound_signature_coverage_without_mutation(
+    tmp_path: Path,
+) -> None:
+    covered = records.normalize_signature("covered claim close authority")
+    uncovered = records.normalize_signature("uncovered claim close authority")
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=covered,
+        stem="covered_claim_close_authority",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=covered,
+        compound_refs=[record_ref],
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["defect_signatures"] = [covered, uncovered]
+    claim_path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding=f"closeout:defect-signature-uncovered:{uncovered}",
+    )
+
+
+def test_work_close_rejects_scalar_authority_in_linked_released_claim_without_mutation(
+    tmp_path: Path,
+) -> None:
+    signature = "released scalar authority shape bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="released_scalar_authority_shape",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-scalar-authority",
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["escalation_triggers"] = claim["escalation_triggers"][0]
+    claim["defect_signatures"] = claim["defect_signatures"][0]
+    claim["compound_refs"] = claim["compound_refs"][0]
+    claim_path.write_text(json.dumps(claim) + "\n", encoding="utf-8")
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+
+
+def test_work_close_rejects_linked_released_claim_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    signature = "released claim store symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="released_claim_store_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        status="released",
+        claim_id="CLAIM-released-store-symlink",
+    )
+    shadow_claim = tmp_path / "shadow-claims" / claim_path.name
+    shadow_claim.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.replace(shadow_claim)
+    try:
+        claim_path.symlink_to(shadow_claim)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    claim_ref = claim_path.relative_to(tmp_path).as_posix()
+    unit_id, _evidence_ref = _write_closeable_unit(
+        tmp_path,
+        claim_refs=[claim_ref],
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_shadow = shadow_claim.read_bytes()
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+@pytest.mark.parametrize("status", ("Claimed", " CLAIMED "))
+def test_work_close_treats_normalized_active_claim_status_as_authority_without_mutation(
+    tmp_path: Path,
+    status: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"normalized active claim status {status!r}",
+        status=status,
+        claim_id="CLAIM-normalized-active-status",
+    )
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:repeat-defect-current-compound-required",
+    )
+
+
+@pytest.mark.parametrize(
+    "status",
+    (
+        pytest.param("mystery-state", id="unknown"),
+        pytest.param(["claimed"], id="non-string"),
+    ),
+)
+def test_work_close_rejects_unknown_or_non_string_claim_status_without_mutation(
+    tmp_path: Path,
+    status: object,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="invalid claim status must not erase close authority",
+        claim_id="CLAIM-invalid-status",
+    )
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload["status"] = status
+    claim_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "adversarial_field",
+    ("deep-nesting", "huge-integer", "oversized"),
+)
+def test_work_close_bounds_adversarial_active_claim_json_without_mutation(
+    tmp_path: Path,
+    adversarial_field: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"bounded active claim JSON {adversarial_field}",
+        claim_id=f"CLAIM-bounded-json-{adversarial_field}",
+    )
+    if adversarial_field == "oversized":
+        payload = json.loads(claim_path.read_text(encoding="utf-8"))
+        payload["padding"] = "x" * (256 * 1024)
+        raw = (json.dumps(payload) + "\n").encode("utf-8")
+        assert len(raw) > 256 * 1024
+    else:
+        base = claim_path.read_text(encoding="utf-8").rstrip()
+        assert base.endswith("}")
+        if adversarial_field == "deep-nesting":
+            raw_value = (
+                "[" * (claim_store.CLAIM_MAX_JSON_DEPTH + 1)
+                + "0"
+                + "]" * (claim_store.CLAIM_MAX_JSON_DEPTH + 1)
+            )
+        else:
+            raw_value = "9" * 5000
+        raw = (
+            base[:-1]
+            + f',\n  "adversarial_{adversarial_field.replace("-", "_")}": '
+            + raw_value
+            + "\n}\n"
+        ).encode("utf-8")
+    claim_path.write_bytes(raw)
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_initialized_claim_store_replaced_with_empty_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="direct claim store replacement hides canonical authority",
+        claim_id="CLAIM-store-replacement",
+    )
+    _write_claim_store_witness_pair(
+        tmp_path,
+        witness_claim_id=claim_path.stem,
+    )
+    claims_dir = claim_path.parent
+    preserved_store = tmp_path / "preserved-claim-store"
+    claims_dir.replace(preserved_store)
+    claims_dir.mkdir()
+
+    _assert_close_rejected_with_full_nonmutation(
+        tmp_path,
+        unit_id=unit_id,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_claim_store_swap_at_scandir_without_mutation(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="claim store swap during scan hides canonical authority",
+        claim_id="CLAIM-store-mid-scan-swap",
+    )
+    _write_claim_store_witness_pair(
+        tmp_path,
+        witness_claim_id=claim_path.stem,
+    )
+    claims_dir = claim_path.parent
+    preserved_store = tmp_path / "preserved-mid-scan-claim-store"
+    work_module = _load_source_work_module()
+    original_scandir = work_module.closure_gate.os.scandir
+    swap_state: dict[str, object] = {"performed": False}
+
+    def swapping_scandir(path):
+        if Path(path) == claims_dir and not swap_state["performed"]:
+            swap_state["performed"] = True
+            claims_dir.replace(preserved_store)
+            claims_dir.mkdir()
+            swap_state["expected_snapshot"] = _project_tree_snapshot(tmp_path)
+        return original_scandir(path)
+
+    monkeypatch.setattr(
+        work_module.closure_gate.os,
+        "scandir",
+        swapping_scandir,
+    )
+
+    returncode = work_module.main(
+        [
+            "--root",
+            str(tmp_path),
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert swap_state["performed"] is True
+    assert returncode == 1
+    assert "closeout:active-claim-context-invalid" in captured.err
+    assert "work-close: closed" not in captured.out
+    assert "Traceback" not in captured.out + captured.err
+    assert _project_tree_snapshot(tmp_path) == swap_state["expected_snapshot"]
+
+
+def test_work_close_rejects_active_claim_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "active claim file symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_claim_file_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-active-file-symlink",
+    )
+    shadow_claim = tmp_path / "shadow-claims" / claim_path.name
+    shadow_claim.parent.mkdir(parents=True, exist_ok=True)
+    claim_path.replace(shadow_claim)
+    try:
+        claim_path.symlink_to(shadow_claim)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before_shadow = shadow_claim.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+def test_work_close_rejects_claim_directory_symlink_outside_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "active claim directory symlink bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_claim_directory_symlink",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-active-directory-symlink",
+    )
+    claims_dir = claim_path.parent
+    shadow_claims = tmp_path / "shadow-claim-store"
+    claims_dir.replace(shadow_claims)
+    try:
+        claims_dir.symlink_to(shadow_claims, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_claim = shadow_claims / claim_path.name
+    before_shadow = shadow_claim.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert shadow_claim.read_bytes() == before_shadow
+
+
+def test_work_close_rejects_broken_claim_store_parent_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="broken ancestor symlink hides canonical active claim store",
+        claim_id="CLAIM-broken-claim-store-parent",
+    )
+    runtime_dir = claim_path.parent.parent
+    shadow_runtime = tmp_path / "shadow-runtime"
+    runtime_dir.replace(shadow_runtime)
+    try:
+        runtime_dir.symlink_to(
+            tmp_path / "missing-runtime",
+            target_is_directory=True,
+        )
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    shadow_claim = shadow_runtime / "task_claims" / claim_path.name
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    ) == before
+
+
+def test_work_close_rejects_missing_claim_store_runtime_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="missing intermediate parent hides canonical active claim store",
+        claim_id="CLAIM-missing-claim-store-runtime",
+    )
+    runtime_dir = claim_path.parent.parent
+    shadow_runtime = tmp_path / "shadow-runtime"
+    runtime_dir.replace(shadow_runtime)
+    shadow_claim = shadow_runtime / "task_claims" / claim_path.name
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert not runtime_dir.exists()
+    assert _tracked_closeout_snapshot(
+        tmp_path,
+        unit_path,
+        shadow_claim,
+    ) == before
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX permission semantics required")
+def test_work_close_rejects_unreadable_claim_store_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="unreadable active claim store enumerates as empty",
+        claim_id="CLAIM-unreadable-active-store",
+    )
+    claims_dir = claim_path.parent
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+    original_mode = claims_dir.stat().st_mode & 0o777
+    claims_dir.chmod(0)
+    try:
+        try:
+            with os.scandir(claims_dir) as entries:
+                next(entries, None)
+        except PermissionError:
+            pass
+        else:
+            pytest.skip("directory permissions are not enforced for this test user")
+
+        result = _run_work(
+            tmp_path,
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        )
+    finally:
+        claims_dir.chmod(original_mode)
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
+
+
+def test_work_close_bounds_active_claim_symlink_loop_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claims_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    claims_dir.mkdir(parents=True, exist_ok=True)
+    loop_path = claims_dir / "CLAIM-loop.json"
+    try:
+        loop_path.symlink_to(loop_path.name)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, loop_path)
+    before_target = os.readlink(loop_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert loop_path.is_symlink()
+    assert os.readlink(loop_path) == before_target
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, loop_path) == before
+
+
+@pytest.mark.parametrize("claim_store_state", ("absent", "empty"))
+def test_work_close_accepts_direct_absent_or_empty_final_claim_store(
+    tmp_path: Path,
+    claim_store_state: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    runtime_dir = tmp_path / "agents" / "runtime"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    claims_dir = runtime_dir / "task_claims"
+    if claim_store_state == "empty":
+        claims_dir.mkdir()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "work-close: closed" in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+
+
+def test_work_close_rejects_noncanonical_duplicate_work_path_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    canonical_unit = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_unit = (
+        tmp_path
+        / "shadow-root/agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    shadow_unit.parent.mkdir(parents=True, exist_ok=True)
+    shadow_unit.write_bytes(canonical_unit.read_bytes())
+    missing_claim = (
+        tmp_path / "agents/runtime/task_claims/CLAIM-absent.json"
+    )
+    before_canonical = canonical_unit.read_bytes()
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=str(shadow_unit),
+        unit_path=shadow_unit,
+        claim_path=missing_claim,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+    assert canonical_unit.read_bytes() == before_canonical
+
+
+@pytest.mark.parametrize(
+    "unit_spec",
+    (
+        pytest.param(None, id="null"),
+        pytest.param(False, id="false"),
+        pytest.param(0, id="zero"),
+        pytest.param([], id="empty-list"),
+        pytest.param({}, id="empty-object"),
+        pytest.param("", id="blank-string"),
+    ),
+)
+def test_work_close_rejects_present_invalid_unit_spec_without_mutation(
+    tmp_path: Path,
+    unit_spec: object,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = f"present invalid unit spec {type(unit_spec).__name__}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_unit_spec_{type(unit_spec).__name__}",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id="CLAIM-present-invalid-unit-spec",
+    )
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    claim["unit_spec"] = unit_spec
+    claim_path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+    assert "unit_spec" in json.loads(claim_path.read_text(encoding="utf-8"))
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "unit_spec_mode",
+    ("absent", "blank", "whitespace"),
+)
+def test_work_close_preserves_task_level_claim_unit_spec_compatibility(
+    tmp_path: Path,
+    unit_spec_mode: str,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    signature = f"task level claim unit spec compatibility {unit_spec_mode}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"task_level_claim_unit_spec_{unit_spec_mode}",
+        work_id=task_id,
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-task-level-unit-spec-{unit_spec_mode}",
+        unit_id="",
+        unit_spec="" if unit_spec_mode != "whitespace" else "   ",
+    )
+    if unit_spec_mode == "absent":
+        claim = json.loads(claim_path.read_text(encoding="utf-8"))
+        claim.pop("unit_spec")
+        claim.pop("unit_id")
+        claim_path.write_text(
+            json.dumps(claim, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    before_claim = claim_path.read_bytes()
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        task_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert records.normalize_signature(signature) in result.stdout
+    assert record_ref in result.stdout
+    assert claim_path.read_bytes() == before_claim
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("kind", "work_id", "id", "display_id", "task_id", "unit_id", "parent_id"),
+)
+@pytest.mark.parametrize(
+    "raw_value",
+    (
+        pytest.param("''", id="blank-scalar"),
+        pytest.param("[]", id="empty-container"),
+    ),
+)
+def test_work_close_rejects_present_blank_or_container_unit_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    raw_value: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = f"present invalid unit identity {field} {raw_value}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_unit_identity_{field}",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-present-invalid-unit-{field}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _set_raw_frontmatter_value(unit_path, field, raw_value)
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("kind", "work_id", "id", "display_id", "task_id"),
+)
+@pytest.mark.parametrize(
+    "raw_value",
+    (
+        pytest.param("''", id="blank-scalar"),
+        pytest.param("[]", id="empty-container"),
+    ),
+)
+def test_work_close_rejects_present_blank_or_container_task_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    raw_value: str,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    signature = f"present invalid task identity {field} {raw_value}"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem=f"present_invalid_task_identity_{field}",
+        work_id=task_id,
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        claim_id=f"CLAIM-present-invalid-task-{field}",
+    )
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    _set_raw_frontmatter_value(task_path, field, raw_value)
+
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=task_id,
+        unit_path=task_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_unit_spec_symlink_alias_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    alias = unit_path.with_name("UNIT-TASK-AR-645-ALIAS.md")
+    try:
+        alias.symlink_to(unit_path.name)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    signature = "active unit spec symlink alias bypass"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="active_unit_spec_symlink_alias",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        unit_spec=alias.relative_to(tmp_path).as_posix(),
+        claim_id="CLAIM-active-unit-spec-symlink-alias",
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_work_close_rejects_canonical_unit_task_identity_contradiction_without_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    unit_text = unit_path.read_text(encoding="utf-8")
+    unit_path.write_text(
+        unit_text.replace("task_id: TASK-AR-645", "task_id: TASK-AR-999", 1),
+        encoding="utf-8",
+    )
+    signature = "canonical unit task identity contradiction"
+    record_ref = _write_supported_repeat_compound(
+        tmp_path,
+        signature=signature,
+        stem="canonical_unit_task_identity_contradiction",
+    )
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=signature,
+        compound_refs=[record_ref],
+        task_id="TASK-AR-999",
+        claim_id="CLAIM-canonical-unit-task-contradiction",
+    )
+    _assert_close_rejected_without_mutation(
+        tmp_path,
+        unit_id=unit_id,
+        unit_path=unit_path,
+        claim_path=claim_path,
+        expected_finding="closeout:active-claim-context-invalid",
+    )
+
+
+def test_wontfix_close_rejects_conflicting_valid_unit_id_without_identity_leak_or_mutation(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    conflicting_unit_id = "UNIT-TASK-AR-645-002"
+    unit_path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    _set_raw_frontmatter_value(unit_path, "unit_id", conflicting_unit_id)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="conflicting valid unit identity repeat authority",
+        claim_id="CLAIM-conflicting-valid-unit-identity",
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        "wontfix",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" not in result.stderr
+    assert "work-close: closed" not in result.stdout
+    assert f'"work_id": "{conflicting_unit_id}"' not in result.stdout
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
+
+
+def test_task_work_close_rejects_self_declared_duplicate_unit_spec(
+    tmp_path: Path,
+) -> None:
+    task_id, _evidence_ref = _write_closeable_task_with_unit(tmp_path)
+    duplicate_ref = _write_self_declared_duplicate_unit_spec(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="self declared duplicate unit claim authority",
+        unit_spec=duplicate_ref,
+        claim_id="CLAIM-self-declared-duplicate-unit",
+    )
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, task_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        task_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:active-claim-context-invalid" in result.stderr
+    assert "repeat-defect-current-compound-required" not in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, task_path, claim_path) == before
+
+
+@pytest.mark.parametrize(
+    "resolution",
+    ("wontfix", "duplicate", "superseded", "moved_to_vault"),
+)
+def test_claim_only_repeat_requires_compound_for_every_non_done_resolution(
+    tmp_path: Path,
+    resolution: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature=f"claim only repeat non done {resolution}",
+        claim_id=f"CLAIM-repeat-non-done-{resolution}",
+    )
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = _tracked_closeout_snapshot(tmp_path, unit_path, claim_path)
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--resolution",
+        resolution,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tracked_closeout_snapshot(tmp_path, unit_path, claim_path) == before
+
+
+_DUPLICATE_WATCH_FIELDS = (
+    "decision",
+    "status",
+    "reviewed_by",
+    "work_id",
+)
+
+_DUPLICATE_WATCH_CASES = [
+    pytest.param(
+        watch_format,
+        field,
+        order,
+        id=f"{watch_format}-{field}-{order}",
+    )
+    for watch_format in ("markdown", "json")
+    for field in _DUPLICATE_WATCH_FIELDS
+    for order in ("invalid-then-valid", "valid-then-invalid")
+]
+
+
+def _duplicate_accepted_watch_document(
+    *,
+    watch_format: str,
+    field: str,
+    order: str,
+    current_work_id: str,
+) -> str:
+    valid = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    invalid: dict[str, object] = {
+        "status": "rejected",
+        "decision": "rejected",
+        "reviewed_by": None,
+        "work_id": "UNIT-TASK-AR-999-001",
+    }
+    duplicate_values = (
+        (invalid[field], valid[field])
+        if order == "invalid-then-valid"
+        else (valid[field], invalid[field])
+    )
+    pairs: list[tuple[str, object]] = []
+    for key in ("status", "decision", "reviewed_by", "work_id"):
+        if key == field:
+            pairs.extend((key, value) for value in duplicate_values)
+        else:
+            pairs.append((key, valid[key]))
+
+    if watch_format == "json":
+        rows = [
+            f"  {json.dumps(key)}: {json.dumps(value)}"
+            for key, value in pairs
+        ]
+        return "{\n" + ",\n".join(rows) + "\n}\n"
+
+    def frontmatter_scalar(value: object) -> str:
+        return "null" if value is None else str(value)
+
+    rows = [
+        f"{key}: {frontmatter_scalar(value)}\n"
+        for key, value in pairs
+    ]
+    return "---\n" + "".join(rows) + "---\n\n# Duplicate watch authority\n"
+
+
+_SEMANTIC_WATCH_REVIEWER_FIELDS = (
+    "reviewed_by",
+    "reviewer",
+    "approved_by",
+    "accepted_by",
+    "verified_by",
+)
+_SEMANTIC_WATCH_WORK_FIELDS = (
+    "work_id",
+    "task_id",
+    "unit_id",
+    "work_ids",
+)
+_SEMANTIC_WATCH_FIELDS = (
+    "decision",
+    "status",
+    *_SEMANTIC_WATCH_REVIEWER_FIELDS,
+    *_SEMANTIC_WATCH_WORK_FIELDS,
+)
+_SEMANTIC_WATCH_QUOTE_STYLES = (
+    "single",
+    "double",
+    "escaped-double",
+)
+_SEMANTIC_DUPLICATE_WATCH_CASES = [
+    pytest.param(
+        field,
+        quote_style,
+        order,
+        value_mode,
+        id=f"{field}-{quote_style}-{order}-{value_mode}",
+    )
+    for field in _SEMANTIC_WATCH_FIELDS
+    for quote_style in _SEMANTIC_WATCH_QUOTE_STYLES
+    for order in ("quoted-then-plain", "plain-then-quoted")
+    for value_mode in ("quoted-invalid", "plain-invalid")
+] + [
+    pytest.param(
+        field,
+        quote_style,
+        "quoted-then-plain",
+        "equal",
+        id=f"{field}-{quote_style}-equal",
+    )
+    for field in _SEMANTIC_WATCH_FIELDS
+    for quote_style in _SEMANTIC_WATCH_QUOTE_STYLES
+]
+
+
+def _quoted_watch_key(field: str, quote_style: str) -> str:
+    if quote_style == "single":
+        return f"'{field}'"
+    if quote_style == "double":
+        return json.dumps(field)
+    return f'"\\u{ord(field[0]):04x}{field[1:]}"'
+
+
+def _semantic_watch_value(
+    field: str,
+    *,
+    current_work_id: str,
+    valid: bool,
+) -> object:
+    if field == "decision":
+        return "accepted_watch" if valid else "rejected"
+    if field == "status":
+        return "accepted" if valid else "rejected"
+    if field in _SEMANTIC_WATCH_REVIEWER_FIELDS:
+        return "qa-independent" if valid else None
+    linked_id = (
+        "TASK-AR-645"
+        if field == "task_id"
+        else current_work_id
+    )
+    if not valid:
+        linked_id = (
+            "TASK-AR-999"
+            if field == "task_id"
+            else "UNIT-TASK-AR-999-001"
+        )
+    return [linked_id] if field == "work_ids" else linked_id
+
+
+def _render_watch_frontmatter(entries: list[tuple[str, object]]) -> str:
+    rows: list[str] = []
+    for key, value in entries:
+        if isinstance(value, list):
+            rows.append(f"{key}:\n")
+            rows.extend(f"  - {item}\n" for item in value)
+        else:
+            scalar = "null" if value is None else str(value)
+            rows.append(f"{key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Semantic watch authority\n"
+
+
+def _semantic_duplicate_accepted_watch_document(
+    *,
+    field: str,
+    quote_style: str,
+    order: str,
+    value_mode: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    base_fields = ("status", "decision", reviewer_field, work_field)
+    if value_mode == "quoted-invalid":
+        quoted_valid, plain_valid = False, True
+    elif value_mode == "plain-invalid":
+        quoted_valid, plain_valid = True, False
+    else:
+        quoted_valid = plain_valid = True
+    semantic_pair = [
+        (
+            _quoted_watch_key(field, quote_style),
+            _semantic_watch_value(
+                field,
+                current_work_id=current_work_id,
+                valid=quoted_valid,
+            ),
+        ),
+        (
+            field,
+            _semantic_watch_value(
+                field,
+                current_work_id=current_work_id,
+                valid=plain_valid,
+            ),
+        ),
+    ]
+    if order == "plain-then-quoted":
+        semantic_pair.reverse()
+
+    entries: list[tuple[str, object]] = []
+    for key in base_fields:
+        if key == field:
+            entries.extend(semantic_pair)
+        else:
+            entries.append(
+                (
+                    key,
+                    _semantic_watch_value(
+                        key,
+                        current_work_id=current_work_id,
+                        valid=True,
+                    ),
+                )
+            )
+    return _render_watch_frontmatter(entries)
+
+
+def _quoted_accepted_watch_document(
+    *,
+    quote_style: str,
+    current_work_id: str,
+) -> str:
+    return _render_watch_frontmatter(
+        [
+            (
+                _quoted_watch_key(field, quote_style),
+                _semantic_watch_value(
+                    field,
+                    current_work_id=current_work_id,
+                    valid=True,
+                ),
+            )
+            for field in ("status", "decision", "reviewed_by", "work_id")
+        ]
+    )
+
+
+_SEMANTIC_SCALAR_INVALID_STYLES = (
+    "nested-single-inside-double",
+    "nested-double-inside-single",
+    "mixed-single-double",
+    "mixed-double-single",
+)
+_SEMANTIC_SCALAR_VALID_STYLES = (
+    "single",
+    "double",
+    "escaped-double",
+)
+_INDENTED_WATCH_FRAGMENTS = (
+    pytest.param(
+        "  decision: rejected\n",
+        id="space-indented-authority",
+    ),
+    pytest.param(
+        "\tdecision: rejected\n",
+        id="tab-indented-authority",
+    ),
+    pytest.param(
+        "summary: accepted\n  rejected\n",
+        id="malformed-continuation",
+    ),
+    pytest.param(
+        "  - rejected\n",
+        id="orphan-list-item",
+    ),
+)
+
+
+def _valid_watch_scalar(field: str, *, current_work_id: str) -> str:
+    value = _semantic_watch_value(
+        field,
+        current_work_id=current_work_id,
+        valid=True,
+    )
+    if isinstance(value, list):
+        return str(value[0])
+    return str(value)
+
+
+def _styled_watch_scalar(value: str, style: str) -> str:
+    if style == "single":
+        return f"'{value}'"
+    if style == "double":
+        return json.dumps(value)
+    if style == "escaped-double":
+        return f'"\\u{ord(value[0]):04x}{value[1:]}"'
+    if style == "nested-single-inside-double":
+        return json.dumps(f"'{value}'")
+    if style == "nested-double-inside-single":
+        return f"'\"{value}\"'"
+    if style == "mixed-single-double":
+        return f"'{value}\""
+    return f"\"{value}'"
+
+
+def _semantic_scalar_accepted_watch_document(
+    *,
+    field: str,
+    style: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows: list[str] = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        if key == field:
+            scalar = _styled_watch_scalar(
+                _valid_watch_scalar(
+                    field,
+                    current_work_id=current_work_id,
+                ),
+                style,
+            )
+            if key == "work_ids":
+                rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            else:
+                rows.append(f"{key}: {scalar}\n")
+            continue
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        if isinstance(value, list):
+            rows.append(f"{key}:\n")
+            rows.extend(f"  - {item}\n" for item in value)
+        else:
+            rows.append(f"{key}: {value}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Semantic scalar authority\n"
+
+
+def _indented_accepted_watch_document(
+    *,
+    fragment: str,
+    current_work_id: str,
+) -> str:
+    return (
+        "---\n"
+        f"{fragment}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        "---\n\n# Indented watch authority\n"
+    )
+
+
+_NONCANONICAL_LIST_INDENT_STYLES = (
+    "tab-only",
+    "space-tab",
+    "tab-space",
+    "inconsistent",
+)
+_NBSP_AUTHORITY_POSITIONS = (
+    "key-before",
+    "key-after",
+    "value-before",
+    "value-after",
+)
+_NONEXACT_MARKER_STYLES = (
+    "tab-open",
+    "tab-close",
+    "nbsp-open",
+    "nbsp-close",
+)
+_SPLITLINES_SEPARATORS = (
+    pytest.param("\v", id="vt"),
+    pytest.param("\f", id="ff"),
+    pytest.param("\x1c", id="fs"),
+    pytest.param("\x1d", id="gs"),
+    pytest.param("\x1e", id="rs"),
+    pytest.param("\x85", id="nel"),
+    pytest.param("\u2028", id="line-separator"),
+    pytest.param("\u2029", id="paragraph-separator"),
+)
+_FRONTMATTER_MARKER_POSITIONS = ("opening", "closing")
+_ACCEPTED_WATCH_MAX_BYTES = 256 * 1024
+_LOSSY_AUTHORITY_STYLES = (
+    "decision-padding",
+    "status-padding",
+    "work-id-padding",
+    "work-ids-padding",
+    "decision-nfkc",
+    "status-nfkc",
+    "work-id-nfkc",
+    "work-ids-nfkc",
+)
+
+
+def _noncanonical_work_ids_watch_document(
+    *,
+    style: str,
+    current_work_id: str,
+) -> str:
+    if style == "tab-only":
+        items = f"\t- {current_work_id}\n"
+    elif style == "space-tab":
+        items = f" \t- {current_work_id}\n"
+    elif style == "tab-space":
+        items = f"\t - {current_work_id}\n"
+    else:
+        items = (
+            "  - UNIT-TASK-AR-999-001\n"
+            f"   - {current_work_id}\n"
+        )
+    return (
+        "---\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        "work_ids:\n"
+        f"{items}"
+        "---\n\n# Noncanonical list indentation\n"
+    )
+
+
+def _nbsp_accepted_watch_document(
+    *,
+    field: str,
+    position: str,
+    current_work_id: str,
+) -> str:
+    reviewer_field = (
+        field
+        if field in _SEMANTIC_WATCH_REVIEWER_FIELDS
+        else "reviewed_by"
+    )
+    work_field = (
+        field if field in _SEMANTIC_WATCH_WORK_FIELDS else "work_id"
+    )
+    rows: list[str] = []
+    for key in ("status", "decision", reviewer_field, work_field):
+        value = _semantic_watch_value(
+            key,
+            current_work_id=current_work_id,
+            valid=True,
+        )
+        rendered_key = key
+        if key == field and position == "key-before":
+            rendered_key = "\u00a0" + key
+        elif key == field and position == "key-after":
+            rendered_key = key + "\u00a0"
+
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == field and position == "value-before":
+                scalar = "\u00a0" + scalar
+            elif key == field and position == "value-after":
+                scalar += "\u00a0"
+            rows.extend((f"{rendered_key}:\n", f"  - {scalar}\n"))
+            continue
+
+        scalar = str(value)
+        if key == field and position == "value-before":
+            scalar = "\u00a0" + scalar
+        elif key == field and position == "value-after":
+            scalar += "\u00a0"
+        rows.append(f"{rendered_key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# NBSP authority\n"
+
+
+def _nonexact_marker_watch_document(
+    *,
+    style: str,
+    current_work_id: str,
+) -> str:
+    opening = "---"
+    closing = "---"
+    if style == "tab-open":
+        opening = "\t---"
+    elif style == "tab-close":
+        closing = "\t---"
+    elif style == "nbsp-open":
+        opening = "\u00a0---\u00a0"
+    else:
+        closing = "\u00a0---\u00a0"
+    return (
+        f"{opening}\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"{closing}\n"
+        "---\n\n# Nonexact marker authority\n"
+    )
+
+
+def _line_boundary_accepted_watch_document(
+    *,
+    separator: str,
+    marker_position: str,
+    current_work_id: str,
+) -> str:
+    opening_ending = separator if marker_position == "opening" else "\n"
+    closing_ending = separator if marker_position == "closing" else "\n"
+    return (
+        f"---{opening_ending}"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "reviewed_by: qa-independent\n"
+        f"work_id: {current_work_id}\n"
+        f"---{closing_ending}"
+        "# Noncanonical physical line boundary\n"
+    )
+
+
+def _line_ending_accepted_watch_document(
+    *,
+    line_ending: str,
+    current_work_id: str,
+) -> str:
+    return line_ending.join(
+        (
+            "---",
+            "status: accepted",
+            "decision: accepted_watch",
+            "reviewed_by: qa-independent",
+            f"work_id: {current_work_id}",
+            "---",
+            "",
+            "# Physical line-ending control",
+            "",
+        )
+    )
+
+
+def _accepted_watch_bytes(
+    *,
+    watch_format: str,
+    current_work_id: str,
+    size: int | None = None,
+) -> bytes:
+    if watch_format == "markdown":
+        prefix = (
+            "---\n"
+            "status: accepted\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n"
+            f"work_id: {current_work_id}\n"
+            "---\n"
+            "# Raw accepted-watch size fixture\n"
+        ).encode("utf-8")
+        if size is None:
+            return prefix
+        assert len(prefix) <= size
+        return prefix + (b"x" * (size - len(prefix)))
+
+    prefix = (
+        "{"
+        '"status":"accepted",'
+        '"decision":"accepted_watch",'
+        '"reviewed_by":"qa-independent",'
+        f'"work_id":"{current_work_id}",'
+        '"padding":"'
+    ).encode("utf-8")
+    suffix = b'"}'
+    if size is None:
+        return prefix + suffix
+    assert len(prefix) + len(suffix) <= size
+    return prefix + (b"x" * (size - len(prefix) - len(suffix))) + suffix
+
+
+def _load_packaged_compound_record():
+    spec = importlib.util.spec_from_file_location(
+        "_packaged_compound_record_for_accepted_watch_boundary_test",
+        TEMPLATE_SCRIPT,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.fixture(scope="module", params=("source", "packaged"))
+def _accepted_watch_module(request):
+    if request.param == "source":
+        return records
+    return _load_packaged_compound_record()
+
+
+@pytest.fixture(scope="module", params=("source", "packaged"))
+def _accepted_watch_helper(request):
+    if request.param == "source":
+        return records._accepted_watch_findings
+
+    return _load_packaged_compound_record()._accepted_watch_findings
+
+
+def _fullwidth_ascii(value: str) -> str:
+    return "".join(
+        chr(ord(character) + 0xFEE0)
+        if 0x21 <= ord(character) <= 0x7E
+        else character
+        for character in value
+    )
+
+
+def _lossy_accepted_watch_document(
+    *,
+    style: str,
+    watch_format: str,
+    current_work_id: str,
+) -> str:
+    field, mode = style.rsplit("-", 1)
+    field = field.replace("-", "_")
+    target_field = "work_id" if field == "work_id" else field
+    if field == "work_ids":
+        target_field = "work_ids"
+    canonical = {
+        "decision": "accepted_watch",
+        "status": "accepted",
+        "work_id": current_work_id,
+        "work_ids": current_work_id,
+    }[target_field]
+    semantic = (
+        f" {canonical} "
+        if mode == "padding"
+        else _fullwidth_ascii(canonical)
+    )
+    values: dict[str, object] = {
+        "status": "accepted",
+        "decision": "accepted_watch",
+        "reviewed_by": "qa-independent",
+        "work_id": current_work_id,
+    }
+    if target_field == "work_ids":
+        values.pop("work_id")
+        values["work_ids"] = [semantic]
+    else:
+        values[target_field] = semantic
+
+    if watch_format == "json":
+        return json.dumps(values, ensure_ascii=False, indent=2) + "\n"
+
+    rows: list[str] = []
+    for key, value in values.items():
+        if isinstance(value, list):
+            scalar = str(value[0])
+            if key == target_field and mode == "padding":
+                scalar = f"'{scalar}'"
+            rows.extend((f"{key}:\n", f"  - {scalar}\n"))
+            continue
+        scalar = str(value)
+        if key == target_field and mode == "padding":
+            scalar = f"'{scalar}'"
+        rows.append(f"{key}: {scalar}\n")
+    return "---\n" + "".join(rows) + "---\n\n# Lossy authority\n"
 
 
 def test_signature_is_deterministic_bounded_and_rejects_unsafe_input() -> None:
@@ -236,6 +2655,9 @@ def test_work_close_keeps_verification_review_and_compound_refs_separate(
     tmp_path: Path,
 ) -> None:
     unit_id, evidence_ref = _write_closeable_unit(tmp_path)
+    prevention = tmp_path / "scripts" / "closure_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
     review_ref = "reviews/REVIEW-2026-07-29-task-ar-645-closeout.md"
     review = tmp_path / review_ref
     review.write_text(
@@ -324,13 +2746,10 @@ def test_work_close_rejects_unrelated_review_and_compound_refs(
     assert "closeout:compound-work-mismatch" in result.stderr
 
 
-def test_repeat_defect_requires_a_current_work_compound_ref(tmp_path: Path) -> None:
+def test_declared_defect_requires_a_current_work_compound_without_prior_match(
+    tmp_path: Path,
+) -> None:
     unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
-    _create(
-        tmp_path,
-        work_id="UNIT-TASK-AR-640-001",
-        signature="same recurring defect",
-    )
 
     result = _run_work(
         tmp_path,
@@ -342,6 +2761,1240 @@ def test_repeat_defect_requires_a_current_work_compound_ref(tmp_path: Path) -> N
         "10",
         "--defect-signature",
         "same recurring defect",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_parent_repeated_failure_trigger_requires_compound_for_unit(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    task = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-645.md"
+    )
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-AR-645\n"
+        "display_id: TASK-AR-645\n"
+        "work_id: TASK-AR-645\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "title: Compound closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "---\n\n# Compound closeout fixture\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_parent_compound_ref_with_supported_prevention_satisfies_unit(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    prevention = tmp_path / "scripts" / "repeat_gate.py"
+    prevention.parent.mkdir(parents=True)
+    prevention.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    record_path, _record = _create(
+        tmp_path,
+        work_id="TASK-AR-645",
+        signature="parent repeated failure",
+        prevention_refs=["scripts/repeat_gate.py"],
+    )
+    compound_ref = records.record_ref(tmp_path, record_path)
+    task = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-645.md"
+    )
+    task.write_text(
+        "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "id: TASK-AR-645\n"
+        "display_id: TASK-AR-645\n"
+        "work_id: TASK-AR-645\n"
+        "kind: task\n"
+        "status: in_progress\n"
+        "title: Compound closeout fixture\n"
+        "priority: P1\n"
+        "difficulty: M\n"
+        "owner: lead_engineer\n"
+        "escalation_triggers:\n"
+        "  - repeated_failure\n"
+        "compound_refs:\n"
+        f"  - {compound_ref}\n"
+        "---\n\n# Compound closeout fixture\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_current_compound_with_missing_prevention_destination_is_rejected(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature="missing prevention destination",
+        prevention_refs=["tests/regressions/test_missing.py"],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        "missing prevention destination",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:compound:prevention-ref-missing" in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+def test_ordinary_closeout_remains_compatible_with_linked_review_only(
+    tmp_path: Path,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    review_ref = "reviews/REVIEW-2026-07-29-ordinary-closeout.md"
+    review = tmp_path / review_ref
+    review.write_text(
+        "---\n"
+        f"work_id: {unit_id}\n"
+        "task_id: TASK-AR-645\n"
+        "---\n\n# Ordinary closeout review\n",
+        encoding="utf-8",
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--review-ref",
+        review_ref,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    ("prevention_ref", "contents"),
+    [
+        ("tests/regressions/test_repeat.py", "def test_repeat():\n    assert True\n"),
+        ("scripts/repeat_gate.py", "raise SystemExit(0)\n"),
+        (
+            "agents/lead_engineer/tasks/TASK-PREVENT-1.md",
+            "---\nwork_id: TASK-PREVENT-1\n---\n\n# Prevention task\n",
+        ),
+        (
+            "reviews/REVIEW-2026-07-29-accepted-watch.md",
+            "---\n"
+            "status: accepted\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n"
+            "work_id: UNIT-TASK-AR-645-001\n"
+            "---\n\n# Accepted watch\n",
+        ),
+    ],
+    ids=["regression", "gate", "task-proposal", "accepted-watch"],
+)
+def test_prevention_destinations_accept_supported_repo_paths(
+    tmp_path: Path,
+    prevention_ref: str,
+    contents: str,
+) -> None:
+    destination = tmp_path / prevention_ref
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(contents, encoding="utf-8")
+    _path, record = _create(tmp_path, prevention_refs=[prevention_ref])
+
+    assert (
+        records.validate_prevention_destinations(
+            tmp_path,
+            record,
+            current_work_ids=["UNIT-TASK-AR-645-001", "TASK-AR-645"],
+        )
+        == []
+    )
+
+
+def test_prevention_destinations_reject_missing_unsupported_and_symlink_escape(
+    tmp_path: Path,
+) -> None:
+    _path, missing = _create(
+        tmp_path,
+        title="Missing prevention",
+        prevention_refs=["tests/regressions/test_missing.py"],
+        update_index=False,
+    )
+    missing_findings = records.validate_prevention_destinations(
+        tmp_path,
+        missing,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert any("prevention-ref-missing" in finding for finding in missing_findings)
+
+    unsupported_ref = "docs/repeated-failure-note.md"
+    unsupported_path = tmp_path / unsupported_ref
+    unsupported_path.parent.mkdir(parents=True)
+    unsupported_path.write_text("# Note\n", encoding="utf-8")
+    _path, unsupported = _create(
+        tmp_path,
+        title="Unsupported prevention",
+        prevention_refs=[unsupported_ref],
+        update_index=False,
+    )
+    unsupported_findings = records.validate_prevention_destinations(
+        tmp_path,
+        unsupported,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert "compound:prevention-destination-unsupported" in unsupported_findings
+
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-gate.py"
+    outside.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    link_ref = "scripts/escaped_gate.py"
+    link = tmp_path / link_ref
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlinks unavailable: {exc}")
+    _path, escaped = _create(
+        tmp_path,
+        title="Escaped prevention",
+        prevention_refs=[link_ref],
+        update_index=False,
+    )
+    escaped_findings = records.validate_prevention_destinations(
+        tmp_path,
+        escaped,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+    assert any("prevention-ref-outside-root" in finding for finding in escaped_findings)
+
+
+def test_accepted_watch_requires_reviewer_and_current_work_link(
+    tmp_path: Path,
+) -> None:
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True)
+    watch.write_text(
+        "---\n"
+        "status: accepted\n"
+        "decision: accepted_watch\n"
+        "work_id: UNIT-TASK-AR-999-001\n"
+        "---\n\n# Invalid watch\n",
+        encoding="utf-8",
+    )
+    _path, record = _create(
+        tmp_path,
+        title="Invalid accepted watch",
+        prevention_refs=[watch_ref],
+        update_index=False,
+    )
+
+    findings = records.validate_prevention_destinations(
+        tmp_path,
+        record,
+        current_work_ids=["UNIT-TASK-AR-645-001"],
+    )
+
+    assert any("prevention-watch-reviewer-missing" in item for item in findings)
+    assert any("prevention-watch-work-mismatch" in item for item in findings)
+    assert "compound:prevention-destination-unsupported" in findings
+
+
+@pytest.mark.parametrize(
+    ("watch_metadata", "expected_finding"),
+    [
+        (
+            "decision: accepted_watch\nreviewed_by: []\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: null\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: false\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "decision: accepted_watch\nreviewed_by: TBD\n",
+            "closeout:compound:prevention-watch-reviewer-missing",
+        ),
+        (
+            "disposition: accepted_watch\nreviewed_by: qa-independent\n",
+            "closeout:compound:prevention-destination-unsupported",
+        ),
+        (
+            "prevention_status: accepted_watch\nreviewed_by: qa-independent\n",
+            "closeout:compound:prevention-destination-unsupported",
+        ),
+        (
+            "? decision\n"
+            ": rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "!!str decision: rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "<<: *authority\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "\"\\x64ecision\": rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+        (
+            "\"decision: rejected\n"
+            "decision: accepted_watch\n"
+            "reviewed_by: qa-independent\n",
+            "closeout:compound:prevention-watch-invalid",
+        ),
+    ],
+    ids=[
+        "empty-list-reviewer",
+        "null-reviewer",
+        "boolean-reviewer",
+        "placeholder-reviewer",
+        "disposition-alias",
+        "prevention-status-alias",
+        "explicit-key-syntax",
+        "tagged-key-syntax",
+        "merge-key-syntax",
+        "unsupported-key-escape",
+        "unclosed-quoted-key",
+    ],
+)
+def test_work_close_rejects_invalid_accepted_watch_metadata(
+    tmp_path: Path,
+    watch_metadata: str,
+    expected_finding: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "invalid accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-watch-authority.md"
+    (tmp_path / watch_ref).write_text(
+        "---\n"
+        "status: accepted\n"
+        f"{watch_metadata}"
+        f"work_id: {unit_id}\n"
+        "---\n\n# Invalid accepted watch authority\n",
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject invalid accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert expected_finding in result.stderr
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("watch_format", "field", "order"),
+    _DUPLICATE_WATCH_CASES,
+)
+def test_work_close_rejects_duplicate_accepted_watch_authority(
+    tmp_path: Path,
+    watch_format: str,
+    field: str,
+    order: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "duplicate accepted watch authority"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-duplicate-watch.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _duplicate_accepted_watch_document(
+            watch_format=watch_format,
+            field=field,
+            order=order,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject duplicate accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("field", "quote_style", "order", "value_mode"),
+    _SEMANTIC_DUPLICATE_WATCH_CASES,
+)
+def test_work_close_rejects_semantic_duplicate_watch_authority(
+    tmp_path: Path,
+    field: str,
+    quote_style: str,
+    order: str,
+    value_mode: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "semantic duplicate accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-semantic-duplicate-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_duplicate_accepted_watch_document(
+            field=field,
+            quote_style=quote_style,
+            order=order,
+            value_mode=value_mode,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject semantic duplicate accepted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "quote_style",
+    _SEMANTIC_WATCH_QUOTE_STYLES,
+)
+def test_work_close_accepts_single_semantic_quoted_watch_keys(
+    tmp_path: Path,
+    quote_style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "valid quoted accepted watch authority"
+    watch_ref = "reviews/REVIEW-2026-07-29-valid-quoted-watch.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _quoted_accepted_watch_document(
+            quote_style=quote_style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Accept valid quoted watch authority",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_INVALID_STYLES)
+def test_work_close_rejects_invalid_semantic_watch_scalars(
+    tmp_path: Path,
+    field: str,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "invalid semantic accepted watch scalar"
+    watch_ref = "reviews/REVIEW-2026-07-29-invalid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject invalid semantic watch scalar",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    if style.startswith("mixed-"):
+        assert (
+            f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+            in result.stderr
+        )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("style", _SEMANTIC_SCALAR_VALID_STYLES)
+def test_work_close_accepts_valid_semantic_watch_scalars(
+    tmp_path: Path,
+    field: str,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "valid semantic accepted watch scalar"
+    watch_ref = "reviews/REVIEW-2026-07-29-valid-semantic-scalar.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _semantic_scalar_accepted_watch_document(
+            field=field,
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Accept valid semantic watch scalar",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("fragment", _INDENTED_WATCH_FRAGMENTS)
+def test_work_close_rejects_unexpected_watch_indentation(
+    tmp_path: Path,
+    fragment: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "unexpected accepted watch indentation"
+    watch_ref = "reviews/REVIEW-2026-07-29-unexpected-indentation.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _indented_accepted_watch_document(
+            fragment=fragment,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject unexpected watch indentation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _NONCANONICAL_LIST_INDENT_STYLES)
+def test_work_close_rejects_noncanonical_watch_list_indentation(
+    tmp_path: Path,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "noncanonical accepted watch list indentation"
+    watch_ref = "reviews/REVIEW-2026-07-29-noncanonical-list-indent.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _noncanonical_work_ids_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject noncanonical watch list indentation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("field", _SEMANTIC_WATCH_FIELDS)
+@pytest.mark.parametrize("position", _NBSP_AUTHORITY_POSITIONS)
+def test_work_close_rejects_nbsp_watch_authority_separation(
+    tmp_path: Path,
+    field: str,
+    position: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "nbsp accepted watch authority separation"
+    watch_ref = "reviews/REVIEW-2026-07-29-nbsp-authority.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nbsp_accepted_watch_document(
+            field=field,
+            position=position,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject NBSP watch authority separation",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _NONEXACT_MARKER_STYLES)
+def test_work_close_rejects_nonexact_watch_frontmatter_markers(
+    tmp_path: Path,
+    style: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "nonexact accepted watch frontmatter marker"
+    watch_ref = "reviews/REVIEW-2026-07-29-nonexact-marker.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _nonexact_marker_watch_document(
+            style=style,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject nonexact watch frontmatter marker",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)
+@pytest.mark.parametrize("marker_position", _FRONTMATTER_MARKER_POSITIONS)
+def test_accepted_watch_helpers_reject_splitlines_separator_markers(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    separator: str,
+    marker_position: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-boundary-helper.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_boundary_accepted_watch_document(
+            separator=separator,
+            marker_position=marker_position,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
+
+
+@pytest.mark.parametrize(
+    ("line_ending", "expected_accepted"),
+    (
+        pytest.param("\n", True, id="lf"),
+        pytest.param("\r\n", True, id="crlf"),
+        pytest.param("\r", False, id="lone-cr"),
+    ),
+)
+def test_accepted_watch_helpers_enforce_physical_line_endings(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    line_ending: str,
+    expected_accepted: bool,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-ending-helper.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_ending_accepted_watch_document(
+            line_ending=line_ending,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is expected_accepted
+    assert findings == (
+        []
+        if expected_accepted
+        else [f"compound:prevention-watch-invalid:{watch_ref}"]
+    )
+
+
+def test_accepted_watch_raw_size_limit_is_shared_by_source_and_packaged(
+    _accepted_watch_module,
+) -> None:
+    assert (
+        getattr(_accepted_watch_module, "MAX_ACCEPTED_WATCH_BYTES", None)
+        == _ACCEPTED_WATCH_MAX_BYTES
+    )
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_accepted_watch_helpers_bound_malformed_utf8(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    watch_format: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-malformed-utf8-helper.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+        )
+        + b"\xff"
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+@pytest.mark.parametrize(
+    ("size", "expected_accepted"),
+    (
+        pytest.param(None, True, id="normal"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES, True, id="exact-boundary"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES + 1, False, id="over-boundary"),
+    ),
+)
+def test_accepted_watch_helpers_enforce_raw_size_bound(
+    tmp_path: Path,
+    _accepted_watch_helper,
+    watch_format: str,
+    size: int | None,
+    expected_accepted: bool,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-raw-size-helper.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+            size=size,
+        )
+    )
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={unit_id},
+    )
+
+    assert accepted is expected_accepted
+    assert findings == (
+        []
+        if expected_accepted
+        else [f"compound:prevention-watch-invalid:{watch_ref}"]
+    )
+
+
+def test_accepted_watch_helpers_bound_deeply_nested_json(
+    tmp_path: Path,
+    _accepted_watch_helper,
+) -> None:
+    watch_ref = "reviews/REVIEW-2026-07-29-deeply-nested-helper.json"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    raw_watch = ("[" * 1200 + "0" + "]" * 1200).encode("utf-8")
+    assert len(raw_watch) == 2401
+    watch.write_bytes(raw_watch)
+
+    accepted, findings = _accepted_watch_helper(
+        watch,
+        watch_ref,
+        current_work_ids={"UNIT-TASK-AR-645-001"},
+    )
+
+    assert accepted is False
+    assert findings == [f"compound:prevention-watch-invalid:{watch_ref}"]
+
+
+def _run_work_close_with_raw_watch(
+    root: Path,
+    *,
+    watch_format: str,
+    raw_watch: bytes,
+    signature: str,
+) -> tuple[subprocess.CompletedProcess[str], bytes, bytes, str]:
+    unit_id, _evidence_ref = _write_closeable_unit(root)
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-raw-watch-close.{suffix}"
+    watch = root / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(raw_watch)
+    record_path, _record = _create(
+        root,
+        work_id=unit_id,
+        signature=signature,
+        title="Bound raw accepted-watch input",
+        prevention_refs=[watch_ref],
+    )
+    unit_path = (
+        root
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-645"
+        / f"{unit_id}.md"
+    )
+    before = unit_path.read_bytes()
+    result = _run_work(
+        root,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(root, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+    return result, before, unit_path.read_bytes(), watch_ref
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_work_close_bounds_malformed_utf8_watch_without_mutation(
+    tmp_path: Path,
+    watch_format: str,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    result, before, after, watch_ref = _run_work_close_with_raw_watch(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=(
+            _accepted_watch_bytes(
+                watch_format=watch_format,
+                current_work_id=unit_id,
+            )
+            + b"\xff"
+        ),
+        signature="malformed utf8 accepted watch",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "UnicodeDecodeError" not in result.stdout + result.stderr
+    assert len(result.stdout + result.stderr) < 4096
+    assert after == before
+
+
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+@pytest.mark.parametrize(
+    ("size", "expected_returncode"),
+    (
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES, 0, id="exact-boundary"),
+        pytest.param(_ACCEPTED_WATCH_MAX_BYTES + 1, 1, id="over-boundary"),
+    ),
+)
+def test_work_close_enforces_raw_watch_size_bound(
+    tmp_path: Path,
+    watch_format: str,
+    size: int,
+    expected_returncode: int,
+) -> None:
+    unit_id = "UNIT-TASK-AR-645-001"
+    result, before, after, watch_ref = _run_work_close_with_raw_watch(
+        tmp_path,
+        watch_format=watch_format,
+        raw_watch=_accepted_watch_bytes(
+            watch_format=watch_format,
+            current_work_id=unit_id,
+            size=size,
+        ),
+        signature="oversized accepted watch input",
+    )
+
+    assert result.returncode == expected_returncode, result.stdout + result.stderr
+    if expected_returncode == 0:
+        assert after != before
+    else:
+        assert (
+            f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+            in result.stderr
+        )
+        assert "Traceback" not in result.stdout + result.stderr
+        assert after == before
+
+
+@pytest.mark.parametrize("separator", _SPLITLINES_SEPARATORS)
+@pytest.mark.parametrize("marker_position", _FRONTMATTER_MARKER_POSITIONS)
+def test_work_close_rejects_splitlines_separator_markers(
+    tmp_path: Path,
+    separator: str,
+    marker_position: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "splitlines separator accepted watch marker"
+    watch_ref = "reviews/REVIEW-2026-07-29-line-boundary-close.md"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_bytes(
+        _line_boundary_accepted_watch_document(
+            separator=separator,
+            marker_position=marker_position,
+            current_work_id=unit_id,
+        ).encode("utf-8")
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject splitlines separator watch marker",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert (
+        f"closeout:compound:prevention-watch-invalid:{watch_ref}"
+        in result.stderr
+    )
+    assert "closeout:repeat-defect-current-compound-required" in result.stderr
+
+
+@pytest.mark.parametrize("style", _LOSSY_AUTHORITY_STYLES)
+@pytest.mark.parametrize("watch_format", ("markdown", "json"))
+def test_work_close_rejects_lossy_watch_authority_normalization(
+    tmp_path: Path,
+    style: str,
+    watch_format: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    signature = "lossy accepted watch authority normalization"
+    suffix = "json" if watch_format == "json" else "md"
+    watch_ref = f"reviews/REVIEW-2026-07-29-lossy-authority.{suffix}"
+    watch = tmp_path / watch_ref
+    watch.parent.mkdir(parents=True, exist_ok=True)
+    watch.write_text(
+        _lossy_accepted_watch_document(
+            style=style,
+            watch_format=watch_format,
+            current_work_id=unit_id,
+        ),
+        encoding="utf-8",
+    )
+    record_path, _record = _create(
+        tmp_path,
+        work_id=unit_id,
+        signature=signature,
+        title="Reject lossy watch authority normalization",
+        prevention_refs=[watch_ref],
+    )
+
+    result = _run_work(
+        tmp_path,
+        "close",
+        unit_id,
+        "--actual-hours",
+        "1",
+        "--actual-tokens",
+        "10",
+        "--compound-ref",
+        records.record_ref(tmp_path, record_path),
+        "--defect-signature",
+        signature,
         "--json",
     )
 
@@ -405,3 +4058,153 @@ def test_root_and_template_cli_create_check_search(script: Path, tmp_path: Path)
     )
     assert searched.returncode == 0, searched.stdout + searched.stderr
     assert json.loads(searched.stdout)[0]["work_ids"] == ["TASK-AR-645"]
+
+
+def _windows_project_snapshot_without_following_runtime_junction(
+    root: Path,
+    runtime_dir: Path,
+) -> dict[str, tuple[object, ...]]:
+    """Snapshot the whole fixture while treating the runtime junction as a leaf."""
+    runtime_rel = runtime_dir.relative_to(root)
+    snapshot: dict[str, tuple[object, ...]] = {}
+    for current_raw, dirnames, filenames in os.walk(
+        root,
+        topdown=True,
+        followlinks=False,
+    ):
+        current = Path(current_raw)
+        current_rel = current.relative_to(root)
+        retained_dirnames: list[str] = []
+        for dirname in sorted(dirnames):
+            path = current / dirname
+            rel = current_rel / dirname
+            entry_stat = os.lstat(path)
+            snapshot[rel.as_posix()] = (
+                "directory",
+                stat.S_IFMT(entry_stat.st_mode),
+                getattr(entry_stat, "st_file_attributes", 0),
+                getattr(entry_stat, "st_reparse_tag", 0),
+            )
+            if rel != runtime_rel:
+                retained_dirnames.append(dirname)
+        dirnames[:] = retained_dirnames
+
+        for filename in sorted(filenames):
+            path = current / filename
+            rel = current_rel / filename
+            entry_stat = os.lstat(path)
+            if stat.S_ISREG(entry_stat.st_mode):
+                snapshot[rel.as_posix()] = (
+                    "file",
+                    stat.S_IFMT(entry_stat.st_mode),
+                    path.read_bytes(),
+                )
+            else:
+                snapshot[rel.as_posix()] = (
+                    "other",
+                    stat.S_IFMT(entry_stat.st_mode),
+                    getattr(entry_stat, "st_file_attributes", 0),
+                    getattr(entry_stat, "st_reparse_tag", 0),
+                )
+    return dict(sorted(snapshot.items()))
+
+
+@pytest.mark.skipif(os.name != "nt", reason="native Windows junction required")
+@pytest.mark.parametrize("junction_state", ("live", "broken"))
+def test_work_close_rejects_windows_runtime_junction_without_mutation(
+    tmp_path: Path,
+    junction_state: str,
+) -> None:
+    unit_id, _evidence_ref = _write_closeable_unit(tmp_path)
+    claim_path = _write_claim_only_repeat_authority(
+        tmp_path,
+        signature="windows runtime junction hides canonical active claim store",
+        claim_id=f"CLAIM-windows-runtime-junction-{junction_state}",
+    )
+    runtime_dir = claim_path.parent.parent
+    junction_target = tmp_path / f"windows-runtime-target-{junction_state}"
+    runtime_dir.replace(junction_target)
+
+    try:
+        created = subprocess.run(
+            [
+                "cmd.exe",
+                "/d",
+                "/c",
+                "mklink",
+                "/J",
+                str(runtime_dir),
+                str(junction_target),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        assert created.returncode == 0, created.stdout + created.stderr
+
+        storage_dir = junction_target
+        if junction_state == "broken":
+            storage_dir = tmp_path / "windows-runtime-preserved-broken"
+            junction_target.replace(storage_dir)
+
+        junction_stat = os.lstat(runtime_dir)
+        reparse_attribute = getattr(
+            stat,
+            "FILE_ATTRIBUTE_REPARSE_POINT",
+            0x00000400,
+        )
+        mount_point_tag = getattr(
+            stat,
+            "IO_REPARSE_TAG_MOUNT_POINT",
+            0xA0000003,
+        )
+        assert junction_stat.st_file_attributes & reparse_attribute
+        assert junction_stat.st_reparse_tag == mount_point_tag
+
+        hidden_claim = storage_dir / "task_claims" / claim_path.name
+        assert hidden_claim.read_bytes()
+        before = _windows_project_snapshot_without_following_runtime_junction(
+            tmp_path,
+            runtime_dir,
+        )
+
+        result = _run_work(
+            tmp_path,
+            "close",
+            unit_id,
+            "--actual-hours",
+            "1",
+            "--actual-tokens",
+            "10",
+            "--json",
+        )
+
+        combined_output = result.stdout + result.stderr
+        assert result.returncode == 1
+        assert "closeout:active-claim-context-invalid" in result.stderr
+        assert "work-close: closed" not in combined_output
+        assert "Traceback" not in combined_output
+        assert (
+            _windows_project_snapshot_without_following_runtime_junction(
+                tmp_path,
+                runtime_dir,
+            )
+            == before
+        )
+    finally:
+        try:
+            os.lstat(runtime_dir)
+        except FileNotFoundError:
+            pass
+        else:
+            removed = subprocess.run(
+                ["cmd.exe", "/d", "/c", "rmdir", str(runtime_dir)],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            assert removed.returncode == 0, removed.stdout + removed.stderr

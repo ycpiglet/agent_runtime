@@ -15,6 +15,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from agent_runtime import claim_store
+
+
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1] / "scripts"
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+import work as work_module  # noqa: E402
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORK = REPO_ROOT / "scripts" / "work.py"
@@ -322,7 +332,7 @@ def test_registration_snapshot_then_dispatch_end_to_end(tmp_path: Path) -> None:
 # --- W0: status visibility ---------------------------------------------------
 
 
-def _write_claim(root: Path, *, task_id: str, status: str, suffix: str) -> None:
+def _write_claim(root: Path, *, task_id: str, status: str, suffix: str) -> Path:
     claim_dir = root / "agents" / "runtime" / "task_claims"
     claim_dir.mkdir(parents=True, exist_ok=True)
     claim = {
@@ -337,14 +347,21 @@ def _write_claim(root: Path, *, task_id: str, status: str, suffix: str) -> None:
         "worktree_path": f".worktrees/{task_id}",
         "branch": f"codex/{task_id.lower()}-work",
     }
-    (claim_dir / f"{claim['claim_id']}.json").write_text(
+    path = claim_dir / f"{claim['claim_id']}.json"
+    path.write_text(
         json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    inspection = claim_store.inspect_store(root)
+    if inspection.state == "migration-required":
+        claim_store.initialize_store(root, witness_claim_id=str(claim["claim_id"]))
+    return path
 
 
 def test_work_status_lists_active_claims_and_inflight_summary(tmp_path: Path) -> None:
     _write_claim(tmp_path, task_id="TASK-AR-930", status="claimed", suffix="01")
     _write_claim(tmp_path, task_id="TASK-AR-931", status="released", suffix="02")
+
+    workload = work_module._active_claim_workload(tmp_path)
 
     result = _run(WORK, "--root", str(tmp_path), "status")
 
@@ -359,6 +376,11 @@ def test_work_status_lists_active_claims_and_inflight_summary(tmp_path: Path) ->
     assert "TASK-AR-931" not in result.stdout
     assert "worktrees=" in result.stdout
     assert "inflight:" in result.stdout
+    assert workload == {
+        "active_claim_count": 1,
+        "by_team": {"unassigned": 1},
+        "by_role": {"lead-engineer": 1},
+    }
 
 
 def test_work_status_json_shape(tmp_path: Path) -> None:
@@ -378,9 +400,161 @@ def test_work_status_json_shape(tmp_path: Path) -> None:
     assert payload["inflight"]["summary"].startswith("inflight:")
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        pytest.param("task_id", ["TASK-AR-930"], id="list-task-id"),
+        pytest.param(
+            "task_set_id",
+            {"id": "TASKSET-T-LC"},
+            id="mapping-task-set-id",
+        ),
+        pytest.param("agent_instance_id", True, id="bool-agent-instance-id"),
+        pytest.param("task_id", 930, id="number-task-id"),
+        pytest.param("agent_instance_id", None, id="null-agent-instance-id"),
+        pytest.param("agent_instance_id", "", id="blank-agent-instance-id"),
+    ),
+)
+def test_work_status_rejects_present_malformed_core_identity_without_mutation(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        task_id="TASK-AR-930",
+        status="claimed",
+        suffix=f"malformed-{field}",
+    )
+    payload = json.loads(claim_path.read_text(encoding="utf-8"))
+    payload[field] = value
+    if field == "agent_instance_id":
+        payload.pop("display_name")
+    claim_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run(WORK, "--root", str(tmp_path), "status", "--json")
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "work-status: fail" in result.stderr
+    assert "active-claim-context-invalid" in result.stderr
+    assert {
+        path.relative_to(tmp_path).as_posix(): path.read_bytes()
+        for path in tmp_path.rglob("*")
+        if path.is_file()
+    } == before
+
+
+def test_work_status_shares_one_canonical_claim_snapshot_with_inflight(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        task_id="TASK-AR-933",
+        status="claimed",
+        suffix="shared-snapshot",
+    )
+    snapshot = work_module._canonical_claim_snapshot(
+        tmp_path,
+        surface="test-shared-snapshot",
+    )
+    reads = 0
+    received: list[list[dict[str, object]] | None] = []
+
+    def read_once(_root: Path, *, surface: str) -> list[dict[str, object]]:
+        nonlocal reads
+        assert surface == "work-status"
+        reads += 1
+        if reads > 1:
+            raise AssertionError("W0 attempted a second claim-store snapshot")
+        return snapshot
+
+    def overlay_from_snapshot(
+        _root: Path,
+        base: str | None = None,
+        *,
+        claim_snapshot: list[dict[str, object]] | None = None,
+    ) -> dict[str, object]:
+        del base
+        received.append(claim_snapshot)
+        index = work_module.inflight_overlay.claim_index_from_snapshot(
+            claim_snapshot or []
+        )
+        assert index["TASK-AR-933"] == {
+            "claim_status": "active",
+            "claim_id": claim_path.stem,
+        }
+        return {
+            "summary": {
+                "divergent_tasks": 0,
+                "divergent_records": 0,
+                "branches_with_divergence": 0,
+                "claimless": 0,
+            }
+        }
+
+    monkeypatch.setattr(work_module, "_canonical_claim_snapshot", read_once)
+    monkeypatch.setattr(work_module.inflight_overlay, "build_overlay", overlay_from_snapshot)
+
+    result = work_module.status_work(tmp_path)
+
+    assert reads == 1
+    assert received == [snapshot]
+    assert [row["claim_id"] for row in result["active_claims"]] == [claim_path.stem]
+    assert result["inflight"]["counts"]["claimless"] == 0
+
+
 def test_work_status_empty_root(tmp_path: Path) -> None:
     result = _run(WORK, "--root", str(tmp_path), "status")
 
     assert result.returncode == 0, result.stderr or result.stdout
     assert "work-status: ok" in result.stdout
     assert "active_claims=0" in result.stdout
+
+
+@pytest.mark.parametrize("invalid_state", ("duplicate-status", "unknown-status", "one-sided-marker"))
+def test_work_status_rows_and_workload_fail_closed_on_claim_integrity(
+    tmp_path: Path,
+    invalid_state: str,
+) -> None:
+    claim_path = _write_claim(
+        tmp_path,
+        task_id="TASK-AR-932",
+        status="claimed",
+        suffix=invalid_state,
+    )
+    if invalid_state == "duplicate-status":
+        claim_path.write_text(
+            '{"schema":"agent-runtime-task-claim/v1",'
+            f'"claim_id":"{claim_path.stem}",'
+            '"status":"claimed","status":"released"}\n',
+            encoding="utf-8",
+        )
+    elif invalid_state == "unknown-status":
+        payload = json.loads(claim_path.read_text(encoding="utf-8"))
+        payload["status"] = "mystery"
+        claim_path.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    else:
+        (tmp_path / "agents/runtime/task_claims/.claim-store").unlink()
+
+    with pytest.raises(work_module.WorkRegistrationError):
+        work_module._active_claim_rows(tmp_path)
+    with pytest.raises(work_module.WorkRegistrationError):
+        work_module._active_claim_workload(tmp_path)
+
+    result = _run(WORK, "--root", str(tmp_path), "status", "--json")
+
+    assert result.returncode == 1
+    assert "work-status: fail" in result.stderr
+    assert "active-claim-context-invalid" in result.stderr

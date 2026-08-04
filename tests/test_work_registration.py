@@ -5,11 +5,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts import backlog_board, org_model_gate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "work.py"
+TASKSET_DISPATCHER = REPO_ROOT / "scripts" / "taskset_dispatcher.py"
 UNIT_GATE = REPO_ROOT / "scripts" / "task_unit_readiness_gate.py"
 
 
@@ -28,6 +31,18 @@ def _run(root: Path, input_path: Path, *args: str) -> subprocess.CompletedProces
 def _run_work(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(TASKSET_DISPATCHER), "--root", str(root), *args],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -188,6 +203,105 @@ def test_work_new_task_round_trips_into_verify_without_frontmatter_repair(tmp_pa
     assert evidence["commands"][0]["stdout"].strip() == "registered task verified"
 
 
+def test_work_new_preserves_task_dependencies_and_replays_exactly(
+    tmp_path: Path,
+) -> None:
+    payload = _payload(include_units=True)
+    payload["tasks"][1]["units"] = payload["tasks"][0].pop("units")  # type: ignore[index]
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-901"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    registered = _run(tmp_path, input_path)
+    replayed = _run(tmp_path, input_path)
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert replayed.returncode == 0, replayed.stderr or replayed.stdout
+    assert '"status": "already_exists"' in replayed.stdout
+    task_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "TASK-AR-902.md"
+    )
+    task_meta, _ = backlog_board.parse_frontmatter(
+        task_path.read_text(encoding="utf-8")
+    )
+    assert task_meta["depends_on"] == ["TASK-AR-901"]
+    unit_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / "TASK-AR-902"
+        / "UNIT-TASK-AR-902-001.md"
+    )
+    unit_meta, _ = backlog_board.parse_frontmatter(
+        unit_path.read_text(encoding="utf-8")
+    )
+    assert unit_meta["depends_on"] == ["TASK-AR-901"]
+
+
+def test_work_new_rejects_missing_task_dependency_before_writes(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-999"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert "depends_on:missing:TASK-AR-999" in result.stderr
+    assert not (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    ).exists()
+
+
+def test_work_new_rejects_task_dependency_cycle_before_writes(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][0]["depends_on"] = ["TASK-AR-902"]  # type: ignore[index]
+    payload["tasks"][1]["depends_on"] = ["TASK-AR-901"]  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert "depends_on:cycle:TASK-AR-901->TASK-AR-902->TASK-AR-901" in result.stderr
+    assert not (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / "TASK-AR-901.md"
+    ).exists()
+
+
+@pytest.mark.parametrize(
+    "depends_on,code",
+    [
+        (["TASK-AR-902"], "depends_on:self:TASK-AR-902"),
+        (
+            ["TASK-AR-901", "TASK-AR-901"],
+            "depends_on:duplicate:TASK-AR-901",
+        ),
+        (["not-a-task"], "depends_on:invalid:not-a-task"),
+    ],
+)
+def test_work_new_rejects_invalid_task_dependencies(
+    tmp_path: Path,
+    depends_on: list[str],
+    code: str,
+) -> None:
+    payload = _payload()
+    payload["tasks"][1]["depends_on"] = depends_on  # type: ignore[index]
+    input_path = _write_input(tmp_path, payload)
+
+    result = _run(tmp_path, input_path)
+
+    assert result.returncode != 0
+    assert code in result.stderr
+
+
 def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: Path) -> None:
     payload = _payload(include_units=True)
     first_task = payload["tasks"][0]
@@ -248,6 +362,7 @@ def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: 
         )
     )
     assert registry["tasksets"][0]["task_set_id"] == "TASKSET-TEST-WORK-CLI"
+    assert registry["tasksets"][0]["tasks"] == ["TASK-AR-901", "TASK-AR-902"]
 
     board = (tmp_path / "BACKLOG-BOARD.md").read_text(encoding="utf-8")
     assert "### Work CLI Test (`TASKSET-TEST-WORK-CLI`)" in board
@@ -258,6 +373,60 @@ def test_work_new_preserves_type_like_strings_for_org_model_consumers(tmp_path: 
     assert "`TASK-AR-901`" in classification
     owner_docs = (tmp_path / "owner-docs.yml").read_text(encoding="utf-8")
     assert "reviews/REVIEW-2026-06-12-taskset-test-work-cli-registration.md" in owner_docs
+
+
+def test_work_new_taskset_registry_is_immediately_dispatchable(tmp_path: Path) -> None:
+    input_path = _write_input(tmp_path, _payload())
+
+    registered = _run(tmp_path, input_path)
+    planned = _run_dispatcher(tmp_path, "plan", "test-work-cli", "--json")
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert planned.returncode == 0, planned.stderr or planned.stdout
+    payload = json.loads(planned.stdout)
+    assert payload["task_set_id"] == "TASKSET-TEST-WORK-CLI"
+    assert payload["display_name"] == "Work CLI Test"
+    assert payload["next_task_id"] == "TASK-AR-901"
+
+
+def test_work_new_preserves_registration_order_before_score_fallback(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    payload["tasks"][0]["priority"] = "P2"
+    payload["tasks"][1]["priority"] = "P0"
+    input_path = _write_input(tmp_path, payload)
+
+    registered = _run(tmp_path, input_path)
+    planned = _run_dispatcher(tmp_path, "plan", "test-work-cli", "--json")
+
+    assert registered.returncode == 0, registered.stderr or registered.stdout
+    assert planned.returncode == 0, planned.stderr or planned.stdout
+    assert json.loads(planned.stdout)["next_task_id"] == "TASK-AR-901"
+
+
+def test_work_new_idempotently_upgrades_legacy_registry_order(
+    tmp_path: Path,
+) -> None:
+    input_path = _write_input(tmp_path, _payload())
+    first = _run(tmp_path, input_path)
+    assert first.returncode == 0, first.stderr or first.stdout
+    registry_path = (
+        tmp_path
+        / "agents"
+        / "project"
+        / "work-items"
+        / "TASKSET-DEFINITIONS.json"
+    )
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["tasksets"][0].pop("tasks")
+    registry_path.write_text(json.dumps(registry, indent=2), encoding="utf-8")
+
+    second = _run(tmp_path, input_path)
+
+    assert second.returncode == 0, second.stderr or second.stdout
+    upgraded = json.loads(registry_path.read_text(encoding="utf-8"))
+    assert upgraded["tasksets"][0]["tasks"] == ["TASK-AR-901", "TASK-AR-902"]
 
 
 def test_work_new_is_idempotent_for_same_structured_input(tmp_path: Path) -> None:

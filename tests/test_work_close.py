@@ -5,7 +5,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts import backlog_board
+
+
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1] / "scripts"
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+import work as work_module  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -77,6 +85,7 @@ def _write_unit(
 ) -> Path:
     task_id = "TASK-AR-901"
     unit_id = "UNIT-TASK-AR-901-001"
+    (root / "agents" / "runtime").mkdir(parents=True, exist_ok=True)
     _write_task(root, task_id)
     path = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id / f"{unit_id}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -244,6 +253,45 @@ def test_work_close_requires_passed_evidence_and_writes_closeout_metadata(tmp_pa
     assert (tmp_path / "BACKLOG-BOARD.md").exists()
     assert (tmp_path / "agents" / "project" / "work-items" / "WORK-ITEM-CLASSIFICATION.md").exists()
     assert evidence.relative_to(tmp_path).as_posix() in (tmp_path / "reviews" / "INDEX.md").read_text(encoding="utf-8")
+
+
+def test_work_close_keeps_committed_result_when_projection_refresh_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    unit_path = _write_unit(tmp_path)
+    _write_passed_evidence(tmp_path)
+    detail = "generated view refresh failed " + "x" * 400
+
+    def fail_projection(_root: Path) -> None:
+        raise OSError(detail)
+
+    monkeypatch.setattr(work_module, "_refresh_generated_views", fail_projection)
+
+    result = work_module.close_work(
+        tmp_path,
+        "UNIT-TASK-AR-901-001",
+        actor="tester-instance",
+        actual_hours="1",
+        actual_tokens=123,
+        now="2026-06-12T13:30:00+09:00",
+    )
+
+    assert result["status"] == "closed"
+    assert result["authority_committed"] is True
+    assert result["post_commit_warnings"] == [
+        {
+            "stage": "generated-view-projection",
+            "reason": detail[:256],
+            "retry_guidance": (
+                "Closeout is committed; retry generated-view refresh separately "
+                "before relying on projections."
+            ),
+        }
+    ]
+    text = unit_path.read_text(encoding="utf-8")
+    assert "status: completed" in text
+    assert "<!-- work-close:start -->" in text
 
 
 def test_work_close_preserves_quoted_hash_metadata(tmp_path: Path) -> None:

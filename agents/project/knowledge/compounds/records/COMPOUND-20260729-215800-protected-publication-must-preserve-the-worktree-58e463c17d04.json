@@ -1,0 +1,32 @@
+{
+  "cause": "The private detached ref context solved symbolic-HEAD races by separating branch publication from the real worktree HEAD, but the design inventory covered content, refs, locks, hooks, and return state without treating the worktree-local reflog as a required publication side effect.",
+  "created_at": "2026-07-29T21:58:00+09:00",
+  "created_by": "codex-root-task-ar-648-005",
+  "defect_signatures": [
+    "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4"
+  ],
+  "id": "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+  "prevention": "Specify recovery and audit artifacts as first-class transaction outputs; require normal and linked-worktree HEAD and branch reflog parity tests, exact symbolic-ref authorization, compare-and-swap publication, and fail-closed capability detection instead of manual or symlinked reflog fabrication.",
+  "prevention_refs": [
+    "scripts/claim_guard.py",
+    "tests/test_claim_guard.py",
+    "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md"
+  ],
+  "recurrence_count": 4,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-07-29-unit-task-ar-648-005.md",
+    "reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json"
+  ],
+  "status": "active",
+  "summary": "The sealed claim commit updated the authorized branch and its reflog but omitted the actual normal or linked worktree HEAD reflog expected for recovery and audit.",
+  "title": "Protected publication must preserve the worktree recovery trail",
+  "verification_refs": [
+    "reviews/W4B-2026-07-29-unit-task-ar-648-005.md"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-005"
+  ]
+}

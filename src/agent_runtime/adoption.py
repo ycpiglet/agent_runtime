@@ -7,6 +7,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import claim_store as _claim_store
 from . import config as _config
 from .inventory import adoption_scan, generated_path_root, is_generated_path
 from .template_profiles import selected_paths
@@ -38,6 +39,9 @@ class AdoptionPlan:
     actions: tuple[AdoptionAction, ...]
     findings: tuple[str, ...]
     config_invalid: bool = False
+    claim_store_state: str = "pristine"
+    claim_store_finding: str | None = None
+    runtime_migrations: tuple[str, ...] = ()
 
     @property
     def conflicts(self) -> tuple[AdoptionAction, ...]:
@@ -108,6 +112,17 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
     root = root.resolve()
     scan = adoption_scan(root)
     findings = list(scan.warnings)
+    claim_store = _claim_store.inspect_store(root)
+    runtime_migrations = (
+        ("claim-store-adopt-existing",)
+        if claim_store.state == "migration-required"
+        else ()
+    )
+    if claim_store.state == "integrity-invalid":
+        findings.append(
+            "claim-store-integrity-invalid: "
+            + (claim_store.finding or "claim-store authority is invalid")
+        )
     config_invalid = False
     try:
         config = _config.load_config(root)
@@ -156,6 +171,9 @@ def build_adoption_plan(root: Path) -> AdoptionPlan:
         scan_warnings=tuple(sorted(scan.warnings)), source_paths=scan.paths, generated_paths=scan.generated_paths, ignored_count=scan.ignored_count, generated_roots=_generated_roots(scan.generated_paths),
         assets=_detected_assets(scan.paths), actions=tuple(sorted(actions, key=lambda action: (action.path, action.action, action.ownership))),
         findings=tuple(sorted(findings)), config_invalid=config_invalid,
+        claim_store_state=claim_store.state,
+        claim_store_finding=claim_store.finding,
+        runtime_migrations=runtime_migrations,
     )
 
 
@@ -165,13 +183,15 @@ def plan_json(plan: AdoptionPlan) -> str:
         "capabilities": list(plan.capabilities),
         "inventory": {"included_count": len(plan.source_paths), "ignored_count": plan.ignored_count, "generated_count": len(plan.generated_paths), "generated_roots": list(plan.generated_roots), "scan_strategy": plan.scan_strategy, "warnings": list(plan.scan_warnings)},
         "assets": list(plan.assets), "actions": [action.as_dict() for action in plan.actions], "findings": list(plan.findings),
-        "readiness": {"conflicts": len(plan.conflicts), "ready": not plan.conflicts and not plan.config_invalid and not any("external symlink" in item for item in plan.findings)},
+        "claim_store": {"state": plan.claim_store_state, "finding": plan.claim_store_finding},
+        "runtime_migrations": list(plan.runtime_migrations),
+        "readiness": {"conflicts": len(plan.conflicts), "ready": not plan.conflicts and not plan.config_invalid and plan.claim_store_state != "integrity-invalid" and not any("external symlink" in item for item in plan.findings)},
     }
     return json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2)
 
 
 def render(plan: AdoptionPlan) -> str:
-    lines = ["# Agent Runtime Adoption Plan", "", f"root={plan.root}", f"scan_strategy={plan.scan_strategy}", f"included_paths={len(plan.source_paths)}", f"ignored_paths={plan.ignored_count}", f"generated_paths={len(plan.generated_paths)}", f"generated_roots={','.join(plan.generated_roots)}", f"conflicts={len(plan.conflicts)}", "", "| Path | Action | Ownership | Reason |", "|---|---|---|---|"]
+    lines = ["# Agent Runtime Adoption Plan", "", f"root={plan.root}", f"scan_strategy={plan.scan_strategy}", f"included_paths={len(plan.source_paths)}", f"ignored_paths={plan.ignored_count}", f"generated_paths={len(plan.generated_paths)}", f"generated_roots={','.join(plan.generated_roots)}", f"conflicts={len(plan.conflicts)}", f"claim_store_state={plan.claim_store_state}", f"runtime_migrations={len(plan.runtime_migrations)}", "", "| Path | Action | Ownership | Reason |", "|---|---|---|---|"]
     lines.extend(f"| `{a.path}` | {a.action} | {a.ownership} | {a.reason} |" for a in plan.actions)
     return "\n".join(lines)
 

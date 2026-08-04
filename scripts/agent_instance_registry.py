@@ -6,9 +6,12 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import atomic_io
+from agent_runtime import claim_store
 from pane_event_log import append_census_event
 
 
@@ -62,6 +65,49 @@ def _skill_versions(value: Any) -> dict[str, str]:
     return {}
 
 
+def _require_revision(value: object, *, field: str) -> int:
+    if type(value) is not int or value < 0:
+        raise AgentInstanceRegistryError(
+            [f"agent-instance:{field}:must-be-nonnegative-integer"]
+        )
+    return value
+
+
+def _require_aware_timestamp(
+    value: object,
+    *,
+    field: str,
+) -> tuple[str, datetime]:
+    if not isinstance(value, str):
+        raise AgentInstanceRegistryError(
+            [f"agent-instance:{field}:must-be-aware-timestamp"]
+        )
+    text = value.strip()
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except (ValueError, OverflowError):
+        raise AgentInstanceRegistryError(
+            [f"agent-instance:{field}:must-be-aware-timestamp"]
+        ) from None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise AgentInstanceRegistryError(
+            [f"agent-instance:{field}:must-be-aware-timestamp"]
+        )
+    return text, parsed
+
+
+def _require_coherent_timestamps(
+    updated_at: datetime,
+    last_heartbeat: datetime,
+    *,
+    field_prefix: str,
+) -> None:
+    if last_heartbeat > updated_at:
+        raise AgentInstanceRegistryError(
+            [f"agent-instance:{field_prefix}:last-heartbeat-after-updated-at"]
+        )
+
+
 def build_instance_record(
     root: Path,
     claim: dict[str, Any],
@@ -74,7 +120,27 @@ def build_instance_record(
     agent_instance_id = str(claim.get("agent_instance_id") or "").strip()
     if not agent_instance_id:
         raise AgentInstanceRegistryError(["agent-instance:claim-missing:agent_instance_id"])
-    claimed_at = str(claim.get("claimed_at") or claim.get("updated_at") or "").strip()
+    claimed_at, _ = _require_aware_timestamp(
+        claim["claimed_at"] if "claimed_at" in claim else claim.get("updated_at"),
+        field="claim:claimed_at",
+    )
+    updated_at, updated_time = _require_aware_timestamp(
+        claim["updated_at"] if "updated_at" in claim else claimed_at,
+        field="claim:updated_at",
+    )
+    last_heartbeat, heartbeat_time = _require_aware_timestamp(
+        claim["last_heartbeat"] if "last_heartbeat" in claim else updated_at,
+        field="claim:last_heartbeat",
+    )
+    _require_coherent_timestamps(
+        updated_time,
+        heartbeat_time,
+        field_prefix="claim",
+    )
+    claim_revision = _require_revision(
+        claim.get("mutation_revision", 0),
+        field="claim:mutation_revision",
+    )
     claim_ref = _claim_ref(root, claim_path, claim)
     return {
         "schema": SCHEMA,
@@ -105,7 +171,9 @@ def build_instance_record(
         "unit_spec": str(claim.get("unit_spec") or "").strip(),
         "claim_refs": [claim_ref] if claim_ref else [],
         "created_at": claimed_at,
-        "updated_at": claimed_at,
+        "updated_at": updated_at,
+        "last_heartbeat": last_heartbeat,
+        "claim_revision": claim_revision,
     }
 
 
@@ -114,9 +182,49 @@ def _merge_existing(
     path: Path,
     existing: dict[str, Any],
     fresh: dict[str, Any],
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], bool]:
     if str(existing.get("schema") or "") != SCHEMA:
         raise AgentInstanceRegistryError([f"{_rel(root, path)}: agent-instance:invalid-schema"])
+    existing_revision = _require_revision(
+        existing.get("claim_revision", 0),
+        field="record:claim_revision",
+    )
+    fresh_revision = _require_revision(
+        fresh.get("claim_revision"),
+        field="claim:mutation_revision",
+    )
+    existing_updated_at, existing_updated_time = _require_aware_timestamp(
+        existing.get("updated_at"),
+        field="record:updated_at",
+    )
+    existing_heartbeat_at, existing_heartbeat_time = _require_aware_timestamp(
+        existing.get("last_heartbeat")
+        if "last_heartbeat" in existing
+        else existing_updated_at,
+        field="record:last_heartbeat",
+    )
+    _require_coherent_timestamps(
+        existing_updated_time,
+        existing_heartbeat_time,
+        field_prefix="record",
+    )
+    fresh_updated_at, fresh_updated_time = _require_aware_timestamp(
+        fresh.get("updated_at"),
+        field="claim:updated_at",
+    )
+    fresh_heartbeat_at, fresh_heartbeat_time = _require_aware_timestamp(
+        fresh.get("last_heartbeat"),
+        field="claim:last_heartbeat",
+    )
+    _require_coherent_timestamps(
+        fresh_updated_time,
+        fresh_heartbeat_time,
+        field_prefix="claim",
+    )
+
+    if fresh_revision < existing_revision:
+        return existing, False
+
     immutable_fields = (
         "agent_instance_id",
         "role",
@@ -132,17 +240,39 @@ def _merge_existing(
             findings.append(f"{_rel(root, path)}: agent-instance:field-conflict:{field}")
     if findings:
         raise AgentInstanceRegistryError(findings)
-    refs = [str(item) for item in existing.get("claim_refs", []) if str(item).strip()]
+
+    if fresh_revision == existing_revision:
+        if (
+            fresh_updated_at != existing_updated_at
+            or fresh_heartbeat_at != existing_heartbeat_at
+        ):
+            raise AgentInstanceRegistryError(
+                ["agent-instance:claim-revision:non-idempotent-replay"]
+            )
+        return existing, False
+
+    regression_findings: list[str] = []
+    if fresh_updated_time < existing_updated_time:
+        regression_findings.append("agent-instance:claim:updated-at-regressed")
+    if fresh_heartbeat_time < existing_heartbeat_time:
+        regression_findings.append("agent-instance:claim:last-heartbeat-regressed")
+    if regression_findings:
+        raise AgentInstanceRegistryError(regression_findings)
+
+    payload = dict(existing)
+    refs = [str(item) for item in payload.get("claim_refs", []) if str(item).strip()]
     for ref in fresh.get("claim_refs", []):
         if ref and ref not in refs:
             refs.append(ref)
-    existing["claim_refs"] = refs
-    if not existing.get("skill_versions") and fresh.get("skill_versions"):
-        existing["skill_versions"] = fresh["skill_versions"]
-    if not str(existing.get("prompt_config_hash") or "").strip() and fresh.get("prompt_config_hash"):
-        existing["prompt_config_hash"] = fresh["prompt_config_hash"]
-    existing["updated_at"] = fresh.get("updated_at") or existing.get("updated_at")
-    return existing
+    payload["claim_refs"] = refs
+    if not payload.get("skill_versions") and fresh.get("skill_versions"):
+        payload["skill_versions"] = fresh["skill_versions"]
+    if not str(payload.get("prompt_config_hash") or "").strip() and fresh.get("prompt_config_hash"):
+        payload["prompt_config_hash"] = fresh["prompt_config_hash"]
+    payload["claim_revision"] = fresh_revision
+    payload["updated_at"] = fresh_updated_at
+    payload["last_heartbeat"] = fresh_heartbeat_at
+    return payload, True
 
 
 def record_claim_instance(
@@ -165,13 +295,21 @@ def record_claim_instance(
         prompt_config_hash=prompt_config_hash,
     )
     path = instance_path(root, str(fresh["agent_instance_id"]))
-    is_new_instance = not path.exists()
-    if is_new_instance:
-        payload = fresh
-    else:
-        payload = _merge_existing(root, path, _read_json(path), fresh)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    with claim_store.store_lock(root):
+        is_new_instance = not path.exists()
+        if is_new_instance:
+            payload = fresh
+            should_publish = True
+        else:
+            payload, should_publish = _merge_existing(
+                root,
+                path,
+                _read_json(path),
+                fresh,
+            )
+        if should_publish:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            atomic_io.write_json_atomic(path, payload, sort_keys=True)
     if emit_spawn_event and is_new_instance:
         # Census event carries the instance id plus join keys only; the full
         # claim payload stays in the claim record referenced by claim_id.

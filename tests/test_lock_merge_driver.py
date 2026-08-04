@@ -8,6 +8,7 @@ and a post-merge hook regenerates the authoritative lock. RETRO-2026-06-14 actio
 import json
 import inspect
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -50,8 +51,7 @@ def test_regenerate_noop_when_current():
 def test_regenerate_restores_stale_lock(tmp_path):
     # copy the fixture host into a tmp dir, corrupt the lock, regenerate
     host = tmp_path / "host"
-    host.mkdir()
-    (host / "agent_runtime.yml").write_text((FIXTURE_HOST / "agent_runtime.yml").read_text(encoding="utf-8"), encoding="utf-8")
+    shutil.copytree(FIXTURE_HOST, host)
     (host / "agent_runtime.lock.json").write_text('{"stale": true}\n', encoding="utf-8")
     assert lmd.regenerate(host) is True
     record = json.loads((host / "agent_runtime.lock.json").read_text(encoding="utf-8"))

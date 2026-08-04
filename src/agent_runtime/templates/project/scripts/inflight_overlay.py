@@ -18,6 +18,7 @@ import argparse
 import json
 import re
 import subprocess
+from collections.abc import Iterable, Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -128,6 +129,29 @@ def _show(root: Path, ref: str, path: str) -> str | None:
     return out if code == 0 else None
 
 
+def claim_index_from_snapshot(
+    claims: Iterable[Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Build the overlay join from an already-validated claim snapshot."""
+
+    index: dict[str, dict[str, Any]] = {}
+    for payload in claims:
+        task_id = str(payload.get("task_id") or "").strip().upper()
+        if not task_id:
+            continue
+        status = str(payload.get("status") or "").strip().lower()
+        claim_status = "active" if status in ACTIVE_CLAIM_STATUSES else "released"
+        current = index.get(task_id)
+        if current is None or (
+            claim_status == "active" and current["claim_status"] != "active"
+        ):
+            index[task_id] = {
+                "claim_status": claim_status,
+                "claim_id": payload.get("claim_id"),
+            }
+    return index
+
+
 def load_claim_index(root: Path) -> dict[str, dict[str, Any]]:
     """Map TASK id -> {claim_status, claim_id} from the working-tree claim dir."""
     index: dict[str, dict[str, Any]] = {}
@@ -226,7 +250,12 @@ def _empty_overlay(root: Path, base: str | None, error: str | None = None) -> di
     return overlay
 
 
-def build_overlay(root: Path | str, base: str | None = None) -> dict[str, Any]:
+def build_overlay(
+    root: Path | str,
+    base: str | None = None,
+    *,
+    claim_snapshot: Iterable[Mapping[str, Any]] | None = None,
+) -> dict[str, Any]:
     root_path = Path(root).resolve()
     code, _ = run_git(root_path, "rev-parse", "--show-toplevel")
     if code != 0:
@@ -235,7 +264,11 @@ def build_overlay(root: Path | str, base: str | None = None) -> dict[str, Any]:
     if resolved_base is None:
         return _empty_overlay(root_path, base, f"base ref not found: {base or 'origin/main|main'}")
 
-    claim_index = load_claim_index(root_path)
+    claim_index = (
+        load_claim_index(root_path)
+        if claim_snapshot is None
+        else claim_index_from_snapshot(claim_snapshot)
+    )
     branches = list_agent_branches(root_path)
     records: list[dict[str, Any]] = []
     for branch in branches:

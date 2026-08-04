@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-07-30T10:14:35+09:00
-task_count: 317
+generated_at: 2026-08-04T14:28:19+09:00
+task_count: 323
 open_count: 20
-completed_count: 297
-task_set_count: 4
+completed_count: 303
+task_set_count: 5
 completed_task_set_count: 64
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `297` completed tasks are archived from this live board.
+- Summary: `20` open or active tasks; `303` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `297`.
-- Task Sets: `4` active workflows; `64` completed workflows are hidden from the live action board.
+- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `303`.
+- Task Sets: `5` active workflows; `64` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -76,14 +76,22 @@ completed_task_set_count: 64
 ### v0.8 Adoption and Enforcement (`TASKSET-AR-V080-ADOPTION-ENFORCEMENT`)
 
 - Flow: Deliver brownfield profiles, lifecycle truth, consumer-complete assets, continuity hooks, knowledge and model-economy enforcement, then validate two pilots and one upgrade rehearsal.
-- Progress: `9/13` done; `4` open or active.
+- Progress: `12/13` done; `1` open or active.
 - WIP: active `0/3`; oldest `0.0h`; stale `0`.
 | Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-648` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md | in_progress | Action | P0 | Critical | Medium | 8h/16000tok | Medium | 8 | agent-runtime-core | lead-engineer | Execute next | Determine, with replayable evidence, whether reversible Agent Runtime adoption preser… |
 | `TASK-AR-651` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-651/UNIT-TASK-AR-651-001.md | planned | Action | P0 | Critical | High | 8h/16000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Produce an exact, installable v0.8.0-rc.1 candidate whose release claims are backed b… |
-| `TASK-AR-649` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-649/UNIT-TASK-AR-649-001.md | planned | Action | P0 | Critical | High | 10h/22000tok | Low | 7 | agent-runtime-core | lead-engineer | Execute next | Prove runtime adoption works in a mixed Python/Next/Supabase security-sensitive servi… |
-| `TASK-AR-650` | INIT-AR-V080-ADOPTION-ENFORCEMENT | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-650/UNIT-TASK-AR-650-001.md | planned | Ask | P0 | Critical | High | 10h/20000tok | Low | 7 | agent-runtime-core | lead-engineer | Owner/agent decision | Prove the new ownership/profile model materially reduces Autofolio's unmanaged seams… |
+
+### v0.8 Operability Hardening (`TASKSET-AR-V080-OPERABILITY-HARDENING`)
+
+- Flow: Turn the pilot findings into enforced, observable, reusable Runtime behavior and keep the RC blocked until the release-critical tasks pass.
+- Progress: `3/6` done; `3` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-657` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md | planned | Action | P1 | High | Medium | 7h/14000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make the safe brownfield procedure discoverable and repeatable in every consumer with… |
+| `TASK-AR-656` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-656/UNIT-TASK-AR-656-001.md | planned | Action | P1 | High | Medium | 10h/19000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Let Runtime own its canonical lifecycle while hosts add authority hooks without perma… |
+| `TASK-AR-658` | INIT-AR-V080-OPERABILITY-HARDENING | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md | planned | Ask | P2 | Medium | High | 12h/23000tok | Low | 5 | agent-runtime-core | lead-engineer | Owner/agent decision | Give the Owner one truthful view of routing economics, Scribe debt, Compound coverage… |
 
 ### Host Required Merge Gates (`TASKSET-AR-HOST-REQUIRED-MERGE-GATES`)
 
@@ -169,10 +177,10 @@ completed_task_set_count: 64
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `20` open across `4` task sets (see Action Board above).
+- Active: `20` open across `5` task sets (see Action Board above).
 - Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `64` (see Archived Task Sets above).
-- Archived task files: `297` — see `ARCHIVE-INDEX.md`.
+- Archived task files: `303` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

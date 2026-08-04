@@ -42,6 +42,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from agent_runtime import claim_store
+
 
 CLAIMS_REL = Path("agents/runtime/task_claims")
 WORKTREES_DIRNAME = ".worktrees"
@@ -49,16 +51,12 @@ PRESERVE_MARKER = "PRESERVE"
 DEFAULT_RETENTION_DAYS = 7.0
 BASE_REF_CANDIDATES = ("origin/main", "origin/master", "main", "master")
 
-ACTIVE_CLAIM_STATUSES = {
-    "active",
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "running",
-    "waiting_review",
-    "working",
-}
+# Deliberately a SUPERSET of the canonical set, derived from it rather than
+# re-typed. "active" and "running" are not canonical claim statuses - they
+# classify as `indeterminate`, which every consumer treats as authority
+# retained - so counting them as active keeps this lifecycle gate fail-safe.
+# Deriving means a future addition to the canonical set lands here too.
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES | {"active", "running"}
 RELEASED_CLAIM_STATUSES = {"released", "completed", "done", "closed"}
 
 
@@ -225,17 +223,6 @@ def _claim_eligibility_time(claim: dict[str, Any]) -> datetime | None:
     return None
 
 
-def _claim_lease_expiry(claim: dict[str, Any]) -> datetime | None:
-    for key in ("lease_expires_at", "expires_at"):
-        parsed = _parse_timestamp(claim.get(key))
-        if parsed is not None:
-            return parsed
-    lease = claim.get("lease")
-    if isinstance(lease, dict):
-        return _parse_timestamp(lease.get("expires_at"))
-    return None
-
-
 def resolve_base_ref(root: Path, preferred: str = "") -> str:
     candidates = [preferred] if preferred else list(BASE_REF_CANDIDATES)
     for candidate in candidates:
@@ -343,19 +330,30 @@ def evaluate_worktree(
     return verdict
 
 
-def find_stale_claims(claims: list[dict[str, Any]], now: datetime) -> list[str]:
+def find_stale_claims(
+    claims: list[dict[str, Any]],
+    now: datetime,
+    *,
+    grace_seconds: object | None = None,
+) -> list[str]:
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     lines: list[str] = []
     for claim in claims:
         if _claim_status(claim) not in ACTIVE_CLAIM_STATUSES:
             continue
-        expiry = _claim_lease_expiry(claim)
-        if expiry is None or expiry >= now:
+        liveness = claim_store.classify_claim_liveness(
+            claim,
+            now=now,
+            grace_seconds=grace,
+        )
+        if liveness.state != "expired" or liveness.effective_deadline is None:
             continue
         claim_id = str(claim.get("claim_id", "")).strip() or "unknown"
         task_id = str(claim.get("task_id", "")).strip() or "unknown"
         lines.append(
             f"stale-claim:{claim_id} task={task_id} "
-            f"status={_claim_status(claim)} lease_expired={expiry.isoformat()}"
+            f"status={_claim_status(claim)} "
+            f"lease_expired={liveness.effective_deadline.isoformat()}"
         )
     return lines
 
@@ -410,8 +408,16 @@ def clean_zombies(root: Path, verdicts: list[ZombieVerdict]) -> tuple[list[str],
     return actions, failures
 
 
-def run(root: Path, *, clean: bool, retention_days: float, base_ref_arg: str) -> int:
+def run(
+    root: Path,
+    *,
+    clean: bool,
+    retention_days: float,
+    base_ref_arg: str,
+    grace_seconds: object | None = None,
+) -> int:
     now = datetime.now(timezone.utc)
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     try:
         worktrees = list_worktrees(root)
     except RuntimeError as exc:
@@ -429,7 +435,7 @@ def run(root: Path, *, clean: bool, retention_days: float, base_ref_arg: str) ->
     zombies = [v for v in verdicts if v.zombie]
     cleanable = [v for v in zombies if v.cleanable]
     exempt = [v for v in zombies if v.exempt_reason]
-    stale = find_stale_claims(claims, now)
+    stale = find_stale_claims(claims, now, grace_seconds=grace)
 
     print("worktree-lifecycle-gate: pass")
     print(f"root={root}")
@@ -481,6 +487,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Integration base ref (default: first of origin/main, origin/master, main, master)",
     )
+    parser.add_argument(
+        "--grace-seconds",
+        type=int,
+        default=None,
+        help="Shared seconds past claim expiry before reporting stale authority",
+    )
     return parser
 
 
@@ -496,6 +508,7 @@ def main(argv: list[str] | None = None) -> int:
         clean=args.clean,
         retention_days=args.retention_days,
         base_ref_arg=args.base_ref,
+        grace_seconds=args.grace_seconds,
     )
 
 

@@ -1,0 +1,27 @@
+{
+  "cause": "Review-producing instructions described human traceability fields without binding their output schema to the exact identifiers consumed by the closeout validator.",
+  "created_at": "2026-07-30T22:35:29+09:00",
+  "created_by": "codex-root-task-ar-652-orchestrator",
+  "defect_signatures": [
+    "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46"
+  ],
+  "id": "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931",
+  "prevention": "Ship independent-verification and runtime-adoption report templates that always emit canonical task_id and unit_id where applicable, and validate generated reports through the work-close contract.",
+  "prevention_refs": [
+    "agents/lead_engineer/tasks/units/TASK-AR-657/UNIT-TASK-AR-657-001.md"
+  ],
+  "recurrence_count": 3,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md"
+  ],
+  "status": "active",
+  "summary": "TASK-AR-652 additive audit reports were independently approved but work close rejected them because their frontmatter used parent_task_id rather than canonical task_id and unit_id linkage.",
+  "title": "Make review artifacts directly consumable by work close",
+  "verification_refs": [
+    "tests/test_closure_gate.py"
+  ],
+  "work_ids": [
+    "TASK-AR-652"
+  ]
+}

@@ -62,6 +62,7 @@ def _write_claim(
     worktree_path: str | None = None,
     released_at: str | None = None,
     expires_at: str | None = None,
+    nested_expires_at: str | None = None,
     tags: list[str] | None = None,
 ) -> None:
     claims = repo / "agents" / "runtime" / "task_claims"
@@ -78,6 +79,9 @@ def _write_claim(
         payload["released_at"] = released_at
     if expires_at is not None:
         payload["expires_at"] = expires_at
+        payload["lease"] = {
+            "expires_at": nested_expires_at or expires_at,
+        }
     (claims / f"{claim_id}.json").write_text(json.dumps(payload), encoding="utf-8")
 
 
@@ -236,6 +240,92 @@ def test_stale_claim_watch(tmp_path: Path, capsys) -> None:
     assert rc == 0
     assert "stale_claims=1" in out
     assert "- watch stale-claim:CLAIM-910 task=TASK-AR-910" in out
+
+
+def test_ar655_lifecycle_stale_detection_uses_shared_grace_boundary() -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+    equality = (now - timedelta(seconds=600)).isoformat()
+    one_microsecond_old = (
+        now - timedelta(seconds=600, microseconds=1)
+    ).isoformat()
+
+    equal_claim = {
+        "claim_id": "CLAIM-AR655-GRACE-EQUALITY",
+        "task_id": "TASK-AR-655",
+        "status": "working",
+        "expires_at": equality,
+        "lease": {"expires_at": equality},
+    }
+    expired_claim = {
+        "claim_id": "CLAIM-AR655-GRACE-AFTER",
+        "task_id": "TASK-AR-655",
+        "status": "working",
+        "expires_at": one_microsecond_old,
+        "lease": {"expires_at": one_microsecond_old},
+    }
+
+    assert worktree_lifecycle_gate.find_stale_claims(
+        [equal_claim],
+        now,
+        grace_seconds=600,
+    ) == []
+    stale = worktree_lifecycle_gate.find_stale_claims(
+        [expired_claim],
+        now,
+        grace_seconds=600,
+    )
+    assert len(stale) == 1
+    assert "stale-claim:CLAIM-AR655-GRACE-AFTER" in stale[0]
+
+
+def test_ar655_lifecycle_stale_detection_uses_latest_deadline_copy() -> None:
+    now = datetime(2026, 8, 3, 0, 0, tzinfo=timezone.utc)
+    claim = {
+        "claim_id": "CLAIM-AR655-LATEST-DEADLINE",
+        "task_id": "TASK-AR-655",
+        "status": "working",
+        "expires_at": (now - timedelta(seconds=601)).isoformat(),
+        "lease": {"expires_at": (now + timedelta(seconds=1)).isoformat()},
+    }
+
+    assert worktree_lifecycle_gate.find_stale_claims(
+        [claim],
+        now,
+        grace_seconds=600,
+    ) == []
+
+
+def test_ar655_clean_never_removes_status_active_expired_worktree(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    repo = _make_repo(tmp_path)
+    worktree = _add_worktree(
+        repo,
+        "TASK-AR-930",
+        "task-ar-930-branch",
+    )
+    _write_claim(
+        repo,
+        "CLAIM-930",
+        "TASK-AR-930",
+        status="working",
+        expires_at=OLD,
+    )
+
+    rc, out = _run_check(
+        repo,
+        "--clean",
+        "--retention-days",
+        "0",
+        capsys=capsys,
+    )
+
+    assert rc == 0
+    assert "stale-claim:CLAIM-930" in out
+    assert "zombies=0" in out
+    assert "removed-worktree .worktrees/TASK-AR-930" not in out
+    assert worktree.exists()
 
 
 def test_released_claim_with_past_expiry_not_stale(tmp_path: Path, capsys) -> None:

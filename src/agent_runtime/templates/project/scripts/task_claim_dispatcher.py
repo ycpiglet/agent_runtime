@@ -15,12 +15,14 @@ by default (--allow-missing-evidence is a loud transitional escape). Claims that
 were already released before this gate existed are exempt; only new release
 invocations enforce it.
 
-Create runs the deferred plan revalidation check (T2, TASK-AR-506) by default:
-when the claim's task_set_id has a recorded assumption set in
-agents/project/work-items/PLAN-ASSUMPTIONS.json, drifted anchors refuse claim
-creation until a replan review re-records them (--skip-plan-check is a loud
-transitional escape). This makes the W0~W6 lifecycle the default for all work,
-not an opt-in per taskset.
+Create runs the deferred plan revalidation check (T2, TASK-AR-506) by default.
+Claims bound to a canonical taskset or complete unit require a valid T0 entry
+in agents/project/work-items/PLAN-ASSUMPTIONS.json, while legacy identity-only
+claims retain their migration-compatible no-snapshot path. Drifted anchors
+refuse claim creation until a replan review re-records them
+(--skip-plan-check is a loud transitional escape for drift only). Direct,
+taskset, and wave claim entry points share the same readiness-before-mutation
+contract.
 """
 
 from __future__ import annotations
@@ -36,7 +38,7 @@ import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import atomic_io
 import backlog_board
@@ -44,6 +46,9 @@ import claim_guard
 import compound_record
 import model_routing
 import plan_assumption_gate
+import status_alias
+import task_unit_readiness_gate
+from agent_runtime import claim_store
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
@@ -60,14 +65,34 @@ except ImportError:  # optional in the portable project template
     role_routing = None
 
 
-def _claim_autocommit_enabled() -> bool:
-    # Default ON; opt out with AGENT_RUNTIME_CLAIM_AUTOCOMMIT=0 (e.g. bespoke flows).
-    return os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", "1").strip().lower() not in {
-        "0", "false", "no", "off",
-    }
+def _claim_autocommit_enabled(*, cli_opt_in: bool = False) -> bool:
+    """Return whether this invocation explicitly authorizes an SCM commit.
+
+    Claim files are normal Runtime persistence; changing a host's Git HEAD is
+    a separate external effect.  Keep the crash-safety path available for
+    trusted control repositories, but never infer that authority from an
+    absent or malformed environment value.
+    """
+
+    if cli_opt_in:
+        return True
+    raw = os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT")
+    if raw is None:
+        return False
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized not in {"0", "false", "no", "off", ""}:
+        print(
+            "warning: invalid AGENT_RUNTIME_CLAIM_AUTOCOMMIT value; "
+            "claim artifacts will remain uncommitted",
+            file=sys.stderr,
+        )
+    return False
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
+SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
 SECURITY_SERVICE_GATE_SHA256 = (
     "a40384ca372d1c986538800687c8e339c45ed72bd3f167631be2f6e799ce32ce"
 )
@@ -87,15 +112,87 @@ SECURITY_SERVICE_GATE_BOOTSTRAP = (
     "exec(compile(_source, _gate_path, 'exec'), "
     "{'__name__': '__main__', '__file__': _gate_path})\n"
 )
-ACTIVE_STATUSES = {
-    "assigned",
-    "claimed",
-    "in_progress",
-    "review",
-    "waiting_review",
-    "working",
-}
+ACTIVE_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
 ORCHESTRATOR_ROLES = {"orchestrator", "release-orchestrator"}
+COMPLETION_PHASES = {"done", "complete", "completed", "released"}
+PROGRESS_FIELDS = (
+    "phase",
+    "progress_pct",
+    "step_index",
+    "step_total",
+    "status_text",
+)
+
+
+class _CreatePreparation(NamedTuple):
+    """Read-only inputs resolved before claim-store lock creation."""
+
+    task_set_id: str
+    strict_claim_preflight: bool
+    target_files: tuple[str, ...]
+    stop_condition: str
+    escalation_triggers: tuple[str, ...]
+    routing_decision: dict[str, Any]
+    token_budgets: dict[str, int | None]
+    defect_signatures: tuple[str, ...]
+    knowledge_matches: tuple[dict[str, Any], ...]
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _scope_binding(
+    *,
+    task_id: object,
+    unit_id: object,
+    unit_spec: object,
+    target_files: object,
+    stop_condition: object,
+    bound_at: str,
+) -> dict[str, Any]:
+    # Delegates to claim_store so role_routing can mint the same binding for
+    # overlay claims; role_routing cannot import this module (the dependency
+    # runs the other way).
+    return claim_store.scope_binding(
+        task_id=task_id,
+        unit_id=unit_id,
+        unit_spec=unit_spec,
+        target_files=target_files,
+        stop_condition=stop_condition,
+        bound_at=bound_at,
+    )
+
+
+def _binding_for_claim(
+    claim: dict[str, Any],
+    *,
+    bound_at: str,
+    target_files: object | None = None,
+    stop_condition: object | None = None,
+) -> dict[str, Any]:
+    return _scope_binding(
+        task_id=claim.get("task_id"),
+        unit_id=claim.get("unit_id"),
+        unit_spec=claim.get("unit_spec"),
+        target_files=(
+            claim.get("target_files", [])
+            if target_files is None
+            else target_files
+        ),
+        stop_condition=(
+            claim.get("stop_condition", "")
+            if stop_condition is None
+            else stop_condition
+        ),
+        bound_at=bound_at,
+    )
 
 
 def _rel(root: Path, path: Path) -> str:
@@ -154,6 +251,294 @@ def _claim_dir(root: Path) -> Path:
     return root / "agents" / "runtime" / "task_claims"
 
 
+_CLAIM_ARTIFACT_PARENT = Path("agents") / "runtime" / "task_claims"
+_WINDOWS_REPARSE_POINT = getattr(
+    stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400
+)
+
+
+def _is_path_alias(metadata: os.stat_result) -> bool:
+    attributes = int(getattr(metadata, "st_file_attributes", 0) or 0)
+    reparse_tag = int(getattr(metadata, "st_reparse_tag", 0) or 0)
+    return (
+        stat.S_ISLNK(metadata.st_mode)
+        or bool(attributes & _WINDOWS_REPARSE_POINT)
+        or bool(reparse_tag)
+    )
+
+
+def _claim_artifact_ref_error(value: object, field: str) -> str | None:
+    text = value.strip() if isinstance(value, str) else ""
+    if not text:
+        return None
+    path = Path(text)
+    suffix = {"handoff_path": ".handoff.md", "log_path": ".log.md"}[field]
+    if (
+        path.is_absolute()
+        or path.parent != _CLAIM_ARTIFACT_PARENT
+        or not path.name.endswith(suffix)
+        or path.name in {suffix, ".", ".."}
+    ):
+        return (
+            f"{field} must be a direct {suffix} file under "
+            "agents/runtime/task_claims"
+        )
+    return None
+
+
+def _direct_repo_file_ref(root: Path, value: object, label: str) -> str:
+    text = value.strip() if isinstance(value, str) else ""
+    if not text:
+        return ""
+    path = Path(text)
+    if path.is_absolute() or not path.parts or ".." in path.parts:
+        raise ValueError(f"{label} must be a repo-relative direct regular file")
+    current = root
+    for index, component in enumerate(path.parts):
+        current = current / component
+        try:
+            metadata = current.lstat()
+        except FileNotFoundError as exc:
+            raise ValueError(f"{label} not found: {path.as_posix()}") from exc
+        except OSError as exc:
+            raise ValueError(f"{label} is unavailable: {path.as_posix()}") from exc
+        if _is_path_alias(metadata):
+            raise ValueError(f"{label} must not use a symlink or reparse point")
+        if index < len(path.parts) - 1:
+            if not stat.S_ISDIR(metadata.st_mode):
+                raise ValueError(f"{label} parent is not a direct directory")
+        elif not stat.S_ISREG(metadata.st_mode):
+            raise ValueError(f"{label} must be a direct regular file")
+    return path.as_posix()
+
+
+def _claim_artifact_file_ref(root: Path, value: object, field: str) -> str:
+    finding = _claim_artifact_ref_error(value, field)
+    if finding:
+        raise ValueError(finding)
+    return _direct_repo_file_ref(root, value, field)
+
+
+def _entry_exists(path: Path, label: str) -> bool:
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        raise ValueError(f"{label} is unavailable") from exc
+    return True
+
+
+def _missing_directories(path: Path, root: Path) -> list[Path]:
+    """Return absent ancestors, child first, without crossing the repo root."""
+
+    missing: list[Path] = []
+    current = path
+    while current != root:
+        if _entry_exists(current, "claim artifact directory"):
+            break
+        missing.append(current)
+        current = current.parent
+    return missing
+
+
+class _CreatedPublication(NamedTuple):
+    path: Path
+    expected: bytes
+    device: int
+    inode: int
+
+
+def _created_publication(
+    path: Path,
+    expected: bytes,
+    identity: atomic_io.PublishedFileIdentity,
+) -> _CreatedPublication:
+    """Register rollback authority without re-opening a committed path."""
+
+    return _CreatedPublication(
+        path=path,
+        expected=expected,
+        device=identity.device,
+        inode=identity.inode,
+    )
+
+
+def _remove_owned_publication(
+    path: Path,
+    *,
+    expected: bytes,
+    identity: tuple[int, int] | None = None,
+) -> str | None:
+    """Remove a transaction-owned direct file, refusing ambiguous cleanup."""
+
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return None
+    except OSError:
+        return f"rollback could not inspect {path}"
+    if _is_path_alias(metadata) or not stat.S_ISREG(metadata.st_mode):
+        return f"rollback refused non-regular publication {path}"
+    if metadata.st_size != len(expected):
+        return f"rollback refused resized publication {path}"
+    if identity is not None and (
+        int(metadata.st_dev),
+        int(metadata.st_ino),
+    ) != identity:
+        return f"rollback refused replaced publication {path}"
+    try:
+        payload = path.read_bytes()
+    except OSError:
+        return f"rollback could not read publication {path}"
+    if payload != expected:
+        return f"rollback refused changed publication {path}"
+    try:
+        path.unlink()
+    except OSError:
+        return f"rollback could not remove publication {path}"
+    return None
+
+
+def _transaction_marker_payload(
+    path: Path,
+    *,
+    claim_id: str,
+) -> tuple[bytes | None, str | None]:
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return None, None
+    except OSError:
+        return None, f"rollback could not inspect marker {path}"
+    if (
+        _is_path_alias(metadata)
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_size > claim_store.MARKER_MAX_BYTES
+    ):
+        return None, f"rollback refused noncanonical marker {path}"
+    try:
+        payload = path.read_bytes()
+        parsed = json.loads(payload.decode("utf-8"))
+        generation = uuid.UUID(str(parsed.get("generation_id")))
+    except (
+        AttributeError,
+        UnicodeError,
+        json.JSONDecodeError,
+        OSError,
+        RecursionError,
+        TypeError,
+        ValueError,
+    ):
+        return None, f"rollback refused malformed marker {path}"
+    if (
+        not isinstance(parsed, dict)
+        or set(parsed) != {"schema", "generation_id", "witness_claim_id"}
+        or parsed.get("schema") != claim_store.MARKER_SCHEMA
+        or parsed.get("witness_claim_id") != claim_id
+        or generation.version != 4
+        or str(generation) != parsed.get("generation_id")
+    ):
+        return None, f"rollback refused unrelated marker {path}"
+    return payload, None
+
+
+def _marker_absence_finding(path: Path) -> str | None:
+    """Prove a transaction marker is absent before deleting its witness."""
+
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return None
+    except (OSError, RuntimeError):
+        return f"rollback could not prove marker absence {path}"
+    return f"rollback left marker publication {path}"
+
+
+def _rollback_claim_creation(
+    root: Path,
+    *,
+    claim_id: str,
+    publications: tuple[_CreatedPublication, ...],
+    pristine_store: bool,
+    missing_directories: tuple[Path, ...],
+) -> list[str]:
+    findings: list[str] = []
+    preserve_witness = False
+    if pristine_store:
+        outer = claim_store.outer_marker_path(root)
+        inner = _claim_dir(root) / ".claim-store"
+        outer_payload, outer_finding = _transaction_marker_payload(
+            outer,
+            claim_id=claim_id,
+        )
+        inner_payload, inner_finding = _transaction_marker_payload(
+            inner,
+            claim_id=claim_id,
+        )
+        findings.extend(
+            finding
+            for finding in (outer_finding, inner_finding)
+            if finding is not None
+        )
+        if not findings and inner_payload is not None:
+            if (
+                outer_payload is not None
+                and outer_payload != inner_payload
+                and not inner_payload.startswith(outer_payload)
+            ):
+                findings.append("rollback refused mismatched marker pair")
+            else:
+                if outer_payload is not None:
+                    finding = _remove_owned_publication(
+                        outer,
+                        expected=outer_payload,
+                    )
+                    if finding:
+                        findings.append(finding)
+                finding = _remove_owned_publication(
+                    inner,
+                    expected=inner_payload,
+                )
+                if finding:
+                    findings.append(finding)
+        elif not findings and outer_payload is not None:
+            findings.append("rollback refused outer-only marker")
+        findings.extend(
+            finding
+            for finding in (
+                _marker_absence_finding(outer),
+                _marker_absence_finding(inner),
+            )
+            if finding is not None
+        )
+        preserve_witness = bool(findings)
+        if preserve_witness:
+            findings.insert(
+                0,
+                "claim-store recovery-required: marker rollback is incomplete; "
+                "witness claim and artifacts were preserved"
+            )
+    if not preserve_witness:
+        for publication in reversed(publications):
+            finding = _remove_owned_publication(
+                publication.path,
+                expected=publication.expected,
+                identity=(publication.device, publication.inode),
+            )
+            if finding:
+                findings.append(finding)
+    for directory in missing_directories:
+        try:
+            directory.rmdir()
+        except FileNotFoundError:
+            continue
+        except OSError:
+            # Never remove an ancestor that another actor populated meanwhile.
+            continue
+    return findings
+
+
 def _claim_files(root: Path) -> list[Path]:
     base = _claim_dir(root)
     if not base.is_dir():
@@ -161,25 +546,28 @@ def _claim_files(root: Path) -> list[Path]:
     return sorted(base.glob("*.json"), key=lambda path: path.name.lower())
 
 
-def _read_claim(path: Path) -> dict[str, Any] | None:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return None
-    return payload if isinstance(payload, dict) else None
+def _read_claim(path: Path) -> dict[str, Any]:
+    return dict(claim_store.read_claim_payload(path))
 
 
 def _read_claims(root: Path) -> list[tuple[Path, dict[str, Any]]]:
     records: list[tuple[Path, dict[str, Any]]] = []
     for path in _claim_files(root):
-        payload = _read_claim(path)
-        if payload is not None:
-            records.append((path, payload))
+        records.append((path, _read_claim(path)))
     return records
 
 
 def _is_active(payload: dict[str, Any]) -> bool:
     return str(payload.get("status") or "").strip().lower() in ACTIVE_STATUSES
+
+
+def _active_task_claim_path(
+    records: list[tuple[Path, dict[str, Any]]], task_id: str
+) -> Path | None:
+    for path, payload in records:
+        if _is_active(payload) and str(payload.get("task_id") or "") == task_id:
+            return path
+    return None
 
 
 def _is_explicit_overlay(payload: dict[str, Any]) -> bool:
@@ -200,6 +588,93 @@ def _has_git_worktree_marker(path: Path) -> bool:
     return path.is_dir() and (path / ".git").exists()
 
 
+def _git_worktree_context(path: Path) -> tuple[Path, Path, bool] | None:
+    """Return ``(top_level, common_dir, is_primary)`` for a registered worktree.
+
+    A linked worktree has a ``.git`` *file*, while the primary checkout has a
+    ``.git`` directory.  That distinction alone is not sufficient: a copied
+    marker, a different repository, or an unregistered directory can look
+    plausible.  Ask Git for both its common directory and registered worktree
+    list, and fail closed when either identity cannot be established.
+
+    ``None`` deliberately preserves the legacy marker-only behavior for the
+    lightweight non-Git fixture hosts used by downstream adopters.  Callers
+    that have already established a Git runtime root must reject ``None`` for
+    the claimed worktree.
+    """
+    try:
+        identity = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(path),
+                "rev-parse",
+                "--path-format=absolute",
+                "--show-toplevel",
+                "--git-common-dir",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if identity.returncode != 0:
+        return None
+    values = [line.strip() for line in identity.stdout.splitlines() if line.strip()]
+    if len(values) != 2:
+        return None
+    top_level = Path(values[0]).resolve()
+    common_dir = Path(values[1]).resolve()
+    try:
+        listing = subprocess.run(
+            ["git", "-C", str(top_level), "worktree", "list", "--porcelain"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if listing.returncode != 0:
+        return None
+    registered = [
+        Path(line[9:]).resolve()
+        for line in listing.stdout.splitlines()
+        if line.startswith("worktree ")
+    ]
+    if registered.count(top_level) != 1:
+        return None
+    primary = [
+        candidate
+        for candidate in registered
+        if (candidate / ".git").is_dir()
+        and (candidate / ".git").resolve() == common_dir
+    ]
+    if len(primary) != 1:
+        return None
+    return top_level, common_dir, top_level == primary[0]
+
+
+def _is_git_repository(path: Path) -> bool:
+    """Whether Git recognizes ``path`` as being inside any repository."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--is-inside-work-tree"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError:
+        return False
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def _is_orchestrator_claim(payload: dict[str, Any]) -> bool:
     role = str(payload.get("agent_role") or "").strip().lower()
     if role in ORCHESTRATOR_ROLES:
@@ -209,27 +684,152 @@ def _is_orchestrator_claim(payload: dict[str, Any]) -> bool:
     return mode == "orchestrator" or scope == "orchestrator"
 
 
+def _unresolvable_scope_remedy(claim: dict[str, Any], detail: str) -> str:
+    """Refusal text that names the way out.
+
+    A spec moved or renamed mid-flight disables heartbeat, renew and adopt at
+    once. That is fail-closed rather than exit-less - release with a verifier
+    identity still works, and terminalize opens once the lease expires - but an
+    operator correcting a spec path should not have to rediscover that.
+    """
+
+    return (
+        f"claim scope cannot be resolved from its unit spec: {detail}; "
+        "restore the spec at "
+        f"{_canonical_unit_spec(claim.get('task_id'), claim.get('unit_id'))} "
+        "to resume, or release the claim with a verifier identity"
+    )
+
+
+_UNSET_TARGET_COMPONENT = object()
+
+
+def _scope_contract_error(
+    root: Path,
+    claim: dict[str, Any],
+    *,
+    recorded_target_component: object = _UNSET_TARGET_COMPONENT,
+    check_footprint: bool = True,
+) -> str | None:
+    """The complete scope contract, enforced identically at birth and at beat.
+
+    Six defects came from `create` and the mutation path disagreeing about what
+    a valid claim looks like, each found one field at a time. Sharing only the
+    resolver still left the sixth - a spec declaring no target_files lets
+    explicit --target-file entries through, and the component comparison then
+    refuses every beat for the life of the claim.
+
+    So the whole contract lives here: canonical spec location, spec resolution,
+    and target_files component equality. Both ends call this one function, so
+    "whatever heartbeat refuses, create refuses" is true by construction rather
+    than for the checks someone remembered to wire.
+
+    ``recorded_target_component`` is the component already persisted on the
+    claim's binding; omit it at creation, where the claim's own declared
+    footprint is the thing being validated.
+
+    ``check_footprint`` is False on the renew path. Renew OWNS scope drift - it
+    reconciles exactly that case against an accepted T2/T3 replan - so applying
+    the footprint clause there would break the command's purpose. The canonical
+    clause still applies, because renew also trusts ``claim["unit_spec"]`` and
+    that pointer is precisely what the pin exists to distrust.
+
+    This is safe only because renew is not the *lenient* path: it refuses a
+    widened footprint on stricter grounds via ``_accepted_replan_ref``. That
+    coupling is load-bearing and lives in a different mechanism, so if the
+    replan gate is ever weakened, renew silently becomes the soft sibling and
+    nothing here would notice. The guards are
+    ``test_renew_refuses_single_component_drift_without_replan_or_mutation``,
+    ``test_renew_refuses_scope_drift_without_matching_accepted_replan``, and
+    ``test_renew_still_reconciles_ordinary_scope_drift``.
+    """
+
+    spec_error = _non_canonical_unit_spec_error(claim)
+    if spec_error:
+        return spec_error
+    try:
+        spec_targets, _stop_condition = _current_scope_values(root, claim)
+    except (ValueError, OSError) as exc:
+        return _unresolvable_scope_remedy(claim, exc)
+    if not check_footprint:
+        return None
+    spec_component = _binding_for_claim(
+        claim, bound_at="", target_files=spec_targets
+    )["components"]["target_files"]
+    recorded = (
+        _binding_for_claim(claim, bound_at="")["components"]["target_files"]
+        if recorded_target_component is _UNSET_TARGET_COMPONENT
+        else recorded_target_component
+    )
+    if spec_component != recorded:
+        return (
+            "claim footprint does not match its unit spec; declare the files in "
+            "the unit spec, or renew with an accepted replan"
+        )
+    return None
+
+
 def _claim_creation_errors(
     root: Path,
     claim: dict[str, Any],
     records: list[tuple[Path, dict[str, Any]]],
 ) -> list[str]:
     errors: list[str] = []
+    # Enforced at birth as well as at every mutation. A claim that create
+    # accepts but heartbeat refuses is born unusable, and nothing says so until
+    # the first beat.
+    scope_error = _scope_contract_error(root, claim)
+    if scope_error:
+        errors.append(scope_error)
+
     if not _is_orchestrator_claim(claim):
         worktree_value = str(claim.get("worktree_path") or "").strip()
         if not worktree_value:
             errors.append("task worktree is not ready: missing worktree_path")
         else:
             worktree = _resolved_worktree(root, worktree_value)
-            if worktree == root.resolve():
-                errors.append("task worktree is not ready: worker claims must not point at the main checkout")
-            elif not worktree.is_dir():
+            if not worktree.is_dir():
                 errors.append(
                     f"task worktree is not ready: {worktree_value} does not exist; "
                     f"run: git worktree add -b {claim.get('branch')} {worktree_value}"
                 )
             elif not _has_git_worktree_marker(worktree):
                 errors.append(f"task worktree is not ready: {worktree_value} is not a git worktree")
+            else:
+                root_context = _git_worktree_context(root)
+                worktree_context = _git_worktree_context(worktree)
+                if root_context is not None:
+                    if worktree_context is None:
+                        errors.append(
+                            f"task worktree is not ready: {worktree_value} is not a registered git worktree"
+                        )
+                    elif root_context[1] != worktree_context[1]:
+                        errors.append(
+                            f"task worktree is not ready: {worktree_value} belongs to a different git repository"
+                        )
+                    elif root_context[2]:
+                        errors.append(
+                            "task worktree is not ready: runtime root must be a registered linked "
+                            "worktree, not the primary checkout"
+                        )
+                    elif worktree_context[2]:
+                        errors.append(
+                            "task worktree is not ready: worker claims must not point at the primary checkout"
+                        )
+                    elif worktree.resolve() != root.resolve():
+                        errors.append(
+                            "task worktree is not ready: worker claims must target the invoking "
+                            "linked worktree itself"
+                        )
+                elif _is_git_repository(root):
+                    errors.append(
+                        "task worktree is not ready: runtime root is not an unambiguous registered git worktree"
+                    )
+                elif worktree == root.resolve():
+                    # Preserve the old fail-closed behavior for non-Git
+                    # fixture hosts, where a marker alone cannot prove a
+                    # linked-worktree identity.
+                    errors.append("task worktree is not ready: worker claims must not point at the main checkout")
 
     task_set_id = str(claim.get("task_set_id") or "").strip()
     allow_parallel = str(claim.get("allow_parallel_task_set") or "").strip().lower() == "true"
@@ -263,6 +863,25 @@ def _unit_spec_target_files(root: Path, unit_spec: str) -> list[str]:
     if isinstance(value, str) and value.strip():
         return _normalize_target_files([value])
     return []
+
+
+def _unit_spec_stop_condition(root: Path, unit_spec: str) -> str:
+    spec_value = str(unit_spec or "").strip()
+    if not spec_value:
+        return ""
+    spec_path = Path(spec_value)
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    if not spec_path.is_file():
+        return ""
+    try:
+        meta, _ = backlog_board.parse_frontmatter(
+            spec_path.read_text(encoding="utf-8")
+        )
+    except OSError:
+        return ""
+    value = meta.get("stop_condition")
+    return str(value).strip() if isinstance(value, str) else ""
 
 
 def _normalize_target_files(values: list[object] | tuple[object, ...]) -> list[str]:
@@ -394,7 +1013,42 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
     explicit = _normalize_target_files(tuple(args.target_file or ()))
     registered = _unit_spec_target_files(root, args.unit_spec)
+    if registered:
+        # The spec is the authority when there is one. Accepting an explicit
+        # file outside it made the claim's footprint a strict superset of the
+        # spec's from birth, so every claim-to-spec comparison downstream
+        # started from a divergence - which is the single root of the
+        # heartbeat, renew, and adopt false positives. Ordering still puts
+        # explicit entries first; only out-of-spec entries are refused.
+        stray = [item for item in explicit if item not in set(registered)]
+        if stray:
+            raise ValueError(
+                "target files outside the unit spec: "
+                + ", ".join(sorted(stray))
+                + "; amend the unit spec instead of widening the claim"
+            )
     return list(dict.fromkeys((*explicit, *registered)))
+
+
+def _resolve_stop_condition(root: Path, args: argparse.Namespace) -> str:
+    """Take the stop boundary from the unit spec when there is one.
+
+    `create` used to store only ``--stop-condition`` (default ""), while every
+    mutation-time comparison read the spec's text, so a claim diverged from its
+    own spec at the instant of creation. renew and adopt have been refusing
+    real claims for that reason since the binding was introduced.
+    """
+
+    registered = _unit_spec_stop_condition(root, args.unit_spec)
+    explicit = str(getattr(args, "stop_condition", "") or "")
+    if not registered:
+        return explicit
+    if explicit and explicit != registered:
+        raise ValueError(
+            "explicit --stop-condition conflicts with the unit spec; "
+            "amend the unit spec instead of overriding it on the claim"
+        )
+    return registered
 
 
 def _resolve_escalation_triggers(root: Path, args: argparse.Namespace) -> list[str]:
@@ -433,6 +1087,38 @@ def _resolve_claim_routing(
         else "selected"
     )
     return decision
+
+
+def _resolve_token_budgets(
+    root: Path,
+    args: argparse.Namespace,
+) -> dict[str, int | None]:
+    """Resolve explicit -> unit -> task durable token budgets."""
+    task_meta = _task_meta(root, args.task_id)
+    unit_meta = _unit_meta(root, args.unit_spec)
+
+    def _one(key: str) -> int | None:
+        raw = (
+            getattr(args, key, None)
+            if getattr(args, key, None) not in (None, "")
+            else unit_meta.get(key)
+            if unit_meta.get(key) not in (None, "")
+            else task_meta.get(key)
+        )
+        if raw in (None, ""):
+            return None
+        try:
+            value = int(raw)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{key} must be a non-negative integer") from exc
+        if value < 0:
+            raise ValueError(f"{key} must be a non-negative integer")
+        return value
+
+    return {
+        "task_token_budget": _one("task_token_budget"),
+        "claim_token_budget": _one("claim_token_budget"),
+    }
 
 
 def _is_footprint_active(payload: dict[str, Any]) -> bool:
@@ -503,25 +1189,26 @@ def _next_slot(records: list[tuple[Path, dict[str, Any]]], *, role: str, mode: s
     return slot
 
 
-def _ensure_text_file(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        return
-    path.write_text(text, encoding="utf-8")
+def _ensure_text_file(path: Path, text: str) -> atomic_io.PublishedFileIdentity:
+    if _entry_exists(path, "claim artifact"):
+        raise FileExistsError(f"claim artifact already exists: {path}")
+    return atomic_io.publish_text_owned_atomic(path, text)
 
 
 def _build_claim(
     args: argparse.Namespace,
     records: list[tuple[Path, dict[str, Any]]],
     *,
+    now: datetime,
+    expires_at: datetime,
     target_files: list[str],
+    stop_condition: str,
     escalation_triggers: list[str],
     routing_decision: dict[str, Any],
+    token_budgets: dict[str, int | None],
     defect_signatures: list[str],
     knowledge_matches: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    now = _parse_now(args.now)
-    expires_at = now + timedelta(minutes=args.lease_minutes)
     suffix = _slug(args.suffix or uuid.uuid4().hex[:4])
     task_slug = _slug(args.task_id)
     mode = _slug(args.mode or "work")
@@ -565,12 +1252,25 @@ def _build_claim(
         "provider_tier": routing_decision["provider_tier"],
         "routing_status": routing_decision["routing_status"],
         "routing_reason": routing_decision["reason"],
+        "routing_policy_id": routing_decision["routing_policy_id"],
+        "routing_policy_reason": routing_decision["routing_policy_reason"],
+        "routing_high_tier_authorized": routing_decision[
+            "high_tier_authorized"
+        ],
+        "routing_escalation_reason": routing_decision[
+            "registered_escalation_reason"
+        ],
+        "routing_registered_triggers": list(
+            routing_decision["registered_escalation_triggers"]
+        ),
         "routing_signals": list(routing_decision["escalation_triggers"]),
         "routing_unknown_triggers": list(routing_decision["unknown_triggers"]),
+        "task_token_budget": token_budgets["task_token_budget"],
+        "claim_token_budget": token_budgets["claim_token_budget"],
         "actual_model": None,
         "actual_model_status": "unverified",
         "wip_slot": args.wip_slot,
-        "stop_condition": args.stop_condition,
+        "stop_condition": stop_condition,
         "phase": args.phase,
         "progress_pct": args.progress_pct,
         "step_index": args.step_index,
@@ -602,8 +1302,28 @@ def _build_claim(
     }
 
 
+def _claim_lease_window(args: argparse.Namespace) -> tuple[datetime, datetime]:
+    """Validate the requested lease before claim-store authority is touched."""
+
+    now = _parse_now(args.now)
+    expires_at = claim_store.expiration_after(
+        now,
+        args.lease_minutes,
+        unit="minutes",
+        field="lease_minutes",
+        minimum=1,
+    )
+    return now, expires_at
+
+
 def _validate_create_args(args: argparse.Namespace) -> list[str]:
     errors: list[str] = []
+    if args.claim_id and not claim_store.valid_claim_id(args.claim_id):
+        errors.append("claim_id must use the canonical CLAIM-* identifier syntax")
+    for field in ("handoff_path", "log_path"):
+        finding = _claim_artifact_ref_error(getattr(args, field, None), field)
+        if finding:
+            errors.append(finding)
     if args.progress_pct < 0 or args.progress_pct > 100:
         errors.append("progress_pct must be between 0 and 100")
     if args.step_total < 1:
@@ -633,12 +1353,52 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> None:
         print(f"display_name={claim.get('display_name')}")
 
 
-def _plan_assumption_findings(root: Path, task_set_id: str) -> list[str] | None:
-    """Return T2 drift findings for the taskset's recorded assumption set.
+def _structured_claim_preflight_expected(root: Path, task_id: str) -> bool:
+    """Return whether the host has adopted canonical task or unit records.
 
-    ``None`` means no snapshot is recorded for this taskset (T0 never ran);
-    an empty list means the snapshot exists and every anchor still holds.
+    Legacy lightweight callers can still create identity-only claims without
+    first materializing the full work graph. Once the selected task is bound
+    to a canonical taskset or a complete unit record, however, a direct claim
+    must honor the same T0 and readiness gates used by taskset and wave
+    dispatch.
     """
+
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    for task in tasks:
+        if task.task_id != task_id:
+            continue
+        task_set_id = str(task.task_set_id or "").strip()
+        if (
+            task_set_id
+            and task_set_id != "TASKSET-AR-UNCLASSIFIED"
+            and _canonical_taskset_statuses(root, task_set_id)
+        ):
+            return True
+
+    for _path, meta, _body in task_unit_readiness_gate.load_unit_specs(root):
+        if str(meta.get("task_id") or "").strip() != task_id:
+            continue
+        if (
+            str(meta.get("unit_id") or "").strip()
+            and str(meta.get("task_set_id") or "").strip()
+            and str(meta.get("status") or "").strip()
+        ):
+            return True
+    return False
+
+
+def _plan_assumption_findings(
+    root: Path, task_set_id: str
+) -> list[str] | None:
+    """Return legacy-compatible T2 findings for orchestration callers.
+
+    ``None`` means no snapshot is recorded. Taskset and wave dispatchers retain
+    that migration boundary; direct claims that have adopted structured work
+    use ``_strict_plan_assumption_findings`` instead.
+    """
+
     registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
     entry = next(
         (
@@ -658,49 +1418,135 @@ def _plan_assumption_findings(root: Path, task_set_id: str) -> list[str] | None:
     return findings
 
 
-def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) -> bool:
+def _strict_plan_assumption_findings(root: Path, task_set_id: str) -> list[str]:
+    """Return typed T0 registry and T2 drift findings for one taskset."""
+    registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
+    if not isinstance(registry, dict):
+        return ["registry:invalid-root"]
+    if registry.get("schema") != plan_assumption_gate.SCHEMA:
+        return [f"registry:invalid-schema:{registry.get('schema') or 'missing'}"]
+    sets = registry.get("assumption_sets")
+    if not isinstance(sets, list):
+        return ["registry:invalid-assumption-sets"]
+    matches = [
+        item
+        for item in sets
+        if isinstance(item, dict)
+        and str(item.get("taskset_id") or "").strip() == task_set_id
+    ]
+    if not matches:
+        return [f"registry:missing-taskset:{task_set_id}"]
+    if len(matches) > 1:
+        return [f"registry:duplicate-taskset:{task_set_id}"]
+    entry = matches[0]
+    anchors = entry.get("anchors")
+    if not isinstance(anchors, list):
+        return [f"registry:invalid-anchors:{task_set_id}"]
+    if not anchors:
+        return [f"registry:empty-anchors:{task_set_id}"]
+
+    findings: list[str] = []
+    for index, anchor in enumerate(anchors):
+        if not isinstance(anchor, dict):
+            findings.append(f"registry:invalid-anchor:{task_set_id}:{index}")
+            continue
+        raw_path = anchor.get("path")
+        raw_kind = anchor.get("kind")
+        path = raw_path.strip() if isinstance(raw_path, str) else ""
+        kind = raw_kind.strip() if isinstance(raw_kind, str) else ""
+        path_value = Path(path) if path else None
+        invalid_path = (
+            path_value is None
+            or path_value.is_absolute()
+            or ".." in path_value.parts
+        )
+        digest = anchor.get("value")
+        invalid_digest = (
+            kind == "sha256"
+            and (
+                not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            )
+        )
+        if invalid_path or kind not in {"sha256", "absent"} or invalid_digest:
+            findings.append(f"registry:invalid-anchor:{task_set_id}:{index}")
+            continue
+        finding = plan_assumption_gate._check_anchor(root, anchor)  # noqa: SLF001
+        if finding is not None:
+            findings.append(f"{task_set_id}: {finding}")
+    return findings
+
+
+def _plan_check_refusal(
+    root: Path,
+    task_set_id: str,
+    *,
+    skip_plan_check: bool,
+    require_snapshot: bool = False,
+    emit_success: bool = True,
+) -> bool:
     """T2 dispatch gate: verify the taskset's recorded plan assumptions.
 
     Returns True when claim creation must be refused. All output goes to
     stderr so --json stdout stays machine-readable.
     """
     try:
-        findings = _plan_assumption_findings(root, task_set_id)
-    except (OSError, ValueError) as exc:
+        findings = (
+            _strict_plan_assumption_findings(root, task_set_id)
+            if require_snapshot
+            else _plan_assumption_findings(root, task_set_id)
+        )
+    except (KeyError, OSError, TypeError, ValueError) as exc:
         findings = [f"registry-unreadable:{plan_assumption_gate.REGISTRY_REL}:{exc}"]
     if findings is None:
-        print(
-            f"note: no plan-assumption snapshot recorded for {task_set_id} "
-            "(T0 skipped at registration); T2 drift check has nothing to verify. "
-            "Record one with: python scripts/plan_assumption_gate.py record "
-            f"--taskset {task_set_id} --design-record <review> --anchor <path>",
-            file=sys.stderr,
-        )
+        if emit_success:
+            print(
+                f"note: no plan-assumption snapshot recorded for {task_set_id} "
+                "(T0 skipped at registration); T2 drift check has nothing to verify. "
+                "Record one with: python scripts/plan_assumption_gate.py record "
+                f"--taskset {task_set_id} --design-record <review> --anchor <path>",
+                file=sys.stderr,
+            )
         return False
     if not findings:
-        print(f"plan-assumption-gate: pass ({task_set_id})", file=sys.stderr)
+        if emit_success:
+            print(f"plan-assumption-gate: pass ({task_set_id})", file=sys.stderr)
         return False
-    if skip_plan_check:
+    hard_registry_findings = [
+        finding
+        for finding in findings
+        if finding.startswith(("registry:", "registry-unreadable:"))
+    ]
+    if skip_plan_check and not hard_registry_findings:
+        if emit_success:
+            print(
+                "WARNING: --skip-plan-check used: creating claim for "
+                f"{task_set_id} DESPITE drifted plan assumptions "
+                "(T2 dispatch gate bypassed):",
+                file=sys.stderr,
+            )
+            for finding in findings:
+                print(f"  - {finding}", file=sys.stderr)
+            print(
+                "This is a transitional escape; run a replan review and re-record "
+                "anchors as soon as possible.",
+                file=sys.stderr,
+            )
+        return False
+    if hard_registry_findings:
         print(
-            "WARNING: --skip-plan-check used: creating claim for "
-            f"{task_set_id} DESPITE drifted plan assumptions (T2 dispatch gate bypassed):",
+            f"claim preflight refused for {task_set_id}: missing or malformed "
+            "plan assumptions (T0/T2 dispatch gate)",
             file=sys.stderr,
         )
-        for finding in findings:
-            print(f"  - {finding}", file=sys.stderr)
+    else:
         print(
-            "This is a transitional escape; run a replan review and re-record "
-            "anchors as soon as possible.",
+            f"plan assumption drift detected for {task_set_id}: "
+            "claim creation refused (T2 dispatch gate)",
             file=sys.stderr,
         )
-        return False
-    print(
-        f"plan assumption drift detected for {task_set_id}: "
-        "claim creation refused (T2 dispatch gate)",
-        file=sys.stderr,
-    )
     for finding in findings:
-        print(f"- {finding}", file=sys.stderr)
+        print(f"claim-preflight:t0:{finding}", file=sys.stderr)
     print(
         "action=drifted plan assumptions; run a replan review for the affected "
         "taskset, then re-record anchors (python scripts/plan_assumption_gate.py "
@@ -709,6 +1555,164 @@ def _plan_check_refusal(root: Path, task_set_id: str, *, skip_plan_check: bool) 
         file=sys.stderr,
     )
     return True
+
+
+def _canonical_taskset_statuses(root: Path, task_set_id: str) -> list[str]:
+    tasksets_dir = root / "agents" / "project" / "initiatives"
+    if not tasksets_dir.is_dir():
+        return []
+    statuses: list[str] = []
+    for path in sorted(tasksets_dir.glob("TASKSET-*.md")):
+        meta, _body = backlog_board.parse_frontmatter(
+            path.read_text(encoding="utf-8")
+        )
+        if str(meta.get("work_id") or "").strip() == task_set_id:
+            statuses.append(str(meta.get("status") or "").strip())
+    return statuses
+
+
+def _effective_taskset_id(
+    root: Path,
+    *,
+    task_id: str,
+    requested_taskset_id: str,
+) -> tuple[str, list[str]]:
+    """Resolve a missing taskset from the task and reject identity drift."""
+    requested = str(requested_taskset_id or "").strip()
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    matches = [task for task in tasks if task.task_id == task_id]
+    if len(matches) != 1:
+        return requested, []
+    actual = str(matches[0].task_set_id or "").strip()
+    if requested and actual != requested:
+        return requested, [
+            f"task-taskset-mismatch:{actual or 'missing'}:{requested}"
+        ]
+    return requested or actual, []
+
+
+def _claim_readiness_findings(
+    root: Path,
+    *,
+    task_id: str,
+    task_set_id: str,
+    unit_id: str,
+    unit_spec: str,
+) -> list[str]:
+    """Return pre-persistence readiness findings for every claim entry point."""
+    findings: list[str] = []
+    tasks = backlog_board.load_tasks(
+        root / "agents" / "lead_engineer" / "tasks"
+    )
+    task_matches = [task for task in tasks if task.task_id == task_id]
+    if len(task_matches) > 1:
+        findings.append(f"task:duplicate-id:{task_id}")
+    elif not task_matches:
+        findings.append(f"task:not-found:{task_id}")
+    else:
+        task_status = str(task_matches[0].status or "").strip()
+        if status_alias.is_blocked(task_status):
+            findings.append(f"task:blocked-status:{task_status}")
+        actual_taskset = str(task_matches[0].task_set_id or "").strip()
+        if task_set_id and actual_taskset != task_set_id:
+            findings.append(
+                f"task-taskset-mismatch:{actual_taskset or 'missing'}:"
+                f"{task_set_id}"
+            )
+
+    taskset_statuses = (
+        _canonical_taskset_statuses(root, task_set_id) if task_set_id else []
+    )
+    if len(taskset_statuses) > 1:
+        findings.append(f"taskset:duplicate-id:{task_set_id}")
+    elif taskset_statuses and status_alias.is_blocked(taskset_statuses[0]):
+        findings.append(f"taskset:blocked-status:{taskset_statuses[0]}")
+
+    units = task_unit_readiness_gate.load_unit_specs(root)
+    task_units = [
+        unit
+        for unit in units
+        if str(unit[1].get("task_id") or "").strip() == task_id
+    ]
+    if not unit_id and not unit_spec and not task_units:
+        return list(dict.fromkeys(findings))
+    if not task_set_id:
+        findings.append("unit:missing-taskset-id")
+
+    spec_matches: list[tuple[Path, dict[str, Any], str]] = []
+    if unit_spec:
+        spec_path = Path(unit_spec)
+        if not spec_path.is_absolute():
+            spec_path = root / spec_path
+        resolved_spec = spec_path.resolve()
+        spec_matches = [
+            unit for unit in units if unit[0].resolve() == resolved_spec
+        ]
+        if not spec_matches:
+            findings.append(f"unit:spec-not-registered:{unit_spec}")
+        elif len(spec_matches) > 1:
+            findings.append(f"unit:duplicate-spec:{unit_spec}")
+        else:
+            spec_meta = spec_matches[0][1]
+            spec_task = str(spec_meta.get("task_id") or "").strip()
+            spec_unit = str(spec_meta.get("unit_id") or "").strip()
+            if spec_task != task_id:
+                findings.append(
+                    f"unit-spec-task-mismatch:{spec_task or 'missing'}:{task_id}"
+                )
+            if unit_id and spec_unit != unit_id:
+                findings.append(
+                    f"unit-spec-id-mismatch:{spec_unit or 'missing'}:{unit_id}"
+                )
+
+    readiness_unit_id = unit_id
+    if not readiness_unit_id and len(spec_matches) == 1:
+        readiness_unit_id = str(spec_matches[0][1].get("unit_id") or "").strip()
+    gate_findings = task_unit_readiness_gate.check_root(
+        root,
+        task_id=task_id,
+        unit_id=readiness_unit_id,
+        require_ready=True,
+    )
+    selected_for_readiness = task_units
+    if readiness_unit_id:
+        selected_for_readiness = [
+            unit
+            for unit in task_units
+            if str(unit[1].get("unit_id") or "").strip() == readiness_unit_id
+        ]
+    localized_ready_statuses = {
+        str(meta.get("status") or "").strip()
+        for _path, meta, _body in selected_for_readiness
+        if status_alias.normalize_status(meta.get("status"))
+        in task_unit_readiness_gate.READY_STATUSES
+    }
+    for finding in gate_findings:
+        if any(
+            finding.endswith(f"unit:not-worker-ready:{ready_status}")
+            for ready_status in localized_ready_statuses
+        ):
+            continue
+        findings.append(finding)
+
+    selected = [
+        meta
+        for _path, meta, _body in units
+        if (
+            not readiness_unit_id
+            or str(meta.get("unit_id") or "").strip() == readiness_unit_id
+        )
+        and str(meta.get("task_id") or "").strip() == task_id
+    ]
+    for meta in selected:
+        unit_taskset = str(meta.get("task_set_id") or "").strip()
+        if task_set_id and unit_taskset != task_set_id:
+            findings.append(
+                f"unit-taskset-mismatch:{unit_taskset}:{task_set_id}"
+            )
+    return list(dict.fromkeys(findings))
 
 
 def _security_service_refusal(
@@ -1078,29 +2082,65 @@ def _missing_security_service_gate_refusal(root: Path) -> bool:
     return True
 
 
-def cmd_create(args: argparse.Namespace) -> int:
+def _claim_store_refusal(
+    operation: str,
+    inspection: Any,
+) -> int:
+    detail = str(inspection.finding or "claim-store state is not writable")
+    detail = " ".join(detail.split())[:256]
+    print(
+        f"claim-store {operation} refused ({inspection.state}): {detail}",
+        file=sys.stderr,
+    )
+    return 1
+
+
+def _prepare_create(
+    args: argparse.Namespace,
+    *,
+    emit_success: bool = True,
+) -> int | _CreatePreparation:
+    """Resolve every non-claim-store create gate without mutating the host."""
+
     root = args.root.resolve()
     errors = _validate_create_args(args)
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    records = _read_claims(root)
-    for path, payload in records:
-        if not _is_active(payload):
-            continue
-        if str(payload.get("task_id") or "") == args.task_id:
-            print(
-                f"task already has an active claim: {args.task_id} ({_rel(root, path)})",
-                file=sys.stderr,
-            )
-            return 1
 
-    task_set_id = str(args.task_set_id or "").strip()
+    task_set_id, binding_findings = _effective_taskset_id(
+        root,
+        task_id=args.task_id,
+        requested_taskset_id=str(args.task_set_id or "").strip(),
+    )
+    if binding_findings:
+        for finding in binding_findings:
+            print(f"claim-preflight:readiness:{finding}", file=sys.stderr)
+        return 1
+    strict_claim_preflight = _structured_claim_preflight_expected(
+        root, args.task_id
+    )
     if task_set_id and _plan_check_refusal(
-        root, task_set_id, skip_plan_check=args.skip_plan_check
+        root,
+        task_set_id,
+        skip_plan_check=args.skip_plan_check,
+        require_snapshot=strict_claim_preflight,
+        emit_success=emit_success,
     ):
         return 1
+    if strict_claim_preflight:
+        readiness_findings = _claim_readiness_findings(
+            root,
+            task_id=args.task_id,
+            task_set_id=task_set_id,
+            unit_id=str(args.unit_id or "").strip(),
+            unit_spec=str(args.unit_spec or "").strip(),
+        )
+        if readiness_findings:
+            for finding in readiness_findings:
+                print(f"claim-preflight:readiness:{finding}", file=sys.stderr)
+            return 1
 
     explicit_targets = _normalize_target_files(tuple(args.target_file or ()))
     if _security_service_refusal(
@@ -1120,15 +2160,145 @@ def cmd_create(args: argparse.Namespace) -> int:
         return 1
     escalation_triggers = _resolve_escalation_triggers(root, args)
     target_files = _resolve_target_files(root, args)
+    stop_condition = _resolve_stop_condition(root, args)
+    try:
+        token_budgets = _resolve_token_budgets(root, args)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    return _CreatePreparation(
+        task_set_id=task_set_id,
+        strict_claim_preflight=strict_claim_preflight,
+        target_files=tuple(target_files),
+        stop_condition=stop_condition,
+        escalation_triggers=tuple(escalation_triggers),
+        routing_decision=_resolve_claim_routing(
+            root, args, escalation_triggers
+        ),
+        token_budgets=token_budgets,
+        defect_signatures=tuple(defect_signatures),
+        knowledge_matches=tuple(knowledge_matches),
+    )
+
+
+def cmd_create(args: argparse.Namespace) -> int:
+    root = args.root.resolve()
+    try:
+        claim_now, claim_expires_at = _claim_lease_window(args)
+        inspection = claim_store.inspect_store(root)
+        if inspection.state not in {"pristine", "initialized"}:
+            return _claim_store_refusal("create", inspection)
+        records = _read_claims(root)
+        active_path = _active_task_claim_path(records, args.task_id)
+        if active_path is not None:
+            print(
+                f"task already has an active claim: {args.task_id} "
+                f"({_rel(root, active_path)})",
+                file=sys.stderr,
+            )
+            return 1
+        preflight = _prepare_create(args, emit_success=False)
+        if isinstance(preflight, int):
+            return preflight
+        with claim_store.store_lock(root):
+            inspection = claim_store.inspect_store(root)
+            if inspection.state not in {"pristine", "initialized"}:
+                return _claim_store_refusal("create", inspection)
+            preparation = _prepare_create(args)
+            if isinstance(preparation, int):
+                return preparation
+            if (
+                preflight.task_set_id != preparation.task_set_id
+                or preflight.strict_claim_preflight
+                != preparation.strict_claim_preflight
+            ):
+                print(
+                    "claim-preflight:readiness:authority-changed-while-locking; "
+                    "retry claim creation",
+                    file=sys.stderr,
+                )
+                return 1
+            args.task_set_id = preparation.task_set_id
+            outcome = _cmd_create_locked(
+                args,
+                store_inspection=inspection,
+                preparation=preparation,
+                now=claim_now,
+                expires_at=claim_expires_at,
+            )
+    except (
+        claim_store.ClaimStoreError,
+        TimeoutError,
+        OSError,
+        RuntimeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store unavailable"
+        print(f"claim-store create refused: {detail}", file=sys.stderr)
+        return 1
+    if isinstance(outcome, int):
+        return outcome
+    claim, claim_dir, claim_path, claim_commit_authorized = outcome
+    return _complete_create(
+        args,
+        claim=claim,
+        claim_dir=claim_dir,
+        claim_path=claim_path,
+        claim_commit_authorized=claim_commit_authorized,
+    )
+
+
+def _cmd_create_locked(
+    args: argparse.Namespace,
+    *,
+    store_inspection: Any,
+    preparation: _CreatePreparation,
+    now: datetime,
+    expires_at: datetime,
+) -> int | tuple[dict[str, Any], Path, Path, bool]:
+    root = args.root.resolve()
+    records = _read_claims(root)
+    active_path = _active_task_claim_path(records, args.task_id)
+    if active_path is not None:
+        print(
+            f"task already has an active claim: {args.task_id} "
+            f"({_rel(root, active_path)})",
+            file=sys.stderr,
+        )
+        return 1
+    claim_commit_authorized = _claim_autocommit_enabled(
+        cli_opt_in=args.commit_claim_artifacts
+    )
     claim = _build_claim(
         args,
         records,
-        target_files=target_files,
-        escalation_triggers=escalation_triggers,
-        routing_decision=_resolve_claim_routing(root, args, escalation_triggers),
-        defect_signatures=defect_signatures,
-        knowledge_matches=knowledge_matches,
+        now=now,
+        expires_at=expires_at,
+        target_files=list(preparation.target_files),
+        stop_condition=preparation.stop_condition,
+        escalation_triggers=list(preparation.escalation_triggers),
+        routing_decision=preparation.routing_decision,
+        token_budgets=preparation.token_budgets,
+        defect_signatures=list(preparation.defect_signatures),
+        knowledge_matches=list(preparation.knowledge_matches),
     )
+    claim["mutation_revision"] = 0
+    claim["scope_binding"] = _binding_for_claim(
+        claim,
+        bound_at=str(claim["claimed_at"]),
+    )
+    claim["persistence"] = {
+        "mode": "scm_commit" if claim_commit_authorized else "working_tree",
+        "scm_commit_authorized": claim_commit_authorized,
+    }
+    if not claim_store.valid_claim_id(claim.get("claim_id")):
+        print("claim_id must use the canonical CLAIM-* identifier syntax", file=sys.stderr)
+        return 1
+    for field in ("handoff_path", "log_path"):
+        finding = _claim_artifact_ref_error(claim.get(field), field)
+        if finding:
+            print(finding, file=sys.stderr)
+            return 1
     creation_errors = _claim_creation_errors(root, claim, records)
     if creation_errors:
         for error in creation_errors:
@@ -1142,118 +2312,270 @@ def cmd_create(args: argparse.Namespace) -> int:
             print(error, file=sys.stderr)
         return 1
     print(
-        f"compound knowledge lookup: {len(knowledge_matches)} match(es) before claim persistence",
+        "compound knowledge lookup: "
+        f"{len(preparation.knowledge_matches)} match(es) before claim persistence",
         file=sys.stderr,
     )
-    for match in knowledge_matches:
+    for match in preparation.knowledge_matches:
         print(
             f"- {match.get('id')} {match.get('path')}: {match.get('title', '')}",
             file=sys.stderr,
         )
-    claim_dir = _claim_dir(root)
-    claim_dir.mkdir(parents=True, exist_ok=True)
-    claim_path = claim_dir / f"{claim['claim_id']}.json"
-    if claim_path.exists():
-        print(f"claim file already exists: {_rel(root, claim_path)}", file=sys.stderr)
+    if not claim_store.verify_snapshot(root, store_inspection.snapshot):
+        print(
+            "claim-store create refused: authority changed before persistence",
+            file=sys.stderr,
+        )
         return 1
+    claim_dir = _claim_dir(root)
+    claim_path = claim_dir / f"{claim['claim_id']}.json"
+    artifact_paths = [
+        (claim_path, "claim file"),
+        (root / str(claim["handoff_path"]), "handoff_path"),
+        (root / str(claim["log_path"]), "log_path"),
+    ]
+    collisions = [
+        f"{label} already exists: {_rel(root, candidate)}"
+        for candidate, label in artifact_paths
+        if _entry_exists(candidate, label)
+    ]
+    if collisions:
+        for collision in collisions:
+            print(collision, file=sys.stderr)
+        return 1
+    handoff_path = root / str(claim["handoff_path"])
+    log_path = root / str(claim["log_path"])
+    handoff_text = "\n".join(
+        [
+            f"# Handoff: {claim['display_name']}",
+            "",
+            f"- claim_id: {claim['claim_id']}",
+            f"- task_id: {claim['task_id']}",
+            f"- worktree_path: {claim['worktree_path']}",
+            f"- branch: {claim['branch']}",
+            f"- task_set_id: {claim['task_set_id']}",
+            f"- project_id: {claim['project_id']}",
+            f"- unit_id: {claim['unit_id']}",
+            f"- unit_spec: {claim['unit_spec']}",
+            f"- requested_model_tier: {claim['requested_model_tier']}",
+            f"- selected_model_tier: {claim['selected_model_tier']}",
+            f"- model_tier: {claim['model_tier']}",
+            f"- routing_status: {claim['routing_status']}",
+            f"- wip_slot: {claim['wip_slot']}",
+            f"- stop_condition: {claim['stop_condition']}",
+            f"- phase: {claim['phase']}",
+            f"- step: {claim['step_index']}/{claim['step_total']}",
+            f"- progress_pct: {claim['progress_pct']}",
+            f"- status_text: {claim['status_text']}",
+            "- status: claimed",
+            "",
+        ]
+    )
+    log_text = "\n".join(
+        [
+            f"# Claim Log: {claim['display_name']}",
+            "",
+            f"- claimed_at: {claim['claimed_at']}",
+            f"- agent_instance_id: {claim['agent_instance_id']}",
+            f"- callsite_id: {claim['callsite_id']}",
+            f"- task_set_id: {claim['task_set_id']}",
+            f"- project_id: {claim['project_id']}",
+            f"- unit_id: {claim['unit_id']}",
+            f"- unit_spec: {claim['unit_spec']}",
+            f"- requested_model_tier: {claim['requested_model_tier']}",
+            f"- selected_model_tier: {claim['selected_model_tier']}",
+            f"- model_tier: {claim['model_tier']}",
+            f"- routing_status: {claim['routing_status']}",
+            f"- wip_slot: {claim['wip_slot']}",
+            f"- stop_condition: {claim['stop_condition']}",
+            f"- status_text: {claim['status_text']}",
+            "",
+        ]
+    )
+    claim_bytes = (
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
+    intended_publications = (
+        (handoff_path, handoff_text.encode("utf-8")),
+        (log_path, log_text.encode("utf-8")),
+        (claim_path, claim_bytes),
+    )
+    publications: list[_CreatedPublication] = []
+    missing_directories = tuple(_missing_directories(claim_dir, root))
+    try:
+        handoff_identity = _ensure_text_file(handoff_path, handoff_text)
+        publications.append(
+            _created_publication(
+                *intended_publications[0],
+                handoff_identity,
+            )
+        )
+        log_identity = _ensure_text_file(log_path, log_text)
+        publications.append(
+            _created_publication(
+                *intended_publications[1],
+                log_identity,
+            )
+        )
+        claim_identity = atomic_io.publish_json_owned_atomic(claim_path, claim)
+        publications.append(
+            _created_publication(
+                *intended_publications[2],
+                claim_identity,
+            )
+        )
+        if store_inspection.state == "pristine":
+            claim_store.initialize_store(
+                root,
+                witness_claim_id=str(claim["claim_id"]),
+            )
+    except Exception as exc:
+        rollback_findings = _rollback_claim_creation(
+            root,
+            claim_id=str(claim["claim_id"]),
+            publications=tuple(publications),
+            pristine_store=store_inspection.state == "pristine",
+            missing_directories=missing_directories,
+        )
+        if rollback_findings:
+            raise RuntimeError(
+                "claim creation rollback incomplete: " + "; ".join(rollback_findings)
+            ) from exc
+        raise
+    return claim, claim_dir, claim_path, claim_commit_authorized
 
-    _ensure_text_file(
-        root / str(claim["handoff_path"]),
-        "\n".join(
-            [
-                f"# Handoff: {claim['display_name']}",
-                "",
-                f"- claim_id: {claim['claim_id']}",
-                f"- task_id: {claim['task_id']}",
-                f"- worktree_path: {claim['worktree_path']}",
-                f"- branch: {claim['branch']}",
-                f"- task_set_id: {claim['task_set_id']}",
-                f"- project_id: {claim['project_id']}",
-                f"- unit_id: {claim['unit_id']}",
-                f"- unit_spec: {claim['unit_spec']}",
-                f"- requested_model_tier: {claim['requested_model_tier']}",
-                f"- selected_model_tier: {claim['selected_model_tier']}",
-                f"- model_tier: {claim['model_tier']}",
-                f"- routing_status: {claim['routing_status']}",
-                f"- wip_slot: {claim['wip_slot']}",
-                f"- stop_condition: {claim['stop_condition']}",
-                f"- phase: {claim['phase']}",
-                f"- step: {claim['step_index']}/{claim['step_total']}",
-                f"- progress_pct: {claim['progress_pct']}",
-                f"- status_text: {claim['status_text']}",
-                "- status: claimed",
-                "",
-            ]
-        ),
-    )
-    _ensure_text_file(
-        root / str(claim["log_path"]),
-        "\n".join(
-            [
-                f"# Claim Log: {claim['display_name']}",
-                "",
-                f"- claimed_at: {claim['claimed_at']}",
-                f"- agent_instance_id: {claim['agent_instance_id']}",
-                f"- callsite_id: {claim['callsite_id']}",
-                f"- task_set_id: {claim['task_set_id']}",
-                f"- project_id: {claim['project_id']}",
-                f"- unit_id: {claim['unit_id']}",
-                f"- unit_spec: {claim['unit_spec']}",
-                f"- requested_model_tier: {claim['requested_model_tier']}",
-                f"- selected_model_tier: {claim['selected_model_tier']}",
-                f"- model_tier: {claim['model_tier']}",
-                f"- routing_status: {claim['routing_status']}",
-                f"- wip_slot: {claim['wip_slot']}",
-                f"- stop_condition: {claim['stop_condition']}",
-                f"- status_text: {claim['status_text']}",
-                "",
-            ]
-        ),
+
+def _add_post_commit_warning(
+    warnings: list[dict[str, str]],
+    *,
+    stage: str,
+    error: BaseException,
+) -> None:
+    reason = " ".join(str(error).split())[:256] or type(error).__name__
+    warnings.append({"stage": stage, "reason": reason})
+    print(
+        f"warning: claim authority persisted but {stage} failed: {reason}",
+        file=sys.stderr,
     )
 
-    atomic_io.write_json_atomic(claim_path, claim)
-    record_claim_instance(root, claim, claim_path=claim_path)
-    append_event(
-        root,
-        {
-            "event": "claim_created",
-            "actor": claim["agent_instance_id"],
-            "actor_role": claim["agent_role"],
-            "agent_instance_id": claim["agent_instance_id"],
-            "display_name": claim["display_name"],
-            "callsite_id": claim["callsite_id"],
-            "task_id": claim["task_id"],
-            "task_set_id": claim["task_set_id"],
-            "claim_id": claim["claim_id"],
-            "worktree_path": claim["worktree_path"],
-            "message": claim["status_text"],
-            "ts": claim["claimed_at"],
-        },
-    )
+
+def _complete_create(
+    args: argparse.Namespace,
+    *,
+    claim: dict[str, Any],
+    claim_dir: Path,
+    claim_path: Path,
+    claim_commit_authorized: bool,
+) -> int:
+    """Run non-authoritative effects after the claim-store lock is released."""
+
+    root = args.root.resolve()
+    post_commit_warnings: list[dict[str, str]] = []
+    try:
+        record_claim_instance(root, claim, claim_path=claim_path)
+    except Exception as exc:  # noqa: BLE001 - claim authority is already durable
+        _add_post_commit_warning(
+            post_commit_warnings,
+            stage="agent-instance-registry",
+            error=exc,
+        )
+    try:
+        append_event(
+            root,
+            {
+                "event": "claim_created",
+                "actor": claim["agent_instance_id"],
+                "actor_role": claim["agent_role"],
+                "agent_instance_id": claim["agent_instance_id"],
+                "display_name": claim["display_name"],
+                "callsite_id": claim["callsite_id"],
+                "task_id": claim["task_id"],
+                "task_set_id": claim["task_set_id"],
+                "claim_id": claim["claim_id"],
+                "worktree_path": claim["worktree_path"],
+                "message": claim["status_text"],
+                "ts": claim["claimed_at"],
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 - claim authority is already durable
+        _add_post_commit_warning(
+            post_commit_warnings,
+            stage="claim-created-event",
+            error=exc,
+        )
     # Live A2A traffic: a real claim create opens the request->review->decision->
     # correction lifecycle on the runtime message stream. Additive observability
     # only — it RECORDS, it never changes who gets the claim, and a failure here
     # must never break claim creation (the emitter swallows its own errors).
     if a2a_claim_emitter is not None:
-        a2a_claim_emitter.emit_claim_request(claim, root=root)
+        try:
+            a2a_claim_emitter.emit_claim_request(claim, root=root)
+        except Exception as exc:  # noqa: BLE001 - additive observability only
+            _add_post_commit_warning(
+                post_commit_warnings,
+                stage="claim-created-a2a",
+                error=exc,
+            )
     # Crash-safety guard: commit the claim immediately so a sibling session's
     # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
     # (incident 2026-06-12). Best-effort — never fails claim creation.
-    if _claim_autocommit_enabled():
-        guard = claim_guard.commit_claim_artifacts(
-            root,
-            claim_path,
-            extra_paths=[root / str(claim["handoff_path"]), root / str(claim["log_path"])],
-            claim_id=str(claim["claim_id"]),
-        )
-        if not guard.get("ok") and guard.get("reason") != "not-a-git-repo":
-            print(
-                f"warning: claim {claim['claim_id']} was not committed "
-                f"({guard.get('reason')}); an untracked claim can be lost by a "
-                "concurrent 'git reset --hard'/'git clean -fd'",
-                file=sys.stderr,
+    persistence_result: dict[str, Any] | None = None
+    if claim_commit_authorized:
+        try:
+            persistence_result = claim_guard.commit_claim_artifacts(
+                root,
+                claim_path,
+                extra_paths=[
+                    claim_dir / ".claim-store",
+                    root / str(claim["handoff_path"]),
+                    root / str(claim["log_path"]),
+                ],
+                claim_id=str(claim["claim_id"]),
             )
-    _emit({"status": "created", "path": _rel(root, claim_path), "claim": claim}, as_json=args.json)
+        except Exception as exc:  # noqa: BLE001 - claim authority is durable
+            _add_post_commit_warning(
+                post_commit_warnings,
+                stage="claim-artifact-scm-persistence",
+                error=exc,
+            )
+        if (
+            persistence_result is not None
+            and not persistence_result.get("ok")
+            and persistence_result.get("reason") != "not-a-git-repo"
+        ):
+            if persistence_result.get("committed"):
+                print(
+                    f"error: claim {claim['claim_id']} was published but could "
+                    "not be verified "
+                    f"({persistence_result.get('reason')}); DO NOT RETRY this "
+                    "claim commit and stop for operator recovery",
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    f"warning: claim {claim['claim_id']} was not committed "
+                    f"({persistence_result.get('reason')}); an untracked claim "
+                    "can be lost by a concurrent 'git reset --hard'/'git clean -fd'",
+                    file=sys.stderr,
+                )
+    response = {
+        "status": "created",
+        "path": _rel(root, claim_path),
+        "claim": claim,
+    }
+    if post_commit_warnings:
+        response["post_commit_warnings"] = post_commit_warnings
+    if persistence_result is not None:
+        response["persistence_result"] = persistence_result
+    if (
+        persistence_result is not None
+        and not persistence_result.get("ok")
+        and persistence_result.get("committed")
+    ):
+        response["status"] = "created_published_unverified"
+        _emit(response, as_json=args.json)
+        return 1
+    _emit(response, as_json=args.json)
     return 0
 
 
@@ -1264,35 +2586,379 @@ def _find_claim(root: Path, claim_id: str) -> tuple[Path, dict[str, Any]] | None
     return None
 
 
-def cmd_projection(args: argparse.Namespace) -> int:
-    """Emit the deterministic active-work projection required after dispatch.
+def _find_claim_in_canonical_snapshot(
+    root: Path,
+    claim_id: str,
+) -> tuple[Path, dict[str, Any]] | None:
+    """Resolve one claim from the locked, verified store snapshot."""
 
-    The dispatcher remains claim-only: generated board and canonical work-item
-    writes belong to the serial projection owner.  This command prevents the
-    former scalar-ID workaround by giving that owner the exact task/unit refs
-    and complete ``current_agents`` record to project.
+    for payload in claim_store.read_claims_snapshot(root):
+        if str(payload.get("claim_id") or "") != claim_id:
+            continue
+        path = _claim_dir(root) / f"{claim_id}.json"
+        return path, dict(payload)
+    return None
+
+
+def _parse_aware_timestamp(value: object, label: str) -> datetime:
+    text = str(value or "").strip()
+    if not text:
+        raise ValueError(f"{label} timestamp is missing")
+    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{label} timestamp is malformed") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError(f"{label} timestamp must be timezone-aware")
+    return parsed
+
+
+def _mutation_now(value: str | None) -> datetime:
+    """Resolve the mutation clock, clamped so it can never run ahead of reality.
+
+    ``--now`` is a determinism seam for tests, not an authority seam. Unclamped,
+    a caller can pass a ``now`` just short of the deadline and each heartbeat
+    advances the lease by a full window - unbounded, in constant real time -
+    while every consumer believes the fabricated deadline, because nothing
+    compares a persisted lease field to the wall clock. That is precisely the
+    "worker outlives its lease with no surface noticing" failure this task
+    exists to close. ``_recovery_now`` already applies this rule.
     """
-    root = args.root.resolve()
-    found = _find_claim(root, args.claim_id)
-    if found is None:
-        print(f"claim not found: {args.claim_id}", file=sys.stderr)
-        return 1
-    path, claim = found
+
+    wall = datetime.now(timezone.utc).astimezone()
+    if value is None:
+        return wall
+    return min(_parse_aware_timestamp(value, "now"), wall)
+
+
+def _claim_temporal_fields(
+    claim: dict[str, Any],
+) -> tuple[datetime, datetime]:
+    lease = claim.get("lease")
+    if not isinstance(lease, dict):
+        raise ValueError("claim lease timestamps are missing")
+    heartbeat = _parse_aware_timestamp(
+        claim.get("last_heartbeat"),
+        "last_heartbeat",
+    )
+    nested_heartbeat = _parse_aware_timestamp(
+        lease.get("heartbeat_at"),
+        "lease heartbeat",
+    )
+    if heartbeat != nested_heartbeat:
+        raise ValueError("claim heartbeat timestamp copies do not match")
+    expires = _parse_aware_timestamp(claim.get("expires_at"), "expires_at")
+    nested_expires = _parse_aware_timestamp(
+        lease.get("expires_at"),
+        "lease expires_at",
+    )
+    if expires != nested_expires:
+        raise ValueError("claim expires timestamp copies do not match")
+    return heartbeat, expires
+
+
+def _validate_progress_update(args: argparse.Namespace) -> dict[str, Any] | None:
+    values = {field: getattr(args, field, None) for field in PROGRESS_FIELDS}
+    present = [value is not None for value in values.values()]
+    if any(present) and not all(present):
+        raise ValueError(
+            "progress update requires phase, progress_pct, step_index, "
+            "step_total, and status_text together"
+        )
+    if not any(present):
+        return None
+    phase = str(values["phase"] or "").strip()
+    status_text = str(values["status_text"] or "").strip()
+    progress_pct = values["progress_pct"]
+    step_index = values["step_index"]
+    step_total = values["step_total"]
+    if not phase or not status_text:
+        raise ValueError("progress phase and status_text must be non-empty")
+    if type(progress_pct) is not int or not 0 <= progress_pct <= 100:
+        raise ValueError("progress_pct must be between 0 and 100")
+    if type(step_total) is not int or step_total < 1:
+        raise ValueError("step_total must be at least 1")
+    if type(step_index) is not int or not 1 <= step_index <= step_total:
+        raise ValueError("step_index must be between 1 and step_total")
+    if phase.lower() in COMPLETION_PHASES and (
+        step_index != step_total or progress_pct != 100
+    ):
+        raise ValueError(
+            "completion phase requires final step and 100 percent progress"
+        )
+    return {
+        "phase": phase,
+        "progress_pct": progress_pct,
+        "step_index": step_index,
+        "step_total": step_total,
+        "status_text": status_text,
+    }
+
+
+def _validate_mutation_authority(
+    root: Path,
+    claim: dict[str, Any],
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    now: datetime,
+) -> tuple[datetime, datetime, int]:
     if not _is_active(claim):
-        print(f"projection requires an active worker claim: {args.claim_id}", file=sys.stderr)
-        return 1
-    if _is_explicit_overlay(claim):
-        print(f"projection does not apply to overlay claim: {args.claim_id}", file=sys.stderr)
-        return 1
+        raise ValueError("claim mutation requires an active claim")
+    if _is_explicit_overlay(claim) and operation != "heartbeat":
+        raise ValueError("claim scope renewal does not apply to an overlay claim")
+    if str(claim.get("agent_instance_id") or "") != args.agent_instance_id:
+        raise ValueError("claim owner does not match agent_instance_id")
+    if str(claim.get("callsite_id") or "") != args.callsite_id:
+        raise ValueError("claim callsite does not match callsite_id")
+    revision = claim.get("mutation_revision")
+    if type(revision) is not int or revision < 0:
+        raise ValueError("claim mutation revision is invalid")
+    if revision != args.expected_revision:
+        raise ValueError(
+            f"claim revision mismatch: expected {args.expected_revision}, "
+            f"observed {revision}"
+        )
+    heartbeat, expires = _claim_temporal_fields(claim)
+    liveness = claim_store.classify_claim_liveness(claim, now=now)
+    if liveness.state == "expired":
+        raise ValueError("claim lease is expired")
+    if liveness.state != "live":
+        raise ValueError(
+            f"claim lease is indeterminate: {liveness.reason}"
+        )
+    if now <= heartbeat:
+        raise ValueError("heartbeat timestamp must be strictly increasing")
+    # Every scope-bearing mutation revalidates the persisted binding, not just
+    # renew. target_files is the enforced footprint - _footprint_conflict_errors
+    # reads it to refuse sibling creates and footprint_conflict_gate blocks
+    # writes outside it - so an out-of-band edit followed by a heartbeat would
+    # launder a scope broadening past the replan bar and keep re-authorizing it.
+    #
+    # Unconditional. There is no exemption and therefore no predicate to
+    # attack: every such field lives in the same file whose integrity is in
+    # question. Overlays are bound at birth in role_routing.
+    persisted = _persisted_scope_binding(claim)
+    # Internal consistency is not authority. The binding is an unkeyed digest
+    # over the claim's own fields, so widening target_files and recomputing the
+    # binding yields a self-consistent claim. renew re-derives scope from the
+    # unit spec and refuses on drift; heartbeat did not, and heartbeat is the
+    # command that keeps a claim alive indefinitely. Removing that asymmetry is
+    # the fix - not another predicate.
+    #
+    # Consequence, accepted deliberately: editing a unit's target_files
+    # mid-flight starts refusing heartbeats until a replan-backed renew lands.
+    # That is what "the lease tracks the approved scope" means.
+    # Scoped to heartbeat because renew owns the drift path: it re-derives the
+    # same values and reconciles them against an accepted T2/T3 replan. This is
+    # a difference in what the two commands are FOR, not a predicate read out
+    # of the claim being validated.
+    if operation == "heartbeat":
+        # One predicate, shared with _claim_creation_errors: canonical spec
+        # location, spec resolution, and target_files component equality.
+        # Sharing only the resolver left a sixth field - a spec declaring no
+        # target_files let explicit entries through at create and the
+        # comparison then refused every beat.
+        scope_error = _scope_contract_error(
+            root,
+            claim,
+            recorded_target_component=persisted.get("components", {}).get(
+                "target_files"
+            ),
+        )
+        if scope_error:
+            raise ValueError(scope_error)
+    return heartbeat, expires, revision
+
+
+def _persisted_scope_binding(claim: dict[str, Any]) -> dict[str, Any]:
+    binding = claim.get("scope_binding")
+    if not isinstance(binding, dict):
+        raise ValueError("claim scope binding is missing")
+    bound_at = binding.get("bound_at")
+    if not isinstance(bound_at, str) or not bound_at.strip():
+        raise ValueError("claim scope binding bound_at is invalid")
+    expected = _binding_for_claim(claim, bound_at=bound_at)
+    if binding != expected:
+        raise ValueError("claim scope binding is invalid")
+    return json.loads(json.dumps(binding, ensure_ascii=False))
+
+
+def _canonical_unit_spec(task_id: object, unit_id: object) -> str:
+    """The one location a unit spec may live.
+
+    Already hardcoded in work.py, work_schema_gate.py,
+    verification_freshness_gate.py, and security_service.py; centralised here
+    so `create` and `_validate_mutation_authority` cannot disagree about it.
+    """
+
+    return f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+
+
+def _non_canonical_unit_spec_error(claim: dict[str, Any]) -> str | None:
+    declared = str(claim.get("unit_spec") or "").strip()
+    if not declared:
+        # No spec pointer, nothing to anchor. Spec-less claims are a supported
+        # shape handled by their own stricter path.
+        return None
+    task_id = str(claim.get("task_id") or "").strip()
+    unit_id = str(claim.get("unit_id") or "").strip()
+    if not task_id or not unit_id:
+        # A spec pointer with no unit identity has no authority to anchor to.
+        # Returning None here was an escape hatch precisely for the attack this
+        # predicate exists to stop: with unit_id blank, _current_scope_values'
+        # identity check also passes ("" == ""), so an arbitrary spec file
+        # becomes the authority. Such claims were already born unusable -
+        # heartbeat refused them with "unit_spec unit identity changed" - so
+        # this refuses them at birth instead.
+        return (
+            f"claim unit_spec {declared} has no unit identity to anchor to; "
+            "declare unit_id alongside unit_spec"
+        )
+    canonical = _canonical_unit_spec(task_id, unit_id)
+    if declared == canonical:
+        return None
+    return (
+        f"claim unit_spec {declared} is not the canonical spec for "
+        f"{claim.get('unit_id')}; expected {canonical}"
+    )
+
+
+def _comparable_stop_condition(claim: dict[str, Any], spec_stop: object) -> str:
+    """Treat an unrecorded stop boundary as inheriting the spec's, not as drift.
+
+    `create` did not copy the spec's stop_condition into the claim until this
+    task fixed it, so every claim already in the store carries "" while its
+    spec declares text. Comparing those directly reports drift on every one of
+    them and refuses renew and adopt across the board. An empty value means
+    "not overridden", not "changed".
+
+    Safe to tolerate: stop_condition is governance text with no mechanical
+    enforcement anywhere in the tree - unlike target_files, which bounds the
+    footprint gate - so an attacker gains nothing by clearing it.
+    """
+
+    recorded = str(claim.get("stop_condition") or "")
+    return recorded if not recorded else str(spec_stop or "")
+
+
+def _current_scope_values(
+    root: Path,
+    claim: dict[str, Any],
+) -> tuple[list[str], str]:
+    unit_spec = str(claim.get("unit_spec") or "").strip()
+    if not unit_spec:
+        return (
+            _normalize_target_files(tuple(claim.get("target_files") or ())),
+            str(claim.get("stop_condition") or ""),
+        )
+    direct_ref = _direct_repo_file_ref(root, unit_spec, "unit_spec")
+    meta = _unit_meta(root, direct_ref)
+    if str(meta.get("task_id") or "").strip() != str(
+        claim.get("task_id") or ""
+    ):
+        raise ValueError("unit_spec task identity changed")
+    if str(meta.get("unit_id") or "").strip() != str(
+        claim.get("unit_id") or ""
+    ):
+        raise ValueError("unit_spec unit identity changed")
+    return (
+        _unit_spec_target_files(root, direct_ref),
+        _unit_spec_stop_condition(root, direct_ref),
+    )
+
+
+def _accepted_replan_ref(
+    root: Path,
+    claim: dict[str, Any],
+    value: str,
+) -> str:
+    replan_ref = _direct_repo_file_ref(root, value, "replan_ref")
+    if not replan_ref:
+        raise ValueError("scope drift requires an accepted direct replan")
+    meta = _work_item_meta(root / replan_ref)
+    if str(meta.get("status") or "").strip().lower() != "accepted":
+        raise ValueError("replan review must have accepted status")
+    if str(meta.get("signal") or "").strip().lower() != "pass":
+        raise ValueError("replan review must have pass signal")
+    if str(meta.get("tier") or "").strip().upper() not in {"T2", "T3"}:
+        raise ValueError("replan review must be tier T2 or T3")
+    if str(meta.get("task_id") or "").strip() != str(
+        claim.get("task_id") or ""
+    ):
+        raise ValueError("replan review task identity does not match claim")
+    if str(meta.get("unit_id") or "").strip() != str(
+        claim.get("unit_id") or ""
+    ):
+        raise ValueError("replan review unit identity does not match claim")
+
+    registry = plan_assumption_gate._load_registry(root)  # noqa: SLF001
+    if not isinstance(registry, dict) or registry.get("schema") != plan_assumption_gate.SCHEMA:
+        raise ValueError("replan plan-assumption registry is invalid")
+    task_set_id = str(claim.get("task_set_id") or "").strip()
+    entries = [
+        entry
+        for entry in registry.get("assumption_sets", [])
+        if isinstance(entry, dict)
+        and str(entry.get("taskset_id") or "").strip() == task_set_id
+    ]
+    if len(entries) != 1:
+        raise ValueError("replan plan-assumption entry is missing or duplicated")
+    entry = entries[0]
+    if str(entry.get("design_record") or "").strip() != replan_ref:
+        raise ValueError("replan must be the direct plan design_record")
+    if str(entry.get("revalidation_policy") or "").strip() != "block_dispatch_on_drift":
+        raise ValueError("replan must block dispatch on drift")
+    anchors = entry.get("anchors")
+    if not isinstance(anchors, list) or not anchors:
+        raise ValueError("replan plan-assumption anchors are missing")
+    findings = _strict_plan_assumption_findings(root, task_set_id)
+    if findings:
+        raise ValueError("replan plan-assumption anchors are invalid or drifted")
+    return replan_ref
+
+
+def _projection_payload(
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+    *,
+    include_revision: bool,
+) -> dict[str, Any]:
     rel_path = _rel(root, path)
+    pointer_agent_fields = tuple(
+        field
+        for field in claim_store.POINTER_AGENT_FIELDS
+        if field not in {"claim_path", "handoff_path", "log_path", "last_heartbeat"}
+    )
     agent = {
         key: claim.get(key)
-        for key in ("claim_id", "agent_role", "agent_instance_id", "display_name", "callsite_id", "pane_id")
+        for key in pointer_agent_fields
+        + (
+            "requested_model_tier",
+            "selected_model_tier",
+            "routing_policy_id",
+            "routing_escalation_reason",
+            "task_token_budget",
+            "claim_token_budget",
+        )
     }
-    projection = {
+    agent.update(
+        {
+            "claim_path": rel_path,
+            "handoff_path": claim.get("handoff_path"),
+            "log_path": claim.get("log_path"),
+            "last_heartbeat": claim.get("last_heartbeat"),
+        }
+    )
+    if include_revision:
+        agent["mutation_revision"] = claim.get("mutation_revision", 0)
+    return {
         "status": "projection",
         "operation": "merge",
         "claim_id": claim.get("claim_id"),
+        "claim_revision": claim.get("mutation_revision", 0),
         "task_claim_ref": rel_path,
         "task_id": claim.get("task_id"),
         "unit_id": claim.get("unit_id"),
@@ -1304,19 +2970,375 @@ def cmd_projection(args: argparse.Namespace) -> int:
             "current_agents": [agent],
         },
     }
+
+
+def cmd_projection(args: argparse.Namespace) -> int:
+    """Emit the deterministic active-work projection required after dispatch.
+
+    The dispatcher remains claim-only: generated board and canonical work-item
+    writes belong to the serial projection owner.  This command prevents the
+    former scalar-ID workaround by giving that owner the exact task/unit refs
+    and complete ``current_agents`` record to project.
+    """
+    root = args.root.resolve()
+    try:
+        found = _find_claim_in_canonical_snapshot(root, args.claim_id)
+        if found is None:
+            raise ValueError(f"claim not found: {args.claim_id}")
+        path, claim = found
+        if not _is_active(claim):
+            raise ValueError(
+                f"projection requires an active worker claim: {args.claim_id}"
+            )
+        if _is_explicit_overlay(claim):
+            raise ValueError(
+                f"projection does not apply to overlay claim: {args.claim_id}"
+            )
+        now = _mutation_now(args.now)
+        liveness = claim_store.classify_claim_liveness(claim, now=now)
+        if liveness.state == "expired":
+            raise ValueError(f"projection claim is expired: {args.claim_id}")
+        if liveness.state != "live":
+            raise ValueError(
+                f"projection claim liveness is indeterminate: {liveness.reason}"
+            )
+        projection = _projection_payload(
+            root,
+            path,
+            claim,
+            include_revision=True,
+        )
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store unavailable"
+        print(f"claim-store projection refused: {detail}", file=sys.stderr)
+        return 1
     _emit(projection, as_json=args.json)
     return 0
 
 
+def _cmd_claim_mutation_locked(
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    now: datetime,
+    progress: dict[str, Any] | None = None,
+    renewal_expires_at: datetime | None = None,
+) -> tuple[Path, dict[str, Any], dict[str, Any] | None]:
+    root = args.root.resolve()
+    inspection = claim_store.inspect_store(root)
+    if inspection.state != "initialized" or inspection.snapshot is None:
+        raise claim_store.ClaimStoreError(
+            inspection.finding or "claim-store authority is not initialized"
+        )
+    found = _find_claim(root, args.claim_id)
+    if found is None:
+        raise ValueError(f"claim not found: {args.claim_id}")
+    path, claim = found
+    heartbeat, expires, revision = _validate_mutation_authority(
+        root,
+        claim,
+        args,
+        operation=operation,
+        now=now,
+    )
+    now_text = now.isoformat()
+    scope_change: dict[str, Any] | None = None
+    renewed_targets: list[str] | None = None
+    renewed_stop: str | None = None
+
+    if operation == "heartbeat":
+        duration = expires - heartbeat
+        if duration <= timedelta(0):
+            raise ValueError("claim lease duration must be positive")
+        try:
+            new_expires = now + duration
+        except OverflowError:
+            raise ValueError("claim lease duration exceeds datetime bounds") from None
+    elif operation == "renew":
+        if renewal_expires_at is None:
+            raise ValueError("renewal lease expiration is missing")
+        new_expires = renewal_expires_at
+        old_binding = _persisted_scope_binding(claim)
+        old_digest = str(old_binding["digest"])
+        if str(args.expected_scope_digest or "").strip() != old_digest:
+            raise ValueError(
+                "claim scope digest mismatch: expected persisted scope binding"
+            )
+        renew_scope_error = _scope_contract_error(
+            root, claim, check_footprint=False
+        )
+        if renew_scope_error:
+            raise ValueError(renew_scope_error)
+        try:
+            renewed_targets, renewed_stop = _current_scope_values(root, claim)
+        except (ValueError, OSError) as exc:
+            # Same condition as heartbeat's; name the same way out rather than
+            # leaving one of the two commands with a bare "not found".
+            raise ValueError(_unresolvable_scope_remedy(claim, exc)) from exc
+        # Grandfather a pre-fix claim once, then heal it. Leaving it empty kept
+        # it tolerated for life and made clearing a boundary permanently
+        # acceptable, reachable forward as well as backward. Writing the spec's
+        # boundary in on the first tolerated renew means any later clearing is
+        # ordinary drift again.
+        inherited_stop = _comparable_stop_condition(claim, renewed_stop)
+        heals_stop_condition = inherited_stop != str(renewed_stop or "")
+        candidate_binding = _binding_for_claim(
+            claim,
+            bound_at=now_text,
+            target_files=renewed_targets,
+            stop_condition=inherited_stop,
+        )
+        changed = str(candidate_binding["digest"]) != old_digest
+        if heals_stop_condition and not changed:
+            # Same scope, but the claim never recorded the boundary. Adopt the
+            # spec's text and re-mint so the tolerance is spent.
+            renewed_stop = str(renewed_stop or "")
+            candidate_binding = _binding_for_claim(
+                claim,
+                bound_at=now_text,
+                target_files=renewed_targets,
+                stop_condition=renewed_stop,
+            )
+        else:
+            renewed_stop = inherited_stop
+        replan_ref: str | None = None
+        if changed:
+            replan_ref = _accepted_replan_ref(root, claim, args.replan_ref)
+            new_binding = candidate_binding
+        elif heals_stop_condition:
+            new_binding = candidate_binding
+        else:
+            new_binding = old_binding
+        scope_change = {
+            "changed": changed,
+            "healed_stop_condition": heals_stop_condition and not changed,
+            "old_digest": old_digest,
+            "new_digest": str(new_binding["digest"]),
+            "replan_ref": replan_ref,
+            "old_scope_binding": old_binding,
+            "new_scope_binding": new_binding,
+        }
+    else:
+        raise ValueError(f"unknown claim mutation operation: {operation}")
+
+    updated = json.loads(json.dumps(claim, ensure_ascii=False))
+    lease = dict(updated.get("lease") or {})
+    expires_text = new_expires.isoformat()
+    updated["last_heartbeat"] = now_text
+    updated["updated_at"] = now_text
+    updated["expires_at"] = expires_text
+    lease["heartbeat_at"] = now_text
+    lease["expires_at"] = expires_text
+    updated["lease"] = lease
+    updated["mutation_revision"] = revision + 1
+    if progress is not None:
+        updated.update(progress)
+    if scope_change is not None:
+        if scope_change["changed"] or scope_change.get("healed_stop_condition"):
+            assert renewed_targets is not None and renewed_stop is not None
+            updated["target_files"] = renewed_targets
+            updated["stop_condition"] = renewed_stop
+            updated["scope_binding"] = scope_change["new_scope_binding"]
+        last_renewal = {
+            "renewed_at": now_text,
+            "replan_ref": scope_change["replan_ref"],
+            "old_scope_binding": scope_change["old_scope_binding"],
+            "new_scope_binding": scope_change["new_scope_binding"],
+        }
+        if len(json.dumps(last_renewal, ensure_ascii=False)) > 4096:
+            raise ValueError("renewal scope provenance exceeds the bounded limit")
+        updated["last_renewal"] = last_renewal
+
+    if not claim_store.verify_snapshot(root, inspection.snapshot):
+        raise claim_store.ClaimStoreError(
+            "claim-store authority changed before mutation persistence"
+        )
+    atomic_io.write_json_atomic(path, updated)
+    return path, updated, scope_change
+
+
+def _mutation_projection_payload(
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a receipt projection without inventing overlay pointer authority."""
+
+    if not _is_explicit_overlay(claim):
+        return _projection_payload(root, path, claim, include_revision=True)
+    return {
+        "status": "projection",
+        "operation": "overlay-no-primary-pointer",
+        "claim_id": claim.get("claim_id"),
+        "claim_revision": claim.get("mutation_revision", 0),
+        "task_claim_ref": _rel(root, path),
+        "task_id": claim.get("task_id"),
+        "unit_id": claim.get("unit_id"),
+        "task_set_id": claim.get("task_set_id"),
+    }
+
+
+def _complete_claim_mutation(
+    args: argparse.Namespace,
+    *,
+    operation: str,
+    path: Path,
+    claim: dict[str, Any],
+    scope_change: dict[str, Any] | None,
+) -> int:
+    root = args.root.resolve()
+    warnings: list[dict[str, str]] = []
+    receipt: dict[str, Any] = {
+        "committed": True,
+        "claim_revision": claim["mutation_revision"],
+    }
+    if scope_change is not None:
+        receipt["scope_change"] = scope_change
+    try:
+        instance_path, instance = record_claim_instance(
+            root,
+            claim,
+            claim_path=path,
+            emit_spawn_event=False,
+        )
+        receipt["instance"] = {
+            "path": _rel(root, instance_path),
+            "updated_at": instance.get("updated_at"),
+            "last_heartbeat": instance.get("last_heartbeat"),
+            "claim_revision": instance.get("claim_revision"),
+        }
+    except Exception as exc:  # noqa: BLE001 - claim authority is committed
+        _add_post_commit_warning(
+            warnings,
+            stage="agent-instance-registry",
+            error=exc,
+        )
+    try:
+        pane_event = append_event(
+            root,
+            {
+                "event": "instance_heartbeat",
+                "actor": claim.get("agent_instance_id") or "unknown",
+                "actor_role": claim.get("agent_role"),
+                "agent_instance_id": claim.get("agent_instance_id"),
+                "display_name": claim.get("display_name"),
+                "callsite_id": claim.get("callsite_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": claim.get("task_set_id"),
+                "claim_id": claim.get("claim_id"),
+                "worktree_path": claim.get("worktree_path"),
+                "message": claim.get("status_text"),
+                "ts": claim.get("last_heartbeat"),
+            },
+        )
+        receipt["pane_event"] = pane_event
+    except Exception as exc:  # noqa: BLE001 - claim authority is committed
+        _add_post_commit_warning(
+            warnings,
+            stage=(
+                "claim-heartbeat-event"
+                if operation == "heartbeat"
+                else "claim-renewal-event"
+            ),
+            error=exc,
+        )
+    response = {
+        "status": "heartbeated" if operation == "heartbeat" else "renewed",
+        "path": _rel(root, path),
+        "claim": claim,
+        "receipt": receipt,
+        "projection": _mutation_projection_payload(root, path, claim),
+    }
+    if warnings:
+        response["status"] = f"{operation}_committed_with_warnings"
+        response["post_commit_warnings"] = warnings
+    _emit(response, as_json=args.json)
+    return 0
+
+
+def cmd_heartbeat(args: argparse.Namespace) -> int:
+    try:
+        now = _mutation_now(args.now)
+        progress = _validate_progress_update(args)
+        with claim_store.store_lock(args.root.resolve()):
+            outcome = _cmd_claim_mutation_locked(
+                args,
+                operation="heartbeat",
+                now=now,
+                progress=progress,
+            )
+    except (
+        AttributeError,
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim mutation unavailable"
+        print(f"claim heartbeat refused: {detail}", file=sys.stderr)
+        return 1
+    path, claim, scope_change = outcome
+    return _complete_claim_mutation(
+        args,
+        operation="heartbeat",
+        path=path,
+        claim=claim,
+        scope_change=scope_change,
+    )
+
+
+def cmd_renew(args: argparse.Namespace) -> int:
+    try:
+        now = _mutation_now(args.now)
+        renewal_expires_at = claim_store.expiration_after(
+            now,
+            args.lease_minutes,
+            unit="minutes",
+            field="lease_minutes",
+            minimum=1,
+        )
+        with claim_store.store_lock(args.root.resolve()):
+            outcome = _cmd_claim_mutation_locked(
+                args,
+                operation="renew",
+                now=now,
+                renewal_expires_at=renewal_expires_at,
+            )
+    except (
+        AttributeError,
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim mutation unavailable"
+        print(f"claim renewal refused: {detail}", file=sys.stderr)
+        return 1
+    path, claim, scope_change = outcome
+    return _complete_claim_mutation(
+        args,
+        operation="renew",
+        path=path,
+        claim=claim,
+        scope_change=scope_change,
+    )
+
+
 def _normalize_evidence_ref(root: Path, value: str) -> str:
     """Normalize an evidence path into a repo-relative POSIX ref."""
-    text = str(value or "").strip()
-    if not text:
-        return ""
-    path = Path(text)
-    if path.is_absolute():
-        return _rel(root, path)
-    return path.as_posix()
+    return _direct_repo_file_ref(root, value, "verification evidence")
 
 
 def _cross_verification_errors(
@@ -1366,24 +3388,79 @@ def _cross_verification_errors(
 
 def cmd_release(args: argparse.Namespace) -> int:
     root = args.root.resolve()
+    try:
+        with claim_store.store_lock(root):
+            inspection = claim_store.inspect_store(root)
+            if inspection.state not in {"pristine", "initialized"}:
+                return _claim_store_refusal("release", inspection)
+            outcome = _cmd_release_locked(args, store_inspection=inspection)
+    except (
+        claim_store.ClaimStoreError,
+        TimeoutError,
+        OSError,
+        RuntimeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store unavailable"
+        print(f"claim-store release refused: {detail}", file=sys.stderr)
+        return 1
+    if isinstance(outcome, int):
+        return outcome
+    path, claim, verified_by, verifier_role, evidence_ref, now_text = outcome
+    return _complete_release(
+        args,
+        path=path,
+        claim=claim,
+        verified_by=verified_by,
+        verifier_role=verifier_role,
+        evidence_ref=evidence_ref,
+        now_text=now_text,
+    )
+
+
+def _cmd_release_locked(
+    args: argparse.Namespace,
+    *,
+    store_inspection: Any,
+) -> int | tuple[Path, dict[str, Any], str, str, str, str]:
+    root = args.root.resolve()
     found = _find_claim(root, args.claim_id)
     if found is None:
         print(f"claim not found: {args.claim_id}", file=sys.stderr)
         return 1
 
     path, claim = found
+    if not _is_active(claim):
+        print(
+            f"release requires an active claim: {args.claim_id} "
+            f"(status={claim.get('status')})",
+            file=sys.stderr,
+        )
+        return 1
     errors: list[str] = []
-    missing = [
-        str(claim.get(field) or "")
-        for field in ("handoff_path", "log_path")
-        if not str(claim.get(field) or "").strip() or not (root / str(claim.get(field))).exists()
-    ]
-    if missing:
+    pointer_errors: list[str] = []
+    for field in ("handoff_path", "log_path"):
+        value = claim.get(field)
+        if not isinstance(value, str) or not value.strip():
+            pointer_errors.append(f"{field} is missing")
+            continue
+        try:
+            _claim_artifact_file_ref(root, value, field)
+        except ValueError as exc:
+            pointer_errors.append(str(exc))
+    if pointer_errors:
         errors.append(f"handoff/log pointer is missing for claim: {args.claim_id}")
+        errors.extend(pointer_errors)
 
     verified_by = str(args.verified_by or "").strip()
     verifier_role = str(args.verifier_role or "").strip()
-    evidence_ref = _normalize_evidence_ref(root, args.verification_evidence)
+    try:
+        evidence_ref = _normalize_evidence_ref(
+            root, args.verification_evidence
+        )
+    except ValueError as exc:
+        evidence_ref = ""
+        errors.append(str(exc))
     errors.extend(
         _cross_verification_errors(
             root,
@@ -1407,6 +3484,13 @@ def cmd_release(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
 
+    if not claim_store.verify_snapshot(root, store_inspection.snapshot):
+        print(
+            "claim-store release refused: authority changed before persistence",
+            file=sys.stderr,
+        )
+        return 1
+
     now_text = _parse_now(args.now).isoformat(timespec="seconds")
     claim["status"] = "released"
     claim["released_at"] = now_text
@@ -1418,39 +3502,73 @@ def cmd_release(args: argparse.Namespace) -> int:
     lease = claim.get("lease")
     if isinstance(lease, dict):
         lease["heartbeat_at"] = now_text
-    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    append_event(
-        root,
-        {
-            "event": "claim_released",
-            "actor": claim.get("agent_instance_id") or "unknown",
-            "actor_role": claim.get("agent_role"),
-            "agent_instance_id": claim.get("agent_instance_id"),
-            "display_name": claim.get("display_name"),
-            "callsite_id": claim.get("callsite_id"),
-            "task_id": claim.get("task_id"),
-            "task_set_id": claim.get("task_set_id"),
-            "claim_id": claim.get("claim_id"),
-            "worktree_path": claim.get("worktree_path"),
-            "verified_by": verified_by,
-            "verifier_role": verifier_role,
-            "message": f"Released after cross-verification by {verified_by} ({verifier_role})",
-            "ts": now_text,
-        },
-    )
+    atomic_io.write_json_atomic(path, claim)
+    return path, claim, verified_by, verifier_role, evidence_ref, now_text
+
+
+def _complete_release(
+    args: argparse.Namespace,
+    *,
+    path: Path,
+    claim: dict[str, Any],
+    verified_by: str,
+    verifier_role: str,
+    evidence_ref: str,
+    now_text: str,
+) -> int:
+    """Run non-authoritative release effects after the store lock is released."""
+
+    root = args.root.resolve()
+    post_commit_warnings: list[dict[str, str]] = []
+    try:
+        append_event(
+            root,
+            {
+                "event": "claim_released",
+                "actor": claim.get("agent_instance_id") or "unknown",
+                "actor_role": claim.get("agent_role"),
+                "agent_instance_id": claim.get("agent_instance_id"),
+                "display_name": claim.get("display_name"),
+                "callsite_id": claim.get("callsite_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": claim.get("task_set_id"),
+                "claim_id": claim.get("claim_id"),
+                "worktree_path": claim.get("worktree_path"),
+                "verified_by": verified_by,
+                "verifier_role": verifier_role,
+                "message": (
+                    f"Released after cross-verification by {verified_by} "
+                    f"({verifier_role})"
+                ),
+                "ts": now_text,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 - release authority is already durable
+        _add_post_commit_warning(
+            post_commit_warnings,
+            stage="claim-released-event",
+            error=exc,
+        )
     # Live A2A traffic: release closes the lifecycle the create-time `request`
     # opened, emitting review -> decision -> correction so the runtime message
     # stream carries a full, reconstructable request->review->decision->correction
     # chain per claim (what a2a_trace_gate validates). Additive observability only;
     # best-effort — the emitter swallows its own errors so release never breaks.
     if a2a_claim_emitter is not None:
-        a2a_claim_emitter.emit_claim_release_chain(
-            claim,
-            root=root,
-            verified_by=verified_by,
-            verifier_role=verifier_role,
-            verification_evidence=evidence_ref,
-        )
+        try:
+            a2a_claim_emitter.emit_claim_release_chain(
+                claim,
+                root=root,
+                verified_by=verified_by,
+                verifier_role=verifier_role,
+                verification_evidence=evidence_ref,
+            )
+        except Exception as exc:  # noqa: BLE001 - additive observability only
+            _add_post_commit_warning(
+                post_commit_warnings,
+                stage="claim-released-a2a",
+                error=exc,
+            )
     # Dormant-role routing seam (TASK-AR-592): a claim release is a task
     # closeout, a high-risk event the audit flagged as never exercising the
     # review roles. When AR_ROLE_ROUTING is ON, dispatch an ADDITIVE reviewer
@@ -1489,27 +3607,433 @@ def cmd_release(args: argparse.Namespace) -> int:
         # (boundary guard + UI banner) can enforce STOP-and-report rather than
         # drifting into out-of-scope follow-on work.
         scope = str(claim.get("active_scope") or claim.get("task_set_id") or "").strip()
+        try:
+            append_event(
+                root,
+                {
+                    "event": "taskset.completed",
+                    "actor": claim.get("agent_instance_id") or "unknown",
+                    "actor_role": claim.get("agent_role"),
+                    "agent_instance_id": claim.get("agent_instance_id"),
+                    "display_name": claim.get("display_name"),
+                    "callsite_id": claim.get("callsite_id"),
+                    "task_id": claim.get("task_id"),
+                    "task_set_id": scope,
+                    "claim_id": claim.get("claim_id"),
+                    "worktree_path": claim.get("worktree_path"),
+                    "message": (
+                        f"Taskset {scope} completed; stop and report. "
+                        "Out-of-scope follow-on work requires owner approval."
+                    ),
+                    "ts": now_text,
+                },
+            )
+        except Exception as exc:  # noqa: BLE001 - release authority is durable
+            _add_post_commit_warning(
+                post_commit_warnings,
+                stage="taskset-completed-event",
+                error=exc,
+            )
+    response = {"status": "released", "path": _rel(root, path), "claim": claim}
+    if post_commit_warnings:
+        response["post_commit_warnings"] = post_commit_warnings
+    _emit(response, as_json=args.json)
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Owner-bound recovery (TASK-AR-659)
+#
+# A claim can end up reachable by no automated path: the reaper never
+# auto-reaps an orchestrator claim, and heartbeat/renew reject any claim that
+# predates the mutation_revision/scope_binding fields. Without the commands
+# below, the only exit is hand-editing the JSON -- which is how
+# CLAIM-20260803-002651-task-ar-655-5f27 had to be cleared.
+#
+# These are recovery primitives, not lifecycle shortcuts. They never release,
+# complete, delete, or accept a claim, and they never touch a live one.
+# ---------------------------------------------------------------------------
+
+RECOVERY_AUTHORITY = "owner-explicit-approval"
+
+
+OWNER_IDENTITY_MAX = 256
+# Both provenance fields land in the same claim record; capping one is half a fix.
+RECOVERY_REASON_MAX = 1024
+
+
+def _recovery_now(value: str | None) -> datetime:
+    """Resolve the recovery clock, clamped so it can never run ahead of reality.
+
+    ``--now`` is a determinism seam for tests, not an authority seam. Judging
+    liveness against an unclamped caller-supplied clock makes "a live claim is
+    never terminalizable" false: any caller could pass a future timestamp, end
+    a healthy claim, and then create their own claim on the freed task.
+    Clamping to the wall clock keeps replayable past timestamps working while
+    removing the ability to fast-forward a lease.
+    """
+
+    wall = datetime.now(timezone.utc).astimezone()
+    if value is None:
+        return wall
+    return min(_parse_aware_timestamp(value, "now"), wall)
+
+
+def _owner_identity(value: object) -> str:
+    owner = " ".join(str(value or "").split())
+    if not owner:
+        raise ValueError(
+            "owner identity is required: claim recovery is owner-bound and "
+            "refuses an unidentified caller"
+        )
+    if len(owner) > OWNER_IDENTITY_MAX:
+        raise ValueError(
+            f"owner identity exceeds {OWNER_IDENTITY_MAX} characters"
+        )
+    return owner
+
+
+def _recovery_reason(value: object) -> str:
+    reason = " ".join(str(value or "").split())
+    if not reason:
+        raise ValueError("a recovery reason is required")
+    if len(reason) > RECOVERY_REASON_MAX:
+        raise ValueError(f"recovery reason exceeds {RECOVERY_REASON_MAX} characters")
+    return reason
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _recovery_target(
+    root: Path,
+    claim_id: str,
+) -> tuple[Path, dict[str, Any], Any]:
+    """Resolve a recovery target and the store authority it was read under.
+
+    The caller must re-verify that authority immediately before writing. The
+    store lock proves exclusion; it does not prove the store is still the
+    same store, which is what verify_snapshot asserts.
+    """
+
+    inspection = claim_store.inspect_store(root)
+    found = _find_claim_in_canonical_snapshot(root, claim_id)
+    if found is None:
+        raise ValueError(f"claim not found: {claim_id}")
+    path, claim = found
+    if not _is_active(claim):
+        raise ValueError(
+            f"claim is already terminal ({claim.get('status')!r}); "
+            "recovery applies only to a claim still presenting as active"
+        )
+    return path, claim, inspection
+
+
+def _assert_recovery_authority(root: Path, inspection: Any, operation: str) -> None:
+    if not claim_store.verify_snapshot(root, inspection.snapshot):
+        raise ValueError(
+            f"claim-store authority changed before {operation} persistence"
+        )
+
+
+def _stamp_recovery(
+    claim: dict[str, Any],
+    *,
+    owner: str,
+    reason: str,
+    now_text: str,
+    operation: str,
+    supplied_clock: bool,
+) -> None:
+    # Provenance records when the recovery actually happened. `--now` is a
+    # liveness seam and must not backdate the audit trail of an explicitly
+    # owner-attributed command; it is kept alongside for replayability.
+    # Emitted only when the caller actually supplied a clock. Comparing two
+    # independent wall-clock reads would emit it on any run straddling a second
+    # boundary, falsely asserting an override the operator never passed.
+    wall_text = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    if supplied_clock and wall_text != now_text:
+        claim["recovery_evaluated_at"] = now_text
+    claim["updated_at"] = wall_text
+    claim["recovered_at"] = wall_text
+    claim["recovered_by"] = owner
+    claim["recovery_authority"] = RECOVERY_AUTHORITY
+    claim["recovery_operation"] = operation
+    claim["recovery_reason"] = reason
+    claim["recovery_scope"] = "single-claim"
+
+
+def cmd_adopt(args: argparse.Namespace) -> int:
+    """Bring a pre-mutation-field claim under the current mutation contract.
+
+    Adoption is not a lifecycle change: status, progress, and lease are left
+    exactly as found. It only supplies the missing fields so heartbeat and
+    renew can reach the claim again.
+    """
+    try:
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
+        now = _recovery_now(args.now)
+        now_text = now.isoformat(timespec="seconds")
+        root = args.root.resolve()
+        with claim_store.store_lock(root):
+            path, claim, inspection = _recovery_target(root, args.claim_id)
+            raw_revision = claim.get("mutation_revision")
+            has_revision = type(raw_revision) is int and raw_revision >= 0
+            has_binding = isinstance(claim.get("scope_binding"), dict)
+            if "mutation_revision" in claim and not has_revision:
+                # Present but unusable (e.g. "7", -1, True, null). Rewriting it
+                # to 0 would destroy CAS history rather than adopt a legacy
+                # claim, so refuse and make a human look. An explicit null is
+                # ambiguous, not absent, and takes the same path.
+                raise ValueError(
+                    f"claim mutation_revision is present but invalid ({raw_revision!r}); "
+                    "adopt will not overwrite it"
+                )
+            if has_revision and has_binding:
+                raise ValueError(
+                    "claim already carries mutation_revision and scope_binding; "
+                    "adopt is only for legacy claims and must not reset scope"
+                )
+            before = _digest(path)
+            if not has_revision:
+                claim["mutation_revision"] = 0
+            if not has_binding:
+                # Anchor to the unit spec, exactly as renew does. Deriving the
+                # binding from the claim's own mutable target_files /
+                # stop_condition would let a caller delete scope_binding, edit
+                # those fields, and have adopt bless scope of their choosing.
+                target_files, stop_condition = _current_scope_values(root, claim)
+                stop_condition = _comparable_stop_condition(claim, stop_condition)
+                if not str(claim.get("unit_spec") or "").strip():
+                    # No unit spec means no authority to anchor to:
+                    # _current_scope_values echoes the claim's own fields back,
+                    # so a diff-based gate would compare the claim to itself and
+                    # never fire, blessing whatever is in the file with a valid
+                    # digest. Require an explicit replan unconditionally instead
+                    # of pretending a comparison happened.
+                    claim["adopted_replan_ref"] = _accepted_replan_ref(
+                        root, claim, args.replan_ref
+                    )
+                else:
+                    drifted = (
+                        _normalize_target_files(tuple(claim.get("target_files") or ()))
+                        != _normalize_target_files(tuple(target_files))
+                    ) or (str(claim.get("stop_condition") or "") != str(stop_condition))
+                    if drifted:
+                        # Same bar as renew: a scope change needs an accepted
+                        # T2/T3 replan.
+                        claim["adopted_replan_ref"] = _accepted_replan_ref(
+                            root, claim, args.replan_ref
+                        )
+                # Write the fields and the binding together. _persisted_scope_binding
+                # recomputes the expected binding from the claim's OWN fields, so
+                # writing the binding alone would leave the two permanently
+                # irreconcilable and make renew refuse forever - defeating the
+                # whole point of adoption.
+                claim["target_files"] = target_files
+                claim["stop_condition"] = stop_condition
+                claim["scope_binding"] = _binding_for_claim(
+                    claim,
+                    bound_at=now_text,
+                    target_files=target_files,
+                    stop_condition=stop_condition,
+                )
+            _stamp_recovery(
+                claim,
+                owner=owner,
+                reason=reason,
+                now_text=now_text,
+                operation="adopt",
+                supplied_clock=args.now is not None,
+            )
+            claim["adopted_at"] = now_text
+            _assert_recovery_authority(root, inspection, "adopt")
+            atomic_io.write_json_atomic(path, claim)
+            after = _digest(path)
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim adoption unavailable"
+        print(f"claim adoption refused: {detail}", file=sys.stderr)
+        return 1
+    _emit(
+        {
+            "status": "adopted",
+            "path": _rel(args.root.resolve(), path),
+            "claim_id": claim.get("claim_id"),
+            "before_sha256": before,
+            "after_sha256": after,
+            "recovered_by": owner,
+            "claim": claim,
+        },
+        as_json=args.json,
+    )
+    return 0
+
+
+def cmd_terminalize(args: argparse.Namespace) -> int:
+    """End a claim whose lease is provably dead and that nothing else can reach.
+
+    The claim file is preserved. This is not a release, not a completion, and
+    grants no unit acceptance or release authority.
+    """
+    try:
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
+        now = _recovery_now(args.now)
+        now_text = now.isoformat(timespec="seconds")
+        root = args.root.resolve()
+        with claim_store.store_lock(root):
+            path, claim, inspection = _recovery_target(root, args.claim_id)
+            liveness = claim_store.classify_claim_liveness(claim, now=now)
+            # Every indeterminate shape is exit-less, not just a wholly absent
+            # deadline. `deadline-partial` is the pre-`lease`-nesting legacy
+            # claim and is the most likely real-world instance of this family.
+            indeterminate = liveness.state == "indeterminate"
+            if indeterminate and liveness.effective_deadline is not None:
+                # Indeterminate does not mean "no evidence". When at least one
+                # deadline parses, an effective deadline is still computed; if
+                # it has not passed the claim is demonstrably live and no flag
+                # may end it. The pre-`lease`-nesting legacy shape - the very
+                # case this flag serves - is exactly the one carrying readable
+                # positive evidence of liveness.
+                grace = claim_store.resolve_claim_grace(None)
+                if liveness.effective_deadline > now - timedelta(seconds=grace):
+                    raise ValueError(
+                        f"claim lease is indeterminate ({liveness.reason}) but its "
+                        f"readable deadline {liveness.effective_deadline.isoformat()} "
+                        "has not passed; terminalize never ends a claim with "
+                        "positive evidence of liveness"
+                    )
+            if indeterminate and not args.allow_indeterminate_lease:
+                # Liveness can never be settled for such a claim, so it can
+                # never expire, never be reaped, and never be proven live. It
+                # needs an exit, but ending it is a judgement rather than a
+                # provable fact, so it must be opted into explicitly instead of
+                # riding the expired path.
+                raise ValueError(
+                    f"claim lease is indeterminate ({liveness.reason}), so death "
+                    "cannot be proven; re-run with --allow-indeterminate-lease to "
+                    "end it deliberately"
+                )
+            if not indeterminate and liveness.state != "expired":
+                raise ValueError(
+                    f"claim lease is {liveness.state} ({liveness.reason}); "
+                    "terminalize refuses a live claim and only ends an expired one"
+                )
+            before = _digest(path)
+            prior = str(claim.get("status") or "")
+            claim["status"] = "expired"
+            claim["recovered_from_status"] = prior
+            claim["reaped_at"] = now_text
+            claim["reaped_by"] = "owner-manual-recovery"
+            claim["reaped_reason"] = "lease-expired"
+            _stamp_recovery(
+                claim,
+                owner=owner,
+                reason=reason,
+                now_text=now_text,
+                operation="terminalize",
+                supplied_clock=args.now is not None,
+            )
+            _assert_recovery_authority(root, inspection, "terminalize")
+            atomic_io.write_json_atomic(path, claim)
+            after = _digest(path)
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim terminalization unavailable"
+        print(f"claim terminalization refused: {detail}", file=sys.stderr)
+        return 1
+    _emit(
+        {
+            "status": "terminalized",
+            "path": _rel(args.root.resolve(), path),
+            "claim_id": claim.get("claim_id"),
+            "recovered_from_status": claim["recovered_from_status"],
+            "before_sha256": before,
+            "after_sha256": after,
+            "recovered_by": owner,
+            "claim": claim,
+        },
+        as_json=args.json,
+    )
+    return 0
+
+
+def cmd_activate_store(args: argparse.Namespace) -> int:
+    """Activate this checkout's claim store.
+
+    The outer marker lives in the per-worktree git admin directory, so a fresh
+    worktree starts `migration-required`. The only other caller of
+    adopt_legacy_store() is the consumer sync path, which needs an
+    agent_runtime.yml the runtime repository itself does not have.
+    """
+    try:
+        # This is the third mutating recovery command, so it is owner-bound
+        # like the other two. It lifts the whole store out of the fail-closed
+        # `migration-required` state that claim_reaper, release, and every
+        # mutation path refuse on; an unattributed actor must not be able to
+        # do that silently.
+        owner = _owner_identity(args.owner_id)
+        reason = _recovery_reason(args.reason)
+        root = args.root.resolve()
+        before_state = claim_store.inspect_store(root).state
+        inspection = claim_store.adopt_legacy_store(root)
+    except (claim_store.ClaimStoreError, OSError, TimeoutError, ValueError) as exc:
+        detail = " ".join(str(exc).split())[:256] or "claim-store activation unavailable"
+        print(f"claim-store activation refused: {detail}", file=sys.stderr)
+        return 1
+    audit = "recorded"
+    try:
         append_event(
             root,
             {
-                "event": "taskset.completed",
-                "actor": claim.get("agent_instance_id") or "unknown",
-                "actor_role": claim.get("agent_role"),
-                "agent_instance_id": claim.get("agent_instance_id"),
-                "display_name": claim.get("display_name"),
-                "callsite_id": claim.get("callsite_id"),
-                "task_id": claim.get("task_id"),
-                "task_set_id": scope,
-                "claim_id": claim.get("claim_id"),
-                "worktree_path": claim.get("worktree_path"),
+                "event": "claim_store_activated",
+                "actor": owner,
+                "actor_role": "owner",
                 "message": (
-                    f"Taskset {scope} completed; stop and report. "
-                    "Out-of-scope follow-on work requires owner approval."
+                    f"claim store activated by owner ({before_state} -> "
+                    f"{inspection.state}); reason: {reason}"
                 ),
-                "ts": now_text,
             },
         )
-    _emit({"status": "released", "path": _rel(root, path), "claim": claim}, as_json=args.json)
+    except Exception as exc:  # noqa: BLE001 - activation already succeeded
+        # Do not roll back a successful activation, but never swallow the loss:
+        # this event is the only durable attribution artifact for the store.
+        audit = "lost"
+        print(
+            "claim-store activation WARNING: activation succeeded but the audit "
+            f"event was not recorded ({exc!r}); attribution for this activation "
+            "is not durable",
+            file=sys.stderr,
+        )
+    _emit(
+        {
+            "status": "activated",
+            "activated_by": owner,
+            "audit": audit,
+            "claim_store_state_before": before_state,
+            "claim_store_state": inspection.state,
+            "witness_claim_id": inspection.witness_claim_id,
+            "marker": _rel(root, claim_store.outer_marker_path(root)),
+        },
+        as_json=args.json,
+    )
     return 0
 
 
@@ -1555,6 +4079,16 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Requested PM tier; derives from unit/task metadata when omitted",
     )
+    create.add_argument(
+        "--task-token-budget",
+        default="",
+        help="Durable cumulative task token budget (explicit -> unit -> task)",
+    )
+    create.add_argument(
+        "--claim-token-budget",
+        default="",
+        help="Durable cumulative claim token budget (explicit -> unit -> task)",
+    )
     create.add_argument("--wip-slot", type=int, default=0)
     create.add_argument("--stop-condition", default="")
     create.add_argument("--mode", default="work")
@@ -1591,8 +4125,20 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--branch")
     create.add_argument("--handoff-path")
     create.add_argument("--log-path")
-    create.add_argument("--lease-minutes", type=int, default=30)
+    create.add_argument(
+        "--lease-minutes",
+        type=int,
+        default=claim_store.DEFAULT_CLAIM_LEASE_MINUTES,
+    )
     create.add_argument("--allow-parallel-task-set", action="store_true")
+    create.add_argument(
+        "--commit-claim-artifacts",
+        action="store_true",
+        help=(
+            "Explicitly authorize one Git commit containing only the claim "
+            "JSON, handoff, and log. Default claim creation never changes HEAD."
+        ),
+    )
     create.add_argument(
         "--skip-plan-check",
         action="store_true",
@@ -1605,8 +4151,97 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--json", action="store_true")
     create.set_defaults(func=cmd_create)
 
+    heartbeat = sub.add_parser(
+        "heartbeat",
+        help="Atomically refresh one owned active claim and optional progress",
+    )
+    heartbeat.add_argument("--claim-id", required=True)
+    heartbeat.add_argument("--agent-instance-id", required=True)
+    heartbeat.add_argument("--callsite-id", required=True)
+    heartbeat.add_argument("--expected-revision", type=int, required=True)
+    heartbeat.add_argument("--phase")
+    heartbeat.add_argument("--progress-pct", type=int)
+    heartbeat.add_argument("--step-index", type=int)
+    heartbeat.add_argument("--step-total", type=int)
+    heartbeat.add_argument("--status-text")
+    heartbeat.add_argument("--now")
+    heartbeat.add_argument("--json", action="store_true")
+    heartbeat.set_defaults(func=cmd_heartbeat)
+
+    renew = sub.add_parser(
+        "renew",
+        help="Atomically renew one owned active claim with scope-drift binding",
+    )
+    renew.add_argument("--claim-id", required=True)
+    renew.add_argument("--agent-instance-id", required=True)
+    renew.add_argument("--callsite-id", required=True)
+    renew.add_argument("--expected-revision", type=int, required=True)
+    renew.add_argument("--expected-scope-digest", required=True)
+    renew.add_argument("--lease-minutes", type=int, required=True)
+    renew.add_argument("--replan-ref", default="")
+    renew.add_argument("--now")
+    renew.add_argument("--json", action="store_true")
+    renew.set_defaults(func=cmd_renew)
+
+    adopt = sub.add_parser(
+        "adopt",
+        help=(
+            "Owner-bound: bring a legacy claim missing mutation_revision/"
+            "scope_binding under the current contract so heartbeat and renew "
+            "can reach it again. Does not change status, progress, or lease."
+        ),
+    )
+    adopt.add_argument("--claim-id", required=True)
+    adopt.add_argument("--owner-id", required=True)
+    adopt.add_argument("--reason", required=True)
+    adopt.add_argument(
+        "--replan-ref",
+        default="",
+        help=(
+            "Accepted T2/T3 replan review. Required when the unit spec's scope "
+            "no longer matches the claim's recorded scope, same bar as renew."
+        ),
+    )
+    adopt.add_argument("--now")
+    adopt.add_argument("--json", action="store_true")
+    adopt.set_defaults(func=cmd_adopt)
+
+    terminalize = sub.add_parser(
+        "terminalize",
+        help=(
+            "Owner-bound: end a claim whose lease is provably dead and that no "
+            "automated path can reach. Never deletes, releases, or completes a "
+            "claim, never touches a live one, and grants no acceptance."
+        ),
+    )
+    terminalize.add_argument("--claim-id", required=True)
+    terminalize.add_argument("--owner-id", required=True)
+    terminalize.add_argument("--reason", required=True)
+    terminalize.add_argument(
+        "--allow-indeterminate-lease",
+        action="store_true",
+        help=(
+            "End a claim whose lease state can never be settled (missing, "
+            "partial, or invalid deadline). Death cannot be proven for such a "
+            "claim, so this is a deliberate owner judgement."
+        ),
+    )
+    terminalize.add_argument("--now")
+    terminalize.add_argument("--json", action="store_true")
+    terminalize.set_defaults(func=cmd_terminalize)
+
+    activate_store = sub.add_parser(
+        "activate-store",
+        help="Activate this checkout's claim store (a fresh worktree starts migration-required)",
+    )
+    activate_store.add_argument("--owner-id", required=True)
+    activate_store.add_argument("--reason", required=True)
+    activate_store.add_argument("--json", action="store_true")
+    activate_store.set_defaults(func=cmd_activate_store)
+
     projection = sub.add_parser("projection", help="Emit the required active task/unit/pointer projection for a claim")
     projection.add_argument("--claim-id", required=True)
+    projection.add_argument("--now")
     projection.add_argument("--json", action="store_true")
     projection.set_defaults(func=cmd_projection)
 

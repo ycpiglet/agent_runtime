@@ -102,7 +102,10 @@ Command/skill map: `OPS-COMMAND-REFERENCE.md`.
   `--skip-plan-check` is a loud transitional escape. The claim is created in
   the main checkout BEFORE any worktree work; footprint conflicts and
   duplicate task/taskset claims block. Never create a worktree without a
-  claim.
+  claim. Claim creation persists its JSON/handoff/log but does not change Git
+  `HEAD` by default. Use `--commit-claim-artifacts` (or the compatibility
+  setting `AGENT_RUNTIME_CLAIM_AUTOCOMMIT=1`) only when SCM mutation is
+  explicitly authorized for that repository.
 - W3 Implement: work only inside the claimed worktree/branch; keep
   heartbeat/pane events current; no shared-SSoT writes (board, STATUS, INDEX,
   registries are orchestrator-only); adjacent problems found mid-work go to

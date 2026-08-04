@@ -49,6 +49,48 @@ MAX_SIGNATURE_INPUT = 240
 MAX_REFS = 64
 MAX_RECORDS = 10000
 MAX_SEARCH_RESULTS = 100
+MAX_FRONTMATTER_SCALAR = 4096
+MAX_ACCEPTED_WATCH_BYTES = 256 * 1024
+ACCEPTED_WATCH_STATUSES = {"accepted", "approved"}
+ACCEPTED_WATCH_DECISIONS = {"accepted_watch"}
+ACCEPTED_WATCH_REVIEWER_FIELDS = (
+    "reviewed_by",
+    "reviewer",
+    "approved_by",
+    "accepted_by",
+    "verified_by",
+)
+REVIEWER_IDENTITY_RE = re.compile(r"^[A-Za-z][A-Za-z0-9._@/+:-]{0,159}$")
+FRONTMATTER_KEY_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
+NONCANONICAL_FRONTMATTER_LINE_SEPARATORS = (
+    "\v",
+    "\f",
+    "\x1c",
+    "\x1d",
+    "\x1e",
+    "\x85",
+    "\u2028",
+    "\u2029",
+)
+REVIEWER_IDENTITY_PLACEHOLDERS = {
+    "-",
+    "~",
+    "false",
+    "n",
+    "n/a",
+    "na",
+    "nil",
+    "no",
+    "none",
+    "null",
+    "off",
+    "on",
+    "tbd",
+    "true",
+    "unknown",
+    "y",
+    "yes",
+}
 SECRET_RE = re.compile(
     r"(?i)(?:"
     r"\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]|"
@@ -154,6 +196,355 @@ def normalize_ref(value: object) -> str:
     if any(part in {"", ".", ".."} for part in parts) or parts[0] == ".git":
         raise CompoundRecordError(f"compound:invalid-ref:{text[:80]}")
     return "/".join(parts)
+
+
+def _frontmatter_key(raw_key: str) -> str:
+    token = raw_key.strip(" \t")
+    if not token:
+        raise CompoundRecordError("compound:prevention-watch-invalid-field")
+    if token.startswith("'"):
+        if len(token) < 2 or not token.endswith("'"):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        inner = token[1:-1]
+        if "'" in inner.replace("''", ""):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        key = inner.replace("''", "'")
+    elif token.startswith('"'):
+        if len(token) < 2 or not token.endswith('"'):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        try:
+            key = json.loads(token)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            ) from exc
+    else:
+        key = token
+    if not isinstance(key, str) or FRONTMATTER_KEY_RE.fullmatch(key) is None:
+        raise CompoundRecordError("compound:prevention-watch-invalid-field")
+    return key
+
+
+def _frontmatter_scalar(raw_value: str) -> str:
+    token = raw_value.strip(" \t")
+    if not token or len(token) > MAX_FRONTMATTER_SCALAR:
+        raise CompoundRecordError("compound:prevention-watch-invalid-value")
+    if token.startswith("'"):
+        if len(token) < 2 or not token.endswith("'"):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        inner = token[1:-1]
+        if "'" in inner.replace("''", ""):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        value = inner.replace("''", "'")
+    elif token.startswith('"'):
+        if len(token) < 2 or not token.endswith('"'):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        try:
+            value = json.loads(token)
+        except (json.JSONDecodeError, UnicodeError) as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            ) from exc
+    else:
+        if token.endswith(("'", '"')):
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-value"
+            )
+        value = token
+    if (
+        not isinstance(value, str)
+        or len(value) > MAX_FRONTMATTER_SCALAR
+        or any(ord(character) < 32 for character in value)
+        or any(character.isspace() and character != " " for character in value)
+    ):
+        raise CompoundRecordError("compound:prevention-watch-invalid-value")
+    return value
+
+
+def _unique_watch_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise CompoundRecordError(
+                f"compound:prevention-watch-duplicate-field:{key}"
+            )
+        payload[key] = value
+    return payload
+
+
+def _frontmatter_lines(text: str) -> list[str]:
+    """Split authority Markdown using only explicit LF or CRLF endings."""
+
+    if any(
+        separator in text
+        for separator in NONCANONICAL_FRONTMATTER_LINE_SEPARATORS
+    ):
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-line-ending"
+        )
+    normalized = text.replace("\r\n", "\n")
+    if "\r" in normalized:
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-line-ending"
+        )
+    return normalized.split("\n")
+
+
+def _read_accepted_watch_text(path: Path) -> str:
+    """Read one authority-bearing watch without unbounded text decoding."""
+
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_ACCEPTED_WATCH_BYTES + 1)
+    if len(raw) > MAX_ACCEPTED_WATCH_BYTES:
+        raise CompoundRecordError(
+            "compound:prevention-watch-oversized"
+        )
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise CompoundRecordError(
+            "compound:prevention-watch-invalid-utf8"
+        ) from exc
+
+
+def _simple_frontmatter_payload(path: Path) -> dict[str, Any]:
+    """Read the bounded ASCII-separation subset used by accepted-watch refs."""
+
+    text = _read_accepted_watch_text(path)
+    lines = _frontmatter_lines(text)
+    if not lines or lines[0] != "---":
+        return {}
+    try:
+        end = next(
+            index
+            for index, line in enumerate(lines[1:], start=1)
+            if line == "---"
+        )
+    except StopIteration:
+        return {}
+
+    payload: dict[str, Any] = {}
+    seen: set[str] = set()
+    active_list = ""
+    active_list_indent: int | None = None
+    for raw in lines[1:end]:
+        if not raw or raw.startswith("#"):
+            continue
+        if raw.startswith((" ", "\t")):
+            prefix_length = len(raw) - len(raw.lstrip(" \t"))
+            indentation = raw[:prefix_length]
+            content = raw[prefix_length:]
+            if "\t" in indentation:
+                raise CompoundRecordError(
+                    "compound:prevention-watch-invalid-indentation"
+                )
+            if not content or content.startswith("#"):
+                continue
+            if active_list and content.startswith("- "):
+                if active_list_indent is None:
+                    active_list_indent = prefix_length
+                elif prefix_length != active_list_indent:
+                    raise CompoundRecordError(
+                        "compound:prevention-watch-invalid-indentation"
+                    )
+                payload.setdefault(active_list, []).append(
+                    _frontmatter_scalar(content[2:])
+                )
+                continue
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-indentation"
+            )
+        if ":" not in raw:
+            active_list = ""
+            active_list_indent = None
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-field"
+            )
+        key, value = raw.split(":", 1)
+        key = _frontmatter_key(key)
+        if key in seen:
+            raise CompoundRecordError(
+                f"compound:prevention-watch-duplicate-field:{key}"
+            )
+        seen.add(key)
+        if value.strip(" \t"):
+            payload[key] = _frontmatter_scalar(value)
+            active_list = ""
+            active_list_indent = None
+        else:
+            payload[key] = []
+            active_list = key
+            active_list_indent = None
+    return payload
+
+
+def _watch_payload(path: Path) -> dict[str, Any]:
+    if path.suffix.lower() == ".json":
+        try:
+            payload = json.loads(
+                _read_accepted_watch_text(path),
+                object_pairs_hook=_unique_watch_object,
+            )
+        except RecursionError as exc:
+            raise CompoundRecordError(
+                "compound:prevention-watch-invalid-json-depth"
+            ) from exc
+        if not isinstance(payload, dict):
+            raise CompoundRecordError("compound:prevention-watch-invalid-root")
+        return payload
+    return _simple_frontmatter_payload(path)
+
+
+def _value_items(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str) and item]
+    return [value] if isinstance(value, str) and value else []
+
+
+def _accepted_watch_token(value: object, allowed: set[str]) -> bool:
+    return isinstance(value, str) and value.casefold() in allowed
+
+
+def _reviewer_identity(value: object) -> str:
+    if not isinstance(value, str):
+        return ""
+    text = value
+    if (
+        not text
+        or text != text.strip()
+        or text.casefold() in REVIEWER_IDENTITY_PLACEHOLDERS
+        or REVIEWER_IDENTITY_RE.fullmatch(text) is None
+    ):
+        return ""
+    return text
+
+
+def _accepted_watch_findings(
+    path: Path,
+    ref: str,
+    *,
+    current_work_ids: set[str],
+) -> tuple[bool, list[str]]:
+    try:
+        payload = _watch_payload(path)
+    except (OSError, json.JSONDecodeError, CompoundRecordError):
+        return False, [f"compound:prevention-watch-invalid:{ref}"]
+
+    decision = payload.get("decision")
+    if not _accepted_watch_token(decision, ACCEPTED_WATCH_DECISIONS):
+        return False, []
+
+    findings: list[str] = []
+    if not _accepted_watch_token(payload.get("status"), ACCEPTED_WATCH_STATUSES):
+        findings.append(f"compound:prevention-watch-not-accepted:{ref}")
+    reviewers = {
+        identity
+        for field in ACCEPTED_WATCH_REVIEWER_FIELDS
+        if (identity := _reviewer_identity(payload.get(field)))
+    }
+    if not any(reviewers):
+        findings.append(f"compound:prevention-watch-reviewer-missing:{ref}")
+
+    linked_work: set[str] = set()
+    for field in ("work_id", "task_id", "unit_id", "work_ids"):
+        for value in _value_items(payload.get(field)):
+            try:
+                normalized = normalize_work_id(value)
+            except CompoundRecordError:
+                continue
+            if normalized == value:
+                linked_work.add(normalized)
+    if not current_work_ids.intersection(linked_work):
+        findings.append(f"compound:prevention-watch-work-mismatch:{ref}")
+    return not findings, findings
+
+
+def validate_prevention_destinations(
+    root: Path,
+    record: dict[str, Any],
+    *,
+    current_work_ids: Iterable[object] = (),
+) -> list[str]:
+    """Validate durable prevention destinations when a Compound is consumed.
+
+    This is deliberately separate from store validation so historical
+    append-only records are never rewritten or newly invalidated in bulk.
+    """
+
+    try:
+        normalized_record = validate_record(record)
+        accepted_work_ids = {
+            normalize_work_id(value) for value in current_work_ids
+        }
+    except CompoundRecordError as exc:
+        return list(exc.findings)
+
+    repository = Path(root).resolve()
+    findings: list[str] = []
+    supported = False
+    for ref in normalized_record["prevention_refs"]:
+        candidate = repository / ref
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (FileNotFoundError, OSError):
+            findings.append(f"compound:prevention-ref-missing:{ref}")
+            continue
+        try:
+            resolved.relative_to(repository)
+        except ValueError:
+            findings.append(f"compound:prevention-ref-outside-root:{ref}")
+            continue
+        if not resolved.is_file():
+            findings.append(f"compound:prevention-ref-not-file:{ref}")
+            continue
+
+        relative = Path(ref)
+        parts = relative.parts
+        is_regression = bool(
+            parts
+            and (
+                parts[0] == "tests"
+                or (
+                    parts[0] == "scripts"
+                    and relative.suffix == ".py"
+                    and relative.name.startswith("test_")
+                )
+            )
+        )
+        is_gate = relative.suffix == ".py" and relative.name.endswith("_gate.py")
+        is_task = (
+            len(parts) >= 4
+            and parts[:3] == ("agents", "lead_engineer", "tasks")
+            and relative.suffix.lower() == ".md"
+        )
+        if is_regression or is_gate or is_task:
+            supported = True
+            continue
+
+        if parts and parts[0] == "reviews":
+            accepted, watch_findings = _accepted_watch_findings(
+                resolved,
+                ref,
+                current_work_ids=accepted_work_ids,
+            )
+            supported = supported or accepted
+            findings.extend(watch_findings)
+
+    if not supported:
+        findings.append("compound:prevention-destination-unsupported")
+    return list(dict.fromkeys(findings))
 
 
 def _string_field(payload: dict[str, Any], field: str) -> str:
@@ -757,6 +1148,7 @@ __all__ = [
     "search_knowledge",
     "search_legacy",
     "search_records",
+    "validate_prevention_destinations",
     "validate_record",
     "write_index",
 ]

@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1",
+  "task_id": "SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1",
+  "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "agent_role": "progress-scout",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "progress-scout-CLAIM-SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1",
+  "display_name": "progress-scout@scout-sweep",
+  "callsite_id": "role-routing:progress_scout_sweep:TASKSET-AR-V080-OPERABILITY-HARDENING:progress-scout",
+  "pane_id": "overlay:CLAIM-SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1",
+  "mode": "scout-sweep",
+  "status": "released",
+  "phase": "claim-created",
+  "progress_pct": 0,
+  "status_text": "Progress-scout sweep for TASKSET-AR-V080-OPERABILITY-HARDENING wave 1",
+  "claimed_at": "2026-07-30T22:50:27+09:00",
+  "last_heartbeat": "2026-07-30T23:11:27+09:00",
+  "updated_at": "2026-07-30T23:11:27+09:00",
+  "tags": [
+    "scout",
+    "sweep",
+    "wave:1"
+  ],
+  "overlay": true,
+  "allow_parallel_task_set": true,
+  "parent_task_id": "",
+  "parent_task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-SCOUT-TASKSET-AR-V080-OPERABILITY-HARDENING-W1.log.md",
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "released_at": "2026-07-30T23:11:27+09:00",
+  "verified_by": "qa-20260730-ar653-overlay-lifecycle-supersession",
+  "verifier_role": "qa-reviewer",
+  "verification_evidence": "reviews/W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession.md"
+}

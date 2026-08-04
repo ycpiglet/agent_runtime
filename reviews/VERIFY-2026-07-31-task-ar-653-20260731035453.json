@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-31-task-ar-653-20260731035453",
+  "work_id": "TASK-AR-653",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-653.md",
+  "kind": "task",
+  "task_id": "TASK-AR-653",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-31T03:54:53+09:00",
+  "verified_by": "codex-root-task-ar-653-orchestrator",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-31T03:54:53+09:00",
+      "finished_at": "2026-07-31T03:55:45+09:00",
+      "stdout": "........................................................................ [ 33%]\n........................................................................ [ 67%]\n......................................................................   [100%]\n214 passed in 50.30s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/scribe_due.py --root . --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-31T03:55:45+09:00",
+      "finished_at": "2026-07-31T03:55:45+09:00",
+      "stdout": "35760999` both passed Python 3.10/3.11/3.12 on attempt 1; GitHub issue #297 was closed completed with evidence comment `5048456934`.\",\n      \"path\": \"STATUS.md\"\n    },\n    {\n      \"adapter\": \"conventional\",\n      \"checklist\": \"none\",\n      \"heading\": \"2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next\",\n      \"item\": \"Independent W4b and skeptic reviews both approved exact implementation HEAD `a8d89026026dd84ab06f2e3260a9cf99a9863cdc`.\",\n      \"path\": \"STATUS.md\"\n    }\n  ],\n  \"source_count\": 1,\n  \"source_debt\": {\n    \"hot_count\": 773,\n    \"overdue_sources\": [\n      \"STATUS.md\"\n    ],\n    \"status\": \"overdue\"\n  },\n  \"sources\": [\n    {\n      \"adapter\": \"conventional\",\n      \"cold_count\": 0,\n      \"configured\": false,\n      \"digest\": \"1320044c4c3bf19084f5bf39be0a3bcde8f2940d5a5bb97ec82f4afc7312692f\",\n      \"finding_codes\": [],\n      \"hot_count\": 773,\n      \"path\": \"STATUS.md\",\n      \"present\": true,\n      \"selected_count\": 10,\n      \"selected_items\": [\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Decision\",\n          \"item\": \"Do not move or delete the published tag. If a release defect is discovered, publish a warning and forward-fix as v0.7.1; immutable v0.6.0 remains the prior known release.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Decision\",\n          \"item\": \"The v0.7.0 release and intake taskset are complete. W5 closeout branch integration and local worktree/branch removal remain the final mechanical cleanup before the next W0 session.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Bottom Line\",\n          \"item\": \"No active claim remains. `TASK-AR-621` in `TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY` and `TASK-AR-622` in `TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY` preserve two follow-up defects found during closeout; neither is claimed or impl…\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Bottom Line\",\n          \"item\": \"GitHub issues `#274`, `#279`, `#280`, `#285`, `#287`, `#289`, and `#290` are closed.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Bottom Line\",\n          \"item\": \"`TASK-AR-602` and `UNIT-TASK-AR-602-001` are completed after independent W4b; `TASKSET-AR-JULY-UPSTREAM-INTAKE-CLOSEOUT --require-complete` passes with findings 0.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"Bottom Line\",\n          \"item\": \"`v0.7.0` is a public, non-draft, non-prerelease GitHub release from annotated tag object `99292aadd72284b83f6e55b1de4e48102f449512`, peeled to verified main commit `23c4be4059dc4c12d107ac8cc5fefa795dfab7f8`.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next\",\n          \"item\": \"Next: TASK-AR-608 for GitHub #298, which owns the quote-unaware frontmatter parser defect observed during TASK-AR-604 through TASK-AR-607 metadata handling.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next\",\n          \"item\": \"W5 cleanup removed the feature worktree and local/remote branch; W0 now reports zero active claims, one main worktree, and zero divergent tasks.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next\",\n          \"item\": \"PR #314 CI run `29935529242` and post-merge main run `29935760999` both passed Python 3.10/3.11/3.12 on attempt 1; GitHub issue #297 was closed completed with evidence comment `5048456934`.\"\n        },\n        {\n          \"checklist\": \"none\",\n          \"heading\": \"2026-07-23 - TASK-AR-607/#297 complete; TASK-AR-608 next\",\n          \"item\": \"Independent W4b and skeptic reviews both approved exact implementation HEAD `a8d89026026dd84ab06f2e3260a9cf99a9863cdc`.\"\n        }\n      ],\n      \"state\": \"overdue\",\n      \"total_count\": 773\n    }\n  ],\n  \"state\": \"overdue\",\n  \"total_count\": 773\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-31T03:55:45+09:00",
+      "finished_at": "2026-07-31T03:55:45+09:00",
+      "stdout": "template-mirror: expected=84 common=84 identical=81 intentional=3 findings=0\n",
+      "stderr": ""
+    }
+  ]
+}

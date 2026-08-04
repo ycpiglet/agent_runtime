@@ -34,7 +34,11 @@ from typing import Any
 
 import backlog_board
 import model_routing
+import task_claim_dispatcher
 import taskset_dispatcher
+from footprint_conflict_gate import (
+    ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_CLAIM_STATUSES,
+)
 from footprint_conflict_gate import footprints_overlap
 from task_unit_readiness_gate import depends_on_refs, load_unit_specs
 
@@ -147,6 +151,43 @@ def _all_units(root: Path) -> list[UnitNode]:
     return [UnitNode(path=path, meta=meta) for path, meta, _body in load_unit_specs(root)]
 
 
+def _index_units_by_id(root: Path, nodes: list[UnitNode]) -> dict[str, UnitNode]:
+    indexed: dict[str, UnitNode] = {}
+    for node in nodes:
+        unit_id = node.unit_id
+        if not unit_id:
+            continue
+        existing = indexed.get(unit_id)
+        if existing is not None and existing.path.resolve() != node.path.resolve():
+            paths = sorted((_rel(root, existing.path), _rel(root, node.path)))
+            raise WaveError(
+                "registry:duplicate-unit-id "
+                f"id={unit_id} paths={paths[0]},{paths[1]}"
+            )
+        indexed[unit_id] = node
+    return indexed
+
+
+def _index_tasks_by_id(
+    root: Path,
+    tasks: list[backlog_board.Task],
+) -> dict[str, backlog_board.Task]:
+    indexed: dict[str, backlog_board.Task] = {}
+    for task in tasks:
+        task_id = task.task_id
+        if not task_id:
+            continue
+        existing = indexed.get(task_id)
+        if existing is not None and existing.path.resolve() != task.path.resolve():
+            paths = sorted((_rel(root, existing.path), _rel(root, task.path)))
+            raise WaveError(
+                "registry:duplicate-task-id "
+                f"id={task_id} paths={paths[0]},{paths[1]}"
+            )
+        indexed[task_id] = task
+    return indexed
+
+
 def _resolve_taskset_id(root: Path, value: str) -> str:
     return taskset_dispatcher._resolve_taskset(value, root).task_set_id
 
@@ -178,7 +219,7 @@ def select_units(root: Path, *, taskset: str = "", units: list[str] | None = Non
             raise WaveError(f"no unit specs found for task set: {task_set_id}")
         label = f"taskset:{task_set_id}"
     else:
-        by_id = {node.unit_id: node for node in repo_units if node.unit_id}
+        by_id = _index_units_by_id(root, repo_units)
         for value in units or []:
             text = value.strip()
             if not text:
@@ -193,15 +234,13 @@ def select_units(root: Path, *, taskset: str = "", units: list[str] | None = Non
             raise WaveError("no units selected; pass --taskset or at least one --unit")
         label = f"units:{len(selected)}"
 
-    seen: set[str] = set()
-    unique: list[UnitNode] = []
-    for node in sorted(selected, key=lambda item: item.unit_id):
+    for node in selected:
         if not node.unit_id:
             raise WaveError(f"unit spec is missing unit_id: {_rel(root, node.path)}")
-        if node.unit_id in seen:
-            continue
-        seen.add(node.unit_id)
-        unique.append(node)
+    unique = sorted(
+        _index_units_by_id(root, selected).values(),
+        key=lambda item: item.unit_id,
+    )
     return unique, label
 
 
@@ -210,15 +249,16 @@ def select_units(root: Path, *, taskset: str = "", units: list[str] | None = Non
 # ---------------------------------------------------------------------------
 
 
-def _validate_refs(root: Path, nodes: list[UnitNode], repo_unit_ids: set[str]) -> None:
-    tasks_dir = root / "agents" / "lead_engineer" / "tasks"
-    known_task_ids = {node.task_id for node in nodes if node.task_id}
+def _validate_refs(
+    nodes: list[UnitNode],
+    repo_units_by_id: dict[str, UnitNode],
+    repo_tasks_by_id: dict[str, backlog_board.Task],
+) -> None:
+    known_task_ids = set(repo_tasks_by_id) | {node.task_id for node in nodes if node.task_id}
     problems: list[str] = []
     for node in nodes:
         for ref in node.depends_on:
-            if ref in repo_unit_ids or ref in known_task_ids:
-                continue
-            if (tasks_dir / f"{ref}.md").is_file():
+            if ref in repo_units_by_id or ref in known_task_ids:
                 continue
             problems.append(f"unknown depends_on reference: {node.unit_id} -> {ref}")
     if problems:
@@ -237,24 +277,91 @@ def _selection_deps(node: UnitNode, by_id: dict[str, UnitNode], by_task: dict[st
     return deps
 
 
+def _selected_ref_taskset(
+    ref: str,
+    by_id: dict[str, UnitNode],
+    by_task: dict[str, list[UnitNode]],
+    repo_tasks_by_id: dict[str, backlog_board.Task],
+) -> str:
+    if ref in by_id:
+        return by_id[ref].task_set_id
+    if ref in by_task:
+        task = repo_tasks_by_id.get(ref)
+        if task is not None:
+            return str(task.task_set_id or "").strip()
+        tasksets = {unit.task_set_id for unit in by_task[ref] if unit.task_set_id}
+        if len(tasksets) == 1:
+            return next(iter(tasksets))
+    return ""
+
+
+def _canonical_dependency_state(
+    ref: str,
+    repo_units_by_id: dict[str, UnitNode],
+    repo_tasks_by_id: dict[str, backlog_board.Task],
+) -> tuple[str, bool]:
+    if ref in repo_units_by_id:
+        status = repo_units_by_id[ref].status
+        return (
+            status,
+            taskset_dispatcher._normalize_status(status) in DONE_UNIT_STATUSES,
+        )
+    dependency = repo_tasks_by_id.get(ref)
+    if dependency is None:
+        return "missing-status", False
+    status = str(dependency.status or "").strip()
+    return (
+        status,
+        taskset_dispatcher._normalize_status(status)
+        in taskset_dispatcher.DONE_STATUSES,
+    )
+
+
 def compute_waves(root: Path, nodes: list[UnitNode]) -> WavePlan:
     """List-schedule units into waves honoring depends_on + footprint disjointness."""
-    repo_unit_ids = {node.unit_id for node in _all_units(root) if node.unit_id}
-    repo_unit_ids.update(node.unit_id for node in nodes)
-    _validate_refs(root, nodes, repo_unit_ids)
+    repo_units_by_id = _index_units_by_id(root, [*_all_units(root), *nodes])
+    repo_tasks = backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks")
+    repo_tasks_by_id = _index_tasks_by_id(root, repo_tasks)
+    _validate_refs(nodes, repo_units_by_id, repo_tasks_by_id)
 
-    by_id = {node.unit_id: node for node in nodes}
+    by_id = _index_units_by_id(root, nodes)
+    nodes = list(by_id.values())
     by_task: dict[str, list[UnitNode]] = {}
     for node in nodes:
         by_task.setdefault(node.task_id, []).append(node)
 
     deps = {node.unit_id: _selection_deps(node, by_id, by_task) for node in nodes}
     external: list[tuple[str, str]] = []
+    unresolved_external: list[str] = []
     in_selection = set(by_id) | set(by_task)
     for node in nodes:
         for ref in node.depends_on:
-            if ref not in in_selection:
-                external.append((node.unit_id, ref))
+            selected_ref = ref in in_selection
+            selected_cross_taskset = selected_ref and (
+                _selected_ref_taskset(ref, by_id, by_task, repo_tasks_by_id)
+                != node.task_set_id
+            )
+            if selected_ref and not selected_cross_taskset:
+                continue
+            external.append((node.unit_id, ref))
+            if selected_cross_taskset:
+                # Keep the internal ordering edge, but retain an explicit W5
+                # barrier that cmd_dispatch rechecks before issuing downstream.
+                continue
+            dependency_status, resolved = _canonical_dependency_state(
+                ref,
+                repo_units_by_id,
+                repo_tasks_by_id,
+            )
+            if resolved:
+                continue
+            unresolved_external.append(
+                "dependency:external-unresolved "
+                f"unit={node.unit_id} ref={ref} "
+                f"status={dependency_status or 'missing-status'}"
+            )
+    if unresolved_external:
+        raise WaveError("\n".join(sorted(unresolved_external)))
 
     scheduled: set[str] = set()
     remaining = dict(by_id)
@@ -432,7 +539,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
             f"(footprint overlap with {deferral['conflicts_with']}: {'; '.join(deferral['overlap'])})"
         )
     for unit_id, ref in plan.external_deps:
-        print(f"external-dep: {unit_id} -> {ref} (outside selection; not used for wave ordering)")
+        print(f"external-dep: {unit_id} -> {ref} (canonical W5 barrier)")
     return 0
 
 
@@ -577,6 +684,8 @@ def _claim_command(
         command.extend(["--now", args.now])
     if suffix:
         command.extend(["--suffix", suffix])
+    if getattr(args, "scope_transition_approved", False):
+        command.append("--scope-transition-approved")
     command.append("--json")
     return command
 
@@ -624,6 +733,100 @@ def _dispatch_payload(
         suffix=suffix,
     )
     return payload
+
+
+def _candidate_preflight_findings(
+    root: Path,
+    candidates: list[UnitNode],
+    claims: list[dict[str, Any]],
+) -> list[str]:
+    """Run every claim T0/readiness preflight before any batch subprocess."""
+    findings: list[str] = []
+    for node in candidates:
+        taskset_id, binding_findings = task_claim_dispatcher._effective_taskset_id(  # noqa: SLF001
+            root,
+            task_id=node.task_id,
+            requested_taskset_id=node.task_set_id,
+        )
+        for finding in binding_findings:
+            findings.append(f"{node.unit_id}:readiness:{finding}")
+        if taskset_id:
+            try:
+                t0_findings = task_claim_dispatcher._plan_assumption_findings(  # noqa: SLF001
+                    root,
+                    taskset_id,
+                )
+            except (KeyError, OSError, TypeError, ValueError) as exc:
+                t0_findings = [
+                    "registry-unreadable:"
+                    f"{task_claim_dispatcher.plan_assumption_gate.REGISTRY_REL}:{exc}"
+                ]
+            for finding in t0_findings or []:
+                findings.append(f"{node.unit_id}:t0:{finding}")
+        for finding in task_claim_dispatcher._claim_readiness_findings(  # noqa: SLF001
+            root,
+            task_id=node.task_id,
+            task_set_id=taskset_id,
+            unit_id=node.unit_id,
+            unit_spec=_rel(root, node.path),
+        ):
+            findings.append(f"{node.unit_id}:readiness:{finding}")
+        for claim in claims:
+            claim_status = str(claim.get("status") or "").strip().lower()
+            if claim_status not in FOOTPRINT_ACTIVE_CLAIM_STATUSES:
+                continue
+            if str(claim.get("task_id") or "").strip() == node.task_id:
+                continue
+            other_files = [
+                str(item) for item in (claim.get("target_files") or [])
+            ]
+            if not node.target_files or not other_files:
+                continue
+            overlaps = footprints_overlap(node.target_files, other_files)
+            if overlaps:
+                claim_id = str(claim.get("claim_id") or "unknown")
+                findings.append(
+                    f"{node.unit_id}:footprint:active-claim-conflict:{claim_id}"
+                )
+                for own_path, other_path in overlaps:
+                    findings.append(
+                        f"{node.unit_id}:footprint:{own_path}<->{claim_id}:{other_path}"
+                    )
+    return list(dict.fromkeys(findings))
+
+
+def _external_dependency_findings(
+    root: Path,
+    candidates: list[UnitNode],
+    external_deps: list[tuple[str, str]],
+) -> list[str]:
+    """Recheck canonical W5 state for every external edge of this batch."""
+    candidate_ids = {node.unit_id for node in candidates}
+    relevant = [
+        (unit_id, ref)
+        for unit_id, ref in external_deps
+        if unit_id in candidate_ids
+    ]
+    if not relevant:
+        return []
+    repo_units_by_id = _index_units_by_id(root, _all_units(root))
+    repo_tasks_by_id = _index_tasks_by_id(
+        root,
+        backlog_board.load_tasks(root / "agents" / "lead_engineer" / "tasks"),
+    )
+    findings: list[str] = []
+    for unit_id, ref in sorted(relevant):
+        status, resolved = _canonical_dependency_state(
+            ref,
+            repo_units_by_id,
+            repo_tasks_by_id,
+        )
+        if not resolved:
+            findings.append(
+                "dependency:external-unresolved "
+                f"unit={unit_id} ref={ref} status={status or 'missing-status'}"
+            )
+    return findings
 
 
 def _persisted_wave_claim(
@@ -783,6 +986,20 @@ def cmd_dispatch(args: argparse.Namespace) -> int:
         for note in skipped:
             print(f"skipped: {note}")
         return 0
+
+    preflight_findings = _external_dependency_findings(
+        root,
+        candidates,
+        plan.external_deps,
+    )
+    preflight_findings.extend(
+        _candidate_preflight_findings(root, candidates, claims)
+    )
+    if preflight_findings:
+        raise WaveError(
+            "wave claim preflight refused before batch mutation:\n"
+            + "\n".join(f"- {finding}" for finding in preflight_findings)
+        )
 
     prepared: list[tuple[UnitNode, dict[str, Any]]] = []
     for index, node in enumerate(candidates, start=1):
@@ -962,6 +1179,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--team-id", default="")
     parser.add_argument("--now")
     parser.add_argument("--suffix")
+    parser.add_argument(
+        "--scope-transition-approved",
+        action="store_true",
+        help=(
+            "Record explicit Owner approval to cross a previously completed "
+            "taskset boundary on every claim issued by this dispatch"
+        ),
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 

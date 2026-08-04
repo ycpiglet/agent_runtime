@@ -1,0 +1,314 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20260803-163441-task-ar-655-f9b6",
+  "task_id": "TASK-AR-655",
+  "agent_role": "lead-engineer",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "le-20260803-163441-kst-f9b6",
+  "display_name": "lead_engineer@worker-01",
+  "callsite_id": "terminal:wt-task-ar-655:tab-01",
+  "pane_id": "terminal:wt-task-ar-655:tab-01",
+  "mode": "worker",
+  "status": "expired",
+  "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "scope_transition_approved": true,
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "unit_id": "UNIT-TASK-AR-655-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
+  "requested_model_tier": "worker_standard",
+  "selected_model_tier": "planner_high",
+  "model_tier": "planner_high",
+  "provider_tier": "opus",
+  "routing_status": "escalated",
+  "routing_reason": "escalated to planner_high by task/unit trigger",
+  "routing_policy_id": "task-unit-tier-policy",
+  "routing_policy_reason": "unit tier overrides task tier; registered high-risk triggers gate worker escalation",
+  "routing_high_tier_authorized": true,
+  "routing_escalation_reason": "trigger:data_integrity,repeated_failure",
+  "routing_registered_triggers": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "routing_signals": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "routing_unknown_triggers": [],
+  "task_token_budget": null,
+  "claim_token_budget": null,
+  "actual_model": null,
+  "actual_model_status": "unverified",
+  "wip_slot": 0,
+  "stop_condition": "",
+  "phase": "w4b-round5-false-positive-fixed",
+  "progress_pct": 99,
+  "step_index": 12,
+  "step_total": 12,
+  "status_text": "Narrowed the heartbeat anchor to the enforced footprint",
+  "worktree_path": ".",
+  "branch": "codex/task-ar-655-v080-lease-bounds",
+  "claimed_at": "2026-08-03T16:34:41+09:00",
+  "last_heartbeat": "2026-08-03T17:53:32.489880+09:00",
+  "updated_at": "2026-08-04T12:10:29+09:00",
+  "expires_at": "2026-08-03T19:53:32.489880+09:00",
+  "lease": {
+    "claimed_at": "2026-08-03T16:34:41+09:00",
+    "heartbeat_at": "2026-08-03T17:53:32.489880+09:00",
+    "expires_at": "2026-08-03T19:53:32.489880+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20260803-163441-task-ar-655-f9b6.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [],
+  "escalation_triggers": [
+    "data_integrity",
+    "repeated_failure"
+  ],
+  "defect_signatures": [
+    "defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424",
+    "defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a",
+    "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88",
+    "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c",
+    "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9",
+    "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9",
+    "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca",
+    "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9",
+    "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9",
+    "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b",
+    "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3",
+    "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe",
+    "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b",
+    "defect:ui-console-pre-load-summary-fabricates-healthy-z:e18e21bcf63e1ade"
+  ],
+  "knowledge_lookup": {
+    "status": "matched",
+    "match_count": 8
+  },
+  "knowledge_matches": [
+    {
+      "id": "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json",
+      "title": "Bind claim progress to one lease-revision transaction",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88",
+        "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c",
+        "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9",
+        "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9",
+        "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca",
+        "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9",
+        "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9",
+        "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b",
+        "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json",
+      "title": "Bind duration domains before claim authority mutation",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424",
+        "defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9.json",
+      "title": "Require type-strict complete pointer authority",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d.json",
+      "title": "Bind the complete pointer agent to canonical claim authority",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5.json",
+      "title": "Bind current-agent projection to canonical claim authority",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json",
+      "title": "Bind claim-progress projection to committed claim authority",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05.json",
+      "title": "Keep cockpit rendering null-safe before runtime state load",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b"
+      ]
+    },
+    {
+      "id": "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d.json",
+      "title": "Keep pre-load cockpit summaries neutral",
+      "score": 180,
+      "legacy": false,
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ],
+      "defect_signatures": [
+        "defect:ui-console-pre-load-summary-fabricates-healthy-z:e18e21bcf63e1ade"
+      ]
+    }
+  ],
+  "target_files": [
+    "src/agent_runtime/claim_store.py",
+    "scripts/agent_runtime/claim_store.py",
+    "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
+    "scripts/task_claim_dispatcher.py",
+    "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+    "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+    "scripts/agent_instance_registry.py",
+    "src/agent_runtime/templates/project/scripts/agent_instance_registry.py",
+    "scripts/role_routing.py",
+    "src/agent_runtime/templates/project/scripts/role_routing.py",
+    "scripts/claim_lease.py",
+    "src/agent_runtime/templates/project/scripts/claim_lease.py",
+    "scripts/claim_reaper.py",
+    "src/agent_runtime/templates/project/scripts/claim_reaper.py",
+    "scripts/deadlock_watchdog.py",
+    "src/agent_runtime/templates/project/scripts/deadlock_watchdog.py",
+    "scripts/state_sync_gate.py",
+    "src/agent_runtime/templates/project/scripts/state_sync_gate.py",
+    "scripts/parallel_worktree_gate.py",
+    "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+    "scripts/owner_governance_gate.py",
+    "src/agent_runtime/templates/project/scripts/owner_governance_gate.py",
+    "scripts/worktree_lifecycle_gate.py",
+    "src/agent_runtime/templates/project/scripts/worktree_lifecycle_gate.py",
+    "src/agent_runtime/ui_state.py",
+    "src/agent_runtime/ui_console_assets.py",
+    "src/agent_runtime/doctor.py",
+    "agents/project/NEXT-SESSION-POINTER.yml",
+    "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
+    "tests/test_task_claim_dispatcher.py",
+    "tests/test_claim_store.py",
+    "tests/test_claim_lease.py",
+    "tests/test_claim_reaper.py",
+    "tests/test_deadlock_watchdog.py",
+    "tests/test_claim_reaper_concurrency.py",
+    "tests/test_claim_reaper_hook.py",
+    "tests/test_state_sync_gate.py",
+    "tests/test_parallel_worktree_gate.py",
+    "tests/test_worktree_lifecycle_gate.py",
+    "tests/test_ui_state.py",
+    "tests/test_ui_design_assets.py",
+    "tests/test_doctor.py",
+    "tests/test_agent_identity_gate.py",
+    "tests/test_orchestrator_atomic_writes.py",
+    "tests/test_role_routing.py",
+    "tests/test_role_routing_wiring.py",
+    "tests/test_claim_guard.py",
+    "tests/test_scm_steward.py",
+    "tests/test_ui_console.py",
+    "tests/test_ui_console_e2e.py",
+    "tests/test_template_mirror_gate.py",
+    "tests/test_owner_governance_chain_parity.py",
+    "tests/test_regen_host_lock_if_needed.py",
+    "tests/test_lock_merge_driver.py",
+    "tests/test_template_smoke.py",
+    "tests/fixtures/host/agent_runtime.lock.json",
+    "reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md",
+    "reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md",
+    "reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md",
+    "reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md",
+    "reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md",
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md",
+    "reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md",
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md",
+    "reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md",
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md",
+    "reviews/W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md",
+    "reviews/W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md",
+    "reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md",
+    "reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md",
+    "reviews/INDEX.md"
+  ],
+  "mutation_revision": 4,
+  "scope_binding": {
+    "schema": "agent-runtime-claim-scope-binding/v1",
+    "digest": "22739b0de6f0c4d5e94a5e689736b39c3d4055359239fbd1b677dd2c6ac38ca5",
+    "components": {
+      "task": "b47821b7a2ef25ef475dcc726716ac48399c38073d792ec8b2b69378e4ca89f2",
+      "unit": "969aad353c09ed369723e8f579b25ef0a692ebc40897d2dc241fcc55aa5afd36",
+      "target_files": "f12799ff83e55bea90a935d31e0d72332f4d74fea8dd443985d3fb6a375d9d61",
+      "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    "bound_at": "2026-08-03T16:34:41+09:00"
+  },
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "recovered_from_status": "claimed",
+  "reaped_at": "2026-08-04T12:10:29+09:00",
+  "reaped_by": "claim_reaper",
+  "reaped_reason": "lease-expired"
+}

@@ -1,0 +1,29 @@
+{
+  "cause": "The selector removed only completed units, treated blocked history as open, and fell back to the first lexical unit whenever none had ready or in-progress status; it also ignored the task's canonical unit_spec pointer.",
+  "created_at": "2026-07-29T23:38:30+09:00",
+  "created_by": "codex-root-task-ar-648-007-planner",
+  "defect_signatures": [
+    "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1"
+  ],
+  "id": "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
+  "prevention": "Define an explicit runnable status matrix, prefer a runnable canonical unit_spec, skip blocked and terminal history, and fail closed with no claim command when no runnable unit exists; cover blocked-history plus new-planned-unit order in a producer-level regression.",
+  "prevention_refs": [
+    "scripts/taskset_dispatcher.py",
+    "src/agent_runtime/templates/project/scripts/taskset_dispatcher.py"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md"
+  ],
+  "status": "active",
+  "summary": "Canonical taskset planning selected the oldest blocked remediation unit instead of a newly registered planned unit and emitted a claim command for the frozen scope.",
+  "title": "Blocked unit history must never be a dispatch fallback",
+  "verification_refs": [
+    "tests/test_taskset_dispatcher.py"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-007"
+  ]
+}

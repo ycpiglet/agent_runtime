@@ -1,0 +1,218 @@
+{
+  "schema": "agent-runtime-migration-pilot-evidence/v1",
+  "host": "autofolio",
+  "pilot_id": "autofolio-v080-green-attempt-3",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+    "runtime_commit": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+    "runtime_tree": "bb1e2c9c79dde8de3775a4740e1cefa5022d92b7",
+    "template_tree": "52dbe6e673bf7c18314591d56c78de36bf88625a",
+    "template_scripts_tree": "bbd6035c01cf80bd9125bc2a540f4b23988937d9"
+  },
+  "source_migration": {
+    "source_runtime_ref": "v0.6.0",
+    "source_config_schema": "legacy-v1-implicit",
+    "source_unmanaged_count": 20,
+    "source_unmanaged_paths_sha256": "05cb779f1a578b23cc10fa6812cf4750647afcaa4b87d404773d4e9e86c28edf",
+    "attempt_2_manifest_reproduced": true
+  },
+  "adoption": {
+    "target_config_schema": "agent-runtime-config/v2",
+    "profiles": [
+      "core",
+      "web-content",
+      "security-service"
+    ],
+    "capabilities": [
+      "lifecycle",
+      "continuity",
+      "verification",
+      "compound",
+      "scribe",
+      "model-routing",
+      "web-content",
+      "security-service"
+    ],
+    "selected_template_files": 251,
+    "initial_reconcile": {
+      "safe_updates": 59,
+      "conflicts": 0,
+      "preserved": 170,
+      "excluded": 22
+    },
+    "final_reconcile": {
+      "safe_updates": 0,
+      "conflicts": 0,
+      "preserved": 237,
+      "excluded": 14
+    },
+    "ownership_counts": {
+      "managed": 229,
+      "seed_once": 8,
+      "host_owned": 14,
+      "generated": 0
+    },
+    "lock": {
+      "schema": "agent-runtime-lock/v2",
+      "migration": "current",
+      "package_version": "0.7.0",
+      "template_files": 251,
+      "template_digest": "sha256:d8a663bc65fac51f05d68e3db203311a79aeff8408a1dffb812e3ffaabaaf992",
+      "upstream_ref": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+      "finding_count": 0
+    },
+    "idempotence": {
+      "second_plan_apply_identical": true,
+      "before": {
+        "status_sha256": "c58630d953bb1427cee063c614ca7964a121db4fdb9b788e75301a888ec9e16c",
+        "tracked_diff_sha256": "f13da65bdb623015d7afc075525e060ce5c992f016bc1d5cd1466fbb3be3066b",
+        "untracked_paths_sha256": "98051718a1ef59be37c71416d397a69ba39b1676a52d1a49aaa366cfef2bfadd",
+        "untracked_content_sha256": "d0c07194f59885480796a6464af45d35908545c1caf7ce1bdddd5b9ce5a66767",
+        "config_sha256": "702ea25229c5385cfba4e868be06ffb6687d28ce4ecb21ca0744df04dd0ade1d",
+        "lock_sha256": "bee540472f70528e0117724b21a839124e752a2bfa9a094444d0ef165aceefad",
+        "hooks_sha256": "99fdf53bf2cb2b9a7fed0996748262cc9fbfc2b01ded8014c9c8c6e633d06518",
+        "scribe_projection_sha256": "e37fc4094dfdb03b18c70e9f2bc1c76db9d539ee2f9cfb7f7391cc3b7a12d63d"
+      },
+      "after": {
+        "status_sha256": "c58630d953bb1427cee063c614ca7964a121db4fdb9b788e75301a888ec9e16c",
+        "tracked_diff_sha256": "f13da65bdb623015d7afc075525e060ce5c992f016bc1d5cd1466fbb3be3066b",
+        "untracked_paths_sha256": "98051718a1ef59be37c71416d397a69ba39b1676a52d1a49aaa366cfef2bfadd",
+        "untracked_content_sha256": "d0c07194f59885480796a6464af45d35908545c1caf7ce1bdddd5b9ce5a66767",
+        "config_sha256": "702ea25229c5385cfba4e868be06ffb6687d28ce4ecb21ca0744df04dd0ade1d",
+        "lock_sha256": "bee540472f70528e0117724b21a839124e752a2bfa9a094444d0ef165aceefad",
+        "hooks_sha256": "99fdf53bf2cb2b9a7fed0996748262cc9fbfc2b01ded8014c9c8c6e633d06518",
+        "scribe_projection_sha256": "e37fc4094dfdb03b18c70e9f2bc1c76db9d539ee2f9cfb7f7391cc3b7a12d63d"
+      }
+    }
+  },
+  "seam_reduction": {
+    "source_unmanaged_count": 20,
+    "unclassified_count": 0,
+    "temporary_conflict_count": 0,
+    "dispositions": {
+      "managed": 6,
+      "seed_once": 5,
+      "host_owned": 9,
+      "generated": 0
+    },
+    "changed_source_path_count": 7,
+    "additional_reclaimed_conflicts": [
+      "scripts/status_alias.py",
+      "scripts/task_claim_dispatcher.py"
+    ]
+  },
+  "preservation": {
+    "protected_file_count": 1804,
+    "protected_paths_sha256": "f095e32b66baba5bcbaa1e0ec13b2810c1e8705d72581096175798c196eeefb9",
+    "protected_manifest_before": "bd97835ce0931b02154a05b538be7543022e070c2ba0f4ef4c76af1f0f49907d",
+    "protected_manifest_after": "bd97835ce0931b02154a05b538be7543022e070c2ba0f4ef4c76af1f0f49907d",
+    "protected_change_count": 0,
+    "primary_unchanged": true,
+    "control_unchanged": true,
+    "runtime_product_unchanged": true
+  },
+  "lifecycle": {
+    "compound": {
+      "search_count_before": 0,
+      "search_count_after": 1,
+      "check_status": "pass",
+      "record_id": "COMPOUND-20260730-104500-keep-claim-readiness-identical-across-entry-poin-d3f21753dc80",
+      "defect_signature": "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4",
+      "work_id": "TASK-AR-650",
+      "legacy_source_before": "8093c80f12c622bef231df1b9dfa1bd6ac0922d9790fb383304bc66c434c1089",
+      "legacy_source_after": "8093c80f12c622bef231df1b9dfa1bd6ac0922d9790fb383304bc66c434c1089"
+    },
+    "scribe": {
+      "projection_status": "fresh",
+      "readiness": "ready",
+      "closure_blocking": false,
+      "source_before": "99b65fccee3cf440b558dafb30083ab7a1e8532c28f68ce89c804cc38f8557b3",
+      "source_after": "99b65fccee3cf440b558dafb30083ab7a1e8532c28f68ce89c804cc38f8557b3",
+      "source_overdue": true,
+      "source_hot_count": 272,
+      "selected_count": 10,
+      "active_task_coverage": "unverified",
+      "compaction_performed": false
+    },
+    "hooks": {
+      "canonical_event_count": 5,
+      "canonical_command_count": 6,
+      "owner_command_preserved": true,
+      "legacy_duplicate_count": 2
+    }
+  },
+  "continuity": {
+    "evidence_mode": "contract-replay-only",
+    "product_work_dispatch_count": 0,
+    "product_claim_mutation_count": 0,
+    "parallel_contract_tests_passed": 9,
+    "reason": "migration-only-no-product-task"
+  },
+  "routing": {
+    "availability": "configured_unverified",
+    "live_probe_performed": false,
+    "equivalent_tier_warning_count": 6,
+    "actual_model_status": "unverified",
+    "provider_usage_verified": false,
+    "savings_claim": "unavailable"
+  },
+  "external_effects": {
+    "publish": 0,
+    "deploy": 0,
+    "origin_push": 0,
+    "host_commit": 0,
+    "credential_read": 0,
+    "credential_change": 0,
+    "network_delivery": 0,
+    "provider_call": 0,
+    "notification": 0,
+    "broker_call": 0,
+    "order": 0,
+    "package_install": 0,
+    "database_migration": 0,
+    "content_mutation": 0,
+    "product_mutation": 0,
+    "version_change": 0,
+    "tag": 0,
+    "package_build": 0
+  },
+  "findings": [
+    {
+      "code": "model-tier-execution-equivalence",
+      "priority": "P1"
+    },
+    {
+      "code": "scribe-source-overdue-active-task-unverified",
+      "priority": "P1"
+    },
+    {
+      "code": "legacy-hook-command-duplication",
+      "priority": "P2"
+    }
+  ],
+  "verification": {
+    "host_contract_tests_passed": 210,
+    "owner_governance_tests_passed": 13,
+    "parallel_worktree_tests_passed": 9,
+    "task_claim_tests_passed": 25,
+    "taskset_tests_passed": 85,
+    "wave_tests_passed": 59,
+    "hook_tests_passed": 19,
+    "runtime_targeted_tests_passed": 165,
+    "runtime_full_tests_passed": 2958,
+    "runtime_full_tests_skipped": 3,
+    "work_schema_findings": 0,
+    "doctor_blockers": 0,
+    "lock_findings": 0,
+    "compound_findings": 0,
+    "isolation_blockers": 0,
+    "template_mirror_findings": 0
+  },
+  "rollback": {
+    "strategy": "discard-disposable-target",
+    "primary_restore_required": false,
+    "control_restore_required": false,
+    "runtime_product_restore_required": false
+  }
+}

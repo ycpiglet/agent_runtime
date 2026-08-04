@@ -1,0 +1,182 @@
+{
+  "schema": "agent-runtime-migration-seam-ledger/v1",
+  "host": "autofolio",
+  "pilot_id": "autofolio-v080-green-attempt-3",
+  "host_commit": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+  "runtime_commit": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+  "source_unmanaged_count": 20,
+  "unclassified_count": 0,
+  "temporary_conflict_count": 0,
+  "counts": {
+    "managed": 6,
+    "seed_once": 5,
+    "host_owned": 9,
+    "generated": 0
+  },
+  "additional_reclaimed_conflicts": [
+    "scripts/status_alias.py",
+    "scripts/task_claim_dispatcher.py"
+  ],
+  "entries": [
+    {
+      "path": "AGENTS.md",
+      "disposition": "host_owned",
+      "before": "41433ac624a1f8661ef394d3888379cc2164ca3b02d2434bd033ff0c9f2dec8a",
+      "after": "41433ac624a1f8661ef394d3888379cc2164ca3b02d2434bd033ff0c9f2dec8a",
+      "changed": false,
+      "reason": "Autofolio operating and safety overlay remains host policy."
+    },
+    {
+      "path": "agents/roles.yml",
+      "disposition": "host_owned",
+      "before": "ef11be8886fc6d87b76514557fa1f18ada840ba4168a9f91b1a56d16e4699b9c",
+      "after": "ef11be8886fc6d87b76514557fa1f18ada840ba4168a9f91b1a56d16e4699b9c",
+      "changed": false,
+      "reason": "The project role registry maps Autofolio-specific responsibilities and paths."
+    },
+    {
+      "path": "schemas/task.schema.json",
+      "disposition": "host_owned",
+      "before": "ee44e3863d590b0751db238b8b823b424b5273f2c24d3ab77f6616efcbe8eaac",
+      "after": "ee44e3863d590b0751db238b8b823b424b5273f2c24d3ab77f6616efcbe8eaac",
+      "changed": false,
+      "reason": "Autofolio's product task schema remains an explicit host contract."
+    },
+    {
+      "path": "agents/lead_engineer/REPORTING-FORMAT.md",
+      "disposition": "host_owned",
+      "before": "ad1f77a2c8ce982543870f3bd351dd1ad3f3d12ec1012cfd345619b4ce3be69d",
+      "after": "ad1f77a2c8ce982543870f3bd351dd1ad3f3d12ec1012cfd345619b4ce3be69d",
+      "changed": false,
+      "reason": "The host reporting convention contains Autofolio-specific operating rules."
+    },
+    {
+      "path": "agents/project/SKILL-GOVERNANCE.md",
+      "disposition": "host_owned",
+      "before": "26913eefd63a8dcf4d8ae6e4694a4128ae96a037cc12c9d0342c106546f9bbca",
+      "after": "26913eefd63a8dcf4d8ae6e4694a4128ae96a037cc12c9d0342c106546f9bbca",
+      "changed": false,
+      "reason": "Skill authority and domain constraints are host policy."
+    },
+    {
+      "path": "CLAUDE.md",
+      "disposition": "seed_once",
+      "before": "8a890385f8417808041d7712519ebb321d3eb0ebada218c13eed185d0616f5cc",
+      "after": "8a890385f8417808041d7712519ebb321d3eb0ebada218c13eed185d0616f5cc",
+      "changed": false,
+      "reason": "Existing bootstrapped client guidance is retained once and not overwritten."
+    },
+    {
+      "path": "agents/project/NEXT-SESSION-POINTER.yml",
+      "disposition": "seed_once",
+      "before": "12882439c7939d7d89eac5dc990dffc24de18bdda51c0f6badd4355abb54f454",
+      "after": "12882439c7939d7d89eac5dc990dffc24de18bdda51c0f6badd4355abb54f454",
+      "changed": false,
+      "reason": "Live continuity state is preserved as host data."
+    },
+    {
+      "path": "agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md",
+      "disposition": "host_owned",
+      "before": "0a202069bcbff98f9e58f743a8464faa0071de1628c0883a0cf4a64b294e8d6e",
+      "after": "0a202069bcbff98f9e58f743a8464faa0071de1628c0883a0cf4a64b294e8d6e",
+      "changed": false,
+      "reason": "The evidence note is Autofolio research content."
+    },
+    {
+      "path": "scripts/task_identity.py",
+      "disposition": "host_owned",
+      "before": "67e45875b55dd30e70058cee8a567aa758c3bcf3e7f3cc1d173b36dd170a35ad",
+      "after": "67e45875b55dd30e70058cee8a567aa758c3bcf3e7f3cc1d173b36dd170a35ad",
+      "changed": false,
+      "reason": "Grandfathered pre-TASK-070 identity behavior remains an explicit host compatibility seam."
+    },
+    {
+      "path": ".codex/hooks.json",
+      "disposition": "seed_once",
+      "before": "6fabd616d18cc1e0529a509e7e542aebbd2b99ba6f74a19acc9cdd14e05f2917",
+      "after": "99fdf53bf2cb2b9a7fed0996748262cc9fbfc2b01ded8014c9c8c6e633d06518",
+      "changed": true,
+      "reason": "Canonical lifecycle dispatch was merged with the Autofolio authority hook and two test-pinned legacy compatibility commands."
+    },
+    {
+      "path": "scripts/agent_orchestrator.py",
+      "disposition": "managed",
+      "before": "c2c21d86217b477999147bc12733d18dab2999099656547f325bbd08ded924b4",
+      "after": "4cdf74188e7c7d1818ad40d6e0a17a96504d5783da5904c154d3fa0b44c1bd6e",
+      "changed": true,
+      "reason": "Runtime now carries atomic state persistence; compile, help, and spawn dry-run passed."
+    },
+    {
+      "path": "scripts/owner_governance_gate.py",
+      "disposition": "managed",
+      "before": "ac29ca845f420be3c56e54caae756116b4646c22c239e89a82c92d9d2b46d197",
+      "after": "2ad02d797d9aa076069d3ec38cdc89aefdf82c123800f179db3f6cd4c2ebbf08",
+      "changed": true,
+      "reason": "The Runtime consumer-host guard passes all 13 Autofolio owner tests."
+    },
+    {
+      "path": "scripts/parallel_worktree_gate.py",
+      "disposition": "managed",
+      "before": "ff7e226bf63c7c89606143cf6619854a8bcc429aeec306774f1550512fc4f278",
+      "after": "4683aa09c1184aebfae0578bb6a14490d1fcddc0d35e444b9be8987cd091dfbb",
+      "changed": true,
+      "reason": "Runtime continuity fallback and localized markers pass all 9 Autofolio tests."
+    },
+    {
+      "path": "scripts/taskset_dispatcher.py",
+      "disposition": "managed",
+      "before": "d44ae37418f649528dac513c0cd07bde354c1bd49ed13cdcec2a94c041438351",
+      "after": "2aa1256d42a3140ae5282b74e18c2cc27d720aeca85119a0de44e3a8dceaa41f",
+      "changed": true,
+      "reason": "Runtime canonical order, readiness, claim-first, and adoption behavior passes all 85 Autofolio tests."
+    },
+    {
+      "path": "scripts/wave_dispatcher.py",
+      "disposition": "managed",
+      "before": "fdeb614597850e6c411e0fb94d835e97dc55e65466779f83e755844e4ef9b722",
+      "after": "1721527376a7206d43903eb27eac244480127f569273f19ddfc9cdf03b2ba2b9",
+      "changed": true,
+      "reason": "Runtime wave preflight, dependency, and claim-first behavior passes all 59 Autofolio tests."
+    },
+    {
+      "path": "agents/project/WORK-SCHEMA.yml",
+      "disposition": "managed",
+      "before": "c073f7d19bf9610139c3edfeecf56f44c653c83755a7074f8de0a49d00957965",
+      "after": "986bc6997dc47c6faa0930dc1efc0e238cfa7744859a47bee89f43e3c5e4896c",
+      "changed": true,
+      "reason": "Runtime now owns ordered taskset membership and the host schema gate passes with zero findings."
+    },
+    {
+      "path": "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md",
+      "disposition": "seed_once",
+      "before": "19dc5ea83eb3fed65ec5385e315dea61ce9943580a1df47361a02451e5d46864",
+      "after": "19dc5ea83eb3fed65ec5385e315dea61ce9943580a1df47361a02451e5d46864",
+      "changed": false,
+      "reason": "The existing host example retains its real task identity."
+    },
+    {
+      "path": "agents/lead_engineer/compound_log.md",
+      "disposition": "seed_once",
+      "before": "8093c80f12c622bef231df1b9dfa1bd6ac0922d9790fb383304bc66c434c1089",
+      "after": "8093c80f12c622bef231df1b9dfa1bd6ac0922d9790fb383304bc66c434c1089",
+      "changed": false,
+      "reason": "Legacy Compound operating history remains host data and is not overwritten."
+    },
+    {
+      "path": "agents/lead_engineer/reports/INDEX.md",
+      "disposition": "host_owned",
+      "before": "915a859469990c6f65ddd5cd06740635a8bb3dfcd6b719d01b72acd020a1ab20",
+      "after": "915a859469990c6f65ddd5cd06740635a8bb3dfcd6b719d01b72acd020a1ab20",
+      "changed": false,
+      "reason": "The report index is accumulated Autofolio operating data."
+    },
+    {
+      "path": "agents/lead_engineer/reports/README.md",
+      "disposition": "host_owned",
+      "before": "4c7e8009829fb942733c07d9992270be84f56b2860e9611e28e20bb1bb428b38",
+      "after": "4c7e8009829fb942733c07d9992270be84f56b2860e9611e28e20bb1bb428b38",
+      "changed": false,
+      "reason": "The report-store convention is host operating data."
+    }
+  ]
+}

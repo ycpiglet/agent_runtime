@@ -1,0 +1,31 @@
+{
+  "cause": "The continuity gate inferred source and consumer documentation from file location alone and imposed one source-repository contract everywhere; it did not consume the v2 config and lock ownership evidence already produced by adoption.",
+  "created_at": "2026-07-30T02:22:53+09:00",
+  "created_by": "codex-root-task-ar-648-010",
+  "defect_signatures": [
+    "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab"
+  ],
+  "id": "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808",
+  "prevention": "Keep source-repository documentation strict, but activate generated-consumer behavior only when v2 config and v2 lock agree on project, upstream, and ownership; validate common rules from digest-matched managed AGENT_RUNTIME.md, keep seed-once documents strict, and enforce the pointer in every mode.",
+  "prevention_refs": [
+    "scripts/continuity_contract_gate.py",
+    "src/agent_runtime/templates/project/AGENT_RUNTIME.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-07-30-unit-task-ar-648-009.md",
+    "reviews/PILOT-BEAN-WIKI-v080-GREEN.md"
+  ],
+  "status": "active",
+  "summary": "A Bean Wiki installation passed portable pointer continuity but Owner governance then required Agent Runtime source-repository wording in an unmanaged README and explicitly host-owned AGENTS.md and CLAUDE.md.",
+  "title": "Portable governance must respect consumer document ownership",
+  "verification_refs": [
+    "tests/test_continuity_contract_gate.py",
+    "tests/test_owner_governance_consumer_host.py"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-010"
+  ]
+}

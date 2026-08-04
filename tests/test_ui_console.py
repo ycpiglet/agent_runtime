@@ -4175,6 +4175,13 @@ def _write_office_claim(root: Path, claim_id: str, instance_id: str, *, status: 
         "status": status,
         "claimed_at": "2026-06-14T10:30:00+09:00",
         "last_heartbeat": "2026-06-14T10:40:00+09:00",
+        "updated_at": "2026-06-14T10:40:00+09:00",
+        "expires_at": "2026-06-14T11:10:00+09:00",
+        "lease": {
+            "claimed_at": "2026-06-14T10:30:00+09:00",
+            "heartbeat_at": "2026-06-14T10:40:00+09:00",
+            "expires_at": "2026-06-14T11:10:00+09:00",
+        },
     }
     if mode is not None:
         record["mode"] = mode
@@ -4194,7 +4201,15 @@ def test_ui_console_office_map_view_registered_in_agents_sidebar(tmp_path):
     assert 'id="office-map-legend"' in html
 
 
-def test_ui_console_office_map_route_serves_world_areas_and_agents(tmp_path):
+def test_ui_console_office_map_route_serves_world_areas_and_agents(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        ui_state,
+        "_now_iso",
+        lambda: "2026-06-14T10:45:00+09:00",
+    )
     _write_office_instance(tmp_path, "inst-le", role="lead-engineer")
     _write_office_claim(tmp_path, "CLAIM-le", "inst-le", status="in_progress")
 
@@ -4269,9 +4284,17 @@ def test_ui_console_office_map_css_uses_tokens_not_raw_color(tmp_path):
     assert ".office-room.token-blue { border-top-color: var(--blue); }" in css
 
 
-def test_ui_console_office_map_in_meeting_agents_render_in_meeting_room(tmp_path):
+def test_ui_console_office_map_in_meeting_agents_render_in_meeting_room(
+    tmp_path,
+    monkeypatch,
+):
     # TASK-AR-361 integration through the route: a meeting-mode claim relocates
     # the agent to the meeting room and carries the meeting glyph.
+    monkeypatch.setattr(
+        ui_state,
+        "_now_iso",
+        lambda: "2026-06-14T10:45:00+09:00",
+    )
     _write_office_instance(tmp_path, "inst-le", role="lead-engineer")
     _write_office_claim(tmp_path, "CLAIM-meet", "inst-le", status="in_progress", mode="meeting")
 

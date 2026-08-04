@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-28T16:36:01+09:00
+updated_at: 2026-07-30T11:25:00+09:00
 origin_type: owner_request
 origin_ref: reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md
 created_by: codex-root-v080-planner
@@ -23,7 +23,7 @@ model_tier: worker_standard
 escalation_triggers:
   - ambiguity
   - data_integrity
-context: The current package reports v0.7.0 while README examples still pin v0.1.8, and local tag discovery can use stale refs. The open v0.8 release issue predates the adoption/enforcement pilot evidence.
+context: The current package reports v0.7.0 while README examples still pin v0.1.8, and local tag discovery can use stale refs. The open v0.8 release issue predates the adoption/enforcement pilot evidence. Autofolio attempt 3 passed the migration contract but exposed six release-critical operability gaps tracked by TASK-AR-652 through TASK-AR-657.
 inputs:
   - pyproject.toml
   - src/agent_runtime/__init__.py
@@ -36,6 +36,12 @@ target_files:
   - README.md
   - README.ko.md
   - CHANGELOG.md
+  - agents/lead_engineer/tasks/TASK-AR-652.md
+  - agents/lead_engineer/tasks/TASK-AR-653.md
+  - agents/lead_engineer/tasks/TASK-AR-654.md
+  - agents/lead_engineer/tasks/TASK-AR-655.md
+  - agents/lead_engineer/tasks/TASK-AR-656.md
+  - agents/lead_engineer/tasks/TASK-AR-657.md
   - scripts/release_cadence_trigger.py
   - scripts/release_version_cascade.py
   - tests/test_release_cadence_trigger.py
@@ -44,7 +50,7 @@ target_files:
 scope: Prepare and verify an RC commit and release plan. Final tag push and GitHub Release remain Owner-gated.
 acceptance:
   - No stale version or tag reference remains.
-  - All mandatory release evidence is exact-SHA linked.
+  - All mandatory release evidence is exact-SHA linked, including closed TASK-AR-652 through TASK-AR-657.
   - Skipped browser exploration is not accepted for RC.
   - No final release is published without explicit Owner approval.
 verification:
@@ -59,7 +65,7 @@ stop_condition: Stop before final tag push, GitHub Release publication, or closi
 
 ## Context
 
-The current package reports v0.7.0 while README examples still pin v0.1.8, and local tag discovery can use stale refs. The open v0.8 release issue predates the adoption/enforcement pilot evidence.
+The current package reports v0.7.0 while README examples still pin v0.1.8, and local tag discovery can use stale refs. The open v0.8 release issue predates the adoption/enforcement pilot evidence. Autofolio attempt 3 passed the migration contract but exposed six release-critical operability gaps tracked by TASK-AR-652 through TASK-AR-657.
 
 ## Inputs
 
@@ -76,6 +82,12 @@ The current package reports v0.7.0 while README examples still pin v0.1.8, and l
 - README.md
 - README.ko.md
 - CHANGELOG.md
+- agents/lead_engineer/tasks/TASK-AR-652.md
+- agents/lead_engineer/tasks/TASK-AR-653.md
+- agents/lead_engineer/tasks/TASK-AR-654.md
+- agents/lead_engineer/tasks/TASK-AR-655.md
+- agents/lead_engineer/tasks/TASK-AR-656.md
+- agents/lead_engineer/tasks/TASK-AR-657.md
 - scripts/release_cadence_trigger.py
 - scripts/release_version_cascade.py
 - tests/test_release_cadence_trigger.py
@@ -84,20 +96,21 @@ The current package reports v0.7.0 while README examples still pin v0.1.8, and l
 
 ## Scope
 
-Prepare and verify an RC commit and release plan. Final tag push and GitHub Release remain Owner-gated.
+Prepare and verify an RC commit and release plan only after TASK-AR-652 through TASK-AR-657 close. Final tag push and GitHub Release remain Owner-gated.
 
 ## Steps
 
-1. Require fresh remote tag discovery.
-2. Run the version and documentation cascade.
-3. Build and install the exact candidate in clean environments.
-4. Run full, browser, pilot, migration, and release gates.
-5. Produce the Owner approval packet.
+1. Verify TASK-AR-652 through TASK-AR-657 are closed with exact evidence and independent review.
+2. Require fresh remote tag discovery.
+3. Run the version and documentation cascade.
+4. Build and install the exact candidate in clean environments.
+5. Run full, browser, pilot, migration, and release gates.
+6. Produce the Owner approval packet.
 
 ## Acceptance Criteria
 
 - No stale version or tag reference remains.
-- All mandatory release evidence is exact-SHA linked.
+- All mandatory release evidence is exact-SHA linked, including closed TASK-AR-652 through TASK-AR-657.
 - Skipped browser exploration is not accepted for RC.
 - No final release is published without explicit Owner approval.
 
