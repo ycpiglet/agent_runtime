@@ -162,10 +162,21 @@ def _prepared_error(raw, *, env, root, expected_ref, old_oid, new_oid, expected_
     head_lines = [line for line in lines if line.endswith(" HEAD")]
     ref_lines = [line for line in lines if line == expected_ref_line]
     payload_ok = (
-        len(lines) == 2
-        and len(head_lines) == 1
-        and len(ref_lines) == 1
-        and head_lines[0] in accepted_head_lines
+        # The branch-ref line is mandatory and exact in every git version. It
+        # carries the compare-and-swap guarantee, so this is the check that
+        # actually seals the transaction.
+        len(ref_lines) == 1
+        # Nothing unexpected may ride along: every line is either that ref line
+        # or a recognised HEAD line.
+        and len(lines) == len(ref_lines) + len(head_lines)
+        and all(line in accepted_head_lines for line in head_lines)
+        # HEAD's placement is what changed across versions, measured directly:
+        #   2.34.1  prepared -> "<old> <new> HEAD" + "<old> <new> <ref>"
+        #   2.47.3  prepared -> "<zeros> <new> HEAD" + "<old> <new> <ref>"
+        #   2.54.0  preparing -> "<old> <new> HEAD"
+        #           prepared  -> "<old> <new> <ref>"      (HEAD absent here)
+        # So the prepared payload legitimately carries one HEAD line or none.
+        and len(head_lines) <= 1
     )
     if (
         symbolic.returncode != 0
@@ -187,9 +198,26 @@ def _prepared_error(raw, *, env, root, expected_ref, old_oid, new_oid, expected_
 
 
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in {"prepared", "committed", "aborted"}:
+    # git 2.54 added a fourth state, `preparing`, emitted before `prepared`.
+    # Measured against alpine/git:2.54.0: the hook is called with preparing,
+    # aborted, prepared, committed. Rejecting the unknown state returned 2 and
+    # aborted the ref update, so on git >= 2.54 every claim-commit transaction
+    # failed with "invalid state" - which is what blocked CI while every local
+    # git (2.34) and container (2.47) passed.
+    #
+    # Forward-compatibility is deliberate here: an unrecognised state now
+    # delegates and passes through rather than aborting the transaction. The
+    # sealing checks are gated on `prepared` and are unchanged, so a new state
+    # cannot bypass them - it can only fail to add a check that did not exist.
+    if len(sys.argv) != 2:
         print("claim-guard reference transaction: invalid state", file=sys.stderr)
         return 2
+    if sys.argv[1] not in {"preparing", "prepared", "committed", "aborted"}:
+        print(
+            f"claim-guard reference transaction: unknown state {sys.argv[1]!r}; "
+            "delegating without sealing checks",
+            file=sys.stderr,
+        )
     state = sys.argv[1]
     raw = sys.stdin.buffer.read()
     env = dict(os.environ)

@@ -107,6 +107,23 @@ def _write_runtime_claim(root: Path) -> tuple[Path, Path, Path]:
     return claim, handoff, log
 
 
+def _delegated_states(path: Path) -> list[str]:
+    """States the delegated hook observed, with git's `preparing` filtered out.
+
+    git 2.54 added a `preparing` notification ahead of `prepared`. These tests
+    assert the states the delegated hook is handed, and that contract is about
+    which phases claim-guard forwards - not about how many notifications the
+    installed git emits. Dropping `preparing` keeps the assertion meaningful on
+    every version instead of pinning one.
+    """
+
+    return [
+        line
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line != "preparing" and not line.startswith("preparing:")
+    ]
+
+
 def _install_runtime_gate_hook(
     root: Path,
     *,
@@ -825,9 +842,10 @@ def test_reference_transaction_hook_can_reject_claim_publication(
     assert _git(tmp_path, "rev-parse", "HEAD").stdout.strip() == before
     assert _reflog_rows(tmp_path, "HEAD") == head_reflog_before
     assert _reflog_rows(tmp_path, symbolic_ref) == branch_reflog_before
-    assert (tmp_path / "reference-transaction.log").read_text(
-        encoding="utf-8"
-    ).splitlines() == ["prepared", "aborted"]
+    assert _delegated_states(tmp_path / "reference-transaction.log") == [
+        "prepared",
+        "aborted",
+    ]
     assert not list(_transaction_dir(tmp_path).glob("*"))
 
 
@@ -1172,9 +1190,10 @@ def test_linked_worktree_uses_actual_head_lock_and_private_ref_context(
     assert not Path(observed["context"]).exists()
     assert _git(linked, "symbolic-ref", "-q", "HEAD").stdout.strip() == original_ref
     assert _git(linked, "rev-parse", "HEAD").stdout.strip() == result["commit"]
-    assert (linked / "reference-transaction.log").read_text(
-        encoding="utf-8"
-    ).splitlines() == ["prepared:blocked", "committed"]
+    assert _delegated_states(linked / "reference-transaction.log") == [
+        "prepared:blocked",
+        "committed",
+    ]
     assert (
         _git(linked, "rev-parse", "concurrent-branch").stdout.strip()
         == start_head
