@@ -28,6 +28,7 @@ import json
 import os
 import secrets
 import stat
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator, NamedTuple
@@ -35,6 +36,17 @@ from typing import Any, Iterator, NamedTuple
 
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400)
 _TEMP_ATTEMPTS = 128
+# Windows has no overwrite-atomic rename. MoveFileEx fails with
+# ERROR_ACCESS_DENIED / ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION while any
+# other handle to the destination is open - which every concurrent publisher
+# holds for the microseconds between open and close. POSIX rename simply cannot
+# fail that way, so the overwrite guarantee this module sells is only real on
+# Windows if the transient collision is waited out instead of surfaced. Bounded,
+# so a genuine ACL denial still propagates rather than spinning.
+_WINDOWS_REPLACE_TRANSIENT_WINERRORS = frozenset({5, 32, 33})
+_WINDOWS_REPLACE_DEADLINE_SECONDS = 10.0
+_WINDOWS_REPLACE_BACKOFF_SECONDS = 0.001
+_WINDOWS_REPLACE_BACKOFF_CEILING_SECONDS = 0.05
 
 
 class UnsafePathError(OSError):
@@ -283,6 +295,36 @@ def _unlink_sidecar(path: Path, name: str, parent_fd: int | None) -> None:
         (path.parent / name).unlink()
 
 
+def _windows_replace_is_transient(exc: OSError) -> bool:
+    winerror = getattr(exc, "winerror", None)
+    if winerror is not None:
+        return winerror in _WINDOWS_REPLACE_TRANSIENT_WINERRORS
+    return exc.errno == errno.EACCES
+
+
+def _replace_over_open_destination(source: Path, path: Path) -> None:
+    """Give Windows the overwrite atomicity POSIX rename provides for free.
+
+    A failed MoveFileEx leaves the sidecar intact, so retrying is safe: either
+    the destination handle closes and we publish, or the deadline expires and
+    the original error propagates untouched.
+    """
+
+    deadline = time.monotonic() + _WINDOWS_REPLACE_DEADLINE_SECONDS
+    delay = _WINDOWS_REPLACE_BACKOFF_SECONDS
+    while True:
+        try:
+            os.replace(source, path)
+            return
+        except OSError as exc:
+            if not _windows_replace_is_transient(exc):
+                raise
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, _WINDOWS_REPLACE_BACKOFF_CEILING_SECONDS)
+
+
 def _replace_sidecar(path: Path, name: str, parent_fd: int | None) -> None:
     if parent_fd is not None:
         # POSIX rename is overwrite-atomic and supports directory-relative
@@ -290,7 +332,11 @@ def _replace_sidecar(path: Path, name: str, parent_fd: int | None) -> None:
         os.rename(name, path.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
     else:
         _fallback_prepare_parent(path.parent)
-        os.replace(path.parent / name, path)
+        source = path.parent / name
+        if os.name == "nt":
+            _replace_over_open_destination(source, path)
+        else:
+            os.replace(source, path)
 
 
 def _publish_sidecar(path: Path, name: str, parent_fd: int | None) -> bool:

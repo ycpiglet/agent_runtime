@@ -111,7 +111,7 @@
       "scripts/agent_worker.py": "sha256:8a90f3fde3e7e57e308c233402df38813d43e2494c97b3dba87604e9c014c5e3",
       "scripts/allimbot.py": "sha256:e4105e80d98354c27c3a15450875fb07e53fddd2d9283b3d77ec999ba580416a",
       "scripts/ambiguity_scan.py": "sha256:9d34915e12ddc4249de63d36ddcdd5afd06ca90e1e0d66ae002fe04231159ad5",
-      "scripts/atomic_io.py": "sha256:976cfa522fdf559f269b25ad19f6bbca181d4d8466dc3b3c976675ba818032ca",
+      "scripts/atomic_io.py": "sha256:0265c13f147d0d20d12ce3fc24521dd8dfe5bb259dab322737269927b9a285e7",
       "scripts/attribution_gate.py": "sha256:be7d9ba6d7d48a3914d55c2784ab51ab79642a62f4621eb06af88a0857050848",
       "scripts/auto_dispatch.py": "sha256:ef3b38c5670b61908b39efe82e210af3927cf9b5119e62af2cb1abfd443cd1c4",
       "scripts/auto_merge.py": "sha256:0fe30e17d778bcc040adcfaccf8dbac7ed53d5f86581552e397a5fcccf88a69b",
@@ -519,7 +519,7 @@
     "seeded": [
       "owner-docs.yml"
     ],
-    "template_digest": "sha256:0163d8944b9a0e111273e54e41428d4d3fbd3403b37f98ef218e3a64c5a80d2e",
+    "template_digest": "sha256:120438df51fcb4e34db01d06c42a9480411d5092b358ba5190ce258220497ac5",
     "template_files": 254
   },
   "profiles": [

@@ -10,6 +10,7 @@ Invariants under test:
 
 from __future__ import annotations
 
+import errno
 import json
 import os
 import stat
@@ -543,6 +544,143 @@ def test_concurrent_overwrite_writers_publish_only_complete_payloads(tmp_path: P
     assert failures == []
     assert target.read_text(encoding="utf-8") in payloads
     assert _tmp_siblings(target) == []
+
+
+def _transient(winerror: int | None) -> OSError:
+    """The shape Windows raises while another handle holds the destination."""
+
+    exc = OSError(errno.EACCES, "Access is denied")
+    if winerror is not None:
+        exc.winerror = winerror
+    return exc
+
+
+# ERROR_ACCESS_DENIED, ERROR_SHARING_VIOLATION, ERROR_LOCK_VIOLATION, and the
+# errno-only shape seen when winerror is unavailable.
+@pytest.mark.parametrize("winerror", [5, 32, 33, None])
+def test_windows_replace_waits_out_a_transient_destination_handle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    winerror: int | None,
+) -> None:
+    """Runs on every platform: the Windows branch is otherwise never exercised."""
+
+    source = tmp_path / "sidecar"
+    target = tmp_path / "published"
+    source.write_text("payload\n", encoding="utf-8")
+    attempts: list[int] = []
+
+    real_replace = os.replace
+
+    def flaky_replace(src: object, dst: object) -> None:
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise _transient(winerror)
+        real_replace(src, dst)
+
+    monkeypatch.setattr(atomic_io.os, "replace", flaky_replace)
+    monkeypatch.setattr(atomic_io.time, "sleep", lambda _seconds: None)
+
+    atomic_io._replace_over_open_destination(source, target)
+
+    assert len(attempts) == 3
+    assert target.read_text(encoding="utf-8") == "payload\n"
+    assert not source.exists()
+
+
+# ERROR_PRIVILEGE_NOT_HELD and a plain EPERM: neither clears by waiting.
+@pytest.mark.parametrize(
+    ("winerror", "err"),
+    [(1314, errno.EACCES), (None, errno.EPERM)],
+)
+def test_windows_replace_never_retries_a_genuine_denial(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    winerror: int | None,
+    err: int,
+) -> None:
+    """A retry that swallows a real ACL failure would hide a broken deployment."""
+
+    source = tmp_path / "sidecar"
+    source.write_text("payload\n", encoding="utf-8")
+    attempts: list[int] = []
+
+    def denying_replace(src: object, dst: object) -> None:
+        attempts.append(1)
+        exc = OSError(err, "denied")
+        if winerror is not None:
+            exc.winerror = winerror
+        raise exc
+
+    monkeypatch.setattr(atomic_io.os, "replace", denying_replace)
+    monkeypatch.setattr(atomic_io.time, "sleep", lambda _seconds: None)
+
+    with pytest.raises(OSError) as caught:
+        atomic_io._replace_over_open_destination(source, tmp_path / "published")
+
+    assert caught.value.errno == err
+    assert attempts == [1]
+
+
+def test_windows_replace_retry_is_deadline_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A destination handle that never closes must surface, not spin forever."""
+
+    source = tmp_path / "sidecar"
+    source.write_text("payload\n", encoding="utf-8")
+    attempts: list[int] = []
+    clock = {"now": 0.0}
+
+    def stuck_replace(src: object, dst: object) -> None:
+        attempts.append(1)
+        raise _transient(32)
+
+    monkeypatch.setattr(atomic_io.os, "replace", stuck_replace)
+    monkeypatch.setattr(atomic_io.time, "monotonic", lambda: clock["now"])
+    monkeypatch.setattr(
+        atomic_io.time,
+        "sleep",
+        lambda seconds: clock.__setitem__("now", clock["now"] + max(seconds, 1e-3)),
+    )
+
+    with pytest.raises(OSError) as caught:
+        atomic_io._replace_over_open_destination(source, tmp_path / "published")
+
+    assert getattr(caught.value, "winerror", None) == 32
+    assert clock["now"] >= atomic_io._WINDOWS_REPLACE_DEADLINE_SECONDS
+    # Backoff caps out, so the deadline is reached in a bounded number of tries.
+    assert len(attempts) < 1000
+    assert source.exists(), "a failed replace must leave the sidecar recoverable"
+
+
+def test_replace_sidecar_routes_windows_through_the_bounded_retry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Pins the dispatch itself: the helper is useless if nothing calls it."""
+
+    target = tmp_path / "published"
+    name = "sidecar.tmp"
+    (tmp_path / name).write_text("payload\n", encoding="utf-8")
+    attempts: list[int] = []
+    real_replace = os.replace
+
+    def flaky_replace(src: object, dst: object) -> None:
+        attempts.append(1)
+        if len(attempts) < 2:
+            raise _transient(32)
+        real_replace(src, dst)
+
+    monkeypatch.setattr(atomic_io.os, "name", "nt")
+    monkeypatch.setattr(atomic_io.os, "replace", flaky_replace)
+    monkeypatch.setattr(atomic_io.time, "sleep", lambda _seconds: None)
+
+    atomic_io._replace_sidecar(target, name, None)
+
+    assert attempts == [1, 1], "the sharing violation was surfaced, not waited out"
+    assert target.read_text(encoding="utf-8") == "payload\n"
 
 
 def test_concurrent_exclusive_publish_has_exactly_one_winner(tmp_path: Path) -> None:
