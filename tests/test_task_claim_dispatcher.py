@@ -7010,3 +7010,138 @@ def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted
         f"{operation} refused an ordinary pre-fix claim as drifted: "
         + (result.stderr or result.stdout)
     )
+
+
+# --- The symmetry invariant: whatever `create` accepts, `heartbeat` must too ---
+#
+# Three separate defects were each discovered as their own field - stop_condition,
+# out-of-spec --target-file, non-canonical unit_spec - and each got its own fix at
+# its own layer. They are one bug: create and the mutation path disagreeing about
+# what a valid claim looks like. This matrix is the invariant, so a fourth field
+# cannot repeat it silently.
+
+
+@pytest.mark.parametrize(
+    "label, extra_create_args, mutate_spec",
+    [
+        ("plain", (), False),
+        ("explicit-target-inside-spec", ("--target-file", "scripts/routing_second.py"), False),
+        ("nested-unit-spec", (), True),
+    ],
+)
+def test_every_claim_create_accepts_can_immediately_heartbeat(
+    tmp_path: Path, label: str, extra_create_args: tuple, mutate_spec: bool
+) -> None:
+    task_id = f"TASK-AR-655sym{label.replace('-', '')}"
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-sym-{label}")
+    unit_rel = _write_routing_work(linked, task_id)
+
+    if mutate_spec:
+        nested_rel = (
+            f"agents/lead_engineer/tasks/units/{task_id}/nested/UNIT-{task_id}-001.md"
+        )
+        nested = linked / nested_rel
+        nested.parent.mkdir(parents=True, exist_ok=True)
+        nested.write_text((linked / unit_rel).read_text(encoding="utf-8"), encoding="utf-8")
+        unit_rel = nested_rel
+
+    result = _run_dispatcher(
+        linked, "create",
+        "--task-id", task_id,
+        "--agent-role", "lead-engineer",
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--worktree-path", ".",
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", f"sym{label[:6].replace('-','')}",
+        *extra_create_args,
+        "--json",
+    )
+    if result.returncode != 0:
+        # Refusing at create is a legitimate answer; being born unusable is not.
+        return
+    claim = json.loads(result.stdout)["claim"]
+
+    beat = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+    assert beat.returncode == 0, (
+        f"{label}: create accepted a claim that heartbeat refuses, so it was "
+        "born unusable: " + (beat.stderr or beat.stdout)
+    )
+
+
+def test_the_stop_condition_tolerance_extinguishes_itself(tmp_path: Path) -> None:
+    """Grandfathering must be once, not forever.
+
+    A tolerated renew that leaves the claim empty keeps it in the tolerated
+    state for life, and turns "legacy claims are grandfathered" into "empty is
+    permanently acceptable" - reachable forward by clearing a boundary that was
+    previously set.
+    """
+    task_id = "TASK-AR-655extinguish"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-extinguish")
+    path, claim = _spec_backed_claim(linked, task_id, "exting", minutes="120")
+    dispatcher = _load_dispatcher_module()
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["stop_condition"] = ""
+    payload["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=payload["task_id"], unit_id=payload["unit_id"],
+        unit_spec=payload["unit_spec"], target_files=payload["target_files"],
+        stop_condition="", bound_at=payload["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--expected-scope-digest", payload["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+
+    healed = json.loads(path.read_text(encoding="utf-8"))
+    assert healed["stop_condition"], (
+        "the tolerated renew left the claim empty, so the tolerance never "
+        "expires and clearing the boundary stays permanently acceptable"
+    )
+    assert healed["stop_condition"] == "Stop before anything irreversible"
+
+    # Residual, recorded rather than papered over: "never recorded" and
+    # "cleared" are indistinguishable in claim-local state, so a determined
+    # tamperer can re-enter the tolerated state by clearing the boundary again.
+    # A marker saying "already healed" would itself be strippable - the same
+    # door as the overlay flag - so the guarantee claimed here is the one that
+    # is actually achievable: the tolerated population shrinks monotonically
+    # with ordinary use, and a boundary changed to a DIFFERENT value is still
+    # refused outright.
+    tampered = dict(healed)
+    tampered["stop_condition"] = "no limits whatsoever"
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"], unit_id=tampered["unit_id"],
+        unit_spec=tampered["unit_spec"], target_files=tampered["target_files"],
+        stop_condition=tampered["stop_condition"],
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    again = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", str(tampered["mutation_revision"]),
+        "--expected-scope-digest", tampered["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+    assert again.returncode != 0, "a rewritten stop boundary was tolerated"

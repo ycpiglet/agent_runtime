@@ -690,6 +690,13 @@ def _claim_creation_errors(
     records: list[tuple[Path, dict[str, Any]]],
 ) -> list[str]:
     errors: list[str] = []
+    # Enforced at birth as well as at every mutation. A claim that create
+    # accepts but heartbeat refuses is born unusable, and nothing says so until
+    # the first beat - the same create-versus-mutate disagreement that produced
+    # the stop_condition and out-of-spec --target-file defects.
+    spec_error = _non_canonical_unit_spec_error(claim)
+    if spec_error:
+        errors.append(spec_error)
     if not _is_orchestrator_claim(claim):
         worktree_value = str(claim.get("worktree_path") or "").strip()
         if not worktree_value:
@@ -2665,18 +2672,10 @@ def _validate_mutation_authority(
     if operation == "heartbeat":
         # The spec pointer is itself claim content, so trusting it lets a
         # second file with matching ids stand in as the authority - the same
-        # mistake as the overlay flag, one level up. Pin it to the canonical
-        # location instead of believing the claim's own pointer.
-        canonical = (
-            f"agents/lead_engineer/tasks/units/{claim.get('task_id')}/"
-            f"{claim.get('unit_id')}.md"
-        )
-        declared = str(claim.get("unit_spec") or "").strip()
-        if declared and declared != canonical:
-            raise ValueError(
-                f"claim unit_spec {declared} is not the canonical spec for "
-                f"{claim.get('unit_id')}; expected {canonical}"
-            )
+        # mistake as the overlay flag, one level up.
+        spec_error = _non_canonical_unit_spec_error(claim)
+        if spec_error:
+            raise ValueError(spec_error)
         # Compare the target_files component only. `create` does not copy the
         # spec's stop_condition into the claim, so comparing whole digests
         # reports drift on every real claim from the moment it is created -
@@ -2709,6 +2708,35 @@ def _persisted_scope_binding(claim: dict[str, Any]) -> dict[str, Any]:
     if binding != expected:
         raise ValueError("claim scope binding is invalid")
     return json.loads(json.dumps(binding, ensure_ascii=False))
+
+
+def _canonical_unit_spec(task_id: object, unit_id: object) -> str:
+    """The one location a unit spec may live.
+
+    Already hardcoded in work.py, work_schema_gate.py,
+    verification_freshness_gate.py, and security_service.py; centralised here
+    so `create` and `_validate_mutation_authority` cannot disagree about it.
+    """
+
+    return f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+
+
+def _non_canonical_unit_spec_error(claim: dict[str, Any]) -> str | None:
+    declared = str(claim.get("unit_spec") or "").strip()
+    task_id = str(claim.get("task_id") or "").strip()
+    unit_id = str(claim.get("unit_id") or "").strip()
+    if not declared or not task_id or not unit_id:
+        # No canonical name can be computed without both ids, and a claim may
+        # legitimately carry a unit_spec without a unit_id. Refusing here would
+        # be a false positive of exactly the kind this predicate exists to stop.
+        return None
+    canonical = _canonical_unit_spec(task_id, unit_id)
+    if declared == canonical:
+        return None
+    return (
+        f"claim unit_spec {declared} is not the canonical spec for "
+        f"{claim.get('unit_id')}; expected {canonical}"
+    )
 
 
 def _comparable_stop_condition(claim: dict[str, Any], spec_stop: object) -> str:
@@ -2957,22 +2985,43 @@ def _cmd_claim_mutation_locked(
                 "claim scope digest mismatch: expected persisted scope binding"
             )
         renewed_targets, renewed_stop = _current_scope_values(root, claim)
-        renewed_stop = _comparable_stop_condition(claim, renewed_stop)
+        # Grandfather a pre-fix claim once, then heal it. Leaving it empty kept
+        # it tolerated for life and made clearing a boundary permanently
+        # acceptable, reachable forward as well as backward. Writing the spec's
+        # boundary in on the first tolerated renew means any later clearing is
+        # ordinary drift again.
+        inherited_stop = _comparable_stop_condition(claim, renewed_stop)
+        heals_stop_condition = inherited_stop != str(renewed_stop or "")
         candidate_binding = _binding_for_claim(
             claim,
             bound_at=now_text,
             target_files=renewed_targets,
-            stop_condition=renewed_stop,
+            stop_condition=inherited_stop,
         )
         changed = str(candidate_binding["digest"]) != old_digest
+        if heals_stop_condition and not changed:
+            # Same scope, but the claim never recorded the boundary. Adopt the
+            # spec's text and re-mint so the tolerance is spent.
+            renewed_stop = str(renewed_stop or "")
+            candidate_binding = _binding_for_claim(
+                claim,
+                bound_at=now_text,
+                target_files=renewed_targets,
+                stop_condition=renewed_stop,
+            )
+        else:
+            renewed_stop = inherited_stop
         replan_ref: str | None = None
         if changed:
             replan_ref = _accepted_replan_ref(root, claim, args.replan_ref)
+            new_binding = candidate_binding
+        elif heals_stop_condition:
             new_binding = candidate_binding
         else:
             new_binding = old_binding
         scope_change = {
             "changed": changed,
+            "healed_stop_condition": heals_stop_condition and not changed,
             "old_digest": old_digest,
             "new_digest": str(new_binding["digest"]),
             "replan_ref": replan_ref,
@@ -2995,7 +3044,7 @@ def _cmd_claim_mutation_locked(
     if progress is not None:
         updated.update(progress)
     if scope_change is not None:
-        if scope_change["changed"]:
+        if scope_change["changed"] or scope_change.get("healed_stop_condition"):
             assert renewed_targets is not None and renewed_stop is not None
             updated["target_files"] = renewed_targets
             updated["stop_condition"] = renewed_stop
