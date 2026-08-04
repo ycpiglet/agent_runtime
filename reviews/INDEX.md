@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-04T13:59:20+09:00
-record_count: 1337
+generated_at: 2026-08-04T14:07:11+09:00
+record_count: 1338
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1337` review and evidence records under `reviews/`.
+- Summary: indexed `1338` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1337` files |
+| Reviews covered | pass | `1338` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1368,6 +1368,7 @@ record_count: 1337
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | blocked | fail | TASK-AR-655 projection-binding repair final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | blocked | block | TASK-AR-655 type-strict pointer final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md` | `W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final` | md | accepted | pass | TASK-AR-659 owner-bound recovery commands final independent W4b |
+| `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md` | `W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final` | md | accepted | pass | TASK-AR-655 lease truthfulness final independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

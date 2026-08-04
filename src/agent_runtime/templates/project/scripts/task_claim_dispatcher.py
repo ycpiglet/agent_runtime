@@ -733,6 +733,15 @@ def _scope_contract_error(
     the footprint clause there would break the command's purpose. The canonical
     clause still applies, because renew also trusts ``claim["unit_spec"]`` and
     that pointer is precisely what the pin exists to distrust.
+
+    This is safe only because renew is not the *lenient* path: it refuses a
+    widened footprint on stricter grounds via ``_accepted_replan_ref``. That
+    coupling is load-bearing and lives in a different mechanism, so if the
+    replan gate is ever weakened, renew silently becomes the soft sibling and
+    nothing here would notice. The guards are
+    ``test_renew_refuses_single_component_drift_without_replan_or_mutation``,
+    ``test_renew_refuses_scope_drift_without_matching_accepted_replan``, and
+    ``test_renew_still_reconciles_ordinary_scope_drift``.
     """
 
     spec_error = _non_canonical_unit_spec_error(claim)

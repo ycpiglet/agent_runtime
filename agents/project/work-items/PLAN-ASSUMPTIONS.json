@@ -1049,7 +1049,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
-          "value": "780f5ef1cd3f13ff364e3b32a6ab89d9d2255764a30947a5f8bdde8dc4a4faf5"
+          "value": "1231c8c49943e15fe8c1daee955cbd41709f918e878fef0a1b0b2960d9433d3e"
         },
         {
           "kind": "sha256",
@@ -1114,12 +1114,12 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "157dfcc73dd7427da4b28e5def526505fe6abde86cf415d7f1d702b2b4757f67"
+          "value": "28c99d820d6f1426c0ff2b8d07dc3cb1f0d3d0dc544999f57e0bb7f4c8a64699"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
-          "value": "157dfcc73dd7427da4b28e5def526505fe6abde86cf415d7f1d702b2b4757f67"
+          "value": "28c99d820d6f1426c0ff2b8d07dc3cb1f0d3d0dc544999f57e0bb7f4c8a64699"
         },
         {
           "kind": "sha256",
@@ -1309,11 +1309,11 @@
         {
           "kind": "sha256",
           "path": "tests/fixtures/host/agent_runtime.lock.json",
-          "value": "0320d1eb339a2055427997ef36cae74cebf31be1f894b5508f263231ee70e193"
+          "value": "d0da98531fa63dcd9bace5bc95b7f80574de4793cb4865ab66d7c1ebaf1aabf9"
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md",
-      "recorded_at": "2026-08-04T13:59:20+09:00",
+      "recorded_at": "2026-08-04T14:07:12+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-04T13:59:20+09:00"
+  "updated_at": "2026-08-04T14:07:12+09:00"
 }
