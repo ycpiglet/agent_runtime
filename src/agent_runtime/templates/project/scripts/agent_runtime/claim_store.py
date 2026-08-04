@@ -81,6 +81,11 @@ MARKER_SCHEMA = "agent-runtime-task-claim-store/v1"
 WITNESS_SCHEMA = "agent-runtime-task-claim/v1"
 MARKER_MAX_BYTES = 4096
 CLAIM_MAX_BYTES = 256 * 1024
+# Explicit nesting bound. Rejecting deeply-nested payloads used to depend on
+# json.loads raising RecursionError, which CPython 3.12+ no longer does at the
+# depths these payloads use - so the bound held on 3.10/3.11 and silently
+# vanished on 3.12. A parser side effect is not a limit; this is.
+CLAIM_MAX_JSON_DEPTH = 64
 JSON_MAX_INTEGER_DIGITS = 256
 CLAIM_IDENTITY_MAX_CHARS = 160
 MAX_STORE_ENTRIES = 4096
@@ -595,9 +600,25 @@ def _unique_json_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
     return result
 
 
+def _json_depth_exceeds(value: object, limit: int) -> bool:
+    """Iterative depth probe: no recursion, so no interpreter limit to inherit."""
+
+    stack: list[tuple[object, int]] = [(value, 1)]
+    while stack:
+        node, depth = stack.pop()
+        # Depth counts container nesting only; a scalar leaf is not a level.
+        if not isinstance(node, (Mapping, list, tuple)):
+            continue
+        if depth > limit:
+            return True
+        children = node.values() if isinstance(node, Mapping) else node
+        stack.extend((child, depth + 1) for child in children)
+    return False
+
+
 def _decode_json(payload: bytes, label: str) -> object:
     try:
-        return json.loads(
+        parsed = json.loads(
             payload.decode("utf-8"),
             parse_int=_bounded_json_int,
             parse_float=_bounded_json_float,
@@ -606,6 +627,9 @@ def _decode_json(payload: bytes, label: str) -> object:
         )
     except (UnicodeError, json.JSONDecodeError, RecursionError, ValueError) as exc:
         raise ClaimStoreError(f"claim-store {label} JSON is malformed") from exc
+    if _json_depth_exceeds(parsed, CLAIM_MAX_JSON_DEPTH):
+        raise ClaimStoreError(f"claim-store {label} JSON is malformed")
+    return parsed
 
 
 def _validate_claim_core_identities(

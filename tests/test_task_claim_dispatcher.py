@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from agent_runtime import knowledge_records
+from agent_runtime import claim_store, knowledge_records
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -332,6 +332,12 @@ def test_create_one_minute_lease_preserves_exact_boundary(tmp_path: Path) -> Non
     assert claim["lease"]["expires_at"] == claim["expires_at"]
 
 
+# One level past the declared bound. Derived, never hardcoded: the old fixtures
+# used 1100/1200 to overflow CPython's recursion limit, so the refusal was a
+# parser side effect that silently disappeared on 3.12+.
+_OVER_DEPTH = claim_store.CLAIM_MAX_JSON_DEPTH + 1
+
+
 def _adversarial_claim_bytes(
     payload_kind: str,
     *,
@@ -351,9 +357,9 @@ def _adversarial_claim_bytes(
         return (
             json.dumps(base)[:-1]
             + ',"nested":'
-            + "[" * 1100
+            + "[" * _OVER_DEPTH
             + "0"
-            + "]" * 1100
+            + "]" * _OVER_DEPTH
             + "}"
         ).encode("utf-8")
     if payload_kind == "invalid-utf8":

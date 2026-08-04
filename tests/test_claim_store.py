@@ -776,6 +776,57 @@ def test_shared_claim_reader_rejects_nonstandard_json_values(
         claim_store.read_claim_payload(path)
 
 
+def _claim_with_nesting(root: Path, claim_id: str, depth: int) -> Path:
+    """Write a valid claim whose one extra field nests exactly `depth` deep."""
+
+    path = _write_claim(root, claim_id)
+    base = path.read_text(encoding="utf-8").rstrip()
+    assert base.endswith("}")
+    # depth counts the claim object itself, so the array nests depth-1 times.
+    arms = depth - 1
+    path.write_text(
+        base[:-1] + ',"nested":' + "[" * arms + "0" + "]" * arms + "}",
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_claim_json_nesting_at_the_declared_bound_is_accepted(
+    tmp_path: Path,
+) -> None:
+    """The bound must admit everything up to it, or it is a silent outage."""
+
+    root = _runtime_root(tmp_path)
+    path = _claim_with_nesting(
+        root, "CLAIM-depth-at-bound", claim_store.CLAIM_MAX_JSON_DEPTH
+    )
+
+    payload = claim_store.read_claim_payload(path)
+
+    assert payload["claim_id"] == "CLAIM-depth-at-bound"
+
+
+def test_claim_json_nesting_past_the_declared_bound_is_refused(
+    tmp_path: Path,
+) -> None:
+    """Refusal must come from the declared bound, not the recursion limit.
+
+    The bound is enforced iteratively, so this holds on every interpreter -
+    unlike the old fixtures, which nested ~1100 deep to provoke a
+    RecursionError and quietly stopped refusing on CPython 3.12+.
+    """
+
+    root = _runtime_root(tmp_path)
+    path = _claim_with_nesting(
+        root, "CLAIM-depth-past-bound", claim_store.CLAIM_MAX_JSON_DEPTH + 1
+    )
+    # Far under the byte bound: depth is the only thing being refused.
+    assert path.stat().st_size < claim_store.CLAIM_MAX_BYTES
+
+    with pytest.raises(claim_store.ClaimStoreError):
+        claim_store.read_claim_payload(path)
+
+
 def test_initialization_is_idempotent_but_never_rebinds_an_existing_pair(
     tmp_path: Path,
 ) -> None:

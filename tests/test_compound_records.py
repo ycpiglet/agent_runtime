@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from agent_runtime import knowledge_records as records
+from agent_runtime import claim_store, knowledge_records as records
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -1082,7 +1082,11 @@ def test_work_close_bounds_adversarial_active_claim_json_without_mutation(
         base = claim_path.read_text(encoding="utf-8").rstrip()
         assert base.endswith("}")
         if adversarial_field == "deep-nesting":
-            raw_value = "[" * 1200 + "0" + "]" * 1200
+            raw_value = (
+                "[" * (claim_store.CLAIM_MAX_JSON_DEPTH + 1)
+                + "0"
+                + "]" * (claim_store.CLAIM_MAX_JSON_DEPTH + 1)
+            )
         else:
             raw_value = "9" * 5000
         raw = (
