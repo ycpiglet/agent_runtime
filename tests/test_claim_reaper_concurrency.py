@@ -9,8 +9,10 @@ supervisor restart cap is enforced at its boundary.
 """
 
 import json
+import shutil
 import sys
 import threading
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -25,12 +27,41 @@ NOW = "2026-06-14T12:00:00+09:00"
 NOW_DT = datetime(2026, 6, 14, 12, 0, 0, tzinfo=timezone(timedelta(hours=9)))
 
 
+def _claim_store_markers(root: Path) -> tuple[Path, Path]:
+    return (
+        root / "agents" / "runtime" / "task_claims" / ".claim-store",
+        claim_reaper.claim_store.outer_marker_path(root),
+    )
+
+
+def _ensure_claim_store(root: Path, witness_claim_id: str) -> None:
+    inner, outer = _claim_store_markers(root)
+    raw = (
+        json.dumps(
+            {
+                "schema": claim_reaper.claim_store.MARKER_SCHEMA,
+                "generation_id": "11111111-1111-4111-8111-111111111111",
+                "witness_claim_id": witness_claim_id,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+    for marker in (inner, outer):
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        if not marker.is_file():
+            marker.write_bytes(raw)
+    assert inner.read_bytes() == outer.read_bytes()
+
+
 def _write_claim(tmp_path: Path, claim_id: str, *, status: str = "claimed",
                  expires_at: str | None = "2026-06-14T11:00:00+09:00",
                  agent_role: str = "lead-engineer", task_id: str = "TASK-AR-1") -> Path:
     claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
     claim_dir.mkdir(parents=True, exist_ok=True)
     payload = {
+        "schema": "agent-runtime-task-claim/v1",
         "claim_id": claim_id, "task_id": task_id, "agent_role": agent_role,
         "agent_instance_id": f"ai-{claim_id}", "status": status,
         "worktree_path": f".worktrees/{task_id}", "branch": f"codex/{task_id}",
@@ -40,6 +71,7 @@ def _write_claim(tmp_path: Path, claim_id: str, *, status: str = "claimed",
         payload["lease"] = {"expires_at": expires_at, "heartbeat_at": expires_at}
     path = claim_dir / f"{claim_id}.json"
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    _ensure_claim_store(tmp_path, claim_id)
     return path
 
 
@@ -112,6 +144,146 @@ def test_concurrent_reapers_reap_single_claim_exactly_once(tmp_path):
     final = _load(path)  # must be valid JSON (no corruption) and expired
     assert final["status"] == "expired"
     assert final["recovered_from_status"] == "claimed"
+
+
+def test_concurrent_apply_holds_store_lock_through_revalidation_and_write(
+    tmp_path,
+    monkeypatch,
+):
+    _write_claim(tmp_path, "CLAIM-dead-locked")
+    thread_state = threading.local()
+    observation_lock = threading.Lock()
+    observations = {"verified": 0, "written": 0}
+    real_store_lock = claim_reaper.claim_store.store_lock
+    real_verify_snapshot = claim_reaper.claim_store.verify_snapshot
+    real_write = claim_reaper._write_json_atomic
+
+    @contextmanager
+    def observed_store_lock(root, *args, **kwargs):
+        with real_store_lock(root, *args, **kwargs):
+            thread_state.depth = getattr(thread_state, "depth", 0) + 1
+            try:
+                yield
+            finally:
+                thread_state.depth -= 1
+
+    def observed_verify(root, snapshot):
+        assert getattr(thread_state, "depth", 0) > 0
+        with observation_lock:
+            observations["verified"] += 1
+        return real_verify_snapshot(root, snapshot)
+
+    def observed_write(path, payload):
+        assert getattr(thread_state, "depth", 0) > 0
+        with observation_lock:
+            observations["written"] += 1
+        return real_write(path, payload)
+
+    monkeypatch.setattr(
+        claim_reaper.claim_store,
+        "store_lock",
+        observed_store_lock,
+    )
+    monkeypatch.setattr(
+        claim_reaper.claim_store,
+        "verify_snapshot",
+        observed_verify,
+    )
+    monkeypatch.setattr(claim_reaper, "_write_json_atomic", observed_write)
+
+    reports = _concurrent_sweeps(tmp_path, threads=4)
+
+    assert sum(len(report["reaped"]) for report in reports) == 1
+    assert observations["verified"] >= 1
+    assert observations["written"] == 1
+
+
+def test_apply_releases_store_lock_before_reap_audit(tmp_path, monkeypatch):
+    _write_claim(tmp_path, "CLAIM-dead-audit-outside-lock")
+    thread_state = threading.local()
+    observed_depths: list[int] = []
+    real_store_lock = claim_reaper.claim_store.store_lock
+    real_pane_event = claim_reaper.pane_event_log.append_event
+    real_stop_event = claim_reaper.stop_events.record_stop_event
+
+    @contextmanager
+    def observed_store_lock(root, *args, **kwargs):
+        with real_store_lock(root, *args, **kwargs):
+            thread_state.depth = getattr(thread_state, "depth", 0) + 1
+            try:
+                yield
+            finally:
+                thread_state.depth -= 1
+
+    def observed_pane_event(*args, **kwargs):
+        observed_depths.append(getattr(thread_state, "depth", 0))
+        return real_pane_event(*args, **kwargs)
+
+    def observed_stop_event(*args, **kwargs):
+        observed_depths.append(getattr(thread_state, "depth", 0))
+        return real_stop_event(*args, **kwargs)
+
+    monkeypatch.setattr(claim_reaper.claim_store, "store_lock", observed_store_lock)
+    monkeypatch.setattr(claim_reaper.pane_event_log, "append_event", observed_pane_event)
+    monkeypatch.setattr(
+        claim_reaper.stop_events,
+        "record_stop_event",
+        observed_stop_event,
+    )
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    assert len(report["reaped"]) == 1
+    assert observed_depths == [0, 0]
+
+
+def test_apply_rejects_store_identity_replacement_before_atomic_mutation(
+    tmp_path,
+    monkeypatch,
+):
+    path = _write_claim(tmp_path, "CLAIM-replaced-authority")
+    store = path.parent
+    hidden = tmp_path / "claim-store-before-authority-replacement"
+    original_read_claims = claim_reaper._read_claims
+    swap: dict[str, object] = {"performed": False}
+
+    def read_then_replace(root):
+        records = original_read_claims(root)
+        if not swap["performed"]:
+            swap["performed"] = True
+            store.rename(hidden)
+            shutil.copytree(hidden, store)
+            swap["claim_bytes"] = path.read_bytes()
+            swap["hidden_claim_bytes"] = (hidden / path.name).read_bytes()
+        return records
+
+    monkeypatch.setattr(claim_reaper, "_read_claims", read_then_replace)
+
+    report = claim_reaper.sweep(
+        tmp_path,
+        now=NOW,
+        apply=True,
+        grace_seconds=600,
+    )
+
+    assert swap["performed"] is True
+    assert report["reaped"] == []
+    authority = report["claim_store"]
+    assert authority["state"] == "integrity-invalid"
+    assert isinstance(authority["finding"], str) and authority["finding"]
+    assert len(authority["finding"]) <= 256
+    assert "\n" not in authority["finding"]
+    assert "Traceback" not in authority["finding"]
+    assert path.read_bytes() == swap["claim_bytes"]
+    assert (hidden / path.name).read_bytes() == swap["hidden_claim_bytes"]
+    assert not (tmp_path / "agents/runtime/pane_events/pane-events.jsonl").exists()
+    assert not (tmp_path / "agents/runtime/events").exists()
+    assert not (tmp_path / "agents/runtime/stop_counters.json").exists()
 
 
 def test_concurrent_reapers_mixed_no_corruption(tmp_path):

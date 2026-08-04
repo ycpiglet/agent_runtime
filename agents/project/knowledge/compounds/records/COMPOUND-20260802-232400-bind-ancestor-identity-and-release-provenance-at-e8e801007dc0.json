@@ -1,0 +1,36 @@
+{
+  "cause": "Parent validation trusted the nearest existing directory, the shared claim reader did not validate core identity shapes, and role idempotency applied one generic lifecycle contract instead of status-specific released provenance.",
+  "created_at": "2026-08-02T23:24:00+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+    "defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f",
+    "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4"
+  ],
+  "id": "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0",
+  "prevention": "Walk every POSIX lexical ancestor with no-follow directory handles, reject malformed core identities in the shared canonical claim reader before any consumer projection, and require all four terminal provenance fields whenever an existing role overlay is released.",
+  "prevention_refs": [
+    "tests/test_atomic_io.py",
+    "tests/test_claim_store.py",
+    "tests/test_lifecycle_defaults.py",
+    "tests/test_task_claim_dispatcher.py",
+    "tests/test_role_routing.py"
+  ],
+  "recurrence_count": 4,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md",
+    "reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md"
+  ],
+  "status": "mitigated",
+  "summary": "Atomic writers could follow an aliased ancestor, malformed core claim identities could enter active authority and permit a duplicate, and released overlays could be accepted without terminal provenance.",
+  "title": "Bind ancestor identity and release provenance at admission",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json"
+  ],
+  "work_ids": [
+    "TASK-AR-654",
+    "UNIT-TASK-AR-654-001"
+  ]
+}

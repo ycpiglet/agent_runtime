@@ -9,10 +9,10 @@ kind: task
 parent_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
 registered_at: 2026-07-28T16:36:01+09:00
 created_at: 2026-07-28T16:36:01+09:00
-updated_at: 2026-07-29T16:57:16+09:00
+updated_at: 2026-07-30T07:30:00+09:00
 started_at: 2026-07-29T15:36:41+09:00
 title: Run the Bean Wiki web-content pilot
-status: in_progress
+status: completed
 priority: P0
 difficulty: M
 est_hours: 8
@@ -22,12 +22,12 @@ team: evaluation-office
 initiative_id: INIT-AR-V080-ADOPTION-ENFORCEMENT
 project_id: PROJECT-AGENT-RUNTIME
 task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-002.md
+unit_spec: agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-016.md
 reservation_id: RES-20260728-163601-b8c2a87a-10
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md
 created_by: codex-root-v080-planner
-summary: Repair the five release-blocking defects observed by the reversible Bean Wiki pilot, then replay the adoption from a fresh pinned worktree without weakening host ownership or evidence truth.
+summary: Repair the release-blocking defects observed by two reversible Bean Wiki attempts, then replay adoption from a fresh pinned worktree without weakening host ownership, SCM, packaging, or evidence truth.
 planner_model_tier: planner_high
 worker_model_tier: worker_standard
 reviewer_model_tier: reviewer_standard
@@ -35,6 +35,34 @@ tags:
   - work-cli-created
 claim_refs:
   - agents/runtime/task_claims/CLAIM-20260729-153641-task-ar-648-648001.json
+  - agents/runtime/task_claims/CLAIM-20260729-171404-task-ar-648-648002.json
+  - agents/runtime/task_claims/CLAIM-20260729-184002-task-ar-648-648003.json
+  - agents/runtime/task_claims/CLAIM-20260729-195026-task-ar-648-648004.json
+  - agents/runtime/task_claims/CLAIM-20260729-203438-task-ar-648-648005.json
+  - agents/runtime/task_claims/CLAIM-20260729-230858-task-ar-648-648006.json
+  - agents/runtime/task_claims/CLAIM-20260729-234200-task-ar-648-648007.json
+  - agents/runtime/task_claims/CLAIM-20260730-002220-task-ar-648-648008.json
+  - agents/runtime/task_claims/CLAIM-20260730-013340-task-ar-648-648009.json
+  - agents/runtime/task_claims/CLAIM-20260730-020255-task-ar-648-648010.json
+  - agents/runtime/task_claims/CLAIM-20260730-024630-task-ar-648-648011.json
+  - agents/runtime/task_claims/CLAIM-20260730-034214-task-ar-648-648012.json
+  - agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json
+  - agents/runtime/task_claims/CLAIM-20260730-044919-task-ar-648-702ebc.json
+  - agents/runtime/task_claims/CLAIM-20260730-054522-task-ar-648-ar648015.json
+  - agents/runtime/task_claims/CLAIM-20260730-062954-task-ar-648-ar648016.json
+verification_status: passed
+verified_at: 2026-07-30T07:28:00+09:00
+verified_by: codex-root-v080-planner
+evidence_refs:
+  - reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json
+review_refs:
+  - reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md
+  - reviews/W4A-2026-07-30-unit-task-ar-648-016.md
+  - reviews/W4B-2026-07-30-unit-task-ar-648-016.md
+resolution: done
+completed_at: 2026-07-30T07:30:00+09:00
+closed_by: codex-root-v080-planner
+measurement_unavailable_reason: The multi-unit offline pilot did not capture reliable aggregate effort or provider token/cost telemetry; unknown values must not be coerced to zero.
 ---
 
 # TASK-AR-648 - Run the Bean Wiki web-content pilot
@@ -45,8 +73,156 @@ claim_refs:
   five P0 defects. Its evidence is integrated at Agent Runtime
   `main@ec08a3d8c2a6613f508f1d9fd3f2f67693b4a92b`.
 - `UNIT-TASK-AR-648-002` repairs only those five P0 defects and reruns the
-  adoption from a fresh Bean Wiki worktree. P1 profile, overlay-execution, and
+  adoption from a fresh Bean Wiki worktree. Its integrated code repair passed,
+  but the first green replay independently found two additional P0s and is
+  therefore blocked.
+- `UNIT-TASK-AR-648-003` makes claim SCM mutation explicitly opt-in, packages
+  the state-projection dependency for standalone installed-host scripts, and
+  closes the staged-only commit-failure gap. Independent W4b approved that
+  repair, but the resulting high-risk release exposed a self-blocking
+  auto-review overlay claim and stopped the Bean replay.
+- `UNIT-TASK-AR-648-004` aligns role-routing overlay claims with the canonical
+  gate/persistence contract. The overlay seam passed, but independent W4b
+  proved that a later hook command can replace the claim blob after the gate
+  approves it, so the unit is blocked before Bean.
+- `UNIT-TASK-AR-648-005` replaces the path-only exception with an immutable
+  private-index/tree transaction, preserves unrelated staged changes, and
+  requires a fresh independent W4b. Its first W4a is historical only after
+  RED-R2 exposed an equal-OID symbolic-HEAD switch race; the repair now adds a
+  real worktree HEAD lock around final validation and Git CAS through an
+  isolated detached administrative context. Its W4a R2 then became historical
+  when RED-R3 proved the Runtime-invoked post-commit hook ran after lock
+  release and could switch symbolic HEAD. The repair keeps that lock through
+  post-hook execution. W4a R3 passed at product
+  `4c50297416fe4a72673bcf43378e0614c955f0a1` with `2634 passed, 3 skipped`
+  and a task-linked Compound record, but independent W4b rejected that product
+  because its private ref publication omitted the actual worktree `HEAD`
+  reflog. UNIT-005 now adds normal and linked-worktree reflog parity inside
+  the protected publication boundary; RED-R4 deterministically fails both
+  reflog parity tests on the rejected product. An adversarial design review of
+  the first repair then found that a final-state-preserving equal-OID
+  `A -> B -> A` switch could hide between Git releasing `HEAD.lock` and
+  Runtime reacquiring it. The R5 repair keeps the actual symbolic `HEAD` file
+  open across that handoff, verifies the same device/inode under both locks,
+  and makes any published-but-unverified result terminal and non-retriable.
+  Explicit SCM fails before publication where the POSIX no-follow primitive is
+  unavailable; default working-tree claims are unchanged. W4a R4 passed at
+  exact product `6ccfd9192185a87fa4ef0d4bd654fdba4dd84e39` with focused
+  `154`, routing `49`, and full `2644 passed, 3 skipped`; fresh independent
+  W4b R4 then approved the same product at `97/100` with focused `203`, the
+  same full-suite result, and no P0/P1. UNIT-005 is completed and its claim is
+  released. UNIT-006 replayed Bean from the original pinned baseline and its
+  default claim correctly persisted in `working_tree` mode without moving Bean
+  `HEAD`. That claim then exposed a new P0: the installed core gate requires a
+  STATUS candidate that profile selection, adoption, lock, and doctor neither
+  install nor diagnose. Independent W4b returned `REQUEST_CHANGES` at 45/100.
+  UNIT-006 and its Runtime claim are blocked/released, Bean attempt 2 is frozen,
+  and Allimbot remains stopped pending a Runtime-only portable-continuity repair
+  plus a new independently approved Bean replay.
+  The required pre-claim taskset plan then selected historical blocked
+  UNIT-002 instead of the new planned repair. No claim was created. UNIT-007 is
+  now the isolated blocked-unit redispatch guard; portable continuity moved to
+  UNIT-008 and remains unclaimed. Both units forbid every consumer and release
+  action.
+  UNIT-007 was explicitly claimed only after T2 passed; this recovery does not
+  use the planner's rejected UNIT-002 command or `--skip-plan-check`. Default
+  claim persistence left Runtime `HEAD` unchanged and its Compound lookup
+  retrieved the exact selector record first with score 180. Exact product
+  `a3a5eebe0584a7d5359a15c43f205b9770b7cbce` then passed W4a,
+  independent W4b at 99/100 with no P0/P1, and canonical verification
+  (`113` selector, `83` claim/readiness, full `2658 passed, 3 skipped`).
+  UNIT-007 is completed and its claim is released. UNIT-008 then closed the
+  portable-continuity contract at exact product
+  `b82042eba58f1e06e1e73130a189cb72245462a0`. Canonical W4a, fresh
+  independent W4b at 99/100, and canonical six-command verification passed
+  with no P0/P1. UNIT-009 replayed Bean from the original pinned baseline and
+  passed adoption, lock, doctor, standby/active pointer continuity, state sync,
+  Scribe, RBAC, and preservation, but the installed continuity gate imposed
+  Runtime source wording on Bean's host-owned documentation. Independent W4b
+  froze attempt 3 as `BLOCK / P1` with no consumer workaround.
+  UNIT-010 repaired only that source/consumer ownership boundary at exact
+  product `dd279cd5613578c87ed6c4c24b37325084449d82`. It requires agreeing v2
+  config and lock provenance plus digest-matched managed Runtime contracts,
+  keeps source and pointer checks strict, and preserves host-owned project
+  documents. Canonical verification and independent W4b both passed; W4b
+  scored 99/100 with no P0/P1. UNIT-010 is closed. UNIT-011 then ran all three
+  attempt-4 Bean traces to independent local approval, preserved the disposable
+  consumer and zero-effect boundary, and stopped at the final completion gate.
+  Independent W4b confirmed two P1s: the packaged
+  `taskset_work_gate.py` omitted root ISO-timestamp masking, and the pilot's
+  live-primary byte-identity oracle treated unrelated owner edits as a causal
+  failure. Attempt 4 is frozen, its Runtime Compound is recorded, and Allimbot
+  remains blocked. The next action is a separately registered Runtime-only
+  mirror-parity and pilot-isolation repair, followed by a fresh Bean replay.
+  P1 profile, overlay-execution, and
   provider-observability work remains separately queued.
+  UNIT-012 is now the Runtime-only repair for the two attempt-4 P1s. It
+  synchronizes five stale portable template scripts, establishes a
+  digest-pinned whole-intersection mirror contract for the three intentional
+  source/consumer variants, and replaces the live-primary immutability oracle
+  with a causal pilot-isolation decision matrix. Bean attempt 5, Allimbot, and
+  all release actions remain blocked until UNIT-012 passes exact-product W4a
+  and fresh independent W4b.
+  UNIT-012 is independently blocked at exact product
+  `f49ff61bb7dcac7466ae76b6cfc775864d1a83ab`: its current-intersection mirror
+  gate silently accepts a portable script missing from either side.
+  UNIT-013 is the separate Runtime-only repair. It pins the exact expected
+  84-path common inventory, blocks a missing source or template side and
+  unexpected common additions, preserves legitimate one-sided populations,
+  and requires new W4a/W4b before any Bean attempt 5.
+  UNIT-013 completed at exact product
+  `34427e1fe18d6c4db8a81142616ccad24cc6e7de`. W4a and fresh
+  independent W4b both approve it with no P0/P1; the independent full suite is
+  `2719 passed, 3 skipped`. Its claim is released. The next action is to
+  register a fresh disposable Bean attempt 5 with a newly captured baseline;
+  Allimbot remains blocked until that Bean replay passes.
+  UNIT-014 replayed Runtime product `34427e1f` from a new disposable Bean
+  target and same-commit frozen control. Adoption, exactly three offline
+  traces, preservation, delayed taskset freshness, and causal isolation
+  passed, with no consumer commit or external effect. The article specialist
+  independently returned `REVISE` in its separate publication domain without
+  changing content. Runtime W4a and fresh independent W4b nevertheless block
+  UNIT-014 with P0 0/P1 2/P2 2: the acceptance script binds Bean to one
+  historical red contract, and raw absolute-root isolation proof cannot also
+  pass the public sanitizer. Attempt 5 and its claim are frozen/released.
+  The next action is a separately registered Runtime-only, fail-closed
+  multi-contract and evidence-portability repair. Allimbot remains blocked.
+  UNIT-015 is that repair. It keeps shared pilot safety invariants executable,
+  moves exact run observations into strict `(host, pilot_id)` contracts,
+  preserves both red and green semantic evidence, and introduces a
+  digest-bound public projection only after raw physical-root isolation
+  passes. It is Runtime-only; Bean attempt 6 and Allimbot remain blocked until
+  one exact repaired product passes W4a and fresh independent W4b.
+  UNIT-015 is now claimed in default working-tree mode. Its requested worker
+  tier is `worker_standard`; policy escalated orchestration to `planner_high`
+  for the three declared risk signals. Claim creation left Runtime HEAD at
+  `598c960bb4431209013e71fea1fa2d0fd0d0bf56`.
+  UNIT-015 completed at exact Runtime product
+  `4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2`, tree
+  `b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f`. Exact red/green contract
+  selection, digest-bound path-free v2 isolation evidence, focused `41`, and
+  full `2739 passed, 3 skipped` verification passed. W4a and fresh independent
+  W4b both approve with P0 0/P1 0/P2 1. The claim is ready for normal release.
+  The next action is a separately registered, fresh Bean attempt 6 pinned to
+  this exact product; Allimbot and every release surface remain blocked.
+  UNIT-016 is that separately registered replay. It uses a new attempt-6
+  disposable target and same-commit frozen control, validates physical
+  isolation before emitting a path-free raw-digest-bound projection, and
+  registers one exact attempt-6 acceptance contract. Exactly three offline
+  traces are allowed; Allimbot remains blocked until W4a and fresh independent
+  W4b approve with no P0/P1.
+  UNIT-016 is now claimed in default working-tree mode. Requested execution is
+  `worker_standard`; orchestration policy selected `planner_high` for the
+  declared cross-cutting, data-integrity, and repeated-failure risks. Claim
+  creation left Runtime HEAD at `2025bc75a1c044e69e23bf975ee1243298db7b2c`.
+  UNIT-016 has now passed canonical verification plus W4a and fresh independent
+  W4b with P0 0/P1 0/P2 3. Bean HEAD and tracked content remain unchanged,
+  attempt-6 raw and sanitized isolation both pass, and the exact attempt-6,
+  attempt-5, and historical-red contracts all return zero findings. Bean Wiki
+  is independently green for Runtime adoption; its separate article verdict
+  remains `REVISE`. The next action is normal UNIT-016 closeout and claim
+  release, followed by a separately registered Allimbot pilot. No release
+  surface is authorized.
 
 ## Goal
 
@@ -106,9 +282,15 @@ claim_refs:
 - Register-then-dispatch, linked-worktree self-claim, installed-example
   classification, configured state projection, and post-registration
   reconcile all have focused regressions and pass in a fresh Bean replay.
+- Default claim creation in an adopted consumer repository leaves Git `HEAD`
+  unchanged; crash-safety commits remain available only through an explicit,
+  tested opt-in.
+- Installed Scribe/state-sync scripts run from a clean consumer process with
+  no source checkout, editable install, or ambient `PYTHONPATH`.
 - The green replay has zero P0 findings, zero reconcile conflicts, zero
-  unexpected host/content mutations, and zero external effects. The original
-  red evidence remains immutable and distinguishable from the replay.
+  unexpected host/content mutations, zero host commits, and zero external
+  effects. The original red evidence and the blocked first green attempt
+  remain immutable and distinguishable from the successful replay.
 
 ## Verification
 
@@ -116,3 +298,20 @@ claim_refs:
 - `python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py -q`
 - `python scripts/pilot_acceptance.py --host bean-wiki --check`
 - `python -m pytest tests/test_pilot_acceptance.py -q`
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-07-30T07:30:00+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: The multi-unit offline pilot did not capture reliable aggregate effort or provider token/cost telemetry; unknown values must not be coerced to zero.
+- Closed by: `codex-root-v080-planner`
+- Verification evidence:
+  - `reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json`
+- Reviews:
+  - `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md`
+  - `reviews/W4A-2026-07-30-unit-task-ar-648-016.md`
+  - `reviews/W4B-2026-07-30-unit-task-ar-648-016.md`
+<!-- work-close:end -->

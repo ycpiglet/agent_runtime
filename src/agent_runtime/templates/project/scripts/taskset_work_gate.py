@@ -18,9 +18,26 @@ DONE_TASK_STATUSES = {"completed", "done", "released"}
 # the freshness comparison masks them on both sides. Record-derived fields
 # (task rows, lane counts, WIP `active` counts) stay unmasked so real
 # staleness — task add/remove, status change, claim change — is still caught.
-_WALL_CLOCK_GENERATED_AT = re.compile(r"^generated_at: \d{4}-\d{2}-\d{2}$", re.MULTILINE)
+# TASK-AR-623: match both date-only (archive index) and ISO-second (board)
+# generated_at so the wall-clock field is masked before the drift comparison.
+_WALL_CLOCK_GENERATED_AT = re.compile(
+    r"^generated_at: \d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}[+\-]\d{2}:\d{2})?$", re.MULTILINE
+)
 _WALL_CLOCK_WIP = re.compile(
     r"^(- WIP: active `[^`\n]*`; oldest `)[0-9.]+h(`; stale `)\d+(`\.)$",
+    re.MULTILINE,
+)
+# TASK-AR-630: the canonical "Needs attention" rollup includes the stale group,
+# whose membership decays with wall-clock time (a task crosses the 7-day line
+# without any record changing). Mask the whole line so a committed board does
+# not go "stale" purely by time passing; real record changes are still caught
+# by the task rows, lane counts, and the other rollup lines.
+_WALL_CLOCK_ATTENTION = re.compile(r"^- Needs attention: .*$", re.MULTILINE)
+# The seven-day throughput window also changes as completed_at timestamps age
+# out, even when the underlying task records are untouched. Keep it visible on
+# the board, but exclude that rolling projection from record-drift detection.
+_WALL_CLOCK_THROUGHPUT = re.compile(
+    r"^- Throughput \(7d\): .*$",
     re.MULTILINE,
 )
 
@@ -40,6 +57,11 @@ def _mask_wall_clock_fields(text: str) -> str:
     """Mask wall-clock derived tokens so only record changes affect freshness."""
     text = _WALL_CLOCK_GENERATED_AT.sub("generated_at: <wall-clock>", text)
     text = _WALL_CLOCK_WIP.sub(r"\g<1><wall-clock>\g<2><wall-clock>\g<3>", text)
+    text = _WALL_CLOCK_ATTENTION.sub("- Needs attention: <wall-clock>", text)
+    text = _WALL_CLOCK_THROUGHPUT.sub(
+        "- Throughput (7d): <wall-clock>",
+        text,
+    )
     return text
 
 

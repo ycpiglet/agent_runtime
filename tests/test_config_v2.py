@@ -85,6 +85,7 @@ def test_compound_store_ownership_defaults_are_safe_without_host_config_entries(
         == "generated"
     )
     assert default_ownership(DEFAULT_STATE_PROJECTION) == "generated"
+    assert default_ownership("owner-docs.yml") == "seed_once"
     assert default_ownership("STATUS.md") == "host_owned"
     assert default_ownership("docs/PROJECT_STATUS.ko.md") == "host_owned"
     assert default_ownership("scripts/compound_record.py") == "managed"

@@ -1,0 +1,36 @@
+{
+  "cause": "Closure validation treated the current work item as the complete authority source and parsed accepted-watch input through convenience text APIs, so byte-boundary failures and claim-only escalation signals could disappear or fail open.",
+  "created_at": "2026-08-01T01:46:07+09:00",
+  "created_by": "le-20260801-000005-kst-ar654repair001",
+  "defect_signatures": [
+    "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694",
+    "defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1",
+    "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb",
+    "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a"
+  ],
+  "id": "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+  "prevention": "Read accepted-watch input as bounded strict UTF-8 physical lines; resolve one exact active claim context from the primary checkout; merge only approved authority fields; validate explicitly linked released claims before mutation; and require a current-work canonical Compound for every terminal resolution carrying repeated-failure authority.",
+  "prevention_refs": [
+    "tests/test_compound_records.py",
+    "tests/test_closure_gate.py",
+    "tests/test_task_claim_dispatcher.py"
+  ],
+  "recurrence_count": 2,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json",
+    "reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md",
+    "reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md",
+    "reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md"
+  ],
+  "status": "mitigated",
+  "summary": "Repeated-failure closure could be bypassed when accepted-watch bytes were normalized, malformed, or unbounded, and when active or explicitly linked released claim authority was omitted during closeout.",
+  "title": "Fail closed across accepted-watch and claim authority boundaries",
+  "verification_refs": [
+    "reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json"
+  ],
+  "work_ids": [
+    "TASK-AR-654",
+    "UNIT-TASK-AR-654-001"
+  ]
+}

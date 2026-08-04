@@ -34,6 +34,9 @@ into a form the proposal engine can use.
 | Authorization parser differs from consumed semantics | `authorization-boundary-parser-differs-from-rendered-document-semantics` | `COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0`, TASK-AR-647 W4b r1-r8 | gate+fixture | bind exact typed canonical inputs and installed code; validate rendered semantics; adversarially probe adjacent states |
 | Mandatory W4b evidence cannot be consumed by closeout | `closeout-evidence-producer-consumer-gap` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 first-class task-linked review evidence; TASK-AR-651 no-manual-edit lifecycle smoke |
 | Released unit conflated with completed taskset | `released-unit-taskset-phase-conflation` | `COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction`, TASK-AR-639 | needs enforcement | TASK-AR-645 split phase semantics; RC blocks if honest intermediate close still needs a waiver |
+| Economic eligibility trusts caller-controlled state | `economic-eligibility-caller-state-trust` | TASK-AR-652 W4b chain, `RETRO-2026-07-30-task-ar-652-economic-routing-integrity` | gate+fixture | keep exact observed receipt, immutable provenance, ordered identity, and container-sealing regressions |
+| Merge queue cannot consume an attached worker branch | `merge-queue-checked-out-worktree-ordering` | TASK-AR-652 W5, `RETRO-2026-07-30-task-ar-652-economic-routing-integrity` | task proposal | TASK-AR-657 scope amendment: worktree-aware preflight and one canonical cleanup/integration order |
+| Closeout review omits canonical work identifiers | `closeout-review-canonical-linkage` | TASK-AR-652 additive audit, existing producer/consumer gap | task proposal | TASK-AR-657 skill templates must emit canonical `task_id`/`unit_id` and closure-contract fixtures |
 
 ## Detailed Cases
 
@@ -383,3 +386,54 @@ into a form the proposal engine can use.
 | `linked_regression_fixture` | n/a |
 | `task_proposal` | PROPOSAL: schedule beta exploration rounds (BTC-* → QA bug intake), same as routing other dormant roles into the loop. |
 | `prevention_status` | proposal |
+
+### CASE-ECONOMIC-ELIGIBILITY-CALLER-STATE-TRUST
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-ECONOMIC-ELIGIBILITY-CALLER-STATE-TRUST` |
+| `dedupe_key` | `economic-eligibility-caller-state-trust` |
+| `symptom` | A syntactically valid report could treat request intent, replaceable provenance, mutated receipt values, or duplicate/mutated container membership as observed savings evidence. |
+| `trigger` | Economic eligibility reads caller-owned configuration, row objects, or collection structure after validation without binding the exact observed terminal receipt and immutable membership. |
+| `owner_boundary` | local economic evidence; no live provider authority |
+| `affected_gate` | `src/agent_runtime/templates/project/scripts/eval_harness.py` and its W4b eligibility boundary |
+| `recurrence_count` | 6 adjacent trust-boundary repair rounds in TASK-AR-652 |
+| `source_refs` | `reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md`, `reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md`, `reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md` |
+| `reproduction` | Start from one valid synthetic baseline/actual ledger, then copy or mutate a receipt, replace authority, duplicate membership, invoke direct base-list mutation, reinitialize, or supply a forged subclass; every changed view must report zero economic eligibility. |
+| `linked_regression_fixture` | `src/agent_runtime/templates/project/scripts/test_eval_harness.py` receipt-attestation and container-integrity matrix |
+| `task_proposal` | shipped in TASK-AR-652: observed terminal identity, canonical receipt digests, immutable snapshots, exact ordered membership, sealed authority, and fail-closed report-time validation |
+| `prevention_status` | gate+fixture |
+
+### CASE-MERGE-QUEUE-CHECKED-OUT-WORKTREE-ORDERING
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-MERGE-QUEUE-CHECKED-OUT-WORKTREE-ORDERING` |
+| `dedupe_key` | `merge-queue-checked-out-worktree-ordering` |
+| `symptom` | A clean, verified, released branch fails merge-queue processing before verification because Git will not check it out in the integrator while it remains attached to its worker worktree. |
+| `trigger` | Follow the documented order `integrate -> cleanup` with `merge_queue.py`, whose local mode first runs `git checkout <worker-branch>` in the integrator checkout. |
+| `owner_boundary` | local SCM cleanup and integration |
+| `affected_gate` | `scripts/merge_queue.py`, `skills/merge-integrator/SKILL.md`, Work Model W5 ordering |
+| `recurrence_count` | 1 deterministic TASK-AR-652 integration failure |
+| `source_refs` | `reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md`, local merge commit `1a18a3a6` |
+| `reproduction` | Keep a clean worker branch attached to `.worktrees/<task>`, enqueue it, and run `python scripts/merge_queue.py process --all --base main`; Git returns `already checked out`. |
+| `linked_regression_fixture` | proposed addition to `tests/test_merge_queue.py` covering attached clean worktrees and actionable dry-run/preflight output |
+| `task_proposal` | TASK-AR-657 scope amendment: make the merge-integrator skill and executable preflight agree on detach-before-checkout or integrate through the existing worktree |
+| `prevention_status` | task proposal |
+
+### CASE-CLOSEOUT-REVIEW-CANONICAL-LINKAGE
+
+| Field | Value |
+| --- | --- |
+| `case_id` | `CASE-CLOSEOUT-REVIEW-CANONICAL-LINKAGE` |
+| `dedupe_key` | `closeout-review-canonical-linkage` |
+| `symptom` | Independently approved audit reports are indexed and human-readable but `work close` rejects them because they carry `parent_task_id` instead of canonical `task_id`/`unit_id`. |
+| `trigger` | A review-producing agent or skill invents a near-equivalent frontmatter key rather than consuming the work-close evidence schema. |
+| `owner_boundary` | local work closeout |
+| `affected_gate` | `scripts/work.py close`, `scripts/closure_gate.py`, independent-verification report templates |
+| `recurrence_count` | 3 (two TASK-AR-639 units plus TASK-AR-652 additive closeout) |
+| `source_refs` | `reviews/COMPOUND-2026-07-28-v080-lifecycle-and-closeout-friction.md`, `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md`, `reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md` |
+| `reproduction` | Create an approved review with only `parent_task_id: TASK-AR-652`, pass it via `work.py close --review-ref`, and observe `closeout:review-work-mismatch`. |
+| `linked_regression_fixture` | `tests/test_closure_gate.py` plus a proposed skill-template contract test in TASK-AR-657 |
+| `task_proposal` | TASK-AR-657: require runtime-adoption and independent-verification templates to emit closeout-consumable canonical identifiers and test the generated report against `work close` |
+| `prevention_status` | task proposal |

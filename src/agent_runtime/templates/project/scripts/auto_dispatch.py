@@ -8,11 +8,10 @@ Why this design has no runaway/orphan/race surface:
   - SINGLE process, SYNCHRONOUS: each provider.run() is awaited and its result
     collected before the next dispatch — no fire-and-forget, so no orphaned
     agent can keep billing after the runner moves on.
-  - IN-MEMORY cumulative budget: there is no persistent ledger file, so the
-    hazards a persistent ledger would carry (cross-process write races, a crash
-    window between spend and record, midnight date-key rollover) simply do not
-    exist for a single in-process counter (skeptic must-fix, CYCLE-075 → here
-    sidestepped rather than mitigated).
+  - PERSISTENT task/claim budget: immutable execution receipts are re-read
+    before each call, so cumulative usage survives a process restart. The
+    append-only ledger uses an exclusive lock and rejects duplicate dispatch
+    ids.
   - Layered on the CYCLE-075 guardrails: each provider.run() is itself bounded
     by DISPATCH_PER_CALL_CAP, and get_provider() refuses billable providers
     unless DISPATCH_ENABLE_LIVE=1. So even one dispatch cannot run away, and
@@ -28,7 +27,9 @@ The session-budget check is *cumulative and pre-call*: before every provider
 call, the runner compares remaining session budget with the provider's
 worst-case per-dispatch ceiling. If the next call cannot fit, it is skipped
 without spend. Routed agent providers expose `per_dispatch_cap`; providers that
-do not expose a ceiling are allowed but cannot weaken the live-agent guardrail.
+do not expose a ceiling are allowed only when no task/claim budget is
+configured; configured durable budgets fail closed when the ceiling is
+unknown.
 
 Default provider is 'dummy' (zero cost). Usage:
   python scripts/auto_dispatch.py --demo                 # dummy, safe
@@ -86,21 +87,20 @@ DEFAULT_MAX_DISPATCHES = 10
 def _routing_decision_for_item(item: dict, instruction: str) -> dict | None:
     context = dict(item.get("context", {}) or {})
     model = item.get("routing_model") or context.get("routing_model") or context.get("model")
-    if not model:
-        return None
-    changed = item.get("routing_changed_files") or context.get("routing_changed_files") or []
-    if changed and not isinstance(changed, list):
-        changed = [str(changed)]
-    try:
-        diff_lines = int(item.get("routing_diff_lines") or context.get("routing_diff_lines") or 0)
-    except (TypeError, ValueError):
-        diff_lines = 0
-    return model_routing.resolve_model(
-        str(model),
-        grade=str(item.get("routing_grade") or context.get("routing_grade") or "Medium"),
-        prompt=str(instruction or ""),
-        changed_files=changed,
-        diff_lines=diff_lines,
+    triggers = (
+        item.get("escalation_triggers")
+        or context.get("escalation_triggers")
+        or item.get("routing_escalation_triggers")
+        or context.get("routing_escalation_triggers")
+        or []
+    )
+    role = str(item.get("role") or context.get("role") or "worker").strip()
+    if role.lower().startswith("subagent-"):
+        role = role[len("subagent-"):]
+    return model_routing.resolve_subagent_tier(
+        role,
+        requested_tier=str(model or "auto"),
+        escalation_triggers=triggers,
     )
 
 
@@ -110,14 +110,18 @@ def _apply_routing_to_provider(
     decision: dict | None,
     *,
     baseline_model: str | None = None,
+    baseline_reasoning_effort: str | None = None,
 ) -> dict | None:
     if not decision:
         return None
     route = model_routing.resolve_provider_route(
         provider_name,
         decision["selected_tier"],
-        requested_tier=decision.get("policy_tier"),
+        requested_tier=(
+            decision.get("requested_tier") or decision.get("policy_tier")
+        ),
         baseline_model=baseline_model,
+        baseline_reasoning_effort=baseline_reasoning_effort,
     )
     for name, value in dict(route.get("provider_env") or {}).items():
         import os
@@ -172,6 +176,69 @@ def _eval_baseline_model(item: dict) -> str | None:
         if model:
             return model
     return None
+
+
+def _item_context_value(item: dict, *keys: str):
+    context = dict(item.get("context", {}) or {})
+    for key in keys:
+        value = item.get(key)
+        if value not in (None, ""):
+            return value
+        value = context.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _eval_baseline_reasoning(item: dict) -> str | None:
+    value = _item_context_value(
+        item,
+        "eval_baseline_reasoning_effort",
+        "baseline_reasoning_effort",
+    )
+    return str(value or "").strip() or None
+
+
+def _eval_baseline_observation_status(item: dict) -> str:
+    value = _item_context_value(
+        item,
+        "eval_baseline_observation_status",
+        "baseline_observation_status",
+    )
+    if value not in (None, ""):
+        return str(value).strip()
+    return "configured" if _eval_baseline_model(item) else "unavailable"
+
+
+def _budget_value(item: dict, key: str) -> int | str | None:
+    return _item_context_value(item, key)
+
+
+def _claim_id(item: dict) -> str | None:
+    value = _item_context_value(item, "claim_id")
+    return str(value or "").strip() or None
+
+
+def _baseline_receipt_id(item: dict) -> str | None:
+    value = _item_context_value(
+        item,
+        "eval_baseline_receipt_id",
+        "baseline_receipt_id",
+    )
+    return str(value or "").strip() or None
+
+
+def _workload_id(item: dict) -> str | None:
+    value = _item_context_value(item, "eval_workload_id", "workload_id")
+    return str(value or "").strip() or None
+
+
+def _item_task_id(item: dict, dispatch_id: str) -> str:
+    value = _item_context_value(item, "task_id")
+    task_id = str(value or "").strip()
+    if task_id and task_id.lower() not in {"none", "unknown", "null"}:
+        return task_id
+    return str(dispatch_id)
 
 
 def _optional_nonnegative_float(value) -> float | None:
@@ -242,6 +309,7 @@ def _routing_eval_skip_reason(
     *,
     baseline_tokens: int | None,
     baseline_model: str | None,
+    baseline_observation_status: str,
 ) -> str | None:
     if not routing_decision or not route:
         return "routing_not_resolved"
@@ -249,18 +317,20 @@ def _routing_eval_skip_reason(
         return "model_observation_unavailable"
     if route.get("application_status") != "applied":
         return "routing_not_applied"
+    if route.get("route_changed") is not True:
+        return "route_not_effective"
     if not baseline_model:
         return "baseline_model_unavailable"
-    if route.get("model_changed") is not True:
-        return "route_not_effective"
-    if observation.get("token_usage_status") == "unavailable":
+    if baseline_observation_status != "observed":
+        return "baseline_observation_unavailable"
+    if observation.get("token_usage_status") != "observed":
         return "token_usage_unavailable"
     if baseline_tokens is None:
         return "baseline_usage_unavailable"
     return None
 
 
-def _record_eval_outcome(
+def _record_execution_receipt(
     item: dict,
     provider_name: str,
     routing_decision: dict | None,
@@ -269,60 +339,124 @@ def _record_eval_outcome(
     finish_reason: str,
     error,
     eval_log_path: Path | None,
+    *,
+    dispatch_id: str,
+    role: str,
+    status: str,
+    source: str,
+    budget_preflight_result: dict | None = None,
 ) -> tuple[bool, str | None]:
-    if not routing_decision:
-        return False, None
     baseline = _eval_baseline_tokens(item)
     baseline_model = _eval_baseline_model(item)
+    baseline_reasoning = _eval_baseline_reasoning(item)
+    baseline_observation = _eval_baseline_observation_status(item)
+    context = dict(item.get("context", {}) or {})
+    baseline_cost, baseline_currency = _eval_baseline_cost(item)
+    task_id = _item_task_id(item, dispatch_id)
+    try:
+        record_receipt = (
+            eval_harness.record_pre_provider_skip_receipt
+            if source
+            in {"claim_preflight", "session_budget_preflight"}
+            else eval_harness.record_execution_receipt
+        )
+        receipt = record_receipt(
+            dispatch_id=dispatch_id,
+            task_id=task_id,
+            claim_id=_claim_id(item),
+            role=role,
+            workload_id=_workload_id(item),
+            provider=provider_name,
+            execution_surface=(
+                route.get("execution_surface") if route else "provider_worker"
+            ),
+            requested_tier=route.get("requested_tier") if route else None,
+            selected_tier=route.get("selected_tier") if route else None,
+            resolved_model=route.get("resolved_model") if route else None,
+            resolved_reasoning_effort=(
+                route.get("reasoning_effort") if route else None
+            ),
+            resolved_model_source=(
+                route.get("model_source") if route else "unavailable"
+            ),
+            resolved_reasoning_source=(
+                route.get("reasoning_source") if route else "unavailable"
+            ),
+            observed_provider=observation.get("observed_provider"),
+            observed_model=observation.get("observed_model"),
+            observed_reasoning_effort=observation.get(
+                "observed_reasoning_effort"
+            ),
+            token_usage_status=observation.get("token_usage_status"),
+            tokens_in=observation.get("tokens_in"),
+            tokens_out=observation.get("tokens_out"),
+            billed_cost_status=observation.get("billed_cost_status"),
+            billed_cost=observation.get("billed_cost"),
+            currency=observation.get("currency"),
+            source=source,
+            status=status,
+            error=str(error or "").strip() or None,
+            route_status=route.get("route_status") if route else None,
+            application_status=(
+                route.get("application_status") if route else None
+            ),
+            model_changed=route.get("model_changed") if route else None,
+            route_changed=route.get("route_changed") if route else None,
+            baseline_receipt_id=_baseline_receipt_id(item),
+            baseline_model=baseline_model,
+            baseline_reasoning_effort=baseline_reasoning,
+            baseline_observation_status=baseline_observation,
+            baseline_tokens=baseline,
+            baseline_billed_cost=baseline_cost,
+            baseline_currency=baseline_currency,
+            grade=(
+                routing_decision.get("grade") if routing_decision else "?"
+            ),
+            policy_model=(
+                routing_decision.get("policy_tier")
+                if routing_decision
+                else None
+            ),
+            selected_model=(
+                routing_decision.get("selected_tier")
+                if routing_decision
+                else None
+            ),
+            routing_signals=(
+                list(routing_decision.get("signals") or [])
+                if routing_decision
+                else []
+            ),
+            budget_preflight_result=budget_preflight_result,
+            path=eval_log_path or eval_harness.EVAL_LOG,
+            finish_reason=finish_reason,
+        )
+    except eval_harness.ReceiptConflictError:
+        return False, "duplicate_dispatch_id"
+    except eval_harness.ReceiptIntegrityError:
+        return False, "receipt_ledger_untrusted"
     skip_reason = _routing_eval_skip_reason(
         routing_decision,
         route,
         observation,
-        baseline_tokens=baseline,
-        baseline_model=baseline_model,
+        baseline_tokens=receipt.get("baseline_tokens"),
+        baseline_model=receipt.get("baseline_model"),
+        baseline_observation_status=(
+            "observed"
+            if receipt.get("baseline_reference_status") == "verified"
+            else str(receipt.get("baseline_reference_reason") or "unavailable")
+        ),
     )
-    if skip_reason:
-        return False, skip_reason
-    tokens = int(observation.get("tokens_in") or 0) + int(
-        observation.get("tokens_out") or 0
-    )
-    context = dict(item.get("context", {}) or {})
-    baseline_cost, baseline_currency = _eval_baseline_cost(item)
-    eval_harness.record_outcome(
-        str(context.get("task_id") or item.get("task_id") or "none"),
-        routing_decision["grade"],
-        str(observation["observed_model"]),
-        tokens,
-        finish_reason=str(finish_reason or "stop"),
-        outcome="ok" if not error else "gate-error",
-        path=eval_log_path or eval_harness.EVAL_LOG,
-        policy_model=routing_decision["policy_tier"],
-        selected_model=routing_decision["selected_tier"],
-        routing_signals=list(routing_decision.get("signals") or []),
-        baseline_tokens=baseline,
-        actual_tokens_known=True,
-        provider=provider_name,
-        requested_tier=route.get("requested_tier"),
-        resolved_model=route.get("resolved_model"),
-        observed_model=observation.get("observed_model"),
-        model_changed=route.get("model_changed"),
-        route_status=route.get("route_status"),
-        application_status=route.get("application_status"),
-        baseline_model=baseline_model,
-        billed_cost=observation.get("billed_cost"),
-        currency=observation.get("currency"),
-        baseline_billed_cost=baseline_cost,
-        baseline_currency=baseline_currency,
-    )
-    return True, None
+    return True, skip_reason
 
 
 @dataclass
 class SessionBudget:
     """In-memory cumulative token budget for one runner process.
 
-    No persistence by design (see module docstring). `remaining()` never goes
-    negative; `exhausted()` is the halt signal.
+    This fast local counter supplements, but never replaces, the durable
+    task/claim budget enforced through execution receipts. `remaining()` never
+    goes negative; `exhausted()` is the halt signal.
     """
 
     total: int
@@ -491,20 +625,155 @@ def run_bounded_dispatch(
         if budget.exhausted():
             halt_reason = f"session_budget ({budget.total})"
             break
-        routing_decision = _routing_decision_for_item(item, instruction)
         baseline_model = _eval_baseline_model(item)
-        planned_route = _apply_routing_to_provider(
-            provider,
-            provider_name,
-            routing_decision,
-            baseline_model=baseline_model,
-        )
+        baseline_reasoning = _eval_baseline_reasoning(item)
         dispatch_ceiling = _provider_dispatch_ceiling(provider)
+        receipt_path = Path(eval_log_path or eval_harness.EVAL_LOG)
+        task_id = _item_task_id(item, dispatch_id)
+        try:
+            routing_decision = _routing_decision_for_item(item, instruction)
+            planned_route = _apply_routing_to_provider(
+                provider,
+                provider_name,
+                routing_decision,
+                baseline_model=baseline_model,
+                baseline_reasoning_effort=baseline_reasoning,
+            )
+        except (KeyError, ValueError) as exc:
+            observation = _not_dispatched_observation()
+            error = f"routing_policy_rejected: {exc}"
+            receipt_recorded, receipt_skip_reason = _record_execution_receipt(
+                item,
+                provider_name,
+                None,
+                None,
+                observation,
+                "skipped",
+                error,
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="skipped",
+                source="routing_policy",
+            )
+            skipped = {
+                "index": i,
+                "role": role,
+                "tokens": 0,
+                "finish_reason": "skipped",
+                "error": error,
+                "budget_preflight": None,
+                "eval_recorded": receipt_recorded,
+                "receipt_recorded": receipt_recorded,
+                "eval_skip_reason": receipt_skip_reason,
+                **_routing_result_fields(
+                    None,
+                    None,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
+            }
+            results.append(skipped)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_skipped",
+                provider=provider_name,
+                dispatch_status="skipped",
+                **{key: value for key, value in skipped.items() if key != "role"},
+            )
+            continue
+        try:
+            persistent_preflight = eval_harness.reserve_dispatch_budget(
+                path=receipt_path,
+                root=REPO_ROOT,
+                task_id=task_id,
+                claim_id=_claim_id(item),
+                dispatch_id=dispatch_id,
+                dispatch_ceiling=dispatch_ceiling,
+                task_token_budget=_budget_value(item, "task_token_budget"),
+                claim_token_budget=_budget_value(item, "claim_token_budget"),
+                source="auto_dispatch",
+            )
+        except eval_harness.ReceiptIntegrityError as exc:
+            persistent_preflight = {
+                "allowed": False,
+                "reason": "receipt_ledger_untrusted",
+                "dispatch_id": dispatch_id,
+                "error": str(exc),
+            }
+        if not persistent_preflight["allowed"]:
+            halt_reason = f"durable_budget ({persistent_preflight['reason']})"
+            observation = _not_dispatched_observation()
+            receipt_recorded = False
+            receipt_skip_reason = persistent_preflight["reason"]
+            if persistent_preflight["reason"] != "duplicate_dispatch_id":
+                receipt_recorded, receipt_skip_reason = _record_execution_receipt(
+                    item,
+                    provider_name,
+                    routing_decision,
+                    planned_route,
+                    observation,
+                    "skipped",
+                    persistent_preflight["reason"],
+                    receipt_path,
+                    dispatch_id=dispatch_id,
+                    role=role,
+                    status="skipped",
+                    source="budget_preflight",
+                    budget_preflight_result=persistent_preflight,
+                )
+            skipped = {
+                "index": i,
+                "role": role,
+                "tokens": 0,
+                "finish_reason": "skipped",
+                "error": persistent_preflight["reason"],
+                "budget_preflight": persistent_preflight,
+                "eval_recorded": receipt_recorded,
+                "receipt_recorded": receipt_recorded,
+                "eval_skip_reason": receipt_skip_reason,
+                **_routing_result_fields(
+                    routing_decision,
+                    planned_route,
+                    observation,
+                    dispatch_id=dispatch_id,
+                ),
+            }
+            results.append(skipped)
+            append_event(
+                events_dir,
+                role,
+                "auto_dispatch_skipped",
+                provider=provider_name,
+                dispatch_status="skipped",
+                **{key: value for key, value in skipped.items() if key != "role"},
+            )
+            break
         if dispatch_ceiling is not None and dispatch_ceiling > budget.remaining():
             halt_reason = f"session_budget ({budget.total})"
             observation = _not_dispatched_observation()
+            receipt_recorded, eval_skip_reason = _record_execution_receipt(
+                item,
+                provider_name,
+                routing_decision,
+                planned_route,
+                observation,
+                "skipped",
+                "budget_insufficient",
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="skipped",
+                source="session_budget_preflight",
+                budget_preflight_result=persistent_preflight,
+            )
             skipped = {
                 **_budget_skip_result(i, role, budget, dispatch_ceiling),
+                "budget_preflight": persistent_preflight,
+                "eval_recorded": receipt_recorded,
+                "receipt_recorded": receipt_recorded,
+                "eval_skip_reason": eval_skip_reason,
                 **_routing_result_fields(
                     routing_decision,
                     planned_route,
@@ -543,9 +812,28 @@ def run_bounded_dispatch(
                 # Lost the claim (a worker took it, or it is no longer open).
                 # No dispatch => no spend: the anti-waste invariant holds.
                 observation = _not_dispatched_observation()
+                receipt_recorded, eval_skip_reason = _record_execution_receipt(
+                    item,
+                    provider_name,
+                    routing_decision,
+                    planned_route,
+                    observation,
+                    "skipped",
+                    "claim_lost",
+                    receipt_path,
+                    dispatch_id=dispatch_id,
+                    role=role,
+                    status="skipped",
+                    source="claim_preflight",
+                    budget_preflight_result=persistent_preflight,
+                )
                 skipped = {
                     "index": i, "role": role, "tokens": 0,
                     "finish_reason": "skipped", "error": "claim_lost", "reply": None,
+                    "budget_preflight": persistent_preflight,
+                    "eval_recorded": receipt_recorded,
+                    "receipt_recorded": receipt_recorded,
+                    "eval_skip_reason": eval_skip_reason,
                     **_routing_result_fields(
                         routing_decision,
                         planned_route,
@@ -566,6 +854,19 @@ def run_bounded_dispatch(
             src_meta, _ = claimed
             call_started = time.monotonic()
             try:
+                eval_harness.record_provider_call_start(
+                    dispatch_id=dispatch_id,
+                    task_id=task_id,
+                    source="auto_dispatch_provider_run",
+                    provider=provider_name,
+                    execution_surface=(
+                        planned_route.get("execution_surface")
+                        if planned_route
+                        else "provider_worker"
+                    ),
+                    path=receipt_path,
+                    root=REPO_ROOT,
+                )
                 res = provider.run(role, instruction, context)
                 reply_text = (getattr(res, "text", "") or getattr(res, "error", "") or "").strip()
                 tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
@@ -584,10 +885,11 @@ def run_bounded_dispatch(
                 provider_name,
                 routing_decision,
                 baseline_model=baseline_model,
+                baseline_reasoning_effort=baseline_reasoning,
                 observation=observation,
             )
             budget.record(tokens)  # synchronous: recorded before next dispatch
-            eval_recorded, eval_skip_reason = _record_eval_outcome(
+            eval_recorded, eval_skip_reason = _record_execution_receipt(
                 item,
                 provider_name,
                 routing_decision,
@@ -595,7 +897,12 @@ def run_bounded_dispatch(
                 observation,
                 finish,
                 err,
-                eval_log_path,
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="completed" if not err else "error",
+                source="provider_completion",
+                budget_preflight_result=persistent_preflight,
             )
             reply_path = _write_back_reply(role, src_meta, reply_text, Path(source))
             result = {
@@ -603,6 +910,8 @@ def run_bounded_dispatch(
                 "finish_reason": finish, "error": err,
                 "reply": reply_path.name if reply_path else None,
                 "eval_recorded": eval_recorded,
+                "receipt_recorded": eval_recorded,
+                "budget_preflight": persistent_preflight,
                 **_routing_result_fields(
                     routing_decision,
                     completion_route,
@@ -625,6 +934,19 @@ def run_bounded_dispatch(
 
         call_started = time.monotonic()
         try:
+            eval_harness.record_provider_call_start(
+                dispatch_id=dispatch_id,
+                task_id=task_id,
+                source="auto_dispatch_provider_run",
+                provider=provider_name,
+                execution_surface=(
+                    planned_route.get("execution_surface")
+                    if planned_route
+                    else "provider_worker"
+                ),
+                path=receipt_path,
+                root=REPO_ROOT,
+            )
             res = provider.run(role, instruction, context)
             tokens = int(getattr(res, "tokens_in", 0) or 0) + int(getattr(res, "tokens_out", 0) or 0)
             observation = _completion_observation(
@@ -634,12 +956,13 @@ def run_bounded_dispatch(
                 provider_name,
                 routing_decision,
                 baseline_model=baseline_model,
+                baseline_reasoning_effort=baseline_reasoning,
                 observation=observation,
             )
             budget.record(tokens)  # synchronous: recorded before next dispatch
             finish = getattr(res, "finish_reason", "stop")
             err = getattr(res, "error", None)
-            eval_recorded, eval_skip_reason = _record_eval_outcome(
+            eval_recorded, eval_skip_reason = _record_execution_receipt(
                 item,
                 provider_name,
                 routing_decision,
@@ -647,13 +970,20 @@ def run_bounded_dispatch(
                 observation,
                 finish,
                 err,
-                eval_log_path,
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="completed" if not err else "error",
+                source="provider_completion",
+                budget_preflight_result=persistent_preflight,
             )
             result = {
                 "index": i, "role": role, "tokens": tokens,
                 "finish_reason": finish,
                 "error": err,
                 "eval_recorded": eval_recorded,
+                "receipt_recorded": eval_recorded,
+                "budget_preflight": persistent_preflight,
                 **_routing_result_fields(
                     routing_decision,
                     completion_route,
@@ -681,9 +1011,10 @@ def run_bounded_dispatch(
                 provider_name,
                 routing_decision,
                 baseline_model=baseline_model,
+                baseline_reasoning_effort=baseline_reasoning,
                 observation=observation,
             )
-            eval_recorded, eval_skip_reason = _record_eval_outcome(
+            eval_recorded, eval_skip_reason = _record_execution_receipt(
                 item,
                 provider_name,
                 routing_decision,
@@ -691,12 +1022,19 @@ def run_bounded_dispatch(
                 observation,
                 "error",
                 err,
-                eval_log_path,
+                receipt_path,
+                dispatch_id=dispatch_id,
+                role=role,
+                status="error",
+                source="provider_error",
+                budget_preflight_result=persistent_preflight,
             )
             result = {
                 "index": i, "role": role, "tokens": 0,
                 "finish_reason": "error", "error": err,
                 "eval_recorded": eval_recorded,
+                "receipt_recorded": eval_recorded,
+                "budget_preflight": persistent_preflight,
                 **_routing_result_fields(
                     routing_decision,
                     completion_route,
@@ -786,21 +1124,64 @@ def inbox_work_items(role=None, *, limit=DEFAULT_MAX_DISPATCHES, inbox_dir=None)
         if not meta or meta.get("status") != "open" or meta.get("type") == "reply":
             continue
         to = meta.get("to")
-        if role is not None and to != role:
-            continue
+        normalized_to = str(to or "worker").strip()
+        if normalized_to.lower().startswith("subagent-"):
+            normalized_to = normalized_to[len("subagent-"):]
+        if role is not None:
+            normalized_filter = str(role).strip()
+            if normalized_filter.lower().startswith("subagent-"):
+                normalized_filter = normalized_filter[len("subagent-"):]
+            if normalized_to != normalized_filter:
+                continue
         msg_id = meta.get("id")
         task_id = _metadata_task_id(meta, msg_id)
-        eval_baseline_tokens = meta.get("eval_baseline_tokens") or meta.get("baseline_tokens")
-        context = {"msg_id": msg_id, "type": meta.get("type"), "task_id": task_id}
-        if eval_baseline_tokens is not None:
-            context["eval_baseline_tokens"] = eval_baseline_tokens
-        items.append({
-            "role": str(to or "worker"),
+        dispatch_id = str(meta.get("dispatch_id") or msg_id or p.stem).strip()
+        role_id = normalized_to
+
+        def _metadata_list(value) -> list[str]:
+            if value in (None, "", "[]"):
+                return []
+            if isinstance(value, list):
+                return [
+                    str(item).strip()
+                    for item in value
+                    if str(item).strip()
+                ]
+            text = str(value).strip()
+            if text.startswith("[") and text.endswith("]"):
+                text = text[1:-1]
+            return [
+                part.strip()
+                for part in text.split(",")
+                if part.strip()
+            ]
+
+        eval_baseline_tokens = (
+            meta.get("eval_baseline_tokens")
+            if meta.get("eval_baseline_tokens") not in (None, "")
+            else meta.get("baseline_tokens")
+        )
+        context = {
+            "msg_id": msg_id,
+            "type": meta.get("type"),
+            "task_id": task_id,
+            "dispatch_id": dispatch_id,
+            "recipient": to,
+        }
+        item = {
+            "role": role_id,
             "instruction": (body or "").strip() or str(meta.get("subject", "")),
             "context": context,
-            "routing_model": meta.get("routing_model"),
+            "dispatch_id": dispatch_id,
+            "routing_model": (
+                meta.get("routing_model")
+                or meta.get("requested_model_tier")
+                or meta.get("selected_model_tier")
+            ),
             "routing_grade": meta.get("routing_grade"),
-            "routing_changed_files": meta.get("routing_changed_files") or [],
+            "routing_changed_files": _metadata_list(
+                meta.get("routing_changed_files")
+            ),
             "routing_diff_lines": meta.get("routing_diff_lines") or 0,
             "task_id": task_id,
             "eval_baseline_tokens": eval_baseline_tokens,
@@ -809,7 +1190,40 @@ def inbox_work_items(role=None, *, limit=DEFAULT_MAX_DISPATCHES, inbox_dir=None)
             # re-reads fresh at claim time so a stale snapshot can never
             # overwrite a message a worker changed since the scan.
             "_source_path": p,
-        })
+        }
+        triggers = _metadata_list(
+            meta.get("escalation_triggers")
+            or meta.get("routing_escalation_triggers")
+        )
+        if triggers:
+            item["escalation_triggers"] = triggers
+            context["escalation_triggers"] = triggers
+        for key in (
+            "claim_id",
+            "task_token_budget",
+            "claim_token_budget",
+            "eval_workload_id",
+            "workload_id",
+            "eval_baseline_receipt_id",
+            "baseline_receipt_id",
+            "eval_baseline_model",
+            "baseline_model",
+            "eval_baseline_reasoning_effort",
+            "baseline_reasoning_effort",
+            "eval_baseline_observation_status",
+            "baseline_observation_status",
+            "eval_baseline_billed_cost",
+            "baseline_billed_cost",
+            "eval_baseline_currency",
+            "baseline_currency",
+        ):
+            value = meta.get(key)
+            if value not in (None, ""):
+                item[key] = value
+                context[key] = value
+        if eval_baseline_tokens is not None:
+            context["eval_baseline_tokens"] = eval_baseline_tokens
+        items.append(item)
     return items
 
 

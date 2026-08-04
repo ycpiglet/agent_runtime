@@ -357,7 +357,28 @@ def check_task_registry(errors: list[str], warnings: list[str]) -> None:
 def check_status_doc(errors: list[str]) -> None:
     status_path = ROOT / "agents" / "lead_engineer" / "STATUS.md"
     if not status_path.exists():
-        errors.append("agents/lead_engineer/STATUS.md: missing status board.")
+        try:
+            from parallel_worktree_gate import continuity_report
+
+            continuity = continuity_report(
+                ROOT,
+                require_standby_pointer=True,
+            )
+        except Exception as exc:
+            errors.append(
+                "agents/lead_engineer/STATUS.md: missing status board and "
+                f"pointer continuity could not be evaluated: {exc}"
+            )
+            return
+        if continuity.status == "pass" and continuity.mode == "pointer+sidecars":
+            return
+        detail = "; ".join(continuity.findings) or (
+            f"effective continuity mode is {continuity.mode}"
+        )
+        errors.append(
+            "agents/lead_engineer/STATUS.md: missing status board and strict "
+            f"pointer continuity is unavailable: {detail}"
+        )
         return
 
     text = read_text(status_path)

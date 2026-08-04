@@ -14,8 +14,11 @@ import re
 import subprocess
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from agent_runtime import claim_store, state_projection
 
 
 POINTER = Path("agents/project/NEXT-SESSION-POINTER.yml")
@@ -29,7 +32,19 @@ try:
 except ImportError:  # imported as scripts.<name> (namespace package)
     from scripts import status_alias
 DONE_STATUSES = status_alias.DONE_STATUSES
-ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+# Canonical set, imported rather than re-typed: "every surface agrees on
+# active versus expired" must hold by construction, not by coincidence.
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
+STATE_PROJECTION_BLOCKING_CODES = {
+    "config-invalid",
+    "source-missing",
+    "source-unsafe",
+    "source-parse-error",
+    "source-too-large",
+    "projection-missing",
+    "projection-stale",
+    "projection-unsafe",
+}
 
 
 @dataclass(frozen=True)
@@ -38,6 +53,22 @@ class Finding:
     subject: str
     path: str
     detail: str
+
+
+def _parse_aware_datetime(value: str) -> datetime:
+    raw = value.strip()
+    normalized = raw[:-1] + "+00:00" if raw.endswith(("Z", "z")) else raw
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise argparse.ArgumentTypeError(
+            "invalid --now: expected a timezone-aware ISO-8601 timestamp"
+        )
+    return parsed
 
 
 @dataclass(frozen=True)
@@ -173,6 +204,91 @@ def active_pointer(root: Path) -> tuple[str, str, str]:
 
 def _contains(root: Path, path: Path, needle: str) -> bool:
     return not needle or needle == "none" or needle in _read(root / path)
+
+
+def _configured_state_contract(root: Path) -> tuple[bool, list[Finding]]:
+    """Validate explicit v2 state adapters without asserting on host content.
+
+    Legacy and unconfigured hosts retain the historical BACKLOG/STATUS checks.
+    Once a host explicitly configures an adapter, its source stays read-only and
+    the generated, digest-pinned projection becomes the Runtime-facing contract.
+    """
+
+    try:
+        settings = state_projection.resolve_settings(root)
+    except Exception as exc:
+        return True, [
+            Finding(
+                "block",
+                "state-projection:evaluation-error",
+                "agent_runtime.yml",
+                f"state adapter settings could not be resolved: {exc}",
+            )
+        ]
+    setting_codes = {
+        str(finding.get("code") or "")
+        for finding in settings.findings
+        if isinstance(finding, dict)
+    }
+    configured = any(source.configured for source in settings.sources)
+    configured = configured or "config-invalid" in setting_codes
+    if not configured:
+        return False, []
+
+    try:
+        evaluation = state_projection.evaluate_state(root)
+    except Exception as exc:
+        return True, [
+            Finding(
+                "block",
+                "state-projection:evaluation-error",
+                settings.projection_path,
+                f"configured state projection could not be evaluated: {exc}",
+            )
+        ]
+
+    findings: list[Finding] = []
+    seen: set[tuple[str, str]] = set()
+    for raw in evaluation.get("findings", []):
+        if not isinstance(raw, dict):
+            continue
+        code = str(raw.get("code") or "")
+        if code not in STATE_PROJECTION_BLOCKING_CODES:
+            continue
+        path = str(raw.get("path") or settings.projection_path)
+        key = (code, path)
+        if key in seen:
+            continue
+        seen.add(key)
+        findings.append(
+            Finding(
+                "block",
+                f"state-projection:{code}",
+                path,
+                str(raw.get("detail") or "configured state projection is invalid"),
+            )
+        )
+    projection_status = str(
+        (evaluation.get("projection") or {}).get("status") or ""
+    )
+    if projection_status != "fresh" and not any(
+        finding.subject
+        in {
+            "state-projection:projection-missing",
+            "state-projection:projection-stale",
+            "state-projection:projection-unsafe",
+        }
+        for finding in findings
+    ):
+        findings.append(
+            Finding(
+                "block",
+                f"state-projection:projection-{projection_status or 'invalid'}",
+                settings.projection_path,
+                "configured state adapters require a fresh generated projection",
+            )
+        )
+    return True, findings
 
 
 def _is_active(claim: dict[str, object]) -> bool:
@@ -367,8 +483,15 @@ def _validate_active_claim(
     return findings
 
 
-def analyze(root: Path) -> list[Finding]:
+def analyze(
+    root: Path,
+    *,
+    now: datetime | None = None,
+    grace_seconds: object | None = None,
+) -> list[Finding]:
     root = root.resolve()
+    now_dt = now or datetime.now(timezone.utc)
+    grace = claim_store.resolve_claim_grace(grace_seconds)
     pointer_path = root / POINTER
     if not pointer_path.exists():
         return [Finding("block", "pointer:missing", POINTER.as_posix(), "NEXT-SESSION-POINTER.yml is required")]
@@ -397,13 +520,17 @@ def analyze(root: Path) -> list[Finding]:
     taskset_is_complete = bool(taskset_tasks) and not open_tasks
     if task_set_id and task_set_id != "none" and pointer_status in {"active", "in_progress"} and taskset_tasks and not open_tasks:
         findings.append(Finding("block", f"taskset:active-but-complete:{task_set_id}", POINTER.as_posix(), "pointer says active but all taskset tasks are done"))
-    for path in (BOARD, BACKLOG, STATUS):
+    configured_state, configured_state_findings = _configured_state_contract(root)
+    findings.extend(configured_state_findings)
+    state_surfaces = (BOARD,) if configured_state else (BOARD, BACKLOG, STATUS)
+    for path in state_surfaces:
         if not (root / path).exists():
             findings.append(Finding("block", f"surface:missing:{path.as_posix()}", path.as_posix(), "required state surface is missing"))
         elif task_set_id and task_set_id != "none" and not (path == BOARD and taskset_is_complete and pointer_status not in {"active", "in_progress"}) and not _contains(root, path, task_set_id):
             findings.append(Finding("block", f"surface:missing-taskset:{path.as_posix()}", path.as_posix(), f"{path.as_posix()} does not mention active taskset {task_set_id}"))
     if active_task and active_task != "none":
-        for path in (BOARD, STATUS):
+        active_task_surfaces = (BOARD,) if configured_state else (BOARD, STATUS)
+        for path in active_task_surfaces:
             if (root / path).exists() and not _contains(root, path, active_task):
                 findings.append(Finding("watch", f"surface:missing-active-task:{path.as_posix()}", path.as_posix(), f"{path.as_posix()} does not mention active task {active_task}"))
 
@@ -411,10 +538,73 @@ def analyze(root: Path) -> list[Finding]:
     findings.extend(claim_findings)
     pointer_claim_refs = _pointer_list(pointer_text, "active_claims")
     pointer_agents = _pointer_agents(pointer_text)
-    for claim_path, claim in records:
-        if _is_active(claim):
-            findings.extend(_validate_active_claim(root, claim_path, claim, by_id, units_by_id, task_set_id, active_task, pointer_claim_refs, pointer_agents))
-    active_workers = [claim for _, claim in records if _is_active(claim) and not _is_explicit_overlay(claim)]
+    classified = [
+        (
+            claim_path,
+            claim,
+            claim_store.classify_claim_liveness(
+                claim,
+                now=now_dt,
+                grace_seconds=grace,
+            ),
+        )
+        for claim_path, claim in records
+    ]
+    for claim_path, claim, liveness in classified:
+        claim_id = str(claim.get("claim_id") or claim_path.stem)
+        rel_claim_path = _rel(root, claim_path)
+        if liveness.state == "expired":
+            findings.append(
+                Finding(
+                    "block",
+                    f"claim:liveness-expired:{claim_id}",
+                    rel_claim_path,
+                    "status-active claim authority expired beyond shared grace",
+                )
+            )
+        elif liveness.state == "indeterminate":
+            findings.append(
+                Finding(
+                    "block",
+                    f"claim:liveness-indeterminate:{claim_id}",
+                    rel_claim_path,
+                    f"claim authority is retained conservatively: {liveness.reason}",
+                )
+            )
+        if any("mismatch" in item for item in liveness.findings):
+            findings.append(
+                Finding(
+                    "watch",
+                    f"claim:liveness-deadline-mismatch:{claim_id}",
+                    rel_claim_path,
+                    "top-level and nested claim deadlines differ; later valid deadline is effective",
+                )
+            )
+
+    authority_records = [
+        (claim_path, claim)
+        for claim_path, claim, liveness in classified
+        if liveness.state in {"live", "indeterminate"}
+    ]
+    for claim_path, claim in authority_records:
+        findings.extend(
+            _validate_active_claim(
+                root,
+                claim_path,
+                claim,
+                by_id,
+                units_by_id,
+                task_set_id,
+                active_task,
+                pointer_claim_refs,
+                pointer_agents,
+            )
+        )
+    active_workers = [
+        claim
+        for _, claim in authority_records
+        if not _is_explicit_overlay(claim)
+    ]
     if active_workers:
         if not task_set_id or task_set_id == "none":
             findings.append(Finding("block", "pointer:primary-worker-missing-taskset", POINTER.as_posix(), "active worker claims require a primary pointer taskset"))
@@ -461,12 +651,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Active state sync gate")
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
     parser.add_argument("--check", action="store_true", help="Fail on block findings")
+    parser.add_argument(
+        "--now",
+        type=_parse_aware_datetime,
+        help="Evaluate claim liveness at a timezone-aware ISO-8601 timestamp",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    findings = analyze(args.root)
+    findings = analyze(args.root, now=args.now)
     print(render(args.root, findings))
     return 1 if args.check and any(f.severity == "block" for f in findings) else 0
 

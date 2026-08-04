@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import uuid
@@ -36,6 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import orchestrator_safety_gate as safety_gate  # noqa: E402
 import cycle_gate  # noqa: E402
 import subagent_dispatch  # noqa: E402
+from agent_runtime import claim_store  # noqa: E402
 
 if sys.platform == "win32":
     try:
@@ -952,6 +954,311 @@ def cmd_leave_for_work(args: argparse.Namespace) -> Outcome:
     return Outcome(0, summary, payload)
 
 
+CLAIM_PROGRESS_SUCCESS_STATUSES = {
+    "heartbeated",
+    "heartbeat_committed_with_warnings",
+}
+CLAIM_PROGRESS_PROJECTION_OPERATIONS = {
+    "merge",
+    "overlay-no-primary-pointer",
+}
+
+
+def _strict_revision(value: object) -> int | None:
+    if type(value) is not int or value < 0:
+        return None
+    return value
+
+
+def _bounded_claim_id(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    return value[:256]
+
+
+def _claim_progress_identity_value_valid(
+    value: object,
+    *,
+    required: bool,
+) -> bool:
+    if value is None:
+        return not required
+    if (
+        not isinstance(value, str)
+        or not value
+        or len(value) > claim_store.CLAIM_IDENTITY_MAX_CHARS
+    ):
+        return False
+    if "\n" in value or "\r" in value or value != value.strip():
+        return False
+    return True
+
+
+def _claim_progress_identity_matches(
+    candidate: dict[str, object],
+    claim: dict[str, object],
+) -> bool:
+    for field, required in (
+        ("task_id", True),
+        ("unit_id", False),
+        ("task_set_id", False),
+    ):
+        value = claim.get(field)
+        if not _claim_progress_identity_value_valid(value, required=required):
+            return False
+        if candidate.get(field) != value:
+            return False
+    return True
+
+
+def _claim_progress_pointer_agent_matches(
+    candidate: dict[str, object],
+    claim: dict[str, object],
+    *,
+    claim_ref: str,
+) -> bool:
+    for field in claim_store.POINTER_AGENT_FIELDS:
+        if field not in candidate:
+            return False
+        if field == "claim_path":
+            expected = claim_ref
+        else:
+            if field not in claim:
+                return False
+            expected = claim[field]
+        value = candidate[field]
+        if type(value) is not type(expected) or value != expected:
+            return False
+    return True
+
+
+def _claim_progress_projection_valid(
+    payload: dict[str, object],
+    claim: dict[str, object],
+    projection: dict[str, object],
+    *,
+    claim_id: str,
+    committed_revision: int,
+) -> bool:
+    claim_ref = f"agents/runtime/task_claims/{claim_id}.json"
+    claim_status = claim.get("status")
+    if (
+        payload.get("path") != claim_ref
+        or projection.get("status") != "projection"
+        or projection.get("task_claim_ref") != claim_ref
+        or claim_status not in claim_store.ACTIVE_CLAIM_STATUSES
+        or not _claim_progress_identity_matches(projection, claim)
+    ):
+        return False
+
+    operation = projection.get("operation")
+    if operation == "overlay-no-primary-pointer":
+        return claim.get("overlay") is True and "pointer" not in projection
+    if operation != "merge" or claim.get("overlay") is True:
+        return False
+
+    pointer = projection.get("pointer")
+    if not isinstance(pointer, dict):
+        return False
+    if (
+        pointer.get("active_task") != claim.get("task_id")
+        or pointer.get("active_task_set") != claim.get("task_set_id")
+        or pointer.get("active_claims") != [claim_ref]
+    ):
+        return False
+    current_agents = pointer.get("current_agents")
+    if not isinstance(current_agents, list) or len(current_agents) != 1:
+        return False
+    current_agent = current_agents[0]
+    return (
+        isinstance(current_agent, dict)
+        and _claim_progress_pointer_agent_matches(
+            current_agent,
+            claim,
+            claim_ref=claim_ref,
+        )
+        and _strict_revision(current_agent.get("mutation_revision"))
+        == committed_revision
+    )
+
+
+def _claim_progress_current(payload: object) -> dict[str, object]:
+    claim = payload.get("claim") if isinstance(payload, dict) else None
+    receipt = payload.get("receipt") if isinstance(payload, dict) else None
+    projection = payload.get("projection") if isinstance(payload, dict) else None
+    return {
+        "claim_id": (
+            _bounded_claim_id(claim.get("claim_id"))
+            if isinstance(claim, dict)
+            else None
+        ),
+        "claim_revision": (
+            _strict_revision(claim.get("mutation_revision"))
+            if isinstance(claim, dict)
+            else None
+        ),
+        "receipt_revision": (
+            _strict_revision(receipt.get("claim_revision"))
+            if isinstance(receipt, dict)
+            else None
+        ),
+        "projection_claim_id": (
+            _bounded_claim_id(projection.get("claim_id"))
+            if isinstance(projection, dict)
+            else None
+        ),
+        "projection_revision": (
+            _strict_revision(projection.get("claim_revision"))
+            if isinstance(projection, dict)
+            else None
+        ),
+    }
+
+
+def _claim_progress_receipt_valid(
+    payload: object,
+    *,
+    claim_id: str,
+    committed_revision: int,
+) -> bool:
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("status") not in CLAIM_PROGRESS_SUCCESS_STATUSES:
+        return False
+    claim = payload.get("claim")
+    receipt = payload.get("receipt")
+    projection = payload.get("projection")
+    if not all(isinstance(item, dict) for item in (claim, receipt, projection)):
+        return False
+    assert isinstance(claim, dict)
+    assert isinstance(receipt, dict)
+    assert isinstance(projection, dict)
+    identity_and_revision_valid = (
+        claim.get("claim_id") == claim_id
+        and _strict_revision(claim.get("mutation_revision"))
+        == committed_revision
+        and receipt.get("committed") is True
+        and _strict_revision(receipt.get("claim_revision"))
+        == committed_revision
+        and projection.get("claim_id") == claim_id
+        and _strict_revision(projection.get("claim_revision"))
+        == committed_revision
+        and projection.get("operation")
+        in CLAIM_PROGRESS_PROJECTION_OPERATIONS
+    )
+    return identity_and_revision_valid and _claim_progress_projection_valid(
+        payload,
+        claim,
+        projection,
+        claim_id=claim_id,
+        committed_revision=committed_revision,
+    )
+
+
+def _claim_progress_indeterminate(
+    args: argparse.Namespace,
+    *,
+    dispatcher_returncode: int,
+    payload: object,
+    stderr: object,
+) -> Outcome:
+    committed_revision = args.expected_revision + 1
+    bounded_stderr = " ".join(str(stderr or "").split())[:256]
+    result = {
+        "status": "claim_progress_receipt_indeterminate",
+        "commit_state": "unknown",
+        "retry_safe": False,
+        "dispatcher_returncode": dispatcher_returncode,
+        "expected": {
+            "claim_id": args.claim_id,
+            "prior_revision": args.expected_revision,
+            "committed_revision": committed_revision,
+        },
+        "current": _claim_progress_current(payload),
+    }
+    if bounded_stderr:
+        result["stderr"] = bounded_stderr
+    return Outcome(2, "claim_progress_receipt_indeterminate", result)
+
+
+def cmd_claim_progress(args: argparse.Namespace) -> Outcome:
+    """Delegate one progress mutation to the serial claim authority."""
+
+    dispatcher = Path(__file__).resolve().parent / "task_claim_dispatcher.py"
+    command = [
+        sys.executable,
+        str(dispatcher),
+        "--root",
+        str(REPO_ROOT),
+        "heartbeat",
+        "--claim-id",
+        args.claim_id,
+        "--agent-instance-id",
+        args.agent_instance_id,
+        "--callsite-id",
+        args.callsite_id,
+        "--expected-revision",
+        str(args.expected_revision),
+        "--phase",
+        args.phase,
+        "--progress-pct",
+        str(args.progress_pct),
+        "--step-index",
+        str(args.step_index),
+        "--step-total",
+        str(args.step_total),
+        "--status-text",
+        args.status_text,
+    ]
+    if args.now:
+        command.extend(("--now", args.now))
+    command.append("--json")
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return Outcome(
+            1,
+            "claim_progress_failed",
+            {
+                "status": "claim_progress_failed",
+                "stderr": " ".join(str(exc).split())[:256],
+            },
+        )
+    try:
+        parsed_payload = json.loads(result.stdout)
+    except (json.JSONDecodeError, TypeError):
+        parsed_payload = None
+    if result.returncode == 0:
+        committed_revision = args.expected_revision + 1
+        if not _claim_progress_receipt_valid(
+            parsed_payload,
+            claim_id=args.claim_id,
+            committed_revision=committed_revision,
+        ):
+            return _claim_progress_indeterminate(
+                args,
+                dispatcher_returncode=result.returncode,
+                payload=parsed_payload,
+                stderr=result.stderr,
+            )
+        assert isinstance(parsed_payload, dict)
+        return Outcome(0, str(parsed_payload["status"]), parsed_payload)
+    if isinstance(parsed_payload, dict):
+        payload = parsed_payload
+    else:
+        payload = {
+            "status": "claim_progress_failed",
+            "stderr": " ".join(str(result.stderr or "").split())[:256],
+        }
+    summary = str(payload.get("status") or "claim_progress")
+    return Outcome(result.returncode, summary, payload)
+
+
 # ---------- CLI ----------
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1025,6 +1332,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_lfw = sp("leave-for-work", help="end the session and stop heartbeats")
     add_dry_run(p_lfw)
     p_lfw.set_defaults(func=cmd_leave_for_work)
+
+    p_progress = sp(
+        "claim-progress",
+        help="atomically record progress through task_claim_dispatcher heartbeat",
+    )
+    p_progress.add_argument("--claim-id", required=True)
+    p_progress.add_argument("--agent-instance-id", required=True)
+    p_progress.add_argument("--callsite-id", required=True)
+    p_progress.add_argument("--expected-revision", type=int, required=True)
+    p_progress.add_argument("--phase", required=True)
+    p_progress.add_argument("--progress-pct", type=int, required=True)
+    p_progress.add_argument("--step-index", type=int, required=True)
+    p_progress.add_argument("--step-total", type=int, required=True)
+    p_progress.add_argument("--status-text", required=True)
+    p_progress.add_argument("--now")
+    p_progress.set_defaults(func=cmd_claim_progress)
 
     p_dn = sp("dispatch-next", help="auto-dispatch the highest-priority 대기 TASK to its Owner")
     p_dn.add_argument("--role", help="optional Owner role filter (qa/backend/...)")

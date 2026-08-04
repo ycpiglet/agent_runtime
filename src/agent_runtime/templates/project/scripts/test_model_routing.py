@@ -87,6 +87,44 @@ def test_explorer_defaults_to_worker_low():
     assert decision["selected_tier"] == "worker_low"
 
 
+def test_runtime_role_families_have_explicit_economic_policy():
+    expected = {
+        "scribe": ("scribe", "worker_low"),
+        "research": ("exploration", "worker_low"),
+        "implementation": ("implementation", "worker_low"),
+        "backend": ("implementation", "worker_low"),
+        "uiux": ("implementation", "worker_low"),
+        "ci-cd": ("implementation", "worker_low"),
+        "timeline": ("exploration", "worker_low"),
+        "reviewer": ("review", "reviewer_standard"),
+        "beta-tester": ("review", "reviewer_standard"),
+        "auditor": ("audit", "reviewer_high"),
+    }
+    for role, (policy_id, tier) in expected.items():
+        decision = mr.resolve_subagent_tier(role)
+        assert decision["role_policy_status"] == "explicit"
+        assert decision["role_policy_id"] == policy_id
+        assert decision["selected_tier"] == tier
+
+
+def test_high_tier_needs_role_policy_or_registered_trigger():
+    denied = mr.resolve_subagent_tier(
+        "explorer",
+        requested_tier="planner_high",
+    )
+    escalated = mr.resolve_subagent_tier(
+        "explorer",
+        requested_tier="planner_high",
+        escalation_triggers=["security"],
+    )
+    audit = mr.resolve_subagent_tier("auditor")
+
+    assert denied["routing_status"] == "high_tier_denied"
+    assert denied["selected_tier"] == "worker_low"
+    assert escalated["registered_escalation_reason"] == "trigger:security"
+    assert audit["registered_escalation_reason"] == "role_policy:audit"
+
+
 def test_lookup_preflight_blocks_without_bounded_evidence():
     blocked = mr.deterministic_preflight("find and list provider files")
     allowed = mr.deterministic_preflight(
@@ -133,6 +171,50 @@ def test_native_codex_route_carries_exact_model_and_reasoning(monkeypatch):
     assert route["model_observation_status"] == "unverified"
 
 
+def test_provider_reasoning_capability_comes_from_canonical_mapping():
+    assert mr.provider_reasoning_capability("native-codex") == "required"
+    assert mr.provider_reasoning_capability("codex-session") == "required"
+    assert mr.provider_reasoning_capability("codex-agent") == "unsupported"
+    assert mr.provider_reasoning_capability("codex") == "unsupported"
+    assert mr.provider_reasoning_capability("claude-agent") == "unsupported"
+    assert mr.provider_reasoning_capability("unknown-provider") == "unknown"
+
+
+def test_provider_identity_canonicalizes_only_registered_aliases():
+    assert mr.canonical_provider_identity("native-codex") == "native-codex"
+    assert mr.canonical_provider_identity("codex-session") == "native-codex"
+    assert mr.canonical_provider_identity("codex-native") == "native-codex"
+    assert mr.canonical_provider_identity("codex-agent") == "codex-agent"
+    assert mr.canonical_provider_identity("codex") == "codex-agent"
+    assert mr.canonical_provider_identity("claude-agent") == "claude-agent"
+    assert mr.canonical_provider_identity("") is None
+    assert mr.canonical_provider_identity("unknown-provider") is None
+
+
+def test_native_equivalence_uses_model_and_reasoning(monkeypatch):
+    for name in (
+        "CODEX_NATIVE_WORKER_LOW_MODEL",
+        "CODEX_NATIVE_WORKER_STANDARD_MODEL",
+        "CODEX_NATIVE_WORKER_LOW_REASONING",
+        "CODEX_NATIVE_WORKER_STANDARD_REASONING",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    matrix = mr.provider_routing_matrix("native-codex")
+    rows = {row["pm_tier"]: row for row in matrix["rows"]}
+    route = mr.resolve_provider_route(
+        "native-codex",
+        "worker_low",
+        baseline_tier="worker_standard",
+        observed_model="gpt-5.6-terra",
+        observed_reasoning_effort="low",
+    )
+
+    assert rows["worker_low"]["equivalence_status"] == "distinct"
+    assert rows["worker_standard"]["equivalence_status"] == "distinct"
+    assert route["model_changed"] is False
+    assert route["route_changed"] is True
+    assert route["application_status"] == "applied"
 def test_provider_env_resolves_claude_agent_tier(monkeypatch):
     monkeypatch.setenv("CLAUDE_AGENT_SONNET_MODEL", "claude-sonnet-test")
     env = mr.provider_env("claude-agent", "sonnet")

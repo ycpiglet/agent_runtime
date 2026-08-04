@@ -1,0 +1,28 @@
+{
+  "cause": "The acceptance harness embedded mutable per-run expectations in a single HOST_CONTRACTS entry keyed only by host instead of loading schema-checked immutable contracts keyed by host and pilot identity.",
+  "created_at": "2026-07-30T05:31:18+09:00",
+  "created_by": "codex-root-task-ar-648-014",
+  "defect_signatures": [
+    "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e"
+  ],
+  "id": "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+  "prevention": "Keep shared safety invariants in code, move run-specific expectations to declarative contracts keyed by host plus pilot_id, preserve historical contracts, and fail closed on unknown duplicate malformed or drifting records.",
+  "prevention_refs": [
+    "reviews/W4A-2026-07-30-unit-task-ar-648-014.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md"
+  ],
+  "status": "active",
+  "summary": "A host-only acceptance lookup bound Bean Wiki to one historical red execution, so an internally consistent green replay was rejected by twelve obsolete contract expectations.",
+  "title": "Pilot acceptance must select an immutable run contract",
+  "verification_refs": [
+    "reviews/W4A-2026-07-30-unit-task-ar-648-014.md"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-014"
+  ]
+}

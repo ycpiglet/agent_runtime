@@ -4,13 +4,16 @@ import argparse
 import importlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
+from . import claim_store as _claim_store
 from . import config as _config
 from . import adoption as _adoption
 from . import allimbot as _allimbot_policy
@@ -34,6 +37,7 @@ class DoctorPlan:
     root: Path
     findings: tuple[DoctorFinding, ...]
     config_loaded: bool = False
+    continuity: dict[str, object] | None = None
     scribe: dict[str, object] | None = None
     routing: dict[str, object] | None = None
     security_service: dict[str, object] | None = None
@@ -52,6 +56,7 @@ class DoctorPlan:
 
 
 REQUIRED_TEMPLATE_FILES = (
+    "scripts/agent_runtime/claim_store.py",
     "scripts/agent_orchestrator.py",
     "scripts/agent_worker.py",
     "scripts/auto_runner.py",
@@ -116,6 +121,7 @@ CODEX_HOOK_REQUIREMENTS = (
     ("Stop", "stop-owner", "scripts/stop_hook_owner_governance.py"),
     ("Stop", "stop-closure", "scripts/stop_hook_closure_gate.py"),
 )
+CODEX_HOOK_POSIX_PYTHONS = ("python3", "python")
 ALLIMBOT_ENV_NAMES = (
     "ALLIMBOT_ENDPOINT",
     "ALLIMBOT_PROJECT_TOKEN",
@@ -157,6 +163,104 @@ def _rel(root: Path, path: Path) -> str:
 
 def _findings_append(findings: list[DoctorFinding], severity: str, *, area: str, path: str, kind: str, detail: str) -> None:
     findings.append(DoctorFinding(severity=severity, area=area, path=path, kind=kind, detail=detail))
+
+
+def _check_task_claim_store(root: Path, findings: list[DoctorFinding]) -> None:
+    try:
+        result = _claim_store.inspect_store(root)
+    except Exception as exc:
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=f"claim-store inspection failed: {type(exc).__name__}",
+        )
+        return
+    if result.state == "migration-required":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-migration-required",
+            detail=result.finding or "existing task claims require explicit sync migration",
+        )
+    elif result.state == "integrity-invalid":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=result.finding or "claim-store authority is invalid",
+        )
+        return
+    else:
+        try:
+            claims = _claim_store.read_claims_snapshot(root)
+        except Exception as exc:
+            _findings_append(
+                findings,
+                "blocker",
+                area="task-claim-store",
+                path="agents/runtime/task_claims",
+                kind="claim-store-integrity-invalid",
+                detail=f"full claim snapshot validation failed: {type(exc).__name__}",
+            )
+            return
+
+        now = datetime.now(timezone.utc).astimezone()
+        grace_seconds = _claim_store.resolve_claim_grace(environ=os.environ)
+        for claim in claims:
+            claim_id = str(claim.get("claim_id") or "unknown-claim")
+            liveness = _claim_store.classify_claim_liveness(
+                claim,
+                now=now,
+                grace_seconds=grace_seconds,
+            )
+            if liveness.state == "expired":
+                deadline = (
+                    liveness.effective_deadline.isoformat()
+                    if liveness.effective_deadline is not None
+                    else "unknown"
+                )
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-expired",
+                    detail=f"{claim_id}: active claim lease expired at {deadline}",
+                )
+            elif liveness.state == "indeterminate":
+                _findings_append(
+                    findings,
+                    "blocker",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-liveness-indeterminate",
+                    detail=f"{claim_id}: {liveness.reason}",
+                )
+            if any("mismatch" in finding.lower() for finding in liveness.findings):
+                _findings_append(
+                    findings,
+                    "warning",
+                    area="task-claim-store",
+                    path="agents/runtime/task_claims",
+                    kind="claim-liveness-deadline-mismatch",
+                    detail=f"{claim_id}: top-level and nested lease deadlines differ",
+                )
+
+        _findings_append(
+            findings,
+            "info",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind=f"claim-store-{result.state}",
+            detail=f"task-claim store authority and {len(claims)} claim records are internally consistent",
+        )
 
 
 def _json_matches(path: Path, expected: dict[str, object]) -> bool:
@@ -338,6 +442,77 @@ def _run_subcommand(root: Path, script_name: str, args: tuple[str, ...], timeout
     return process.returncode, (process.stdout or "") + (process.stderr or "")
 
 
+def _continuity_report(
+    root: Path,
+    findings: list[DoctorFinding],
+) -> dict[str, object]:
+    rc, output = _run_subcommand(
+        root,
+        "parallel_worktree_gate.py",
+        ("--continuity-only", "--require-standby-pointer", "--json"),
+    )
+    try:
+        payload = json.loads(output.strip())
+    except (json.JSONDecodeError, TypeError):
+        report = {
+            "status": "fail",
+            "mode": "unavailable",
+            "pointer": "agents/project/NEXT-SESSION-POINTER.yml",
+            "active_claims": 0,
+            "findings": [output.strip() or "continuity diagnostic produced no output"],
+        }
+        _findings_append(
+            findings,
+            "blocker",
+            area="continuity",
+            path="scripts/parallel_worktree_gate.py",
+            kind="diagnostic-failed",
+            detail=f"continuity diagnostic failed with rc={rc}: {report['findings'][0]}",
+        )
+        return report
+    if not isinstance(payload, dict):
+        payload = {}
+    raw_findings = payload.get("findings")
+    report_findings = (
+        [str(item) for item in raw_findings]
+        if isinstance(raw_findings, list)
+        else ["continuity diagnostic returned malformed findings"]
+    )
+    report = {
+        "status": str(payload.get("status") or ("fail" if rc else "pass")),
+        "mode": str(payload.get("mode") or "unavailable"),
+        "pointer": str(
+            payload.get("pointer")
+            or "agents/project/NEXT-SESSION-POINTER.yml"
+        ),
+        "active_claims": int(payload.get("active_claims") or 0),
+        "findings": report_findings,
+    }
+    if report["status"] == "pass" and rc == 0:
+        _findings_append(
+            findings,
+            "info",
+            area="continuity",
+            path=str(report["pointer"]),
+            kind="effective-path",
+            detail=(
+                f"mode={report['mode']} active_claims={report['active_claims']}"
+            ),
+        )
+        return report
+    for detail in report_findings:
+        match = re.search(r"continuity:([a-z0-9-]+):", detail)
+        _findings_append(
+            findings,
+            "blocker",
+            area="continuity",
+            path=str(report["pointer"]),
+            kind=match.group(1) if match else "continuity-invalid",
+            detail=detail,
+        )
+    return report
+
+
 def _hook_entries(hooks: dict[str, object], event: str) -> list[dict[str, object]]:
     entries: list[dict[str, object]] = []
     groups = hooks.get(event, [])
@@ -423,6 +598,10 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
 
     for event, mode, target in CODEX_HOOK_REQUIREMENTS:
         expected_posix = f"python3 -m agent_runtime.hook_runtime {mode}"
+        compatible_posix = {
+            f"{python} -m agent_runtime.hook_runtime {mode}"
+            for python in CODEX_HOOK_POSIX_PYTHONS
+        }
         expected_windows = f"py -3 -m agent_runtime.hook_runtime {mode}"
         entries = _hook_entries(hooks, event)
         candidates = [
@@ -433,7 +612,7 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
         matching = [
             hook
             for hook in candidates
-            if str(hook.get("command") or "").strip() == expected_posix
+            if str(hook.get("command") or "").strip() in compatible_posix
         ]
         if not matching:
             _findings_append(
@@ -447,14 +626,31 @@ def _check_codex_hooks(root: Path, findings: list[DoctorFinding]) -> None:
 
         for hook in candidates:
             command = str(hook.get("command") or "").strip()
-            if command != expected_posix:
+            if command not in compatible_posix:
+                severity = "warning" if matching else "blocker"
+                kind = (
+                    "legacy-hook-command-preserved"
+                    if matching
+                    else "stale-hook-command"
+                )
                 _findings_append(
                     findings,
-                    "blocker",
+                    severity,
                     area="codex-hooks",
                     path=".codex/hooks.json",
-                    kind="stale-hook-command",
+                    kind=kind,
                     detail=f"{event}:{mode}: {command or '<missing>'}",
+                )
+                if matching:
+                    continue
+            elif command != expected_posix:
+                _findings_append(
+                    findings,
+                    "warning",
+                    area="codex-hooks",
+                    path=".codex/hooks.json",
+                    kind="compatible-python-alias",
+                    detail=f"{event}:{mode}: {command}",
                 )
             windows = str(hook.get("commandWindows") or "").strip()
             if not windows:
@@ -899,6 +1095,7 @@ def _routing_matrix_plan(
 def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
     findings: list[DoctorFinding] = []
     root = root.resolve()
+    _check_task_claim_store(root, findings)
     _check_codex_hooks(root, findings)
 
     for rel in REQUIRED_TEMPLATE_FILES:
@@ -912,6 +1109,8 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
                 kind="missing-required-file",
                 detail="required template artifact is missing",
             )
+
+    continuity_report = _continuity_report(root, findings)
 
     for rel in REQUIRED_DOC_FILES:
         target = root / rel
@@ -1146,6 +1345,7 @@ def build_doctor_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]]:
         root=root,
         findings=tuple(findings),
         config_loaded=cfg_ok,
+        continuity=continuity_report,
         scribe=scribe_report,
         routing=routing_report,
         security_service=security_service_report,
@@ -1165,6 +1365,25 @@ def build_pre_adoption_plan(root: Path) -> tuple[DoctorPlan, list[DoctorFinding]
         _findings_append(findings, "blocker", area="adoption", path=".", kind="adoption-plan-failed", detail=str(exc))
         return DoctorPlan(root=root, findings=tuple(findings)), findings
     _findings_append(findings, "info", area="adoption", path=".", kind="adoption-plan-ready", detail=f"scan={plan.scan_strategy} source_paths={len(plan.source_paths)}")
+    if plan.claim_store_state == "migration-required":
+        _findings_append(
+            findings,
+            "warning",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-migration-required",
+            detail=plan.claim_store_finding
+            or "sync --apply must adopt the existing task-claim store before runtime activation",
+        )
+    elif plan.claim_store_state == "integrity-invalid":
+        _findings_append(
+            findings,
+            "blocker",
+            area="task-claim-store",
+            path="agents/runtime/task_claims",
+            kind="claim-store-integrity-invalid",
+            detail=plan.claim_store_finding or "claim-store authority is invalid",
+        )
     for warning in plan.scan_warnings:
         _findings_append(findings, "warning", area="adoption", path=".", kind="scan-fallback", detail=warning)
     for asset in plan.assets:
@@ -1201,6 +1420,10 @@ def render(plan: DoctorPlan) -> str:
                 f"security_service_selected={str(selected).lower()}",
                 f"allimbot_dependency={dependency_status}",
             ]
+        )
+    if plan.continuity is not None:
+        lines.append(
+            f"continuity_mode={plan.continuity.get('mode', 'unavailable')}"
         )
     lines.extend(
         [
@@ -1298,6 +1521,8 @@ def render_json(plan: DoctorPlan, *, actions: list[str] | None = None) -> str:
     }
     if plan.scribe is not None:
         payload["scribe"] = plan.scribe
+    if plan.continuity is not None:
+        payload["continuity"] = plan.continuity
     if plan.routing is not None:
         payload["routing"] = plan.routing
     if plan.security_service is not None:

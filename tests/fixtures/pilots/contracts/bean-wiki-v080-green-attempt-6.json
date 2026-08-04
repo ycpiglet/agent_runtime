@@ -1,0 +1,72 @@
+{
+  "schema": "agent-runtime-pilot-contract/v1",
+  "host": "bean-wiki",
+  "pilot_id": "bean-wiki-v080-green-attempt-6",
+  "evidence_semantic_sha256": "99c0bd4d14b09fdd29eec596e89648d67d7006744c0af587fa086b0d9c054dfb",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "357eee4fd8c29c33a949adbe3a0ffa80c874bf42",
+    "runtime_commit": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+    "runtime_product_tree": "b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f",
+    "runtime_template_tree": "e45e7aaeeb0639c24f5e9e80c18d5e203b98ba8f",
+    "runtime_template_scripts_tree": "62311b7847f66206a2a33e4bd497750bf074384f"
+  },
+  "selected_template_files": 246,
+  "web_content_incremental_files": 0,
+  "content_file_count": 125,
+  "post_registration_conflicts": [],
+  "expected_task_count": 3,
+  "tasks": {
+    "TASK-AR-201": {
+      "unit_id": "UNIT-TASK-AR-201-001",
+      "claim_id": "CLAIM-20260730-063823-task-ar-201-green6201",
+      "task_status": "completed",
+      "claim_status": "released"
+    },
+    "TASK-AR-202": {
+      "unit_id": "UNIT-TASK-AR-202-001",
+      "claim_id": "CLAIM-20260730-064520-task-ar-202-green6202",
+      "task_status": "completed",
+      "claim_status": "released"
+    },
+    "TASK-AR-203": {
+      "unit_id": "UNIT-TASK-AR-203-001",
+      "claim_id": "CLAIM-20260730-065520-task-ar-203-green6203",
+      "task_status": "completed",
+      "claim_status": "released"
+    }
+  },
+  "findings": {},
+  "verification": {
+    "lock_findings": 0,
+    "final_reconcile_conflicts": 0,
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "check_content_returncode": 0,
+    "check_editorial_returncode": 0,
+    "state_sync_blockers": 0,
+    "work_item_classifier_findings": 0,
+    "taskset_gate_findings": 0,
+    "isolation_blockers": 0,
+    "isolation_watches": 0
+  },
+  "required_external_effects": [
+    "publish",
+    "deploy",
+    "origin_push",
+    "host_commit",
+    "credential_read",
+    "network_delivery",
+    "package_install",
+    "provider_live_call",
+    "content_mutation"
+  ],
+  "artifact_bindings": [
+    {
+      "kind": "pilot_isolation",
+      "path": "tests/fixtures/pilots/bean-wiki/isolation-green-attempt-6.json",
+      "semantic_sha256": "37086702e4efb96fd283ded40229d6746549f6c0a36f0a6263045186fe63e367",
+      "raw_evidence_sha256": "1365fd1b1bf6f96e1f273b773fdf8ab7ef30a79a98e4bbd1396490a1c757fa2b"
+    }
+  ]
+}

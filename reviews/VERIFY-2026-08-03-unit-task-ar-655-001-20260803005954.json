@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954",
+  "work_id": "UNIT-TASK-AR-655-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-655",
+  "unit_id": "UNIT-TASK-AR-655-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-08-03T00:59:54+09:00",
+  "verified_by": "le-20260803-001200-kst-ar655lease001",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_claim_lease.py tests/test_claim_reaper.py tests/test_deadlock_watchdog.py tests/test_claim_reaper_concurrency.py tests/test_claim_reaper_hook.py tests/test_state_sync_gate.py tests/test_parallel_worktree_gate.py tests/test_worktree_lifecycle_gate.py tests/test_ui_state.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T00:59:54+09:00",
+      "finished_at": "2026-08-03T01:00:42+09:00",
+      "stdout": "........................................................................ [ 13%]\n.......................................ss............................... [ 26%]\n........................................................................ [ 39%]\n........................................................................ [ 52%]\n........................................................................ [ 65%]\n........................................................................ [ 78%]\n........................................................................ [ 91%]\n............................................                             [100%]\n546 passed, 2 skipped in 47.84s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_lock_merge_driver.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T01:00:42+09:00",
+      "finished_at": "2026-08-03T01:00:45+09:00",
+      "stdout": "...........................................                              [100%]\n43 passed in 2.01s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T01:00:45+09:00",
+      "finished_at": "2026-08-03T01:00:45+09:00",
+      "stdout": "template-mirror: expected=86 common=86 identical=83 intentional=3 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T01:00:45+09:00",
+      "finished_at": "2026-08-03T01:00:45+09:00",
+      "stdout": "OK: /home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-655/tests/fixtures/host/agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    }
+  ]
+}

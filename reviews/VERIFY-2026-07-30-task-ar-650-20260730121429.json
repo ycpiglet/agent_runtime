@@ -1,0 +1,79 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-task-ar-650-20260730121429",
+  "work_id": "TASK-AR-650",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-650.md",
+  "kind": "task",
+  "task_id": "TASK-AR-650",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T12:14:29+09:00",
+  "verified_by": "codex-root-task-ar-650-001",
+  "command_count": 7,
+  "commands": [
+    {
+      "command": "python scripts/pilot_isolation_gate.py --evidence tests/fixtures/pilots/autofolio/isolation-green-attempt-3.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:29+09:00",
+      "finished_at": "2026-07-30T12:14:29+09:00",
+      "stdout": "{\n  \"block_count\": 0,\n  \"findings\": [],\n  \"schema\": \"agent-runtime-pilot-isolation/v1\",\n  \"status\": \"pass\",\n  \"watch_count\": 0\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/pilot_acceptance.py --host autofolio --fixture tests/fixtures/pilots/autofolio/evidence-green-attempt-3.json --check --json",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:29+09:00",
+      "finished_at": "2026-07-30T12:14:29+09:00",
+      "stdout": "{\n  \"contract_id\": \"autofolio:autofolio-v080-green-attempt-3\",\n  \"finding_count\": 0,\n  \"findings\": [],\n  \"fixture\": \"tests/fixtures/pilots/autofolio/evidence-green-attempt-3.json\",\n  \"host\": \"autofolio\",\n  \"schema\": \"agent-runtime-pilot-acceptance-result/v1\",\n  \"status\": \"pass\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_work_registration.py tests/test_taskset_dispatcher.py tests/test_pilot_acceptance.py tests/test_pilot_isolation_gate.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:29+09:00",
+      "finished_at": "2026-07-30T12:14:38+09:00",
+      "stdout": "........................................................................ [ 34%]\n........................................................................ [ 69%]\n...............................................................          [100%]\n207 passed in 8.45s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest tests/test_adoption.py tests/test_config_v2.py tests/test_inventory_sync_sanitize.py tests/test_template_smoke.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:38+09:00",
+      "finished_at": "2026-07-30T12:14:55+09:00",
+      "stdout": "........................................................................ [ 39%]\n........................................................................ [ 79%]\n......................................                                   [100%]\n182 passed in 17.36s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:55+09:00",
+      "finished_at": "2026-07-30T12:14:55+09:00",
+      "stdout": "template-mirror: expected=84 common=84 identical=81 intentional=3 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/runtime_asset_usage.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:55+09:00",
+      "finished_at": "2026-07-30T12:14:56+09:00",
+      "stdout": "ge=6 reuse=2\n- metric gate.collaboration_governance kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric gate.template_mirror kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.pilot_isolation kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.runtime_asset_usage kind=gate status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric gate.state_sync kind=gate status=active lifecycle=keep paths=3 evidence=2 usage=3 reuse=2\n- metric report.governance_ops kind=script status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric hook.taskset_prompt kind=hook status=active lifecycle=keep paths=2 evidence=3 usage=6 reuse=2\n- metric hook.stop_owner_governance kind=hook status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric trigger.planning kind=trigger status=watch lifecycle=observe paths=1 evidence=2 usage=9 reuse=2\n- metric capability.ralph_loop kind=script status=active lifecycle=keep paths=1 evidence=2 usage=2 reuse=2\n- metric capability.agent_retro kind=script status=active lifecycle=keep paths=1 evidence=2 usage=11 reuse=2\n- metric capability.retro_forward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=7 reuse=2\n- metric capability.scribe_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=62 reuse=2\n- metric capability.doc_steward_due kind=script status=active lifecycle=keep paths=1 evidence=2 usage=5 reuse=2\n- metric skill.taskset_dispatch kind=skill status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric gate.footprint_conflict kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.worktree_lifecycle kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric gate.attribution kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=7 reuse=2\n- metric gate.verification_freshness kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=6 reuse=2\n- metric gate.release_cadence kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric gate.conversation_work_audit kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric gate.work_schema kind=gate status=active lifecycle=keep paths=1 evidence=3 usage=8 reuse=2\n- metric capability.wave_dispatcher kind=script status=active lifecycle=keep paths=1 evidence=3 usage=9 reuse=2\n- metric capability.merge_queue kind=script status=active lifecycle=keep paths=1 evidence=3 usage=11 reuse=2\n- metric capability.scm_steward kind=script status=active lifecycle=keep paths=1 evidence=2 usage=12 reuse=2\n- metric capability.inflight_overlay kind=script status=active lifecycle=keep paths=1 evidence=3 usage=10 reuse=2\n- metric capability.work kind=script status=active lifecycle=keep paths=1 evidence=2 usage=6 reuse=2\n- metric capability.compound_record kind=script status=active lifecycle=keep paths=2 evidence=2 usage=17 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=15 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\n",
+      "stderr": ""
+    },
+    {
+      "command": "PYTHONPATH=src python -m agent_runtime.cli sanitize --root . --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T12:14:56+09:00",
+      "finished_at": "2026-07-30T12:14:57+09:00",
+      "stdout": "# Agent Runtime Public Sanitization\n\nfindings=0\n\n| Path | Kind | Detail |\n|------|------|--------|\n| - | ok | No forbidden public package content found. |\n",
+      "stderr": ""
+    }
+  ]
+}

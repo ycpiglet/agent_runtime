@@ -8,6 +8,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import claim_store as _claim_store
 from .config import AgentRuntimeConfig, default_ownership, load_config
 from .template_profiles import selected_paths
 
@@ -38,6 +39,9 @@ class SyncPlan:
     lock_schema: str = "none"
     prior_managed: tuple[str, ...] = ()
     seeded: tuple[str, ...] = ()
+    claim_store_state: str = "pristine"
+    claim_store_finding: str | None = None
+    runtime_migrations: tuple[str, ...] = ()
 
 
 def default_template_root() -> Path:
@@ -148,6 +152,12 @@ def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
     conflicts: list[TemplateUpdate] = []
     preserved: list[TemplateUpdate] = []
     excluded: list[TemplateUpdate] = []
+    claim_store = _claim_store.inspect_store(root)
+    runtime_migrations = (
+        ("claim-store-adopt-existing",)
+        if claim_store.state == "migration-required"
+        else ()
+    )
     for source in _template_files(resolved_template_root, config.profiles):
         rel = source.relative_to(resolved_template_root).as_posix()
         ownership = _ownership(config, rel)
@@ -186,11 +196,19 @@ def build_sync_plan(root: Path, template_root: Path | None = None) -> SyncPlan:
         conflicts=tuple(conflicts),
         preserved=tuple(preserved), excluded=tuple(excluded), lock_schema=str(lock.get("schema", "none")),
         prior_managed=tuple(sorted(managed_files)), seeded=tuple(sorted(seeded)),
+        claim_store_state=claim_store.state,
+        claim_store_finding=claim_store.finding,
+        runtime_migrations=runtime_migrations,
     )
 
 
 def render_check(plan: SyncPlan) -> str:
-    status = "blocked" if plan.config.allow_silent_overwrite else "ready"
+    status = (
+        "blocked"
+        if plan.config.allow_silent_overwrite
+        or plan.claim_store_state == "integrity-invalid"
+        else "ready"
+    )
     lines = [
         "# Agent Runtime Sync Check",
         "",
@@ -200,7 +218,13 @@ def render_check(plan: SyncPlan) -> str:
         f"status={status}",
         f"updates={len(plan.updates)}",
         f"conflicts={len(plan.conflicts)}",
+        f"claim_store_state={plan.claim_store_state}",
+        f"runtime_migrations={len(plan.runtime_migrations)}",
     ]
+    if plan.claim_store_finding:
+        lines.append(f"- claim-store {plan.claim_store_finding}")
+    for migration in plan.runtime_migrations:
+        lines.append(f"- migrate {migration}")
     for update in plan.updates:
         lines.append(f"- {update.action} {update.path}")
     for conflict in plan.conflicts:
@@ -215,13 +239,18 @@ def reconcile_json(plan: SyncPlan) -> str:
         "upstream": {"package": plan.config.upstream_package, "remote_url": plan.config.upstream_remote_url, "ref": plan.config.upstream_ref},
         "template_root": str(plan.template_root), "template_digest": template_digest(plan.template_root, plan.config.profiles)[0], "lock_schema": plan.lock_schema,
         "lock_migration": {"none": "new", "agent-runtime-lock/v1": "migrate-v1", "agent-runtime-lock/v2": "current"}.get(plan.lock_schema, "unknown"),
+        "claim_store": {"state": plan.claim_store_state, "finding": plan.claim_store_finding},
+        "runtime_migrations": list(plan.runtime_migrations),
         "actions": [{"path": a.path, "ownership": a.ownership, "action": a.action, "reason": a.reason, "safety": a.safety} for a in actions],
         "counts": {"safe_updates": len(plan.updates), "conflicts": len(plan.conflicts), "preserved": len(plan.preserved), "excluded": len(plan.excluded)}}
     return json.dumps(payload, indent=2, sort_keys=True)
 
 
 def render_reconcile(plan: SyncPlan) -> str:
-    lines = ["# Agent Runtime Sync Reconcile", f"project={plan.config.project}", f"template_root={plan.template_root}", f"safe_updates={len(plan.updates)}", f"conflicts={len(plan.conflicts)}", f"preserved={len(plan.preserved)}", f"excluded={len(plan.excluded)}"]
+    lines = ["# Agent Runtime Sync Reconcile", f"project={plan.config.project}", f"template_root={plan.template_root}", f"safe_updates={len(plan.updates)}", f"conflicts={len(plan.conflicts)}", f"preserved={len(plan.preserved)}", f"excluded={len(plan.excluded)}", f"claim_store_state={plan.claim_store_state}", f"runtime_migrations={len(plan.runtime_migrations)}"]
+    if plan.claim_store_finding:
+        lines.append(f"- claim-store {plan.claim_store_finding}")
+    lines.extend(f"- migrate {migration}" for migration in plan.runtime_migrations)
     lines.extend(f"- {a.path} {a.ownership} {a.action} {a.safety}: {a.reason}" for a in sorted([*plan.updates, *plan.conflicts, *plan.preserved, *plan.excluded], key=lambda item: item.path))
     return "\n".join(lines)
 
@@ -248,9 +277,15 @@ def _diff_update(update: TemplateUpdate) -> str:
 
 def render_diff(plan: SyncPlan) -> str:
     all_items = [*plan.updates, *plan.conflicts]
+    lines = [f"claim_store_state={plan.claim_store_state}"]
+    if plan.claim_store_finding:
+        lines.append(f"- claim-store {plan.claim_store_finding}")
     if not all_items:
-        return "No template updates available."
-    return "\n\n".join(_diff_update(update) for update in all_items)
+        lines.append("No template updates available.")
+        return "\n".join(lines)
+    lines.append("")
+    lines.append("\n\n".join(_diff_update(update) for update in all_items))
+    return "\n".join(lines)
 
 
 def _print_output(text: str) -> None:
@@ -261,51 +296,284 @@ def _print_output(text: str) -> None:
     sys.stdout.write("\n")
 
 
+@dataclass(frozen=True)
+class _ObservedTarget:
+    state: str
+    content: bytes | None = None
+
+
+@dataclass(frozen=True)
+class _PreparedUpdate:
+    update: TemplateUpdate
+    expected: bytes
+    before: _ObservedTarget
+
+
+@dataclass(frozen=True)
+class _TemplateApplication:
+    state: str
+    applied: int | None
+    observed_applied: int
+
+
+def _observe_target(path: Path) -> _ObservedTarget:
+    try:
+        if not path.exists():
+            return _ObservedTarget("missing")
+        if not path.is_file():
+            return _ObservedTarget("non-regular")
+        return _ObservedTarget("content", _canonical_content(path))
+    except OSError:
+        return _ObservedTarget("unknown")
+
+
+def _prepare_updates(updates: tuple[TemplateUpdate, ...]) -> tuple[_PreparedUpdate, ...]:
+    return tuple(
+        _PreparedUpdate(
+            update=update,
+            expected=_canonical_content(update.source),
+            before=_observe_target(update.target),
+        )
+        for update in updates
+    )
+
+
+def _observe_template_application(
+    prepared: tuple[_PreparedUpdate, ...],
+    *,
+    required: bool,
+) -> _TemplateApplication:
+    if not prepared:
+        state = "not-applied" if required else "not-required"
+        return _TemplateApplication(state, 0, 0)
+
+    committed = 0
+    mutation_observed = False
+    unknown = False
+    for item in prepared:
+        after = _observe_target(item.update.target)
+        if after.state == "unknown":
+            unknown = True
+            continue
+        if after.state == "content" and after.content == item.expected:
+            committed += 1
+            continue
+        if item.before.state == "unknown":
+            unknown = True
+            continue
+        if after != item.before:
+            mutation_observed = True
+
+    if unknown:
+        return _TemplateApplication("unknown", None, committed)
+    if committed == len(prepared):
+        return _TemplateApplication("committed", committed, committed)
+    if committed or mutation_observed:
+        return _TemplateApplication("partial", committed, committed)
+    return _TemplateApplication("not-applied", 0, 0)
+
+
+def _observe_claim_store_migration(root: Path, *, required: bool) -> str:
+    if not required:
+        return "not-required"
+    try:
+        state = _claim_store.inspect_store(root).state
+    except (_claim_store.ClaimStoreError, OSError, RuntimeError):
+        return "unknown"
+    if state == "initialized":
+        return "applied"
+    if state == "migration-required":
+        return "not-applied"
+    return "unknown"
+
+
+def _post_apply_plan(
+    root: Path,
+    template_root: Path,
+) -> tuple[SyncPlan | None, str | None]:
+    try:
+        return build_sync_plan(root, template_root=template_root), None
+    except (
+        _claim_store.ClaimStoreError,
+        OSError,
+        RuntimeError,
+        UnicodeError,
+        ValueError,
+    ) as exc:
+        return None, str(exc)
+
+
+def _print_apply_observation(
+    migration: str,
+    templates: _TemplateApplication,
+) -> None:
+    _print_output(f"claim_store_migration={migration}")
+    _print_output(f"template_application={templates.state}")
+    if templates.applied is None:
+        _print_output("applied=unknown")
+        _print_output(f"observed_applied={templates.observed_applied}")
+    else:
+        _print_output(f"applied={templates.applied}")
+
+
+def _apply_exit_failed(
+    *,
+    error: Exception | None,
+    post: SyncPlan | None,
+    migration: str,
+    templates: _TemplateApplication,
+) -> bool:
+    if error is not None or post is None:
+        return True
+    if migration in {"not-applied", "unknown"}:
+        return True
+    if migration == "applied" and post.claim_store_state != "initialized":
+        return True
+    if templates.state not in {"committed", "not-required"}:
+        return True
+    return bool(
+        post.updates
+        or post.runtime_migrations
+        or post.conflicts
+        or post.claim_store_state == "integrity-invalid"
+    )
+
+
 def apply_updates(plan: SyncPlan) -> int:
-    fresh = build_sync_plan(plan.root, template_root=plan.template_root)
-    if fresh.conflicts:
-        _print_output(render_check(fresh))
+    initial = build_sync_plan(plan.root, template_root=plan.template_root)
+    if initial.conflicts or initial.claim_store_state == "integrity-invalid":
+        _print_output(render_check(initial))
         _print_output("applied=0")
         return 1
-    for update in fresh.updates:
-        if _unsafe_target(fresh.root, update.target):
-            _print_output(render_check(fresh))
-            _print_output("applied=0")
-            return 1
-    applied = 0
-    for update in fresh.updates:
-        update.target.parent.mkdir(parents=True, exist_ok=True)
-        update.target.write_text(_read(update.source), encoding="utf-8")
-        applied += 1
-    if not fresh.updates:
-        _print_output("No template updates available.")
+    migration_required = initial.claim_store_state == "migration-required"
+    template_updates_required = bool(initial.updates)
+    prepared: tuple[_PreparedUpdate, ...] = ()
+    error: Exception | None = None
+    try:
+        with _claim_store.store_lock(plan.root):
+            fresh = build_sync_plan(plan.root, template_root=plan.template_root)
+            migration_required = fresh.claim_store_state == "migration-required"
+            template_updates_required = bool(fresh.updates)
+            if fresh.conflicts or fresh.claim_store_state == "integrity-invalid":
+                _print_output(render_check(fresh))
+                _print_output("applied=0")
+                return 1
+            for update in fresh.updates:
+                if _unsafe_target(fresh.root, update.target):
+                    _print_output(render_check(fresh))
+                    _print_output("applied=0")
+                    return 1
+            prepared = _prepare_updates(fresh.updates)
+            if fresh.claim_store_state == "migration-required":
+                _claim_store.adopt_legacy_store(fresh.root)
+            for update in fresh.updates:
+                update.target.parent.mkdir(parents=True, exist_ok=True)
+                update.target.write_text(_read(update.source), encoding="utf-8")
+    except (_claim_store.ClaimStoreError, TimeoutError, OSError) as exc:
+        error = exc
+
+    migration = _observe_claim_store_migration(
+        plan.root,
+        required=migration_required,
+    )
+    templates = _observe_template_application(
+        prepared,
+        required=template_updates_required,
+    )
+    post, post_error = _post_apply_plan(plan.root, plan.template_root)
+    if error is not None:
+        _print_output(f"ERROR: sync apply failed: {error}")
+    if post is None:
+        _print_output("post_apply_plan=unavailable")
+        if post_error:
+            _print_output(f"post_apply_error={post_error}")
     else:
-        _print_output(render_check(fresh))
-    _print_output(f"applied={applied}")
-    return 0
+        _print_output(render_check(post))
+    if not prepared:
+        _print_output("No template updates available.")
+    _print_apply_observation(migration, templates)
+    failed = _apply_exit_failed(
+        error=error,
+        post=post,
+        migration=migration,
+        templates=templates,
+    )
+    return 1 if failed else 0
 
 
 def apply_safe_updates(plan: SyncPlan) -> int:
-    fresh = build_sync_plan(plan.root, template_root=plan.template_root)
+    initial = build_sync_plan(plan.root, template_root=plan.template_root)
     planned_conflicts = {item.path for item in plan.conflicts}
-    if any(item.path not in planned_conflicts for item in fresh.conflicts):
-        _print_output(render_reconcile(fresh))
+    if (
+        initial.claim_store_state == "integrity-invalid"
+        or any(item.path not in planned_conflicts for item in initial.conflicts)
+    ):
+        _print_output(render_reconcile(initial))
         _print_output("applied=0")
-        _print_output(f"remaining_conflicts={len(fresh.conflicts)}")
+        _print_output(f"remaining_conflicts={len(initial.conflicts)}")
         return 1
-    applied = 0
-    unsafe = 0
-    for update in fresh.updates:
-        if _unsafe_target(fresh.root, update.target):
-            unsafe += 1
-            continue
-        update.target.parent.mkdir(parents=True, exist_ok=True)
-        update.target.write_bytes(update.source.read_bytes())
-        applied += 1
-    _print_output(render_reconcile(fresh))
-    _print_output(f"applied={applied}")
-    _print_output(f"remaining_conflicts={len(fresh.conflicts) + unsafe}")
-    return 1 if fresh.conflicts or unsafe else 0
+    migration_required = initial.claim_store_state == "migration-required"
+    template_updates_required = bool(initial.updates)
+    prepared: tuple[_PreparedUpdate, ...] = ()
+    error: Exception | None = None
+    try:
+        with _claim_store.store_lock(plan.root):
+            fresh = build_sync_plan(plan.root, template_root=plan.template_root)
+            migration_required = fresh.claim_store_state == "migration-required"
+            template_updates_required = bool(fresh.updates)
+            if (
+                fresh.claim_store_state == "integrity-invalid"
+                or any(item.path not in planned_conflicts for item in fresh.conflicts)
+            ):
+                _print_output(render_reconcile(fresh))
+                _print_output("applied=0")
+                _print_output(f"remaining_conflicts={len(fresh.conflicts)}")
+                return 1
+            safe_updates = tuple(
+                update
+                for update in fresh.updates
+                if _unsafe_target(fresh.root, update.target) is None
+            )
+            prepared = _prepare_updates(safe_updates)
+            if fresh.claim_store_state == "migration-required":
+                _claim_store.adopt_legacy_store(fresh.root)
+            for update in safe_updates:
+                if _unsafe_target(fresh.root, update.target) is not None:
+                    continue
+                update.target.parent.mkdir(parents=True, exist_ok=True)
+                update.target.write_bytes(update.source.read_bytes())
+    except (_claim_store.ClaimStoreError, TimeoutError, OSError) as exc:
+        error = exc
+
+    migration = _observe_claim_store_migration(
+        plan.root,
+        required=migration_required,
+    )
+    templates = _observe_template_application(
+        prepared,
+        required=template_updates_required,
+    )
+    post, post_error = _post_apply_plan(plan.root, plan.template_root)
+    if error is not None:
+        _print_output(f"ERROR: sync apply-safe failed: {error}")
+    if post is None:
+        _print_output("post_apply_plan=unavailable")
+        if post_error:
+            _print_output(f"post_apply_error={post_error}")
+    else:
+        _print_output(render_reconcile(post))
+    _print_apply_observation(migration, templates)
+    if post is None:
+        _print_output("remaining_conflicts=unknown")
+    else:
+        _print_output(f"remaining_conflicts={len(post.conflicts)}")
+    failed = _apply_exit_failed(
+        error=error,
+        post=post,
+        migration=migration,
+        templates=templates,
+    )
+    return 1 if failed else 0
 
 
 def run_sync(root: Path, mode: str, template_root: Path | None = None, json_output: bool = False) -> int:
@@ -317,16 +585,17 @@ def run_sync(root: Path, mode: str, template_root: Path | None = None, json_outp
 
     if mode == "check":
         _print_output(render_check(plan))
-        return 1 if plan.conflicts else 0
+        return 1 if plan.conflicts or plan.claim_store_state == "integrity-invalid" else 0
     elif mode == "diff":
         _print_output(render_diff(plan))
+        return 1 if plan.claim_store_state == "integrity-invalid" else 0
     elif mode == "apply":
         return apply_updates(plan)
     elif mode == "apply-safe":
         return apply_safe_updates(plan)
     elif mode == "reconcile":
         _print_output(reconcile_json(plan) if json_output else render_reconcile(plan))
-        return 1 if plan.conflicts else 0
+        return 1 if plan.conflicts or plan.claim_store_state == "integrity-invalid" else 0
     else:
         raise ValueError(f"unknown sync mode: {mode}")
     return 0

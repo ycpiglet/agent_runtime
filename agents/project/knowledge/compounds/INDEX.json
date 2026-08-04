@@ -1,13 +1,238 @@
 {
   "by_signature": {
+    "defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694": [
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
+    "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
+    "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
     "defect:authorization-boundary-parser-differs-from-rende:6e4c7cd7622cc220": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
+    ],
+    "defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ],
     "defect:ci-flaky-temp-git:d1ff9421d45168c6": [
       "COMPOUND-20260729-081348-temp-git-fixture-head-corruption-survives-bounde-2514bdcf5f65"
     ],
+    "defect:claim-commit-final-tree-toctou:f39b32eb331a6963": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-commit-symbolic-head-race:f2860072798c6ac5": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89": [
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
+    ],
+    "defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788"
+    ],
+    "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe": [
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
+    ],
+    "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a": [
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556"
+    ],
+    "defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711"
+    ],
+    "defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4": [
+      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04"
+    ],
+    "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46": [
+      "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
+    ],
+    "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab": [
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+    ],
+    "defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f": [
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
+    "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:defect-expired-claim-has-no-registered-recovery:2ea5474ca846c52d": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7"
+    ],
+    "defect:defect-guard-added-without-verifying-the-opposit:3de54e9a16081874": [
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
+    ],
+    "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4": [
+      "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
+    ],
+    "defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552": [
+      "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f"
+    ],
+    "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
+    "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
+    "defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
+    "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326": [
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
+    "defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300": [
+      "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91"
+    ],
+    "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799": [
+      "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
+    ],
+    "defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424": [
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556"
+    ],
+    "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c": [
+      "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
+    ],
+    "defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8": [
+      "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+    ],
+    "defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e": [
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e"
+    ],
     "defect:source-layout-cli-verification-omitted-pythonpat:737e2a5c17884615": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
+    ],
+    "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9": [
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6"
+    ],
+    "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1": [
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+    ],
+    "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b": [
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05"
+    ],
+    "defect:ui-console-pre-load-summary-fabricates-healthy-z:e18e21bcf63e1ade": [
+      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d"
+    ],
+    "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4": [
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c"
+    ],
+    "defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
+    ],
+    "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2": [
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52"
+    ],
+    "defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23": [
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077"
     ]
   },
   "by_work": {
@@ -20,6 +245,45 @@
     "TASK-AR-647": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
     ],
+    "TASK-AR-648": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
+      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
+      "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef",
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808",
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
+    "TASK-AR-650": [
+      "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342"
+    ],
+    "TASK-AR-652": [
+      "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f",
+      "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
+      "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931"
+    ],
+    "TASK-AR-654": [
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
+    "TASK-AR-655": [
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
+      "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
+    ],
+    "TASK-AR-659": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
+    ],
     "UNIT-TASK-AR-645-002": [
       "COMPOUND-20260729-054610-source-layout-cli-verification-must-declare-pyth-b7ebc6c5875c"
     ],
@@ -28,9 +292,55 @@
     ],
     "UNIT-TASK-AR-647-001": [
       "COMPOUND-20260729-145000-authorization-boundary-accepted-normalized-or-no-581ab8448ac0"
+    ],
+    "UNIT-TASK-AR-648-005": [
+      "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
+      "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+      "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200"
+    ],
+    "UNIT-TASK-AR-648-006": [
+      "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef"
+    ],
+    "UNIT-TASK-AR-648-007": [
+      "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152"
+    ],
+    "UNIT-TASK-AR-648-010": [
+      "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808"
+    ],
+    "UNIT-TASK-AR-648-011": [
+      "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25"
+    ],
+    "UNIT-TASK-AR-648-013": [
+      "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b"
+    ],
+    "UNIT-TASK-AR-648-014": [
+      "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6"
+    ],
+    "UNIT-TASK-AR-654-001": [
+      "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0"
+    ],
+    "UNIT-TASK-AR-655-001": [
+      "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
+      "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9"
+    ],
+    "UNIT-TASK-AR-659-001": [
+      "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691"
     ]
   },
-  "record_count": 3,
+  "record_count": 33,
   "records": [
     {
       "created_at": "2026-07-29T05:46:10+09:00",
@@ -76,8 +386,500 @@
         "TASK-AR-647",
         "UNIT-TASK-AR-647-001"
       ]
+    },
+    {
+      "created_at": "2026-07-29T21:46:00+09:00",
+      "defect_signatures": [
+        "defect:claim-commit-final-tree-toctou:f39b32eb331a6963",
+        "defect:claim-commit-symbolic-head-race:f2860072798c6ac5",
+        "defect:claim-post-commit-symbolic-head-race:d12d0dfbbb046fc1"
+      ],
+      "id": "COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Claim authorization must cover the final publication boundary",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-005"
+      ]
+    },
+    {
+      "created_at": "2026-07-29T21:58:00+09:00",
+      "defect_signatures": [
+        "defect:claim-transaction-omits-actual-worktree-head-ref:1d5e935f7b8caef4"
+      ],
+      "id": "COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json",
+      "recurrence_count": 4,
+      "status": "active",
+      "title": "Protected publication must preserve the worktree recovery trail",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-005"
+      ]
+    },
+    {
+      "created_at": "2026-07-29T22:36:00+09:00",
+      "defect_signatures": [
+        "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89"
+      ],
+      "id": "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200.json",
+      "recurrence_count": 5,
+      "status": "active",
+      "title": "Symbolic HEAD publication needs a verifiable lock handoff",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-005"
+      ]
+    },
+    {
+      "created_at": "2026-07-29T23:31:00+09:00",
+      "defect_signatures": [
+        "defect:portable-active-claim-requires-status-that-core:ed6b5505366251e8"
+      ],
+      "id": "COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-233100-portable-continuity-must-close-the-adoption-to-f-d70d307c6cef.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Portable continuity must close the adoption-to-first-claim journey",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-006"
+      ]
+    },
+    {
+      "created_at": "2026-07-29T23:38:30+09:00",
+      "defect_signatures": [
+        "defect:taskset-planner-redispatches-oldest-blocked-unit:aa5c303786c7e9a1"
+      ],
+      "id": "COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260729-233830-blocked-unit-history-must-never-be-a-dispatch-fa-7dbe38c3c152.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Blocked unit history must never be a dispatch fallback",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-007"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T02:22:53+09:00",
+      "defect_signatures": [
+        "defect:consumer-continuity-contract-imposes-runtime-sou:049414886aaf1eab"
+      ],
+      "id": "COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-022253-portable-governance-must-respect-consumer-docume-7f2adb565808.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Portable governance must respect consumer document ownership",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-010"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T03:31:00+09:00",
+      "defect_signatures": [
+        "defect:packaged-taskset-gate-misses-root-iso-generated:710892b67aa49a4c"
+      ],
+      "id": "COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-033100-packaged-runtime-mirrors-must-preserve-root-wall-465b16b1da25.json",
+      "recurrence_count": 2,
+      "status": "active",
+      "title": "Packaged runtime mirrors must preserve root wall-clock semantics",
+      "work_ids": [
+        "UNIT-TASK-AR-648-011"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T04:19:04+09:00",
+      "defect_signatures": [
+        "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799"
+      ],
+      "id": "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Intersection parity cannot detect a missing side",
+      "work_ids": [
+        "UNIT-TASK-AR-648-013"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T05:31:18+09:00",
+      "defect_signatures": [
+        "defect:single-red-pilot-acceptance-contract-rejects-tru:40ad2f5a164a999e"
+      ],
+      "id": "COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-053118-pilot-acceptance-must-select-an-immutable-run-co-316cbd00f97e.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Pilot acceptance must select an immutable run contract",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-014"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T05:31:19+09:00",
+      "defect_signatures": [
+        "defect:isolation-gate-absolute-checkout-roots-conflict:66ae5d7076b00326"
+      ],
+      "id": "COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-053119-isolation-evidence-needs-a-verifiable-sanitized-e1fd6062dba6.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Isolation evidence needs a verifiable sanitized identity",
+      "work_ids": [
+        "TASK-AR-648",
+        "UNIT-TASK-AR-648-014"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T10:05:00+09:00",
+      "defect_signatures": [
+        "defect:direct-claim-bypassed-taskset-readiness-prefligh:d7bbee801435e1f4"
+      ],
+      "id": "COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-100500-keep-claim-readiness-identical-across-direct-tas-5ff5f67aa342.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Keep claim readiness identical across direct, taskset, and wave entry points",
+      "work_ids": [
+        "TASK-AR-650"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:27+09:00",
+      "defect_signatures": [
+        "defect:economic-eligibility-trusted-caller-mutable-rece:005554e49d45f552"
+      ],
+      "id": "COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223527-bind-economic-eligibility-to-sealed-observed-rec-ca0cc6a5cb9f.json",
+      "recurrence_count": 6,
+      "status": "resolved",
+      "title": "Bind economic eligibility to sealed observed receipts",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:28+09:00",
+      "defect_signatures": [
+        "defect:merge-queue-requires-completed-worker-worktree-c:88b368d51f45e300"
+      ],
+      "id": "COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223528-make-merge-integration-aware-of-attached-worker-f89b07edeb91.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Make merge integration aware of attached worker worktrees",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
+    },
+    {
+      "created_at": "2026-07-30T22:35:29+09:00",
+      "defect_signatures": [
+        "defect:closeout-review-evidence-omitted-canonical-task:a2ca41b52d847c46"
+      ],
+      "id": "COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260730-223529-make-review-artifacts-directly-consumable-by-wor-55babe0b8931.json",
+      "recurrence_count": 3,
+      "status": "active",
+      "title": "Make review artifacts directly consumable by work close",
+      "work_ids": [
+        "TASK-AR-652"
+      ]
+    },
+    {
+      "created_at": "2026-08-01T00:23:36+09:00",
+      "defect_signatures": [
+        "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694"
+      ],
+      "id": "COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260801-002336-preserve-physical-accepted-watch-line-boundaries-a18a5a430b8b.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Preserve physical accepted-watch line boundaries",
+      "work_ids": [
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-01T01:46:07+09:00",
+      "defect_signatures": [
+        "defect:accepted-watch-splitlines-boundary-normalization:40cd1dd2748ea694",
+        "defect:accepted-watch-malformed-utf8-fail-open:eac1aefa14add5d1",
+        "defect:claim-repeated-failure-signals-lost-at-closure:1da2d2d41b194afb",
+        "defect:accepted-watch-unbounded-raw-file-read:ceb1edfdb452964a"
+      ],
+      "id": "COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260801-014607-fail-closed-across-accepted-watch-and-claim-auth-634ffb3a3711.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Fail closed across accepted-watch and claim authority boundaries",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-02T12:21:58+09:00",
+      "defect_signatures": [
+        "defect:released-claim-scalar-authority-shape-accepted:12a9795c8b117218",
+        "defect:claim-ref-symlink-escapes-canonical-claim-store:09782265a699dc29",
+        "defect:unit-spec-symlink-alias-accepted-as-canonical-id:8f8644f6caac78e7",
+        "defect:relative-worktree-falls-back-to-linked-root-shad:a9421e5faf4c59df",
+        "defect:work-frontmatter-identity-contradicts-canonical:bb011854a4cc3ca2",
+        "defect:deep-accepted-watch-json-recursion-fail-open:5d494f605a860dac"
+      ],
+      "id": "COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-122158-bind-closure-authority-to-canonical-paths-shapes-73db9fe7ce52.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Bind closure authority to canonical paths, shapes, and bounded parsing",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-02T13:24:33+09:00",
+      "defect_signatures": [
+        "defect:active-claim-symlink-escapes-canonical-claim-sto:3e1307eb404a2428",
+        "defect:falsy-non-string-unit-spec-falls-back-to-canonic:64fe169f1ab37824",
+        "defect:falsy-non-string-work-identity-treated-as-missin:2349f1fed3ad7660",
+        "defect:untrusted-unit-id-bypasses-canonical-claim-conte:9950c5dcb729c2d4"
+      ],
+      "id": "COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-132433-bind-close-authority-to-direct-canonical-stores-5232981b9e7c.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Bind close authority to direct canonical stores and identities",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-02T19:59:51+09:00",
+      "defect_signatures": [
+        "defect:broken-ancestor-symlink-hides-canonical-active-c:23158c0595f498bb",
+        "defect:windows-junction-parent-hides-canonical-active-c:731de644205f5d8d",
+        "defect:unreadable-active-claim-store-enumerates-as-empt:c7816e3946c29101",
+        "defect:missing-intermediate-claim-store-parent-hides-ac:4560560004a1fb77",
+        "defect:active-claim-symlink-loop-escapes-bounded-handli:49bf17a5e1901460",
+        "defect:claim-status-casing-hides-active-repeated-failur:43313896c2b45087",
+        "defect:direct-claim-store-replacement-hides-canonical-a:7477bae20f4a3c1f",
+        "defect:deep-active-claim-json-escapes-bounded-handling:6694294b2602e0ce",
+        "defect:claim-id-escapes-canonical-artifact-namespace:84dd007e34346fae",
+        "defect:claim-evidence-alias-escapes-repository-boundary:422a442d426e3c59",
+        "defect:tracked-inner-marker-activates-without-checkout:7eaad2998875a161",
+        "defect:claim-store-snapshot-accepts-stale-or-aliased-ba:165eeaa33e9e0650",
+        "defect:claim-store-marker-activation-leaves-partial-aut:4d351ca878f09963",
+        "defect:atomic-no-clobber-publication-accepts-destinatio:b5af68a325007016",
+        "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+        "defect:claim-create-failure-leaves-partial-transaction:36409fe931d01cfd",
+        "defect:inactive-claim-re-release-rebinds-verification-p:da793d1a17eecca2",
+        "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4",
+        "defect:atomic-publisher-reports-failure-after-committed:2e080352410acda0",
+        "defect:role-overlay-rollback-deletes-replacement-artifa:24910ed49f07f9b7",
+        "defect:claim-store-witness-accepts-unknown-claim-status:8e42ea5ea2d844c9",
+        "defect:partial-compound-coverage-satisfies-declared-def:90587dadec03fe8f",
+        "defect:claim-json-accepts-nonfinite-or-duplicate-fields:2fc824544a55622d",
+        "defect:sync-reports-zero-after-committed-claim-migratio:4317243460108472",
+        "defect:post-commit-fallible-step-reverses-durable-autho:cb20f7de91cd1390",
+        "defect:work-status-hides-active-claim-integrity-failure:f48114a15d1fee23"
+      ],
+      "id": "COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-195951-bind-claim-authority-to-one-durable-no-clobber-t-3b8cec108077.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Bind claim authority to one durable no-clobber transaction",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-02T23:24:00+09:00",
+      "defect_signatures": [
+        "defect:atomic-publication-accepts-aliased-parent-compon:e89f4bf8d6bd13c4",
+        "defect:container-valued-core-claim-identity-permits-dup:53594ebe603a7c1f",
+        "defect:incomplete-role-overlay-is-accepted-as-idempoten:88dc7419f9159bb4"
+      ],
+      "id": "COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260802-232400-bind-ancestor-identity-and-release-provenance-at-e8e801007dc0.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Bind ancestor identity and release provenance at admission",
+      "work_ids": [
+        "TASK-AR-654",
+        "UNIT-TASK-AR-654-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T01:03:43+09:00",
+      "defect_signatures": [
+        "defect:negative-lease-or-grace-kills-live-claim:315a2daf2bae5424",
+        "defect:claim-reaper-deadline-overflow-partially-mutates:5d3658dc71ab217a"
+      ],
+      "id": "COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-010343-bind-duration-domains-before-claim-authority-mut-c55c1cd29556.json",
+      "recurrence_count": 5,
+      "status": "mitigated",
+      "title": "Bind duration domains before claim authority mutation",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T04:17:00+09:00",
+      "defect_signatures": [
+        "defect:task-claim-progress-outlives-unrenewed-lease:9dae21269ca06d88",
+        "defect:expired-task-claim-appears-live-across-runtime-c:39f0d2087c60993c",
+        "defect:concurrent-task-claim-renewal-overwrites-newer-o:c22a19adb1ea01e9",
+        "defect:task-claim-renewal-silently-broadens-scope-witho:972c3033ed564ed9",
+        "defect:agent-orchestrator-claim-progress-acknowledges-s:865827031e86d0ca",
+        "defect:agent-instance-registry-concurrent-publish-rolls:609cd581edd3cea9",
+        "defect:claim-projection-without-explicit-now-skips-live:f96238afdd1aa3f9",
+        "defect:role-routing-overlay-claim-omits-lease-deadline:01470e887b26aa2b",
+        "defect:agent-instance-registry-mixes-revision-timestamp:1997c0b1b3471da3"
+      ],
+      "id": "COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-041700-bind-claim-progress-to-one-lease-revision-transa-77631cec1af6.json",
+      "recurrence_count": 9,
+      "status": "mitigated",
+      "title": "Bind claim progress to one lease-revision transaction",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T05:01:59+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-050159-bind-claim-progress-projection-to-committed-clai-2398011ac247.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Bind claim-progress projection to committed claim authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T05:58:57+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055857-bind-current-agent-projection-to-canonical-claim-dec8884408f5.json",
+      "recurrence_count": 2,
+      "status": "mitigated",
+      "title": "Bind current-agent projection to canonical claim authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T05:59:06+09:00",
+      "defect_signatures": [
+        "defect:ui-console-cockpit-render-dereferences-runtime-s:cfd7f51f9ac8179b"
+      ],
+      "id": "COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-055906-keep-cockpit-rendering-null-safe-before-runtime-6bf65a1deb05.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Keep cockpit rendering null-safe before runtime state load",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T07:09:45+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-070945-bind-the-complete-pointer-agent-to-canonical-cla-9232deaaf17d.json",
+      "recurrence_count": 3,
+      "status": "mitigated",
+      "title": "Bind the complete pointer agent to canonical claim authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T07:09:57+09:00",
+      "defect_signatures": [
+        "defect:ui-console-pre-load-summary-fabricates-healthy-z:e18e21bcf63e1ade"
+      ],
+      "id": "COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-070957-keep-pre-load-cockpit-summaries-neutral-d2921d2f4e9d.json",
+      "recurrence_count": 1,
+      "status": "mitigated",
+      "title": "Keep pre-load cockpit summaries neutral",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T08:08:31+09:00",
+      "defect_signatures": [
+        "defect:claim-progress-accepts-non-matching-committed-pr:354921871935cffe"
+      ],
+      "id": "COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-080831-require-type-strict-complete-pointer-authority-200381d73cd9.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Require type-strict complete pointer authority",
+      "work_ids": [
+        "TASK-AR-655",
+        "UNIT-TASK-AR-655-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T15:02:41+09:00",
+      "defect_signatures": [
+        "defect:defect-expired-claim-has-no-registered-recovery:2ea5474ca846c52d"
+      ],
+      "id": "COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-150241-give-every-claim-state-a-registered-exit-before-c0729965fea7.json",
+      "recurrence_count": 4,
+      "status": "mitigated",
+      "title": "Give every claim state a registered exit before adding guards",
+      "work_ids": [
+        "TASK-AR-659",
+        "UNIT-TASK-AR-659-001"
+      ]
+    },
+    {
+      "created_at": "2026-08-03T16:26:10+09:00",
+      "defect_signatures": [
+        "defect:defect-guard-added-without-verifying-the-opposit:3de54e9a16081874"
+      ],
+      "id": "COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691",
+      "path": "agents/project/knowledge/compounds/records/COMPOUND-20260803-162610-test-both-directions-of-every-guard-and-never-le-dfd058a7f691.json",
+      "recurrence_count": 1,
+      "status": "active",
+      "title": "Test both directions of every guard, and never let the author be the last reviewer",
+      "work_ids": [
+        "TASK-AR-659",
+        "UNIT-TASK-AR-659-001"
+      ]
     }
   ],
   "schema": "agent-runtime-compound-index/v1",
-  "source_digest": "sha256:2a01b5f05963b856d77f113431d69b194a73ce372d02ca373bf3e6fc6aa822ab"
+  "source_digest": "sha256:55800456b1f5e2b1160027696c6bcb625178dfd774d65f2130be15ed39e11983"
 }

@@ -228,7 +228,8 @@ class ClaudeProvider(Provider):
             )
         # Real `claude --output-format json` carries top-level stop_reason
         # (e.g. "end_turn") — keep it for parity with the sdk backend.
-        finish = data.get("stop_reason") or "stop"
+        raw_finish = data.get("stop_reason")
+        finish = "stop" if raw_finish is None else str(raw_finish)
         return ProviderResult(
             text=str(text), tokens_in=tokens_in, tokens_out=tokens_out, finish_reason=finish,
         )
@@ -327,7 +328,8 @@ class ClaudeProvider(Provider):
         usage = getattr(resp, "usage", None)
         tokens_in = int(getattr(usage, "input_tokens", 0) or 0) if usage else 0
         tokens_out = int(getattr(usage, "output_tokens", 0) or 0) if usage else 0
-        finish = getattr(resp, "stop_reason", None) or "stop"
+        raw_finish = getattr(resp, "stop_reason", None)
+        finish = "stop" if raw_finish is None else str(raw_finish)
         return ProviderResult(
             text=text, tokens_in=tokens_in, tokens_out=tokens_out, finish_reason=finish,
         )

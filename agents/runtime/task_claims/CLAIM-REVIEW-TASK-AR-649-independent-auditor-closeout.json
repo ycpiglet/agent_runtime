@@ -1,0 +1,40 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-649-independent-auditor",
+  "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "active_scope": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "callsite_id": "role-routing:review_pass_dispatched:TASK-AR-649:independent-auditor",
+  "pane_id": "overlay:CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout",
+  "mode": "review",
+  "status": "released",
+  "phase": "claim-created",
+  "progress_pct": 0,
+  "status_text": "Additive independent-auditor review pass for TASK-AR-649 (closeout)",
+  "claimed_at": "2026-07-30T08:35:10+09:00",
+  "last_heartbeat": "2026-07-30T08:36:00+09:00",
+  "updated_at": "2026-07-30T08:36:00+09:00",
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "allow_parallel_task_set": true,
+  "parent_task_id": "TASK-AR-649",
+  "parent_task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-649-independent-auditor-closeout.log.md",
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "released_at": "2026-07-30T08:36:00+09:00",
+  "verified_by": "codex-independent-runtime-unit-649-001-w4b",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-07-30-unit-task-ar-649-001.md"
+}

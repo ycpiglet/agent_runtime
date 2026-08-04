@@ -143,6 +143,43 @@ def test_profile_matrix_is_deterministic_and_security_is_additive():
     } <= security
     assert "scripts/allimbot_stop_hook.cmd" not in core
     assert "scripts/allimbot_stop_hook.cmd" not in security
+    assert "skills/failure-to-regression/SKILL.md" in core
+
+
+def test_failure_to_regression_skill_is_registered_on_source_and_consumer_surfaces():
+    root = Path(__file__).resolve().parents[1]
+    source_registry = json.loads(
+        (root / "agents/project/RUNTIME-ASSET-REGISTRY.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    template_root = root / "src/agent_runtime/templates/project"
+    consumer_registry = json.loads(
+        (
+            template_root / "agents/project/RUNTIME-ASSET-REGISTRY.json"
+        ).read_text(encoding="utf-8")
+    )
+    source_asset = next(
+        asset
+        for asset in source_registry["assets"]
+        if asset["id"] == "skill.failure_to_regression"
+    )
+    consumer_asset = next(
+        asset
+        for asset in consumer_registry["assets"]
+        if asset["id"] == "skill.failure_to_regression"
+    )
+
+    assert source_asset["paths"] == [
+        "skills/failure-to-regression/SKILL.md",
+        "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
+    ]
+    assert consumer_asset["paths"] == [
+        "skills/failure-to-regression/SKILL.md"
+    ]
+    assert (
+        template_root / "skills/failure-to-regression/SKILL.md"
+    ).is_file()
 
 
 def test_missing_and_cross_profile_findings_are_distinct(tmp_path):

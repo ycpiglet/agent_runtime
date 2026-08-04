@@ -267,3 +267,35 @@ jobs:
             --tag v0.7.0 \
             --warning-summary-gate-strict-refs "${{ steps.resolve_warning_summary_strict_refs.outputs.strict_refs }}" \
             --check
+
+  windows-claim-store-junction:
+    name: Windows claim-store integrity (Python ${{ matrix.python-version }})
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install targeted test dependencies
+        run: python -m pip install --upgrade pip pytest
+      - name: Run native Windows claim transaction regressions
+        env:
+          PYTHONPATH: src
+        run: >-
+          python -m pytest
+          tests/test_compound_records.py::test_work_close_rejects_windows_runtime_junction_without_mutation
+          tests/test_claim_store.py::test_snapshot_revalidation_rejects_native_windows_runtime_junction
+          tests/test_claim_store.py::test_store_lock_rejects_native_windows_outer_anchor_junction
+          tests/test_claim_store.py::test_store_lock_contention_times_out_boundedly_across_processes
+          tests/test_atomic_io.py
+          tests/test_claim_reaper_concurrency.py::test_concurrent_reapers_reap_single_claim_exactly_once
+          tests/test_claim_reaper_concurrency.py::test_concurrent_apply_holds_store_lock_through_revalidation_and_write
+          tests/test_task_claim_dispatcher.py::test_first_claim_creation_rolls_back_authority_on_publication_failure
+          tests/test_task_claim_dispatcher.py::test_release_refuses_to_rebind_inactive_claim_verification
+          -q

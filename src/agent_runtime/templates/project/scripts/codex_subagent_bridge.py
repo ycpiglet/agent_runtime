@@ -35,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import subagent_council as sc  # noqa: E402
 import subagent_dispatch as sd  # noqa: E402
 import model_routing  # noqa: E402
+import eval_harness  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 BRIDGE_DIR = ROOT / "agents" / "runtime" / "codex_subagents"
@@ -65,6 +66,19 @@ def _display(path: Path | None) -> str | None:
 
 def _packet_path(bridge_id: str) -> Path:
     return BRIDGE_DIR / f"{bridge_id}.json"
+
+
+def _receipt_path(
+    explicit: Path | str | None,
+    packet: dict | None = None,
+) -> Path:
+    if explicit is not None:
+        return Path(explicit)
+    stored = str((packet or {}).get("receipt_log_path") or "").strip()
+    if stored:
+        path = Path(stored)
+        return path if path.is_absolute() else ROOT / path
+    return Path(eval_harness.EVAL_LOG)
 
 
 def _write_packet(packet: dict, dry_run: bool) -> Path:
@@ -112,12 +126,27 @@ def _execution_instructions(
     task_id: str,
     prompt: str,
     route: dict,
+    bridge_id: str,
+    *,
+    council_member: bool = False,
 ) -> dict:
+    role_arg = f" --role {role_id}" if council_member else ""
     return {
         "capability": "native_subagent_spawn",
         "tool_hint": "collaboration.spawn_agent",
         "suggested_agent_type": _suggested_agent_type(role_id),
         "parent_session_only": True,
+        "pre_spawn_guard": {
+            "required": True,
+            "command": (
+                "python scripts/codex_subagent_bridge.py authorize "
+                f"--bridge-id {bridge_id}{role_arg}"
+            ),
+            "invariant": (
+                "Run immediately before spawn; do not spawn unless the result "
+                "says authorized=true."
+            ),
+        },
         "spawn_args": {
             "task_name": _task_name(role_id, task_id),
             "message": prompt,
@@ -125,9 +154,11 @@ def _execution_instructions(
             "reasoning_effort": route.get("reasoning_effort"),
         },
         "after_completion": (
-            "Run `python scripts/codex_subagent_bridge.py record-reply "
+            "On success, cancellation, or spawn error, run "
+            "`python scripts/codex_subagent_bridge.py record-reply "
             "--bridge-id <id> --verdict <APPROVED|NEEDS_CHANGES|...> "
-            "--summary-file <file>` from the parent Codex session."
+            "--summary-file <file> [--status completed|error|skipped]` from "
+            "the parent Codex session so the reservation becomes terminal."
         ),
     }
 
@@ -200,6 +231,63 @@ def _completion_observation(
     }
 
 
+def _route_receipt_fields(route: dict) -> dict:
+    return {
+        "requested_tier": route.get("requested_tier"),
+        "selected_tier": route.get("selected_tier"),
+        "resolved_model": route.get("resolved_model"),
+        "resolved_reasoning_effort": route.get("reasoning_effort"),
+        "resolved_model_source": route.get("model_source"),
+        "resolved_reasoning_source": route.get("reasoning_source"),
+        "route_status": route.get("route_status"),
+        "application_status": route.get("application_status"),
+        "model_changed": route.get("model_changed"),
+        "route_changed": route.get("route_changed"),
+    }
+
+
+def _no_spawn_receipt_values(
+    *,
+    dispatch_id: str,
+    task_id: str,
+    claim_id: str | None,
+    role_id: str,
+    route: dict,
+    source: str,
+    reason: str,
+    workload_id: str | None = None,
+    baseline_receipt_id: str | None = None,
+    budget_preflight: dict | None = None,
+) -> dict:
+    return {
+        "dispatch_id": dispatch_id,
+        "task_id": task_id,
+        "claim_id": claim_id,
+        "role": role_id,
+        "workload_id": workload_id,
+        "provider": "native-codex",
+        "execution_surface": "native_subagent_spawn",
+        "source": source,
+        "status": "skipped",
+        "finish_reason": "skipped",
+        "error": reason,
+        "baseline_receipt_id": baseline_receipt_id,
+        "budget_preflight_result": budget_preflight,
+        **_route_receipt_fields(route),
+    }
+
+
+def _record_no_spawn_receipt(
+    *,
+    receipt_path: Path,
+    **kwargs,
+) -> dict:
+    return eval_harness.record_execution_receipt(
+        **_no_spawn_receipt_values(**kwargs),
+        path=receipt_path,
+    )
+
+
 def _mark_message_answered(parent_id: str, dry_run: bool) -> bool:
     """Best-effort status transition for the matching subagent_call message."""
     path = sd.MESSAGES_INBOX / f"{parent_id}.md"
@@ -258,6 +346,86 @@ def _parse_observations(items: list[str]) -> dict[str, dict]:
     return observations
 
 
+def _parse_role_values(items: list[str], option: str) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for raw in items or []:
+        role, separator, value = str(raw).partition("=")
+        role = role.strip()
+        value = value.strip()
+        if not separator or not role or not value:
+            raise ValueError(f"{option} must be role=value, got {raw!r}")
+        if role in values:
+            raise ValueError(f"{option} repeated role: {role}")
+        values[role] = value
+    return values
+
+
+def authorize_dispatch(
+    *,
+    bridge_id: str,
+    role_id: str | None = None,
+) -> dict:
+    """Revalidate a packet's pending reservation immediately before spawn."""
+    packet = _load_packet(bridge_id)
+    receipt_path = _receipt_path(None, packet)
+    if packet.get("kind") == "codex_session_subagent_council":
+        roles = [role_id] if role_id else list(packet.get("members") or [])
+        unknown = sorted(set(roles) - set(packet.get("members") or []))
+        if unknown:
+            raise ValueError(
+                "role is not a council member: " + ", ".join(unknown)
+            )
+        checks = {
+            role: eval_harness.validate_dispatch_reservation(
+                dispatch_id=f"{bridge_id}:{role}",
+                path=receipt_path,
+                root=ROOT,
+            )
+            for role in roles
+        }
+        authorized = all(check["authorized"] for check in checks.values())
+        if authorized:
+            for role, check in checks.items():
+                marker = eval_harness.record_provider_call_start(
+                    dispatch_id=f"{bridge_id}:{role}",
+                    task_id=str(check["task_id"]),
+                    source="native_codex_authorize",
+                    provider="native-codex",
+                    execution_surface="native_subagent_spawn",
+                    path=receipt_path,
+                    root=ROOT,
+                )
+                check["provider_call_start"] = marker
+        return {
+            "authorized": authorized,
+            "bridge_id": bridge_id,
+            "checks": checks,
+        }
+    if role_id and role_id != packet.get("role"):
+        raise ValueError(f"role does not match dispatch packet: {role_id}")
+    check = eval_harness.validate_dispatch_reservation(
+        dispatch_id=str(packet.get("dispatch_id") or bridge_id),
+        path=receipt_path,
+        root=ROOT,
+    )
+    if check["authorized"]:
+        check["provider_call_start"] = (
+            eval_harness.record_provider_call_start(
+                dispatch_id=str(packet.get("dispatch_id") or bridge_id),
+                task_id=str(check["task_id"]),
+                source="native_codex_authorize",
+                provider="native-codex",
+                execution_surface="native_subagent_spawn",
+                path=receipt_path,
+                root=ROOT,
+            )
+        )
+    return {
+        **check,
+        "bridge_id": bridge_id,
+    }
+
+
 def create_dispatch_packet(
     *,
     role_id: str,
@@ -268,6 +436,13 @@ def create_dispatch_packet(
     evidence: list[str] | None = None,
     requested_tier: str | None = None,
     escalation_triggers: list[str] | None = None,
+    claim_id: str | None = None,
+    dispatch_ceiling: int | str | None = None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+    workload_id: str | None = None,
+    baseline_receipt_id: str | None = None,
+    receipt_log_path: Path | str | None = None,
     preflight_status: str | None = None,
     preflight_evidence: list[str] | None = None,
     emit_call: bool = False,
@@ -275,26 +450,8 @@ def create_dispatch_packet(
 ) -> dict:
     """Create a single Codex subagent dispatch packet."""
     sd.get_role(role_id)
-    preflight = model_routing.deterministic_preflight(
-        intent,
-        status=preflight_status,
-        evidence=preflight_evidence,
-    )
-    if preflight["status"] == "completed_sufficient":
-        return {
-            "id": _new_id("CODEX-SUBAGENT"),
-            "schema_version": SCHEMA_VERSION,
-            "kind": "codex_session_subagent_dispatch",
-            "runtime": "codex-session",
-            "status": "deterministic_complete_no_spawn",
-            "task_id": task_id,
-            "role": role_id,
-            "intent": intent,
-            "deterministic_preflight": preflight,
-            "execution": None,
-        }
-    if not preflight["allow_dispatch"]:
-        raise ValueError(f"model dispatch blocked: {preflight['reason']}")
+    bridge_id = _new_id("CODEX-SUBAGENT")
+    receipt_path = _receipt_path(receipt_log_path)
     tier_route = model_routing.resolve_subagent_tier(
         role_id,
         requested_tier=requested_tier,
@@ -305,7 +462,132 @@ def create_dispatch_packet(
         tier_route["selected_tier"],
         requested_tier=tier_route["requested_tier"],
     )
-    bridge_id = _new_id("CODEX-SUBAGENT")
+    route = {**tier_route, **provider_route}
+    preflight = model_routing.deterministic_preflight(
+        intent,
+        status=preflight_status,
+        evidence=preflight_evidence,
+    )
+    if preflight["status"] == "completed_sufficient":
+        receipt = None
+        if not dry_run:
+            receipt = _record_no_spawn_receipt(
+                dispatch_id=bridge_id,
+                task_id=task_id,
+                claim_id=str(claim_id or "").strip() or None,
+                role_id=role_id,
+                route=route,
+                source="deterministic_preflight_complete",
+                reason=str(preflight["reason"]),
+                receipt_path=receipt_path,
+                workload_id=workload_id,
+                baseline_receipt_id=baseline_receipt_id,
+            )
+        return {
+            "id": bridge_id,
+            "schema_version": SCHEMA_VERSION,
+            "kind": "codex_session_subagent_dispatch",
+            "runtime": "codex-session",
+            "status": "deterministic_complete_no_spawn",
+            "task_id": task_id,
+            "role": role_id,
+            "intent": intent,
+            "dispatch_id": bridge_id,
+            "routing": route,
+            "deterministic_preflight": preflight,
+            "execution_receipt": (
+                {
+                    "receipt_id": receipt["receipt_id"],
+                    "path": _display(receipt_path),
+                }
+                if receipt
+                else None
+            ),
+            "execution": None,
+        }
+    if not preflight["allow_dispatch"]:
+        if not dry_run:
+            _record_no_spawn_receipt(
+                dispatch_id=bridge_id,
+                task_id=task_id,
+                claim_id=str(claim_id or "").strip() or None,
+                role_id=role_id,
+                route=route,
+                source="deterministic_preflight_blocked",
+                reason=str(preflight["reason"]),
+                receipt_path=receipt_path,
+                workload_id=workload_id,
+                baseline_receipt_id=baseline_receipt_id,
+            )
+        raise ValueError(
+            f"deterministic preflight blocked model dispatch: {preflight['reason']}"
+        )
+    try:
+        budget_check = (
+            eval_harness.budget_preflight
+            if dry_run
+            else eval_harness.reserve_dispatch_budget
+        )
+        budget_preflight = budget_check(
+            path=receipt_path,
+            root=ROOT,
+            task_id=task_id,
+            claim_id=str(claim_id or "").strip() or None,
+            dispatch_id=bridge_id,
+            dispatch_ceiling=_optional_nonnegative_int(
+                dispatch_ceiling,
+                "dispatch_ceiling",
+            ),
+            task_token_budget=task_token_budget,
+            claim_token_budget=claim_token_budget,
+            **({"source": "codex_subagent_bridge"} if not dry_run else {}),
+        )
+    except eval_harness.ReceiptIntegrityError as exc:
+        budget_preflight = {
+            "allowed": False,
+            "reason": "receipt_ledger_untrusted",
+            "dispatch_id": bridge_id,
+            "error": str(exc),
+        }
+    if not budget_preflight["allowed"]:
+        receipt = None
+        if not dry_run and budget_preflight["reason"] != "duplicate_dispatch_id":
+            receipt = _record_no_spawn_receipt(
+                dispatch_id=bridge_id,
+                task_id=task_id,
+                claim_id=str(claim_id or "").strip() or None,
+                role_id=role_id,
+                route=route,
+                source="budget_preflight",
+                reason=str(budget_preflight["reason"]),
+                receipt_path=receipt_path,
+                workload_id=workload_id,
+                baseline_receipt_id=baseline_receipt_id,
+                budget_preflight=budget_preflight,
+            )
+        return {
+            "id": bridge_id,
+            "schema_version": SCHEMA_VERSION,
+            "kind": "codex_session_subagent_dispatch",
+            "runtime": "codex-session",
+            "status": "budget_blocked_no_spawn",
+            "task_id": task_id,
+            "role": role_id,
+            "intent": intent,
+            "dispatch_id": bridge_id,
+            "routing": route,
+            "deterministic_preflight": preflight,
+            "budget_preflight": budget_preflight,
+            "execution_receipt": (
+                {
+                    "receipt_id": receipt["receipt_id"],
+                    "path": _display(receipt_path),
+                }
+                if receipt
+                else None
+            ),
+            "execution": None,
+        }
     prompt = sd.render_prompt(
         role_id=role_id,
         task_id=task_id,
@@ -318,6 +600,9 @@ def create_dispatch_packet(
         ),
         tier_route=tier_route,
         provider_route=provider_route,
+        requested_tier=requested_tier,
+        escalation_triggers=escalation_triggers,
+        provider="native-codex",
     )
     packet_path = _packet_path(bridge_id)
     ev = list(evidence or [])
@@ -334,6 +619,20 @@ def create_dispatch_packet(
             evidence=ev,
             tier_route=tier_route,
             provider_route=provider_route,
+            requested_tier=requested_tier,
+            escalation_triggers=escalation_triggers,
+            provider="native-codex",
+            dispatch_id=bridge_id,
+            claim_id=(
+                (budget_preflight.get("budget_authority") or {}).get(
+                    "claim_id"
+                )
+                or claim_id
+            ),
+            task_token_budget=budget_preflight.get("task_token_budget"),
+            claim_token_budget=budget_preflight.get("claim_token_budget"),
+            workload_id=workload_id,
+            baseline_receipt_id=baseline_receipt_id,
             dry_run=dry_run,
         )
         event_path = sd.emit_event(
@@ -349,7 +648,7 @@ def create_dispatch_packet(
                     None,
                     dispatch_id=bridge_id,
                     provider="native-codex",
-                    route=provider_route,
+                    route={**tier_route, **provider_route},
                     preflight=preflight,
                 ),
             },
@@ -368,6 +667,11 @@ def create_dispatch_packet(
         "role": role_id,
         "intent": intent,
         "dispatch_id": bridge_id,
+        "claim_id": str(claim_id or "").strip() or None,
+        "workload_id": str(workload_id or "").strip() or None,
+        "baseline_receipt_id": str(baseline_receipt_id or "").strip() or None,
+        "receipt_log_path": _display(receipt_path),
+        "budget_preflight": budget_preflight,
         "context_packet": context_packet_path,
         "evidence": ev,
         "prompt": prompt,
@@ -379,7 +683,11 @@ def create_dispatch_packet(
         "call_message": _display(call_path),
         "dispatch_event": _display(event_path),
         "execution": _execution_instructions(
-            role_id, task_id, prompt, provider_route
+            role_id,
+            task_id,
+            prompt,
+            provider_route,
+            bridge_id,
         ),
     }
     _write_packet(packet, dry_run=dry_run)
@@ -405,6 +713,12 @@ def record_reply(
     latency_ms: float | str | None = None,
     billed_cost: float | str | None = None,
     currency: str | None = None,
+    status: str = "completed",
+    finish_reason: str | None = None,
+    error: str | None = None,
+    workload_id: str | None = None,
+    baseline_receipt_id: str | None = None,
+    receipt_log_path: Path | str | None = None,
     dry_run: bool = False,
 ) -> dict:
     """Record a completed Codex subagent result as subagent_reply evidence."""
@@ -414,29 +728,30 @@ def record_reply(
     if not role or not task:
         raise ValueError("role/task_id required when packet does not provide them")
     sd.get_role(role)
+    terminal_status = str(status or "completed").strip().lower()
+    if terminal_status not in {"completed", "error", "skipped"}:
+        raise ValueError("status must be completed, error, or skipped")
+    terminal_error = str(error or "").strip() or None
+    if terminal_status == "error" and terminal_error is None:
+        raise ValueError("error detail is required when status=error")
+    terminal_finish = (
+        None
+        if finish_reason is None and terminal_status == "completed"
+        else terminal_status
+        if finish_reason is None
+        else str(finish_reason)
+    )
 
     call_message = packet.get("call_message")
     parent = parent_id
     if not parent and call_message:
         parent = Path(str(call_message)).stem
-    if not parent:
-        raise ValueError("--parent-id is required when the packet has no call_message")
 
     ev = list(evidence or [])
     packet_path = packet.get("packet_path")
     if packet_path:
         ev.append(packet_path)
     text = _read_summary(summary, summary_file)
-    reply_path = sd.emit_reply_message(
-        parent_id=parent,
-        role_id=role,
-        task_id=task,
-        verdict=verdict,
-        sender=sender,
-        summary=text,
-        evidence=ev,
-        dry_run=dry_run,
-    )
     observation = _completion_observation(
         provider=observed_provider,
         model=observed_model,
@@ -448,48 +763,126 @@ def record_reply(
         currency=currency,
     )
     requested_route = dict(packet.get("routing") or {})
-    completed_route = model_routing.resolve_provider_route(
-        "native-codex",
-        str(requested_route.get("selected_tier") or "worker_standard"),
-        requested_tier=str(
-            requested_route.get("requested_tier")
-            or requested_route.get("selected_tier")
-            or "worker_standard"
-        ),
-        observed_model=observation["observed_model"],
-        observed_reasoning_effort=observation["observed_reasoning_effort"],
-    )
-    event_path = sd.emit_event(
-        role_id=role,
-        task_id=task,
-        kind="reply",
-        extra={
-            "runtime": "codex-session",
-            "bridge_id": bridge_id,
-            "message_id": reply_path.stem,
-            "in_reply_to": parent,
-            "verdict": verdict,
-            **sd.routing_event_fields(
-                None,
-                dispatch_id=str(packet.get("dispatch_id") or bridge_id),
-                provider="native-codex",
-                route=completed_route,
-                preflight=dict(packet.get("deterministic_preflight") or {}),
+    completed_route = {
+        **requested_route,
+        **model_routing.resolve_provider_route(
+            "native-codex",
+            str(requested_route.get("selected_tier") or "worker_standard"),
+            requested_tier=str(
+                requested_route.get("requested_tier")
+                or requested_route.get("selected_tier")
+                or "worker_standard"
             ),
-            **observation,
-        },
-        dry_run=dry_run,
-    )
-    marked = _mark_message_answered(parent, dry_run=dry_run)
+            observed_model=observation["observed_model"],
+            observed_reasoning_effort=observation["observed_reasoning_effort"],
+        ),
+    }
+    dispatch_id = str(packet.get("dispatch_id") or bridge_id)
+    receipt_path = _receipt_path(receipt_log_path, packet)
+    receipt = None
+    if not dry_run:
+        receipt = eval_harness.record_execution_receipt(
+            dispatch_id=dispatch_id,
+            task_id=str(task),
+            claim_id=str(packet.get("claim_id") or "").strip() or None,
+            role=str(role),
+            workload_id=(
+                str(workload_id or packet.get("workload_id") or "").strip()
+                or None
+            ),
+            provider="native-codex",
+            execution_surface="native_subagent_spawn",
+            requested_tier=completed_route.get("requested_tier"),
+            selected_tier=completed_route.get("selected_tier"),
+            resolved_model=completed_route.get("resolved_model"),
+            resolved_reasoning_effort=completed_route.get("reasoning_effort"),
+            resolved_model_source=completed_route.get("model_source"),
+            resolved_reasoning_source=completed_route.get("reasoning_source"),
+            observed_provider=observation.get("observed_provider"),
+            observed_model=observation.get("observed_model"),
+            observed_reasoning_effort=observation.get(
+                "observed_reasoning_effort"
+            ),
+            token_usage_status=observation.get("token_usage_status"),
+            tokens_in=observation.get("tokens_in"),
+            tokens_out=observation.get("tokens_out"),
+            billed_cost_status=observation.get("billed_cost_status"),
+            billed_cost=observation.get("billed_cost"),
+            currency=observation.get("currency"),
+            source="native_codex_reply",
+            status=terminal_status,
+            finish_reason=terminal_finish,
+            error=terminal_error,
+            route_status=completed_route.get("route_status"),
+            application_status=completed_route.get("application_status"),
+            model_changed=completed_route.get("model_changed"),
+            route_changed=completed_route.get("route_changed"),
+            baseline_receipt_id=(
+                str(
+                    baseline_receipt_id
+                    or packet.get("baseline_receipt_id")
+                    or ""
+                ).strip()
+                or None
+            ),
+            budget_preflight_result=dict(packet.get("budget_preflight") or {}),
+            path=receipt_path,
+        )
+    reply_path = None
+    event_path = None
+    marked = False
+    if parent:
+        reply_path = sd.emit_reply_message(
+            parent_id=parent,
+            role_id=role,
+            task_id=task,
+            verdict=verdict,
+            sender=sender,
+            summary=text,
+            evidence=ev,
+            dry_run=dry_run,
+        )
+        event_path = sd.emit_event(
+            role_id=role,
+            task_id=task,
+            kind="reply",
+            extra={
+                "runtime": "codex-session",
+                "bridge_id": bridge_id,
+                "message_id": reply_path.stem,
+                "in_reply_to": parent,
+                "verdict": verdict,
+                **sd.routing_event_fields(
+                    None,
+                    dispatch_id=dispatch_id,
+                    provider="native-codex",
+                    route=completed_route,
+                    preflight=dict(packet.get("deterministic_preflight") or {}),
+                ),
+                **observation,
+            },
+            dry_run=dry_run,
+        )
+        marked = _mark_message_answered(parent, dry_run=dry_run)
     updates = {
-        "status": "completed",
+        "status": terminal_status,
         "completed_at": _now_iso(),
+        "finish_reason": terminal_finish,
+        "error": terminal_error,
         "verdict": verdict,
         "reply_message": _display(reply_path),
         "reply_event": _display(event_path),
         "parent_marked_answered": marked,
         "completion_observation": observation,
         "routing_completion": completed_route,
+        "execution_receipt": (
+            {
+                "receipt_id": receipt["receipt_id"],
+                "path": _display(receipt_path),
+            }
+            if receipt
+            else None
+        ),
     }
     _update_packet(bridge_id, updates, dry_run=dry_run)
     return {**updates, "role": role, "task_id": task, "summary": text}
@@ -504,6 +897,13 @@ def create_council_packet(
     context_packet_path: str | None = None,
     sender: str = "lead-engineer",
     evidence: list[str] | None = None,
+    claim_id: str | None = None,
+    dispatch_ceiling: int | str | None = None,
+    task_token_budget: int | str | None = None,
+    claim_token_budget: int | str | None = None,
+    workload_id: str | None = None,
+    baseline_receipt_ids: dict[str, str] | None = None,
+    receipt_log_path: Path | str | None = None,
     preflight_status: str | None = None,
     preflight_evidence: list[str] | None = None,
     emit_calls: bool = False,
@@ -512,38 +912,14 @@ def create_council_packet(
     """Create a Codex subagent council packet with one prompt per member."""
     if method not in sc.CONSENSUS_METHODS:
         raise ValueError(f"method must be one of {sorted(sc.CONSENSUS_METHODS)}")
-    preflight = model_routing.deterministic_preflight(
-        intent,
-        status=preflight_status,
-        evidence=preflight_evidence,
-    )
-    if not preflight["allow_dispatch"]:
-        if preflight["status"] == "completed_sufficient":
-            return {
-                "id": _new_id("CODEX-COUNCIL"),
-                "schema_version": SCHEMA_VERSION,
-                "kind": "codex_session_subagent_council",
-                "runtime": "codex-session",
-                "status": "deterministic_complete_no_spawn",
-                "task_id": task_id,
-                "members": members,
-                "intent": intent,
-                "deterministic_preflight": preflight,
-                "execution": None,
-            }
-        raise ValueError(f"model dispatch blocked: {preflight['reason']}")
-    prompts = sc.render_council_prompts(
-        task_id=task_id,
-        members=members,
-        intent=intent,
-        context_packet_path=context_packet_path,
-    )
+    if len(members) < 2:
+        raise ValueError("a council needs at least two members")
+    if len(set(members)) != len(members):
+        raise ValueError("council members must be unique")
+    for member in members:
+        sd.get_role(member)
     bridge_id = _new_id("CODEX-COUNCIL")
-    packet_path = _packet_path(bridge_id)
-    ev = list(evidence or [])
-    ev.append(_display(packet_path) or str(packet_path))
-
-    calls: list[dict] = []
+    receipt_path = _receipt_path(receipt_log_path)
     member_execution: dict[str, dict] = {}
     for member in members:
         tier_route = model_routing.resolve_subagent_tier(member)
@@ -552,6 +928,179 @@ def create_council_packet(
             tier_route["selected_tier"],
             requested_tier=tier_route["requested_tier"],
         )
+        member_execution[member] = {
+            "routing": {**tier_route, **provider_route},
+        }
+    preflight = model_routing.deterministic_preflight(
+        intent,
+        status=preflight_status,
+        evidence=preflight_evidence,
+    )
+    if not preflight["allow_dispatch"]:
+        source = (
+            "deterministic_preflight_complete"
+            if preflight["status"] == "completed_sufficient"
+            else "deterministic_preflight_blocked"
+        )
+        receipts: list[dict] = []
+        if not dry_run:
+            receipts = eval_harness.record_execution_receipts(
+                [
+                    _no_spawn_receipt_values(
+                        dispatch_id=f"{bridge_id}:{member}",
+                        task_id=task_id,
+                        claim_id=str(claim_id or "").strip() or None,
+                        role_id=member,
+                        route=member_execution[member]["routing"],
+                        source=source,
+                        reason=str(preflight["reason"]),
+                        workload_id=workload_id,
+                        baseline_receipt_id=(
+                            (baseline_receipt_ids or {}).get(member)
+                        ),
+                    )
+                    for member in members
+                ],
+                path=receipt_path,
+            )
+        if preflight["status"] == "completed_sufficient":
+            return {
+                "id": bridge_id,
+                "schema_version": SCHEMA_VERSION,
+                "kind": "codex_session_subagent_council",
+                "runtime": "codex-session",
+                "status": "deterministic_complete_no_spawn",
+                "task_id": task_id,
+                "members": members,
+                "intent": intent,
+                "deterministic_preflight": preflight,
+                "execution_receipts": {
+                    member: {
+                        "receipt_id": receipt["receipt_id"],
+                        "path": _display(receipt_path),
+                    }
+                    for member, receipt in zip(members, receipts)
+                },
+                "execution": None,
+            }
+        raise ValueError(
+            f"deterministic preflight blocked model dispatch: {preflight['reason']}"
+        )
+
+    parsed_ceiling = _optional_nonnegative_int(
+        dispatch_ceiling,
+        "dispatch_ceiling",
+    )
+    budget_requests = [
+        {
+            "root": ROOT,
+            "task_id": task_id,
+            "claim_id": str(claim_id or "").strip() or None,
+            "dispatch_id": f"{bridge_id}:{member}",
+            "dispatch_ceiling": parsed_ceiling,
+            "task_token_budget": task_token_budget,
+            "claim_token_budget": claim_token_budget,
+        }
+        for member in members
+    ]
+    try:
+        budget_batch = (
+            eval_harness.plan_dispatch_budgets(
+                budget_requests,
+                path=receipt_path,
+                root=ROOT,
+                source="codex_subagent_council_dry_run",
+            )
+            if dry_run
+            else eval_harness.reserve_dispatch_budgets(
+                budget_requests,
+                path=receipt_path,
+                root=ROOT,
+                source="codex_subagent_council",
+            )
+        )
+    except eval_harness.ReceiptIntegrityError as exc:
+        budget_batch = {
+            "allowed": False,
+            "results": [
+                {
+                    "allowed": False,
+                    "reason": "receipt_ledger_untrusted",
+                    "dispatch_id": f"{bridge_id}:{member}",
+                    "error": str(exc),
+                }
+                for member in members
+            ],
+            "reservations": [],
+        }
+    member_budget_preflights = {
+        member: result
+        for member, result in zip(members, budget_batch["results"])
+    }
+    if not budget_batch["allowed"]:
+        receipts: list[dict] = []
+        if not dry_run:
+            receipts = eval_harness.record_execution_receipts(
+                [
+                    _no_spawn_receipt_values(
+                        dispatch_id=f"{bridge_id}:{member}",
+                        task_id=task_id,
+                        claim_id=str(claim_id or "").strip() or None,
+                        role_id=member,
+                        route=member_execution[member]["routing"],
+                        source="budget_preflight",
+                        reason=str(
+                            member_budget_preflights[member].get(
+                                "batch_reason"
+                            )
+                            or member_budget_preflights[member].get("reason")
+                            or "council_batch_budget_denied"
+                        ),
+                        workload_id=workload_id,
+                        baseline_receipt_id=(
+                            (baseline_receipt_ids or {}).get(member)
+                        ),
+                        budget_preflight=member_budget_preflights[member],
+                    )
+                    for member in members
+                ],
+                path=receipt_path,
+            )
+        return {
+            "id": bridge_id,
+            "schema_version": SCHEMA_VERSION,
+            "kind": "codex_session_subagent_council",
+            "runtime": "codex-session",
+            "status": "budget_blocked_no_spawn",
+            "task_id": task_id,
+            "members": members,
+            "intent": intent,
+            "claim_id": str(claim_id or "").strip() or None,
+            "deterministic_preflight": preflight,
+            "member_budget_preflights": member_budget_preflights,
+            "execution_receipts": {
+                member: {
+                    "receipt_id": receipt["receipt_id"],
+                    "path": _display(receipt_path),
+                }
+                for member, receipt in zip(members, receipts)
+            },
+            "execution": None,
+        }
+
+    prompts = sc.render_council_prompts(
+        task_id=task_id,
+        members=members,
+        intent=intent,
+        context_packet_path=context_packet_path,
+    )
+    packet_path = _packet_path(bridge_id)
+    ev = list(evidence or [])
+    ev.append(_display(packet_path) or str(packet_path))
+
+    calls: list[dict] = []
+    for member in members:
+        member_route = member_execution[member]["routing"]
         prompts[member] = sd.render_prompt(
             role_id=member,
             task_id=task_id,
@@ -561,15 +1110,22 @@ def create_council_packet(
                 f"Codex council member: {member}. The parent session executes "
                 "the exact native spawn arguments recorded in this packet."
             ),
-            tier_route=tier_route,
-            provider_route=provider_route,
+            tier_route=member_route,
+            provider_route=member_route,
+            provider="native-codex",
         )
-        member_execution[member] = {
-            "routing": {**tier_route, **provider_route},
-            "spawn_args": _execution_instructions(
-                member, task_id, prompts[member], provider_route
-            )["spawn_args"],
-        }
+        instructions = _execution_instructions(
+            member,
+            task_id,
+            prompts[member],
+            member_route,
+            bridge_id,
+            council_member=True,
+        )
+        member_execution[member]["spawn_args"] = instructions["spawn_args"]
+        member_execution[member]["pre_spawn_guard"] = instructions[
+            "pre_spawn_guard"
+        ]
     if emit_calls:
         for member in members:
             member_route = member_execution[member]["routing"]
@@ -579,18 +1135,29 @@ def create_council_packet(
                 intent=f"{intent} (council member: {member})",
                 sender=sender,
                 evidence=ev,
-                tier_route={
-                    key: value
-                    for key, value in member_route.items()
-                    if key
-                    in {
-                        "role",
-                        "escalation_triggers",
-                        "unknown_triggers",
-                        "reason",
-                    }
-                },
+                tier_route=member_route,
                 provider_route=member_route,
+                provider="native-codex",
+                dispatch_id=f"{bridge_id}:{member}",
+                claim_id=(
+                    (
+                        member_budget_preflights[member].get(
+                            "budget_authority"
+                        )
+                        or {}
+                    ).get("claim_id")
+                    or claim_id
+                ),
+                task_token_budget=member_budget_preflights[member].get(
+                    "task_token_budget"
+                ),
+                claim_token_budget=member_budget_preflights[member].get(
+                    "claim_token_budget"
+                ),
+                workload_id=workload_id,
+                baseline_receipt_id=(
+                    (baseline_receipt_ids or {}).get(member)
+                ),
                 dry_run=dry_run,
             )
             event_path = sd.emit_event(
@@ -629,10 +1196,15 @@ def create_council_packet(
         "created_at": _now_iso(),
         "sender": sender,
         "task_id": task_id,
+        "claim_id": str(claim_id or "").strip() or None,
+        "workload_id": str(workload_id or "").strip() or None,
+        "baseline_receipt_ids": dict(baseline_receipt_ids or {}),
         "members": members,
         "method": method,
         "intent": intent,
         "context_packet": context_packet_path,
+        "receipt_log_path": _display(receipt_path),
+        "member_budget_preflights": member_budget_preflights,
         "evidence": ev,
         "prompts": prompts,
         "deterministic_preflight": preflight,
@@ -647,10 +1219,18 @@ def create_council_packet(
                 role: data["spawn_args"]
                 for role, data in member_execution.items()
             },
+            "pre_spawn_guard_by_member": {
+                role: data["pre_spawn_guard"]
+                for role, data in member_execution.items()
+            },
             "after_completion": (
                 "Run `python scripts/codex_subagent_bridge.py council-record "
                 "--bridge-id <id> --task-id <task> --method <method> "
-                "--verdict role=vote[:summary] ...`."
+                "--verdict role=vote[:summary] ...`. For every cancellation, "
+                "skipped member, or spawn error, also pass one "
+                "`--observation '{\"role\":\"<role>\",\"status\":"
+                "\"error|skipped\",\"error\":\"<reason>\"}'` so every "
+                "reservation becomes terminal even when no verdict exists."
             ),
         },
     }
@@ -666,6 +1246,7 @@ def record_council(
     verdicts: list[sc.Verdict],
     sender: str = "lead-engineer",
     observations: dict[str, dict] | None = None,
+    receipt_log_path: Path | str | None = None,
     dry_run: bool = False,
 ) -> dict:
     packet = _load_packet(bridge_id)
@@ -673,40 +1254,166 @@ def record_council(
     method_name = method or packet.get("method")
     if not task or not method_name:
         raise ValueError("task_id/method required when packet does not provide them")
-    result = sc.decide(method_name, verdicts)
+    members = list(packet.get("members") or [])
+    verdict_roles = {verdict.role for verdict in verdicts}
+    unknown_verdict_roles = sorted(verdict_roles - set(members))
+    if unknown_verdict_roles:
+        raise ValueError(
+            "verdict role is not a council member: "
+            + ", ".join(unknown_verdict_roles)
+        )
+    result = (
+        sc.decide(method_name, verdicts)
+        if verdicts
+        else sc.CouncilResult(
+            method=method_name,
+            final="incomplete",
+            rationale="no council member verdict was recorded",
+            verdicts=[],
+        )
+    )
+    supplied_observations = observations or {}
+    member_observations: dict[str, dict] = {}
+    member_terminal: dict[str, dict] = {}
+    for role in members:
+        raw = dict(supplied_observations.get(role) or {})
+        default_status = "completed" if role in verdict_roles else "skipped"
+        status = str(raw.pop("status", default_status) or default_status).lower()
+        if status not in {"completed", "error", "skipped"}:
+            raise ValueError(
+                f"member {role} status must be completed, error, or skipped"
+            )
+        error = str(raw.pop("error", "") or "").strip() or None
+        if status == "error" and error is None:
+            raise ValueError(f"member {role} error detail is required")
+        if status == "skipped" and error is None and role not in verdict_roles:
+            error = "member_verdict_missing"
+        supplied_finish = raw.pop("finish_reason", None)
+        finish_reason = (
+            None
+            if supplied_finish is None and status == "completed"
+            else status
+            if supplied_finish is None
+            else str(supplied_finish)
+        )
+        workload_id = str(raw.pop("workload_id", "") or "").strip() or None
+        baseline_receipt_id = (
+            str(raw.pop("baseline_receipt_id", "") or "").strip() or None
+        )
+        member_observations[role] = _completion_observation(**raw)
+        member_terminal[role] = {
+            "status": status,
+            "finish_reason": finish_reason,
+            "error": error,
+            "workload_id": workload_id,
+            "baseline_receipt_id": baseline_receipt_id,
+        }
+    incomplete = [
+        role
+        for role, terminal in member_terminal.items()
+        if terminal["status"] != "completed"
+    ]
+    if incomplete:
+        result = sc.CouncilResult(
+            method=result.method,
+            final="incomplete",
+            rationale=(
+                "council member execution incomplete: " + ", ".join(incomplete)
+            ),
+            verdicts=result.verdicts,
+        )
+    member_routing: dict[str, dict] = {}
+    for role in members:
+        requested = dict(
+            (packet.get("member_execution") or {}).get(role, {}).get("routing")
+            or {}
+        )
+        observation = member_observations[role]
+        member_routing[role] = {
+            **requested,
+            **model_routing.resolve_provider_route(
+                "native-codex",
+                str(requested.get("selected_tier") or "worker_standard"),
+                requested_tier=str(
+                    requested.get("requested_tier")
+                    or requested.get("selected_tier")
+                    or "worker_standard"
+                ),
+                observed_model=observation.get("observed_model"),
+                observed_reasoning_effort=observation.get(
+                    "observed_reasoning_effort"
+                ),
+            ),
+        }
+    receipt_path = _receipt_path(receipt_log_path, packet)
+    receipt_preflights = dict(packet.get("member_budget_preflights") or {})
+    execution_receipts: dict[str, dict | None] = {role: None for role in members}
+    if not dry_run:
+        receipt_values: list[dict] = []
+        for role in members:
+            route = member_routing[role]
+            observation = member_observations[role]
+            terminal = member_terminal[role]
+            receipt_values.append({
+                "dispatch_id": f"{bridge_id}:{role}",
+                "task_id": str(task),
+                "claim_id": str(packet.get("claim_id") or "").strip() or None,
+                "role": role,
+                "workload_id": (
+                    terminal["workload_id"]
+                    or str(packet.get("workload_id") or "").strip()
+                    or None
+                ),
+                "provider": "native-codex",
+                "execution_surface": "native_subagent_spawn",
+                "requested_tier": route.get("requested_tier"),
+                "selected_tier": route.get("selected_tier"),
+                "resolved_model": route.get("resolved_model"),
+                "resolved_reasoning_effort": route.get("reasoning_effort"),
+                "resolved_model_source": route.get("model_source"),
+                "resolved_reasoning_source": route.get("reasoning_source"),
+                "observed_provider": observation.get("observed_provider"),
+                "observed_model": observation.get("observed_model"),
+                "observed_reasoning_effort": observation.get(
+                    "observed_reasoning_effort"
+                ),
+                "token_usage_status": observation.get("token_usage_status"),
+                "tokens_in": observation.get("tokens_in"),
+                "tokens_out": observation.get("tokens_out"),
+                "billed_cost_status": observation.get("billed_cost_status"),
+                "billed_cost": observation.get("billed_cost"),
+                "currency": observation.get("currency"),
+                "source": "native_codex_council_reply",
+                "status": terminal["status"],
+                "finish_reason": terminal["finish_reason"],
+                "error": terminal["error"],
+                "baseline_receipt_id": (
+                    terminal["baseline_receipt_id"]
+                    or (packet.get("baseline_receipt_ids") or {}).get(role)
+                ),
+                "route_status": route.get("route_status"),
+                "application_status": route.get("application_status"),
+                "model_changed": route.get("model_changed"),
+                "route_changed": route.get("route_changed"),
+                "budget_preflight_result": dict(
+                    receipt_preflights.get(role) or {}
+                ),
+            })
+        receipts = eval_harness.record_execution_receipts(
+            receipt_values,
+            path=receipt_path,
+        )
+        for role, receipt in zip(members, receipts):
+            execution_receipts[role] = {
+                "receipt_id": receipt["receipt_id"],
+                "path": _display(receipt_path),
+            }
     consensus_path = sc.emit_consensus_message(
         task_id=task,
         result=result,
         sender=sender,
         dry_run=dry_run,
     )
-    supplied_observations = observations or {}
-    member_observations = {
-        role: _completion_observation(
-            **dict(supplied_observations.get(role) or {})
-        )
-        for role in packet.get("members") or []
-    }
-    member_routing: dict[str, dict] = {}
-    for role in packet.get("members") or []:
-        requested = dict(
-            (packet.get("member_execution") or {}).get(role, {}).get("routing")
-            or {}
-        )
-        observation = member_observations[role]
-        member_routing[role] = model_routing.resolve_provider_route(
-            "native-codex",
-            str(requested.get("selected_tier") or "worker_standard"),
-            requested_tier=str(
-                requested.get("requested_tier")
-                or requested.get("selected_tier")
-                or "worker_standard"
-            ),
-            observed_model=observation.get("observed_model"),
-            observed_reasoning_effort=observation.get(
-                "observed_reasoning_effort"
-            ),
-        )
     event_path = sd.emit_event(
         role_id="council",
         task_id=task,
@@ -744,6 +1451,7 @@ def record_council(
             ),
             "member_routing": member_routing,
             "member_observations": member_observations,
+            "member_terminal": member_terminal,
         },
         dry_run=dry_run,
     )
@@ -765,6 +1473,8 @@ def record_council(
         "parent_calls_marked_answered": marked_calls,
         "member_routing_completion": member_routing,
         "member_observations": member_observations,
+        "member_terminal": member_terminal,
+        "execution_receipts": execution_receipts,
     }
     _update_packet(bridge_id, updates, dry_run=dry_run)
     return {**updates, "task_id": task, "method": result.method}
@@ -804,6 +1514,13 @@ def _cmd_dispatch(args: argparse.Namespace) -> int:
             evidence=args.evidence or [],
             requested_tier=args.pm_tier,
             escalation_triggers=args.escalation_trigger,
+            claim_id=args.claim_id,
+            dispatch_ceiling=args.dispatch_ceiling,
+            task_token_budget=args.task_token_budget,
+            claim_token_budget=args.claim_token_budget,
+            workload_id=args.workload_id,
+            baseline_receipt_id=args.baseline_receipt_id,
+            receipt_log_path=args.receipt_log,
             preflight_status=args.preflight_status,
             preflight_evidence=args.preflight_evidence,
             emit_call=args.emit_call,
@@ -836,18 +1553,54 @@ def _cmd_record_reply(args: argparse.Namespace) -> int:
             latency_ms=args.latency_ms,
             billed_cost=args.billed_cost,
             currency=args.currency,
+            status=args.status,
+            finish_reason=args.finish_reason,
+            error=args.error,
+            workload_id=args.workload_id,
+            baseline_receipt_id=args.baseline_receipt_id,
+            receipt_log_path=args.receipt_log,
             dry_run=args.dry_run,
         )
-    except (FileNotFoundError, ValueError, KeyError) as exc:
+    except (
+        FileNotFoundError,
+        ValueError,
+        KeyError,
+        eval_harness.ReceiptIntegrityError,
+    ) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
+def _cmd_authorize(args: argparse.Namespace) -> int:
+    try:
+        result = authorize_dispatch(
+            bridge_id=args.bridge_id,
+            role_id=args.role,
+        )
+    except (
+        FileNotFoundError,
+        ValueError,
+        eval_harness.ReceiptIntegrityError,
+    ) as exc:
+        result = {
+            "authorized": False,
+            "bridge_id": args.bridge_id,
+            "reason": "authorization_failed",
+            "error": str(exc),
+        }
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result.get("authorized") else 1
+
+
 def _cmd_council_plan(args: argparse.Namespace) -> int:
     try:
         members = _parse_members(args.members)
+        baseline_receipts = _parse_role_values(
+            args.baseline_receipt,
+            "--baseline-receipt",
+        )
         packet = create_council_packet(
             task_id=args.task_id,
             members=members,
@@ -856,6 +1609,13 @@ def _cmd_council_plan(args: argparse.Namespace) -> int:
             context_packet_path=args.context_packet,
             sender=args.sender,
             evidence=args.evidence or [],
+            claim_id=args.claim_id,
+            dispatch_ceiling=args.dispatch_ceiling,
+            task_token_budget=args.task_token_budget,
+            claim_token_budget=args.claim_token_budget,
+            workload_id=args.workload_id,
+            baseline_receipt_ids=baseline_receipts,
+            receipt_log_path=args.receipt_log,
             preflight_status=args.preflight_status,
             preflight_evidence=args.preflight_evidence,
             emit_calls=args.emit_calls,
@@ -879,9 +1639,15 @@ def _cmd_council_record(args: argparse.Namespace) -> int:
             verdicts=verdicts,
             sender=args.sender,
             observations=observations,
+            receipt_log_path=args.receipt_log,
             dry_run=args.dry_run,
         )
-    except (FileNotFoundError, ValueError, KeyError) as exc:
+    except (
+        FileNotFoundError,
+        ValueError,
+        KeyError,
+        eval_harness.ReceiptIntegrityError,
+    ) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -904,6 +1670,13 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--evidence", action="append")
     d.add_argument("--pm-tier", choices=sorted(model_routing.ALLOWED_PM_TIERS))
     d.add_argument("--escalation-trigger", action="append", default=[])
+    d.add_argument("--claim-id")
+    d.add_argument("--dispatch-ceiling", type=int)
+    d.add_argument("--task-token-budget")
+    d.add_argument("--claim-token-budget")
+    d.add_argument("--workload-id")
+    d.add_argument("--baseline-receipt-id")
+    d.add_argument("--receipt-log")
     d.add_argument(
         "--preflight-status",
         choices=sorted(model_routing.PREFLIGHT_STATUSES),
@@ -932,8 +1705,26 @@ def build_parser() -> argparse.ArgumentParser:
     rr.add_argument("--latency-ms", type=float)
     rr.add_argument("--billed-cost", type=float)
     rr.add_argument("--currency")
+    rr.add_argument(
+        "--status",
+        default="completed",
+        choices=["completed", "error", "skipped"],
+    )
+    rr.add_argument("--finish-reason")
+    rr.add_argument("--error")
+    rr.add_argument("--workload-id")
+    rr.add_argument("--baseline-receipt-id")
+    rr.add_argument("--receipt-log")
     rr.add_argument("--dry-run", action="store_true")
     rr.set_defaults(func=_cmd_record_reply)
+
+    auth = sub.add_parser(
+        "authorize",
+        help="revalidate a pending reservation immediately before native spawn",
+    )
+    auth.add_argument("--bridge-id", required=True)
+    auth.add_argument("--role", choices=sd.list_roles())
+    auth.set_defaults(func=_cmd_authorize)
 
     cp = sub.add_parser("council-plan", help="create a Codex council packet")
     cp.add_argument("--task-id", required=True)
@@ -944,6 +1735,18 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--context-packet")
     cp.add_argument("--sender", default="lead-engineer")
     cp.add_argument("--evidence", action="append")
+    cp.add_argument("--claim-id")
+    cp.add_argument("--dispatch-ceiling", type=int)
+    cp.add_argument("--task-token-budget")
+    cp.add_argument("--claim-token-budget")
+    cp.add_argument("--workload-id")
+    cp.add_argument(
+        "--baseline-receipt",
+        action="append",
+        default=[],
+        help="role=receipt_id, repeatable",
+    )
+    cp.add_argument("--receipt-log")
     cp.add_argument(
         "--preflight-status",
         choices=sorted(model_routing.PREFLIGHT_STATUSES),
@@ -958,9 +1761,10 @@ def build_parser() -> argparse.ArgumentParser:
     cr.add_argument("--bridge-id", required=True)
     cr.add_argument("--task-id")
     cr.add_argument("--method", choices=sorted(sc.CONSENSUS_METHODS))
-    cr.add_argument("--verdict", action="append", required=True,
+    cr.add_argument("--verdict", action="append", default=[],
                     help="role=vote[:summary], repeatable")
     cr.add_argument("--sender", default="lead-engineer")
+    cr.add_argument("--receipt-log")
     cr.add_argument(
         "--observation",
         action="append",

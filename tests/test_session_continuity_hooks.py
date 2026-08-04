@@ -127,7 +127,10 @@ def test_start_scribe_summary_is_read_only_for_missing_and_fresh_projection(
     )
     projection_mtime = projection.stat().st_mtime_ns
     fresh = START.scribe_summary(tmp_path)
-    assert "projection=fresh" in fresh and "readiness=ready" in fresh
+    assert "projection=fresh" in fresh and "readiness=blocked" in fresh
+    assert "debt=overdue" in fresh
+    assert "coverage=complete" in fresh
+    assert "cleanup=none" in fresh
     assert source.stat().st_mtime_ns == source_mtime
     assert projection.stat().st_mtime_ns == projection_mtime
 

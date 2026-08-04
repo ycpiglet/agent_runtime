@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import importlib.util
+import hashlib
 import json
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -16,6 +21,20 @@ SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
+
+
+def _load_dispatcher_module():
+    scripts_dir = str(REPO_ROOT / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    spec = importlib.util.spec_from_file_location(
+        "task_claim_dispatcher_transaction_test",
+        SCRIPT,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _routing_off_env() -> dict[str, str]:
@@ -39,10 +58,20 @@ def _routing_off_env() -> dict[str, str]:
     )
     for flag in ("AR_ROLE_ROUTING", "AR_SCOUT_COUNCIL", "AR_BETA_ACTIVATION"):
         env.pop(flag, None)
+    # Claim SCM policy must be explicit in each regression. An ambient setting
+    # must never turn a nominal host test into a committing test.
+    env.pop("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", None)
     return env
 
 
-def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_dispatcher(
+    root: Path,
+    *args: str,
+    env_overrides: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    env = _routing_off_env()
+    if env_overrides:
+        env.update(env_overrides)
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(root), *args],
         cwd=REPO_ROOT,
@@ -51,13 +80,20 @@ def _run_dispatcher(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         encoding="utf-8",
         errors="replace",
-        env=_routing_off_env(),
+        env=env,
     )
 
 
-def _run_gate(root: Path) -> subprocess.CompletedProcess[str]:
+def _run_gate(
+    root: Path,
+    *,
+    now: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, str(GATE), "--root", str(root), "--check"]
+    if now is not None:
+        command.extend(("--now", now))
     return subprocess.run(
-        [sys.executable, str(GATE), "--root", str(root), "--check"],
+        command,
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -97,6 +133,1557 @@ def _write_worktree(root: Path, task_id: str) -> None:
     (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
 
 
+def _run_git(root: Path, *args: str) -> None:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+
+
+def _git_stdout(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    return result.stdout.strip()
+
+
+def _claim_store_outer_anchor(root: Path) -> Path:
+    git_dir = Path(_git_stdout(root, "rev-parse", "--git-dir"))
+    if not git_dir.is_absolute():
+        git_dir = root / git_dir
+    return git_dir.resolve() / "agent-runtime" / "task-claim-store"
+
+
+def _init_git_worktree(tmp_path: Path, name: str) -> tuple[Path, Path]:
+    primary = tmp_path / name
+    primary.mkdir()
+    _run_git(primary, "init")
+    _run_git(primary, "config", "user.email", "dispatcher-test@example.invalid")
+    _run_git(primary, "config", "user.name", "Dispatcher Test")
+    (primary / "README.md").write_text("fixture\n", encoding="utf-8")
+    _run_git(primary, "add", "README.md")
+    _run_git(primary, "commit", "-m", "fixture")
+    linked = tmp_path / f"{name}-linked"
+    _run_git(primary, "worktree", "add", "-b", f"{name}-worker", str(linked))
+    return primary, linked
+
+
+def _create_linked_claim(
+    linked: Path,
+    *,
+    suffix: str,
+    extra_args: tuple[str, ...] = (),
+    env_overrides: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    return _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        f"TASK-AR-{suffix}",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        suffix,
+        "--json",
+        *extra_args,
+        env_overrides=env_overrides,
+    )
+
+
+def _tree_entry_snapshot(root: Path) -> dict[str, bytes]:
+    """Capture files *and* directories so rejected creates leave no residue."""
+
+    if not root.exists():
+        return {}
+    snapshot: dict[str, bytes] = {}
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if relative == ".git" or relative.startswith(".git/"):
+            continue
+        if path.is_symlink():
+            snapshot[relative] = ("symlink:" + os.readlink(path)).encode("utf-8")
+        elif path.is_dir():
+            snapshot[relative] = b"directory"
+        elif path.is_file():
+            snapshot[relative] = path.read_bytes()
+    return snapshot
+
+
+def _claim_create_mutation_snapshot(root: Path) -> tuple[dict[str, bytes], dict[str, bytes]]:
+    """Capture checkout and checkout-admin claim authority surfaces."""
+
+    outer_runtime_dir = _claim_store_outer_anchor(root).parent
+    return _tree_entry_snapshot(root), _tree_entry_snapshot(outer_runtime_dir)
+
+
+@pytest.mark.parametrize("lease_minutes", ("-1", "0"))
+def test_create_cli_refuses_nonpositive_lease_before_any_mutation(
+    tmp_path: Path,
+    lease_minutes: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"create-invalid-lease-{lease_minutes.replace('-', 'negative')}",
+    )
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"655-invalid-{lease_minutes.replace('-', 'negative')}",
+        extra_args=("--lease-minutes", lease_minutes),
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+def test_create_cli_refuses_overflowing_lease_without_traceback_or_residue(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "create-overflowing-lease")
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="655-overflow",
+        extra_args=("--lease-minutes", "100000000000000000000"),
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+@pytest.mark.parametrize("lease_minutes", (True, False))
+def test_create_api_refuses_boolean_lease_before_any_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    lease_minutes: bool,
+) -> None:
+    module = _load_dispatcher_module()
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"create-boolean-lease-{str(lease_minutes).lower()}",
+    )
+    for flag in (
+        "AR_ROLE_ROUTING",
+        "AR_SCOUT_COUNCIL",
+        "AR_BETA_ACTIVATION",
+        "AGENT_RUNTIME_CLAIM_AUTOCOMMIT",
+    ):
+        monkeypatch.delenv(flag, raising=False)
+    args = module.build_parser().parse_args(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-655-bool-{str(lease_minutes).lower()}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:00:00+09:00",
+            "--suffix",
+            f"655-bool-{str(lease_minutes).lower()}",
+            "--json",
+        ]
+    )
+    args.lease_minutes = lease_minutes
+    before = _claim_create_mutation_snapshot(linked)
+
+    result = args.func(args)
+
+    assert result != 0
+    assert _claim_create_mutation_snapshot(linked) == before
+
+
+def test_create_one_minute_lease_preserves_exact_boundary(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "create-one-minute-lease")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="655-one-minute",
+        extra_args=("--lease-minutes", "1"),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    claim = json.loads(result.stdout)["claim"]
+    claimed_at = datetime.fromisoformat(claim["claimed_at"])
+    expires_at = datetime.fromisoformat(claim["expires_at"])
+    assert (expires_at - claimed_at).total_seconds() == 60
+    assert claim["lease"]["expires_at"] == claim["expires_at"]
+
+
+def _adversarial_claim_bytes(
+    payload_kind: str,
+    *,
+    claim_id: str,
+    task_id: str,
+) -> bytes:
+    base: dict[str, object] = {
+        "schema": "agent-runtime-task-claim/v1",
+        "claim_id": claim_id,
+        "task_id": task_id,
+        "agent_role": "lead-engineer",
+        "status": "claimed",
+    }
+    if payload_kind == "oversized-malformed":
+        return json.dumps(base).encode("utf-8") + b"x" * (256 * 1024 + 1)
+    if payload_kind == "deep":
+        return (
+            json.dumps(base)[:-1]
+            + ',"nested":'
+            + "[" * 1100
+            + "0"
+            + "]" * 1100
+            + "}"
+        ).encode("utf-8")
+    if payload_kind == "invalid-utf8":
+        return json.dumps(base).encode("utf-8") + b"\xff"
+    if payload_kind == "unknown-status":
+        base["status"] = "mystery"
+        return json.dumps(base).encode("utf-8")
+    if payload_kind == "nonstring-status":
+        base["status"] = ["claimed"]
+        return json.dumps(base).encode("utf-8")
+    return (
+        json.dumps(base)[:-1]
+        + ',"integer":'
+        + "9" * 1000
+        + "}"
+    ).encode("utf-8")
+
+
+def test_default_claim_creation_persists_files_without_changing_host_head(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "default-files-only")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(linked, suffix="648-default")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert (linked / payload["path"]).is_file()
+    assert payload["claim"]["persistence"] == {
+        "mode": "working_tree",
+        "scm_commit_authorized": False,
+    }
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+
+
+def test_first_claim_initializes_identical_inner_and_checkout_outer_witnesses(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-store-first-claim")
+
+    result = _create_linked_claim(linked, suffix="654-witness")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim_id = json.loads(result.stdout)["claim"]["claim_id"]
+    inner = linked / "agents/runtime/task_claims/.claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    assert inner.read_bytes() == outer.read_bytes()
+    witness = json.loads(inner.read_text(encoding="utf-8"))
+    assert witness == {
+        "schema": "agent-runtime-task-claim-store/v1",
+        "generation_id": witness["generation_id"],
+        "witness_claim_id": claim_id,
+    }
+
+
+def test_claim_creation_refuses_outer_only_store_before_any_claim_side_effect(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-store-outer-only")
+    outer = _claim_store_outer_anchor(linked)
+    outer.parent.mkdir(parents=True, exist_ok=True)
+    outer.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "12345678-1234-4234-9234-123456789abc",
+                "witness_claim_id": "CLAIM-hidden",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = _create_linked_claim(linked, suffix="654-outer-only")
+
+    assert result.returncode == 1
+    assert "claim-store" in result.stderr
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
+@pytest.mark.parametrize(
+    "claim_id",
+    ("../../ESCAPE", "CLAIM-valid/../../ESCAPE", "CLAIM-"),
+)
+def test_claim_creation_refuses_noncanonical_claim_id_without_mutation(
+    tmp_path: Path,
+    claim_id: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-id-boundary")
+    seeded = _create_linked_claim(linked, suffix="654-claim-id-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-claim-id-boundary",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--claim-id",
+        claim_id,
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        "654-claim-id-boundary",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim_id" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    ("path_flag", "outside_name"),
+    (
+        ("--handoff-path", "escaped-claim-handoff.md"),
+        ("--log-path", "escaped-claim-log.md"),
+    ),
+)
+def test_claim_creation_refuses_artifact_path_escape_without_mutation(
+    tmp_path: Path,
+    path_flag: str,
+    outside_name: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"artifact-{outside_name}")
+    seeded = _create_linked_claim(linked, suffix=f"654-{outside_name}-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    outside = linked.parent / outside_name
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        f"TASK-AR-{outside_name}",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--claim-id",
+        f"CLAIM-{outside_name}",
+        path_flag,
+        f"../{outside_name}",
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        f"654-{outside_name}",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert path_flag.removeprefix("--").replace("-", "_") in result.stderr
+    assert not outside.exists()
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    ("path_flag", "artifact_name"),
+    (
+        ("--handoff-path", "retained.handoff.md"),
+        ("--log-path", "retained.log.md"),
+    ),
+)
+def test_claim_creation_refuses_existing_artifact_without_mutation(
+    tmp_path: Path,
+    path_flag: str,
+    artifact_name: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"artifact-collision-{artifact_name}")
+    seeded = _create_linked_claim(linked, suffix=f"654-{artifact_name}-witness")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    artifact = linked / "agents/runtime/task_claims" / artifact_name
+    artifact.write_text("retained artifact\n", encoding="utf-8")
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"654-{artifact_name}-collision",
+        extra_args=(
+            path_flag,
+            f"agents/runtime/task_claims/{artifact_name}",
+        ),
+    )
+
+    assert result.returncode == 1
+    assert "already exists" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize(
+    "payload_kind",
+    (
+        "oversized-malformed",
+        "deep",
+        "invalid-utf8",
+        "huge-integer",
+        "unknown-status",
+        "nonstring-status",
+    ),
+)
+def test_claim_creation_refuses_unbounded_existing_claim_before_side_effects(
+    tmp_path: Path,
+    payload_kind: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-store-bounded-{payload_kind}",
+    )
+    first = _create_linked_claim(linked, suffix="654-retained-witness")
+    assert first.returncode == 0, first.stderr or first.stdout
+    claims = linked / "agents" / "runtime" / "task_claims"
+    path = claims / f"CLAIM-adversarial-{payload_kind}.json"
+    raw = _adversarial_claim_bytes(
+        payload_kind,
+        claim_id=f"CLAIM-adversarial-{payload_kind}",
+        task_id="TASK-AR-adversarial",
+    )
+    path.write_bytes(raw)
+    before = {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-adversarial",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:05:00+09:00",
+        "--suffix",
+        "654-bounded-refusal",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store create refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert path.read_bytes() == raw
+    assert {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    } == before
+
+
+def test_claim_creation_rejects_container_valued_active_authority_without_mutation(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        "claim-container-valued-active-authority",
+    )
+    first = _create_linked_claim(linked, suffix="654-retained-witness")
+    assert first.returncode == 0, first.stderr or first.stdout
+    claims = linked / "agents" / "runtime" / "task_claims"
+    malformed_id = "CLAIM-malformed-active-shape"
+    malformed_path = claims / f"{malformed_id}.json"
+    malformed_path.write_text(
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": malformed_id,
+                "status": "claimed",
+                "task_id": ["TASK-AR-target"],
+                "task_set_id": {"bad": "shape"},
+                "agent_instance_id": ["bad"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    before = {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    }
+    outer = _claim_store_outer_anchor(linked)
+    outer_before = outer.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-target",
+        "--agent-role",
+        "orchestrator",
+        "--mode",
+        "orchestrator",
+        "--now",
+        "2026-08-02T11:00:00+09:00",
+        "--suffix",
+        "second-authority",
+        "--json",
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "claim-store create refused" in result.stderr
+    assert "task_id" in result.stderr
+    assert {
+        path.relative_to(linked).as_posix(): path.read_bytes()
+        for path in linked.rglob("*")
+        if path.is_file()
+    } == before
+    assert outer.read_bytes() == outer_before
+    assert len(list(claims.glob("CLAIM-*.json"))) == 2
+
+
+@pytest.mark.parametrize(
+    "payload_kind",
+    (
+        "oversized-malformed",
+        "deep",
+        "invalid-utf8",
+        "huge-integer",
+        "unknown-status",
+        "nonstring-status",
+    ),
+)
+def test_claim_release_refuses_unbounded_existing_claim_before_side_effects(
+    tmp_path: Path,
+    payload_kind: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-release-bounded-{payload_kind}",
+    )
+    created = _create_linked_claim(
+        linked,
+        suffix=f"654-release-retained-{payload_kind}",
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    created_payload = json.loads(created.stdout)
+    claim = created_payload["claim"]
+    claims = linked / "agents" / "runtime" / "task_claims"
+    adversarial_id = f"CLAIM-release-adversarial-{payload_kind}"
+    adversarial_path = claims / f"{adversarial_id}.json"
+    raw = _adversarial_claim_bytes(
+        payload_kind,
+        claim_id=adversarial_id,
+        task_id="TASK-AR-release-adversarial",
+    )
+    adversarial_path.write_bytes(raw)
+    before = {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    }
+
+    result = _run_dispatcher(
+        linked,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260729-080600-kst-bounded-release",
+        "--verifier-role",
+        "qa-reviewer",
+        "--allow-missing-evidence",
+        "--now",
+        "2026-07-29T08:06:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store release refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert adversarial_path.read_bytes() == raw
+    assert {
+        item.name: item.read_bytes()
+        for item in claims.iterdir()
+        if item.is_file()
+    } == before
+    persisted = json.loads((linked / created_payload["path"]).read_text(encoding="utf-8"))
+    assert persisted["status"] == "claimed"
+
+
+@pytest.mark.parametrize(
+    ("failure_stage", "warning_stage"),
+    (
+        ("registry", "agent-instance-registry"),
+        ("event", "claim-created-event"),
+    ),
+)
+def test_claim_creation_reports_truthful_success_after_post_commit_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure_stage: str,
+    warning_stage: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-post-commit-{failure_stage}",
+    )
+    dispatcher = _load_dispatcher_module()
+    lock_depth = {"value": 0}
+    original_store_lock = dispatcher.claim_store.store_lock
+
+    @contextmanager
+    def observed_store_lock(*args, **kwargs):
+        with original_store_lock(*args, **kwargs):
+            lock_depth["value"] += 1
+            try:
+                yield
+            finally:
+                lock_depth["value"] -= 1
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "store_lock",
+        observed_store_lock,
+    )
+
+    def fail_post_commit(*_args, **_kwargs):
+        assert lock_depth["value"] == 0
+        raise OSError(f"injected {failure_stage} failure")
+
+    if failure_stage == "registry":
+        monkeypatch.setattr(dispatcher, "record_claim_instance", fail_post_commit)
+    else:
+        monkeypatch.setattr(dispatcher, "append_event", fail_post_commit)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-post-commit-{failure_stage}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            f"654-post-commit-{failure_stage}",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "claim-store create refused" not in captured.err
+    payload = json.loads(captured.out)
+    assert payload["status"] == "created"
+    assert payload["post_commit_warnings"] == [
+        {
+            "stage": warning_stage,
+            "reason": f"injected {failure_stage} failure",
+        }
+    ]
+    claim_path = linked / payload["path"]
+    assert claim_path.is_file()
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "claimed"
+    assert (
+        linked / "agents" / "runtime" / "task_claims" / ".claim-store"
+    ).is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
+
+
+def test_claim_creation_has_no_fallible_post_publish_ownership_capture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-owned-publication")
+    dispatcher = _load_dispatcher_module()
+    capture_calls: list[Path] = []
+
+    def fail_legacy_capture(path: Path, _expected: bytes) -> None:
+        capture_calls.append(Path(path))
+        raise OSError("injected post-publication ownership capture failure")
+
+    monkeypatch.setattr(
+        dispatcher,
+        "_capture_created_publication",
+        fail_legacy_capture,
+        raising=False,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-owned-publication",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-owned-publication",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err
+    assert capture_calls == []
+    response = json.loads(captured.out)
+    claim = response["claim"]
+    assert (linked / response["path"]).is_file()
+    assert (linked / claim["handoff_path"]).is_file()
+    assert (linked / claim["log_path"]).is_file()
+    assert (linked / "agents/runtime/task_claims/.claim-store").is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
+
+
+@pytest.mark.parametrize(
+    "failure_stage",
+    ("second-artifact", "claim-publication", "outer-marker"),
+)
+def test_first_claim_creation_rolls_back_authority_on_publication_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure_stage: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"claim-create-rollback-{failure_stage}",
+    )
+    dispatcher = _load_dispatcher_module()
+    suffix = f"654-rollback-{failure_stage}"
+
+    if failure_stage == "second-artifact":
+        original = dispatcher._ensure_text_file
+        calls = {"count": 0}
+
+        def fail_second_artifact(*args, **kwargs):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise OSError("injected second artifact publication failure")
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(dispatcher, "_ensure_text_file", fail_second_artifact)
+    elif failure_stage == "claim-publication":
+        original = dispatcher.atomic_io.publish_json_owned_atomic
+
+        def fail_claim_publication(path, payload, **kwargs):
+            if Path(path).name.startswith("CLAIM-"):
+                raise OSError("injected claim publication failure")
+            return original(path, payload, **kwargs)
+
+        monkeypatch.setattr(
+            dispatcher.atomic_io,
+            "publish_json_owned_atomic",
+            fail_claim_publication,
+        )
+    else:
+        original = dispatcher.claim_store._write_immutable
+        calls = {"count": 0}
+
+        def fail_outer_marker(path, payload):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise OSError("injected outer marker publication failure")
+            return original(path, payload)
+
+        monkeypatch.setattr(
+            dispatcher.claim_store,
+            "_write_immutable",
+            fail_outer_marker,
+        )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-{suffix}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            suffix,
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "claim-store create refused" in captured.err
+    claim_dir = linked / "agents/runtime/task_claims"
+    assert not list(claim_dir.glob("CLAIM-*"))
+    assert not (claim_dir / ".claim-store").exists()
+    assert not _claim_store_outer_anchor(linked).exists()
+    assert not (linked / "agents").exists()
+
+    retried = _create_linked_claim(linked, suffix=suffix)
+    assert retried.returncode == 0, retried.stderr or retried.stdout
+
+
+def test_failed_claim_creation_preserves_initialized_marker_pair(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-create-marker-preservation")
+    seeded = _create_linked_claim(linked, suffix="654-marker-seed")
+    assert seeded.returncode == 0, seeded.stderr or seeded.stdout
+    inner = linked / "agents/runtime/task_claims/.claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    marker_bytes = (inner.read_bytes(), outer.read_bytes())
+    dispatcher = _load_dispatcher_module()
+    original = dispatcher._ensure_text_file
+    calls = {"count": 0}
+
+    def fail_second_artifact(*args, **kwargs):
+        calls["count"] += 1
+        if calls["count"] == 2:
+            raise OSError("injected initialized-store artifact failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(dispatcher, "_ensure_text_file", fail_second_artifact)
+    suffix = "654-marker-preserved-retry"
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            f"TASK-AR-{suffix}",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            suffix,
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "claim-store create refused" in captured.err
+    assert (inner.read_bytes(), outer.read_bytes()) == marker_bytes
+    assert not list((linked / "agents/runtime/task_claims").glob(f"*{suffix}*"))
+
+    retried = _create_linked_claim(linked, suffix=suffix)
+    assert retried.returncode == 0, retried.stderr or retried.stdout
+
+
+def test_first_claim_preserves_witness_when_inner_marker_cleanup_is_incomplete(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        "claim-create-incomplete-marker-recovery",
+    )
+    dispatcher = _load_dispatcher_module()
+    outer = _claim_store_outer_anchor(linked)
+    original_write = dispatcher.claim_store._write_immutable
+    original_remove_marker = dispatcher.claim_store._remove_created_marker
+    original_remove_publication = dispatcher._remove_owned_publication
+
+    def fail_outer_marker(path, payload):
+        if Path(path) == outer:
+            raise OSError("injected outer marker publication failure")
+        return original_write(path, payload)
+
+    def fail_inner_marker_cleanup(path, identity, payload):
+        if Path(path).name == ".claim-store":
+            return False
+        return original_remove_marker(path, identity, payload)
+
+    def keep_inner_marker(path, *, expected, identity=None):
+        if Path(path).name == ".claim-store":
+            return "injected inner marker cleanup remained unavailable"
+        return original_remove_publication(
+            path,
+            expected=expected,
+            identity=identity,
+        )
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "_write_immutable",
+        fail_outer_marker,
+    )
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "_remove_created_marker",
+        fail_inner_marker_cleanup,
+    )
+    monkeypatch.setattr(
+        dispatcher,
+        "_remove_owned_publication",
+        keep_inner_marker,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-incomplete-marker-recovery",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-incomplete-marker-recovery",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "recovery-required" in captured.err
+    claim_dir = linked / "agents/runtime/task_claims"
+    claims = sorted(claim_dir.glob("CLAIM-*.json"))
+    assert len(claims) == 1
+    claim = json.loads(claims[0].read_text(encoding="utf-8"))
+    claim_id = claim["claim_id"]
+    assert (claim_dir / f"{claim_id}.handoff.md").is_file()
+    assert (claim_dir / f"{claim_id}.log.md").is_file()
+    assert (claim_dir / ".claim-store").is_file()
+    assert not outer.exists()
+    inspection = dispatcher.claim_store.inspect_store(linked)
+    assert inspection.state == "migration-required"
+    assert inspection.witness_claim_id == claim_id
+
+
+def test_claim_creation_uses_exclusive_publication_for_new_authority_files(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-exclusive-publication")
+    dispatcher = _load_dispatcher_module()
+    published_text: list[Path] = []
+    published_json: list[Path] = []
+    original_publish_text = dispatcher.atomic_io.publish_text_owned_atomic
+    original_publish_json = dispatcher.atomic_io.publish_json_owned_atomic
+    original_write_text = dispatcher.atomic_io.write_text_atomic
+    original_write_json = dispatcher.atomic_io.write_json_atomic
+
+    def observe_publish_text(path, text, **kwargs):
+        published_text.append(Path(path))
+        return original_publish_text(path, text, **kwargs)
+
+    def observe_publish_json(path, payload, **kwargs):
+        published_json.append(Path(path))
+        return original_publish_json(path, payload, **kwargs)
+
+    def refuse_claim_overwrite_text(path, text, **kwargs):
+        if Path(path).name.endswith((".handoff.md", ".log.md")):
+            raise AssertionError("claim artifacts must use exclusive publication")
+        return original_write_text(path, text, **kwargs)
+
+    def refuse_claim_overwrite_json(path, payload, **kwargs):
+        if Path(path).name.startswith("CLAIM-"):
+            raise AssertionError("claim authority must use exclusive publication")
+        return original_write_json(path, payload, **kwargs)
+
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "publish_text_owned_atomic",
+        observe_publish_text,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "publish_json_owned_atomic",
+        observe_publish_json,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "write_text_atomic",
+        refuse_claim_overwrite_text,
+    )
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "write_json_atomic",
+        refuse_claim_overwrite_json,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-exclusive-publication",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-exclusive-publication",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err
+    artifact_publications = [
+        path
+        for path in published_text
+        if path.name.endswith((".handoff.md", ".log.md"))
+    ]
+    assert sorted(path.suffixes[-2:] for path in artifact_publications) == [
+        [".handoff", ".md"],
+        [".log", ".md"],
+    ]
+    assert len(published_json) == 1
+    assert published_json[0].name.startswith("CLAIM-")
+
+
+def test_claim_create_revalidates_preflight_after_lock_acquisition(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-revalidation")
+    dispatcher = _load_dispatcher_module()
+    original_prepare = dispatcher._prepare_create
+    calls: list[bool] = []
+
+    def mutate_between_preflights(args, *, emit_success=True):
+        calls.append(emit_success)
+        result = original_prepare(args, emit_success=emit_success)
+        if len(calls) == 1 and not isinstance(result, int):
+            args.progress_pct = 101
+        return result
+
+    monkeypatch.setattr(dispatcher, "_prepare_create", mutate_between_preflights)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-preflight-revalidation",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-preflight-revalidation",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert calls == [False, True]
+    assert "progress_pct must be between 0 and 100" in captured.err
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
+def test_create_preflight_does_not_mutate_inferred_taskset(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    args = dispatcher.build_parser().parse_args(
+        [
+            "--root",
+            str(tmp_path),
+            "create",
+            "--task-id",
+            "TASK-AR-inferred-taskset",
+            "--agent-role",
+            "lead-engineer",
+        ]
+    )
+    monkeypatch.setattr(
+        dispatcher,
+        "_effective_taskset_id",
+        lambda *_args, **_kwargs: ("TASKSET-INFERRED", []),
+    )
+
+    preparation = dispatcher._prepare_create(args, emit_success=False)
+
+    assert not isinstance(preparation, int)
+    assert preparation.task_set_id == "TASKSET-INFERRED"
+    assert args.task_set_id == ""
+
+
+def test_claim_create_refuses_preflight_authority_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-authority")
+    dispatcher = _load_dispatcher_module()
+    original_prepare = dispatcher._prepare_create
+    calls = {"count": 0}
+
+    def change_first_authority(args, *, emit_success=True):
+        calls["count"] += 1
+        result = original_prepare(args, emit_success=emit_success)
+        if calls["count"] == 1 and not isinstance(result, int):
+            return result._replace(
+                task_set_id="TASKSET-REMOVED-WHILE-LOCKING",
+                strict_claim_preflight=True,
+            )
+        return result
+
+    monkeypatch.setattr(dispatcher, "_prepare_create", change_first_authority)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-preflight-authority",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-preflight-authority",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert calls["count"] == 2
+    assert "authority-changed-while-locking" in captured.err
+    assert not (linked / "agents/runtime/task_claims").exists()
+
+
+def test_explicit_cli_opt_in_commits_only_claim_artifacts(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit")
+    unrelated = linked / "unrelated.txt"
+    unrelated.write_text("must stay uncommitted\n", encoding="utf-8")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-cli-opt-in",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    after = _git_stdout(linked, "rev-parse", "HEAD")
+    assert after != before
+    changed = set(_git_stdout(linked, "diff-tree", "--no-commit-id", "--name-only", "-r", after).splitlines())
+    claim_id = json.loads(result.stdout)["claim"]["claim_id"]
+    assert changed == {
+        "agents/runtime/task_claims/.claim-store",
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+    assert "?? unrelated.txt" in _git_stdout(linked, "status", "--porcelain")
+
+
+def test_opt_in_scm_helper_exception_reports_committed_claim_truth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-commit-helper-exception")
+    dispatcher = _load_dispatcher_module()
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    calls = {"count": 0}
+
+    def fail_commit_helper(*_args, **_kwargs):
+        calls["count"] += 1
+        raise RuntimeError(
+            "injected opt-in SCM helper failure\n" + "x" * 400
+        )
+
+    monkeypatch.setattr(
+        dispatcher.claim_guard,
+        "commit_claim_artifacts",
+        fail_commit_helper,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "create",
+            "--task-id",
+            "TASK-AR-scm-helper-exception",
+            "--worktree-path",
+            ".",
+            "--agent-role",
+            "lead-engineer",
+            "--now",
+            "2026-07-29T08:05:00+09:00",
+            "--suffix",
+            "654-scm-helper-exception",
+            "--commit-claim-artifacts",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert calls["count"] == 1
+    response = json.loads(captured.out)
+    assert response["status"] == "created"
+    assert response["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    assert len(response["post_commit_warnings"]) == 1
+    warning = response["post_commit_warnings"][0]
+    assert warning["stage"] == "claim-artifact-scm-persistence"
+    reason = warning["reason"]
+    assert reason.startswith("injected opt-in SCM helper failure")
+    assert 0 < len(reason) <= 256
+    assert "\n" not in reason and "\r" not in reason
+    assert "claim-store create refused" not in captured.err
+    assert "claim authority persisted" in captured.err
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+    claim_path = linked / response["path"]
+    assert claim_path.is_file()
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "claimed"
+    assert (linked / "agents/runtime/task_claims/.claim-store").is_file()
+    assert _claim_store_outer_anchor(linked).is_file()
+
+
+def test_explicit_cli_opt_in_failed_commit_is_blocked_as_not_persisted(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "explicit-claim-commit-hook-failure")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    hook = primary / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    hook.chmod(0o755)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-cli-hook-failure",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["claim"]["persistence"] == {
+        "mode": "scm_commit",
+        "scm_commit_authorized": True,
+    }
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+    claim_id = payload["claim"]["claim_id"]
+    assert set(_git_stdout(linked, "diff", "--cached", "--name-only").splitlines()) == {
+        "agents/runtime/task_claims/.claim-store",
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+
+    gate = _run_gate(linked)
+
+    assert gate.returncode == 1
+    assert "task-claim:authorized-commit-not-persisted" in gate.stdout
+    assert "AGENT_RUNTIME_CLAIM_COMMIT_TRANSACTION" not in os.environ
+    transaction_dir = Path(
+        _git_stdout(linked, "rev-parse", "--git-path", "agent-runtime/claim-commit")
+    )
+    if not transaction_dir.is_absolute():
+        transaction_dir = linked / transaction_dir
+    assert not list(transaction_dir.glob("*.json"))
+
+
+def test_published_unverified_claim_is_terminal_and_never_reported_as_success(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "published-unverified")
+    original_ref = _git_stdout(linked, "symbolic-ref", "-q", "HEAD")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+    _run_git(linked, "branch", "roundtrip-branch")
+    marker = linked / ".reference-roundtrip-active"
+    hook = primary / ".git" / "hooks" / "reference-transaction"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "if test \"$1\" = committed && "
+        f"! test -e {str(marker)!r}; then\n"
+        f"  : > {str(marker)!r}\n"
+        "  git symbolic-ref HEAD refs/heads/roundtrip-branch || exit 1\n"
+        f"  git symbolic-ref HEAD {original_ref!r} || exit 1\n"
+        f"  rm -f {str(marker)!r}\n"
+        "fi\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-published-unverified",
+        extra_args=("--commit-claim-artifacts",),
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "created_published_unverified"
+    persistence = payload["persistence_result"]
+    assert persistence["ok"] is False
+    assert persistence["committed"] is True
+    assert persistence["publication_state"] == "published_unverified"
+    assert persistence["reason"] == "claim-commit-sealed-head-identity-changed"
+    assert "DO NOT RETRY" in result.stderr
+    assert _git_stdout(linked, "symbolic-ref", "-q", "HEAD") == original_ref
+    after = _git_stdout(linked, "rev-parse", "HEAD")
+    assert after == persistence["commit"]
+    assert _git_stdout(linked, "rev-list", "--count", f"{before}..{after}") == "1"
+    claim_id = payload["claim"]["claim_id"]
+    changed = set(
+        _git_stdout(
+            linked,
+            "diff-tree",
+            "--no-commit-id",
+            "--name-only",
+            "-r",
+            after,
+        ).splitlines()
+    )
+    assert changed == {
+        "agents/runtime/task_claims/.claim-store",
+        f"agents/runtime/task_claims/{claim_id}.json",
+        f"agents/runtime/task_claims/{claim_id}.handoff.md",
+        f"agents/runtime/task_claims/{claim_id}.log.md",
+    }
+    assert not marker.exists()
+
+
+@pytest.mark.parametrize("setting", ["0", "false", "off", "not-a-policy"])
+def test_false_or_malformed_compatibility_setting_never_commits(
+    tmp_path: Path,
+    setting: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"claim-policy-{setting}")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix=f"648-{setting}",
+        env_overrides={"AGENT_RUNTIME_CLAIM_AUTOCOMMIT": setting},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"]["mode"] == "working_tree"
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before
+
+
+def test_true_compatibility_setting_retains_authorized_crash_safety(
+    tmp_path: Path,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "claim-policy-true")
+    before = _git_stdout(linked, "rev-parse", "HEAD")
+
+    result = _create_linked_claim(
+        linked,
+        suffix="648-env-opt-in",
+        env_overrides={"AGENT_RUNTIME_CLAIM_AUTOCOMMIT": "1"},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["persistence"]["mode"] == "scm_commit"
+    assert _git_stdout(linked, "rev-parse", "HEAD") != before
+
+
+def test_create_claim_allows_registered_linked_worktree_as_runtime_root(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "runtime")
+    (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        "linked-root",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["claim"]["worktree_path"] == "."
+
+
+def test_create_claim_refuses_primary_checkout_even_when_registered(tmp_path: Path) -> None:
+    primary, _linked = _init_git_worktree(tmp_path, "runtime")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        ".",
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "primary checkout" in result.stderr
+
+
+def test_create_claim_refuses_registered_worktree_from_other_repository(tmp_path: Path) -> None:
+    primary, _linked = _init_git_worktree(tmp_path, "runtime")
+    _other_primary, other_linked = _init_git_worktree(tmp_path, "other")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(other_linked),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "different git repository" in result.stderr
+
+
+def test_create_claim_refuses_primary_root_targeting_same_repo_linked_worktree(
+    tmp_path: Path,
+) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "runtime")
+    (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        primary,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(linked),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "primary checkout" in result.stderr
+
+
+def test_create_claim_refuses_linked_root_targeting_sibling_worktree(tmp_path: Path) -> None:
+    primary, linked = _init_git_worktree(tmp_path, "runtime")
+    sibling = tmp_path / "runtime-sibling"
+    _run_git(primary, "worktree", "add", "-b", "runtime-sibling-worker", str(sibling))
+    (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        "TASK-AR-648",
+        "--worktree-path",
+        str(sibling),
+        "--agent-role",
+        "lead-engineer",
+    )
+
+    assert result.returncode == 1
+    assert "invoking linked worktree itself" in result.stderr
+
+
 def _write_routing_work(
     root: Path,
     task_id: str,
@@ -127,8 +1714,16 @@ def _write_routing_work(
         f"unit_id: {unit_id}",
         f"task_id: {task_id}",
         f"model_tier: {worker_tier}",
+        # Deliberately NON-degenerate. This helper generates the spec behind
+        # nearly every claim test, and while it emitted one target file and no
+        # stop_condition, every claim-to-spec comparison was evaluated where
+        # both sides were trivially equal. That is why a whole-digest heartbeat
+        # anchor which would have refused every production heartbeat passed 219
+        # tests, and why renew and adopt shipped the same break undetected.
         "target_files:",
         "  - scripts/routing_target.py",
+        "  - scripts/routing_second.py",
+        "stop_condition: Stop before anything irreversible",
         "escalation_triggers:",
     ]
     lines.extend(f"  - {trigger}" for trigger in (triggers or []))
@@ -250,7 +1845,10 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert events[-1]["claim_id"] == claim["claim_id"]
     assert events[-1]["task_id"] == "TASK-AR-246"
 
-    gate = _run_gate(tmp_path)
+    gate = _run_gate(
+        tmp_path,
+        now="2026-06-10T14:31:00+09:00",
+    )
     assert gate.returncode == 0, gate.stdout
     concurrency_gate = _run_concurrency_gate(tmp_path)
     assert concurrency_gate.returncode == 0, concurrency_gate.stdout
@@ -322,10 +1920,23 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
     )
     assert created.returncode == 0, created.stderr or created.stdout
     claim = json.loads(created.stdout)["claim"]
+    pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: serial-projection-owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
 
-    result = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
+    result = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        claim["claim_id"],
+        "--now",
+        "2026-06-10T14:31:12+09:00",
+        "--json",
+    )
 
     assert result.returncode == 0, result.stderr or result.stdout
+    assert pointer.read_bytes() == pointer_before
     projection = json.loads(result.stdout)
     assert projection["operation"] == "merge"
     assert projection["task_claim_ref"].endswith(f"{claim['claim_id']}.json")
@@ -333,11 +1944,107 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
     assert projection["pointer"]["current_agents"] == [{
         "claim_id": claim["claim_id"],
         "agent_role": "lead-engineer",
+        "team_id": "agent-runtime-core",
         "agent_instance_id": claim["agent_instance_id"],
         "display_name": claim["display_name"],
         "callsite_id": claim["callsite_id"],
         "pane_id": claim["pane_id"],
+        "task_id": "TASK-AR-246",
+        "unit_id": "UNIT-TASK-AR-246-001",
+        "task_set_id": "TASKSET-AR-PROJECTION",
+        "status": "claimed",
+        "phase": "claim-created",
+        "progress_pct": 0,
+        "step_index": 1,
+        "step_total": 6,
+        "status_text": "Claim created",
+        "worktree_path": ".worktrees/TASK-AR-246",
+        "branch": claim["branch"],
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "worker_standard",
+        "routing_policy_id": "task-unit-tier-policy",
+        "routing_escalation_reason": None,
+        "task_token_budget": None,
+        "claim_token_budget": None,
+        "claim_path": projection["task_claim_ref"],
+        "handoff_path": claim["handoff_path"],
+        "log_path": claim["log_path"],
+        "last_heartbeat": "2026-06-10T14:30:12+09:00",
+        "mutation_revision": 0,
     }]
+
+
+def test_projection_reads_release_committed_before_its_canonical_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id="TASK-AR-projection-snapshot",
+        suffix="projection-snapshot",
+    )
+    claim = payload["claim"]
+    claim_path = tmp_path / payload["path"]
+    dispatcher = _load_dispatcher_module()
+    original_snapshot = dispatcher.claim_store.read_claims_snapshot
+    calls = {"count": 0}
+
+    def release_then_read_snapshot(root):
+        calls["count"] += 1
+        with dispatcher.claim_store.store_lock(root):
+            current = dispatcher.claim_store.read_claim_payload(claim_path)
+            current["status"] = "released"
+            dispatcher.atomic_io.write_json_atomic(claim_path, current)
+        return original_snapshot(root)
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "read_claims_snapshot",
+        release_then_read_snapshot,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            claim["claim_id"],
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert calls["count"] == 1
+    assert rc == 1
+    assert "projection requires an active worker claim" in captured.err
+    assert json.loads(claim_path.read_text(encoding="utf-8"))["status"] == "released"
+
+
+def test_projection_reports_bounded_claim_store_failure_without_traceback(
+    tmp_path: Path,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id="TASK-AR-246",
+        suffix="projection-invalid-store",
+    )
+    claim = payload["claim"]
+    malformed = tmp_path / "agents/runtime/task_claims/CLAIM-000-invalid.json"
+    malformed.write_bytes(b"{\xff")
+
+    result = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        claim["claim_id"],
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "claim-store projection refused" in result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
 
 
 def test_projection_rejects_released_or_overlay_claims(tmp_path: Path):
@@ -456,6 +2163,25 @@ def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
 def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
     _write_worktree(tmp_path, "TASK-AR-344")
+    # The spec must exist and declare this claim's ids: create now runs the
+    # same resolution heartbeat does, so a claim pointing at a missing or
+    # mismatched spec would be born unusable. Written inline rather than via
+    # _write_routing_work because this test supplies its own --stop-condition
+    # and must not also inherit one from the spec.
+    spec = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-344/UNIT-TASK-AR-344-001.md"
+    )
+    spec.parent.mkdir(parents=True, exist_ok=True)
+    spec.write_text(
+        "---\n"
+        "unit_id: UNIT-TASK-AR-344-001\n"
+        "task_id: TASK-AR-344\n"
+        "target_files:\n"
+        "  - scripts/pm_scope.py\n"
+        "---\n\n# UNIT-TASK-AR-344-001\n",
+        encoding="utf-8",
+    )
 
     result = _run_dispatcher(
         tmp_path,
@@ -530,6 +2256,10 @@ def test_create_claim_derives_low_requested_and_selected_tier_from_unit(
     assert claim["model_tier"] == "worker_low"
     assert claim["provider_tier"] == "haiku"
     assert claim["routing_status"] == "selected"
+    assert claim["routing_policy_id"] == "task-unit-tier-policy"
+    assert claim["routing_high_tier_authorized"] is True
+    assert claim["routing_escalation_reason"] is None
+    assert claim["routing_registered_triggers"] == []
     assert claim["routing_signals"] == []
     assert claim["actual_model"] is None
     assert claim["actual_model_status"] == "unverified"
@@ -572,8 +2302,72 @@ def test_create_claim_visibly_escalates_data_integrity_signal(
     assert claim["model_tier"] == "planner_high"
     assert claim["provider_tier"] == "opus"
     assert claim["routing_status"] == "escalated"
+    assert claim["routing_high_tier_authorized"] is True
+    assert claim["routing_escalation_reason"] == "trigger:data_integrity"
+    assert claim["routing_registered_triggers"] == ["data_integrity"]
     assert claim["routing_signals"] == ["data_integrity"]
     assert claim["routing_unknown_triggers"] == []
+
+
+def test_create_claim_records_durable_task_and_claim_budgets(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-652"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        f"UNIT-TASK-AR-652-001",
+        "--unit-spec",
+        unit_rel,
+        "--agent-role",
+        "lead-engineer",
+        "--task-token-budget",
+        "1200",
+        "--claim-token-budget",
+        "400",
+        "--now",
+        "2026-07-30T07:02:00+09:00",
+        "--suffix",
+        "budget",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+    assert claim["task_token_budget"] == 1200
+    assert claim["claim_token_budget"] == 400
+
+
+def test_create_claim_rejects_invalid_durable_budget(tmp_path: Path) -> None:
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-652"
+    _write_worktree(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--task-token-budget",
+        "-1",
+        "--json",
+    )
+
+    assert result.returncode == 1
+    assert "task_token_budget must be a non-negative integer" in result.stderr
 
 
 def test_create_claim_runs_installed_security_service_gate_before_persistence(
@@ -1141,6 +2935,8 @@ def test_create_claim_keeps_unknown_routing_signal_visible(
         "create",
         "--task-id",
         task_id,
+        "--unit-id",
+        f"UNIT-TASK-AR-648-001",
         "--unit-spec",
         unit_rel,
         "--agent-role",
@@ -1417,6 +3213,8 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
         "TASK-AR-503",
         "--agent-role",
         "lead-engineer",
+        "--unit-id",
+        f"UNIT-TASK-AR-503-001",
         "--unit-spec",
         unit_rel,
         "--now",
@@ -1431,9 +3229,17 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
     assert claim["target_files"] == ["scripts/unit_target.py", "docs/unit_target.md"]
 
 
-def test_explicit_target_files_are_unioned_with_registered_unit_footprint(
+def test_explicit_target_files_outside_the_unit_spec_are_refused(
     tmp_path: Path,
 ) -> None:
+    """The spec is the authority when there is one.
+
+    Unioning an out-of-spec file made the claim's footprint a strict superset
+    of the spec's from birth, so every claim-to-spec comparison downstream
+    started from a divergence - the single root of the heartbeat, renew, and
+    adopt false positives. Explicit entries that ARE in the spec still work and
+    still order first; see the companion test below.
+    """
     (tmp_path / "STATUS.md").write_text(
         "## Handoff Checklist\n- continue here\n", encoding="utf-8"
     )
@@ -1461,9 +3267,39 @@ def test_explicit_target_files_are_unioned_with_registered_unit_footprint(
         "--json",
     )
 
+    assert result.returncode != 0
+    assert "outside the unit spec" in (result.stdout + result.stderr)
+
+
+def test_explicit_target_files_inside_the_unit_spec_are_ordered_first(
+    tmp_path: Path,
+) -> None:
+    """The explicit-first ordering contract survives the narrowing."""
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n", encoding="utf-8"
+    )
+    task_id = "TASK-AR-504b"
+    _write_worktree(tmp_path, task_id)
+    unit_rel = _write_routing_work(tmp_path, task_id)
+
+    result = _run_dispatcher(
+        tmp_path, "create",
+        "--task-id", task_id,
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--agent-role", "lead-engineer",
+        "--target-file", "scripts/routing_second.py",
+        "--now", "2026-07-29T07:06:00+09:00",
+        "--suffix", "orderfirst",
+        "--json",
+    )
+
     assert result.returncode == 0, result.stderr or result.stdout
     claim = json.loads(result.stdout)["claim"]
-    assert claim["target_files"] == ["README.md", "scripts/routing_target.py"]
+    assert claim["target_files"] == [
+        "scripts/routing_second.py",
+        "scripts/routing_target.py",
+    ]
 
 
 def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(
@@ -1696,6 +3532,129 @@ def test_release_with_distinct_verifier_records_fields_and_pane_event(tmp_path: 
     assert release_event["verifier_role"] == "qa-reviewer"
 
 
+@pytest.mark.parametrize("inactive_status", ("released", "blocked"))
+def test_release_refuses_to_rebind_inactive_claim_verification(
+    tmp_path: Path,
+    inactive_status: str,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        task_id=f"TASK-AR-inactive-{inactive_status}",
+        suffix=f"inactive-{inactive_status}",
+    )
+    claim_path = tmp_path / payload["path"]
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    original_evidence = _write_evidence(
+        tmp_path,
+        "agents/runtime/task_claims/evidence/ORIGINAL-W4B.md",
+    )
+    claim.update(
+        {
+            "status": inactive_status,
+            "released_at": "2026-06-13T09:30:00+09:00",
+            "verified_by": "qa-original-verifier",
+            "verifier_role": "qa-reviewer",
+            "verification_evidence": original_evidence,
+        }
+    )
+    claim_path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = claim_path.read_bytes()
+    replacement_evidence = _write_evidence(
+        tmp_path,
+        "agents/runtime/task_claims/evidence/REPLACEMENT-W4B.md",
+    )
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-replacement-verifier",
+        "--verifier-role",
+        "release-manager",
+        "--verification-evidence",
+        replacement_evidence,
+        "--now",
+        "2026-06-13T11:00:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "active claim" in refused.stderr
+    assert claim_path.read_bytes() == before
+
+
+def test_release_reports_truthful_success_after_post_commit_event_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    payload = _create_release_candidate(tmp_path, suffix="post-release-event")
+    claim = payload["claim"]
+    evidence_rel = _write_evidence(tmp_path)
+    dispatcher = _load_dispatcher_module()
+    lock_depth = {"value": 0}
+    original_store_lock = dispatcher.claim_store.store_lock
+
+    @contextmanager
+    def observed_store_lock(*args, **kwargs):
+        with original_store_lock(*args, **kwargs):
+            lock_depth["value"] += 1
+            try:
+                yield
+            finally:
+                lock_depth["value"] -= 1
+
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "store_lock",
+        observed_store_lock,
+    )
+
+    def fail_event(*_args, **_kwargs):
+        assert lock_depth["value"] == 0
+        raise OSError("injected release event failure")
+
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "release",
+            "--claim-id",
+            claim["claim_id"],
+            "--verified-by",
+            "qa-20260613-101500-kst-w4b-post-event",
+            "--verifier-role",
+            "qa-reviewer",
+            "--verification-evidence",
+            evidence_rel,
+            "--now",
+            "2026-06-13T10:15:00+09:00",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "claim-store release refused" not in captured.err
+    released = json.loads(captured.out)
+    assert released["status"] == "released"
+    assert released["post_commit_warnings"] == [
+        {
+            "stage": "claim-released-event",
+            "reason": "injected release event failure",
+        }
+    ]
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "released"
+    assert saved["verified_by"] == "qa-20260613-101500-kst-w4b-post-event"
+
+
 def test_release_requires_evidence_ref_by_default(tmp_path: Path):
     payload = _create_release_candidate(tmp_path)
     claim = payload["claim"]
@@ -1742,6 +3701,110 @@ def test_release_refuses_nonexistent_evidence_ref(tmp_path: Path):
 
     assert refused.returncode == 1
     assert "verification evidence not found" in refused.stderr
+
+
+@pytest.mark.parametrize(
+    "evidence_mode",
+    ("absolute-outside", "relative-escape", "directory", "symlink"),
+)
+def test_release_refuses_noncanonical_evidence_without_mutating_claim(
+    tmp_path: Path,
+    evidence_mode: str,
+) -> None:
+    payload = _create_release_candidate(tmp_path, suffix=f"evidence-{evidence_mode}")
+    claim = payload["claim"]
+    outside = tmp_path.parent / f"outside-{evidence_mode}.md"
+    outside.write_text("# Not repository evidence\n", encoding="utf-8")
+    if evidence_mode == "absolute-outside":
+        evidence_ref = str(outside.resolve())
+    elif evidence_mode == "relative-escape":
+        evidence_ref = f"../{outside.name}"
+    elif evidence_mode == "directory":
+        evidence_dir = tmp_path / "reviews/evidence-directory"
+        evidence_dir.mkdir(parents=True)
+        evidence_ref = evidence_dir.relative_to(tmp_path).as_posix()
+    else:
+        target = tmp_path / "reviews/direct-evidence.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("# Direct evidence\n", encoding="utf-8")
+        alias = tmp_path / "reviews/evidence-alias.md"
+        try:
+            alias.symlink_to(target)
+        except OSError as exc:
+            pytest.skip(f"symlink creation unavailable: {exc}")
+        evidence_ref = alias.relative_to(tmp_path).as_posix()
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b-evidence-boundary",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_ref,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "verification evidence" in refused.stderr
+    saved = json.loads((tmp_path / payload["path"]).read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+    assert "verification_evidence" not in saved
+
+
+@pytest.mark.parametrize("pointer_mode", ("outside", "symlink"))
+def test_release_refuses_noncanonical_handoff_pointer_without_mutating_claim(
+    tmp_path: Path,
+    pointer_mode: str,
+) -> None:
+    payload = _create_release_candidate(
+        tmp_path,
+        suffix=f"handoff-pointer-{pointer_mode}",
+    )
+    claim_path = tmp_path / payload["path"]
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    if pointer_mode == "outside":
+        outside = tmp_path.parent / "outside-handoff.md"
+        outside.write_text("# Outside handoff\n", encoding="utf-8")
+        claim["handoff_path"] = f"../{outside.name}"
+    else:
+        direct = tmp_path / "agents/runtime/task_claims/direct-handoff.md"
+        direct.write_text("# Direct handoff\n", encoding="utf-8")
+        alias = tmp_path / "agents/runtime/task_claims/alias.handoff.md"
+        try:
+            alias.symlink_to(direct)
+        except OSError as exc:
+            pytest.skip(f"symlink creation unavailable: {exc}")
+        claim["handoff_path"] = alias.relative_to(tmp_path).as_posix()
+    claim_path.write_text(json.dumps(claim), encoding="utf-8")
+    evidence_ref = _write_evidence(tmp_path)
+
+    refused = _run_dispatcher(
+        tmp_path,
+        "release",
+        "--claim-id",
+        claim["claim_id"],
+        "--verified-by",
+        "qa-20260613-101500-kst-w4b-pointer-boundary",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence_ref,
+        "--now",
+        "2026-06-13T10:15:00+09:00",
+        "--json",
+    )
+
+    assert refused.returncode == 1
+    assert "handoff_path" in refused.stderr
+    saved = json.loads(claim_path.read_text(encoding="utf-8"))
+    assert saved["status"] == "claimed"
+    assert "verification_evidence" not in saved
 
 
 def test_release_allow_missing_evidence_escape_prints_loud_warning(tmp_path: Path):
@@ -1979,3 +4042,3279 @@ def test_release_without_completion_phase_emits_no_completion_event(tmp_path: Pa
     event_log = tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
     events = [json.loads(line) for line in event_log.read_text(encoding="utf-8").splitlines()]
     assert not [event for event in events if event["event"] == "taskset.completed"]
+
+
+# TASK-AR-655: task-claim heartbeat/renewal authority -----------------------
+
+SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
+
+
+def _canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _expected_scope_binding(claim: dict[str, object], *, bound_at: str) -> dict[str, object]:
+    """Independent oracle for the immutable renewal scope contract."""
+
+    components = {
+        "task": _canonical_sha256({"task_id": claim.get("task_id") or ""}),
+        "unit": _canonical_sha256(
+            {
+                "unit_id": claim.get("unit_id") or "",
+                "unit_spec": claim.get("unit_spec") or "",
+            }
+        ),
+        "target_files": _canonical_sha256(
+            sorted({str(item) for item in claim.get("target_files", [])})
+        ),
+        "stop_condition": _canonical_sha256(claim.get("stop_condition") or ""),
+    }
+    return {
+        "schema": SCOPE_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def _claim_scope_binding(claim: dict[str, object]) -> dict[str, object]:
+    binding = claim.get("scope_binding")
+    if isinstance(binding, dict) and isinstance(binding.get("digest"), str):
+        return json.loads(json.dumps(binding))
+    return _expected_scope_binding(
+        claim,
+        bound_at=str(claim.get("claimed_at") or ""),
+    )
+
+
+def _claim_scope_digest(claim: dict[str, object]) -> str:
+    return str(_claim_scope_binding(claim)["digest"])
+
+
+def _write_heartbeat_unit(
+    root: Path,
+    *,
+    task_id: str,
+    targets: tuple[str, ...] = ("scripts/claim_worker.py",),
+    stop_condition: str = "stop_after:UNIT:verification",
+) -> str:
+    unit_id = f"UNIT-{task_id}-001"
+    relative = f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        f"unit_id: {unit_id}",
+        f"task_id: {task_id}",
+        "status: worker_ready",
+        "target_files:",
+        *(f"  - {target}" for target in targets),
+        f"stop_condition: {stop_condition}",
+        "---",
+        "",
+        "# Heartbeat fixture unit",
+        "",
+    ]
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return relative
+
+
+def _create_heartbeat_candidate(
+    root: Path,
+    *,
+    task_id: str = "TASK-AR-655-HEARTBEAT",
+    suffix: str = "heartbeat",
+    now: str = "2026-08-03T09:00:00+09:00",
+    worktree_path: str = "",
+) -> dict[str, object]:
+    (root / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n",
+        encoding="utf-8",
+    )
+    if not worktree_path:
+        _write_worktree(root, task_id)
+    stop_condition = f"stop_after:UNIT-{task_id}-001:verification"
+    unit_rel = _write_heartbeat_unit(
+        root,
+        task_id=task_id,
+        stop_condition=stop_condition,
+    )
+    create_args = [
+        "create",
+        "--task-id",
+        task_id,
+        "--task-set-id",
+        "TASKSET-AR-655-HEARTBEAT",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--stop-condition",
+        stop_condition,
+        "--agent-role",
+        "lead-engineer",
+        "--agent-instance-id",
+        f"le-20260803-090000-kst-{suffix}",
+        "--callsite-id",
+        f"terminal:wt-{task_id.lower()}:tab-01",
+        "--lease-minutes",
+        "30",
+        "--now",
+        now,
+        "--suffix",
+        suffix,
+        "--json",
+    ]
+    if worktree_path:
+        create_args.extend(("--worktree-path", worktree_path))
+    created = _run_dispatcher(root, *create_args)
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout)
+
+
+def _heartbeat_args(
+    claim: dict[str, object],
+    *,
+    now: str = "2026-08-03T09:10:00+09:00",
+    expected_revision: int = 0,
+    agent_instance_id: str | None = None,
+    callsite_id: str | None = None,
+) -> tuple[str, ...]:
+    return (
+        "heartbeat",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--agent-instance-id",
+        agent_instance_id or str(claim["agent_instance_id"]),
+        "--callsite-id",
+        callsite_id or str(claim["callsite_id"]),
+        "--expected-revision",
+        str(expected_revision),
+        "--phase",
+        "implementation",
+        "--progress-pct",
+        "45",
+        "--step-index",
+        "4",
+        "--step-total",
+        "10",
+        "--status-text",
+        "Atomic heartbeat contract under test",
+        "--now",
+        now,
+        "--json",
+    )
+
+
+def _replace_cli_option(args: tuple[str, ...], flag: str, value: str) -> tuple[str, ...]:
+    updated = list(args)
+    index = updated.index(flag)
+    updated[index + 1] = value
+    return tuple(updated)
+
+
+def _without_cli_option(args: tuple[str, ...], flag: str) -> tuple[str, ...]:
+    updated = list(args)
+    index = updated.index(flag)
+    del updated[index : index + 2]
+    return tuple(updated)
+
+
+PROGRESS_OPTIONS = (
+    "--phase",
+    "--progress-pct",
+    "--step-index",
+    "--step-total",
+    "--status-text",
+)
+
+
+def _heartbeat_without_progress_args(claim: dict[str, object]) -> tuple[str, ...]:
+    args = _heartbeat_args(claim)
+    for flag in PROGRESS_OPTIONS:
+        args = _without_cli_option(args, flag)
+    return args
+
+
+def _claim_path(root: Path, created: dict[str, object]) -> Path:
+    return root / str(created["path"])
+
+
+def _read_created_claim(root: Path, created: dict[str, object]) -> dict[str, object]:
+    return json.loads(_claim_path(root, created).read_text(encoding="utf-8"))
+
+
+def test_create_claim_starts_revision_zero_with_component_scope_binding(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="create-binding")
+    claim = created["claim"]
+
+    assert claim["mutation_revision"] == 0
+    assert claim["scope_binding"] == _expected_scope_binding(
+        claim,
+        bound_at="2026-08-03T09:00:00+09:00",
+    )
+    assert _read_created_claim(tmp_path, created)["scope_binding"] == claim["scope_binding"]
+
+
+def test_heartbeat_cli_atomically_advances_timestamps_progress_and_revision(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="cli-success")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["expires_at"] == "2026-08-03T09:40:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert persisted["phase"] == "implementation"
+    assert persisted["progress_pct"] == 45
+    assert persisted["step_index"] == 4
+    assert persisted["step_total"] == 10
+    assert persisted["status_text"] == "Atomic heartbeat contract under test"
+    assert persisted["mutation_revision"] == 1
+    assert response["receipt"]["claim_revision"] == 1
+    assert response["projection"]["claim_revision"] == 1
+    projected_agent = response["projection"]["pointer"]["current_agents"][0]
+    for field in (
+        "phase",
+        "progress_pct",
+        "step_index",
+        "step_total",
+        "status_text",
+        "last_heartbeat",
+        "mutation_revision",
+    ):
+        assert projected_agent[field] == persisted[field]
+
+
+def test_heartbeat_module_api_uses_the_same_atomic_contract(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="api-success")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+    parsed = dispatcher.build_parser().parse_args(
+        ["--root", str(tmp_path), *_heartbeat_args(claim)]
+    )
+
+    rc = parsed.func(parsed)
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["receipt"]["claim_revision"] == 1
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def test_heartbeat_success_reconciles_instance_and_pane_event_receipts(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="receipt-reconcile")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    instance_path = (
+        tmp_path
+        / "agents/runtime/instances"
+        / f"{claim['agent_instance_id']}.json"
+    )
+    instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert instance["updated_at"] == persisted["updated_at"]
+    assert instance["last_heartbeat"] == persisted["last_heartbeat"]
+    assert instance["claim_revision"] == persisted["mutation_revision"]
+    instance_receipt = response["receipt"]["instance"]
+    assert instance_receipt["path"] == instance_path.relative_to(tmp_path).as_posix()
+    assert instance_receipt["updated_at"] == instance["updated_at"]
+    assert instance_receipt["claim_revision"] == instance["claim_revision"]
+
+    event_log = tmp_path / "agents/runtime/pane_events/pane-events.jsonl"
+    events = [
+        json.loads(line)
+        for line in event_log.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    heartbeats = [event for event in events if event.get("event") == "instance_heartbeat"]
+    assert len(heartbeats) == 1
+    event = heartbeats[0]
+    assert event["agent_instance_id"] == claim["agent_instance_id"]
+    assert event["claim_id"] == claim["claim_id"]
+    assert event["ts"] == persisted["last_heartbeat"]
+    event_receipt = response["receipt"]["pane_event"]
+    for field in ("seq", "event", "agent_instance_id", "claim_id", "ts"):
+        assert event_receipt[field] == event[field]
+
+
+@pytest.mark.parametrize(
+    ("case", "mutate", "now", "revision", "owner_suffix", "callsite_suffix", "message"),
+    (
+        (
+            "wrong-owner",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "-other",
+            "",
+            "owner",
+        ),
+        (
+            "wrong-callsite",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            ":other",
+            "callsite",
+        ),
+        (
+            "inactive",
+            lambda claim: claim.update(status="released"),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "active",
+        ),
+        (
+            "expired",
+            lambda claim: (
+                claim.update(expires_at="2026-08-03T08:59:59+09:00"),
+                claim["lease"].update(expires_at="2026-08-03T08:59:59+09:00"),
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "expired",
+        ),
+        (
+            "timestamp-regression",
+            lambda claim: None,
+            "2026-08-03T08:59:59+09:00",
+            0,
+            "",
+            "",
+            "strictly increasing",
+        ),
+        (
+            "timestamp-equality",
+            lambda claim: None,
+            "2026-08-03T09:00:00+09:00",
+            0,
+            "",
+            "",
+            "strictly increasing",
+        ),
+        (
+            "torn-heartbeat",
+            lambda claim: claim["lease"].update(
+                heartbeat_at="2026-08-03T08:59:59+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "timestamp",
+        ),
+        (
+            "torn-expiry",
+            lambda claim: claim["lease"].update(
+                expires_at="2026-08-03T09:31:00+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+            "",
+            "",
+            "expires",
+        ),
+        (
+            "stale-revision",
+            lambda claim: None,
+            "2026-08-03T09:10:00+09:00",
+            7,
+            "",
+            "",
+            "revision",
+        ),
+    ),
+    ids=lambda value: value if isinstance(value, str) else None,
+)
+def test_heartbeat_refuses_invalid_authority_without_mutation(
+    tmp_path: Path,
+    case: str,
+    mutate,
+    now: str,
+    revision: int,
+    owner_suffix: str,
+    callsite_suffix: str,
+    message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"reject-{case}")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    mutate(claim)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_heartbeat_args(
+            claim,
+            now=now,
+            expected_revision=revision,
+            agent_instance_id=str(claim["agent_instance_id"]) + owner_suffix,
+            callsite_id=str(claim["callsite_id"]) + callsite_suffix,
+        ),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert message in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+def test_heartbeat_accepts_exact_expiry_equality_but_requires_newer_heartbeat(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="expiry-equality")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim["expires_at"] = "2026-08-03T09:10:00+09:00"
+    claim["lease"]["expires_at"] = "2026-08-03T09:10:00+09:00"
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_heartbeat_args(claim, now="2026-08-03T09:10:00+09:00"),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["mutation_revision"] == 1
+    assert persisted["expires_at"] == "2026-08-03T09:20:00+09:00"
+
+
+@pytest.mark.parametrize("operation", ("heartbeat", "renew"))
+def test_claim_mutation_preserves_subsecond_timestamp_monotonicity(
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"subsecond-{operation}",
+    )
+    claim = created["claim"]
+    now = "2026-08-03T09:00:00.000001+09:00"
+    args = (
+        _heartbeat_args(claim, now=now)
+        if operation == "heartbeat"
+        else _renew_args(claim, now=now)
+    )
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == now
+    assert persisted["lease"]["heartbeat_at"] == now
+    expected_expiry = (
+        "2026-08-03T09:30:00.000001+09:00"
+        if operation == "heartbeat"
+        else "2026-08-03T09:45:00.000001+09:00"
+    )
+    assert persisted["expires_at"] == expected_expiry
+    assert persisted["lease"]["expires_at"] == expected_expiry
+
+
+def test_heartbeat_without_progress_options_preserves_coherent_progress(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="heartbeat-no-progress")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_heartbeat_without_progress_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    persisted = _read_created_claim(tmp_path, created)
+    for field in ("phase", "progress_pct", "step_index", "step_total", "status_text"):
+        assert persisted[field] == claim[field]
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+
+
+@pytest.mark.parametrize("missing_flag", PROGRESS_OPTIONS)
+def test_heartbeat_refuses_partial_progress_group_without_mutation(
+    tmp_path: Path,
+    missing_flag: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"partial-{missing_flag.removeprefix('--')}",
+    )
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+    args = _without_cli_option(_heartbeat_args(claim), missing_flag)
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "progress" in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+@pytest.mark.parametrize(
+    ("case", "overrides", "message"),
+    (
+        ("negative-pct", {"--progress-pct": "-1"}, "progress"),
+        ("oversized-pct", {"--progress-pct": "101"}, "progress"),
+        ("zero-step-index", {"--step-index": "0"}, "step"),
+        ("step-past-total", {"--step-index": "11"}, "step"),
+        ("zero-step-total", {"--step-total": "0"}, "step"),
+        (
+            "completion-before-final-step",
+            {
+                "--phase": "completed",
+                "--progress-pct": "100",
+                "--step-index": "9",
+                "--step-total": "10",
+            },
+            "completion",
+        ),
+        (
+            "completion-before-full-progress",
+            {
+                "--phase": "completed",
+                "--progress-pct": "99",
+                "--step-index": "10",
+                "--step-total": "10",
+            },
+            "completion",
+        ),
+    ),
+)
+def test_heartbeat_refuses_incoherent_progress_without_mutation(
+    tmp_path: Path,
+    case: str,
+    overrides: dict[str, str],
+    message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"progress-{case}")
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+    before_tree = _tree_entry_snapshot(tmp_path)
+    args = _heartbeat_args(claim)
+    for flag, value in overrides.items():
+        args = _replace_cli_option(args, flag, value)
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert message in result.stderr.lower()
+    assert path.read_bytes() == before
+    assert _tree_entry_snapshot(tmp_path) == before_tree
+
+
+def test_heartbeat_atomic_write_failure_leaves_all_authority_unchanged(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="atomic-failure")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    dispatcher = _load_dispatcher_module()
+
+    def fail_atomic_write(*_args, **_kwargs):
+        raise OSError("forced heartbeat atomic replacement failure")
+
+    monkeypatch.setattr(dispatcher.atomic_io, "write_json_atomic", fail_atomic_write)
+    rc = dispatcher.main(["--root", str(tmp_path), *_heartbeat_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "forced heartbeat atomic replacement failure" in captured.err
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_concurrent_heartbeats_with_same_revision_have_exactly_one_winner(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="concurrent-cas")
+    claim = created["claim"]
+
+    def invoke() -> subprocess.CompletedProcess[str]:
+        return _run_dispatcher(tmp_path, *_heartbeat_args(claim))
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _index: invoke(), range(2)))
+
+    assert sorted(result.returncode for result in results) == [0, 1]
+    loser = next(result for result in results if result.returncode == 1)
+    assert "revision" in loser.stderr.lower()
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def _renew_args(
+    claim: dict[str, object],
+    *,
+    expected_revision: int = 0,
+    expected_scope_digest: str | None = None,
+    now: str = "2026-08-03T09:10:00+09:00",
+    replan_ref: str = "",
+    agent_instance_id: str | None = None,
+    callsite_id: str | None = None,
+    lease_minutes: str = "45",
+) -> tuple[str, ...]:
+    args = [
+        "renew",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--agent-instance-id",
+        agent_instance_id or str(claim["agent_instance_id"]),
+        "--callsite-id",
+        callsite_id or str(claim["callsite_id"]),
+        "--expected-revision",
+        str(expected_revision),
+        "--expected-scope-digest",
+        expected_scope_digest or _claim_scope_digest(claim),
+        "--lease-minutes",
+        lease_minutes,
+        "--now",
+        now,
+        "--json",
+    ]
+    if replan_ref:
+        args.extend(("--replan-ref", replan_ref))
+    return tuple(args)
+
+
+@pytest.mark.parametrize("operation", ("heartbeat", "renew"))
+@pytest.mark.parametrize("deadline_case", ("malformed", "partial", "naive"))
+def test_claim_mutation_refuses_indeterminate_deadline_without_mutation(
+    tmp_path: Path,
+    operation: str,
+    deadline_case: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"{operation}-deadline-{deadline_case}",
+    )
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    if deadline_case == "malformed":
+        claim["expires_at"] = "not-an-iso-deadline"
+        claim["lease"]["expires_at"] = "not-an-iso-deadline"
+    elif deadline_case == "partial":
+        claim["lease"].pop("expires_at")
+    else:
+        claim["expires_at"] = "2026-08-03T09:30:00"
+        claim["lease"]["expires_at"] = "2026-08-03T09:30:00"
+    path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = _tree_entry_snapshot(tmp_path)
+    args = _heartbeat_args(claim) if operation == "heartbeat" else _renew_args(claim)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *args,
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    ("case", "mutate", "now", "expected_revision"),
+    (
+        ("inactive", lambda claim: claim.update(status="released"), "2026-08-03T09:10:00+09:00", 0),
+        ("overlay", lambda claim: claim.update(overlay=True), "2026-08-03T09:10:00+09:00", 0),
+        (
+            "expired",
+            lambda claim: (
+                claim.update(expires_at="2026-08-03T08:59:59+09:00"),
+                claim["lease"].update(expires_at="2026-08-03T08:59:59+09:00"),
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        ("heartbeat-regression", lambda claim: None, "2026-08-03T08:59:59+09:00", 0),
+        ("heartbeat-equality", lambda claim: None, "2026-08-03T09:00:00+09:00", 0),
+        (
+            "torn-heartbeat",
+            lambda claim: claim["lease"].update(
+                heartbeat_at="2026-08-03T08:59:59+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        (
+            "torn-expiry",
+            lambda claim: claim["lease"].update(
+                expires_at="2026-08-03T09:31:00+09:00"
+            ),
+            "2026-08-03T09:10:00+09:00",
+            0,
+        ),
+        ("stale-revision", lambda claim: None, "2026-08-03T09:10:00+09:00", 9),
+    ),
+)
+def test_renew_refuses_invalid_authority_without_any_mutation(
+    tmp_path: Path,
+    case: str,
+    mutate,
+    now: str,
+    expected_revision: int,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-reject-{case}")
+    path = _claim_path(tmp_path, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    mutate(claim)
+    path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(
+            claim,
+            now=now,
+            expected_revision=expected_revision,
+        ),
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_atomic_write_failure_leaves_full_snapshot_unchanged(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-atomic-failure")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    dispatcher = _load_dispatcher_module()
+
+    def fail_atomic_write(*_args, **_kwargs):
+        raise OSError("forced renewal atomic replacement failure")
+
+    monkeypatch.setattr(dispatcher.atomic_io, "write_json_atomic", fail_atomic_write)
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_renew_args(claim)])
+
+    capsys.readouterr()
+    assert rc == 1
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_unchanged_scope_extends_lease_and_returns_equal_scope_digests(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-same")
+    claim = created["claim"]
+    old_digest = _claim_scope_digest(claim)
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["expires_at"] == "2026-08-03T09:55:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert persisted["mutation_revision"] == 1
+    assert response["receipt"]["claim_revision"] == 1
+    scope_change = response["receipt"]["scope_change"]
+    assert scope_change["changed"] is False
+    assert scope_change["old_digest"] == old_digest
+    assert scope_change["new_digest"] == old_digest
+    assert scope_change["replan_ref"] is None
+
+
+def test_renew_success_reconciles_projection_instance_and_single_pane_event(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-receipt-reconcile")
+    claim = created["claim"]
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    projection = response["projection"]
+    assert projection["claim_revision"] == persisted["mutation_revision"]
+    projected_agents = projection["pointer"]["current_agents"]
+    assert len(projected_agents) == 1
+    projected = projected_agents[0]
+    assert projected["claim_id"] == claim["claim_id"]
+    assert projected["mutation_revision"] == persisted["mutation_revision"]
+    assert projected["last_heartbeat"] == persisted["last_heartbeat"]
+
+    instance_path = (
+        tmp_path
+        / "agents/runtime/instances"
+        / f"{claim['agent_instance_id']}.json"
+    )
+    instance = json.loads(instance_path.read_text(encoding="utf-8"))
+    assert instance["updated_at"] == persisted["updated_at"]
+    assert instance["last_heartbeat"] == persisted["last_heartbeat"]
+    assert instance["claim_revision"] == persisted["mutation_revision"]
+    instance_receipt = response["receipt"]["instance"]
+    assert instance_receipt["updated_at"] == instance["updated_at"]
+    assert instance_receipt["claim_revision"] == instance["claim_revision"]
+
+    event_log = tmp_path / "agents/runtime/pane_events/pane-events.jsonl"
+    events = [
+        json.loads(line)
+        for line in event_log.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    renewal_events = [
+        event for event in events if event.get("event") == "instance_heartbeat"
+    ]
+    assert len(renewal_events) == 1
+    event = renewal_events[0]
+    assert event["claim_id"] == claim["claim_id"]
+    assert event["agent_instance_id"] == claim["agent_instance_id"]
+    assert event["ts"] == persisted["last_heartbeat"]
+    event_receipt = response["receipt"]["pane_event"]
+    for field in ("seq", "event", "claim_id", "agent_instance_id", "ts"):
+        assert event_receipt[field] == event[field]
+
+
+def test_renew_refuses_stale_expected_scope_digest_without_mutation(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="stale-scope-digest")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, expected_scope_digest="0" * 64),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "scope" in result.stderr.lower()
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_concurrent_renewals_with_same_revision_have_exactly_one_winner(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-concurrent-cas")
+    claim = created["claim"]
+    args = _renew_args(claim)
+
+    def invoke() -> subprocess.CompletedProcess[str]:
+        return _run_dispatcher(tmp_path, *args)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _index: invoke(), range(2)))
+
+    assert sorted(result.returncode for result in results) == [0, 1]
+    loser = next(result for result in results if result.returncode == 1)
+    assert "revision" in loser.stderr.lower()
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+
+
+@pytest.mark.parametrize(
+    ("identity_field", "expected_message"),
+    (("agent_instance_id", "owner"), ("callsite_id", "callsite")),
+)
+def test_renew_refuses_wrong_owner_or_callsite_without_mutation(
+    tmp_path: Path,
+    identity_field: str,
+    expected_message: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-{identity_field}")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+    kwargs = {
+        "agent_instance_id": str(claim["agent_instance_id"]),
+        "callsite_id": str(claim["callsite_id"]),
+    }
+    kwargs[identity_field] += "-wrong"
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim, **kwargs))
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert expected_message in result.stderr.lower()
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("lease_minutes", ("0", "-1", str(10**100)))
+def test_renew_refuses_invalid_or_overflowing_lease_without_mutation(
+    tmp_path: Path,
+    lease_minutes: str,
+) -> None:
+    suffix = "overflow" if len(lease_minutes) > 20 else lease_minutes.replace("-", "negative")
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"renew-lease-{suffix}")
+    claim = created["claim"]
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, lease_minutes=lease_minutes),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert "lease_minutes" in result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("drift_component", ("target_files", "stop_condition"))
+def test_renew_refuses_single_component_drift_without_replan_or_mutation(
+    tmp_path: Path,
+    drift_component: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"single-drift-{drift_component}",
+    )
+    claim = created["claim"]
+    targets = tuple(str(item) for item in claim["target_files"])
+    stop_condition = str(claim["stop_condition"])
+    if drift_component == "target_files":
+        targets = (*targets, "scripts/target_only_replan.py")
+    else:
+        stop_condition = stop_condition + ":stop-only-drift"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=targets,
+        stop_condition=stop_condition,
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(tmp_path, *_renew_args(claim))
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("with_unaccepted_replan", (False, True))
+def test_renew_refuses_scope_drift_without_matching_accepted_replan(
+    tmp_path: Path,
+    with_unaccepted_replan: bool,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"drift-{with_unaccepted_replan}")
+    claim = created["claim"]
+    unit_path = tmp_path / str(claim["unit_spec"])
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=("scripts/claim_worker.py", "scripts/silently_broadened.py"),
+        stop_condition="stop_after:UNIT:adjacent-scope",
+    )
+    replan_ref = ""
+    if with_unaccepted_replan:
+        replan_ref = "reviews/REVIEW-2026-08-03-draft-replan.md"
+        review = tmp_path / replan_ref
+        review.parent.mkdir(parents=True, exist_ok=True)
+        review.write_text(
+            "---\nstatus: draft\ntask_id: "
+            + str(claim["task_id"])
+            + "\nunit_id: "
+            + str(claim["unit_id"])
+            + "\n---\n",
+            encoding="utf-8",
+        )
+        _write_plan_design_record(
+            tmp_path,
+            claim=claim,
+            replan_ref=replan_ref,
+            anchor=unit_path,
+        )
+    before = _claim_path(tmp_path, created).read_bytes()
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "replan" in result.stderr.lower()
+    assert _claim_path(tmp_path, created).read_bytes() == before
+
+
+def _write_plan_design_record(
+    root: Path,
+    *,
+    claim: dict[str, object],
+    replan_ref: str,
+    anchor: Path,
+) -> None:
+    anchor_rel = anchor.relative_to(root).as_posix()
+    registry = {
+        "schema": "agent-runtime-plan-assumptions/v1",
+        "updated_at": "2026-08-03T09:09:00+09:00",
+        "assumption_sets": [
+            {
+                "taskset_id": claim["task_set_id"],
+                "design_record": replan_ref,
+                "recorded_at": "2026-08-03T09:09:00+09:00",
+                "revalidation_policy": "block_dispatch_on_drift",
+                "anchors": [
+                    {
+                        "path": anchor_rel,
+                        "kind": "sha256",
+                        "value": hashlib.sha256(anchor.read_bytes()).hexdigest(),
+                    }
+                ],
+            }
+        ],
+    }
+    path = root / "agents/project/work-items/PLAN-ASSUMPTIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _write_accepted_replan_review(
+    root: Path,
+    *,
+    relative: str,
+    task_id: str,
+    unit_id: str,
+    indirect_ref: str = "",
+) -> None:
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        f"id: {Path(relative).stem}",
+        "status: accepted",
+        "signal: pass",
+        "tier: T3",
+        f"task_id: {task_id}",
+        f"unit_id: {unit_id}",
+    ]
+    if indirect_ref:
+        lines.extend(("evidence:", f"  - {indirect_ref}"))
+    lines.extend(("---", "", "# Accepted renewal replan", ""))
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "invalid_replan",
+    ("wrong-task", "wrong-unit", "design-record-mismatch", "indirect-design-record"),
+)
+def test_renew_refuses_nonmatching_or_indirect_accepted_replan_without_mutation(
+    tmp_path: Path,
+    invalid_replan: str,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix=f"bad-replan-{invalid_replan}")
+    claim = created["claim"]
+    unit_path = tmp_path / str(claim["unit_spec"])
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=(*tuple(str(item) for item in claim["target_files"]), "scripts/replan_drift.py"),
+        stop_condition=str(claim["stop_condition"]),
+    )
+    requested_ref = f"reviews/REVIEW-2026-08-03-{invalid_replan}-requested.md"
+    review_task_id = str(claim["task_id"])
+    review_unit_id = str(claim["unit_id"])
+    if invalid_replan == "wrong-task":
+        review_task_id = review_task_id + "-OTHER"
+    elif invalid_replan == "wrong-unit":
+        review_unit_id = review_unit_id + "-OTHER"
+    _write_accepted_replan_review(
+        tmp_path,
+        relative=requested_ref,
+        task_id=review_task_id,
+        unit_id=review_unit_id,
+    )
+
+    design_ref = requested_ref
+    if invalid_replan in {"design-record-mismatch", "indirect-design-record"}:
+        design_ref = f"reviews/REVIEW-2026-08-03-{invalid_replan}-design-record.md"
+        _write_accepted_replan_review(
+            tmp_path,
+            relative=design_ref,
+            task_id=str(claim["task_id"]),
+            unit_id=str(claim["unit_id"]),
+            indirect_ref=requested_ref if invalid_replan == "indirect-design-record" else "",
+        )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=design_ref,
+        anchor=unit_path,
+    )
+    before = _tree_entry_snapshot(tmp_path)
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=requested_ref),
+    )
+
+    assert result.returncode == 1, result.stdout or result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert _tree_entry_snapshot(tmp_path) == before
+
+
+def test_renew_accepts_matching_plan_design_replan_and_receipts_old_new_scope(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="accepted-replan")
+    claim = created["claim"]
+    old_digest = _claim_scope_digest(claim)
+    unit_path = tmp_path / str(claim["unit_spec"])
+    new_targets = ("scripts/claim_worker.py", "scripts/replanned_helper.py")
+    new_stop = "stop_after:UNIT:replanned-verification"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=new_targets,
+        stop_condition=new_stop,
+    )
+    replan_ref = "reviews/REVIEW-2026-08-03-accepted-heartbeat-replan.md"
+    review = tmp_path / replan_ref
+    review.parent.mkdir(parents=True, exist_ok=True)
+    review.write_text(
+        "---\n"
+        "id: REVIEW-2026-08-03-accepted-heartbeat-replan\n"
+        "status: accepted\n"
+        "signal: pass\n"
+        "tier: T3\n"
+        f"task_id: {claim['task_id']}\n"
+        f"unit_id: {claim['unit_id']}\n"
+        "---\n\n# Accepted replan\n",
+        encoding="utf-8",
+    )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=replan_ref,
+        anchor=unit_path,
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    new_digest = persisted["scope_binding"]["digest"]
+    assert new_digest != old_digest
+    assert persisted["target_files"] == list(new_targets)
+    assert persisted["stop_condition"] == new_stop
+    scope_change = response["receipt"]["scope_change"]
+    assert scope_change["changed"] is True
+    assert scope_change["old_digest"] == old_digest
+    assert scope_change["new_digest"] == new_digest
+    assert scope_change["replan_ref"] == replan_ref
+
+
+def test_accepted_renewal_persists_bounded_full_scope_provenance(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="full-scope-provenance")
+    claim = created["claim"]
+    old_binding = _claim_scope_binding(claim)
+    unit_path = tmp_path / str(claim["unit_spec"])
+    new_targets = (*tuple(str(item) for item in claim["target_files"]), "scripts/provenance.py")
+    new_stop = str(claim["stop_condition"]) + ":replanned"
+    _write_heartbeat_unit(
+        tmp_path,
+        task_id=str(claim["task_id"]),
+        targets=new_targets,
+        stop_condition=new_stop,
+    )
+    replan_ref = "reviews/REVIEW-2026-08-03-full-scope-provenance.md"
+    _write_accepted_replan_review(
+        tmp_path,
+        relative=replan_ref,
+        task_id=str(claim["task_id"]),
+        unit_id=str(claim["unit_id"]),
+    )
+    _write_plan_design_record(
+        tmp_path,
+        claim=claim,
+        replan_ref=replan_ref,
+        anchor=unit_path,
+    )
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_renew_args(claim, replan_ref=replan_ref),
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    persisted = _read_created_claim(tmp_path, created)
+    new_binding = persisted["scope_binding"]
+    assert new_binding == _expected_scope_binding(
+        persisted,
+        bound_at="2026-08-03T09:10:00+09:00",
+    )
+    assert set(old_binding["components"]) == {
+        "task",
+        "unit",
+        "target_files",
+        "stop_condition",
+    }
+    assert set(new_binding["components"]) == set(old_binding["components"])
+    last_renewal = persisted["last_renewal"]
+    assert last_renewal["replan_ref"] == replan_ref
+    assert last_renewal["old_scope_binding"] == old_binding
+    assert last_renewal["new_scope_binding"] == new_binding
+    assert len(json.dumps(last_renewal, ensure_ascii=False)) <= 4096
+    scope_receipt = response["receipt"]["scope_change"]
+    assert scope_receipt["replan_ref"] == replan_ref
+    assert scope_receipt["old_scope_binding"] == old_binding
+    assert scope_receipt["new_scope_binding"] == new_binding
+
+
+def test_heartbeat_never_changes_git_head_index_or_refs(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "heartbeat-no-git")
+    created = _create_heartbeat_candidate(
+        linked,
+        task_id="TASK-AR-655-NO-GIT",
+        suffix="no-git",
+        worktree_path=".",
+    )
+    claim = created["claim"]
+    pointer = linked / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: serial projection owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
+    before = {
+        "head": _git_stdout(linked, "rev-parse", "HEAD"),
+        "index": _git_stdout(linked, "write-tree"),
+        "refs": _git_stdout(linked, "for-each-ref", "--format=%(refname) %(objectname)"),
+    }
+
+    heartbeated = _run_dispatcher(linked, *_heartbeat_args(claim))
+    assert heartbeated.returncode == 0, heartbeated.stderr or heartbeated.stdout
+    persisted = _read_created_claim(linked, created)
+    renewed = _run_dispatcher(
+        linked,
+        *_renew_args(
+            persisted,
+            expected_revision=1,
+            expected_scope_digest=str(persisted["scope_binding"]["digest"]),
+            now="2026-08-03T09:20:00+09:00",
+        ),
+    )
+    assert renewed.returncode == 0, renewed.stderr or renewed.stdout
+
+    assert _git_stdout(linked, "rev-parse", "HEAD") == before["head"]
+    assert _git_stdout(linked, "write-tree") == before["index"]
+    assert _git_stdout(linked, "for-each-ref", "--format=%(refname) %(objectname)") == before["refs"]
+    assert pointer.read_bytes() == pointer_before
+
+
+def test_committed_heartbeat_reports_auxiliary_failures_without_retry_ambiguity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="aux-warning")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+
+    def fail_instance(*_args, **_kwargs):
+        raise OSError("forced instance refresh failure")
+
+    def fail_event(*_args, **_kwargs):
+        raise OSError("forced pane event failure")
+
+    monkeypatch.setattr(dispatcher, "record_claim_instance", fail_instance)
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_heartbeat_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["status"] == "heartbeat_committed_with_warnings"
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    stages = {item["stage"] for item in response["post_commit_warnings"]}
+    assert stages == {"agent-instance-registry", "claim-heartbeat-event"}
+    assert _read_created_claim(tmp_path, created)["mutation_revision"] == 1
+
+
+def test_committed_renew_reports_auxiliary_failures_without_losing_claim_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="renew-aux-warning")
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+
+    def fail_instance(*_args, **_kwargs):
+        raise OSError("forced renewal instance refresh failure")
+
+    def fail_event(*_args, **_kwargs):
+        raise OSError("forced renewal pane event failure")
+
+    monkeypatch.setattr(dispatcher, "record_claim_instance", fail_instance)
+    monkeypatch.setattr(dispatcher, "append_event", fail_event)
+    monkeypatch.setattr(
+        dispatcher,
+        "append_census_event",
+        fail_event,
+        raising=False,
+    )
+
+    rc = dispatcher.main(["--root", str(tmp_path), *_renew_args(claim)])
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["status"].endswith("committed_with_warnings")
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    assert len(response["post_commit_warnings"]) == 2
+    persisted = _read_created_claim(tmp_path, created)
+    assert persisted["mutation_revision"] == 1
+    assert persisted["updated_at"] == "2026-08-03T09:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+
+
+def test_projection_rejects_expired_claim_and_exposes_live_claim_revision(
+    tmp_path: Path,
+) -> None:
+    created = _create_heartbeat_candidate(tmp_path, suffix="projection-revision")
+    claim = created["claim"]
+    live = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--now",
+        "2026-08-03T09:10:00+09:00",
+        "--json",
+    )
+    assert live.returncode == 0, live.stderr or live.stdout
+    projection = json.loads(live.stdout)
+    assert projection["claim_revision"] == 0
+    assert projection["pointer"]["current_agents"][0]["mutation_revision"] == 0
+
+    path = _claim_path(tmp_path, created)
+    expired = json.loads(path.read_text(encoding="utf-8"))
+    expired["expires_at"] = "2026-08-03T08:59:59+09:00"
+    expired["lease"]["expires_at"] = "2026-08-03T08:59:59+09:00"
+    path.write_text(json.dumps(expired, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    refused = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--now",
+        "2026-08-03T09:10:00+09:00",
+        "--json",
+        env_overrides={"AGENT_RUNTIME_CLAIM_GRACE_SECONDS": "0"},
+    )
+    assert refused.returncode == 1
+    assert "expired" in refused.stderr.lower()
+
+
+@pytest.mark.parametrize("deadline_case", ("expired", "indeterminate"))
+def test_projection_without_now_uses_wall_clock_and_refuses_nonlive_claim(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    deadline_case: str,
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix=f"projection-default-{deadline_case}",
+    )
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if deadline_case == "expired":
+        payload["expires_at"] = "2026-08-03T08:59:59+09:00"
+        payload["lease"]["expires_at"] = "2026-08-03T08:59:59+09:00"
+    else:
+        payload["lease"].pop("expires_at")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    dispatcher = _load_dispatcher_module()
+    observed: list[str | None] = []
+
+    def fixed_wall_clock(value: str | None) -> datetime:
+        observed.append(value)
+        return datetime.fromisoformat("2026-08-03T09:10:00+09:00")
+
+    monkeypatch.setattr(dispatcher, "_mutation_now", fixed_wall_clock)
+    monkeypatch.setenv("AGENT_RUNTIME_CLAIM_GRACE_SECONDS", "0")
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert observed == [None]
+    assert rc == 1
+    assert deadline_case in captured.err.lower()
+    assert captured.out == ""
+    assert "Traceback" not in captured.err
+
+
+def test_projection_without_now_emits_current_agent_mutation_revision(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    created = _create_heartbeat_candidate(
+        tmp_path,
+        suffix="projection-default-live-revision",
+    )
+    claim = created["claim"]
+    dispatcher = _load_dispatcher_module()
+    observed: list[str | None] = []
+
+    def fixed_wall_clock(value: str | None) -> datetime:
+        observed.append(value)
+        return datetime.fromisoformat("2026-08-03T09:10:00+09:00")
+
+    monkeypatch.setattr(dispatcher, "_mutation_now", fixed_wall_clock)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert observed == [None]
+    assert rc == 0, captured.err or captured.out
+    projection = json.loads(captured.out)
+    assert projection["claim_revision"] == 0
+    assert projection["pointer"]["current_agents"][0]["mutation_revision"] == 0
+
+
+def _canonical_overlay_heartbeat_fixture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> tuple[object, dict[str, object], Path]:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    dispatcher = _load_dispatcher_module()
+    routed = dispatcher.role_routing.route_review_pass(
+        tmp_path,
+        task_id="TASK-AR-655-overlay-heartbeat",
+        task_set_id="TASKSET-AR-V080-OPERABILITY-HARDENING",
+        event="closeout",
+        now="2026-08-03T10:00:00+09:00",
+    )
+    assert len(routed["created"]) == 1
+    claim = dict(routed["created"][0])
+    path = (
+        tmp_path
+        / "agents/runtime/task_claims"
+        / f"{claim['claim_id']}.json"
+    )
+    claim.update(
+        {
+            "mutation_revision": 0,
+            "expires_at": "2026-08-03T10:30:00+09:00",
+            "lease": {
+                "claimed_at": "2026-08-03T10:00:00+09:00",
+                "heartbeat_at": "2026-08-03T10:00:00+09:00",
+                "expires_at": "2026-08-03T10:30:00+09:00",
+            },
+        }
+    )
+    dispatcher.atomic_io.write_json_atomic(path, claim)
+    return dispatcher, claim, path
+
+
+def test_overlay_owner_heartbeat_renews_without_primary_pointer_projection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    dispatcher, claim, path = _canonical_overlay_heartbeat_fixture(
+        tmp_path,
+        monkeypatch,
+    )
+    pointer = tmp_path / "agents/project/NEXT-SESSION-POINTER.yml"
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    pointer.write_text("sentinel: primary projection owner\n", encoding="utf-8")
+    pointer_before = pointer.read_bytes()
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "heartbeat",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--agent-instance-id",
+            str(claim["agent_instance_id"]),
+            "--callsite-id",
+            str(claim["callsite_id"]),
+            "--expected-revision",
+            "0",
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    assert response["receipt"]["committed"] is True
+    assert response["receipt"]["claim_revision"] == 1
+    assert response["projection"]["operation"] == "overlay-no-primary-pointer"
+    assert response["projection"]["claim_id"] == claim["claim_id"]
+    assert response["projection"]["claim_revision"] == 1
+    assert "pointer" not in response["projection"]
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    assert persisted["mutation_revision"] == 1
+    assert persisted["last_heartbeat"] == "2026-08-03T10:10:00+09:00"
+    assert persisted["lease"]["heartbeat_at"] == persisted["last_heartbeat"]
+    assert persisted["expires_at"] == "2026-08-03T10:40:00+09:00"
+    assert persisted["lease"]["expires_at"] == persisted["expires_at"]
+    assert pointer.read_bytes() == pointer_before
+
+
+def test_overlay_scope_renew_and_standalone_projection_remain_refused(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    dispatcher, claim, path = _canonical_overlay_heartbeat_fixture(
+        tmp_path,
+        monkeypatch,
+    )
+    before = path.read_bytes()
+
+    renew_rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "renew",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--agent-instance-id",
+            str(claim["agent_instance_id"]),
+            "--callsite-id",
+            str(claim["callsite_id"]),
+            "--expected-revision",
+            "0",
+            "--expected-scope-digest",
+            "overlay-scope-not-applicable",
+            "--lease-minutes",
+            "30",
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+    renew_output = capsys.readouterr()
+    projection_rc = dispatcher.main(
+        [
+            "--root",
+            str(tmp_path),
+            "projection",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--now",
+            "2026-08-03T10:10:00+09:00",
+            "--json",
+        ]
+    )
+    projection_output = capsys.readouterr()
+
+    assert renew_rc == 1
+    assert "overlay" in renew_output.err.lower()
+    assert projection_rc == 1
+    assert "overlay" in projection_output.err.lower()
+    assert path.read_bytes() == before
+
+
+# ===========================================================================
+# TASK-AR-659 RED — a claim that no automated path can reach must still have a
+# registered, owner-bound recovery command.
+#
+# Regression source: CLAIM-20260803-002651-task-ar-655-5f27 expired and stayed
+# `status: claimed` with four paths closed at once — claim_reaper skips
+# mode=orchestrator before testing liveness, heartbeat/renew reject a claim that
+# predates mutation_revision/scope_binding, task and task-set exclusivity refuse
+# a replacement claim, and no expire/terminalize/bootstrap subcommand exists.
+# One stale claim blocked both its own task and the task needed to fix it.
+# ===========================================================================
+
+_OWNER = "ycpiglet <68498184+ycpiglet@users.noreply.github.com>"
+
+
+def _legacy_claim(linked: Path, suffix: str) -> tuple[Path, dict]:
+    """Create a spec-backed claim, then strip the mutation fields.
+
+    Spec-backed on purpose: every real claim carries a unit_spec, and that is
+    the scope authority adoption anchors to. A spec-less claim has no authority
+    to diff against and is deliberately handled by a separate, stricter path
+    (see test_adopt_refuses_a_spec_less_claim_without_a_replan).
+    """
+    task_id = f"TASK-AR-{suffix}"
+    unit_rel = _write_routing_work(linked, task_id)
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        suffix.replace("-", "")[-8:],
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("mutation_revision", None)
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path, claim
+
+
+def test_red_legacy_claim_is_adoptable_by_owner_bound_command(tmp_path: Path) -> None:
+    """A pre-mutation-field claim must be adoptable instead of unrecoverable."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt")
+    path, claim = _legacy_claim(linked, "659-adopt")
+    assert "mutation_revision" not in claim
+    assert "scope_binding" not in claim
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "legacy claim predates the mutation fields",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+    assert adopted["mutation_revision"] == 0
+    assert isinstance(adopted["scope_binding"], dict)
+    assert adopted["status"] == "claimed"          # adoption is not a lifecycle change
+    assert adopted["recovered_by"] == _OWNER
+
+
+def test_red_adopt_refuses_a_caller_without_owner_identity(tmp_path: Path) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt-anon")
+    path, claim = _legacy_claim(linked, "659-adopt-anon")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        "   ",
+        "--reason",
+        "no identity",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+    # Must be refused for a *stated* reason, not merely because argparse does not
+    # know the subcommand — otherwise this passes vacuously pre-implementation.
+    combined = (result.stdout + result.stderr).lower()
+    assert "owner" in combined
+    assert "invalid choice" not in combined
+
+
+def test_red_expired_claim_is_terminalizable_by_owner_bound_command(
+    tmp_path: Path,
+) -> None:
+    """An expired claim must reach a terminal state without delete/release/complete."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-terminalize")
+    result = _create_linked_claim(
+        linked, suffix="659-term", extra_args=("--lease-minutes", "1")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim_id = payload["claim"]["claim_id"]
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim_id,
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "lease expired with no reachable command",
+        "--now",
+        "2026-07-29T18:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert path.is_file()                          # not deleted
+    after = json.loads(path.read_text(encoding="utf-8"))
+    assert after["status"] == "expired"            # not released, not completed
+    assert after["recovered_from_status"] == "claimed"
+    assert after["recovered_by"] == _OWNER
+    assert after["recovery_reason"]
+
+
+def test_red_terminalize_refuses_a_live_claim(tmp_path: Path) -> None:
+    """A live claim must never be terminalizable, whatever the owner asks."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-live")
+    result = _create_linked_claim(
+        linked, suffix="659-live", extra_args=("--lease-minutes", "120")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "attempting to kill a live claim",
+        "--now",
+        "2026-07-29T08:30:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "Traceback" not in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+    combined = (result.stdout + result.stderr).lower()
+    assert "live" in combined or "not expired" in combined
+    assert "invalid choice" not in combined
+
+
+def test_red_terminalize_reaches_an_orchestrator_claim_the_reaper_skips(
+    tmp_path: Path,
+) -> None:
+    """Mode must not decide reachability: the reaper skips orchestrator claims."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-orch")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-orch",
+        extra_args=("--lease-minutes", "1", "--mode", "orchestrator"),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "orchestrator claim the reaper will never reach",
+        "--now",
+        "2026-07-29T18:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "expired"
+
+
+def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
+    """A fresh worktree must have a registered claim-store activation command.
+
+    The outer marker lives in the per-worktree git admin dir, so every new
+    worktree starts `migration-required`. The only caller of
+    adopt_legacy_store() is sync.py, which needs a consumer agent_runtime.yml
+    that the runtime repository itself does not have.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-activate")
+    result = _create_linked_claim(linked, suffix="659-activate")
+    assert result.returncode == 0, result.stderr or result.stdout
+
+    outer = _claim_store_outer_anchor(linked)
+    assert outer.is_file()
+    outer.unlink()                                  # reproduce a fresh checkout
+
+    # Unattributed activation must be refused: this lifts the whole store out
+    # of the fail-closed migration-required state.
+    anon = _run_dispatcher(linked, "activate-store", "--json")
+    assert anon.returncode != 0
+    assert not outer.is_file()
+
+    result = _run_dispatcher(
+        linked,
+        "activate-store",
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "fresh checkout needs its claim store",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert outer.is_file()
+    assert json.loads(result.stdout)["activated_by"] == _OWNER
+
+
+def test_red_recovery_refuses_when_claim_store_authority_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The store lock proves exclusion, not that the store is the same store.
+
+    Every other mutating path pairs store_lock with verify_snapshot (create
+    2083/2203, projection 2894, release 3128/3223) and claim_reaper does the
+    same. Recovery commands run when the system is already degraded, so they
+    are the last place that may skip the authority check.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-authority")
+    result = _create_linked_claim(
+        linked, suffix="659-authority", extra_args=("--lease-minutes", "1")
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    dispatcher = _load_dispatcher_module()
+    real_verify = dispatcher.claim_store.verify_snapshot
+    calls = {"n": 0}
+
+    def _verify_then_fail(*probe_args, **probe_kwargs):
+        # Let the read path verify normally, then fail the pre-write check.
+        # This isolates the read->write window rather than the read itself.
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return real_verify(*probe_args, **probe_kwargs)
+        return False
+
+    monkeypatch.setattr(dispatcher.claim_store, "verify_snapshot", _verify_then_fail)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "terminalize",
+            "--claim-id",
+            payload["claim"]["claim_id"],
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "authority changed mid-flight",
+            "--now",
+            "2026-07-29T18:00:00+09:00",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc == 1
+    assert "authority changed" in (captured.out + captured.err)
+    assert "Traceback" not in (captured.out + captured.err)
+    assert path.read_bytes() == before
+
+
+# --- TASK-AR-659 W4b P0: a caller-supplied clock must not defeat liveness ---
+
+
+def test_red_terminalize_cannot_use_a_future_now_to_kill_a_live_claim(
+    tmp_path: Path,
+) -> None:
+    """`--now` is a determinism seam, not an authority seam.
+
+    Judging liveness against a caller-supplied clock makes "a live claim is
+    never terminalizable" false: any caller can pass a future timestamp and
+    end a healthy claim, then create their own claim on the freed task.
+    claim_reaper --apply --now 2099 refuses the same claim, so this would be
+    the only path in the runtime that can end a live one.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-future-now")
+    # The claim must be live against the WALL clock, so this trailing --now
+    # overrides the fixture's pinned past timestamp. The property under test is
+    # about real time by nature and cannot be pinned to a fixed instant.
+    wall_now = datetime.now().astimezone().isoformat(timespec="seconds")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-future",
+        extra_args=("--lease-minutes", "600", "--now", wall_now),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        payload["claim"]["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "future clock must not grant authority",
+        "--now",
+        "2099-01-01T00:00:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a future --now terminalized a live claim: "
+        + (result.stdout + result.stderr)
+    )
+    assert path.read_bytes() == before
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "claimed"
+
+
+def test_red_adopt_cannot_use_a_future_now_to_bypass_liveness(tmp_path: Path) -> None:
+    """Adoption must not become reachable on a claim a future clock 'expires'."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt-future")
+    path, claim = _legacy_claim(linked, "659-adopt-future")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "adoption under a future clock",
+        "--now",
+        "2099-01-01T00:00:00+09:00",
+        "--json",
+    )
+
+    if result.returncode == 0:
+        adopted = json.loads(path.read_text(encoding="utf-8"))
+        assert adopted["recovered_at"] < "2099", (
+            "a future --now was recorded as the recovery timestamp: "
+            f"{adopted['recovered_at']}"
+        )
+    else:
+        assert path.read_bytes() == before
+
+
+def test_deadline_missing_claim_needs_explicit_opt_in_to_terminalize(
+    tmp_path: Path,
+) -> None:
+    """A claim with no deadline needs an exit, but ending it is a judgement.
+
+    It must not ride the expired path silently, and it must not stay
+    exit-less the way CLAIM-20260803-002651-task-ar-655-5f27 did.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-nodeadline")
+    result = _create_linked_claim(linked, suffix="659-nodeadline")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim_id = payload["claim"]["claim_id"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("expires_at", None)
+    claim.pop("lease", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    args = (
+        "terminalize",
+        "--claim-id",
+        claim_id,
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "claim carries no deadline at all",
+    )
+
+    refused = _run_dispatcher(linked, *args, "--json")
+    assert refused.returncode != 0
+    assert "allow-indeterminate-lease" in (refused.stdout + refused.stderr)
+    assert path.read_bytes() == before
+
+    allowed = _run_dispatcher(linked, *args, "--allow-indeterminate-lease", "--json")
+    assert allowed.returncode == 0, allowed.stderr or allowed.stdout
+    after = json.loads(path.read_text(encoding="utf-8"))
+    assert after["status"] == "expired"
+    assert after["recovered_by"] == _OWNER
+
+
+def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
+    tmp_path: Path,
+) -> None:
+    """Deleting scope_binding must not let a caller choose their own scope.
+
+    renew derives the binding from _current_scope_values (unit-spec anchored).
+    If adopt derived it from the claim's own mutable target_files, a caller
+    could drop the binding, widen target_files, and have adopt mint a valid
+    binding over the widened scope.
+    """
+    task_id = "TASK-AR-659anchor"
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-scope-anchor")
+    unit_rel = _write_routing_work(linked, task_id)
+    # The unit spec declares exactly one target file; that is the honest scope.
+    spec_files = ["scripts/routing_target.py", "scripts/routing_second.py"]
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--suffix",
+        "anchor",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    assert claim["target_files"] == spec_files
+
+    # Tamper: drop the binding and widen scope inside the claim file itself.
+    claim.pop("scope_binding", None)
+    claim["target_files"] = [
+        "src/agent_runtime/claim_store.py",
+        "scripts/claim_reaper.py",
+    ]
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    before = path.read_bytes()
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "attempting to mint a binding over chosen scope",
+        "--json",
+    )
+
+    # Widened scope must be refused outright, not quietly re-anchored: adopt
+    # holds the same bar as renew, which demands an accepted T2/T3 replan on
+    # any scope change.
+    assert result.returncode != 0, (
+        "adopt accepted caller-widened scope without a replan: " + result.stdout
+    )
+    assert "replan" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+def test_adopt_leaves_the_claim_renewable(tmp_path: Path) -> None:
+    """Adoption exists so heartbeat and renew can reach the claim again.
+
+    _persisted_scope_binding recomputes the expected binding from the claim's
+    OWN target_files/stop_condition, so writing a spec-anchored binding without
+    also writing those fields leaves the two permanently irreconcilable and
+    makes renew refuse forever.
+    """
+    task_id = "TASK-AR-659renewable"
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-renewable")
+    unit_rel = _write_routing_work(linked, task_id)
+
+    result = _run_dispatcher(
+        linked,
+        "create",
+        "--task-id",
+        task_id,
+        "--agent-role",
+        "lead-engineer",
+        "--unit-id",
+        f"UNIT-{task_id}-001",
+        "--unit-spec",
+        unit_rel,
+        "--worktree-path",
+        ".",
+        "--now",
+        "2026-07-29T08:00:00+09:00",
+        "--lease-minutes",
+        "600",
+        "--suffix",
+        "renewable",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+
+    # Reproduce a legacy claim: drop the mutation fields entirely.
+    claim.pop("mutation_revision", None)
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # The spec must actually drift, otherwise spec-anchored and claim-anchored
+    # scope are identical and the regression cannot reproduce. Spec drift after
+    # claim creation is the normal case for a legacy claim.
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py",
+            "  - scripts/routing_target.py\n  - scripts/routing_extra.py",
+        ),
+        encoding="utf-8",
+    )
+    replan_rel = "reviews/REVIEW-adopt-renewable-replan.md"
+    replan_path = linked / replan_rel
+    replan_path.parent.mkdir(parents=True, exist_ok=True)
+    replan_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "id: REVIEW-adopt-renewable-replan",
+                f"task_id: {task_id}",
+                f"unit_id: UNIT-{task_id}-001",
+                "review_kind: scope-amendment",
+                "tier: T3",
+                "status: accepted",
+                "signal: pass",
+                "---",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    # The replan must be the taskset's registered design_record with live
+    # anchors, exactly as renew demands.
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "plan_assumption_gate.py"),
+            "--root",
+            str(linked),
+            "record",
+            "--taskset",
+            str(claim["task_set_id"]),
+            "--design-record",
+            replan_rel,
+            "--anchor",
+            unit_rel,
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "legacy claim predates the mutation fields",
+        "--replan-ref",
+        replan_rel,
+        "--now",
+        "2026-07-29T09:00:00+09:00",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+    # The regression: binding written from the spec while target_files kept the
+    # old value leaves the two permanently irreconcilable.
+    assert "scripts/routing_extra.py" in adopted["target_files"]
+
+    # The whole point: renew must now work against the adopted claim.
+    result = _run_dispatcher(
+        linked,
+        "renew",
+        "--claim-id",
+        adopted["claim_id"],
+        "--agent-instance-id",
+        adopted["agent_instance_id"],
+        "--callsite-id",
+        adopted["callsite_id"],
+        "--expected-revision",
+        str(adopted["mutation_revision"]),
+        "--expected-scope-digest",
+        adopted["scope_binding"]["digest"],
+        "--lease-minutes",
+        "60",
+        "--now",
+        "2026-07-29T10:00:00+09:00",
+        "--json",
+    )
+    assert result.returncode == 0, (
+        "adopt left the claim un-renewable: " + (result.stderr or result.stdout)
+    )
+
+
+def test_adopt_refuses_a_present_but_invalid_mutation_revision(tmp_path: Path) -> None:
+    """`type(x) is int` treats "7" as absent; resetting it to 0 loses CAS history."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-bad-rev")
+    result = _create_linked_claim(linked, suffix="659-badrev")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim["mutation_revision"] = "7"
+    claim.pop("scope_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "string revision must not be silently reset",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert "mutation_revision" in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+
+
+def test_owner_identity_is_length_bounded(tmp_path: Path) -> None:
+    """Every neighbouring provenance field is capped; this one must be too."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-owner-len")
+    path, claim = _legacy_claim(linked, "659-ownerlen")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        "x" * 5050,
+        "--reason",
+        "unbounded owner identity",
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert path.read_bytes() == before
+    # Pin the reason, not just the exit code: otherwise a future refusal for an
+    # unrelated cause would keep this green while the cap silently disappears.
+    assert "owner identity exceeds" in (result.stdout + result.stderr)
+
+
+def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
+    """Owner id and reason land in the same record; capping one is half a fix."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-reason-len")
+    path, claim = _legacy_claim(linked, "659-reasonlen")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "y" * 20000,
+        "--json",
+    )
+
+    assert result.returncode != 0
+    assert path.read_bytes() == before
+    assert "recovery reason exceeds" in (result.stdout + result.stderr)
+
+
+def test_activation_audit_loss_is_reported(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The pane event is the only durable attribution for a store activation."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-audit-loss")
+    result = _create_linked_claim(linked, suffix="659-auditloss")
+    assert result.returncode == 0, result.stderr or result.stdout
+    _claim_store_outer_anchor(linked).unlink()
+
+    dispatcher = _load_dispatcher_module()
+
+    def _broken_sink(*_a, **_k):
+        raise OSError("pane event sink is unavailable")
+
+    monkeypatch.setattr(dispatcher, "append_event", _broken_sink)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "audit sink is broken",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert rc == 0  # activation must not roll back
+    assert _claim_store_outer_anchor(linked).is_file()
+    assert json.loads(captured.out)["audit"] == "lost"
+    assert "not durable" in captured.err
+
+
+def test_indeterminate_flag_cannot_end_a_claim_with_a_future_deadline(
+    tmp_path: Path,
+) -> None:
+    """Indeterminate does not mean "no evidence".
+
+    The pre-`lease`-nesting legacy shape carries a readable, valid, future
+    top-level expires_at. That is positive evidence of liveness, and no flag
+    may discard it -- this is the exact shape the flag exists to serve, so an
+    owner reasonably believes it only ends provably-dead claims.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-indet-live")
+    wall_now = datetime.now().astimezone().isoformat(timespec="seconds")
+    result = _create_linked_claim(
+        linked,
+        suffix="659-indetlive",
+        extra_args=("--lease-minutes", "600", "--now", wall_now),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("lease", None)  # legacy shape: top-level deadline only
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "flag must not override readable liveness",
+        "--allow-indeterminate-lease",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "the flag ended a claim whose readable deadline is still in the future: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "claimed"
+
+
+def test_adopt_refuses_a_spec_less_claim_without_a_replan(tmp_path: Path) -> None:
+    """With no unit_spec there is no authority to diff against.
+
+    _current_scope_values echoes the claim's own fields back, so a diff-based
+    gate compares the claim to itself and can never fire. Such a claim must
+    require an explicit replan instead of having its contents blessed.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar659-specless")
+    result = _create_linked_claim(linked, suffix="659-specless")
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    path = linked / payload["path"]
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    assert not str(claim.get("unit_spec") or "").strip()
+
+    claim.pop("scope_binding", None)
+    claim["target_files"] = [
+        "src/agent_runtime/claim_store.py",
+        "scripts/claim_reaper.py",
+    ]
+    claim["stop_condition"] = "attacker chosen"
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "spec-less claim must not self-bless its scope",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "adopt blessed caller-chosen scope on a spec-less claim: " + result.stdout
+    )
+    assert "replan" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    "label, offset_seconds, expect_ended",
+    [
+        ("future-deadline-live", 36000, False),
+        ("just-past-expiry-within-grace", -60, False),
+        ("at-grace-boundary", -600, True),
+        ("well-past-grace-truly-dead", -18000, True),
+    ],
+)
+def test_indeterminate_flag_respects_the_liveness_evidence_boundary(
+    tmp_path: Path, label: str, offset_seconds: int, expect_ended: bool
+) -> None:
+    """The evidence refusal must not make --allow-indeterminate-lease useless.
+
+    A `deadline-partial` claim still carries a readable deadline. Refuse while
+    that deadline says the claim may be alive; end it once it is provably dead.
+    Without the dead cases pinned, tightening the guard could silently turn the
+    flag into a no-op and re-open the exit-less deadlock this unit closes.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, f"ar659-bound-{label}")
+    now = datetime.now().astimezone()
+    result = _create_linked_claim(
+        linked,
+        suffix="659-bound",
+        extra_args=("--lease-minutes", "600", "--now", now.isoformat(timespec="seconds")),
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    path = linked / json.loads(result.stdout)["path"]
+
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("lease", None)  # legacy shape: readable top-level deadline only
+    claim["expires_at"] = (
+        now + timedelta(seconds=offset_seconds)
+    ).isoformat(timespec="seconds")
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked,
+        "terminalize",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        f"boundary case {label}",
+        "--allow-indeterminate-lease",
+        "--json",
+    )
+
+    final = json.loads(path.read_text(encoding="utf-8"))["status"]
+    if expect_ended:
+        assert result.returncode == 0, (
+            f"{label}: a provably dead legacy claim was not endable — the flag "
+            "has become useless: " + (result.stderr or result.stdout)
+        )
+        assert final == "expired"
+    else:
+        assert result.returncode != 0, f"{label}: ended a claim that may be alive"
+        assert final == "claimed"
+
+
+# ===========================================================================
+# TASK-AR-655 W4b round 2 — the mutation commands must hold the same bar as
+# their recovery siblings. Both defects below let a claim outlive or outgrow
+# what its own record authorizes, which is exactly what this unit exists to
+# prevent.
+# ===========================================================================
+
+
+def _spec_backed_claim(linked: Path, task_id: str, suffix: str, minutes: str = "30"):
+    unit_rel = _write_routing_work(linked, task_id)
+    result = _run_dispatcher(
+        linked, "create",
+        "--task-id", task_id,
+        "--agent-role", "lead-engineer",
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--worktree-path", ".",
+        "--lease-minutes", minutes,
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", suffix,
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    return linked / payload["path"], payload["claim"]
+
+
+def test_heartbeat_refuses_a_claim_whose_scope_binding_no_longer_matches(
+    tmp_path: Path,
+) -> None:
+    """renew validates the persisted binding; heartbeat must too.
+
+    target_files is the enforced footprint: _footprint_conflict_errors reads it
+    to refuse sibling creates, and footprint_conflict_gate --enforce-undeclared
+    blocks on writes outside it. Editing it out of band and then heartbeating
+    launders a scope broadening past the replan bar and keeps re-authorizing it
+    on an indefinitely extendable lease.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-hb-scope")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655hbscope", "hbscope")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = list(tampered["target_files"]) + [
+        "scripts/anything_i_want.py"
+    ]
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "heartbeat",
+        "--claim-id",
+        claim["claim_id"],
+        "--agent-instance-id",
+        claim["agent_instance_id"],
+        "--callsite-id",
+        claim["callsite_id"],
+        "--expected-revision",
+        "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "heartbeat accepted a claim whose target_files no longer match its "
+        "scope_binding: " + result.stdout
+    )
+    assert "scope binding" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("operation", ["heartbeat", "renew"])
+def test_mutation_now_cannot_push_a_lease_past_the_wall_clock(
+    tmp_path: Path, operation: str
+) -> None:
+    """`--now` is a determinism seam, not an authority seam.
+
+    _recovery_now already clamps for adopt/terminalize. _mutation_now does not,
+    so passing a `now` just short of the deadline advances the lease by a full
+    window per call, unbounded and in constant real time. Every consumer then
+    believes the fabricated deadline: the reaper reports the claim live and no
+    surface compares a persisted lease field to the wall clock.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-clock-{operation}")
+    path, claim = _spec_backed_claim(
+        linked, f"TASK-AR-655clock{operation}", f"clk{operation[:3]}"
+    )
+
+    deadline = datetime.fromisoformat(
+        json.loads(path.read_text(encoding="utf-8"))["expires_at"]
+    )
+    forged = (deadline - timedelta(seconds=1)).isoformat(timespec="seconds")
+
+    args = [
+        operation,
+        "--claim-id",
+        claim["claim_id"],
+        "--agent-instance-id",
+        claim["agent_instance_id"],
+        "--callsite-id",
+        claim["callsite_id"],
+        "--expected-revision",
+        "0",
+        "--now",
+        forged,
+    ]
+    if operation == "renew":
+        args += [
+            "--expected-scope-digest",
+            claim["scope_binding"]["digest"],
+            "--lease-minutes",
+            "30",
+        ]
+    args.append("--json")
+
+    result = _run_dispatcher(linked, *args)
+
+    after = json.loads(path.read_text(encoding="utf-8"))
+    wall = datetime.now().astimezone()
+    persisted = datetime.fromisoformat(after["expires_at"])
+    original = datetime.fromisoformat(claim["expires_at"])
+
+    assert persisted <= max(original, wall) + timedelta(minutes=31), (
+        f"{operation} pushed the lease to {persisted.isoformat()} using a forged "
+        f"--now while the wall clock is {wall.isoformat()}; rc={result.returncode}"
+    )
+    assert datetime.fromisoformat(after["last_heartbeat"]) <= wall + timedelta(
+        seconds=5
+    ), f"{operation} recorded a future last_heartbeat: {after['last_heartbeat']}"
+
+
+def test_heartbeat_scope_check_cannot_be_skipped_by_self_declared_overlay(
+    tmp_path: Path,
+) -> None:
+    """The exemption must not key on a flag the claim asserts about itself.
+
+    `overlay` lives in the same file whose integrity is being checked and is
+    not covered by the scope digest, so keying the skip on it lets one extra
+    key launder a widened footprint. A genuine overlay is recognisable by
+    carrying no scope_binding at all, which is not forgeable in the same way.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-overlay-bypass")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655ovl", "ovlbyp")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = list(tampered["target_files"]) + ["src/agent_runtime/**"]
+    tampered["overlay"] = True
+    tampered["allow_parallel_task_set"] = True
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a self-declared overlay flag skipped the scope-binding check: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+def test_heartbeat_refuses_a_non_overlay_claim_with_no_scope_binding(
+    tmp_path: Path,
+) -> None:
+    """Deleting the binding must not be an easier bypass than forging it."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-binding-deleted")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655nobind", "nobind")
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered.pop("scope_binding", None)
+    tampered["target_files"] = list(tampered["target_files"]) + ["src/agent_runtime/**"]
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a non-overlay claim heartbeat with its scope_binding deleted: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+def test_heartbeat_is_anchored_to_the_unit_spec_like_renew(tmp_path: Path) -> None:
+    """A self-consistent claim is not an authorized claim.
+
+    The binding is an unkeyed digest over the claim's own fields, so widening
+    target_files AND recomputing the binding yields a claim that passes an
+    internal-consistency check. renew re-derives scope from unit_spec via
+    _current_scope_values and refuses; heartbeat did not, and heartbeat is the
+    command that keeps a claim alive indefinitely.
+    """
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-hb-anchor")
+    path, claim = _spec_backed_claim(linked, "TASK-AR-655hbanchor", "hbanch")
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["target_files"] = ["src/agent_runtime/**"]
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"],
+        unit_id=tampered["unit_id"],
+        unit_spec=tampered["unit_spec"],
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "heartbeat accepted a self-consistent but unauthorized scope widening: "
+        + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+def test_scope_binding_digest_layout_is_frozen(tmp_path: Path) -> None:
+    """A silent reorder of `components` would invalidate every stored binding.
+
+    Pinned against a fixed input so relocating or refactoring the minter cannot
+    change the wire format unnoticed.
+    """
+    dispatcher = _load_dispatcher_module()
+    binding = dispatcher.claim_store.scope_binding(
+        task_id="TASK-AR-000",
+        unit_id="UNIT-TASK-AR-000-001",
+        unit_spec="agents/lead_engineer/tasks/units/TASK-AR-000/UNIT-TASK-AR-000-001.md",
+        target_files=["b.py", "a.py", "b.py"],
+        stop_condition="stop before anything irreversible",
+        bound_at="2026-01-01T00:00:00+09:00",
+    )
+    assert binding["schema"] == "agent-runtime-claim-scope-binding/v1"
+    assert list(binding["components"]) == ["task", "unit", "target_files", "stop_condition"]
+    assert binding["digest"] == (
+        "88bf816ce577633be95215800beec4365ccf2b519b6e47b8effcc5a3686769c4"
+    )
+
+
+def test_role_routing_binds_overlay_claims_at_birth(tmp_path: Path) -> None:
+    """Overlays must carry a binding so the mutation path needs no exemption."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "role_routing_probe", REPO_ROOT / "scripts" / "role_routing.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["role_routing_probe"] = module
+    spec.loader.exec_module(module)
+    source = (REPO_ROOT / "scripts" / "role_routing.py").read_text(encoding="utf-8")
+    assert '"scope_binding": claim_store.scope_binding(' in source, (
+        "role_routing no longer mints a binding at overlay birth; the "
+        "unconditional heartbeat check would strand every new overlay"
+    )
+
+
+def test_heartbeat_still_works_for_a_claim_whose_spec_declares_a_stop_condition(
+    tmp_path: Path,
+) -> None:
+    """The anchor must not reject the ordinary, untampered path.
+
+    `create` does not copy the spec's stop_condition into the claim, so a
+    spec-derived comparison that includes it reports drift on every real claim
+    from the moment it is created. Fixtures hide this because their generated
+    unit specs declare no stop_condition.
+    """
+    task_id = "TASK-AR-655stopcond"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-stopcond")
+    unit_rel = _write_routing_work(linked, task_id)
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "escalation_triggers:",
+            "stop_condition: Stop before anything irreversible\nescalation_triggers:",
+        ),
+        encoding="utf-8",
+    )
+
+    result = _run_dispatcher(
+        linked, "create",
+        "--task-id", task_id,
+        "--agent-role", "lead-engineer",
+        "--unit-id", f"UNIT-{task_id}-001",
+        "--unit-spec", unit_rel,
+        "--worktree-path", ".",
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", "stopcnd",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+    claim = json.loads(result.stdout)["claim"]
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode == 0, (
+        "the spec anchor rejected an ordinary untampered claim: "
+        + (result.stderr or result.stdout)
+    )
+
+
+def test_heartbeat_refuses_a_claim_repointed_at_an_alternate_unit_spec(
+    tmp_path: Path,
+) -> None:
+    """Door 5: the anchor must not read its own reference out of the claim.
+
+    _current_scope_values re-reads claim["unit_spec"] and only checks that the
+    spec's task_id/unit_id match. A second spec file carrying the same ids and
+    a wider footprint is therefore accepted as the authority - the overlay-flag
+    mistake again, one level up.
+    """
+    task_id = "TASK-AR-655altspec"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-altspec")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "altspec")
+
+    alt_rel = f"agents/lead_engineer/tasks/units/{task_id}/UNIT-{task_id}-001-alt.md"
+    alt_path = linked / alt_rel
+    alt_path.write_text(
+        (linked / unit_rel).read_text(encoding="utf-8").replace(
+            "  - scripts/routing_target.py\n  - scripts/routing_second.py",
+            "  - src/agent_runtime/**",
+        ),
+        encoding="utf-8",
+    )
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["unit_spec"] = alt_rel
+    tampered["target_files"] = ["src/agent_runtime/**"]
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"],
+        unit_id=tampered["unit_id"],
+        unit_spec=alt_rel,
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "a claim repointed at an alternate spec was accepted: " + result.stdout
+    )
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("operation", ["renew", "adopt"])
+def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted(
+    tmp_path: Path, operation: str
+) -> None:
+    """Every claim in the store predates `create` copying the spec's boundary.
+
+    Those claims carry stop_condition '' while the spec declares text, so a
+    naive comparison reports drift and refuses renew and adopt for all of them.
+    An unrecorded boundary is "not overridden", not "changed".
+    """
+    task_id = f"TASK-AR-655legacy{operation}"
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-legacy-{operation}")
+    path, claim = _spec_backed_claim(linked, task_id, f"lg{operation[:3]}", minutes="120")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["stop_condition"] = ""          # the pre-fix shape
+    if operation == "adopt":
+        payload.pop("mutation_revision", None)
+        payload.pop("scope_binding", None)
+    else:
+        payload["scope_binding"] = _load_dispatcher_module().claim_store.scope_binding(
+            task_id=payload["task_id"],
+            unit_id=payload["unit_id"],
+            unit_spec=payload["unit_spec"],
+            target_files=payload["target_files"],
+            stop_condition="",
+            bound_at=payload["scope_binding"]["bound_at"],
+        )
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if operation == "adopt":
+        args = ["adopt", "--claim-id", claim["claim_id"],
+                "--owner-id", _OWNER, "--reason", "legacy claim repair"]
+    else:
+        args = ["renew", "--claim-id", claim["claim_id"],
+                "--agent-instance-id", claim["agent_instance_id"],
+                "--callsite-id", claim["callsite_id"],
+                "--expected-revision", "0",
+                "--expected-scope-digest", payload["scope_binding"]["digest"],
+                "--lease-minutes", "60"]
+
+    result = _run_dispatcher(linked, *args, "--json")
+
+    assert result.returncode == 0, (
+        f"{operation} refused an ordinary pre-fix claim as drifted: "
+        + (result.stderr or result.stdout)
+    )
+
+
+# --- The symmetry invariant: whatever `create` accepts, `heartbeat` must too ---
+#
+# Three separate defects were each discovered as their own field - stop_condition,
+# out-of-spec --target-file, non-canonical unit_spec - and each got its own fix at
+# its own layer. They are one bug: create and the mutation path disagreeing about
+# what a valid claim looks like. This matrix is the invariant, so a fourth field
+# cannot repeat it silently.
+
+
+@pytest.mark.parametrize(
+    "label, extra_create_args, mutate_spec",
+    [
+        ("plain", (), False),
+        ("explicit-target-inside-spec", ("--target-file", "scripts/routing_second.py"), False),
+        ("nested-unit-spec", (), True),
+        # A spec pointer with no unit identity: `create` accepted it and
+        # `_current_scope_values` then refused every beat with "unit_spec unit
+        # identity changed" - born unusable, and a fourth instance of the
+        # create-versus-mutate disagreement independent of the canonical guard.
+        ("unit-spec-without-unit-id", (), False),
+        ("spec-less", (), False),
+        ("orchestrator-mode", ("--mode", "orchestrator"), False),
+        # Frontmatter ids disagreeing with the claim: create validated only
+        # that the spec file exists, so these were born unusable too.
+        ("spec-frontmatter-task-id-mismatch", (), False),
+        ("spec-frontmatter-unit-id-mismatch", (), False),
+        # Spec declares no target_files at all: _resolve_target_files' stray
+        # guard is gated on `if registered:`, so explicit entries pass straight
+        # through and the heartbeat component comparison then refuses forever.
+        ("empty-spec-target-files", ("--target-file", "src/agent_runtime/**"), False),
+    ],
+)
+def test_every_claim_create_accepts_can_immediately_heartbeat(
+    tmp_path: Path, label: str, extra_create_args: tuple, mutate_spec: bool
+) -> None:
+    task_id = f"TASK-AR-655sym{label.replace('-', '')}"
+    _primary, linked = _init_git_worktree(tmp_path, f"ar655-sym-{label}")
+    unit_rel = _write_routing_work(linked, task_id)
+
+    if label == "empty-spec-target-files":
+        spec = linked / unit_rel
+        body = spec.read_text(encoding="utf-8")
+        body = body.replace("target_files:\n  - scripts/routing_target.py\n  - scripts/routing_second.py\n", "")
+        spec.write_text(body, encoding="utf-8")
+    if label == "spec-frontmatter-task-id-mismatch":
+        spec = linked / unit_rel
+        spec.write_text(
+            spec.read_text(encoding="utf-8").replace(
+                f"task_id: {task_id}", "task_id: TASK-AR-OTHER"
+            ),
+            encoding="utf-8",
+        )
+    if label == "spec-frontmatter-unit-id-mismatch":
+        spec = linked / unit_rel
+        spec.write_text(
+            spec.read_text(encoding="utf-8").replace(
+                f"unit_id: UNIT-{task_id}-001", "unit_id: UNIT-SOMETHING-ELSE-001"
+            ),
+            encoding="utf-8",
+        )
+    if mutate_spec:
+        nested_rel = (
+            f"agents/lead_engineer/tasks/units/{task_id}/nested/UNIT-{task_id}-001.md"
+        )
+        nested = linked / nested_rel
+        nested.parent.mkdir(parents=True, exist_ok=True)
+        nested.write_text((linked / unit_rel).read_text(encoding="utf-8"), encoding="utf-8")
+        unit_rel = nested_rel
+
+    create_args = ["--task-id", task_id, "--agent-role", "lead-engineer"]
+    if label == "unit-spec-without-unit-id":
+        create_args += ["--unit-spec", unit_rel]          # deliberately no --unit-id
+    elif label != "spec-less":
+        create_args += ["--unit-id", f"UNIT-{task_id}-001", "--unit-spec", unit_rel]
+
+    result = _run_dispatcher(
+        linked, "create",
+        *create_args,
+        "--worktree-path", ".",
+        "--now", datetime.now().astimezone().isoformat(timespec="seconds"),
+        "--suffix", f"sym{label[:6].replace('-','')}",
+        *extra_create_args,
+        "--json",
+    )
+    if result.returncode != 0:
+        # Refusing at create is a legitimate answer; being born unusable is not.
+        return
+    claim = json.loads(result.stdout)["claim"]
+
+    beat = _run_dispatcher(
+        linked, "heartbeat",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--json",
+    )
+    assert beat.returncode == 0, (
+        f"{label}: create accepted a claim that heartbeat refuses, so it was "
+        "born unusable: " + (beat.stderr or beat.stdout)
+    )
+
+
+def test_the_stop_condition_tolerance_extinguishes_itself(tmp_path: Path) -> None:
+    """Grandfathering must be once, not forever.
+
+    A tolerated renew that leaves the claim empty keeps it in the tolerated
+    state for life, and turns "legacy claims are grandfathered" into "empty is
+    permanently acceptable" - reachable forward by clearing a boundary that was
+    previously set.
+    """
+    task_id = "TASK-AR-655extinguish"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-extinguish")
+    path, claim = _spec_backed_claim(linked, task_id, "exting", minutes="120")
+    dispatcher = _load_dispatcher_module()
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["stop_condition"] = ""
+    payload["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=payload["task_id"], unit_id=payload["unit_id"],
+        unit_spec=payload["unit_spec"], target_files=payload["target_files"],
+        stop_condition="", bound_at=payload["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--expected-scope-digest", payload["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
+
+    healed = json.loads(path.read_text(encoding="utf-8"))
+    assert healed["stop_condition"], (
+        "the tolerated renew left the claim empty, so the tolerance never "
+        "expires and clearing the boundary stays permanently acceptable"
+    )
+    assert healed["stop_condition"] == "Stop before anything irreversible"
+
+    # Residual, recorded rather than papered over: "never recorded" and
+    # "cleared" are indistinguishable in claim-local state, so a determined
+    # tamperer can re-enter the tolerated state by clearing the boundary again.
+    # A marker saying "already healed" would itself be strippable - the same
+    # door as the overlay flag - so the guarantee claimed here is the one that
+    # is actually achievable: the tolerated population shrinks monotonically
+    # with ordinary use, and a boundary changed to a DIFFERENT value is still
+    # refused outright.
+    tampered = dict(healed)
+    tampered["stop_condition"] = "no limits whatsoever"
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"], unit_id=tampered["unit_id"],
+        unit_spec=tampered["unit_spec"], target_files=tampered["target_files"],
+        stop_condition=tampered["stop_condition"],
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    again = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", str(tampered["mutation_revision"]),
+        "--expected-scope-digest", tampered["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+    assert again.returncode != 0, "a rewritten stop boundary was tolerated"
+
+
+def test_renew_refuses_a_claim_repointed_at_a_non_canonical_spec(tmp_path: Path) -> None:
+    """The canonical pin belongs on every path that trusts claim["unit_spec"].
+
+    Enforcing it only on heartbeat leaves the inverse of the born-unusable
+    state: a claim anchored to an unregistered spec file cannot beat but can be
+    renewed indefinitely. The footprint clause must NOT run here - renew owns
+    the drift path and reconciles it against an accepted replan.
+    """
+    task_id = "TASK-AR-655renewpin"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-renewpin")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "rnwpin", minutes="120")
+
+    alt_rel = (
+        f"agents/lead_engineer/tasks/units/{task_id}/nested/UNIT-{task_id}-001.md"
+    )
+    alt = linked / alt_rel
+    alt.parent.mkdir(parents=True, exist_ok=True)
+    alt.write_text((linked / unit_rel).read_text(encoding="utf-8"), encoding="utf-8")
+
+    dispatcher = _load_dispatcher_module()
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["unit_spec"] = alt_rel
+    tampered["scope_binding"] = dispatcher.claim_store.scope_binding(
+        task_id=tampered["task_id"], unit_id=tampered["unit_id"], unit_spec=alt_rel,
+        target_files=tampered["target_files"],
+        stop_condition=tampered.get("stop_condition"),
+        bound_at=tampered["scope_binding"]["bound_at"],
+    )
+    path.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", "0",
+        "--expected-scope-digest", tampered["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        "renew accepted a claim anchored to an unregistered spec: " + result.stdout
+    )
+    assert "canonical" in (result.stdout + result.stderr)
+    assert path.read_bytes() == before
+
+
+def test_renew_still_reconciles_ordinary_scope_drift(tmp_path: Path) -> None:
+    """Guard the other direction: the footprint clause must not leak into renew.
+
+    Renew exists to reconcile drift against an accepted replan. Sharing the
+    whole contract here would break that, so this pins the permitted case.
+    """
+    task_id = "TASK-AR-655renewdrift"
+    _primary, linked = _init_git_worktree(tmp_path, "ar655-renewdrift")
+    unit_rel = _write_routing_work(linked, task_id)
+    path, claim = _spec_backed_claim(linked, task_id, "rnwdft", minutes="120")
+
+    unit_path = linked / unit_rel
+    unit_path.write_text(
+        unit_path.read_text(encoding="utf-8").replace(
+            "  - scripts/routing_second.py",
+            "  - scripts/routing_second.py\n  - scripts/routing_third.py",
+        ),
+        encoding="utf-8",
+    )
+    replan_rel = "reviews/REVIEW-renew-drift-replan.md"
+    (linked / replan_rel).parent.mkdir(parents=True, exist_ok=True)
+    (linked / replan_rel).write_text(
+        "\n".join([
+            "---", "id: REVIEW-renew-drift-replan", f"task_id: {task_id}",
+            f"unit_id: UNIT-{task_id}-001", "review_kind: t3-replan", "tier: T3",
+            "status: accepted", "signal: pass", "---", "",
+        ]),
+        encoding="utf-8",
+    )
+    subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "plan_assumption_gate.py"),
+         "--root", str(linked), "record",
+         "--taskset", str(claim["task_set_id"]),
+         "--design-record", replan_rel, "--anchor", unit_rel],
+        check=True, capture_output=True, text=True,
+    )
+
+    persisted = json.loads(path.read_text(encoding="utf-8"))
+    result = _run_dispatcher(
+        linked, "renew",
+        "--claim-id", claim["claim_id"],
+        "--agent-instance-id", claim["agent_instance_id"],
+        "--callsite-id", claim["callsite_id"],
+        "--expected-revision", str(persisted["mutation_revision"]),
+        "--expected-scope-digest", persisted["scope_binding"]["digest"],
+        "--lease-minutes", "60",
+        "--replan-ref", replan_rel,
+        "--json",
+    )
+
+    assert result.returncode == 0, (
+        "renew refused legitimate drift with an accepted replan: "
+        + (result.stderr or result.stdout)
+    )
+    assert "scripts/routing_third.py" in json.loads(
+        path.read_text(encoding="utf-8")
+    )["target_files"]

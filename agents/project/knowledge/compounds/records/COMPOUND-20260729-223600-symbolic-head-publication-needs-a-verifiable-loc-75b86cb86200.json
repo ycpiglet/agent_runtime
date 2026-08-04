@@ -1,0 +1,33 @@
+{
+  "cause": "The publication model treated the Git-owned prepared lock and the Runtime-owned post-publication lock as adjacent critical sections without carrying an unforgeable cooperative identity across the unlocked handoff.",
+  "created_at": "2026-07-29T22:36:00+09:00",
+  "created_by": "codex-root-task-ar-648-005",
+  "defect_signatures": [
+    "defect:claim-head-lock-handoff-can-miss-equal-oid-symbo:9711c2795ceafc89"
+  ],
+  "id": "COMPOUND-20260729-223600-symbolic-head-publication-needs-a-verifiable-loc-75b86cb86200",
+  "prevention": "Keep the authorized symbolic HEAD regular file open across publication, validate its device/inode/link/content under Git's prepared lock before and after delegated hooks, compare that held identity again under Runtime's reacquired lock, expose published_unverified as terminal non-success, and fail closed when the POSIX no-follow primitive is unavailable.",
+  "prevention_refs": [
+    "scripts/claim_guard.py",
+    "scripts/task_claim_dispatcher.py",
+    "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md"
+  ],
+  "recurrence_count": 5,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260729-214600-claim-authorization-must-cover-the-final-publica-d9e5fa966788.json",
+    "agents/project/knowledge/compounds/records/COMPOUND-20260729-215800-protected-publication-must-preserve-the-worktree-58e463c17d04.json"
+  ],
+  "status": "active",
+  "summary": "A value-only check after Git released HEAD.lock could miss a final-state-preserving equal-OID A-to-B-to-A symbolic-ref round trip before Runtime reacquired the lock.",
+  "title": "Symbolic HEAD publication needs a verifiable lock handoff",
+  "verification_refs": [
+    "tests/test_claim_guard.py",
+    "tests/test_task_claim_dispatcher.py"
+  ],
+  "work_ids": [
+    "TASK-AR-648",
+    "UNIT-TASK-AR-648-005"
+  ]
+}

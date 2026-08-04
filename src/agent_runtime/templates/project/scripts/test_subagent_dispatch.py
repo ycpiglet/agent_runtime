@@ -1,7 +1,7 @@
 """Unit tests for subagent_dispatch (TASK-116).
 
 Covers:
-  - 6 standard roles registered
+  - 7 standard roles registered
   - render_prompt includes role-specific system prompt + output contract
   - emit_call_message produces a frontmatter that passes check_messages.py
   - emit_reply_message links via in_reply_to and uses type=subagent_reply
@@ -23,8 +23,9 @@ import subagent_dispatch as sd  # noqa: E402
 import check_messages as cm  # noqa: E402
 
 
-def test_six_roles_registered():
+def test_seven_roles_registered():
     assert set(sd.list_roles()) == {
+        "scribe",
         "explorer",
         "implementer",
         "reviewer",
@@ -66,9 +67,12 @@ def test_render_prompt_includes_auto_model_routing():
         grade="Medium",
         model="auto",
     )
-    assert "Agent tool model: haiku" in prompt
-    assert "policy_tier=sonnet" in prompt
-    assert "signals=simple_lookup" in prompt
+    assert "provider=native-codex" in prompt
+    assert "requested_pm_tier=reviewer_standard" in prompt
+    assert "selected_pm_tier=reviewer_standard" in prompt
+    assert "resolved_request_model=gpt-5.6-sol" in prompt
+    assert "reasoning_effort=high" in prompt
+    assert "Agent tool model:" not in prompt
 
 
 def test_render_prompt_defaults_to_auto_model_routing():
@@ -79,8 +83,9 @@ def test_render_prompt_defaults_to_auto_model_routing():
         grade="High",
     )
     assert "## Model routing" in prompt
-    assert "Agent tool model: sonnet" in prompt
-    assert "policy_tier=sonnet" in prompt
+    assert "provider=native-codex" in prompt
+    assert "selected_pm_tier=reviewer_standard" in prompt
+    assert "resolved_request_model=gpt-5.6-sol" in prompt
 
 
 def test_render_prompt_uses_provider_aware_route_without_legacy_tier_conflict():
@@ -102,6 +107,69 @@ def test_render_prompt_uses_provider_aware_route_without_legacy_tier_conflict():
     assert "resolved_request_model=gpt-5.6-terra" in prompt
     assert "reasoning_effort=low" in prompt
     assert "Agent tool model: sonnet" not in prompt
+
+
+def test_render_prompt_rejects_forged_high_route_assertions_for_scribe():
+    forged_tier = sd.model_routing.resolve_subagent_tier("auditor")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        "planner_high",
+        requested_tier="planner_high",
+    )
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=forged_tier,
+            provider_route=forged_provider,
+        )
+
+
+def test_render_prompt_rejects_forged_raw_provider_route_assertion():
+    tier = sd.model_routing.resolve_subagent_tier("scribe")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    forged_provider["resolved_model"] = "vendor/raw-expensive-model"
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier,
+            provider_route=forged_provider,
+        )
+
+
+@pytest.mark.parametrize(
+    ("tier_route", "provider_route"),
+    [
+        ({"requested_tier": "reviewer_standard"}, None),
+        (None, {"provider": "codex-agent"}),
+        (
+            {"requested_tier": "reviewer_standard"},
+            {"provider": "codex-agent"},
+        ),
+    ],
+    ids=("partial-tier", "partial-alternate-provider", "mixed-partials"),
+)
+def test_render_prompt_rejects_partial_route_assertions_as_authority(
+    tier_route,
+    provider_route,
+):
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.render_prompt(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier_route,
+            provider_route=provider_route,
+        )
 
 
 def test_render_prompt_skeptic_has_severity():
@@ -142,6 +210,166 @@ def test_emit_call_message_writes_valid_frontmatter(tmp_path, monkeypatch):
     assert meta["task_id"] == "TASK-116"
     assert meta["evidence"] == ["scripts/subagent_dispatch.py"]
     assert "check frontmatter" in meta["next"]
+
+
+def test_emit_call_message_carries_dispatch_claim_budget_and_eval_authority(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    tier = sd.model_routing.resolve_subagent_tier(
+        "scribe",
+        escalation_triggers=["data_integrity"],
+    )
+    route = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    path = sd.emit_call_message(
+        role_id="scribe",
+        task_id="TASK-652",
+        intent="archive bounded state",
+        dispatch_id="dispatch-standard-contract",
+        claim_id="CLAIM-652",
+        task_token_budget=1200,
+        claim_token_budget=300,
+        workload_id="WORKLOAD-652",
+        baseline_receipt_id="receipt-baseline-652",
+        tier_route=tier,
+        provider_route=route,
+        requested_tier="worker_low",
+        escalation_triggers=["data_integrity"],
+        provider="native-codex",
+    )
+
+    meta, err = cm.load_frontmatter(path)
+    assert err == "" and meta is not None
+    assert meta["dispatch_id"] == "dispatch-standard-contract"
+    assert meta["claim_id"] == "CLAIM-652"
+    assert meta["task_token_budget"] == "1200"
+    assert meta["claim_token_budget"] == "300"
+    assert meta["eval_workload_id"] == "WORKLOAD-652"
+    assert meta["eval_baseline_receipt_id"] == "receipt-baseline-652"
+    assert meta["escalation_triggers"] == ["data_integrity"]
+
+
+def test_provider_aware_dispatch_records_role_policy_and_reasoning(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    tier = sd.model_routing.resolve_subagent_tier("explorer")
+    route = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    path = sd.emit_call_message(
+        role_id="explorer",
+        task_id="TASK-652",
+        intent="inspect bounded files",
+        tier_route=tier,
+        provider_route=route,
+    )
+
+    meta, err = cm.load_frontmatter(path)
+    assert err == "" and meta is not None
+    assert meta["role_policy_id"] == "exploration"
+    assert meta["role_policy_status"] == "explicit"
+    assert meta["high_tier_authorized"] == "true"
+    assert meta["reasoning_effort"] == "low"
+    assert meta["reasoning_source"].startswith("adapter_default:")
+
+    fields = sd.routing_event_fields(
+        None,
+        dispatch_id=path.stem,
+        provider="native-codex",
+        route={**tier, **route},
+    )
+    assert fields["role_policy_id"] == "exploration"
+    assert fields["role_policy_status"] == "explicit"
+    assert fields["reasoning_effort"] == "low"
+    assert fields["reasoning_source"].startswith("adapter_default:")
+    assert fields["route_changed"] is None
+
+
+def test_emit_call_message_rejects_forged_high_route_assertions_for_scribe(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    forged_tier = sd.model_routing.resolve_subagent_tier("auditor")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        "planner_high",
+        requested_tier="planner_high",
+    )
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=forged_tier,
+            provider_route=forged_provider,
+        )
+    assert not list(tmp_path.iterdir())
+
+
+def test_emit_call_message_rejects_forged_raw_provider_route_assertion(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+    tier = sd.model_routing.resolve_subagent_tier("scribe")
+    forged_provider = sd.model_routing.resolve_provider_route(
+        "native-codex",
+        tier["selected_tier"],
+        requested_tier=tier["requested_tier"],
+    )
+    forged_provider["resolved_model"] = "vendor/raw-expensive-model"
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier,
+            provider_route=forged_provider,
+        )
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    ("tier_route", "provider_route"),
+    [
+        ({"requested_tier": "reviewer_standard"}, None),
+        (None, {"provider": "codex-agent"}),
+        (
+            {"requested_tier": "reviewer_standard"},
+            {"provider": "codex-agent"},
+        ),
+    ],
+    ids=("partial-tier", "partial-alternate-provider", "mixed-partials"),
+)
+def test_emit_call_message_rejects_partial_route_assertions_as_authority(
+    tmp_path,
+    monkeypatch,
+    tier_route,
+    provider_route,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
+
+    with pytest.raises(ValueError, match="route assertion"):
+        sd.emit_call_message(
+            role_id="scribe",
+            task_id="TASK-652",
+            intent="archive bounded state",
+            tier_route=tier_route,
+            provider_route=provider_route,
+        )
+    assert not list(tmp_path.iterdir())
 
 
 def test_emit_reply_message_links_to_parent(tmp_path, monkeypatch):
@@ -233,7 +461,9 @@ def test_cli_dispatch_dry_run(capsys, tmp_path, monkeypatch):
     assert rc == 0
     out = capsys.readouterr().out
     assert "IMPLEMENTER subagent" in out
-    assert "Agent tool model:" in out
+    assert "provider=native-codex" in out
+    assert "selected_pm_tier=worker_low" in out
+    assert "resolved_request_model=gpt-5.6-terra" in out
     assert "would write" in out
     # dry-run must not create files
     assert not (tmp_path / "inbox").exists() or not any(
@@ -257,8 +487,48 @@ def test_cli_dispatch_dry_run_accepts_auto_model(capsys, tmp_path, monkeypatch):
     )
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Agent tool model: opus" in out
-    assert "policy_tier=sonnet" in out
+    assert "requested_pm_tier=reviewer_standard" in out
+    assert "selected_pm_tier=reviewer_standard" in out
+    assert "resolved_request_model=gpt-5.6-sol" in out
+    assert "Agent tool model:" not in out
+
+
+def test_cli_without_provider_denies_scribe_high_tier(
+    capsys,
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path / "inbox")
+    monkeypatch.setattr(sd, "EVENTS_DIR", tmp_path / "events")
+    rc = sd.main(
+        [
+            "--role", "scribe",
+            "--task-id", "TASK-652",
+            "--intent", "archive bounded state",
+            "--model", "opus",
+            "--emit-call",
+            "--dry-run",
+        ]
+    )
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "requested_pm_tier=planner_high" in out
+    assert "selected_pm_tier=worker_low" in out
+    assert "resolved_request_model=gpt-5.6-terra" in out
+    assert "resolved_request_model=opus" not in out
+
+
+def test_cli_rejects_raw_model_name_before_dispatch():
+    with pytest.raises(SystemExit):
+        sd.main(
+            [
+                "--role", "scribe",
+                "--task-id", "TASK-652",
+                "--intent", "archive bounded state",
+                "--model", "vendor/raw-expensive-model",
+            ]
+        )
 
 
 def test_cli_blocks_lookup_dispatch_without_deterministic_preflight(
@@ -356,7 +626,10 @@ def test_emit_event_records_full_routing_metadata(tmp_path, monkeypatch):
     assert record["routing_reason"]
 
 
-def test_emit_call_message_records_routing_frontmatter(tmp_path, monkeypatch):
+def test_emit_call_message_role_bounds_legacy_routing_frontmatter(
+    tmp_path,
+    monkeypatch,
+):
     monkeypatch.setattr(sd, "MESSAGES_INBOX", tmp_path)
     decision = sd.resolve_model_decision(
         "auto",
@@ -371,9 +644,12 @@ def test_emit_call_message_records_routing_frontmatter(tmp_path, monkeypatch):
     )
     meta, err = cm.load_frontmatter(path)
     assert err == "" and meta is not None
-    assert meta["routing_grade"] == "Medium"
-    assert meta["policy_model"] == "sonnet"
-    assert meta["selected_model"] == "haiku"
+    assert meta["provider"] == "native-codex"
+    assert meta["requested_model_tier"] == "worker_low"
+    assert meta["selected_model_tier"] == "worker_low"
+    assert meta["resolved_model"] == "gpt-5.6-terra"
+    assert meta["role_policy_id"] == "review"
+    assert "routing_grade" not in meta
 
 
 def test_cli_requires_role_task_intent(capsys):

@@ -1,5 +1,27 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-08-04 - TASK-AR-655 and TASK-AR-659 closed
+
+- Completed: `TASK-AR-655` (long-running claims stay truthful; one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor) accepted by an 11-round independent context-isolated W4b, and `TASK-AR-659` (owner-bound recovery for claims no automated path can reach) accepted by a 4-round one. All five claims released or terminalized.
+- Evidence: `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md`, `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md`, plus three Compound records.
+- Production proof, not a test result: a lease expired overnight ~16h past deadline still `status: claimed`. Because the claim was `mode: worker`, `claim_reaper --apply` recovered it in one command with no owner action. The `mode: orchestrator` claim that opened AR-655 sat expired and invisible for 5.4h, deadlocked its own task set, and needed a hand-written terminalize under Owner authority plus a whole recovery task. Same failure, twelve hours apart, with and without the fix.
+- Carried forward, owned by `TASK-AR-648`: `claim_guard.py` chmods its private index to 0600 and then runs `git add`, which rewrites it as `0666 & ~umask`, so `parallel_worktree_gate` never recognises the claim-commit transaction on a default-umask machine. `tests/test_claim_guard.py` is 21 failed / 15 passed under umask 0002 and 36 passed under 0077 — a real defect, not a permanent baseline.
+- Next: `TASK-AR-656` or `TASK-AR-657`. No version, tag, package, push, publication, deployment, or release action is authorized.
+
+## 2026-08-03 - Stale claim deadlock cleared; TASK-AR-659 active
+
+- Active: `TASK-AR-659` (`UNIT-TASK-AR-659-001`, claim `CLAIM-20260803-143123-task-ar-659-cfc8`) gives legacy and orchestrator claims a registered recovery path. RED first.
+- Recovery: `CLAIM-20260803-002651-task-ar-655-5f27` expired at 08:26:51 and was reachable by no registered command — the reaper skips `mode=orchestrator` before testing liveness, `heartbeat`/`renew` reject claims predating `mutation_revision`/`scope_binding`, and no `expire`/`terminalize` subcommand exists. One stale claim blocked both resuming AR-655 and claiming its own fix. Terminalized to `expired` under explicit Owner authority; see `reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md`.
+- Parked: `TASK-AR-655` stays `in_progress` and unaccepted. Its W4b verdict is `REVISE — P1 1`; re-verification waits on AR-659.
+- Boundary: this is the 4th recurrence in the claim-authority defect family, so a Compound record is mandatory before AR-659 closeout. No version, tag, package, push, publication, deployment, or release action is authorized.
+
+## 2026-07-30 - Autofolio migration closed; operability hardening next
+
+- Completed: `TASK-AR-650` passed the exact Autofolio attempt-3 isolation and acceptance contracts, 207 migration/work tests, 182 adoption/config/template tests, independent W4b, and additive independent-auditor plus skeptic closeout.
+- Boundary: this closes only the migration rehearsal. The pinned model/reasoning equivalence and Scribe source/active-work gaps remain P1, and the duplicate legacy hook remains P2.
+- Taskset: `TASKSET-AR-V080-OPERABILITY-HARDENING` is the next gated scope. Its P1 tasks `TASK-AR-652` through `TASK-AR-657` remain mandatory dependencies of `TASK-AR-651`; `TASK-AR-658` is the non-blocking P2 health UI.
+- Next: complete local W5 fast-forward integration, then claim `TASK-AR-652` from a clean worktree. No version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-07-29 - TASK-AR-647 complete; Bean Wiki pilot next
 
 - Completed: `TASK-AR-647` replaced free-form/direct notification delivery with an exact four-event Allimbot producer boundary, preserved enqueue-only ownership, repaired clean-core dependency closure, and made `security-service` enforce typed claim-time risk metadata.

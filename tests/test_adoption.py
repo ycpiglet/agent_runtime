@@ -23,6 +23,17 @@ def _git(root: Path) -> None:
     subprocess.run(["git", "init", "-q", str(root)], check=True)
 
 
+def _git_admin_path(root: Path, relative: str) -> Path:
+    result = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--git-path", relative],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    path = Path(result.stdout.strip())
+    return path if path.is_absolute() else root / path
+
+
 def _snapshot(root: Path) -> tuple[tuple[str, int, int, str], ...]:
     rows = []
     for path in sorted(root.rglob("*")):
@@ -243,3 +254,63 @@ def test_generated_is_compact_external_symlink_and_bad_config_block(tmp_path, ca
     assert cli.main(["doctor", "--root", str(root), "--pre-adoption", "--check"]) == 1
     capsys.readouterr()
     assert doctor.main(["--root", str(root), "--pre-adoption", "--check"]) == 1
+
+
+def test_adoption_plan_reports_markerless_claim_store_migration_read_only(tmp_path):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    _write(
+        root,
+        "agents/runtime/task_claims/CLAIM-existing.json",
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim/v1",
+                "claim_id": "CLAIM-existing",
+                "status": "released",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    before = _snapshot(root)
+
+    plan = build_adoption_plan(root)
+    payload = json.loads(plan_json(plan))
+
+    assert plan.claim_store_state == "migration-required"
+    assert plan.runtime_migrations == ("claim-store-adopt-existing",)
+    assert payload["claim_store"]["state"] == "migration-required"
+    assert payload["runtime_migrations"] == ["claim-store-adopt-existing"]
+    assert _snapshot(root) == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()
+    assert not _git_admin_path(root, "agent-runtime/task-claim-store").exists()
+
+
+def test_adoption_plan_blocks_one_sided_claim_store_read_only(tmp_path):
+    root = tmp_path / "host"
+    root.mkdir()
+    _git(root)
+    outer = _git_admin_path(root, "agent-runtime/task-claim-store")
+    _write(
+        root,
+        outer.relative_to(root).as_posix(),
+        json.dumps(
+            {
+                "schema": "agent-runtime-task-claim-store/v1",
+                "generation_id": "8b42e19f-0143-4aa5-88cd-c4ce5a2c1e10",
+                "witness_claim_id": "CLAIM-missing",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    before = outer.read_bytes()
+
+    plan = build_adoption_plan(root)
+
+    assert plan.claim_store_state == "integrity-invalid"
+    assert plan.runtime_migrations == ()
+    assert "claim-store-integrity-invalid" in plan.claim_store_finding
+    assert outer.read_bytes() == before
+    assert not (root / "agents/runtime/task_claims/.claim-store").exists()

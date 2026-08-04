@@ -1,0 +1,27 @@
+{
+  "cause": "The gate treated the current intersection as both observed state and expected identity, so it had no independent inventory against which to detect a missing source or packaged side.",
+  "created_at": "2026-07-30T04:19:04+09:00",
+  "created_by": "codex-root-v080-planner",
+  "defect_signatures": [
+    "defect:mirror-intersection-ignores-a-deleted-portable-s:9972da39ca5c1799"
+  ],
+  "id": "COMPOUND-20260730-041904-intersection-parity-cannot-detect-a-missing-side-0b344967a08b",
+  "prevention": "Pin an exact reviewed expected-common path inventory; block either missing side and unexpected common additions; keep source-only and template-only deletion regressions.",
+  "prevention_refs": [
+    "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md"
+  ],
+  "recurrence_count": 1,
+  "schema": "agent-runtime-compound-record/v1",
+  "source_refs": [
+    "reviews/W4B-2026-07-30-unit-task-ar-648-012.md"
+  ],
+  "status": "active",
+  "summary": "A mirror gate derived from the current source/template intersection accepts deletion from either side because the path disappears from the governed set.",
+  "title": "Intersection parity cannot detect a missing side",
+  "verification_refs": [
+    "tests/test_template_mirror_gate.py"
+  ],
+  "work_ids": [
+    "UNIT-TASK-AR-648-013"
+  ]
+}

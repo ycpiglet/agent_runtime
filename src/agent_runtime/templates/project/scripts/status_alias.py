@@ -20,6 +20,8 @@ Additive only: the schema enum stays English; aliases are accepted on read.
 
 from __future__ import annotations
 
+import re
+
 # Mirror of agents/project/WORK-SCHEMA.yml `status.allowed_values` (pinned by
 # tests/test_status_alias.py so the two cannot drift apart).
 CANONICAL_STATUSES = (
@@ -63,6 +65,8 @@ DONE_CANONICAL = frozenset({"completed", "done", "released"})
 # "hold" is not in the schema enum either, but is the established runtime value
 # in blocked-family checks (automation_rules_gate carried {"blocked","hold","보류"}).
 BLOCKED_CANONICAL = frozenset({"blocked", "hold"})
+_BLOCKED_MATCH_CANONICAL = BLOCKED_CANONICAL | {"held"}
+_COMPOUND_STATUS_SEPARATOR = re.compile(r"[/|,:;+]+")
 
 
 def normalize_status(value: object) -> str:
@@ -86,3 +90,17 @@ BLOCKED_STATUSES = _alias_inclusive(BLOCKED_CANONICAL)
 
 def is_done(value: object) -> bool:
     return normalize_status(value) in DONE_CANONICAL
+
+
+def is_blocked(value: object) -> bool:
+    """Match exact blocked-family tokens in simple or compound status labels."""
+    raw = str(value or "").strip()
+    if not raw:
+        return False
+    tokens = {normalize_status(raw)}
+    tokens.update(
+        normalize_status(token)
+        for token in _COMPOUND_STATUS_SEPARATOR.split(raw)
+        if token.strip()
+    )
+    return bool(tokens & _BLOCKED_MATCH_CANONICAL)

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-07-30T10:12:24+09:00
-record_count: 1043
+generated_at: 2026-08-04T14:28:19+09:00
+record_count: 1359
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1043` review and evidence records under `reviews/`.
+- Summary: indexed `1359` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1043` files |
+| Reviews covered | pass | `1359` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -37,6 +37,20 @@ record_count: 1043
 | `reviews/A2A-TRACE-GATE-2026-06-09-task-ar-208.json` | `A2A-TRACE-GATE-2026-06-09-task-ar-208` | json | record | n/a | A2A-TRACE-GATE-2026-06-09-task-ar-208 |
 | `reviews/A2A-TRACE-GATE-2026-06-10-task-ar-208-current.json` | `A2A-TRACE-GATE-2026-06-10-task-ar-208-current` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-task-ar-208-current |
 | `reviews/A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final.json` | `A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final` | json | record | n/a | A2A-TRACE-GATE-2026-06-10-taskset-quality-loop-final |
+| `reviews/AUDIT-2026-08-02-task-ar-654-canonical-authority-probe.md` | `AUDIT-2026-08-02-task-ar-654-canonical-authority-probe` | md | revise | fail | TASK-AR-654 canonical authority independent probe |
+| `reviews/AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-authority-continuity-final` | md | revise | fail | TASK-AR-654 claim-authority continuity final audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-claim-store-component-final.md` | `AUDIT-2026-08-02-task-ar-654-claim-store-component-final` | md | revise | fail | TASK-AR-654 claim-store component final audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary.md` | `AUDIT-2026-08-02-task-ar-654-claim-transaction-boundary` | md | revise | fail | TASK-AR-654 claim transaction-boundary audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-combined-green-precommit.md` | `AUDIT-2026-08-02-task-ar-654-combined-green-precommit` | md | revise | fail | TASK-AR-654 combined-green precommit audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-precommit-authority-seams.md` | `AUDIT-2026-08-02-task-ar-654-precommit-authority-seams` | md | revise | fail | TASK-AR-654 precommit authority-seam audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth.md` | `AUDIT-2026-08-02-task-ar-654-preverify-transaction-truth` | md | revise | fail | TASK-AR-654 preverify transaction-truth audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md` | `AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final` | md | revise | fail | TASK-AR-654 Windows native-evidence final audit |
+| `reviews/AUDIT-2026-08-02-task-ar-654-windows-reparse-parent.md` | `AUDIT-2026-08-02-task-ar-654-windows-reparse-parent` | md | revise | fail | TASK-AR-654 Windows reparse-parent independent audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams.md` | `AUDIT-2026-08-03-task-ar-655-deterministic-liveness-time-seams` | md | completed | fail | TASK-AR-655 deterministic liveness CLI time-seam audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers.md` | `AUDIT-2026-08-03-task-ar-655-heartbeat-expiry-consumers` | md | completed | fail | TASK-AR-655 heartbeat, renewal, and expiry-consumer audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries.md` | `AUDIT-2026-08-03-task-ar-655-lease-grace-boundaries` | md | completed | fail | TASK-AR-655 lease and reaper grace boundary audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation.md` | `AUDIT-2026-08-03-task-ar-655-owner-governance-clock-propagation` | md | completed | fail | TASK-AR-655 owner-governance liveness clock propagation audit |
+| `reviews/AUDIT-2026-08-03-task-ar-655-post-green-authority-seams.md` | `AUDIT-2026-08-03-task-ar-655-post-green-authority-seams` | md | completed | fail | TASK-AR-655 post-GREEN authority seam audit |
 | `reviews/AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8.json` | `AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8` | json | record | n/a | AUTONOMY-POLICY-GATE-2026-06-09-v0.1.8 |
 | `reviews/BETA-EXPLORATION-2026-06-24.md` | `BETA-EXPLORATION-2026-06-24` | beta-exploration-bug-catalog | complete | pass | UI Console Beta Exploration — Bug Catalog (2026-06-24) |
 | `reviews/CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call.md` | `CALL-2026-06-09-agent-runtime-task-ar-204-co-location-handoff-call` | md | record | n/a | CALL: TASK-AR-204 Co-Location Handoff |
@@ -83,6 +97,8 @@ record_count: 1043
 | `reviews/DOC-STEWARD-2026-06-21-business-operating-system.md` | `DOC-STEWARD-2026-06-21-business-operating-system` | doc-steward-review | recorded | pass | Business Operating System Doc Steward Review |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
+| `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout.md` | `INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout` | md | passed | pass | Independent Auditor Closeout - TASK-AR-650 |
+| `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout.md` | `INDEPENDENT-AUDIT-2026-07-30-task-ar-652-closeout` | md | approved | pass | Independent Auditor Closeout - TASK-AR-652 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-206.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-206` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-206 |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample.json` | `LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-09-task-ar-207-failure-sample |
 | `reviews/LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current.json` | `LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current` | json | record | n/a | LIVE-REVIEWER-GATE-2026-06-10-task-ar-206-current |
@@ -165,9 +181,20 @@ record_count: 1043
 | `reviews/OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final.json` | `OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final` | json | record | n/a | OVERLAY-SIMULATION-GATE-2026-06-11-context-knowledge-final |
 | `reviews/OWNER-APPROVAL-GATE-2026-06-09-v0.1.8.json` | `OWNER-APPROVAL-GATE-2026-06-09-v0.1.8` | json | record | n/a | OWNER-APPROVAL-GATE-2026-06-09-v0.1.8 |
 | `reviews/PENDING-RELEASE-GUARD-2026-06-09-v0.1.8.json` | `PENDING-RELEASE-GUARD-2026-06-09-v0.1.8` | json | record | n/a | PENDING-RELEASE-GUARD-2026-06-09-v0.1.8 |
+| `reviews/PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1.md` | `PILOT-ALLIMBOT-v080-GREEN-ATTEMPT-1` | md | record | pass | Allimbot Agent Runtime v0.8 Green Pilot — Attempt 1 |
+| `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-GREEN-ATTEMPT-3` | md | passed | pass | Autofolio v0.8 Migration Pilot - Green Attempt 3 |
+| `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-1` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 1 |
+| `reviews/PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2.md` | `PILOT-AUTOFOLIO-MIGRATION-v080-RED-ATTEMPT-2` | md | failed | red | Autofolio v0.8 Migration Pilot - Red Attempt 2 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-1` | md | blocked | fail | Bean Wiki v0.8 Green Replay Attempt 1 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-4` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 4 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-5` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 5 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6.md` | `PILOT-BEAN-WIKI-v080-GREEN-ATTEMPT-6` | md | passed | pass | Bean Wiki v0.8 Green Pilot Attempt 6 |
+| `reviews/PILOT-BEAN-WIKI-v080-GREEN.md` | `PILOT-BEAN-WIKI-v080-GREEN` | md | blocked | block | Bean Wiki v0.8 Green Pilot Attempt 3 |
 | `reviews/PILOT-BEAN-WIKI-v080.md` | `PILOT-BEAN-WIKI-v080` | md | blocked | fail | Bean Wiki v0.8 Agent Runtime Red Pilot |
 | `reviews/PLAN-2026-07-30-host-required-merge-gates.md` | `PLAN-2026-07-30-host-required-merge-gates` | md | record | n/a | TASK-AR-654 — Host-required merge gates |
 | `reviews/PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final.json` | `PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final` | json | record | n/a | PLANNING-EVIDENCE-LINK-2026-06-10-task-ar-243-final |
+| `reviews/QA-REVIEW-2026-07-30-task-ar-652-additive-closeout.md` | `QA-REVIEW-2026-07-30-task-ar-652-additive-closeout` | md | approved | pass | QA Cross-Verification - TASK-AR-652 Additive Closeout Audit |
+| `reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md` | `RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize` | md | applied | recovered | TASK-AR-655 owner-authorized stale claim terminalization |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8.json` | `RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-09-v0.1.8 |
 | `reviews/RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0.json` | `RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0` | json | record | n/a | RELEASE-COUNCIL-GATE-2026-06-13-v0.2.0 |
 | `reviews/RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8.json` | `RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8` | json | record | n/a | RELEASE-EXECUTION-GATE-2026-06-09-v0.1.8 |
@@ -216,6 +243,7 @@ record_count: 1043
 | `reviews/RESEARCH-2026-06-20-ui-ux-visual-resources.md` | `RESEARCH-2026-06-20-ui-ux-visual-resources` | md | synthesized (Strands 1-2 verified; 3-5 from fetched sources + established knowledge) | n/a | RESEARCH — UI/UX Visual Resources (graph · character · fonts · icons · color) |
 | `reviews/RESEARCH-2026-06-24-oss-sprite-generators.md` | `RESEARCH-2026-06-24-oss-sprite-generators` | md | synthesized (license + animation facts fetched from primary sources this run; integration sketch is design, not yet spiked) | n/a | RESEARCH — OSS Sprite Generators for Cute, Role-Distinct, Animated Office-Map Characters |
 | `reviews/RESEARCH-2026-07-28-v080-adoption-enforcement-scope.md` | `RESEARCH-2026-07-28-v080-adoption-enforcement-scope` | md | record | watch | Agent Runtime v0.8 Adoption and Enforcement Scope |
+| `reviews/RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit.md` | `RESEARCH-2026-07-30-agent-runtime-next-release-gap-audit` | md | complete | n/a | Agent Runtime 다음 릴리스 하네스 갭 정밀 감사 |
 | `reviews/RETRO-2026-06-10-agent-runtime-governance-ops.md` | `RETRO-2026-06-10-agent-runtime-governance-ops` | retro | watch | watch | RETRO-2026-06-10 agent runtime governance ops |
 | `reviews/RETRO-2026-06-14-agent-runtime-process-integrity.md` | `RETRO-2026-06-14-agent-runtime-process-integrity` | retro | watch | watch | RETRO 2026-06-14 — Process Integrity (verification / merge / compound-review-retro) |
 | `reviews/RETRO-2026-06-14-knowledge-stack.md` | `RETRO-2026-06-14-knowledge-stack` | retro | watch | watch | RETRO 2026-06-14 — Agent knowledge stack (#1–#4) |
@@ -228,6 +256,7 @@ record_count: 1043
 | `reviews/RETRO-2026-07-29-task-ar-645-compound-scribe.md` | `RETRO-2026-07-29-task-ar-645-compound-scribe` | md | completed | pass | TASK-AR-645 Compound and Scribe Retrospective |
 | `reviews/RETRO-2026-07-29-task-ar-646-model-routing.md` | `RETRO-2026-07-29-task-ar-646-model-routing` | md | completed | pass-with-followup | TASK-AR-646 Model-Routing Retrospective |
 | `reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md` | `RETRO-2026-07-29-task-ar-647-native-events-security-boundary` | md | completed | pass-with-compound | TASK-AR-647 Native-Events and Security-Boundary Retrospective |
+| `reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md` | `RETRO-2026-07-30-task-ar-652-economic-routing-integrity` | md | completed | pass-with-compound | TASK-AR-652 Economic Routing and Receipt-Integrity Retrospective |
 | `reviews/RETRO-2026-07-30-task-ar-653-merge-queue-safety.md` | `RETRO-2026-07-30-task-ar-653-merge-queue-safety` | md | completed | pass-with-followup | TASK-AR-653 Merge-Queue Safety Retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
@@ -602,12 +631,101 @@ record_count: 1043
 | `reviews/REVIEW-2026-07-29-task-ar-645-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-645-w0-t3-replan` | md | record | pass | TASK-AR-645 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-646-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-646-w0-t3-replan` | md | record | pass | TASK-AR-646 W0 T3 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-647-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-647-w0-t3-replan` | md | record | pass | TASK-AR-647 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration.md` | `REVIEW-2026-07-29-task-ar-648-bean-attempt-2-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-2 Registration |
+| `reviews/REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-bean-attempt-2-t3-replan` | md | active | pass | TASK-AR-648 Bean Attempt-2 T3 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-blocked-unit-redispatch-p0-replan` | md | active | stop | TASK-AR-648 Blocked Unit Redispatch P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-claim-tree-toctou-p0-replan` | planning | record | pass | TASK-AR-648 Claim Tree TOCTOU P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-green-evidence-scope-amendment` | planning | record | pass | TASK-AR-648 Bean green evidence scope amendment |
+| `reviews/REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-lock-handoff-p0-replan` | md | active | block | TASK-AR-648 Symbolic HEAD Lock Handoff P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan.md` | `REVIEW-2026-07-29-task-ar-648-head-reflog-p1-replan` | planning | record | fail | TASK-AR-648 Actual Worktree HEAD Reflog P1 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment.md` | `REVIEW-2026-07-29-task-ar-648-host-lock-scope-amendment` | planning | record | pass | TASK-AR-648 host lock scope amendment |
+| `reviews/REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-overlay-claim-p0-replan` | planning | record | pass | TASK-AR-648 Auto-review Overlay Claim P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-p0-remediation-replan` | md | record | pass | TASK-AR-648 Bean Pilot P0 Remediation Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-portable-continuity-p0-replan` | md | active | stop | TASK-AR-648 Portable Continuity P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-portable-continuity-remediation-registration.md` | `REVIEW-2026-07-29-task-ar-648-portable-continuity-remediation-registration` | md | active | pass | TASK-AR-648 Portable Continuity Remediation Registration |
+| `reviews/REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-post-commit-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Post-Commit HEAD Race P0 Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan.md` | `REVIEW-2026-07-29-task-ar-648-second-p0-remediation-replan` | planning | record | pass | TASK-AR-648 Second Bean P0 Remediation Replan |
+| `reviews/REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan.md` | `REVIEW-2026-07-29-task-ar-648-symbolic-head-race-p0-replan` | planning | record | fail | TASK-AR-648 Symbolic HEAD Race P0 Replan |
 | `reviews/REVIEW-2026-07-29-task-ar-648-w0-t3-replan.md` | `REVIEW-2026-07-29-task-ar-648-w0-t3-replan` | md | record | pass | TASK-AR-648 W0 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-3-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-3 Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-3-t3-replan` | md | approved | pass | TASK-AR-648 Bean Attempt-3 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-4-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt-4 Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-4-t3-replan` | md | approved | pass | TASK-AR-648 Bean Attempt-4 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-5-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt 5 Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-5-t3-replan` | md | approved | pass | TASK-AR-648 Bean Wiki Attempt 5 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-6-registration` | md | active | pass | TASK-AR-648 Bean Wiki Attempt 6 Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-bean-attempt-6-t3-replan` | md | approved | pass | TASK-AR-648 Bean Wiki Attempt 6 T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-registration` | md | active | pass | Consumer Continuity Ownership Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-consumer-continuity-ownership-t3-replan` | md | approved | pass | Consumer Continuity Ownership T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration.md` | `REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-registration` | md | active | pass | TASK-AR-648 Expected Common Mirror Inventory Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-mirror-expected-inventory-t3-replan` | md | approved | pass | TASK-AR-648 Expected Common Mirror Inventory T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration.md` | `REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-registration` | md | active | pass | TASK-AR-648 Pilot Evidence Contract Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-pilot-evidence-contract-t3-replan` | md | approved | pass | TASK-AR-648 Pilot Evidence Contract T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-portable-continuity-t3-replan` | md | approved | pass | TASK-AR-648 Portable Continuity T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-registration` | md | active | pass | TASK-AR-648 Template Mirror and Pilot Isolation Repair Registration |
+| `reviews/REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan.md` | `REVIEW-2026-07-30-task-ar-648-template-mirror-isolation-t3-replan` | md | approved | pass | TASK-AR-648 Template Mirror and Pilot Isolation T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan.md` | `REVIEW-2026-07-30-task-ar-649-allimbot-t3-replan` | md | approved | pass | TASK-AR-649 Allimbot Pilot T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t3-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T3 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan.md` | `REVIEW-2026-07-30-task-ar-650-autofolio-t4-replan` | md | approved | pass | TASK-AR-650 Autofolio Migration T4 Replan |
+| `reviews/REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan.md` | `REVIEW-2026-07-30-task-ar-650-w4-contract-deadlock-replan` | md | accepted | n/a | TASK-AR-650 W4 계약 순환 차단 재계획 |
+| `reviews/REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan.md` | `REVIEW-2026-07-30-task-ar-652-readiness-target-path-t3-replan` | md | accepted | n/a | TASK-AR-652 준비성 경로·실행 경계 T3 재계획 |
+| `reviews/REVIEW-2026-07-30-task-ar-652-scope-transition-approval.md` | `REVIEW-2026-07-30-task-ar-652-scope-transition-approval` | planning | record | pass | TASK-AR-652 operability taskset scope transition approval |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-attested-container-sealing-replan` | md | accepted | n/a | TASK-AR-652 attested-container sealing replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-economic-call-provenance-replan` | md | accepted | n/a | TASK-AR-652 economic call-provenance replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-approval-replan` | md | accepted | n/a | TASK-AR-652 final-approval W4b repair replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-candidate-replan` | md | accepted | n/a | TASK-AR-652 final-candidate provider-identity replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-652-w4b-final-scope-amendment` | md | accepted | n/a | TASK-AR-652 final W4b governance scope amendment |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-provider-call-provenance-empty-finish-replan` | md | accepted | n/a | TASK-AR-652 provider-call provenance and empty-finish replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-receipt-row-attestation-replan` | md | accepted | n/a | TASK-AR-652 receipt-row attestation replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-sdk-telemetry-replan` | md | accepted | n/a | TASK-AR-652 SDK completion-telemetry replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-economic-budget-replan` | md | accepted | n/a | TASK-AR-652 terminal economic and budget-integrity replan |
+| `reviews/REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan.md` | `REVIEW-2026-07-30-task-ar-652-w4b-terminal-provenance-success-replan` | md | accepted | n/a | TASK-AR-652 terminal-success and settlement-provenance replan |
+| `reviews/REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan.md` | `REVIEW-2026-07-30-task-ar-653-post-task-ar-652-t3-replan` | md | approved | pass | TASK-AR-653 Post-TASK-AR-652 T3 Replan |
 | `reviews/REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-654-host-lock-scope-amendment` | planning | record | pass | TASK-AR-654 host lock scope amendment |
 | `reviews/REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment.md` | `REVIEW-2026-07-30-task-ar-654-w4-evidence-footprint-amendment` | md | record | n/a | TASK-AR-654 W4 evidence footprint amendment |
+| `reviews/REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment.md` | `REVIEW-2026-07-30-task-ar-657-integration-evidence-scope-amendment` | md | approved | pass | TASK-AR-657 Integration and Closeout-Evidence Scope Amendment |
 | `reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md` | `REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration` | md | record | pass | Host Required Merge Gates Registration |
 | `reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md` | `REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration` | md | record | pass | Merge Queue Safety Registration |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-dependency-t0-replan` | md | approved | pass | v0.8 Operability Dependency Preservation T0 Replan |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-registration` | md | record | pass | v0.8 Operability Hardening Registration |
+| `reviews/REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan.md` | `REVIEW-2026-07-30-taskset-ar-v080-operability-hardening-t0-replan` | md | approved | pass | v0.8 Operability Hardening T0 Replan |
+| `reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md` | `REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan` | md | accepted | n/a | TASK-AR-654 Compound closure T3 replan |
+| `reviews/REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment.md` | `REVIEW-2026-07-31-task-ar-654-rsi-skill-contract-scope-amendment` | md | accepted | n/a | TASK-AR-654 RSI skill contract scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-compound-record-scope-amendment` | md | accepted | n/a | TASK-AR-654 Compound record scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 fail-closed authority T3 replan |
+| `reviews/REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment.md` | `REVIEW-2026-08-01-task-ar-654-failclosed-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 fail-closed corrective Compound scope amendment |
+| `reviews/REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan.md` | `REVIEW-2026-08-01-task-ar-654-splitlines-boundary-t3-replan` | md | accepted | n/a | TASK-AR-654 splitlines boundary T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-adverse-w4b-compound-scope-amendment` | md | accepted | pass | TASK-AR-654 adverse-W4b Compound scope amendment |
+| `reviews/REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-ancestor-identity-provenance-t3-replan` | md | accepted | revise | TASK-AR-654 ancestor, identity, and provenance T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-authority-seams-t3-replan` | md | accepted | n/a | TASK-AR-654 authority-seam T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-broken-parent-store-t3-replan` | md | accepted | n/a | TASK-AR-654 broken-parent claim-store T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-canonical-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 canonical authority T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-canonical-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 canonical-authority Compound scope amendment |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-components-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store component integrity T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-store-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim-store continuity T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 claim-transaction Compound scope amendment |
+| `reviews/REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-claim-transaction-continuity-t3-replan` | md | accepted | n/a | TASK-AR-654 claim transaction continuity T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-falsy-authority-t3-replan` | md | accepted | n/a | TASK-AR-654 strict canonical authority T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-postcommit-projection-t3-replan` | md | accepted | n/a | TASK-AR-654 post-commit and projection T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-strict-authority-compound-scope-amendment` | md | accepted | n/a | TASK-AR-654 strict-authority Compound scope amendment |
+| `reviews/REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan.md` | `REVIEW-2026-08-02-task-ar-654-transaction-truth-t3-replan` | md | accepted | n/a | TASK-AR-654 transaction-truth T3 replan |
+| `reviews/REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction.md` | `REVIEW-2026-08-02-task-ar-654-w4b-evidence-contract-correction` | md | accepted | correction | TASK-AR-654 W4b evidence and contract correction |
+| `reviews/REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment.md` | `REVIEW-2026-08-02-task-ar-654-work-close-fixture-scope-amendment` | md | accepted | n/a | TASK-AR-654 work-close fixture scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-deterministic-liveness-time-seams-t3-replan` | md | accepted | pass | TASK-AR-655 deterministic liveness CLI time-seam T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-heartbeat-expiry-t3-replan` | md | accepted | pass | TASK-AR-655 heartbeat and expiry T3 scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-lease-grace-bounds-t3-replan` | md | accepted | pass | TASK-AR-655 lease and grace bounds T3 scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-owner-governance-clock-propagation-t3-replan` | md | accepted | pass | TASK-AR-655 owner-governance clock propagation T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-post-green-authority-seams-t3-replan` | md | accepted | pass | TASK-AR-655 post-GREEN authority seams T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan` | md | accepted | pass | TASK-AR-655 re-W4b dispatch T3 replan |
+| `reviews/REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-655-shared-duration-primitives-scope-amendment` | md | accepted | pass | TASK-AR-655 shared duration primitives scope amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-ui-initial-state-race-t3-replan` | md | accepted | pass | TASK-AR-655 UI initial-state race T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-current-agent-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b current-agent binding T3 recurrence amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-full-pointer-neutral-preload-t3-replan` | md | accepted | pass | TASK-AR-655 W4b full-pointer and neutral pre-load T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-projection-binding-t3-replan` | md | accepted | pass | TASK-AR-655 W4b projection binding T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan.md` | `REVIEW-2026-08-03-task-ar-655-w4b-type-strict-pointer-t3-replan` | md | accepted | pass | TASK-AR-655 W4b type-strict pointer authority T3 amendment |
+| `reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md` | `REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan` | md | accepted | pass | TASK-AR-659 legacy claim bootstrap dispatch T3 replan |
+| `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
+| `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -660,6 +778,10 @@ record_count: 1043
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC-RECHECK` | md | approved | pass | TASK-AR-622 Skeptic Recheck |
 | `reviews/ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC.md` | `ROLE-REVIEW-2026-07-24-TASK-AR-622-SKEPTIC` | md | hold | fail | TASK-AR-622 Skeptic and Adversarial Review |
 | `reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md` | `ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B` | md | record | watch | TASK-AR-631 Independent W4b and Lifecycle Recovery Review |
+| `reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-08-03-TASK-AR-659-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-659 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC.md` | `ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC` | role-review | record | n/a | TASK-AR-659 Skeptic Role Review |
+| `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-655 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC` | role-review | record | n/a | TASK-AR-655 Skeptic Role Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1.md` | `SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1` | progress-scout-sweep | record | n/a | v0.8 Adoption and Enforcement — Wave 1 Progress Sweep |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
@@ -676,6 +798,14 @@ record_count: 1043
 | `reviews/SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync.md` | `SEMINAR-2026-06-15-agent-runtime-task-ar-223-governance-sync` | md | record | n/a | SEMINAR (2026-06-15) - TASK-AR-223 governance sync |
 | `reviews/SEMINAR-2026-06-17-self-improvement-cadence.md` | `SEMINAR-2026-06-17-self-improvement-cadence` | meeting | planned | planned | Self Improvement Cadence Seminar |
 | `reviews/SEMINAR-2026-06-21-business-operating-system.md` | `SEMINAR-2026-06-21-business-operating-system` | seminar | recorded | pass | Business Operating System Seminar |
+| `reviews/SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract.md` | `SKEPTIC-2026-07-29-task-ar-648-overlay-claim-contract` | md | request_changes | block | TASK-AR-648 Skeptic Audit — Closeout Overlay Claim Contract |
+| `reviews/SKEPTIC-2026-07-30-task-ar-649-closeout.md` | `SKEPTIC-2026-07-30-task-ar-649-closeout` | md | passed | pass | TASK-AR-649 Closeout Skeptic Review |
+| `reviews/SKEPTIC-2026-07-30-task-ar-650-closeout.md` | `SKEPTIC-2026-07-30-task-ar-650-closeout` | md | passed | pass | TASK-AR-650 Skeptic Closeout |
+| `reviews/SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout.md` | `SKEPTIC-2026-07-31-task-ar-654-yaml-conformance-closeout` | md | revise | fail | TASK-AR-654 YAML Conformance Closeout Skeptic Review |
+| `reviews/SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout.md` | `SKEPTIC-2026-08-01-task-ar-654-physical-line-boundary-closeout` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Closeout Skeptic Review |
+| `reviews/SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final.md` | `SKEPTIC-2026-08-02-task-ar-654-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final skeptic review |
+| `reviews/SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-canonical-authority-final` | md | revise | fail | TASK-AR-654 canonical authority final skeptic review |
+| `reviews/SKEPTIC-2026-08-02-task-ar-654-strict-authority-final.md` | `SKEPTIC-2026-08-02-task-ar-654-strict-authority-final` | md | revise | fail | TASK-AR-654 strict-authority final skeptic review |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612150820.json` | `VERIFY-2026-06-12-task-ar-375-20260612150820` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612150820 |
 | `reviews/VERIFY-2026-06-12-task-ar-375-20260612151830.json` | `VERIFY-2026-06-12-task-ar-375-20260612151830` | json | record | n/a | VERIFY-2026-06-12-task-ar-375-20260612151830 |
 | `reviews/VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030.json` | `VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030` | json | record | n/a | VERIFY-2026-06-12-taskset-ar-agent-identity-contract-20260612151030 |
@@ -903,16 +1033,82 @@ record_count: 1043
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729133326 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550.json` | `VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-647-001-20260729140550 |
 | `reviews/VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858.json` | `VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-001-20260729162858 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144.json` | `VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-003-20260729190144 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303.json` | `VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-003-20260729192303 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919.json` | `VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-004-20260729200919 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729210330 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729213242 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729214144 |
+| `reviews/VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310.json` | `VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310` | json | record | n/a | VERIFY-2026-07-29-unit-task-ar-648-005-20260729224310 |
+| `reviews/VERIFY-2026-07-30-task-ar-648-20260730072800.json` | `VERIFY-2026-07-30-task-ar-648-20260730072800` | json | record | n/a | VERIFY-2026-07-30-task-ar-648-20260730072800 |
+| `reviews/VERIFY-2026-07-30-task-ar-649-20260730083005.json` | `VERIFY-2026-07-30-task-ar-649-20260730083005` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083005 |
+| `reviews/VERIFY-2026-07-30-task-ar-649-20260730083100.json` | `VERIFY-2026-07-30-task-ar-649-20260730083100` | json | record | n/a | VERIFY-2026-07-30-task-ar-649-20260730083100 |
+| `reviews/VERIFY-2026-07-30-task-ar-650-20260730121429.json` | `VERIFY-2026-07-30-task-ar-650-20260730121429` | json | record | n/a | VERIFY-2026-07-30-task-ar-650-20260730121429 |
+| `reviews/VERIFY-2026-07-30-task-ar-652-20260730223016.json` | `VERIFY-2026-07-30-task-ar-652-20260730223016` | json | record | n/a | VERIFY-2026-07-30-task-ar-652-20260730223016 |
 | `reviews/VERIFY-2026-07-30-task-ar-653-20260730084810.json` | `VERIFY-2026-07-30-task-ar-653-20260730084810` | json | record | n/a | VERIFY-2026-07-30-task-ar-653-20260730084810 |
 | `reviews/VERIFY-2026-07-30-task-ar-653-independent.md` | `VERIFY-2026-07-30-task-ar-653-independent` | md | record | n/a | TASK-AR-653 Independent Verification |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730000654 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127.json` | `VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-007-20260730001127 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630.json` | `VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-008-20260730011630 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400.json` | `VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-010-20260730022400 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000.json` | `VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-648-016-20260730072000 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000.json` | `VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-649-001-20260730083000 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113.json` | `VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-650-001-20260730121113 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730130910 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730141633 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730150652 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730155247 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730163357 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730170435 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730173228 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730182347 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730200353 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730204330 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730211246 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428.json` | `VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-652-001-20260730214428 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730080509 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730082201 |
+| `reviews/VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407.json` | `VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-653-001-20260730235407 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730094218 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730095331 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100128 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100625 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730100848 |
 | `reviews/VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015.json` | `VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015` | json | record | n/a | VERIFY-2026-07-30-unit-task-ar-654-001-20260730101015 |
+| `reviews/VERIFY-2026-07-31-task-ar-653-20260731035453.json` | `VERIFY-2026-07-31-task-ar-653-20260731035453` | json | record | n/a | VERIFY-2026-07-31-task-ar-653-20260731035453 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731000019 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731003459 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731011752 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731015019 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731023129 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731025837 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731032048 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533.json` | `VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-653-001-20260731033533 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731043905 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731050030 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731052414.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731052414` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731052414 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731054736 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731061244 |
+| `reviews/VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354.json` | `VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354` | json | record | n/a | VERIFY-2026-07-31-unit-task-ar-654-001-20260731233354 |
+| `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801002151 |
+| `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801014422 |
+| `reviews/VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750.json` | `VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750` | json | record | n/a | VERIFY-2026-08-01-unit-task-ar-654-001-20260801015750 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802122023 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802132243 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802195023 |
+| `reviews/VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400.json` | `VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400` | json | record | n/a | VERIFY-2026-08-02-unit-task-ar-654-001-20260802231400 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803005954 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803040700 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803045245 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803054932.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803054932` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803054932 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803065900.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803065900` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803065900 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942.json` | `VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-655-001-20260803075942 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803150906 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106 |
+| `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -925,6 +1121,63 @@ record_count: 1043
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001-r7.md` | `W4A-2026-07-29-unit-task-ar-647-001-r7` | md | passed | pass | TASK-AR-647 UNIT-001 Security Metadata Snapshot Remediation W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001-r8.md` | `W4A-2026-07-29-unit-task-ar-647-001-r8` | md | passed | pass | TASK-AR-647 UNIT-001 HTML Block Section Integrity Remediation W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-647-001.md` | `W4A-2026-07-29-unit-task-ar-647-001` | md | passed | pass | TASK-AR-647 UNIT-001 W4a Self-Review |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-003-r2.md` | `W4A-2026-07-29-unit-task-ar-648-003-r2` | md | passed | pass | TASK-AR-648 UNIT-003 HEAD-persisted Claim Gate W4a R2 |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-003.md` | `W4A-2026-07-29-unit-task-ar-648-003` | md | passed | pass | TASK-AR-648 UNIT-003 Claim SCM and Portable State Runtime W4a |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-004.md` | `W4A-2026-07-29-unit-task-ar-648-004` | md | passed | pass | TASK-AR-648 UNIT-004 Overlay and Claim Transaction W4a |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-005-r3.md` | `W4A-2026-07-29-unit-task-ar-648-005-r3` | md | passed | pass | TASK-AR-648 UNIT-005 Atomic Claim Publication W4a R3 |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-005-r4.md` | `W4A-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Atomic Claim Publication W4a R4 |
+| `reviews/W4A-2026-07-29-unit-task-ar-648-005.md` | `W4A-2026-07-29-unit-task-ar-648-005` | md | passed | pass | TASK-AR-648 UNIT-005 Immutable Claim Tree W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-007.md` | `W4A-2026-07-30-unit-task-ar-648-007` | md | passed | pass | TASK-AR-648 UNIT-007 Blocked Unit Redispatch Guard W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-008.md` | `W4A-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-009.md` | `W4A-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4a — UNIT-TASK-AR-648-009 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-010.md` | `W4A-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-011.md` | `W4A-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4a — UNIT-TASK-AR-648-011 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-012.md` | `W4A-2026-07-30-unit-task-ar-648-012` | md | approved | approve | W4a — UNIT-TASK-AR-648-012 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-013.md` | `W4A-2026-07-30-unit-task-ar-648-013` | md | approved | approve | W4a — UNIT-TASK-AR-648-013 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-014.md` | `W4A-2026-07-30-unit-task-ar-648-014` | md | blocked | block | W4a — UNIT-TASK-AR-648-014 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-015.md` | `W4A-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4a — UNIT-TASK-AR-648-015 |
+| `reviews/W4A-2026-07-30-unit-task-ar-648-016.md` | `W4A-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4a — UNIT-TASK-AR-648-016 |
+| `reviews/W4A-2026-07-30-unit-task-ar-649-001.md` | `W4A-2026-07-30-unit-task-ar-649-001` | md | passed | n/a | W4a — UNIT-TASK-AR-649-001 |
+| `reviews/W4A-2026-07-30-unit-task-ar-650-001.md` | `W4A-2026-07-30-unit-task-ar-650-001` | md | pass | n/a | W4a - UNIT-TASK-AR-650-001 |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-attested-container-sealing-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Attested-Container Sealing Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-economic-call-provenance-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Economic Call-Provenance Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-approval-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Final Approval Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-final-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-final-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Final Recheck Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Economic Routing Repair Follow-up W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-provider-call-provenance-empty-finish-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Provider-Call Provenance and Empty-Finish Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-provider-identity-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Provider Identity Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-receipt-row-attestation-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Receipt-Row Attestation Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-recheck-followup.md` | `W4A-2026-07-30-unit-task-ar-652-001-recheck-followup` | md | passed | pass | TASK-AR-652 UNIT-001 Second Recheck Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-sdk-telemetry-repair` | md | passed | pass | TASK-AR-652 UNIT-001 SDK Telemetry Boundary Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-economic-budget-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Economic and Budget Integrity Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair.md` | `W4A-2026-07-30-unit-task-ar-652-001-terminal-provenance-success-repair` | md | passed | pass | TASK-AR-652 UNIT-001 Terminal Success and Settlement Provenance Repair W4a |
+| `reviews/W4A-2026-07-30-unit-task-ar-652-001.md` | `W4A-2026-07-30-unit-task-ar-652-001` | md | passed | pass | W4a - UNIT-TASK-AR-652-001 |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | passed | pass | TASK-AR-653 Scribe Audit View and Plan Delta Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-repair` | md | passed | pass | TASK-AR-653 Scribe Blank Structure and Unique JSON Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-configured-source-integrity-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-configured-source-integrity-repair` | md | passed | pass | TASK-AR-653 Configured Source Integrity Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | passed | pass | TASK-AR-653 Scribe Git Audit Anchor Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-repair` | md | passed | pass | TASK-AR-653 Invalid Runtime Config Fail-closed Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | passed | pass | TASK-AR-653 Scribe Receipt and Authority Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-repair.md` | `W4A-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-repair` | md | passed | pass | TASK-AR-653 Scribe Semantic Delta and Exact Identity Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-653-001.md` | `W4A-2026-07-31-unit-task-ar-653-001` | md | passed | pass | TASK-AR-653 Scribe Source-Debt Loop W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair` | md | passed | pass | TASK-AR-654 Accepted-Watch Authority Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair` | md | passed | pass | TASK-AR-654 Duplicate Authority Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001-yaml-conformance-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-yaml-conformance-repair` | md | passed | pass | TASK-AR-654 YAML Conformance Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001-yaml-scalar-final-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-yaml-scalar-final-repair` | md | passed | pass | TASK-AR-654 YAML Scalar Final Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-repair.md` | `W4A-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-repair` | md | passed | pass | TASK-AR-654 YAML Semantic Key Repair W4a |
+| `reviews/W4A-2026-07-31-unit-task-ar-654-001.md` | `W4A-2026-07-31-unit-task-ar-654-001` | md | passed | pass | TASK-AR-654 Repeated-Failure Compound Hardening W4a |
+| `reviews/W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-failclosed-authority-repair` | md | passed | pass | TASK-AR-654 Fail-Closed Authority Repair W4a |
+| `reviews/W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair.md` | `W4A-2026-08-01-unit-task-ar-654-001-physical-line-boundary-repair` | md | passed | pass | TASK-AR-654 Physical-Line Boundary Repair W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | passed | pass | TASK-AR-654 Canonical Authority Final W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | passed | pass | TASK-AR-654 claim-transaction final W4a |
+| `reviews/W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4A-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | passed | pass | TASK-AR-654 Strict Canonical Authority Final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final` | md | passed | pass | TASK-AR-655 full-pointer and neutral pre-load final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | passed | pass | TASK-AR-655 lease-authority final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | passed | pass | TASK-AR-655 post-repair final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | passed | pass | TASK-AR-655 projection-binding repair final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4A-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | passed | pass | TASK-AR-655 type-strict pointer authority final W4a |
+| `reviews/W4A-2026-08-03-unit-task-ar-659-001-recovery-commands.md` | `W4A-2026-08-03-unit-task-ar-659-001-recovery-commands` | md | revise | block | TASK-AR-659 owner-bound recovery commands W4a self-review |
 | `reviews/W4B-2026-06-13-TASK-AR-320.md` | `W4B-2026-06-13-TASK-AR-320` | verification | record | n/a | W4b Independent Verification — TASK-AR-320 (Theme System) |
 | `reviews/W4B-2026-06-13-TASK-AR-321.md` | `W4B-2026-06-13-TASK-AR-321` | verification | record | n/a | W4b Independent Verification — TASK-AR-321 (Sidebar IA + Hash Routing) |
 | `reviews/W4B-2026-06-13-TASK-AR-322.md` | `W4B-2026-06-13-TASK-AR-322` | verification | record | n/a | W4b Independent Verification — TASK-AR-322 (Common List Pattern) |
@@ -1071,9 +1324,72 @@ record_count: 1043
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001-r8.md` | `W4B-2026-07-29-unit-task-ar-647-001-r8` | md | approved | pass | TASK-AR-647 UNIT-001 Independent W4b HTML Block Remediation Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-647-001.md` | `W4B-2026-07-29-unit-task-ar-647-001` | md | changes_required | fail | TASK-AR-647 UNIT-001 Independent W4b Verification |
 | `reviews/W4B-2026-07-29-unit-task-ar-648-001.md` | `W4B-2026-07-29-unit-task-ar-648-001` | md | approved | pass | TASK-AR-648 UNIT-001 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-002.md` | `W4B-2026-07-29-unit-task-ar-648-002` | md | blocked | fail | TASK-AR-648 UNIT-002 Independent W4b Verification |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-003-r2.md` | `W4B-2026-07-29-unit-task-ar-648-003-r2` | md | passed | pass | TASK-AR-648 UNIT-003 Independent W4b R2 |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-003.md` | `W4B-2026-07-29-unit-task-ar-648-003` | md | blocked | fail | TASK-AR-648 UNIT-003 독립 W4b 재검증 |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-004.md` | `W4B-2026-07-29-unit-task-ar-648-004` | md | failed | block | TASK-AR-648 UNIT-004 Independent W4b |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-005-r4.md` | `W4B-2026-07-29-unit-task-ar-648-005-r4` | md | passed | pass | TASK-AR-648 UNIT-005 Independent W4b R4 |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-005.md` | `W4B-2026-07-29-unit-task-ar-648-005` | md | failed | block | TASK-AR-648 UNIT-005 Independent W4b |
+| `reviews/W4B-2026-07-29-unit-task-ar-648-006-continuity-block.md` | `W4B-2026-07-29-unit-task-ar-648-006-continuity-block` | md | failed | block | Bean Wiki Attempt-2 Portable Continuity Independent Review |
+| `reviews/W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession.md` | `W4B-2026-07-30-task-ar-653-host-lock-footprint-supersession` | md | supersede | block | TASK-AR-653 Host-Lock Footprint Administrative Supersession |
+| `reviews/W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession.md` | `W4B-2026-07-30-task-ar-653-overlay-claim-lifecycle-supersession` | md | supersede | block | TASK-AR-653 Overlay Claim Lifecycle Administrative Supersession |
+| `reviews/W4B-2026-07-30-task-ar-653-replacement-claim-preflight-supersession.md` | `W4B-2026-07-30-task-ar-653-replacement-claim-preflight-supersession` | md | supersede | block | TASK-AR-653 Replacement Claim Preflight Administrative Supersession |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-007.md` | `W4B-2026-07-30-unit-task-ar-648-007` | md | passed | pass | TASK-AR-648 UNIT-007 Blocked Unit Redispatch Guard W4b |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-008.md` | `W4B-2026-07-30-unit-task-ar-648-008` | md | passed | pass | TASK-AR-648 UNIT-008 Portable Continuity Contract W4b |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-009.md` | `W4B-2026-07-30-unit-task-ar-648-009` | md | blocked | block | W4b — UNIT-TASK-AR-648-009 Bean attempt 3 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-010.md` | `W4B-2026-07-30-unit-task-ar-648-010` | md | passed | pass | TASK-AR-648 UNIT-010 Consumer Continuity Ownership W4b |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-011.md` | `W4B-2026-07-30-unit-task-ar-648-011` | md | blocked | block | W4b — UNIT-TASK-AR-648-011 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-012.md` | `W4B-2026-07-30-unit-task-ar-648-012` | md | blocked | block | W4b — UNIT-TASK-AR-648-012 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-013.md` | `W4B-2026-07-30-unit-task-ar-648-013` | md | approved | approve | W4b — UNIT-TASK-AR-648-013 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-014.md` | `W4B-2026-07-30-unit-task-ar-648-014` | md | blocked | block | W4b — UNIT-TASK-AR-648-014 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-015.md` | `W4B-2026-07-30-unit-task-ar-648-015` | md | approved | pass | W4b — UNIT-TASK-AR-648-015 |
+| `reviews/W4B-2026-07-30-unit-task-ar-648-016.md` | `W4B-2026-07-30-unit-task-ar-648-016` | md | passed | pass | W4b — UNIT-TASK-AR-648-016 |
+| `reviews/W4B-2026-07-30-unit-task-ar-649-001.md` | `W4B-2026-07-30-unit-task-ar-649-001` | md | passed | pass | W4b — UNIT-TASK-AR-649-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-650-001.md` | `W4B-2026-07-30-unit-task-ar-650-001` | md | passed | pass | W4b - UNIT-TASK-AR-650-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-attested-container-sealing-approval` | md | approved | pass | W4b Attested-Container Sealing Approval |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-call-provenance-final` | md | blocked | block | W4b Call Provenance Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-economic-provenance-approval` | md | blocked | block | W4b Economic Provenance Approval Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-approval` | md | blocked | block | W4b Final Approval - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-candidate.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-candidate` | md | blocked | block | W4b Final Candidate - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-final-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-final-recheck` | md | blocked | block | W4b Final Recheck - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-provenance-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-provenance-final` | md | blocked | block | W4b Provenance Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-provider-identity.md` | `W4B-2026-07-30-unit-task-ar-652-001-provider-identity` | md | blocked | block | W4b Provider Identity - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval.md` | `W4B-2026-07-30-unit-task-ar-652-001-receipt-attestation-approval` | md | blocked | block | W4b Receipt Attestation Approval Review |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-recheck.md` | `W4B-2026-07-30-unit-task-ar-652-001-recheck` | md | blocked | block | W4b Recheck - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-sdk-telemetry-final` | md | blocked | block | W4b SDK Telemetry Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final.md` | `W4B-2026-07-30-unit-task-ar-652-001-terminal-integrity-final` | md | blocked | block | W4b Terminal Integrity Final - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-652-001.md` | `W4B-2026-07-30-unit-task-ar-652-001` | md | blocked | block | W4b - UNIT-TASK-AR-652-001 |
+| `reviews/W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession.md` | `W4B-2026-07-30-unit-task-ar-653-001-preimplementation-supersession` | md | supersede | block | W4b Administrative Preimplementation Supersession |
 | `reviews/W4B-2026-07-30-unit-task-ar-654-001-approved.md` | `W4B-2026-07-30-unit-task-ar-654-001-approved` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review — Approved |
 | `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review |
 | `reviews/W4B-2026-07-30-unit-task-ar-654-001-rework2.md` | `W4B-2026-07-30-unit-task-ar-654-001-rework2` | md | record | n/a | UNIT-TASK-AR-654-001 Independent W4b Review — Round 2 |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-audit-view-plan-delta-repair` | md | blocked | block | TASK-AR-653 Audit View and Plan Delta Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-blank-structure-unique-json-final` | md | blocked | block | TASK-AR-653 Blank Structure and Unique JSON Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-configured-source-integrity-final` | md | blocked | block | TASK-AR-653 Configured Source Integrity Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-git-audit-anchor-repair` | md | blocked | block | TASK-AR-653 Scribe Git Audit Anchor Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final` | md | approved | approve | TASK-AR-653 Invalid Runtime Config Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-653-001-receipt-authority-repair` | md | blocked | block | TASK-AR-653 Receipt and Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final.md` | `W4B-2026-07-31-unit-task-ar-653-001-semantic-delta-identity-final` | md | blocked | block | TASK-AR-653 Semantic Delta and Exact Identity Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-653-001.md` | `W4B-2026-07-31-unit-task-ar-653-001` | md | blocked | block | TASK-AR-653 Final Independent Implementation W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-654-001-accepted-watch-authority-repair` | md | revise | fail | TASK-AR-654 Accepted-Watch Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair.md` | `W4B-2026-07-31-unit-task-ar-654-001-duplicate-authority-repair` | md | revise | fail | TASK-AR-654 Duplicate Authority Repair Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-conformance-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-conformance-final` | md | approved | pass | TASK-AR-654 YAML Conformance Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-scalar-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-scalar-final` | md | revise | fail | TASK-AR-654 YAML Conformance Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final.md` | `W4B-2026-07-31-unit-task-ar-654-001-yaml-semantic-key-final` | md | revise | fail | TASK-AR-654 YAML Semantic-Key Final Independent W4b |
+| `reviews/W4B-2026-07-31-unit-task-ar-654-001.md` | `W4B-2026-07-31-unit-task-ar-654-001` | md | revise | fail | TASK-AR-654 Repeated-Failure Compound Hardening Independent W4b |
+| `reviews/W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final.md` | `W4B-2026-08-01-unit-task-ar-654-001-physical-line-boundary-final` | md | revise | fail | TASK-AR-654 Physical-Line Boundary Final W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final` | md | conditional-pass | pass | TASK-AR-654 adverse-W4b repair final independent W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-canonical-authority-final` | md | blocked | fail | TASK-AR-654 Canonical Authority Final Independent W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-claim-transaction-final` | md | blocked | fail | TASK-AR-654 claim-transaction final independent W4b |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption.md` | `W4B-2026-08-02-unit-task-ar-654-001-deep-json-failopen-interruption` | md | revise | fail | TASK-AR-654 deep-JSON fail-open W4b interruption record |
+| `reviews/W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final.md` | `W4B-2026-08-02-unit-task-ar-654-001-strict-authority-final` | md | blocked | fail | TASK-AR-654 Strict Authority Final Independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-full-pointer-neutral-final` | md | blocked | block | TASK-AR-655 full-pointer and neutral pre-load final independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-lease-authority-final` | md | blocked | fail | TASK-AR-655 Lease Authority Final Independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-post-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-post-repair-final` | md | blocked | fail | TASK-AR-655 post-repair final independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-projection-binding-repair-final` | md | blocked | fail | TASK-AR-655 projection-binding repair final independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | blocked | block | TASK-AR-655 type-strict pointer final independent W4b |
+| `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md` | `W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final` | md | accepted | pass | TASK-AR-659 owner-bound recovery commands final independent W4b |
+| `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md` | `W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final` | md | accepted | pass | TASK-AR-655 lease truthfulness final independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |

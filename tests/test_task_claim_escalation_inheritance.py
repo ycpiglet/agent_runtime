@@ -26,11 +26,29 @@ import task_claim_dispatcher as tcd  # noqa: E402
 CLAIM_DISPATCHER = ROOT / "scripts" / "task_claim_dispatcher.py"
 
 
+UNIT_ID = "UNIT-TASK-AR-ESC-001"
+
+
 def _write_unit(tmp_path: Path, frontmatter: str, *, name: str = "UNIT.md") -> Path:
-    """Write a minimal unit definition whose frontmatter is ``frontmatter``."""
-    path = tmp_path / "units" / name
+    """Write a minimal unit definition whose frontmatter is ``frontmatter``.
+
+    Written at the canonical location with matching ids. `create` now runs the
+    mutation path's own spec resolution, so a spec pointer with no unit
+    identity - or one outside
+    agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md - produces a claim
+    that could never heartbeat. No test in this file exercises heartbeat, which
+    is exactly why the old shape went unnoticed here.
+    """
+    path = (
+        tmp_path
+        / "agents/lead_engineer/tasks/units/TASK-AR-ESC"
+        / f"{UNIT_ID}.md"
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f"---\n{frontmatter}\n---\n\n# unit\n", encoding="utf-8")
+    identity = f"unit_id: {UNIT_ID}\ntask_id: TASK-AR-ESC"
+    path.write_text(
+        f"---\n{identity}\n{frontmatter}\n---\n\n# unit\n", encoding="utf-8"
+    )
     return path
 
 
@@ -104,7 +122,10 @@ def _run_create(root: Path, unit: Path | None, *extra: str) -> dict:
         "--json",
     ]
     if unit is not None:
-        args += ["--unit-spec", str(unit)]
+        args += [
+            "--unit-id", UNIT_ID,
+            "--unit-spec", unit.relative_to(root).as_posix(),
+        ]
     args += list(extra)
     proc = subprocess.run(
         args, cwd=ROOT, check=False, capture_output=True, text=True,

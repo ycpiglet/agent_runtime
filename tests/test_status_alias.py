@@ -59,6 +59,13 @@ def test_done_and_blocked_sets_are_alias_inclusive():
     assert status_alias.is_done("blocked") is False
 
 
+def test_blocked_predicate_matches_exact_compound_tokens():
+    for value in ("blocked", "hold", "held", "보류", "blocked/R3", "보류:R3"):
+        assert status_alias.is_blocked(value) is True
+    for value in ("", "unblocked", "unblocked/R3", "placeholder"):
+        assert status_alias.is_blocked(value) is False
+
+
 def test_consumers_use_the_single_alias_source():
     # The five scripts that carried their own (drifting) vocabulary literals
     # must consume status_alias instead — root and template variants alike.

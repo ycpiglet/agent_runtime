@@ -1,22 +1,28 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-07-29T16:29:30+09:00
-updated_by: codex-root-v080-orchestrator
+updated_at: 2026-08-04T14:18:00+09:00
+updated_by: le-20260804-121045-kst-0427
 current_state:
-  summary: "TASK-AR-648 UNIT-001 completed as an independently verified red pilot; five P0 repairs and a green replay are required."
-  status: ready
+  summary: "TASK-AR-655 and TASK-AR-659 are both done and released. Long-running claims are now truthful across every consumer, and a claim no automated path can reach has registered owner-bound exits."
+  status: unclaimed
   task_set_status: active
-  task_set_id: "TASKSET-AR-V080-ADOPTION-ENFORCEMENT"
-  step_index: 10
-  step_total: 13
-  progress_pct: 50
-  status_text: "Bean Wiki red-pilot evidence is verified; register and claim UNIT-002 for the five P0 remediations before any downstream pilot or release."
+  task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
+  step_index: 12
+  step_total: 12
+  progress_pct: 100
+  status_text: "AR-655 closed after an 11-round independent W4b. TASK-AR-656 and TASK-AR-657 remain planned in this task set."
 active_work:
   current_agents: []
-  current_teams: []
+  current_teams:
+    - agent-runtime-core
 resume:
-  active_task: TASK-AR-648
-  active_task_set: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
-  branch_policy: "Use a new clean Bean Wiki pilot worktree; preserve the dirty checkout and all host-owned editorial/publishing assets. No push, deploy, live publication, version, tag, package publication, or product release."
+  active_task: TASK-AR-656
+  active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
+  branch_policy: "AR-655 and AR-659 are closed. Claim the next task in its own worktree; keep consumer primaries and release surfaces read-only."
+  next_actions:
+    - "Claim TASK-AR-656 (composable lifecycle hooks) or TASK-AR-657; the task set is free."
+    - "Create every claim mode=worker. An orchestrator-mode claim is skipped by claim_reaper unconditionally and needs owner-bound terminalize to clear."
+    - "TASK-AR-648 owns the umask defect in claim_guard.py: chmod 0600 precedes a git add that rewrites the index as 0666 & ~umask, so parallel_worktree_gate never recognises the claim-commit transaction. tests/test_claim_guard.py 21-red is that defect, not a permanent baseline."
+    - "Keep TASK-AR-654, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
@@ -54,7 +60,37 @@ pointers:
       status: completed
     - task_id: TASK-AR-648
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: completed
+    - task_id: TASK-AR-649
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: completed
+    - task_id: TASK-AR-650
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: completed
+    - task_id: TASK-AR-651
+      task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
+      status: planned
+    - task_id: TASK-AR-652
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: completed
+    - task_id: TASK-AR-653
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: completed
+    - task_id: TASK-AR-654
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
       status: in_progress
+    - task_id: TASK-AR-655
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: in_progress
+    - task_id: TASK-AR-656
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: planned
+    - task_id: TASK-AR-657
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: planned
+    - task_id: TASK-AR-658
+      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
+      status: planned
     - task_id: TASK-AR-621
       task_set_id: TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY
       status: completed

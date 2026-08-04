@@ -1,0 +1,404 @@
+{
+  "schema": "agent-runtime-pilot-evidence/v1",
+  "host": "allimbot",
+  "pilot_id": "allimbot-v080-green-attempt-1",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+    "runtime_commit": "4929415d059ec8a8dc3b409b2c2e64ca7f9d98f2",
+    "runtime_product_tree": "b50ec188fc8ed078b34b2e86954dd7ef5bd58d2f",
+    "runtime_template_tree": "e45e7aaeeb0639c24f5e9e80c18d5e203b98ba8f",
+    "runtime_template_scripts_tree": "62311b7847f66206a2a33e4bd497750bf074384f"
+  },
+  "bootstrap": {
+    "upstream_claim_id": "CLAIM-20260730-074400-task-ar-649-ar649001",
+    "runtime_lifecycle_commit": "d2e89c74db6d4d5e0cec5b061bd5563e5acb12d7",
+    "runtime_claim_boundary": "35188df669f81d49a69845cc7d335298f284b008",
+    "unmapped_diff_count": 0,
+    "consumer_commit_count": 0,
+    "consumer_push_count": 0
+  },
+  "adoption": {
+    "profiles": [
+      "core",
+      "security-service"
+    ],
+    "capabilities": [
+      "lifecycle",
+      "continuity",
+      "verification",
+      "compound",
+      "scribe",
+      "model-routing",
+      "security-service"
+    ],
+    "selected_template_files": 251,
+    "web_content_incremental_files": 0,
+    "ownership": {
+      "managed": 242,
+      "seed_once": 7,
+      "host_owned_excluded": 2
+    },
+    "initial_reconcile": {
+      "safe_updates": 249,
+      "preserved": 0,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "apply_safe": {
+      "applied": 249,
+      "remaining_conflicts": 0
+    },
+    "immediate_post_apply_reconcile": {
+      "safe_updates": 0,
+      "preserved": 249,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "post_work_registration_reconcile": {
+      "safe_updates": 0,
+      "preserved": 249,
+      "excluded": 2,
+      "conflicts": 0,
+      "conflict_paths": []
+    },
+    "final_reconcile": {
+      "safe_updates": 0,
+      "preserved": 249,
+      "excluded": 2,
+      "conflicts": 0
+    },
+    "lock_schema": "agent-runtime-lock/v2",
+    "package_version": "0.7.0",
+    "template_digest": "sha256:059223a1459cf7c9c1e0bc60868f3993bc547870b0337bf21110b84f33f55c32"
+  },
+  "preservation": {
+    "aggregate_algorithm": "printf declared relative paths NUL-delimited | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum",
+    "host_asset_count": 12,
+    "host_asset_manifest_sha256": "7b4b1a636ebe04f8fa2367c29c4b9b9ffd57b91a76da4f106a8ef935b33e88df",
+    "unexpected_overwrite_count": 0,
+    "host_assets": [
+      {
+        "path": ".env.example",
+        "before": "c45c6cf26cc9ca94021bf230cc8ae1038fe3a0acdd18043b65c4e1d429aaffbc",
+        "after": "c45c6cf26cc9ca94021bf230cc8ae1038fe3a0acdd18043b65c4e1d429aaffbc"
+      },
+      {
+        "path": ".gitattributes",
+        "before": "db1d46af5a62e658d6915a44b8060247266d7d151624018cd9fc2971be5100e9",
+        "after": "db1d46af5a62e658d6915a44b8060247266d7d151624018cd9fc2971be5100e9"
+      },
+      {
+        "path": "docs/SECURITY.md",
+        "before": "186de67a5606c389f1a28636ac4dad79467fa1600c5a5e11620276f4cfbda5fb",
+        "after": "186de67a5606c389f1a28636ac4dad79467fa1600c5a5e11620276f4cfbda5fb"
+      },
+      {
+        "path": "docs/SECURITY_REVIEW.md",
+        "before": "87068aeacf4de115e5e3995d8c1da678e3b898cac416da98113ee02edafd8297",
+        "after": "87068aeacf4de115e5e3995d8c1da678e3b898cac416da98113ee02edafd8297"
+      },
+      {
+        "path": "docs/REMOTE_ACCOUNT_DB_SECURITY.md",
+        "before": "c8290d2e7a24d9ed9cee98d691ecc7729afa4823abe3bac06634a26c779ddb51",
+        "after": "c8290d2e7a24d9ed9cee98d691ecc7729afa4823abe3bac06634a26c779ddb51"
+      },
+      {
+        "path": "docs/DECISIONS_PENDING.md",
+        "before": "4742b6ec1ee6b814029532146559dbe6b4305b360243c8c8227549fea7831ce5",
+        "after": "4742b6ec1ee6b814029532146559dbe6b4305b360243c8c8227549fea7831ce5"
+      },
+      {
+        "path": "docs/PYPI_PUBLISHING.ko.md",
+        "before": "b811ab6526293d5c5479ec2647a6ca1fd9e07b04dbef5b1106fef2b747ae6b67",
+        "after": "b811ab6526293d5c5479ec2647a6ca1fd9e07b04dbef5b1106fef2b747ae6b67"
+      },
+      {
+        "path": "docs/PROJECT_STATUS.ko.md",
+        "before": "9f50c0b7c2c3249bf583d46c74e07cb40a9868bc8399fb5496e17269c0d87608",
+        "after": "9f50c0b7c2c3249bf583d46c74e07cb40a9868bc8399fb5496e17269c0d87608"
+      },
+      {
+        "path": "docs/AGENT_INTEGRATIONS.ko.md",
+        "before": "262dcd4552c736ebd5655e1c33411406a3ae396ecc2881da5d30cbca30c94249",
+        "after": "262dcd4552c736ebd5655e1c33411406a3ae396ecc2881da5d30cbca30c94249"
+      },
+      {
+        "path": "integrations/projects/agent-runtime.json",
+        "before": "2fac726d3df9930fc7c7896a30205401179d91806654f6d336c6e9626c7c782a",
+        "after": "2fac726d3df9930fc7c7896a30205401179d91806654f6d336c6e9626c7c782a"
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "before": "dc52752803217985fd9122ad256587d797fd329e638860606b99712f0a7e71c9",
+        "after": "dc52752803217985fd9122ad256587d797fd329e638860606b99712f0a7e71c9"
+      },
+      {
+        "path": ".github/workflows/publish.yml",
+        "before": "f09925ec99a8b2be1c8ce784749398c15db53009bec1db19725ea131528a0a0d",
+        "after": "f09925ec99a8b2be1c8ce784749398c15db53009bec1db19725ea131528a0a0d"
+      }
+    ],
+    "content": {
+      "file_count": 276,
+      "before": "9de6a8dd96f406540e39fec941507b5a8940001d42cf9e06c90a39150d8d1791",
+      "after": "9de6a8dd96f406540e39fec941507b5a8940001d42cf9e06c90a39150d8d1791"
+    },
+    "auth_security_file_count": 26,
+    "auth_security_manifest_before": "2297a769ab695ba96d9af68b1beb01cdfeac9a7c8d792ad451a1d7193093d46f",
+    "auth_security_manifest_after": "2297a769ab695ba96d9af68b1beb01cdfeac9a7c8d792ad451a1d7193093d46f",
+    "target_head_before": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+    "target_head_after": "5cc15ff3f153339865ffb09b1f4c3b9124b1c4fd",
+    "target_tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "control_status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "primary_status_sha256": "0c81300d8326d89d6782931680a938d341481fa833a38c54186424bdb14e496b",
+    "primary_tracked_diff_sha256": "c90de2ff8397144a33a708f8c551162f6578cea9efcb4af30256cf1246902a69"
+  },
+  "expected_task_count": 3,
+  "tasks": [
+    {
+      "task_id": "TASK-AR-301",
+      "unit_id": "UNIT-TASK-AR-301-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-074200-task-ar-301-green1301",
+        "task_id": "TASK-AR-301",
+        "unit_id": "UNIT-TASK-AR-301-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_process",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/adoption-verification-green-1.json",
+        "agents/host/pilot/reviews/W4A-TASK-AR-301.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-301.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-302",
+      "unit_id": "UNIT-TASK-AR-302-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-074600-task-ar-302-green1302",
+        "task_id": "TASK-AR-302",
+        "unit_id": "UNIT-TASK-AR-302-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_standard",
+        "selected_model_tier": "planner_high",
+        "resolved_provider_tier": "opus",
+        "execution_surface": "codex_subagent_security_review",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/reviews/allimbot-security-and-w4b-green-1.md",
+        "agents/host/pilot/reviews/W4A-TASK-AR-302.md"
+      ]
+    },
+    {
+      "task_id": "TASK-AR-303",
+      "unit_id": "UNIT-TASK-AR-303-001",
+      "status": "completed",
+      "claim_trace": {
+        "claim_id": "CLAIM-20260730-075800-task-ar-303-green1303",
+        "task_id": "TASK-AR-303",
+        "unit_id": "UNIT-TASK-AR-303-001",
+        "status": "released"
+      },
+      "routing": {
+        "requested_model_tier": "worker_low",
+        "selected_model_tier": "worker_low",
+        "resolved_provider_tier": "haiku",
+        "execution_surface": "deterministic_local_processes",
+        "observed_model": null,
+        "actual_model_status": "unverified",
+        "observation_source": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "provider_usage_verified": false,
+        "savings_claim": "unavailable"
+      },
+      "output_refs": [
+        "agents/host/pilot/evidence/event-restart-recovery-green-1.json",
+        "agents/host/pilot/reviews/W4A-TASK-AR-303.md",
+        "agents/host/pilot/reviews/W4B-TASK-AR-303.md"
+      ]
+    }
+  ],
+  "security_review": {
+    "runtime_verdict": "APPROVE",
+    "product_verdict": "REVISE",
+    "reviewer_count": 1,
+    "output_count": 1,
+    "classification_count": 9,
+    "gate_finding_count": 0,
+    "runtime_finding_counts": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1
+    },
+    "product_finding_counts": {
+      "P0": 0,
+      "P1": 1,
+      "P2": 1
+    },
+    "review_sha256": "537d3379529a896fbac0c8809c7b866a3fe75483eb6d636740476ed36a49aa98"
+  },
+  "event_spool": {
+    "safe_event_status": "spooled",
+    "outbound_event_count": 1,
+    "unsafe_event_rejected": true,
+    "count_after_rejection": 1,
+    "spool_sha256": "86138e9529f6ded42df7ef06731a8a15cc3accacbc3ca065a8399364628cd36f",
+    "spool_mode": "0600",
+    "flush_called": false,
+    "worker_started": false,
+    "network_called": false,
+    "cloud_credentials_loaded": false
+  },
+  "compound": {
+    "negative_fixture_matched": true,
+    "signature": "defect:restart-recovery-must-persist-a-local-checkpoint:24350780e7094aec",
+    "record_id": "COMPOUND-20260730-080000-persist-a-bounded-checkpoint-before-restart-sens-bc974168905a",
+    "retrieval_match_count": 1,
+    "unrelated_match_count": 0,
+    "first_match_score": 180
+  },
+  "restart": {
+    "writer_pid": 1519251,
+    "reader_pid": 1519257,
+    "distinct_processes": true,
+    "same_task": true,
+    "same_claim": true,
+    "checkpoint_sha256": "8f7b2b7c5448517e0ec2fc3153d1f973530924c2e52edf0130fa91560aac8d0c",
+    "resume_check_clean": true
+  },
+  "scribe": {
+    "projection_status": "fresh",
+    "readiness": "ready",
+    "closure_blocking": false,
+    "source_state": "overdue",
+    "hot_count": 42,
+    "backlog_before": "9f50c0b7c2c3249bf583d46c74e07cb40a9868bc8399fb5496e17269c0d87608",
+    "backlog_after": "9f50c0b7c2c3249bf583d46c74e07cb40a9868bc8399fb5496e17269c0d87608",
+    "projection_sha256": "2358f80616b7ac5039c908f3df4fbd2ed3c55170d594c1b19446b52a37a93516"
+  },
+  "isolation": {
+    "raw_evidence_sha256": "c812105c2849593ca4142ccb88de1471b2235167a44c6b9e6ca45b565bf660be",
+    "portable_artifact": "tests/fixtures/pilots/allimbot/isolation-green-attempt-1.json",
+    "portable_semantic_sha256": "6434415de42ef0e53f2e0e4367df3aa5da4626b9ac05d3ab7b982e3b85fa4e5c",
+    "observed_write_checkout_ids": [
+      "allimbot-target"
+    ],
+    "raw_status": "pass",
+    "raw_block_count": 0,
+    "raw_watch_count": 0,
+    "portable_block_count": 0
+  },
+  "verification": {
+    "lock_findings": 0,
+    "final_reconcile_conflicts": 0,
+    "doctor_post_repair_blockers": 0,
+    "doctor_post_repair_warnings": 8,
+    "python_test_returncode": 0,
+    "python_tests_passed": 388,
+    "python_tests_skipped": 1,
+    "python_subtests_passed": 121,
+    "state_sync_blockers": 0,
+    "continuity_contract_findings": 0,
+    "owner_governance_blockers": 0,
+    "work_item_classifier_findings": 0,
+    "taskset_gate_findings": 0,
+    "security_service_findings": 0,
+    "isolation_blockers": 0,
+    "isolation_watches": 0
+  },
+  "verification_notes": {
+    "web_tests": {
+      "status": "not_run",
+      "reason": "The clean target had no installed JavaScript dependencies and the pilot prohibited dependency installation."
+    },
+    "security_service_runner": {
+      "status": "passed_with_pinned_source_path",
+      "reason": "The no-install target required the exact Runtime product source on PYTHONPATH."
+    },
+    "collaboration_governance": {
+      "status": "diagnostic_only",
+      "block_count": 5,
+      "reason": "The broad gate required CALL, MEETING, RESEARCH, RETRO, and SEMINAR artifacts outside the selected core plus security-service capability."
+    }
+  },
+  "findings": [
+    {
+      "code": "allimbot-github-oauth-token-browser-session",
+      "priority": "P1"
+    },
+    {
+      "code": "allimbot-static-deployment-secret-boundary",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-distribution-source-path-required",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-scribe-status-classifier-overcounts",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-taskset-release-terminalization-manual-repair",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-taskset-order-required-local-registration-repair",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-task-verification-prose-executed-as-shell",
+      "priority": "P2"
+    },
+    {
+      "code": "runtime-routing-usage-unverified",
+      "priority": "P2"
+    },
+    {
+      "code": "allimbot-web-tests-not-run-no-install-boundary",
+      "priority": "P2"
+    }
+  ],
+  "external_effects": {
+    "publish": 0,
+    "deploy": 0,
+    "origin_push": 0,
+    "host_commit": 0,
+    "credential_read": 0,
+    "network_delivery": 0,
+    "package_install": 0,
+    "provider_live_call": 0,
+    "content_mutation": 0,
+    "migration": 0,
+    "spool_flush": 0,
+    "consumer_commit": 0
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "le-20260801-000005-kst-ar654repair001",
+  "callsign": "lead_engineer@orchestrator-02",
+  "callsite_id": "terminal:wt-task-ar-654:tab-02",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260801-000156-task-ar-654-ar654repair001.json"
+  ],
+  "created_at": "2026-08-01T00:01:56+09:00",
+  "decision_cycle_id": "",
+  "display_name": "lead_engineer@orchestrator-02",
+  "model": "",
+  "model_tier": "planner_high",
+  "on_behalf_of": "UNIT-TASK-AR-654-001",
+  "pane_id": "terminal:wt-task-ar-654:tab-02",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-08-01T00:01:56+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-654",
+  "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
+  "team_id": "quality",
+  "unit_id": "UNIT-TASK-AR-654-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md",
+  "updated_at": "2026-08-01T00:01:56+09:00",
+  "workspace": "",
+  "worktree_path": ".worktrees/TASK-AR-654"
+}

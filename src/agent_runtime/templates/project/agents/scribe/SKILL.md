@@ -16,6 +16,9 @@ dispatcher.
 - Archive or summarize old document-heavy sections when Lead Engineer or Doc
   Steward has already identified them as safe to compress.
 - Keep source links and audit/TASK/MEETING references intact.
+- Produce a deterministic, bounded cleanup proposal before any cleanup task.
+- Record the outcome only after an explicitly authorized cleanup or owner
+  no-touch decision; bind it to before/after source digests and counts.
 - Produce a short cleanup note describing what was compressed and what was left
   unchanged.
 
@@ -31,6 +34,11 @@ dispatcher.
   latest `CYCLE-*.md`, latest `REVIEW-*.md`, active TASK files, or unresolved
   AUDIT entries unless explicitly assigned.
 - Do not edit product code.
+- Do not treat a generated projection as cleanup evidence. Projection refresh,
+  canonical cleanup, and cleanup receipt are three distinct operations.
+- Do not edit host-owned state merely because Doctor, SessionStart, or a closure
+  gate reports overdue debt. Stop until a task or owner record authorizes the
+  exact cleanup scope.
 
 ## Invocation Triggers
 
@@ -53,10 +61,73 @@ heading) **핫 항목 수**가:
   **최신 10개는 hot 으로 유지**.
 
 판정은 `python scripts/scribe_due.py --root .` 로 자동화한다. 기본 호출,
-Doctor, SessionStart는 읽기 전용이며 source of truth가 아니다. 압축이
-필요하면 먼저 `--write-projection`으로 최대 10개 derived item만 담은
-generated projection을 원자적으로 갱신한다. source state 자체는 이
-명령으로 수정하지 않는다.
+Doctor, SessionStart는 읽기 전용이며 source of truth가 아니다.
+`--write-projection`은 최대 10개 derived item, 활성 TASK/비-overlay claim
+identity, bounded cleanup proposal만 담은 generated view를 원자적으로
+갱신한다. **projection freshness만으로 overdue source debt를 해소한 것으로
+보지 않는다.**
+
+실제 압축은 Lead Engineer/Doc Steward가 범위와 no-touch 경계를 명시한
+별도 작업에서 수행한다. 작업 후에는
+`--record-cleanup --authorization-ref <repo-relative-record>`로
+before/after digest·hot count·active-work digest·cleanup-plan digest를 묶은
+receipt를 남긴다. hot count가 줄지 않았다면
+`--owner-decision-ref <repo-relative-owner-record>`가 추가로 필요하다.
+어느 CLI 모드도 canonical host state를 자동 수정하지 않는다.
+
+cleanup 전 감사 순서는 고정한다.
+
+1. `--write-projection`으로 baseline과 cleanup plan을 생성한다.
+2. 그 digest를 활성 TASK/UNIT-TASK authorization에 기록한다.
+3. **canonical source의 baseline bytes가 아직 그대로인 상태에서**
+   authorization을 Git에 commit한다. source가 새 파일이면 같은 commit에
+   반드시 포함한다.
+4. 그 뒤에만 canonical source를 정리하고 `--record-cleanup`을 실행한다.
+5. no-touch라면 owner decision도 source baseline이 그대로인 상태에서
+   authorization commit의 후손 commit으로 먼저 기록한다.
+
+record 시점의 authorization과 owner decision은 각각 현재 파일과 committed
+blob이 byte-for-byte 같아야 한다. receipt는 baseline commit과 authority
+blob OID를 저장하고, 이후 검증은 변경 가능한 현재 권한 파일이 아니라 그
+고정된 Git object를 재생한다. commit되지 않은 승인, 현재 branch에서
+도달할 수 없는 commit, source bytes/count/plan이 맞지 않는 commit은
+fail-closed다. repository-local replace ref나 graft가 존재하는 Git audit
+view도 거부하며, object 재생은 replacement와 lazy fetch를 비활성화한
+로컬 읽기만 사용한다.
+
+authorization은 파일명만 TASK처럼 보이는 문서가 아니다. projection을
+생성할 때부터 활성 canonical TASK/UNIT-TASK여야 하며, frontmatter에 아래
+flat fields를 포함한다. source binding digest는 projection `sources`의
+`adapter/path/present/digest/hot_count` 배열에 대한 canonical JSON
+SHA-256이고 plan digest는 projection이 생성한 값을 그대로 사용한다.
+TASK의 `id`/`work_id`는 파일 stem과 같아야 한다. UNIT-TASK의
+`work_id`/`unit_id`는 파일 stem과, `task_id`/`parent_id`는 상위 디렉터리의
+TASK ID와 모두 같아야 한다. 승인자 identity는 비밀이 아닌 명시적 문자열만
+허용한다. ASCII 영문자로 시작하고 이후에는 영숫자와
+`._@/+:-`만 쓰는 최대 160자 token이어야 한다. null/boolean/숫자/date,
+YAML implicit scalar, collection, escape sequence, placeholder 값은 권한이
+아니다. 따옴표를 제거한 **원문 logical value 자체**가 token과 정확히
+같아야 하며, 앞뒤 ASCII/Unicode 공백이나 control character를 trim한 뒤
+승인해서는 안 된다. owner decision의 `approved_by`에도 같은 규칙을
+적용한다.
+
+```yaml
+scribe_authorization: cleanup
+scribe_authorized_by: <non-secret approver identity>
+scribe_authorized_role: lead-engineer # 또는 doc-steward / owner
+scribe_source_binding_digest: <64 lowercase hex>
+scribe_cleanup_plan_digest: <64 lowercase hex>
+```
+
+no-touch 예외는 TASK authorization으로 대신할 수 없다. `reviews/` 바로
+아래의 `DECISION-*.json` 또는 `OWNER-DECISION-*.json`이 정확히
+`agent-runtime-scribe-owner-decision/v1` schema, `decision: no_touch`,
+authorization의 `work_id`/ref, 같은 source/plan digest, `approved_by`,
+`approver_role: owner`, timezone이 있는 `decided_at`을 모두 결합해야 한다.
+관련 없는 REVIEW/AUDIT/RETRO 파일이나 내용 없는 문서는 권한이 아니다.
+`no_touch`는 hot count를 유지한다는 뜻만이 아니라 모든 source binding
+(path, presence, digest, hot count)이 baseline과 정확히 같다는 뜻이다.
+같은 개수의 내용 교체나 항목 추가도 no-touch receipt로 기록할 수 없다.
 
 ### 2. cadence backstop
 
@@ -77,12 +148,20 @@ generated projection을 원자적으로 갱신한다. source state 자체는 이
 활성 TASK, 미해소 AUDIT. 정본(CYCLE/REVIEW/AUDIT/retros/seminars/meetings)은 **이동·요약하지 않고
 링크로 보존**한다.
 
+활성 범위 판정에는 canonical active TASK와 active non-overlay claim을 모두
+포함한다. review/scout 등 overlay claim은 cleanup coverage 의무에서
+제외한다. 활성 identity가 projection 생성 뒤 추가되면 projection이
+fresh여도 coverage는 incomplete이며, cleanup 전에 다시 projection을
+갱신한다.
+
 ## Standard Inputs
 
 1. Clear cleanup scope from Lead Engineer or Doc Steward.
 2. Target document paths.
 3. Canonical source references that must be preserved.
 4. Any compression level or no-touch sections.
+5. Explicit authorization record. Reduction이 불가능하면 owner no-touch
+   decision record도 필요하다.
 
 ## Output Contract
 
@@ -94,6 +173,9 @@ Preserved references:
 Changed sections:
 Not changed:
 Verification:
+Authorization ref:
+Before/after hot count:
+Cleanup receipt:
 ```
 
 ## Compression Policy
@@ -103,6 +185,47 @@ Verification:
 - `archive`: move or summarize cold historical material only when an existing
   archive location and canonical references are clear.
 
+Generated cleanup proposal은 실행 명령이 아니다. 후보는 오래되어 hot
+selection에서 밀린 항목과 명시적으로 완료된 항목으로 제한하며, active
+identity와 canonical/no-touch record reference는 항상 제외한다.
+reduction receipt는 bound plan에 들어 있는 baseline 후보 행만
+삭제·교체할 수 있다. Markdown의 다른 nonblank 행은 내용과 순서를
+보존해야 하고, JSON은 후보가 아닌 entry와 collection 바깥 구조를
+보존해야 한다. hot count만 줄이거나 receipt digest를 다시 계산해도 이
+행 단위 검증을 우회하지 못한다. 보호 행 앞뒤에 heading, HTML
+comment/block, code fence, list parent 또는 임의 entry를 삽입하여 보호
+행을 숨기거나 re-parent하는 것도 금지한다. continuation이나 nested
+content의 구조적 부모인 Markdown 후보는 자동 정리하지 않는다.
+본문이 없고 다음 heading이 같은 level 또는 상위 level인 heading 후보는
+deletion-only로 정리할 수 있지만 summary로 교체할 수는 없다.
+
+후보를 요약 행으로 교체할 때는 임의 문장을 넣지 않고 아래의 bounded
+형식만 사용한다. `<N>`은 그 위치에서 연속으로 교체하는 bound 후보 수,
+`<PLAN_DIGEST>`는 authorization에 결합된 64자리 cleanup plan digest다.
+각 요약은 반드시 해당 후보 span의 위치에서만 나타나야 한다.
+Markdown summary는 안전한 top-level list 후보 span에서만 허용한다.
+
+```text
+- [x] Scribe archived <N> bound cleanup <candidate|candidates>; plan <PLAN_DIGEST>
+```
+
+`<N>`이 1이면 `candidate`, 그 외에는 `candidates`를 쓴다. JSON
+collection에서는 키가 정확히 아래 네 개뿐인 object를 사용한다(파일의
+공백과 key order는 자유지만 logical object는 같아야 한다).
+
+```json
+{
+  "candidate_count": 5,
+  "cleanup_plan_digest": "<PLAN_DIGEST>",
+  "kind": "scribe_cleanup_summary",
+  "status": "completed"
+}
+```
+
+상세 서술과 source link는 canonical state에 임의 삽입하지 말고 별도의
+`[Scribe Cleanup Note]`에 기록한다. deletion-only cleanup은 계속
+허용되며, 원래 후보 행을 그대로 두는 것도 허용된다.
+
 ## Operating Rules
 
 - Preserve IDs exactly: `TASK-NNN`, `MEETING-YYYY-MM-DD-NNN`,
@@ -111,3 +234,6 @@ Verification:
   an explicit typo.
 - Prefer small diffs. If cleanup requires deciding meaning, stop and hand back
   to Lead Engineer or Doc Steward.
+- 완료 판정은 네 축을 각각 확인한다: source debt, projection freshness,
+  active coverage, cleanup outcome. Fresh projection 하나로 나머지 축을
+  대체하지 않는다.

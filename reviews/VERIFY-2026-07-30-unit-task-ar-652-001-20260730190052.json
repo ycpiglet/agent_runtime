@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-07-30-unit-task-ar-652-001-20260730190052",
+  "work_id": "UNIT-TASK-AR-652-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-652/UNIT-TASK-AR-652-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-652",
+  "unit_id": "UNIT-TASK-AR-652-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-07-30T19:00:52+09:00",
+  "verified_by": "le-20260730-123600-kst-ar652001",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_model_routing.py tests/test_task_claim_dispatcher.py tests/test_doctor.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T19:00:58+09:00",
+      "finished_at": "2026-07-30T19:01:26+09:00",
+      "stdout": "........................................................................ [ 66%]\n....................................                                     [100%]\n108 passed in 27.52s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest src/agent_runtime/templates/project/scripts/test_model_routing.py src/agent_runtime/templates/project/scripts/test_subagent_dispatch.py src/agent_runtime/templates/project/scripts/test_codex_subagent_bridge.py src/agent_runtime/templates/project/scripts/test_agent_worker_routing.py src/agent_runtime/templates/project/scripts/test_auto_dispatch.py src/agent_runtime/templates/project/scripts/test_eval_harness.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T19:01:26+09:00",
+      "finished_at": "2026-07-30T19:01:30+09:00",
+      "stdout": "........................................................................ [ 28%]\n........................................................................ [ 56%]\n........................................................................ [ 84%]\n........................................                                 [100%]\n256 passed in 4.15s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python -m pytest src/agent_runtime/templates/project/scripts/test_verify_sdk_backend.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-07-30T19:01:30+09:00",
+      "finished_at": "2026-07-30T19:01:32+09:00",
+      "stdout": "...                                                                      [100%]\n3 passed in 0.17s\n",
+      "stderr": ""
+    }
+  ]
+}

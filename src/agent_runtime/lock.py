@@ -180,7 +180,15 @@ def run_lock(root: Path, *, mode: str, template_root: Path | None = None) -> int
     plan = build_lock_plan(root, template_root=template_root)
     if mode == "write":
         blockers = _write_blockers(plan.findings)
-        if build_sync_plan(root, template_root=template_root).conflicts:
+        sync_plan = build_sync_plan(root, template_root=template_root)
+        if sync_plan.claim_store_state not in {"pristine", "initialized"}:
+            print(render(plan))
+            print(
+                "lock write refused: claim-store state "
+                f"{sync_plan.claim_store_state}; run sync --apply or repair integrity first"
+            )
+            return 1
+        if sync_plan.conflicts:
             print(render(plan))
             print("lock write refused: unresolved sync conflicts")
             return 1

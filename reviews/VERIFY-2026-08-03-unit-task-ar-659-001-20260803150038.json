@@ -1,0 +1,52 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-08-03-unit-task-ar-659-001-20260803150038",
+  "work_id": "UNIT-TASK-AR-659-001",
+  "work_path": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
+  "kind": "unit",
+  "task_id": "TASK-AR-659",
+  "unit_id": "UNIT-TASK-AR-659-001",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-08-03T15:00:38+09:00",
+  "verified_by": "le-20260803-143123-kst-cfc8",
+  "command_count": 4,
+  "commands": [
+    {
+      "command": "PYTHONPATH=src python -m pytest tests/test_claim_reaper.py tests/test_claim_store.py tests/test_claim_lease.py tests/test_task_claim_dispatcher.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T15:00:38+09:00",
+      "finished_at": "2026-08-03T15:01:44+09:00",
+      "stdout": "........................................................................ [ 18%]\n........................................................................ [ 36%]\n.......................................ss............................... [ 54%]\n........................................................................ [ 72%]\n........................................................................ [ 90%]\n.......................................                                  [100%]\n397 passed, 2 skipped in 65.14s (0:01:05)\n",
+      "stderr": ""
+    },
+    {
+      "command": "PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T15:01:44+09:00",
+      "finished_at": "2026-08-03T15:02:04+09:00",
+      "stdout": "....................................                                     [100%]\n36 passed in 19.90s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/template_mirror_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T15:02:04+09:00",
+      "finished_at": "2026-08-03T15:02:04+09:00",
+      "stdout": "template-mirror: expected=86 common=86 identical=83 intentional=3 findings=0\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/rbac_write_gate.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-08-03T15:02:04+09:00",
+      "finished_at": "2026-08-03T15:02:04+09:00",
+      "stdout": "rbac-write-gate: pass\nroot=/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-659\nfindings=0\n",
+      "stderr": ""
+    }
+  ]
+}

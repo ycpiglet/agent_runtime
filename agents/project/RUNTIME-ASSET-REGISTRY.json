@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-asset-registry/v1",
   "version": 1,
-  "updated_at": "2026-07-29T04:00:00+09:00",
+  "updated_at": "2026-07-31T04:21:40+09:00",
   "status_scale": ["active", "watch", "deprecated", "removed"],
   "lifecycle_decisions": ["keep", "modify", "deprecate", "remove", "observe"],
   "assets": [
@@ -26,6 +26,26 @@
       "min_recent_uses": 1
     },
     {
+      "id": "gate.template_mirror",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/template_mirror_gate.py"],
+      "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/TEMPLATE-MIRROR-CONTRACT.json", "tests/test_template_mirror_gate.py"],
+      "tokens": ["template_mirror_gate.py", "agent-runtime-template-mirror-contract/v1"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "gate.pilot_isolation",
+      "kind": "gate",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": ["scripts/pilot_isolation_gate.py"],
+      "evidence_paths": ["docs/pilot-isolation-contract.md", "tests/test_pilot_isolation_gate.py"],
+      "tokens": ["pilot_isolation_gate.py", "agent-runtime-pilot-isolation/v1"],
+      "min_recent_uses": 1
+    },
+    {
       "id": "gate.runtime_asset_usage",
       "kind": "gate",
       "status": "active",
@@ -40,7 +60,11 @@
       "kind": "gate",
       "status": "active",
       "lifecycle": "keep",
-      "paths": ["scripts/state_sync_gate.py"],
+      "paths": [
+        "scripts/state_sync_gate.py",
+        "scripts/agent_runtime/config.py",
+        "scripts/agent_runtime/state_projection.py"
+      ],
       "evidence_paths": ["scripts/owner_governance_gate.py", "agents/project/NEXT-SESSION-POINTER.yml"],
       "tokens": ["state_sync_gate.py", "TASKSET-AR-GOVERNANCE-OPS"],
       "min_recent_uses": 1
@@ -303,6 +327,29 @@
       "paths": ["scripts/session_start_hook.py", "scripts/session_compact_hook.py", "src/agent_runtime/hook_runtime.py", ".codex/hooks.json"],
       "evidence_paths": ["tests/test_session_continuity_hooks.py", "src/agent_runtime/templates/project/.codex/hooks.json"],
       "tokens": ["session-start", "pre-compact", "post-compact", "state_projection", "hook.session_continuity"],
+      "min_recent_uses": 1
+    },
+    {
+      "id": "skill.failure_to_regression",
+      "kind": "skill",
+      "status": "active",
+      "lifecycle": "keep",
+      "paths": [
+        "skills/failure-to-regression/SKILL.md",
+        "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md"
+      ],
+      "evidence_paths": [
+        "agents/lead_engineer/tasks/TASK-AR-654.md",
+        "reviews/REVIEW-2026-07-31-task-ar-654-compound-closure-t3-replan.md",
+        "tests/test_compound_records.py",
+        "tests/test_closure_gate.py"
+      ],
+      "tokens": [
+        "failure-to-regression",
+        "repeated_failure",
+        "validate_prevention_destinations",
+        "skill.failure_to_regression"
+      ],
       "min_recent_uses": 1
     },
     {

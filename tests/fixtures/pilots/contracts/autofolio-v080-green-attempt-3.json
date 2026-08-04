@@ -1,0 +1,87 @@
+{
+  "schema": "agent-runtime-migration-pilot-contract/v1",
+  "host": "autofolio",
+  "pilot_id": "autofolio-v080-green-attempt-3",
+  "evidence_semantic_sha256": "1b3d702f012a2875e44df91b7391db7bce074f2e41e2929ed2bf7dd6193fec6b",
+  "result": "passed",
+  "baselines": {
+    "host_commit": "ca88433cf155fd03d616584fda7ed4aa3d33fd71",
+    "runtime_commit": "db025d783168b4934ef1260bab0b0b635c9b8f39",
+    "runtime_tree": "bb1e2c9c79dde8de3775a4740e1cefa5022d92b7",
+    "template_tree": "52dbe6e673bf7c18314591d56c78de36bf88625a",
+    "template_scripts_tree": "bbd6035c01cf80bd9125bc2a540f4b23988937d9"
+  },
+  "source_unmanaged_count": 20,
+  "selected_template_files": 251,
+  "seam_dispositions": {
+    "managed": 6,
+    "seed_once": 5,
+    "host_owned": 9,
+    "generated": 0
+  },
+  "unclassified_count": 0,
+  "temporary_conflict_count": 0,
+  "additional_reclaimed_conflicts": [
+    "scripts/status_alias.py",
+    "scripts/task_claim_dispatcher.py"
+  ],
+  "protected_file_count": 1804,
+  "protected_paths_sha256": "f095e32b66baba5bcbaa1e0ec13b2810c1e8705d72581096175798c196eeefb9",
+  "protected_manifest_sha256": "bd97835ce0931b02154a05b538be7543022e070c2ba0f4ef4c76af1f0f49907d",
+  "findings": {
+    "model-tier-execution-equivalence": "P1",
+    "scribe-source-overdue-active-task-unverified": "P1",
+    "legacy-hook-command-duplication": "P2"
+  },
+  "verification": {
+    "host_contract_tests_passed": 210,
+    "owner_governance_tests_passed": 13,
+    "parallel_worktree_tests_passed": 9,
+    "task_claim_tests_passed": 25,
+    "taskset_tests_passed": 85,
+    "wave_tests_passed": 59,
+    "hook_tests_passed": 19,
+    "runtime_targeted_tests_passed": 165,
+    "runtime_full_tests_passed": 2958,
+    "runtime_full_tests_skipped": 3,
+    "work_schema_findings": 0,
+    "doctor_blockers": 0,
+    "lock_findings": 0,
+    "compound_findings": 0,
+    "isolation_blockers": 0,
+    "template_mirror_findings": 0
+  },
+  "required_external_effects": [
+    "publish",
+    "deploy",
+    "origin_push",
+    "host_commit",
+    "credential_read",
+    "credential_change",
+    "network_delivery",
+    "provider_call",
+    "notification",
+    "broker_call",
+    "order",
+    "package_install",
+    "database_migration",
+    "content_mutation",
+    "product_mutation",
+    "version_change",
+    "tag",
+    "package_build"
+  ],
+  "artifact_bindings": [
+    {
+      "kind": "pilot_isolation",
+      "path": "tests/fixtures/pilots/autofolio/isolation-green-attempt-3.json",
+      "semantic_sha256": "dfc5889c7e51cc318240250199b3d90f50e4ba236654e638ac22608288f51c9a",
+      "raw_evidence_sha256": "09a4dbc39b62a48e2d299c6d79722cdf5b547776310806ef05e452553d219a27"
+    },
+    {
+      "kind": "seam_ledger",
+      "path": "tests/fixtures/pilots/autofolio/seam-ledger-green-attempt-3.json",
+      "semantic_sha256": "76f3928297175567fdb94e62ec7b417a552f306d39b2e4d685805e95ef7d6db0"
+    }
+  ]
+}

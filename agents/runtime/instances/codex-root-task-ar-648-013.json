@@ -1,0 +1,33 @@
+{
+  "agent_instance_id": "codex-root-task-ar-648-013",
+  "callsign": "TASK-AR-648 expected mirror inventory repair",
+  "callsite_id": "codex:root:task-ar-648:unit-013",
+  "claim_refs": [
+    "agents/runtime/task_claims/CLAIM-20260730-042240-task-ar-648-961f.json"
+  ],
+  "created_at": "2026-07-30T04:22:40+09:00",
+  "decision_cycle_id": "",
+  "display_name": "TASK-AR-648 expected mirror inventory repair",
+  "model": "",
+  "model_tier": "planner_high",
+  "on_behalf_of": "UNIT-TASK-AR-648-013",
+  "pane_id": "codex:root:task-ar-648:unit-013",
+  "parent_instance_id": "",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "prompt_config_hash": "",
+  "provider": "",
+  "role": "lead-engineer",
+  "schema": "agent-runtime-agent-instance/v1",
+  "session_id": "",
+  "skill_versions": {},
+  "spawned_at": "2026-07-30T04:22:40+09:00",
+  "spawned_by": "task_claim_dispatcher",
+  "task_id": "TASK-AR-648",
+  "task_set_id": "TASKSET-AR-V080-ADOPTION-ENFORCEMENT",
+  "team_id": "evaluation-office",
+  "unit_id": "UNIT-TASK-AR-648-013",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-648/UNIT-TASK-AR-648-013.md",
+  "updated_at": "2026-07-30T04:39:11+09:00",
+  "workspace": "",
+  "worktree_path": "/home/keti-itp-01/ycpiglet/.control-clones/agent-runtime-task-ar-648/.worktrees/TASK-AR-648-002-impl"
+}

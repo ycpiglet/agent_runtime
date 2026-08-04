@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -34,6 +35,14 @@ def run_cycle(
     runner: Callable[[list[str], Path], tuple[int, str]] | None = None,
 ) -> dict[str, Any]:
     import claim_reaper
+
+    if grace_seconds is not None:
+        claim_reaper.claim_store.require_duration(
+            grace_seconds,
+            field="grace_seconds",
+            minimum=0,
+        )
+
     import goal_supervisor
 
     report: dict[str, Any] = {"apply": apply}
@@ -61,6 +70,14 @@ def _summary_line(report: dict[str, Any]) -> str:
         + ("apply" if report.get("apply") else "dry-run")
         + f" | claims {'reaped' if report.get('apply') else 'would-reap'}={len(reaped or [])}"
         + f" live={len(reaper.get('live', []))} skipped={len(reaper.get('skipped', []))}"
+        # Claims no automated path can end. This watchdog exists to break wave
+        # deadlocks, so it is the one place that must not stay quiet about them.
+        + f" needs_owner_recovery={len(reaper.get('needs_owner_recovery', []))}"
+        # A torn lease is the same class: never reapable, and not terminalizable
+        # while the later deadline stands. Splitting it out of
+        # needs_owner_recovery silently dropped it from this line, which is the
+        # one place a scheduled run surfaces anything.
+        + f" torn_lease={len(reaper.get('torn_lease', []))}"
         + f" | goal action={supervisor.get('action')}"
     )
 
@@ -78,10 +95,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    report = run_cycle(
-        args.root, apply=args.apply, now=args.now,
-        grace_seconds=args.grace_seconds, max_restarts=args.max_restarts,
-    )
+    try:
+        report = run_cycle(
+            args.root,
+            apply=args.apply,
+            now=args.now,
+            grace_seconds=args.grace_seconds,
+            max_restarts=args.max_restarts,
+        )
+    except ValueError as exc:
+        print(f"deadlock-watchdog: {exc}", file=sys.stderr)
+        return 2
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:

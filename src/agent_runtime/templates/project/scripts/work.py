@@ -28,7 +28,10 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from agent_runtime import claim_store
+
 import backlog_board
+import closure_gate
 import compound_record
 import evidence_index_generator
 import inflight_overlay
@@ -69,7 +72,8 @@ CLOSEOUT_START = "<!-- work-close:start -->"
 CLOSEOUT_END = "<!-- work-close:end -->"
 PLANNING_OUTBOX_DIR = Path("agents/planning/outbox")
 PLANNING_DRAFTS_DIR = Path("agents/planning/drafts")
-ACTIVE_CLAIM_STATUSES = {"assigned", "claimed", "in_progress", "review", "waiting_review", "working"}
+ACTIVE_CLAIM_STATUSES = claim_store.ACTIVE_CLAIM_STATUSES
+RELEASED_CLAIM_AUTHORITY_STATUSES = {"released", "completed", "done", "closed"}
 ASSIGNMENT_RULES: list[tuple[str, str, tuple[str, ...]]] = [
     (
         "agent-runtime-core",
@@ -332,6 +336,111 @@ def _list_value(value: Any) -> list[str]:
     if isinstance(value, str) and value.strip():
         return [part.strip() for part in value.split(",") if part.strip()]
     return []
+
+
+def _task_dependencies(task: dict[str, Any]) -> list[str]:
+    return _list_value(task.get("depends_on"))
+
+
+def _unit_dependencies(
+    task: dict[str, Any],
+    unit: dict[str, Any],
+) -> list[str]:
+    return list(
+        dict.fromkeys(
+            [
+                *_list_value(unit.get("depends_on")),
+                *_task_dependencies(task),
+            ]
+        )
+    )
+
+
+def _task_dependency_findings(
+    tasks: list[dict[str, Any]],
+    *,
+    existing_ids: set[str] | None = None,
+) -> list[str]:
+    findings: list[str] = []
+    new_ids = {
+        str(task.get("display_id") or "").strip()
+        for task in tasks
+        if str(task.get("display_id") or "").strip()
+    }
+    graph: dict[str, list[str]] = {}
+    for index, task in enumerate(tasks, start=1):
+        prefix = f"tasks[{index}]"
+        task_id = str(task.get("display_id") or "").strip()
+        raw = task.get("depends_on")
+        if raw is None:
+            dependencies: list[str] = []
+        elif not isinstance(raw, list) or any(
+            not isinstance(item, str) or not item.strip() for item in raw
+        ):
+            findings.append(f"input:{prefix}:depends_on:missing-or-invalid")
+            continue
+        else:
+            dependencies = [item.strip() for item in raw]
+        duplicates = sorted(
+            {
+                dependency
+                for dependency in dependencies
+                if dependencies.count(dependency) > 1
+            }
+        )
+        for dependency in duplicates:
+            findings.append(
+                f"input:{prefix}:depends_on:duplicate:{dependency}"
+            )
+        for dependency in dependencies:
+            if not TASK_DISPLAY_RE.fullmatch(dependency):
+                findings.append(
+                    f"input:{prefix}:depends_on:invalid:{dependency}"
+                )
+            elif task_id and dependency == task_id:
+                findings.append(
+                    f"input:{prefix}:depends_on:self:{dependency}"
+                )
+            elif (
+                existing_ids is not None
+                and dependency not in new_ids
+                and dependency not in existing_ids
+            ):
+                findings.append(
+                    f"input:{prefix}:depends_on:missing:{dependency}"
+                )
+        if task_id:
+            graph[task_id] = [
+                dependency
+                for dependency in dependencies
+                if dependency in new_ids and dependency != task_id
+            ]
+
+    visiting: list[str] = []
+    visited: set[str] = set()
+
+    def visit(task_id: str) -> bool:
+        if task_id in visited:
+            return False
+        if task_id in visiting:
+            start = visiting.index(task_id)
+            cycle = visiting[start:] + [task_id]
+            findings.append(
+                f"input:tasks:depends_on:cycle:{'->'.join(cycle)}"
+            )
+            return True
+        visiting.append(task_id)
+        for dependency in graph.get(task_id, []):
+            if visit(dependency):
+                return True
+        visiting.pop()
+        visited.add(task_id)
+        return False
+
+    for task_id in sorted(graph):
+        if visit(task_id):
+            break
+    return findings
 
 
 def _text_lines(value: Any) -> list[str]:
@@ -615,6 +724,9 @@ def _render_task(
         "acceptance": acceptance,
         "verification": verification,
     }
+    dependencies = _task_dependencies(task)
+    if dependencies:
+        meta["depends_on"] = dependencies
     return (
         _frontmatter(meta)
         + "\n\n"
@@ -679,6 +791,9 @@ def _render_unit(
         "handoff": unit["handoff"],
         "stop_condition": unit["stop_condition"],
     }
+    dependencies = _unit_dependencies(task, unit)
+    if dependencies:
+        meta["depends_on"] = dependencies
     steps = _text_lines(unit.get("steps"))
     sections = [
         ("Context", str(unit["context"]).strip()),
@@ -824,12 +939,18 @@ def _validate_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str
     duplicates = sorted({display_id for display_id in display_ids if display_ids.count(display_id) > 1})
     for display_id in duplicates:
         findings.append(f"input:tasks:duplicate-display-id:{display_id}")
+    findings.extend(_task_dependency_findings(tasks))
     if findings:
         raise WorkRegistrationError(findings)
     return initiative, taskset, tasks
 
 
-def _existing_task_matches(path: Path, taskset_id: str, initiative_id: str) -> bool:
+def _existing_task_matches(
+    path: Path,
+    taskset_id: str,
+    initiative_id: str,
+    depends_on: list[str] | None = None,
+) -> bool:
     if not path.exists():
         return False
     meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
@@ -837,6 +958,10 @@ def _existing_task_matches(path: Path, taskset_id: str, initiative_id: str) -> b
         str(meta.get("id") or path.stem) == path.stem
         and str(meta.get("task_set_id") or "") == taskset_id
         and str(meta.get("initiative_id") or "") == initiative_id
+        and (
+            depends_on is None
+            or _list_value(meta.get("depends_on")) == depends_on
+        )
     )
 
 
@@ -862,15 +987,21 @@ def _load_taskset_registry(root: Path) -> dict[str, Any]:
     return payload
 
 
-def _write_taskset_registry(root: Path, taskset: dict[str, Any]) -> None:
+def _write_taskset_registry(
+    root: Path,
+    taskset: dict[str, Any],
+    tasks: list[dict[str, Any]],
+) -> None:
     path = root / TASKSET_REGISTRY_PATH
     payload = _load_taskset_registry(root)
     rows = [row for row in payload.get("tasksets", []) if isinstance(row, dict)]
+    task_ids = [str(task["display_id"]) for task in tasks]
     new_row = {
         "task_set_id": taskset["id"],
         "display_name": taskset["display_name"],
         "summary": taskset["summary"],
         "order": int(taskset.get("order", 500)),
+        "tasks": task_ids,
     }
     for row in rows:
         if row.get("task_set_id") == taskset["id"]:
@@ -880,8 +1011,21 @@ def _write_taskset_registry(root: Path, taskset: dict[str, Any]) -> None:
                 "summary": row.get("summary"),
                 "order": int(row.get("order", 500)),
             }
-            if comparable != new_row:
+            if comparable != {key: value for key, value in new_row.items() if key != "tasks"}:
                 raise WorkRegistrationError([f"{_rel(root, path)}: taskset-definition-conflict:{taskset['id']}"])
+            existing_tasks = row.get("tasks")
+            if existing_tasks is not None and existing_tasks != task_ids:
+                raise WorkRegistrationError(
+                    [f"{_rel(root, path)}: taskset-task-order-conflict:{taskset['id']}"]
+                )
+            if existing_tasks is None:
+                # Backward-compatible migration for registry rows created
+                # before ordered membership was persisted.
+                row["tasks"] = task_ids
+                path.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8",
+                )
             return
     rows.append(new_row)
     rows.sort(key=lambda row: (int(row.get("order", 500)), str(row.get("task_set_id") or "")))
@@ -1012,11 +1156,23 @@ def _unit_targets(root: Path, tasks: list[dict[str, Any]]) -> list[Path]:
     return targets
 
 
-def _existing_unit_matches(path: Path, task_id: str, unit_id: str) -> bool:
+def _existing_unit_matches(
+    path: Path,
+    task_id: str,
+    unit_id: str,
+    depends_on: list[str] | None = None,
+) -> bool:
     if not path.exists():
         return False
     meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
-    return str(meta.get("unit_id") or path.stem) == unit_id and str(meta.get("task_id") or "") == task_id
+    return (
+        str(meta.get("unit_id") or path.stem) == unit_id
+        and str(meta.get("task_id") or "") == task_id
+        and (
+            depends_on is None
+            or _list_value(meta.get("depends_on")) == depends_on
+        )
+    )
 
 
 def _preflight_existing(
@@ -1047,12 +1203,22 @@ def _preflight_existing(
         findings.append(f"{_rel(root, plan_path)}: existing-record-conflict:{taskset['id']}")
     for task in tasks:
         task_path = _task_path(root, str(task["display_id"]))
-        if not _existing_task_matches(task_path, str(taskset["id"]), str(initiative["id"])):
+        if not _existing_task_matches(
+            task_path,
+            str(taskset["id"]),
+            str(initiative["id"]),
+            _task_dependencies(task),
+        ):
             findings.append(f"{_rel(root, task_path)}: existing-task-conflict:{task['display_id']}")
         for unit in _units_for(task):
             unit_id = str(unit["unit_id"])
             unit_path = _unit_path(root, str(task["display_id"]), unit_id)
-            if not _existing_unit_matches(unit_path, str(task["display_id"]), unit_id):
+            if not _existing_unit_matches(
+                unit_path,
+                str(task["display_id"]),
+                unit_id,
+                _unit_dependencies(task, unit),
+            ):
                 findings.append(f"{_rel(root, unit_path)}: existing-unit-conflict:{unit_id}")
     if findings:
         raise WorkRegistrationError(findings)
@@ -1086,10 +1252,26 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
             duplicates = sorted({display_id for display_id in display_ids if display_ids.count(display_id) > 1})
             raise WorkRegistrationError([f"input:tasks:duplicate-display-id:{display_id}" for display_id in duplicates])
         task_displays = task_identity._task_display_ids(root)  # noqa: SLF001
+        dependency_findings = _task_dependency_findings(
+            tasks,
+            existing_ids=set(task_displays),
+        )
+        if dependency_findings:
+            raise WorkRegistrationError(dependency_findings)
         for display_id in display_ids:
             if display_id in task_displays:
                 task_path = _task_path(root, display_id)
-                if not _existing_task_matches(task_path, str(taskset["id"]), str(initiative["id"])):
+                matching_task = next(
+                    task
+                    for task in tasks
+                    if str(task["display_id"]) == display_id
+                )
+                if not _existing_task_matches(
+                    task_path,
+                    str(taskset["id"]),
+                    str(initiative["id"]),
+                    _task_dependencies(matching_task),
+                ):
                     raise WorkRegistrationError([f"task-id:display-id-exists:{display_id}"])
             active = task_identity._active_reservation_for_display(ledger, display_id, now_dt)  # noqa: SLF001
             if active:
@@ -1100,7 +1282,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
         review_path = _review_path(root, now_text, taskset)
         mode = _preflight_existing(root, initiative, taskset, tasks, initiative_path, plan_path, review_path)
         if mode == "already_exists":
-            _write_taskset_registry(root, taskset)
+            _write_taskset_registry(root, taskset, tasks)
             _ensure_owner_doc(root, review_path)
             _refresh_generated_views(root)
             return {
@@ -1204,7 +1386,7 @@ def register(root: Path, input_path: Path, *, now: str | None = None) -> dict[st
     finally:
         task_identity._release_lock(lock_path, fd)  # noqa: SLF001
 
-    _write_taskset_registry(root, taskset)
+    _write_taskset_registry(root, taskset, tasks)
     _ensure_owner_doc(root, review_path)
     _refresh_generated_views(root)
     return {
@@ -1567,27 +1749,37 @@ def _recommend_assignment(root: Path, meta: dict[str, Any], body: str) -> tuple[
     return "planning-office", team_leads.get("planning-office", "planning-coordinator"), "defaulted to planning-office"
 
 
+def _canonical_claim_snapshot(root: Path, *, surface: str) -> list[dict[str, Any]]:
+    try:
+        claims = claim_store.read_claims_snapshot(root)
+    except (claim_store.ClaimStoreError, OSError, RuntimeError, TimeoutError) as exc:
+        raise WorkRegistrationError(
+            [f"{surface}:active-claim-context-invalid"]
+        ) from exc
+    invalid = [
+        str(claim.get("claim_id") or "missing")
+        for claim in claims
+        if not closure_gate._claim_authority_shape_valid(claim)
+    ]
+    if invalid:
+        raise WorkRegistrationError(
+            [f"{surface}:active-claim-context-invalid:{claim_id}" for claim_id in invalid]
+        )
+    return [dict(claim) for claim in claims]
+
+
 def _active_claim_workload(root: Path) -> dict[str, Any]:
-    claims_dir = root / "agents" / "runtime" / "task_claims"
     by_team: dict[str, int] = {}
     by_role: dict[str, int] = {}
     total = 0
-    if claims_dir.is_dir():
-        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(payload, dict):
-                continue
-            status = str(payload.get("status") or "").strip().lower()
-            if status not in ACTIVE_CLAIM_STATUSES:
-                continue
-            total += 1
-            team = str(payload.get("team_id") or "unassigned").strip() or "unassigned"
-            role = str(payload.get("agent_role") or "unassigned").strip() or "unassigned"
-            by_team[team] = by_team.get(team, 0) + 1
-            by_role[role] = by_role.get(role, 0) + 1
+    for payload in _canonical_claim_snapshot(root, surface="work-assign"):
+        if payload["status"] not in ACTIVE_CLAIM_STATUSES:
+            continue
+        total += 1
+        team = str(payload.get("team_id") or "unassigned").strip() or "unassigned"
+        role = str(payload.get("agent_role") or "unassigned").strip() or "unassigned"
+        by_team[team] = by_team.get(team, 0) + 1
+        by_role[role] = by_role.get(role, 0) + 1
     return {
         "active_claim_count": total,
         "by_team": dict(sorted(by_team.items())),
@@ -2210,6 +2402,198 @@ def _accepted_work_ids(meta: dict[str, Any], resolved_id: str) -> set[str]:
     return {value for value in values if value}
 
 
+def _parent_task_meta(
+    root: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> dict[str, Any] | None:
+    task_id = str(meta.get("task_id") or meta.get("parent_id") or "").strip()
+    if not task_id.startswith("TASK-") or task_id == resolved_id:
+        return None
+    path = root / TASKS_DIR / f"{task_id}.md"
+    if not path.is_file():
+        return None
+    try:
+        parent, _body = backlog_board.parse_frontmatter(
+            path.read_text(encoding="utf-8")
+        )
+    except OSError:
+        return None
+    return dict(parent) if parent else None
+
+
+def _closeout_contexts(
+    root: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> list[dict[str, Any]]:
+    contexts = [meta]
+    parent = _parent_task_meta(root, meta, resolved_id)
+    if parent:
+        contexts.append(parent)
+    return contexts
+
+
+def _normalized_trigger(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip(
+        "_"
+    )
+
+
+def _linked_released_claim_authority(
+    root: Path,
+    path: Path,
+    meta: dict[str, Any],
+    *,
+    selected_active_claim_ids: set[str],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Load only explicitly linked, identity-bound released claim authority."""
+
+    claims: list[dict[str, Any]] = []
+    findings: list[str] = []
+    expected_dir = Path("agents/runtime/task_claims")
+    canonical_claim_dir = (root / expected_dir).resolve()
+    for raw_ref in _list_value(meta.get("claim_refs")):
+        try:
+            ref = compound_record.normalize_ref(raw_ref)
+        except compound_record.CompoundRecordError as exc:
+            findings.extend(f"{raw_ref}: closeout:{item}" for item in exc.findings)
+            continue
+        relative = Path(ref)
+        if (
+            relative.parent != expected_dir
+            or not relative.name.startswith("CLAIM-")
+            or relative.suffix.lower() != ".json"
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-invalid")
+            continue
+        claim_path = root / relative
+        try:
+            resolved_claim_path = claim_path.resolve(strict=True)
+            resolved_claim_path.relative_to(root)
+        except FileNotFoundError:
+            findings.append(f"{ref}: closeout:claim-ref-missing")
+            continue
+        except ValueError:
+            findings.append(f"{ref}: closeout:claim-ref-outside-root")
+            continue
+        except OSError:
+            findings.append(f"{ref}: closeout:claim-ref-unavailable")
+            continue
+        if (
+            claim_path.is_symlink()
+            or resolved_claim_path != claim_path.absolute()
+            or resolved_claim_path.parent != canonical_claim_dir
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-noncanonical-path")
+            continue
+        if not resolved_claim_path.is_file():
+            findings.append(f"{ref}: closeout:claim-ref-not-file")
+            continue
+        try:
+            claim = closure_gate._load_bounded_claim_json(resolved_claim_path)
+        except claim_store.ClaimStoreError:
+            findings.append(f"{ref}: closeout:claim-ref-identity-invalid")
+            continue
+        if not isinstance(claim, dict):
+            findings.append(f"{ref}: closeout:claim-ref-invalid-root")
+            continue
+        if not closure_gate._claim_authority_shape_valid(claim):
+            findings.append(f"{ref}: closeout:claim-ref-authority-shape-invalid")
+            continue
+        claim_id = str(claim.get("claim_id") or "").strip()
+        if (
+            claim.get("schema") != "agent-runtime-task-claim/v1"
+            or not claim_store.valid_claim_id(claim_id)
+            or relative.name != f"{claim_id}.json"
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-identity-invalid")
+            continue
+        if closure_gate._claim_is_overlay(claim):
+            findings.append(f"{ref}: closeout:claim-ref-overlay")
+            continue
+        raw_status = claim.get("status")
+        if not isinstance(raw_status, str):
+            findings.append(f"{ref}: closeout:claim-ref-status-invalid:missing")
+            continue
+        status = raw_status.strip().lower()
+        if status in ACTIVE_CLAIM_STATUSES:
+            if claim_id not in selected_active_claim_ids:
+                findings.append(f"{ref}: closeout:claim-ref-active-not-selected")
+                continue
+        elif status not in RELEASED_CLAIM_AUTHORITY_STATUSES:
+            findings.append(
+                f"{ref}: closeout:claim-ref-status-invalid:{status or 'missing'}"
+            )
+            continue
+        if not closure_gate._claim_matches_canonical(
+            root, claim, path, meta
+        ):
+            findings.append(f"{ref}: closeout:claim-ref-work-mismatch")
+            continue
+        if status in RELEASED_CLAIM_AUTHORITY_STATUSES:
+            claims.append(claim)
+    return claims, findings
+
+
+def _claim_authority_for_close(
+    root: Path,
+    path: Path,
+    meta: dict[str, Any],
+    resolved_id: str,
+) -> tuple[dict[str, Any], list[str]]:
+    """Resolve active authority once and retain linked released authority."""
+
+    _task_id, _unit_id, canonical_id = closure_gate._canonical_identity(
+        path, meta
+    )
+    canonical_path = (
+        closure_gate._work_item_path(root, canonical_id)
+        if canonical_id
+        else None
+    )
+    try:
+        canonical_path_valid = bool(
+            canonical_path
+            and not canonical_path.is_symlink()
+            and canonical_path.resolve(strict=True) == canonical_path.absolute()
+            and path.resolve(strict=True) == canonical_path.resolve(strict=True)
+        )
+    except (FileNotFoundError, OSError):
+        canonical_path_valid = False
+    if (
+        not canonical_id
+        or resolved_id != canonical_id
+        or not canonical_path_valid
+    ):
+        return dict(meta), [
+            f"{path.stem or resolved_id}: "
+            "closeout:active-claim-context-invalid"
+        ]
+    resolution = closure_gate.resolve_active_work_contexts(
+        root, work_id=canonical_id
+    )
+    reason = str(resolution.get("reason") or "").strip()
+    if reason:
+        return dict(meta), [f"{canonical_id}: closeout:{reason}"]
+    contexts = list(resolution.get("contexts") or [])
+    merged = dict(contexts[0]) if contexts else dict(meta)
+    selected_ids = {
+        str(value).strip()
+        for value in resolution.get("selected_claim_ids", [])
+        if str(value).strip()
+    }
+    released, findings = _linked_released_claim_authority(
+        root,
+        path,
+        merged,
+        selected_active_claim_ids=selected_ids,
+    )
+    if findings:
+        return dict(meta), findings
+    return closure_gate._merge_claim_authority(merged, released), []
+
+
 def _review_payload(path: Path) -> dict[str, Any]:
     if path.suffix.lower() == ".json":
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -2245,17 +2629,41 @@ def _validate_linked_closeout_refs(
     root: Path, meta: dict[str, Any], resolved_id: str
 ) -> list[str]:
     findings: list[str] = []
-    work_ids = _accepted_work_ids(meta, resolved_id)
+    contexts = _closeout_contexts(root, meta, resolved_id)
+    work_ids: set[str] = set()
+    for context in contexts:
+        work_ids.update(_accepted_work_ids(context, resolved_id))
     try:
         defect_signatures = compound_record.normalize_signatures(
-            _list_value(meta.get("defect_signatures"))
+            [
+                signature
+                for context in contexts
+                for signature in _list_value(context.get("defect_signatures"))
+            ]
+        )
+        compound_refs = list(
+            dict.fromkeys(
+                compound_record.normalize_ref(ref)
+                for context in contexts
+                for ref in _list_value(context.get("compound_refs"))
+            )
         )
     except compound_record.CompoundRecordError as exc:
         return [f"{resolved_id}: closeout:{finding}" for finding in exc.findings]
+    escalation_triggers = list(
+        dict.fromkeys(
+            trigger
+            for context in contexts
+            for raw in _list_value(context.get("escalation_triggers"))
+            if (trigger := _normalized_trigger(raw))
+        )
+    )
+    compound_required = bool(
+        defect_signatures or "repeated_failure" in escalation_triggers
+    )
 
     evidence_refs = set(_list_value(meta.get("evidence_refs")))
     review_refs = _list_value(meta.get("review_refs"))
-    compound_refs = _list_value(meta.get("compound_refs"))
     mixed_refs = evidence_refs.intersection({*review_refs, *compound_refs})
     for ref in sorted(mixed_refs):
         findings.append(f"{ref}: closeout:mixed-evidence-and-learning-ref")
@@ -2276,7 +2684,8 @@ def _validate_linked_closeout_refs(
         ):
             findings.append(f"{normalized}: closeout:review-work-mismatch:{resolved_id}")
 
-    current_compounds = 0
+    valid_current_compounds = 0
+    covered_defect_signatures: set[str] = set()
     for ref in compound_refs:
         try:
             _path, record = compound_record.load_record_ref(root, ref)
@@ -2292,23 +2701,33 @@ def _validate_linked_closeout_refs(
         ):
             findings.append(f"{ref}: closeout:compound-work-mismatch:{resolved_id}")
             continue
-        if work_ids.intersection(record["work_ids"]):
-            current_compounds += 1
+        if not work_ids.intersection(record["work_ids"]):
+            findings.append(f"{ref}: closeout:compound-work-mismatch:{resolved_id}")
+            continue
+        prevention_findings = compound_record.validate_prevention_destinations(
+            root,
+            record,
+            current_work_ids=work_ids,
+        )
+        findings.extend(
+            f"{ref}: closeout:{finding}" for finding in prevention_findings
+        )
+        if not prevention_findings:
+            valid_current_compounds += 1
+            covered_defect_signatures.update(
+                set(record["defect_signatures"]).intersection(defect_signatures)
+            )
 
-    if defect_signatures:
-        try:
-            prior = compound_record.search_records(
-                root, defect_signatures=defect_signatures, limit=100
-            )
-        except compound_record.CompoundRecordError as exc:
-            findings.extend(
-                f"{resolved_id}: closeout:{finding}" for finding in exc.findings
-            )
-        else:
-            if prior and current_compounds == 0:
-                findings.append(
-                    f"{resolved_id}: closeout:repeat-defect-current-compound-required"
-                )
+    if compound_required and valid_current_compounds == 0:
+        findings.append(
+            f"{resolved_id}: closeout:repeat-defect-current-compound-required"
+        )
+    if compound_required:
+        findings.extend(
+            f"{resolved_id}: closeout:defect-signature-uncovered:{signature}"
+            for signature in defect_signatures
+            if signature not in covered_defect_signatures
+        )
     return findings
 
 
@@ -2530,7 +2949,7 @@ def criteria_work(
     return result
 
 
-def close_work(
+def _close_work_locked(
     root: Path,
     work_id: str,
     *,
@@ -2544,6 +2963,7 @@ def close_work(
     compound_refs: list[str] | None = None,
     defect_signatures: list[str] | None = None,
     now: str | None = None,
+    _claim_store_snapshot: object | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
     now_text = _now_text(now)
@@ -2555,7 +2975,12 @@ def close_work(
         command_name="work-close",
         reject_unsafe_legacy_scalars=True,
     )
-    resolved_id = _work_id_from_meta(path, meta)
+    resolved_id = path.stem
+    meta, claim_authority_findings = _claim_authority_for_close(
+        root, path, meta, resolved_id
+    )
+    if claim_authority_findings:
+        raise WorkRegistrationError(claim_authority_findings)
     findings: list[str] = []
     actual_hours_text = "" if actual_hours is None else str(actual_hours).strip()
     actual_tokens_text = "" if actual_tokens is None else str(actual_tokens).strip()
@@ -2588,6 +3013,13 @@ def close_work(
                 *(defect_signatures or []),
             ]
         )
+        normalized_triggers = list(
+            dict.fromkeys(
+                trigger
+                for raw in _list_value(meta.get("escalation_triggers"))
+                if (trigger := _normalized_trigger(raw))
+            )
+        )
     except compound_record.CompoundRecordError as exc:
         raise WorkRegistrationError(
             [f"work-close:{finding}" for finding in exc.findings]
@@ -2598,6 +3030,8 @@ def close_work(
         meta["compound_refs"] = normalized_compounds
     if normalized_signatures:
         meta["defect_signatures"] = normalized_signatures
+    if normalized_triggers:
+        meta["escalation_triggers"] = normalized_triggers
 
     if resolution == "done":
         findings.extend(
@@ -2611,6 +3045,11 @@ def close_work(
                 measurement_unavailable_reason=measurement_unavailable_reason_text,
             )
         )
+    else:
+        # Learning authority is resolution-independent. A repeated defect may
+        # be closed as wontfix/duplicate/superseded/moved-to-vault only after
+        # the same current-work Compound contract has been satisfied.
+        findings.extend(_validate_linked_closeout_refs(root, meta, resolved_id))
     if actual_cost_text:
         _validate_actual_number(actual_cost_text, "actual-cost", findings)
     if findings:
@@ -2647,9 +3086,30 @@ def close_work(
         review_refs=review_ref_values,
         compound_refs=compound_ref_values,
     )
+    if _claim_store_snapshot is None or not claim_store.verify_snapshot(
+        root,
+        _claim_store_snapshot,
+    ):
+        raise WorkRegistrationError(
+            [f"{resolved_id}: closeout:active-claim-context-invalid"]
+        )
     _rewrite_frontmatter(path, meta, _replace_closeout_block(body, closeout))
-    _refresh_generated_views(root)
-    return {
+    post_commit_warnings: list[dict[str, str]] = []
+    try:
+        _refresh_generated_views(root)
+    except Exception as exc:  # noqa: BLE001 - closeout authority is committed
+        reason = " ".join(str(exc).split())[:256] or type(exc).__name__
+        post_commit_warnings.append(
+            {
+                "stage": "generated-view-projection",
+                "reason": reason,
+                "retry_guidance": (
+                    "Closeout is committed; retry generated-view refresh separately "
+                    "before relying on projections."
+                ),
+            }
+        )
+    result = {
         "status": "closed",
         "work_id": resolved_id,
         "work_path": _rel(root, path),
@@ -2664,6 +3124,59 @@ def close_work(
         "actual_cost": actual_cost_text,
         "measurement_unavailable_reason": measurement_unavailable_reason_text,
     }
+    if post_commit_warnings:
+        result["authority_committed"] = True
+        result["post_commit_warnings"] = post_commit_warnings
+    return result
+
+
+def close_work(
+    root: Path,
+    work_id: str,
+    *,
+    actor: str,
+    resolution: str = "done",
+    actual_hours: str | None = None,
+    actual_tokens: int | None = None,
+    actual_cost: str | None = None,
+    measurement_unavailable_reason: str | None = None,
+    review_refs: list[str] | None = None,
+    compound_refs: list[str] | None = None,
+    defect_signatures: list[str] | None = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Close work while one claim-store lock protects authority and mutation."""
+
+    root = root.resolve()
+    try:
+        with claim_store.store_lock(root):
+            inspection = claim_store.inspect_store(root)
+            snapshot = (
+                inspection.snapshot
+                if inspection.state in {"initialized", "pristine"}
+                else None
+            )
+            return _close_work_locked(
+                root,
+                work_id,
+                actor=actor,
+                resolution=resolution,
+                actual_hours=actual_hours,
+                actual_tokens=actual_tokens,
+                actual_cost=actual_cost,
+                measurement_unavailable_reason=measurement_unavailable_reason,
+                review_refs=review_refs,
+                compound_refs=compound_refs,
+                defect_signatures=defect_signatures,
+                now=now,
+                _claim_store_snapshot=snapshot,
+            )
+    except WorkRegistrationError:
+        raise
+    except (claim_store.ClaimStoreError, OSError, RuntimeError, TimeoutError) as exc:
+        raise WorkRegistrationError(
+            [f"{work_id}: closeout:active-claim-context-invalid"]
+        ) from exc
 
 
 def _iter_work_item_records(root: Path) -> list[tuple[Path, dict[str, Any]]]:
@@ -3316,30 +3829,32 @@ def _git_worktrees(root: Path) -> list[dict[str, str]] | None:
     return worktrees
 
 
-def _active_claim_rows(root: Path) -> list[dict[str, Any]]:
-    claims_dir = root / "agents" / "runtime" / "task_claims"
+def _active_claim_rows(
+    root: Path,
+    *,
+    claim_snapshot: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    if claims_dir.is_dir():
-        for path in sorted(claims_dir.glob("*.json"), key=lambda item: item.name.lower()):
-            try:
-                payload = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(payload, dict):
-                continue
-            if str(payload.get("status") or "").strip().lower() not in ACTIVE_CLAIM_STATUSES:
-                continue
-            rows.append(
-                {
-                    "task_id": str(payload.get("task_id") or ""),
-                    "task_set_id": str(payload.get("task_set_id") or ""),
-                    "claim_id": str(payload.get("claim_id") or path.stem),
-                    "status": str(payload.get("status") or ""),
-                    "agent": str(payload.get("display_name") or payload.get("agent_instance_id") or ""),
-                    "worktree_path": str(payload.get("worktree_path") or ""),
-                    "path": _rel(root, path),
-                }
-            )
+    claims = (
+        _canonical_claim_snapshot(root, surface="work-status")
+        if claim_snapshot is None
+        else claim_snapshot
+    )
+    for payload in claims:
+        if payload["status"] not in ACTIVE_CLAIM_STATUSES:
+            continue
+        claim_id = str(payload["claim_id"])
+        rows.append(
+            {
+                "task_id": str(payload.get("task_id") or ""),
+                "task_set_id": str(payload.get("task_set_id") or ""),
+                "claim_id": claim_id,
+                "status": str(payload["status"]),
+                "agent": str(payload.get("display_name") or payload.get("agent_instance_id") or ""),
+                "worktree_path": str(payload.get("worktree_path") or ""),
+                "path": f"agents/runtime/task_claims/{claim_id}.json",
+            }
+        )
     rows.sort(key=lambda row: (row["task_id"], row["claim_id"]))
     return rows
 
@@ -3350,11 +3865,16 @@ def status_work(root: Path) -> dict[str, Any]:
     Read-only. This is the lifecycle entrypoint: never start on a problem
     that already has an active claim here.
     """
-    overlay = inflight_overlay.build_overlay(root)
+    claim_snapshot = _canonical_claim_snapshot(root, surface="work-status")
+    active_claims = _active_claim_rows(root, claim_snapshot=claim_snapshot)
+    overlay = inflight_overlay.build_overlay(
+        root,
+        claim_snapshot=claim_snapshot,
+    )
     return {
         "status": "ok",
         "root": str(root),
-        "active_claims": _active_claim_rows(root),
+        "active_claims": active_claims,
         "worktrees": _git_worktrees(root),
         "inflight": {
             "summary": inflight_overlay.summary_line(overlay),
@@ -3364,7 +3884,14 @@ def status_work(root: Path) -> dict[str, Any]:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
-    result = status_work(args.root)
+    try:
+        result = status_work(args.root)
+    except WorkRegistrationError as exc:
+        print("work-status: fail", file=sys.stderr)
+        print(f"findings={len(exc.findings)}", file=sys.stderr)
+        for finding in exc.findings:
+            print(f"- {finding}", file=sys.stderr)
+        return 1
     if args.json:
         print(json.dumps(result, ensure_ascii=True, indent=2))
         return 0

@@ -36,12 +36,14 @@ def _write_task(
     status: str = "planned",
     priority: str = "P1",
     depends_on: list[str] | None = None,
+    unit_spec: str | None = None,
 ) -> None:
     tasks_dir = root / "agents" / "lead_engineer" / "tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
     dependency_line = (
         f"depends_on: [{', '.join(depends_on)}]\n" if depends_on is not None else ""
     )
+    unit_spec_line = f"unit_spec: {unit_spec}\n" if unit_spec is not None else ""
     (tasks_dir / f"{task_id}.md").write_text(
         f"""---
 id: {task_id}
@@ -52,7 +54,7 @@ est_hours: 2
 est_tokens: 200
 task_set_id: {task_set_id}
 project_id: PROJECT-AGENT-RUNTIME
-{dependency_line}tags: [test]
+{dependency_line}{unit_spec_line}tags: [test]
 ---
 
 ## Goal
@@ -73,6 +75,7 @@ def _write_taskset(
     title: str = "Runtime Liaison",
     task_order: tuple[str, ...] = (),
     tasks: list[str] | str | None = None,
+    status: str = "active",
 ) -> None:
     tasksets_dir = root / "agents" / "project" / "initiatives"
     tasksets_dir.mkdir(parents=True, exist_ok=True)
@@ -107,6 +110,7 @@ work_id: {task_set_id}
 kind: {kind}
 title: {title}
 summary: Test dynamic task set.
+status: {status}
 {task_lines}---
 {task_section}
 """,
@@ -114,21 +118,29 @@ summary: Test dynamic task set.
     )
 
 
+def _write_taskset_registry(root: Path, rows: list[object], *, schema: str = "agent-runtime-taskset-definitions/v1") -> None:
+    path = root / "agents" / "project" / "work-items" / "TASKSET-DEFINITIONS.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"schema": schema, "tasksets": rows}), encoding="utf-8")
+
+
 def _write_unit(
     root: Path,
     task_id: str,
     *,
     status: str = "worker_ready",
+    unit_number: int = 1,
+    model_tier: str = "worker_standard",
     **metadata: str | bool | list[str],
 ) -> None:
     units_dir = root / "agents" / "lead_engineer" / "tasks" / "units" / task_id
     units_dir.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
-        f"unit_id: UNIT-{task_id}-001",
+        f"unit_id: UNIT-{task_id}-{unit_number:03d}",
         f"task_id: {task_id}",
         f"status: {status}",
-        "model_tier: worker_standard",
+        f"model_tier: {model_tier}",
     ]
     for key, value in metadata.items():
         if isinstance(value, list):
@@ -139,7 +151,10 @@ def _write_unit(
             encoded = value
         lines.append(f"{key}: {encoded}")
     lines.extend(["---", ""])
-    (units_dir / f"UNIT-{task_id}-001.md").write_text("\n".join(lines), encoding="utf-8")
+    (units_dir / f"UNIT-{task_id}-{unit_number:03d}.md").write_text(
+        "\n".join(lines),
+        encoding="utf-8",
+    )
 
 
 def _run(
@@ -157,6 +172,169 @@ def _run(
         errors="replace",
         env=env,
     )
+
+
+def _tree_snapshot(root: Path) -> tuple[tuple[str, ...], dict[str, bytes]]:
+    directories = tuple(
+        sorted(
+            path.relative_to(root).as_posix()
+            for path in root.rglob("*")
+            if path.is_dir()
+        )
+    )
+    files = {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+    }
+    return directories, files
+
+
+@pytest.mark.parametrize(
+    ("task_status", "unit_status", "taskset_status", "reason"),
+    [
+        ("planned", "planned", "active", "unit_not_ready"),
+        ("planned", "blocked", "active", "unit_blocked"),
+        ("planned", "held", "active", "unit_blocked"),
+        ("planned", "blocked/R3", "active", "unit_blocked"),
+        ("보류", "worker_ready", "active", "task_blocked"),
+        ("held", "worker_ready", "active", "task_blocked"),
+        ("blocked/R3", "worker_ready", "active", "task_blocked"),
+        ("planned", "worker_ready", "blocked", "taskset_blocked"),
+        ("planned", "worker_ready", "held", "taskset_blocked"),
+        ("planned", "worker_ready", "blocked/R3", "taskset_blocked"),
+    ],
+)
+def test_plan_refuses_non_dispatchable_status_before_claim_command_without_mutation(
+    tmp_path: Path,
+    task_status: str,
+    unit_status: str,
+    taskset_status: str,
+    reason: str,
+) -> None:
+    taskset = "TASKSET-DISPATCH-REFUSAL"
+    _write_taskset(
+        tmp_path,
+        taskset,
+        tasks=["TASK-901"],
+        status=taskset_status,
+    )
+    _write_task(tmp_path, "TASK-901", taskset, status=task_status)
+    _write_unit(tmp_path, "TASK-901", status=unit_status)
+    before = _tree_snapshot(tmp_path)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert result.stdout == ""
+    refusal = json.loads(result.stderr)
+    assert refusal["status"] == "refused"
+    assert refusal["reason"] == reason
+    assert "claim_command" not in refusal
+    assert _tree_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize(
+    "taskset_status",
+    ["blocked/R3", "hold/R3", "held/R3", "보류/R3"],
+)
+def test_start_refuses_composite_taskset_status_before_subprocess_or_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    taskset_status: str,
+) -> None:
+    taskset = "TASKSET-DISPATCH-COMPOSITE-START-REFUSAL"
+    _write_taskset(
+        tmp_path,
+        taskset,
+        tasks=["TASK-901"],
+        status=taskset_status,
+    )
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901")
+    before = _tree_snapshot(tmp_path)
+    args = argparse.Namespace(
+        root=tmp_path,
+        taskset=taskset,
+        agent_role=None,
+        team_id=None,
+        mode=None,
+        now=None,
+        suffix=None,
+        json=True,
+    )
+
+    def forbidden_subprocess(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("status refusal must happen before any subprocess")
+
+    monkeypatch.setattr(dispatcher.subprocess, "run", forbidden_subprocess)
+
+    with pytest.raises(dispatcher.DispatchRefusal) as raised:
+        dispatcher.cmd_start(args)
+
+    assert raised.value.reason == "taskset_blocked"
+    assert raised.value.subject_status == taskset_status
+    assert _tree_snapshot(tmp_path) == before
+
+
+def test_plan_does_not_substring_match_unblocked_status(tmp_path: Path) -> None:
+    taskset = "TASKSET-DISPATCH-NON-BLOCKED-TOKEN"
+    _write_taskset(
+        tmp_path,
+        taskset,
+        tasks=["TASK-901"],
+        status="unblocked/R3",
+    )
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901")
+    before = _tree_snapshot(tmp_path)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["unit_id"] == "UNIT-TASK-901-001"
+    assert _tree_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("unit_status", ["worker_ready", "준비", "진행 중"])
+def test_plan_preserves_ready_unit_claim_command_compatibility(
+    tmp_path: Path,
+    unit_status: str,
+) -> None:
+    taskset = "TASKSET-DISPATCH-READY"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901", status=unit_status)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == "UNIT-TASK-901-001"
+    assert payload["next_task_status"] == "planned"
+    command = payload["claim_command"]
+    assert command[command.index("--unit-id") + 1] == "UNIT-TASK-901-001"
+    assert command[-1] == "--json"
+
+
+def test_plan_propagates_explicit_scope_transition_approval(tmp_path: Path) -> None:
+    taskset = "TASKSET-DISPATCH-APPROVED-TRANSITION"
+    _write_taskset(tmp_path, taskset, tasks=["TASK-901"])
+    _write_task(tmp_path, "TASK-901", taskset)
+    _write_unit(tmp_path, "TASK-901")
+
+    result = _run(
+        tmp_path,
+        "plan",
+        taskset,
+        "--scope-transition-approved",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    command = json.loads(result.stdout)["claim_command"]
+    assert "--scope-transition-approved" in command
+    assert command[-1] == "--json"
 
 
 def test_plan_resolves_canonical_dynamic_taskset_without_static_alias(tmp_path: Path) -> None:
@@ -569,7 +747,198 @@ def test_plan_rejects_open_task_when_all_unit_specs_are_completed(tmp_path: Path
     result = _run(tmp_path, "plan", taskset, "--json")
 
     assert result.returncode == 1
-    assert "TASK-901 has unit specs but no open unit" in (result.stderr or result.stdout)
+    assert "TASK-901 has unit specs but no runnable unit" in (
+        result.stderr or result.stdout
+    )
+
+
+def test_plan_prefers_canonical_planned_unit_over_blocked_history(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-BLOCKED-HISTORY"
+    task_id = "TASK-901"
+    current = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-003.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=current)
+    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
+    _write_unit(tmp_path, task_id, unit_number=2, status="completed")
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=3,
+        status="planned",
+        model_tier="planner_high",
+    )
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-003"
+    assert payload["unit_spec_path"] == current
+    assert current in payload["claim_command"]
+
+
+def test_plan_prefers_in_progress_before_canonical_planned_unit(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-IN-PROGRESS-PRIORITY"
+    task_id = "TASK-901"
+    planned = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-001.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=planned)
+    _write_unit(tmp_path, task_id, unit_number=1, status="planned")
+    _write_unit(tmp_path, task_id, unit_number=2, status="worker_ready")
+    _write_unit(tmp_path, task_id, unit_number=3, status="in_progress")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["unit_id"] == f"UNIT-{task_id}-003"
+
+
+def test_plan_treats_legacy_assigned_unit_as_planned(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-ASSIGNED-COMPATIBILITY"
+    task_id = "TASK-901"
+    assigned = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-002.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=assigned)
+    _write_unit(tmp_path, task_id, unit_number=1, status="blocked")
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=2,
+        status="assigned",
+        model_tier="planner_high",
+    )
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-002"
+    assert payload["unit_spec_path"] == assigned
+
+
+@pytest.mark.parametrize(
+    ("status", "reason"),
+    [
+        ("blocked", "unit_blocked"),
+        ("hold", "unit_blocked"),
+        ("cancelled", "unit_not_ready"),
+        ("rejected", "unit_not_ready"),
+        ("failed", "unit_not_ready"),
+        ("planner_refine_required", "unit_not_ready"),
+    ],
+)
+def test_plan_never_emits_claim_for_non_runnable_unit(
+    tmp_path: Path,
+    status: str,
+    reason: str,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-NON-RUNNABLE"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, status=status)
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    refusal = json.loads(result.stderr)
+    assert refusal["status"] == "refused"
+    assert refusal["reason"] == reason
+
+
+def test_plan_fails_closed_on_unknown_unit_status(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-UNKNOWN-UNIT-STATUS"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, unit_number=1, status="mystery")
+    _write_unit(tmp_path, task_id, unit_number=2, status="planned")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    message = result.stderr or result.stdout
+    assert "unknown unit status" in message
+    assert "mystery" in message
+
+
+def test_plan_rejects_multiple_in_progress_units(tmp_path: Path) -> None:
+    taskset = "TASKSET-DYNAMIC-AMBIGUOUS-ACTIVE-UNITS"
+    task_id = "TASK-901"
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset)
+    _write_unit(tmp_path, task_id, unit_number=1, status="in_progress")
+    _write_unit(tmp_path, task_id, unit_number=2, status="in_progress")
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 1
+    assert "multiple in-progress units" in (result.stderr or result.stdout)
+
+
+def test_plan_uses_only_selected_unit_dependencies_and_routing(
+    tmp_path: Path,
+) -> None:
+    taskset = "TASKSET-DYNAMIC-SELECTED-UNIT-CONTRACT"
+    task_id = "TASK-901"
+    current = (
+        "agents/lead_engineer/tasks/units/"
+        f"{task_id}/UNIT-{task_id}-002.md"
+    )
+    _write_taskset(tmp_path, taskset, tasks=[task_id])
+    _write_task(tmp_path, task_id, taskset, unit_spec=current)
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=1,
+        status="blocked",
+        depends_on=["UNIT-TASK-999-001"],
+        model_tier="reviewer_high",
+    )
+    _write_unit(
+        tmp_path,
+        task_id,
+        unit_number=2,
+        status="worker_ready",
+        model_tier="worker_low",
+    )
+
+    result = _run(tmp_path, "plan", taskset, "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["unit_id"] == f"UNIT-{task_id}-002"
+    assert payload["model_routing"]["requested_tier"] == "worker_low"
+    assert payload["model_routing"]["selected_tier"] == "worker_low"
+
+
+def test_root_and_packaged_taskset_dispatchers_are_byte_identical() -> None:
+    packaged = (
+        REPO_ROOT
+        / "src"
+        / "agent_runtime"
+        / "templates"
+        / "project"
+        / "scripts"
+        / "taskset_dispatcher.py"
+    )
+
+    assert (SCRIPTS_DIR / "taskset_dispatcher.py").read_bytes() == packaged.read_bytes()
 
 
 def test_resolve_taskset_preserves_static_alias_import_contract() -> None:
@@ -1470,15 +1839,19 @@ def test_start_readiness_failure_blocks_claim_and_worktree(
     payload["model_tier"] = "worker_standard"
     calls: list[list[str]] = []
 
-    def fake_run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+    def forbidden_subprocess(command: list[str], **_kwargs: object) -> None:
         calls.append(command)
-        return subprocess.CompletedProcess(command, 9, stdout="readiness failed\n", stderr="")
+        pytest.fail("readiness refusal must happen before the claim subprocess")
 
-    monkeypatch.setattr(dispatcher.subprocess, "run", fake_run)
+    monkeypatch.setattr(dispatcher.subprocess, "run", forbidden_subprocess)
+    monkeypatch.setattr(
+        dispatcher.task_claim_dispatcher,
+        "_claim_readiness_findings",
+        lambda *_args, **_kwargs: ["fixture:not-ready"],
+    )
 
-    assert dispatcher.cmd_start(_start_args(tmp_path)) == 9
-    assert len(calls) == 1
-    assert calls[0][1].endswith("task_unit_readiness_gate.py")
+    assert dispatcher.cmd_start(_start_args(tmp_path)) == 1
+    assert calls == []
 
 
 def test_start_active_taskset_claim_blocks_before_subprocess(
@@ -1502,6 +1875,116 @@ def test_start_active_taskset_claim_blocks_before_subprocess(
 
     assert dispatcher.cmd_start(_start_args(tmp_path)) == 1
     assert payload["task_set_id"] in capsys.readouterr().err
+
+
+def test_taskset_registry_is_canonical_and_dispatchable_without_markdown(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-REGISTERED-LANE"
+    _write_taskset_registry(
+        tmp_path,
+        [
+            {
+                "task_set_id": task_set_id,
+                "display_name": "Registered Lane",
+                "summary": "Created by work.py new.",
+                "order": 500,
+            }
+        ],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id)
+
+    result = _run(tmp_path, "plan", "registered-lane", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["task_set_id"] == task_set_id
+
+
+def test_taskset_registry_tasks_are_strict_canonical_order(
+    tmp_path: Path,
+) -> None:
+    task_set_id = "TASKSET-REGISTERED-ORDER"
+    _write_taskset_registry(
+        tmp_path,
+        [
+            {
+                "task_set_id": task_set_id,
+                "display_name": "Registered Order",
+                "summary": "Created by work.py new.",
+                "order": 500,
+                "tasks": ["TASK-AR-902", "TASK-AR-901"],
+            }
+        ],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id, priority="P0")
+    _write_task(tmp_path, "TASK-AR-902", task_set_id, priority="P2")
+
+    result = _run(tmp_path, "plan", "registered-order", "--json")
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    assert json.loads(result.stdout)["next_task_id"] == "TASK-AR-902"
+
+
+def test_taskset_registry_tasks_fail_closed_when_member_is_omitted(
+    tmp_path: Path,
+) -> None:
+    task_set_id = "TASKSET-REGISTERED-ORDER"
+    _write_taskset_registry(
+        tmp_path,
+        [
+            {
+                "task_set_id": task_set_id,
+                "display_name": "Registered Order",
+                "summary": "Created by work.py new.",
+                "order": 500,
+                "tasks": ["TASK-AR-901"],
+            }
+        ],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id)
+    _write_task(tmp_path, "TASK-AR-902", task_set_id)
+
+    result = _run(tmp_path, "plan", "registered-order", "--json")
+
+    assert result.returncode == 1
+    assert "taskset members omitted from tasks: TASK-AR-902" in (
+        result.stderr or result.stdout
+    )
+
+
+def test_taskset_registry_overrides_matching_static_definition(tmp_path: Path) -> None:
+    task_set_id = "TASKSET-AR-QUALITY-LOOP"
+    _write_taskset_registry(
+        tmp_path,
+        [{"task_set_id": task_set_id, "display_name": "Host Quality Lane", "summary": "Host override.", "order": 500}],
+    )
+    _write_task(tmp_path, "TASK-AR-901", task_set_id)
+
+    for alias in ("host-quality-lane", "2"):
+        result = _run(tmp_path, "plan", alias, "--json")
+
+        assert result.returncode == 0, result.stderr or result.stdout
+        assert json.loads(result.stdout)["display_name"] == "Host Quality Lane"
+
+
+@pytest.mark.parametrize(
+    ("rows", "message"),
+    [
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": "500"}], "order"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500}] * 2, "duplicate task_set_id"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Shared", "summary": "", "order": 500}, {"task_set_id": "TASKSET-OTHER", "display_name": "Shared", "summary": "", "order": 501}], "duplicate task set alias"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "tasks": "TASK-AR-901"}], "tasks must be a non-empty list"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "tasks": ["TASK-AR-901", "TASK-AR-901"]}], "duplicate task ids"),
+        ([{"task_set_id": "TASKSET-BAD", "display_name": "Bad", "summary": "", "order": 500, "unexpected": True}], "unknown fields"),
+    ],
+)
+def test_taskset_registry_fails_closed_for_invalid_rows_or_aliases(
+    tmp_path: Path, rows: list[object], message: str
+) -> None:
+    _write_taskset_registry(tmp_path, rows)
+
+    result = _run(tmp_path, "plan", "taskset-bad", "--json")
+
+    assert result.returncode == 1
+    assert message in (result.stderr or result.stdout)
 
 
 def test_plan_accepts_human_friendly_taskset_alias_and_emits_next_commands(
