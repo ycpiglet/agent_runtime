@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import stat
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -120,6 +121,18 @@ def _install_runtime_gate_hook(
     (scripts / "parallel_worktree_gate.py").write_text(
         (ROOT / "scripts" / "parallel_worktree_gate.py").read_text(encoding="utf-8"),
         encoding="utf-8",
+    )
+    # The gate imports `from agent_runtime import claim_store` - it is one of the
+    # consumers this task pointed at the shared liveness classifier - so the
+    # package has to travel with it. Copying only the script passed locally
+    # because an editable install resolved agent_runtime from another worktree;
+    # in CI, with no editable install and a relative PYTHONPATH that resolves
+    # against the fixture's own cwd, the hook died with ModuleNotFoundError.
+    shutil.copytree(
+        ROOT / "scripts" / "agent_runtime",
+        scripts / "agent_runtime",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__"),
     )
     hooks = root / ".githooks"
     hooks.mkdir(exist_ok=True)
