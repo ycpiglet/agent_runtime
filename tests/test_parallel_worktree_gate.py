@@ -962,6 +962,11 @@ def _transaction_env(
         text=True,
         env=env,
     )
+    # git add writes a lock and renames it over the index, so the chmod above
+    # landed on a discarded inode. Re-apply, exactly as claim_guard now does,
+    # or the gate refuses to recognise its own transaction under any umask
+    # looser than 0077.
+    index_path.chmod(0o600)
     artifacts: list[dict[str, str]] = []
     for artifact_rel in artifact_rels:
         staged = subprocess.run(
@@ -981,6 +986,8 @@ def _transaction_env(
         text=True,
         env=env,
     ).stdout.strip()
+    # write-tree refreshes cached stat info and replaces the index too.
+    index_path.chmod(0o600)
     marker = {
         "schema": TRANSACTION_SCHEMA,
         "root": root_value or str(repo.resolve()),

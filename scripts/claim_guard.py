@@ -945,6 +945,21 @@ def _claim_transaction_commit(
                 "reason": f"claim-commit-private-add-failed: {private_add['err'][:200]}",
                 "paths": rels,
             }
+        # `git add` writes a lock file and renames it over the index, so the
+        # inode changes and the chmod above was applied to a file object git
+        # then discarded. The mode comes back as 0666 & ~umask, and
+        # parallel_worktree_gate rejects any private index with group or other
+        # bits set - so under any umask looser than 0077 the gate refuses to
+        # recognise this very transaction and reports the claim as
+        # authorized-but-not-persisted. Re-apply and verify after every git
+        # invocation that can replace the index.
+        if not _harden_private_index(index_path):
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": "claim-commit-private-index-permission-failed",
+                "paths": rels,
+            }
         artifacts = _private_index_artifacts(root, rels, env=index_env)
         if artifacts is None:
             return {
@@ -954,6 +969,13 @@ def _claim_transaction_commit(
                 "paths": rels,
             }
         sealed = _git(root, ["write-tree"], env=index_env)
+        if not _harden_private_index(index_path):
+            return {
+                "ok": False,
+                "committed": False,
+                "reason": "claim-commit-private-index-permission-failed",
+                "paths": rels,
+            }
         tree_oid = sealed["out"].strip()
         if sealed["code"] != 0 or OID_RE.fullmatch(tree_oid) is None:
             return {
@@ -1289,6 +1311,22 @@ def commit_paths(root: Path, paths: Iterable[Path], *, message: str, apply: bool
     if any(s in blob for s in ("nothing to commit", "no changes added", "nothing added", "working tree clean")):
         return {"ok": True, "committed": False, "reason": "nothing-to-commit", "paths": rels}
     return {"ok": False, "committed": False, "reason": f"git-commit-failed: {(commit['err'] or commit['out'])[:200]}", "paths": rels}
+
+
+def _harden_private_index(index_path: Path) -> bool:
+    """Force 0600 on the private index and confirm it stuck.
+
+    Called after every git invocation that can replace the index file, because
+    git writes a lock and renames it into place rather than editing in situ.
+    Verifying rather than assuming is deliberate: the failure this guards is
+    silent, and it disables the claim-commit transaction wholesale.
+    """
+
+    try:
+        os.chmod(index_path, 0o600)
+        return not (index_path.stat().st_mode & 0o077)
+    except OSError:
+        return False
 
 
 def commit_claim_artifacts(
