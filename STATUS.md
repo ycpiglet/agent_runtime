@@ -1,5 +1,13 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-08-04 - TASK-AR-655 and TASK-AR-659 closed
+
+- Completed: `TASK-AR-655` (long-running claims stay truthful; one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor) accepted by an 11-round independent context-isolated W4b, and `TASK-AR-659` (owner-bound recovery for claims no automated path can reach) accepted by a 4-round one. All five claims released or terminalized.
+- Evidence: `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md`, `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md`, plus three Compound records.
+- Production proof, not a test result: a lease expired overnight ~16h past deadline still `status: claimed`. Because the claim was `mode: worker`, `claim_reaper --apply` recovered it in one command with no owner action. The `mode: orchestrator` claim that opened AR-655 sat expired and invisible for 5.4h, deadlocked its own task set, and needed a hand-written terminalize under Owner authority plus a whole recovery task. Same failure, twelve hours apart, with and without the fix.
+- Carried forward, owned by `TASK-AR-648`: `claim_guard.py` chmods its private index to 0600 and then runs `git add`, which rewrites it as `0666 & ~umask`, so `parallel_worktree_gate` never recognises the claim-commit transaction on a default-umask machine. `tests/test_claim_guard.py` is 21 failed / 15 passed under umask 0002 and 36 passed under 0077 — a real defect, not a permanent baseline.
+- Next: `TASK-AR-656` or `TASK-AR-657`. No version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-08-03 - Stale claim deadlock cleared; TASK-AR-659 active
 
 - Active: `TASK-AR-659` (`UNIT-TASK-AR-659-001`, claim `CLAIM-20260803-143123-task-ar-659-cfc8`) gives legacy and orchestrator claims a registered recovery path. RED first.

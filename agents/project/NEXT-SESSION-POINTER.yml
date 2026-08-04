@@ -1,65 +1,35 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-03T16:38:00+09:00
-updated_by: le-20260803-143123-kst-cfc8
+updated_at: 2026-08-04T14:18:00+09:00
+updated_by: le-20260804-121045-kst-0427
 current_state:
-  summary: "TASK-AR-659 is done and released after an independent 4-round W4b ACCEPT; unreachable claims now have registered owner-bound exits. TASK-AR-655 remains parked unaccepted and is next: its W4b P1 is the defect AR-659 closed."
-  status: active
+  summary: "TASK-AR-655 and TASK-AR-659 are both done and released. Long-running claims are now truthful across every consumer, and a claim no automated path can reach has registered owner-bound exits."
+  status: unclaimed
   task_set_status: active
   task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 11
-  step_total: 11
+  step_index: 12
+  step_total: 12
   progress_pct: 100
-  status_text: "AR-659 closed. Next: re-run the independent W4b for UNIT-TASK-AR-655-001 against a live claim."
+  status_text: "AR-655 closed after an 11-round independent W4b. TASK-AR-656 and TASK-AR-657 remain planned in this task set."
 active_work:
-  current_agents:
-    - claim_id: CLAIM-20260804-121045-task-ar-655-0427
-      agent_role: lead-engineer
-      team_id: agent-runtime-core
-      agent_instance_id: le-20260804-121045-kst-0427
-      display_name: lead_engineer@worker-01
-      callsite_id: terminal:wt-task-ar-655:tab-01
-      pane_id: terminal:wt-task-ar-655:tab-01
-      task_id: TASK-AR-655
-      unit_id: UNIT-TASK-AR-655-001
-      task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
-      status: claimed
-      phase: w4b-round5
-      progress_pct: 99
-      step_index: 12
-      step_total: 12
-      status_text: Fifth independent W4b after the heartbeat-anchor false positive
-      worktree_path: .
-      branch: codex/task-ar-655-v080-lease-bounds
-      requested_model_tier: worker_standard
-      selected_model_tier: planner_high
-      routing_policy_id: task-unit-tier-policy
-      routing_escalation_reason: trigger:data_integrity,repeated_failure
-      task_token_budget: null
-      claim_token_budget: null
-      claim_path: agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.json
-      handoff_path: agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.handoff.md
-      log_path: agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.log.md
-      last_heartbeat: '2026-08-04T12:10:45+09:00'
-      mutation_revision: 0
+  current_agents: []
   current_teams:
     - agent-runtime-core
 resume:
-  active_task: TASK-AR-655
+  active_task: TASK-AR-656
   active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
-  branch_policy: "TASK-AR-659 is closed; resume TASK-AR-655 only in .worktrees/TASK-AR-655; keep consumer primaries and release surfaces read-only."
+  branch_policy: "AR-655 and AR-659 are closed. Claim the next task in its own worktree; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Claim TASK-AR-655 from its own worktree; the task set is free and the AR-659 exits now exist."
-    - "Re-run the independent W4b for UNIT-TASK-AR-655-001 against a LIVE claim; the prior verdict was REVISE (P1 1) and its finding is what AR-659 closed."
-    - "Do not reuse the expired CLAIM-20260803-002651-task-ar-655-5f27; it is terminalized. Create a fresh mode=worker claim."
-    - "Keep TASK-AR-654, TASK-AR-657, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
+    - "Claim TASK-AR-656 (composable lifecycle hooks) or TASK-AR-657; the task set is free."
+    - "Create every claim mode=worker. An orchestrator-mode claim is skipped by claim_reaper unconditionally and needs owner-bound terminalize to clear."
+    - "TASK-AR-648 owns the umask defect in claim_guard.py: chmod 0600 precedes a git add that rewrites the index as 0666 & ~umask, so parallel_worktree_gate never recognises the claim-commit transaction. tests/test_claim_guard.py 21-red is that defect, not a permanent baseline."
+    - "Keep TASK-AR-654, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims:
-    - agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.json
+  active_claims: []
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT

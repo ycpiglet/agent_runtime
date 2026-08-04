@@ -1044,12 +1044,12 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/TASK-AR-655.md",
-          "value": "cae3a6ad7c6657a98dad0c342a9b5bfa64f1bbf657e5fe33a5c929e3c7625078"
+          "value": "626b9a54cc91d3c7d3e9272c4ce68a8ad45ad4afdbb8722fb18ef4be7898750d"
         },
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-655/UNIT-TASK-AR-655-001.md",
-          "value": "1231c8c49943e15fe8c1daee955cbd41709f918e878fef0a1b0b2960d9433d3e"
+          "value": "95186539b94b75ee3c40390d64c37a1ec434995f45dcb6811f20df185e34496f"
         },
         {
           "kind": "sha256",
@@ -1313,7 +1313,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-03-task-ar-655-re-w4b-dispatch-t3-replan.md",
-      "recorded_at": "2026-08-04T14:07:12+09:00",
+      "recorded_at": "2026-08-04T14:16:34+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-V080-OPERABILITY-HARDENING"
     },
@@ -1529,5 +1529,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-04T14:07:12+09:00"
+  "updated_at": "2026-08-04T14:16:34+09:00"
 }

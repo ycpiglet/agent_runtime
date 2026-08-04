@@ -9,8 +9,10 @@ task_id: TASK-AR-655
 task_set_id: TASKSET-AR-V080-OPERABILITY-HARDENING
 initiative_id: INIT-AR-V080-OPERABILITY-HARDENING
 project_id: PROJECT-AGENT-RUNTIME
-status: in_progress
+status: done
 verification_status: passed
+completed_at: 2026-08-04T14:18:00+09:00
+resolution: done
 w4b_acceptance: true
 w4b_ref: reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md
 owner: lead-engineer

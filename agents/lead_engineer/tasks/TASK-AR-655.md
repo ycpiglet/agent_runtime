@@ -12,7 +12,10 @@ created_at: 2026-07-30T11:25:00+09:00
 updated_at: 2026-08-03T08:21:50+09:00
 started_at: 2026-08-03T00:26:51+09:00
 title: Add atomic heartbeat and renewal to task claims
-status: in_progress
+status: done
+completed_at: 2026-08-04T14:18:00+09:00
+resolution: done
+verification_status: passed
 priority: P1
 difficulty: M
 est_hours: 8

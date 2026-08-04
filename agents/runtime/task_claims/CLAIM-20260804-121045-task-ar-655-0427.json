@@ -9,7 +9,7 @@
   "callsite_id": "terminal:wt-task-ar-655:tab-01",
   "pane_id": "terminal:wt-task-ar-655:tab-01",
   "mode": "worker",
-  "status": "claimed",
+  "status": "released",
   "task_set_id": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "active_scope": "TASKSET-AR-V080-OPERABILITY-HARDENING",
   "scope_transition_approved": true,
@@ -49,12 +49,12 @@
   "worktree_path": ".",
   "branch": "codex/task-ar-655-v080-lease-bounds",
   "claimed_at": "2026-08-04T12:10:45+09:00",
-  "last_heartbeat": "2026-08-04T14:07:35.149387+09:00",
-  "updated_at": "2026-08-04T14:07:35.149387+09:00",
+  "last_heartbeat": "2026-08-04T14:14:54+09:00",
+  "updated_at": "2026-08-04T14:14:54+09:00",
   "expires_at": "2026-08-04T17:07:35.149387+09:00",
   "lease": {
     "claimed_at": "2026-08-04T12:10:45+09:00",
-    "heartbeat_at": "2026-08-04T14:07:35.149387+09:00",
+    "heartbeat_at": "2026-08-04T14:14:54+09:00",
     "expires_at": "2026-08-04T17:07:35.149387+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260804-121045-task-ar-655-0427.handoff.md",
@@ -332,5 +332,9 @@
       },
       "bound_at": "2026-08-04T12:10:45+09:00"
     }
-  }
+  },
+  "released_at": "2026-08-04T14:14:54+09:00",
+  "verified_by": "independent-context-isolated-auditor-task-ar-655",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md"
 }

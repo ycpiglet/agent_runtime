@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-04T14:07:11+09:00
-record_count: 1338
+generated_at: 2026-08-04T14:16:34+09:00
+record_count: 1340
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1338` review and evidence records under `reviews/`.
+- Summary: indexed `1340` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1338` files |
+| Reviews covered | pass | `1340` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -774,6 +774,8 @@ record_count: 1338
 | `reviews/ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B.md` | `ROLE-REVIEW-2026-07-28-TASK-AR-631-W4B` | md | record | watch | TASK-AR-631 Independent W4b and Lifecycle Recovery Review |
 | `reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-08-03-TASK-AR-659-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-659 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC.md` | `ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC` | role-review | record | n/a | TASK-AR-659 Skeptic Role Review |
+| `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-655 Independent Auditor Role Review |
+| `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC` | role-review | record | n/a | TASK-AR-655 Skeptic Role Review |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1.md` | `SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1` | progress-scout-sweep | record | n/a | v0.8 Adoption and Enforcement — Wave 1 Progress Sweep |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |
