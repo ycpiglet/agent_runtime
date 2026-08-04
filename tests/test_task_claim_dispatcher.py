@@ -7063,6 +7063,10 @@ def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted
         # that the spec file exists, so these were born unusable too.
         ("spec-frontmatter-task-id-mismatch", (), False),
         ("spec-frontmatter-unit-id-mismatch", (), False),
+        # Spec declares no target_files at all: _resolve_target_files' stray
+        # guard is gated on `if registered:`, so explicit entries pass straight
+        # through and the heartbeat component comparison then refuses forever.
+        ("empty-spec-target-files", ("--target-file", "src/agent_runtime/**"), False),
     ],
 )
 def test_every_claim_create_accepts_can_immediately_heartbeat(
@@ -7072,6 +7076,11 @@ def test_every_claim_create_accepts_can_immediately_heartbeat(
     _primary, linked = _init_git_worktree(tmp_path, f"ar655-sym-{label}")
     unit_rel = _write_routing_work(linked, task_id)
 
+    if label == "empty-spec-target-files":
+        spec = linked / unit_rel
+        body = spec.read_text(encoding="utf-8")
+        body = body.replace("target_files:\n  - scripts/routing_target.py\n  - scripts/routing_second.py\n", "")
+        spec.write_text(body, encoding="utf-8")
     if label == "spec-frontmatter-task-id-mismatch":
         spec = linked / unit_rel
         spec.write_text(

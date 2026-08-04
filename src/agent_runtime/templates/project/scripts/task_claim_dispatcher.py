@@ -701,6 +701,53 @@ def _unresolvable_scope_remedy(claim: dict[str, Any], detail: str) -> str:
     )
 
 
+def _scope_contract_error(
+    root: Path,
+    claim: dict[str, Any],
+    *,
+    recorded_target_component: str | None = None,
+) -> str | None:
+    """The complete scope contract, enforced identically at birth and at beat.
+
+    Six defects came from `create` and the mutation path disagreeing about what
+    a valid claim looks like, each found one field at a time. Sharing only the
+    resolver still left the sixth - a spec declaring no target_files lets
+    explicit --target-file entries through, and the component comparison then
+    refuses every beat for the life of the claim.
+
+    So the whole contract lives here: canonical spec location, spec resolution,
+    and target_files component equality. Both ends call this one function, so
+    "whatever heartbeat refuses, create refuses" is true by construction rather
+    than for the checks someone remembered to wire.
+
+    ``recorded_target_component`` is the component already persisted on the
+    claim's binding; omit it at creation, where the claim's own declared
+    footprint is the thing being validated.
+    """
+
+    spec_error = _non_canonical_unit_spec_error(claim)
+    if spec_error:
+        return spec_error
+    try:
+        spec_targets, _stop_condition = _current_scope_values(root, claim)
+    except (ValueError, OSError) as exc:
+        return _unresolvable_scope_remedy(claim, exc)
+    spec_component = _binding_for_claim(
+        claim, bound_at="", target_files=spec_targets
+    )["components"]["target_files"]
+    recorded = (
+        recorded_target_component
+        if recorded_target_component is not None
+        else _binding_for_claim(claim, bound_at="")["components"]["target_files"]
+    )
+    if spec_component != recorded:
+        return (
+            "claim footprint does not match its unit spec; declare the files in "
+            "the unit spec, or renew with an accepted replan"
+        )
+    return None
+
+
 def _claim_creation_errors(
     root: Path,
     claim: dict[str, Any],
@@ -710,21 +757,9 @@ def _claim_creation_errors(
     # Enforced at birth as well as at every mutation. A claim that create
     # accepts but heartbeat refuses is born unusable, and nothing says so until
     # the first beat.
-    spec_error = _non_canonical_unit_spec_error(claim)
-    if spec_error:
-        errors.append(spec_error)
-    # Run the mutation path's OWN spec resolution here rather than enumerating
-    # the fields it happens to check. Five separate defects came from create
-    # and the mutation path disagreeing about validity - stop_condition,
-    # out-of-spec --target-file, non-canonical unit_spec, blank unit_id, and
-    # frontmatter ids that disagree with the claim - and each was found one at
-    # a time. Calling the same function makes the symmetry hold by
-    # construction, so a sixth field cannot repeat it: whatever
-    # _current_scope_values refuses at heartbeat, create refuses at birth.
-    try:
-        _current_scope_values(root, claim)
-    except (ValueError, OSError) as exc:
-        errors.append(f"claim scope cannot be resolved from its unit spec: {exc}")
+    scope_error = _scope_contract_error(root, claim)
+    if scope_error:
+        errors.append(scope_error)
 
     if not _is_orchestrator_claim(claim):
         worktree_value = str(claim.get("worktree_path") or "").strip()
@@ -2699,33 +2734,20 @@ def _validate_mutation_authority(
     # a difference in what the two commands are FOR, not a predicate read out
     # of the claim being validated.
     if operation == "heartbeat":
-        # The spec pointer is itself claim content, so trusting it lets a
-        # second file with matching ids stand in as the authority - the same
-        # mistake as the overlay flag, one level up.
-        spec_error = _non_canonical_unit_spec_error(claim)
-        if spec_error:
-            raise ValueError(spec_error)
-        # Compare the target_files component only. `create` does not copy the
-        # spec's stop_condition into the claim, so comparing whole digests
-        # reports drift on every real claim from the moment it is created -
-        # fixtures hide that because their generated specs declare none.
-        # target_files is also the component that actually matters: it is the
-        # enforced footprint that refuses sibling creates and bounds
-        # undeclared-write checking.
-        try:
-            target_files, _stop_condition = _current_scope_values(root, claim)
-        except (ValueError, OSError) as exc:
-            raise ValueError(_unresolvable_scope_remedy(claim, exc)) from exc
-        spec_targets = _binding_for_claim(
+        # One predicate, shared with _claim_creation_errors: canonical spec
+        # location, spec resolution, and target_files component equality.
+        # Sharing only the resolver left a sixth field - a spec declaring no
+        # target_files let explicit entries through at create and the
+        # comparison then refused every beat.
+        scope_error = _scope_contract_error(
+            root,
             claim,
-            bound_at=str(persisted.get("bound_at") or ""),
-            target_files=target_files,
-        )["components"]["target_files"]
-        if spec_targets != persisted.get("components", {}).get("target_files"):
-            raise ValueError(
-                "claim footprint no longer matches its unit spec; run renew "
-                "with an accepted replan instead of heartbeat"
-            )
+            recorded_target_component=persisted.get("components", {}).get(
+                "target_files"
+            ),
+        )
+        if scope_error:
+            raise ValueError(scope_error)
     return heartbeat, expires, revision
 
 
@@ -3027,7 +3049,12 @@ def _cmd_claim_mutation_locked(
             raise ValueError(
                 "claim scope digest mismatch: expected persisted scope binding"
             )
-        renewed_targets, renewed_stop = _current_scope_values(root, claim)
+        try:
+            renewed_targets, renewed_stop = _current_scope_values(root, claim)
+        except (ValueError, OSError) as exc:
+            # Same condition as heartbeat's; name the same way out rather than
+            # leaving one of the two commands with a bare "not found".
+            raise ValueError(_unresolvable_scope_remedy(claim, exc)) from exc
         # Grandfather a pre-fix claim once, then heal it. Leaving it empty kept
         # it tolerated for life and made clearing a boundary permanently
         # acceptable, reachable forward as well as backward. Writing the spec's
