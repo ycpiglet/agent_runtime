@@ -28,6 +28,7 @@ import json
 import os
 import secrets
 import stat
+import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -99,6 +100,49 @@ class CreatedDirectoryIdentity(NamedTuple):
     inode: int
 
 
+class _CleanupPathIdentity(NamedTuple):
+    """Callback-bound identity for one direct lexical path component."""
+
+    path: Path
+    device: int
+    inode: int
+    stat_generation: int
+    mode: int
+    size: int
+    change_time_ns: int
+    modification_time_ns: int
+    birth_time_ns: int
+    link_count: int
+    file_attributes: int
+    reparse_tag: int
+
+
+class _RejectedCleanupProof(NamedTuple):
+    """Exact sidecar and parent chain observed immediately before authority."""
+
+    path: Path
+    sidecar_name: str
+    parent_chain: tuple[_CleanupPathIdentity, ...]
+    sidecar: _CleanupPathIdentity
+
+
+class _RollbackAuthority(NamedTuple):
+    """Fresh chain identity granting one best-effort created-parent rollback."""
+
+    parent_chain: tuple[_CleanupPathIdentity, ...]
+
+
+class _ExclusivePrecommitState:
+    """Track pending, capture-failed, armed, rejected, or accepted cleanup."""
+
+    __slots__ = ("callback", "phase", "proof")
+
+    def __init__(self, callback: Callable[[], None]) -> None:
+        self.callback = callback
+        self.phase = "pending"
+        self.proof: _RejectedCleanupProof | None = None
+
+
 def _stat_is_path_alias(metadata: Any) -> bool:
     """Return whether an lstat result is a symlink or Windows reparse point."""
     return stat.S_ISLNK(metadata.st_mode) or bool(
@@ -145,6 +189,234 @@ def _nearest_existing_parent(parent: Path) -> tuple[Path, list[str]]:
 
 def _same_file(left: Any, right: Any) -> bool:
     return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+
+
+def _stat_time_ns(metadata: Any, nanoseconds: str) -> int:
+    value = getattr(metadata, nanoseconds, None)
+    return -1 if value is None else int(value)
+
+
+def _cleanup_path_identity(path: Path, metadata: Any) -> _CleanupPathIdentity:
+    change_time_ns = _stat_time_ns(metadata, "st_ctime_ns")
+    birth_time_ns = _stat_time_ns(
+        metadata,
+        "st_birthtime_ns",
+    )
+    if birth_time_ns < 0 and sys.platform == "win32":
+        # Before Python 3.12 Windows exposed creation time through st_ctime.
+        birth_time_ns = change_time_ns
+    return _CleanupPathIdentity(
+        path=path,
+        device=int(metadata.st_dev),
+        inode=int(metadata.st_ino),
+        stat_generation=int(getattr(metadata, "st_gen", -1)),
+        mode=int(metadata.st_mode),
+        size=int(metadata.st_size),
+        change_time_ns=change_time_ns,
+        modification_time_ns=_stat_time_ns(metadata, "st_mtime_ns"),
+        birth_time_ns=birth_time_ns,
+        link_count=int(getattr(metadata, "st_nlink", 0) or 0),
+        file_attributes=int(getattr(metadata, "st_file_attributes", 0) or 0),
+        reparse_tag=int(getattr(metadata, "st_reparse_tag", 0) or 0),
+    )
+
+
+def _same_cleanup_object(
+    expected: _CleanupPathIdentity,
+    observed: _CleanupPathIdentity,
+) -> bool:
+    """Compare stable object keys while allowing directory entry mutations."""
+
+    return (
+        expected.path == observed.path
+        and expected.device == observed.device
+        and expected.inode == observed.inode
+        and expected.stat_generation == observed.stat_generation
+        and expected.mode == observed.mode
+        and expected.birth_time_ns == observed.birth_time_ns
+        and expected.file_attributes == observed.file_attributes
+        and expected.reparse_tag == observed.reparse_tag
+    )
+
+
+def _same_cleanup_identity(
+    expected: _CleanupPathIdentity,
+    observed: _CleanupPathIdentity,
+) -> bool:
+    """Compare both stable keys and the callback-bound generation."""
+
+    return _same_cleanup_object(expected, observed) and (
+        expected.size == observed.size
+        and expected.change_time_ns == observed.change_time_ns
+        and expected.modification_time_ns == observed.modification_time_ns
+        and expected.link_count == observed.link_count
+    )
+
+
+def _opened_cleanup_identity_matches(
+    expected: _CleanupPathIdentity,
+    observed: _CleanupPathIdentity,
+) -> bool:
+    """Bind the opened sidecar to its first post-close path generation.
+
+    Windows may finalize last-write metadata only when the final writing handle
+    closes. Its stable creation/object fields and exact size must still match,
+    but the first post-close observation becomes the full callback-bound
+    generation used thereafter. POSIX has no such normalization boundary and
+    retains exact full-generation equality.
+    """
+
+    if sys.platform != "win32":
+        return _same_cleanup_identity(expected, observed)
+    return _same_cleanup_object(expected, observed) and expected.size == observed.size
+
+
+def _published_file_identity(metadata: Any) -> PublishedFileIdentity:
+    return PublishedFileIdentity(
+        int(metadata.st_dev),
+        int(metadata.st_ino),
+        int(metadata.st_mode),
+        int(metadata.st_size),
+        int(getattr(metadata, "st_file_attributes", 0) or 0),
+        int(getattr(metadata, "st_reparse_tag", 0) or 0),
+    )
+
+
+def _published_identity_matches(
+    expected: PublishedFileIdentity,
+    observed: _CleanupPathIdentity,
+) -> bool:
+    return (
+        expected.device == observed.device
+        and expected.inode == observed.inode
+        and expected.mode == observed.mode
+        and expected.size == observed.size
+        and expected.file_attributes == observed.file_attributes
+        and expected.reparse_tag == observed.reparse_tag
+    )
+
+
+def _snapshot_directory_chain(parent: Path) -> tuple[_CleanupPathIdentity, ...]:
+    """Capture every direct lexical component from the anchor to ``parent``."""
+
+    absolute = _absolute_lexical(parent)
+    entries: list[_CleanupPathIdentity] = []
+    for candidate in reversed((absolute, *absolute.parents)):
+        metadata = candidate.lstat()
+        _validate_parent_metadata(candidate, metadata)
+        entries.append(_cleanup_path_identity(candidate, metadata))
+    return tuple(entries)
+
+
+def _sidecar_metadata(path: Path, name: str, parent_fd: int | None) -> Any:
+    if parent_fd is not None:
+        return os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    return (path.parent / name).lstat()
+
+
+def _capture_precommit_cleanup(
+    path: Path,
+    name: str,
+    parent_fd: int | None,
+    opened_identity: PublishedFileIdentity,
+    opened_cleanup_identity: _CleanupPathIdentity,
+) -> _RejectedCleanupProof:
+    """Arm rejected-callback cleanup at the final pre-publication boundary."""
+
+    parent_chain = _snapshot_directory_chain(path.parent)
+    if parent_fd is not None:
+        pinned_parent_metadata = os.fstat(parent_fd)
+        _validate_parent_metadata(path.parent, pinned_parent_metadata)
+        pinned_parent = _cleanup_path_identity(path.parent, pinned_parent_metadata)
+        if not _same_cleanup_identity(parent_chain[-1], pinned_parent):
+            raise OSError(
+                errno.EIO,
+                "lexical and pinned atomic parent identities differ before precommit authority",
+                str(path.parent),
+            )
+
+    sidecar_path = path.parent / name
+    metadata = _sidecar_metadata(path, name, parent_fd)
+    if _stat_is_path_alias(metadata) or not stat.S_ISREG(metadata.st_mode):
+        raise OSError(
+            errno.EIO,
+            "atomic sidecar changed before precommit authority",
+            str(sidecar_path),
+        )
+    sidecar = _cleanup_path_identity(sidecar_path, metadata)
+    if not _published_identity_matches(
+        opened_identity,
+        sidecar,
+    ) or not _opened_cleanup_identity_matches(opened_cleanup_identity, sidecar):
+        raise OSError(
+            errno.EIO,
+            "atomic sidecar identity changed before precommit authority",
+            str(sidecar_path),
+        )
+
+    final_parent_chain = _snapshot_directory_chain(path.parent)
+    if len(parent_chain) != len(final_parent_chain) or any(
+        not _same_cleanup_identity(before, after)
+        for before, after in zip(parent_chain, final_parent_chain)
+    ):
+        raise OSError(
+            errno.EIO,
+            "atomic parent chain changed before precommit authority",
+            str(path.parent),
+        )
+    if parent_fd is not None and not _same_cleanup_identity(
+        pinned_parent,
+        final_parent_chain[-1],
+    ):
+        raise OSError(
+            errno.EIO,
+            "lexical and pinned atomic parent identities changed before precommit authority",
+            str(path.parent),
+        )
+    return _RejectedCleanupProof(path, name, final_parent_chain, sidecar)
+
+
+def _run_exclusive_precommit(
+    state: _ExclusivePrecommitState,
+    path: Path,
+    name: str,
+    parent_fd: int | None,
+    opened_identity: PublishedFileIdentity,
+    opened_cleanup_identity: _CleanupPathIdentity,
+) -> None:
+    try:
+        state.proof = _capture_precommit_cleanup(
+            path,
+            name,
+            parent_fd,
+            opened_identity,
+            opened_cleanup_identity,
+        )
+    except BaseException:
+        state.phase = "capture_failed"
+        raise
+    state.phase = "armed"
+    try:
+        state.callback()
+    except BaseException:
+        state.phase = "rejected"
+        raise
+    state.phase = "accepted"
+
+
+def _observe_cleanup_chain(
+    expected: tuple[_CleanupPathIdentity, ...],
+) -> tuple[_CleanupPathIdentity, ...] | None:
+    try:
+        observed = _snapshot_directory_chain(expected[-1].path)
+    except BaseException:
+        return None
+    if len(expected) != len(observed) or not all(
+        _same_cleanup_object(before, after)
+        for before, after in zip(expected, observed)
+    ):
+        return None
+    return observed
 
 
 def _posix_parent_fd(
@@ -335,34 +607,97 @@ def _direct_parent(
 
 def _rollback_created_parents(
     created_parents: list[CreatedDirectoryIdentity],
+    authority: _RollbackAuthority,
 ) -> None:
-    """Best-effort removal of empty directories provably created by this call.
+    """Consume callback-bound authority to remove owned empty parents.
 
-    Cleanup walks leaf-first and refuses any path whose direct, non-alias
-    device/inode identity changed. ``rmdir`` then preserves concurrent data by
-    failing on a nonempty directory. This helper is intentionally used only
-    when an external precommit callback rejects; other atomic-write failure
-    contracts retain their historical parent-creation semantics.
+    The full root-to-leaf object chain is checked before every ``rmdir``. Full
+    generations were already proved intact before sidecar removal minted this
+    token; cleanup never refreshes a post-callback generation and calls it
+    owned. Any alias, replacement, foreign data, or uncertain metadata stops
+    cleanup and preserves the original callback exception.
     """
 
+    expected = list(authority.parent_chain)
+    positions = {entry.path: index for index, entry in enumerate(expected)}
     for created in reversed(created_parents):
-        try:
-            metadata = created.path.lstat()
-        except (FileNotFoundError, NotADirectoryError):
-            continue
-        if (
-            _stat_is_path_alias(metadata)
-            or not stat.S_ISDIR(metadata.st_mode)
-            or (int(metadata.st_dev), int(metadata.st_ino))
-            != (created.device, created.inode)
-        ):
-            continue
+        position = positions.get(created.path)
+        if position is None or position != len(expected) - 1:
+            return
+        observed = _observe_cleanup_chain(tuple(expected))
+        if observed is None:
+            return
+        leaf = observed[-1]
+        if (leaf.device, leaf.inode) != (created.device, created.inode):
+            return
         try:
             created.path.rmdir()
-        except OSError:
-            # Missing, replaced, or nonempty directories are never cleanup
-            # authority. Preserve them and the original callback exception.
-            continue
+        except BaseException:
+            return
+
+        expected = expected[:-1]
+
+
+def _cleanup_rejected_sidecar(
+    state: _ExclusivePrecommitState,
+    path: Path,
+    name: str,
+    parent_fd: int | None,
+    created_parents: list[CreatedDirectoryIdentity],
+) -> _RollbackAuthority | None:
+    """Reclaim the exact sidecar and mint directory rollback authority.
+
+    Every lexical parent and the sidecar must retain its complete callback-bound
+    generation before any pathname is unlinked. Uncertainty deliberately leaks
+    the owned sidecar instead of traversing or deleting another namespace.
+    """
+
+    proof = state.proof
+    if state.phase != "rejected" or proof is None:
+        return None
+
+    first_chain = _observe_cleanup_chain(proof.parent_chain)
+    if first_chain is None or any(
+        not _same_cleanup_identity(before, after)
+        for before, after in zip(proof.parent_chain, first_chain)
+    ):
+        return None
+    try:
+        first_sidecar = _cleanup_path_identity(
+            proof.sidecar.path,
+            _sidecar_metadata(path, name, parent_fd),
+        )
+    except BaseException:
+        return None
+    if not _same_cleanup_identity(proof.sidecar, first_sidecar):
+        return None
+
+    second_chain = _observe_cleanup_chain(proof.parent_chain)
+    if second_chain is None or any(
+        not _same_cleanup_identity(before, after)
+        for before, after in zip(proof.parent_chain, second_chain)
+    ) or any(
+        not _same_cleanup_identity(first, second)
+        for first, second in zip(first_chain, second_chain)
+    ):
+        return None
+    try:
+        second_sidecar = _cleanup_path_identity(
+            proof.sidecar.path,
+            _sidecar_metadata(path, name, parent_fd),
+        )
+    except BaseException:
+        return None
+    if not _same_cleanup_identity(proof.sidecar, second_sidecar):
+        return None
+
+    try:
+        _unlink_sidecar(path, name, parent_fd)
+    except BaseException:
+        return None
+    if not created_parents:
+        return None
+    return _RollbackAuthority(second_chain)
 
 
 def _open_exclusive_tmp(path: Path, parent_fd: int | None) -> tuple[int, str]:
@@ -458,7 +793,9 @@ def _publish_sidecar(
     name: str,
     parent_fd: int | None,
     *,
-    precommit: Callable[[], None] | None = None,
+    precommit_state: _ExclusivePrecommitState | None = None,
+    opened_identity: PublishedFileIdentity,
+    opened_cleanup_identity: _CleanupPathIdentity,
     created_parents: list[CreatedDirectoryIdentity] | None = None,
 ) -> bool:
     """Publish without replacement and report whether cleanup completed.
@@ -470,8 +807,15 @@ def _publish_sidecar(
     caller should make one best-effort cleanup retry.
     """
     if parent_fd is not None:
-        if precommit is not None:
-            precommit()
+        if precommit_state is not None:
+            _run_exclusive_precommit(
+                precommit_state,
+                path,
+                name,
+                parent_fd,
+                opened_identity,
+                opened_cleanup_identity,
+            )
         os.link(
             name,
             path.name,
@@ -489,9 +833,18 @@ def _publish_sidecar(
     source = path.parent / name
     if os.name == "nt":
         # Windows rename fails with FileExistsError when destination exists.
+        if precommit_state is not None:
+            # Callback exceptions are authority results, not rename errors;
+            # preserve their exact object instead of collision-translating them.
+            _run_exclusive_precommit(
+                precommit_state,
+                path,
+                name,
+                parent_fd,
+                opened_identity,
+                opened_cleanup_identity,
+            )
         try:
-            if precommit is not None:
-                precommit()
             os.rename(source, path)
         except OSError as exc:
             try:
@@ -505,8 +858,15 @@ def _publish_sidecar(
             ) from exc
         return True
     else:
-        if precommit is not None:
-            precommit()
+        if precommit_state is not None:
+            _run_exclusive_precommit(
+                precommit_state,
+                path,
+                name,
+                parent_fd,
+                opened_identity,
+                opened_cleanup_identity,
+            )
         os.link(source, path, follow_symlinks=False)
         try:
             source.unlink()
@@ -551,16 +911,9 @@ def _write_text(
 ) -> PublishedFileIdentity | None:
     policy = _require_fsync_policy(fsync_policy)
     created_parents: list[CreatedDirectoryIdentity] = []
-    precommit_rejected = False
-
-    def run_precommit() -> None:
-        nonlocal precommit_rejected
-        assert precommit is not None
-        try:
-            precommit()
-        except BaseException:
-            precommit_rejected = True
-            raise
+    precommit_state = (
+        _ExclusivePrecommitState(precommit) if precommit is not None else None
+    )
 
     with _direct_parent(
         path,
@@ -570,6 +923,7 @@ def _write_text(
         descriptor: int | None = None
         sidecar: str | None = None
         published_identity: PublishedFileIdentity | None = None
+        opened_cleanup_identity: _CleanupPathIdentity | None = None
         try:
             descriptor, sidecar = _open_exclusive_tmp(absolute, parent_fd)
             # newline="" keeps the exact caller bytes on Windows as well as
@@ -597,21 +951,22 @@ def _write_text(
                         "atomic sidecar changed from a regular file",
                         sidecar,
                     )
-                published_identity = PublishedFileIdentity(
-                    int(opened.st_dev),
-                    int(opened.st_ino),
-                    int(opened.st_mode),
-                    int(opened.st_size),
-                    int(getattr(opened, "st_file_attributes", 0) or 0),
-                    int(getattr(opened, "st_reparse_tag", 0) or 0),
+                published_identity = _published_file_identity(opened)
+                opened_cleanup_identity = _cleanup_path_identity(
+                    absolute.parent / sidecar,
+                    opened,
                 )
 
             if exclusive:
+                assert published_identity is not None
+                assert opened_cleanup_identity is not None
                 if _publish_sidecar(
                     absolute,
                     sidecar,
                     parent_fd,
-                    precommit=run_precommit if precommit is not None else None,
+                    precommit_state=precommit_state,
+                    opened_identity=published_identity,
+                    opened_cleanup_identity=opened_cleanup_identity,
                     created_parents=created_parents,
                 ):
                     sidecar = None
@@ -636,12 +991,30 @@ def _write_text(
                 except OSError:
                     pass
             if sidecar is not None:
-                try:
-                    _unlink_sidecar(absolute, sidecar, parent_fd)
-                except OSError:
+                if precommit_state is not None and precommit_state.phase == "rejected":
+                    try:
+                        authority = _cleanup_rejected_sidecar(
+                            precommit_state,
+                            absolute,
+                            sidecar,
+                            parent_fd,
+                            created_parents,
+                        )
+                        if authority is not None:
+                            _rollback_created_parents(created_parents, authority)
+                    except BaseException:
+                        pass
+                elif (
+                    precommit_state is not None
+                    and precommit_state.phase
+                    in {"pending", "armed", "capture_failed"}
+                ):
                     pass
-            if precommit_rejected:
-                _rollback_created_parents(created_parents)
+                else:
+                    try:
+                        _unlink_sidecar(absolute, sidecar, parent_fd)
+                    except OSError:
+                        pass
         if exclusive:
             assert published_identity is not None
             return published_identity

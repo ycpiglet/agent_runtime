@@ -775,7 +775,7 @@ def test_precommit_refuses_real_immediate_sidecar_inode_reuse_and_preserves_repl
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Full generation, not legacy dev/inode metadata, binds the opened file."""
+    """Opened-object generation, not legacy dev/inode metadata, binds the file."""
 
     target = tmp_path / "created-store" / "receipt.json"
     prepared = b"prepared\n"
@@ -820,9 +820,12 @@ def test_precommit_refuses_real_immediate_sidecar_inode_reuse_and_preserves_repl
                 observed.file_attributes,
                 observed.reparse_tag,
             )
-            if opened_legacy == observed_legacy and not atomic_io._same_cleanup_identity(
-                opened_cleanup_identity,
-                observed,
+            if (
+                opened_legacy == observed_legacy
+                and not atomic_io._opened_cleanup_identity_matches(
+                    opened_cleanup_identity,
+                    observed,
+                )
             ):
                 replacement = sidecar
                 return real_run(
@@ -835,7 +838,7 @@ def test_precommit_refuses_real_immediate_sidecar_inode_reuse_and_preserves_repl
                 )
         pytest.skip(
             "test filesystem did not reuse the sidecar inode with a distinct "
-            "generation in 512 immediate recreations"
+            "opened-object generation in 512 immediate recreations"
         )
 
     monkeypatch.setattr(atomic_io, "_run_exclusive_precommit", reuse_at_boundary)
@@ -931,10 +934,13 @@ def test_cleanup_identity_uses_real_windows_legacy_ctime_as_birth_generation(
 
     identity = atomic_io._cleanup_path_identity(tmp_path, metadata)
     changed = identity._replace(change_time_ns=identity.change_time_ns + 1)
+    replaced = identity._replace(birth_time_ns=identity.birth_time_ns + 1)
 
     assert identity.birth_time_ns == metadata.st_ctime_ns
     assert atomic_io._same_cleanup_object(identity, changed)
     assert not atomic_io._same_cleanup_identity(identity, changed)
+    assert atomic_io._opened_cleanup_identity_matches(identity, changed)
+    assert not atomic_io._opened_cleanup_identity_matches(identity, replaced)
 
 
 def test_windows_precommit_normalizes_last_write_generation_after_handle_close(
@@ -947,6 +953,20 @@ def test_windows_precommit_normalizes_last_write_generation_after_handle_close(
     rejection = ValueError("stale recovery actor")
     callback_calls = 0
     real_sidecar_metadata = atomic_io._sidecar_metadata
+    real_lstat = Path.lstat
+    birth_times: dict[tuple[int, int], int] = {}
+
+    class WindowsMetadata:
+        def __init__(self, metadata: object) -> None:
+            self._metadata = metadata
+            key = (int(metadata.st_dev), int(metadata.st_ino))
+            birth_times.setdefault(key, int(metadata.st_ctime_ns))
+            self._birth_time_ns = birth_times[key]
+
+        def __getattr__(self, attribute: str) -> object:
+            if attribute == "st_birthtime_ns":
+                return self._birth_time_ns
+            return getattr(self._metadata, attribute)
 
     class CloseFinalizedMetadata:
         def __init__(self, metadata: object) -> None:
@@ -964,6 +984,9 @@ def test_windows_precommit_normalizes_last_write_generation_after_handle_close(
     ) -> object:
         return CloseFinalizedMetadata(real_sidecar_metadata(path, name, parent_fd))
 
+    def report_windows_birth_time(path: Path) -> object:
+        return WindowsMetadata(real_lstat(path))
+
     def reject_authority() -> None:
         nonlocal callback_calls
         callback_calls += 1
@@ -971,6 +994,7 @@ def test_windows_precommit_normalizes_last_write_generation_after_handle_close(
 
     monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
     monkeypatch.setattr(atomic_io.sys, "platform", "win32")
+    monkeypatch.setattr(Path, "lstat", report_windows_birth_time)
     monkeypatch.setattr(
         atomic_io,
         "_sidecar_metadata",

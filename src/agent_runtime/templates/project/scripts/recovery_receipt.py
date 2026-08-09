@@ -37,8 +37,13 @@ from typing import Any, Callable, Iterator, Mapping
 from atomic_io import (
     AtomicWriteError,
     CreatedDirectoryIdentity,
+    _ExclusivePrecommitState,
+    _cleanup_path_identity,
+    _cleanup_rejected_sidecar,
     _direct_parent as _atomic_direct_parent,
+    _published_file_identity,
     _rollback_created_parents,
+    _run_exclusive_precommit,
     publish_json_atomic,
 )
 
@@ -670,6 +675,7 @@ def _publish_record_at(
     record: Mapping[str, Any],
     *,
     precommit: Callable[[], None] | None = None,
+    created_parents: list[CreatedDirectoryIdentity] | None = None,
 ) -> None:
     """Strictly publish one immutable record into a pinned POSIX directory."""
 
@@ -694,6 +700,10 @@ def _publish_record_at(
     descriptor: int | None = None
     sidecar: str | None = None
     published = False
+    precommit_state = (
+        _ExclusivePrecommitState(precommit) if precommit is not None else None
+    )
+    owned_parents = created_parents if created_parents is not None else []
     for _attempt in range(128):
         candidate = f".{path.name}.tmp-{secrets.token_hex(12)}"
         try:
@@ -711,6 +721,7 @@ def _publish_record_at(
 
     try:
         opened: Any | None = None
+        opened_cleanup_identity: Any | None = None
         write_failed = False
         try:
             _write_all(descriptor, data)
@@ -730,6 +741,10 @@ def _publish_record_at(
                     "recovery receipt sidecar identity changed before publication",
                     sidecar,
                 )
+            opened_cleanup_identity = _cleanup_path_identity(
+                path.parent / sidecar,
+                opened,
+            )
         except BaseException:
             write_failed = True
             raise
@@ -764,12 +779,21 @@ def _publish_record_at(
                 "recovery receipt sidecar changed before publication",
                 sidecar,
             )
-        if precommit is not None:
+        if precommit_state is not None:
             # External authority must be proved inside the publisher, after
             # all fallible sidecar preparation and immediately before the
             # immutable destination link becomes visible.  A rejected proof
-            # leaves only the owned sidecar for the finally block to remove.
-            precommit()
+            # can reclaim only the exact callback-bound sidecar and parents.
+            assert opened is not None
+            assert opened_cleanup_identity is not None
+            _run_exclusive_precommit(
+                precommit_state,
+                path,
+                sidecar,
+                parent_fd,
+                _published_file_identity(opened),
+                opened_cleanup_identity,
+            )
         os.link(
             sidecar,
             path.name,
@@ -824,10 +848,30 @@ def _publish_record_at(
             except OSError:
                 pass
         if sidecar is not None and not published:
-            try:
-                os.unlink(sidecar, dir_fd=parent_fd)
-            except OSError:
+            if precommit_state is not None and precommit_state.phase == "rejected":
+                try:
+                    authority = _cleanup_rejected_sidecar(
+                        precommit_state,
+                        path,
+                        sidecar,
+                        parent_fd,
+                        owned_parents,
+                    )
+                    if authority is not None:
+                        _rollback_created_parents(owned_parents, authority)
+                except BaseException:
+                    pass
+            elif (
+                precommit_state is not None
+                and precommit_state.phase
+                in {"pending", "armed", "capture_failed"}
+            ):
                 pass
+            else:
+                try:
+                    os.unlink(sidecar, dir_fd=parent_fd)
+                except OSError:
+                    pass
 
 
 def _readback_published_record(
@@ -896,46 +940,29 @@ def _publish_record(
         # directory descriptor pinned through sidecar preparation, the actor
         # proof, destination link, durability fsync, and exact readback.
         created_parents: list[CreatedDirectoryIdentity] = []
-        precommit_rejected = False
-
-        def run_precommit() -> None:
-            nonlocal precommit_rejected
-            assert precommit is not None
-            try:
-                precommit()
-            except BaseException:
-                precommit_rejected = True
-                raise
-
-        try:
-            with _atomic_direct_parent(
-                path,
-                strict_creation_fsync=True,
+        with _atomic_direct_parent(
+            path,
+            strict_creation_fsync=True,
+            created_parents=created_parents,
+        ) as (absolute, pinned_parent_fd):
+            if pinned_parent_fd is None:
+                raise OSError(
+                    errno.ENOTSUP,
+                    "POSIX receipt publication requires a pinned parent",
+                    str(path),
+                )
+            _publish_record_at(
+                pinned_parent_fd,
+                absolute,
+                record,
+                precommit=precommit,
                 created_parents=created_parents,
-            ) as (absolute, pinned_parent_fd):
-                if pinned_parent_fd is None:
-                    raise OSError(
-                        errno.ENOTSUP,
-                        "POSIX receipt publication requires a pinned parent",
-                        str(path),
-                    )
-                _publish_record_at(
-                    pinned_parent_fd,
-                    absolute,
-                    record,
-                    precommit=(
-                        run_precommit if precommit is not None else None
-                    ),
-                )
-                return _readback_published_record(
-                    absolute,
-                    record,
-                    parent_fd=pinned_parent_fd,
-                )
-        except BaseException:
-            if precommit_rejected:
-                _rollback_created_parents(created_parents)
-            raise
+            )
+            return _readback_published_record(
+                absolute,
+                record,
+                parent_fd=pinned_parent_fd,
+            )
 
     # Non-POSIX atomic_io performs the platform's direct-parent checks, durable
     # sidecar preparation, and final callback immediately before destination

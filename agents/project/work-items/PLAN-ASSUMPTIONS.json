@@ -180,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "49c149af6f3c939d32cd8b2e3bcdc2fd723b3eb085f134d5c520eef55ad0ad20"
+          "value": "ca7a868604ec96ff47f74c2c9e046e628de8b0422be119810bca492166d51c4d"
         },
         {
           "kind": "sha256",
@@ -215,7 +215,7 @@
         {
           "kind": "sha256",
           "path": "scripts/atomic_io.py",
-          "value": "7cd59281702dee74116e255b5e40127b0c4926537423afe10fbe9621d6d9ba17"
+          "value": "4188c7e353aaac7401a840fead87f5dfc800511c656e3b6c1004e363749210ad"
         },
         {
           "kind": "sha256",
@@ -270,7 +270,7 @@
         {
           "kind": "sha256",
           "path": "scripts/recovery_receipt.py",
-          "value": "ebaf972b8880a092d4d5fe736bb62df6ef28539691d59f1e7115c1409e2951c8"
+          "value": "08a33d879b480d957517550869aea19d2a9498c5bc2e68ba592d4babe1770bb7"
         },
         {
           "kind": "sha256",
@@ -331,10 +331,40 @@
           "kind": "sha256",
           "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md",
           "value": "42e2aecc1daf65fa2a13c2ceb1f84cda3a8267627573680c6f8218509a3af603"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/atomic_io.py",
+          "value": "4188c7e353aaac7401a840fead87f5dfc800511c656e3b6c1004e363749210ad"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/recovery_receipt.py",
+          "value": "08a33d879b480d957517550869aea19d2a9498c5bc2e68ba592d4babe1770bb7"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_atomic_io.py",
+          "value": "8d7bed4a6393ada54f318da0080ad10034653dd9b8dceff7f32a453b3db013e6"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_recovery_receipt.py",
+          "value": "0ea648d92cf15065a7228ad15e48d3a2be7d30f5b82801ad4eb23e2956ac149e"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/fixtures/host/agent_runtime.lock.json",
+          "value": "dcf1c1b303cef5b39b1ed10f349b65883fde193055d859790ce7b6255d0cc8a8"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md",
+          "value": "04ed48673e564926838c965b068d3e76ee5f012eea62f038cc5f8dc43eebb578"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md",
-      "recorded_at": "2026-08-09T18:32:25+09:00",
+      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md",
+      "recorded_at": "2026-08-09T19:40:11+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1978,5 +2008,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T18:32:25+09:00"
+  "updated_at": "2026-08-09T19:40:11+09:00"
 }
