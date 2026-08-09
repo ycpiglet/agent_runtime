@@ -517,6 +517,74 @@ def test_rejected_exclusive_precommit_never_removes_unowned_parent_data(
         )
 
 
+def test_rejected_exclusive_precommit_preserves_replaced_empty_parent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "created-store" / "receipt.json"
+    displaced = tmp_path / "displaced-store"
+    replacement_inode: int | None = None
+
+    def replace_parent_then_reject() -> None:
+        nonlocal replacement_inode
+        sidecars = _tmp_siblings(target)
+        assert len(sidecars) == 1
+        sidecars[0].unlink()
+        target.parent.rename(displaced)
+        target.parent.mkdir()
+        replacement_inode = target.parent.stat().st_ino
+        raise ValueError("stale recovery actor")
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError, match="stale recovery actor"):
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=replace_parent_then_reject,
+        )
+
+    assert replacement_inode is not None
+    assert target.parent.is_dir()
+    assert target.parent.stat().st_ino == replacement_inode
+    assert displaced.is_dir()
+
+
+def test_successful_precommit_is_not_retried_or_rolled_back_after_publish_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "created-store" / "receipt.json"
+    callback_calls = 0
+
+    def prove_authority() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+
+    def fail_destination(_source: object, _destination: object) -> None:
+        raise OSError(errno.EACCES, "injected destination failure")
+
+    monkeypatch.setattr(
+        atomic_io,
+        "os",
+        _NamedOSProxy("nt", rename=fail_destination),
+    )
+
+    with pytest.raises(OSError, match="injected destination failure"):
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=prove_authority,
+        )
+
+    assert callback_calls == 1
+    assert target.parent.is_dir()
+    assert not target.exists()
+    assert _tmp_siblings(target) == []
+
+
 def test_publish_refuses_existing_destination_without_mutation(tmp_path: Path) -> None:
     target = tmp_path / "claim.json"
     target.write_text("owner-one\n", encoding="utf-8")
