@@ -1,0 +1,31 @@
+{
+  "after": {
+    "byte_length": 314,
+    "raw_sha256": "00159905d9cd2caea54d52aa373381c15779420396497af83afe44c7c3954741",
+    "semantic_sha256": "00159905d9cd2caea54d52aa373381c15779420396497af83afe44c7c3954741"
+  },
+  "before": {
+    "byte_length": 101,
+    "raw_sha256": "b28e59d52bc6da90eb5fd2c761e201e179e3bc45cf29c97483326826557ddb89",
+    "semantic_sha256": "b28e59d52bc6da90eb5fd2c761e201e179e3bc45cf29c97483326826557ddb89"
+  },
+  "commit_witness": {
+    "claim_store_operation": "checkout-activation",
+    "claim_store_state_before": "migration-required",
+    "generation_id": "9a80469a-f440-4e3f-9f0a-9a65a770b974",
+    "operation": "activate-store",
+    "subjects": [
+      "git-admin:agent-runtime/task-claim-store"
+    ],
+    "witness_claim_id": "CLAIM-20260610-201352-task-ar-201-ca7e"
+  },
+  "operation": "activate-store",
+  "owner_id": "ycpiglet <68498184+ycpiglet@users.noreply.github.com>",
+  "reason": "activate this claimed TASK-AR-660 worktree against the initialized claim store before owner-bound adoption",
+  "receipt_digest": "ea198ee415132f4991291ccc0e13b106e56826d6af19118325ac8d2e12c2aa3b",
+  "receipt_id": "RECOVERY-20260809T061950838184Z-activate-store-ff9d5f57972645d08a6165f79b75413e",
+  "recorded_at": "2026-08-09T15:19:50+09:00",
+  "schema": "agent-runtime-recovery-receipt/v1",
+  "state": "prepared",
+  "subject_ref": "claim-store:git-admin:agent-runtime/task-claim-store"
+}

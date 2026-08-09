@@ -1,0 +1,30 @@
+{
+  "after": {
+    "byte_length": 5925,
+    "raw_sha256": "707ca4cdd7201c07f4df2cf97aef51f9ec54502f660bb00d06d37d055eb8e24c",
+    "semantic_sha256": "478b9481a21d4e3fc3ac85132068df51e9eb098948602c80dc5b665dd9e7d74c"
+  },
+  "before": {
+    "byte_length": 5056,
+    "raw_sha256": "19dec73e5933e3dcfacadd3b39113eff8fa9cf1197387b43fdaa3003a0eaa775",
+    "semantic_sha256": "8c15f0dc07d4f372611f3313ef2fa412ebda78c2991bb6bef875fe05289e4921"
+  },
+  "commit_witness": {
+    "claim_id": "CLAIM-20260809-125520-task-ar-660-491d",
+    "claim_ref": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json",
+    "mutation_revision": 0,
+    "operation": "adopt",
+    "scope_binding_digest": "68cb29bfea1ac3bdd165a1c0c07d3dbe9eb7ac9ddd2ae428d66b447293f251fb",
+    "status": "claimed",
+    "work_identity_binding_digest": "8dd1d23efa72b195e6bd36c0cf4ead0c6e8f179543da484abc2f8f4958ddd2ad"
+  },
+  "operation": "adopt",
+  "owner_id": "ycpiglet <68498184+ycpiglet@users.noreply.github.com>",
+  "reason": "bind active TASK-AR-660 claim to canonical task and unit UUID authority and the accepted Unit 001 template-contract footprint before verification",
+  "receipt_digest": "e07ef4329e43f3573d9aca28b6bc8a530c1029f1b59e20bf0575e27088e3a7e8",
+  "receipt_id": "RECOVERY-20260809T062004340236Z-adopt-1887427761724257a8f6b2c9a4a6b431",
+  "recorded_at": "2026-08-09T15:20:04+09:00",
+  "schema": "agent-runtime-recovery-receipt/v1",
+  "state": "prepared",
+  "subject_ref": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json"
+}
