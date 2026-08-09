@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-09T15:55:32+09:00
-record_count: 1365
+generated_at: 2026-08-09T16:03:59+09:00
+record_count: 1366
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1365` review and evidence records under `reviews/`.
+- Summary: indexed `1366` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1365` files |
+| Reviews covered | pass | `1366` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -787,6 +787,7 @@ record_count: 1365
 | `reviews/ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC.md` | `ROLE-REVIEW-2026-08-03-TASK-AR-659-SKEPTIC` | role-review | record | n/a | TASK-AR-659 Skeptic Role Review |
 | `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-INDEPENDENT-AUDITOR` | role-review | record | n/a | TASK-AR-655 Independent Auditor Role Review |
 | `reviews/ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC.md` | `ROLE-REVIEW-2026-08-04-TASK-AR-655-SKEPTIC` | role-review | record | n/a | TASK-AR-655 Skeptic Role Review |
+| `reviews/ROLE-REVIEW-2026-08-09-TASK-AR-660-INDEPENDENT-AUDITOR-PREFLIGHT.md` | `ROLE-REVIEW-2026-08-09-TASK-AR-660-INDEPENDENT-AUDITOR-PREFLIGHT` | md | blocked | block | TASK-AR-660 Unit 001 independent-auditor pre-W4b audit |
 | `reviews/RSI-PLANNING-TASKSET-VERIFY.json` | `RSI-PLANNING-TASKSET-VERIFY` | json | record | n/a | RSI-PLANNING-TASKSET-VERIFY |
 | `reviews/SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1.md` | `SCOUT-2026-07-28-taskset-ar-v080-adoption-enforcement-w1` | progress-scout-sweep | record | n/a | v0.8 Adoption and Enforcement — Wave 1 Progress Sweep |
 | `reviews/SCRIBE-2026-06-21-business-operating-system.md` | `SCRIBE-2026-06-21-business-operating-system` | scribe | recorded | pass | Business Operating System Scribe Log |

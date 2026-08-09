@@ -1,0 +1,67 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-660-independent-auditor-closeout",
+  "task_id": "REVIEW-TASK-AR-660-independent-auditor",
+  "task_set_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+  "active_scope": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+  "agent_role": "independent-auditor",
+  "team_id": "agent-runtime-core",
+  "agent_instance_id": "independent-auditor-CLAIM-REVIEW-TASK-AR-660-independent-auditor-closeout",
+  "display_name": "independent-auditor@review",
+  "callsite_id": "role-routing:review_pass_dispatched:TASK-AR-660:independent-auditor",
+  "pane_id": "overlay:CLAIM-REVIEW-TASK-AR-660-independent-auditor-closeout",
+  "mode": "review",
+  "status": "released",
+  "phase": "claim-created",
+  "progress_pct": 0,
+  "status_text": "Additive independent-auditor review pass for TASK-AR-660 (closeout)",
+  "claimed_at": "2026-08-09T15:58:09+09:00",
+  "last_heartbeat": "2026-08-09T16:04:00+09:00",
+  "updated_at": "2026-08-09T16:04:00+09:00",
+  "expires_at": "2026-08-09T16:28:09+09:00",
+  "lease": {
+    "claimed_at": "2026-08-09T15:58:09+09:00",
+    "heartbeat_at": "2026-08-09T16:04:00+09:00",
+    "expires_at": "2026-08-09T16:28:09+09:00"
+  },
+  "mutation_revision": 0,
+  "scope_binding": {
+    "schema": "agent-runtime-claim-scope-binding/v1",
+    "digest": "25fea655663417709710443fcdacb5e13bb988f63ad18fbde197a2576446d07d",
+    "components": {
+      "task": "a76ed376779afaa3cd193d094068d0d98348b788b902be9be587b0febac9fd59",
+      "unit": "835a56a5b81bfe255fdc57db043d52cf335cf6366999730e2ef8e97eba334e0c",
+      "target_files": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "stop_condition": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    "bound_at": "2026-08-09T15:58:09+09:00"
+  },
+  "work_identity_binding": {
+    "schema": "agent-runtime-claim-work-identity-binding/v1",
+    "digest": "556b304a1928ff0ff6a82d9450522ee0e840262b907c328edd939c3bf2f45c70",
+    "components": {
+      "task": "96740ab993028195baf41877c30114672f5508e8f5824df0c74cd85f2f121c1e",
+      "unit": "654d497e2535b5513ab5a51be95b9b81acbb5a3ef609eceaf6d0df0fbd9ad262"
+    },
+    "bound_at": "2026-08-09T15:58:09+09:00"
+  },
+  "tags": [
+    "review",
+    "additive",
+    "review-trigger:closeout"
+  ],
+  "overlay": true,
+  "allow_parallel_task_set": true,
+  "parent_task_id": "TASK-AR-660",
+  "parent_task_set_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+  "handoff_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-660-independent-auditor-closeout.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-660-independent-auditor-closeout.log.md",
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "released_at": "2026-08-09T16:04:00+09:00",
+  "verified_by": "le-20260809-130000-kst-ar660001",
+  "verifier_role": "lead-engineer",
+  "verification_evidence": "reviews/ROLE-REVIEW-2026-08-09-TASK-AR-660-INDEPENDENT-AUDITOR-PREFLIGHT.md"
+}
