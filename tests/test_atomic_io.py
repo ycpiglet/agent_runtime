@@ -516,11 +516,15 @@ def test_rejected_exclusive_precommit_never_removes_unowned_parent_data(
 
     assert target.parent.is_dir()
     assert not target.exists()
-    assert _tmp_siblings(target) == []
     if parent_case == "concurrently-populated":
+        sidecars = _tmp_siblings(target)
+        assert len(sidecars) == 1
+        assert sidecars[0].read_bytes() == b"prepared\n"
         assert (target.parent / "concurrent.txt").read_text(encoding="utf-8") == (
             "belongs to another writer\n"
         )
+    else:
+        assert _tmp_siblings(target) == []
 
 
 def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_aba_identity(
@@ -629,7 +633,7 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
     assert replacement_sidecar is not None
     assert replacement_sidecar_bytes == b"prepared\n"
     assert target.parent.is_dir()
-    assert not replacement_sidecar.exists()
+    assert replacement_sidecar.read_bytes() == replacement_sidecar_bytes
 
 
 def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
@@ -684,6 +688,312 @@ def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
     displaced_parent = displaced_root / "nested"
     assert displaced_parent.is_dir()
     assert (displaced_parent / prepared_sidecar_name).read_bytes() == prepared_sidecar_bytes
+
+
+def test_rejected_exclusive_precommit_missing_sidecar_never_authorizes_parent_rollback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "created-store" / "receipt.json"
+    rejection = ValueError("stale recovery actor")
+
+    def remove_capability_then_reject() -> None:
+        sidecars = _tmp_siblings(target)
+        assert len(sidecars) == 1
+        sidecars[0].unlink()
+        raise rejection
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError) as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=remove_capability_then_reject,
+        )
+
+    assert rejected.value is rejection
+    assert target.parent.is_dir()
+    assert list(target.parent.iterdir()) == []
+
+
+def test_rejected_exclusive_precommit_preserves_sidecar_generation_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "created-store" / "receipt.json"
+    real_lstat = Path.lstat
+    rejected_callback = False
+    owned_sidecar: Path | None = None
+    rejection = ValueError("stale recovery actor")
+
+    class ChangedGenerationMetadata:
+        def __init__(self, metadata: object) -> None:
+            self._metadata = metadata
+
+        def __getattr__(self, attribute: str) -> object:
+            if attribute == "st_ctime_ns":
+                return int(getattr(self._metadata, attribute)) + 1_000_000_000
+            if attribute == "st_ctime":
+                return float(getattr(self._metadata, attribute)) + 1.0
+            return getattr(self._metadata, attribute)
+
+    def report_generation_change(path: Path) -> object:
+        metadata = real_lstat(path)
+        if rejected_callback and path == owned_sidecar:
+            return ChangedGenerationMetadata(metadata)
+        return metadata
+
+    def change_sidecar_generation_then_reject() -> None:
+        nonlocal owned_sidecar
+        nonlocal rejected_callback
+        sidecars = _tmp_siblings(target)
+        assert len(sidecars) == 1
+        owned_sidecar = sidecars[0]
+        rejected_callback = True
+        raise rejection
+
+    monkeypatch.setattr(Path, "lstat", report_generation_change)
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError) as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=change_sidecar_generation_then_reject,
+        )
+
+    assert rejected.value is rejection
+    assert owned_sidecar is not None
+    assert owned_sidecar.read_bytes() == b"prepared\n"
+    assert target.parent.is_dir()
+
+
+def test_precommit_refuses_real_immediate_sidecar_inode_reuse_and_preserves_replacement(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Full generation, not legacy dev/inode metadata, binds the opened file."""
+
+    target = tmp_path / "created-store" / "receipt.json"
+    prepared = b"prepared\n"
+    foreign = b"FOREIGN!\n"
+    assert len(prepared) == len(foreign)
+    callback_calls = 0
+    replacement: Path | None = None
+    real_run = atomic_io._run_exclusive_precommit
+
+    def callback() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+
+    def reuse_at_boundary(
+        state: atomic_io._ExclusivePrecommitState,
+        path: Path,
+        name: str,
+        parent_fd: int | None,
+        opened_identity: atomic_io.PublishedFileIdentity,
+        opened_cleanup_identity: atomic_io._CleanupPathIdentity,
+    ) -> None:
+        nonlocal replacement
+        sidecar = path.parent / name
+        opened_legacy = (
+            opened_identity.device,
+            opened_identity.inode,
+            opened_identity.mode,
+            opened_identity.size,
+            opened_identity.file_attributes,
+            opened_identity.reparse_tag,
+        )
+        for _attempt in range(512):
+            sidecar.unlink()
+            sidecar.write_bytes(foreign)
+            sidecar.chmod(stat.S_IMODE(opened_identity.mode))
+            observed = atomic_io._cleanup_path_identity(sidecar, sidecar.lstat())
+            observed_legacy = (
+                observed.device,
+                observed.inode,
+                observed.mode,
+                observed.size,
+                observed.file_attributes,
+                observed.reparse_tag,
+            )
+            if opened_legacy == observed_legacy and not atomic_io._same_cleanup_identity(
+                opened_cleanup_identity,
+                observed,
+            ):
+                replacement = sidecar
+                return real_run(
+                    state,
+                    path,
+                    name,
+                    parent_fd,
+                    opened_identity,
+                    opened_cleanup_identity,
+                )
+        pytest.skip(
+            "test filesystem did not reuse the sidecar inode with a distinct "
+            "generation in 512 immediate recreations"
+        )
+
+    monkeypatch.setattr(atomic_io, "_run_exclusive_precommit", reuse_at_boundary)
+
+    with pytest.raises(OSError, match="sidecar identity changed"):
+        atomic_io.publish_text_atomic(
+            target,
+            prepared.decode("utf-8"),
+            fsync_policy="strict",
+            precommit=callback,
+        )
+
+    assert callback_calls == 0
+    assert not target.exists()
+    assert replacement is not None
+    assert replacement.read_bytes() == foreign
+    assert target.parent.is_dir()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="pinned directory fd is POSIX-only")
+def test_precommit_refuses_pinned_parent_lexical_replacement_before_callback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Lexical authority cannot be combined with a displaced pinned parent."""
+
+    target = tmp_path / "created-store" / "receipt.json"
+    displaced = tmp_path / "displaced-store"
+    callback_calls = 0
+    injected = False
+    real_run = atomic_io._run_exclusive_precommit
+
+    def callback() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+
+    def move_parent_at_boundary(
+        state: atomic_io._ExclusivePrecommitState,
+        path: Path,
+        name: str,
+        parent_fd: int | None,
+        opened_identity: atomic_io.PublishedFileIdentity,
+        opened_cleanup_identity: atomic_io._CleanupPathIdentity,
+    ) -> None:
+        nonlocal injected
+        assert parent_fd is not None
+        assert not injected
+        injected = True
+        path.parent.rename(displaced)
+        path.parent.mkdir()
+        (path.parent / "foreign.txt").write_bytes(b"foreign owner\n")
+        return real_run(
+            state,
+            path,
+            name,
+            parent_fd,
+            opened_identity,
+            opened_cleanup_identity,
+        )
+
+    monkeypatch.setattr(atomic_io, "_run_exclusive_precommit", move_parent_at_boundary)
+
+    with pytest.raises(OSError, match="lexical and pinned atomic parent identities"):
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=callback,
+        )
+
+    assert injected
+    assert callback_calls == 0
+    assert not target.exists()
+    assert not (displaced / target.name).exists()
+    assert (target.parent / "foreign.txt").read_bytes() == b"foreign owner\n"
+    assert displaced.is_dir()
+
+
+def test_cleanup_identity_uses_real_windows_legacy_ctime_as_birth_generation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    metadata = SimpleNamespace(
+        st_dev=1,
+        st_ino=2,
+        st_mode=stat.S_IFDIR | 0o700,
+        st_size=0,
+        st_ctime_ns=3,
+        st_mtime_ns=4,
+        st_nlink=1,
+    )
+    monkeypatch.setattr(atomic_io.sys, "platform", "win32")
+
+    identity = atomic_io._cleanup_path_identity(tmp_path, metadata)
+    changed = identity._replace(change_time_ns=identity.change_time_ns + 1)
+
+    assert identity.birth_time_ns == metadata.st_ctime_ns
+    assert atomic_io._same_cleanup_object(identity, changed)
+    assert not atomic_io._same_cleanup_identity(identity, changed)
+
+
+def test_rejected_precommit_cleanup_failure_never_masks_callback_exception(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "created-store" / "receipt.json"
+    rejection = ValueError("stale recovery actor")
+
+    def reject_authority() -> None:
+        raise rejection
+
+    def fail_cleanup(_path: Path) -> None:
+        raise RuntimeError("injected rmdir failure")
+
+    monkeypatch.setattr(Path, "rmdir", fail_cleanup)
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError) as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=reject_authority,
+        )
+
+    assert rejected.value is rejection
+    assert target.parent.is_dir()
+    assert _tmp_siblings(target) == []
+
+
+def test_windows_precommit_oserror_is_not_translated_as_destination_collision(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "existing-receipt.json"
+    target.write_text("existing\n", encoding="utf-8")
+    rejection = OSError(errno.EACCES, "actor authority disappeared")
+    callback_calls = 0
+
+    def reject_with_oserror() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+        raise rejection
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(OSError) as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=reject_with_oserror,
+        )
+
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert target.read_bytes() == b"existing\n"
+    assert _tmp_siblings(target) == []
 
 
 def test_successful_precommit_is_not_retried_or_rolled_back_after_publish_error(

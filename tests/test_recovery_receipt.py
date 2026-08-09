@@ -17,6 +17,7 @@ from __future__ import annotations
 import errno
 import hashlib
 import json
+import os
 import sys
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -231,6 +232,57 @@ def test_prepare_precommit_failure_leaves_no_receipt_authority(
         assert sidecar_observed
     assert not receipt_dir.exists()
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.skipif(os.name != "posix", reason="pinned parent cleanup is POSIX-only")
+def test_prepare_rejection_never_follows_replaced_ancestor_alias(
+    tmp_path: Path,
+) -> None:
+    created_root = tmp_path / "created-root"
+    receipt_dir = created_root / "nested" / "recovery_receipts"
+    displaced_root = tmp_path / "displaced-root"
+    before, after = _before_after()
+    callback_calls = 0
+    sidecar_name: str | None = None
+    sidecar_bytes: bytes | None = None
+    rejection = ValueError("actor authority disappeared")
+
+    def replace_ancestor_then_reject() -> None:
+        nonlocal callback_calls
+        nonlocal sidecar_name
+        nonlocal sidecar_bytes
+        callback_calls += 1
+        sidecars = list(receipt_dir.glob(f".{RECEIPT_ID}.prepared.json.tmp-*"))
+        assert len(sidecars) == 1
+        sidecar_name = sidecars[0].name
+        sidecar_bytes = sidecars[0].read_bytes()
+        created_root.rename(displaced_root)
+        created_root.symlink_to(displaced_root, target_is_directory=True)
+        raise rejection
+
+    with pytest.raises(ValueError) as rejected:
+        recovery_receipt.prepare_recovery_receipt(
+            receipt_dir=receipt_dir,
+            receipt_id=RECEIPT_ID,
+            operation="terminalize",
+            subject_ref=SUBJECT_REF,
+            before_bytes=before,
+            predicted_after_bytes=after,
+            owner_id=OWNER_ID,
+            reason=REASON,
+            recorded_at=RECORDED_AT,
+            commit_witness=COMMIT_WITNESS,
+            precommit=replace_ancestor_then_reject,
+        )
+
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert sidecar_name is not None
+    assert sidecar_bytes is not None
+    assert created_root.is_symlink()
+    displaced_receipt_dir = displaced_root / "nested" / "recovery_receipts"
+    assert (displaced_receipt_dir / sidecar_name).read_bytes() == sidecar_bytes
+    assert list(displaced_receipt_dir.glob("*.json")) == []
 
 
 def test_validate_rejects_missing_and_self_digest_tampered_receipts(
