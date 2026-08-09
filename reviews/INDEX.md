@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-09T15:18:20+09:00
-record_count: 1363
+generated_at: 2026-08-09T15:43:36+09:00
+record_count: 1364
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1363` review and evidence records under `reviews/`.
+- Summary: indexed `1364` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1363` files |
+| Reviews covered | pass | `1364` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -727,6 +727,7 @@ record_count: 1363
 | `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md` | `REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan` | md | accepted | pass | Claim Recovery and Work Identity Correction Plan |
+| `reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 recovery actor attribution T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 template contract footprint T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan.md` | `REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan` | md | accepted | pass | TASK-AR-661 Existing Taskset Recovery T3 Replan |
 | `reviews/REVIEW-2026-08-09-taskset-ar-claim-recovery-work-identity-correction-registration.md` | `REVIEW-2026-08-09-taskset-ar-claim-recovery-work-identity-correction-registration` | md | record | pass | Claim Recovery and Work Identity Correction Registration |

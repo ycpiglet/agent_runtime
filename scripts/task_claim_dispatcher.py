@@ -51,7 +51,11 @@ import recovery_receipt
 import status_alias
 import task_unit_readiness_gate
 from agent_runtime import claim_store
-from agent_instance_registry import record_claim_instance
+from agent_instance_registry import (
+    INSTANCES_DIR as AGENT_INSTANCES_DIR,
+    SCHEMA as AGENT_INSTANCE_SCHEMA,
+    record_claim_instance,
+)
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
 from pane_event_log import append_event
@@ -101,8 +105,10 @@ SECURITY_SERVICE_GATE_SHA256 = (
 SECURITY_SERVICE_GATE_MAX_BYTES = 64 * 1024
 SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES = 128 * 1024
 WORK_ITEM_MAX_BYTES = 512 * 1024
+AGENT_INSTANCE_RECORD_MAX_BYTES = 256 * 1024
 CANONICAL_TASK_NAMESPACE_MAX_ENTRIES = 4096
 CANONICAL_UNIT_NAMESPACE_MAX_ENTRIES = 4096
+RECOVERY_ACTOR_INSTANCE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.@-]*$")
 SECURITY_SERVICE_PROFILE_MARKERS = (
     ".allimbot.json",
     "agents/project/SECURITY-SERVICE-POLICY.json",
@@ -141,6 +147,15 @@ class _CreatePreparation(NamedTuple):
     token_budgets: dict[str, int | None]
     defect_signatures: tuple[str, ...]
     knowledge_matches: tuple[dict[str, Any], ...]
+
+
+class _RecoveryActor(NamedTuple):
+    """Canonical execution identity for one Owner-approved recovery."""
+
+    agent_instance_id: str
+    role: str
+    display_name: str
+    callsite_id: str
 
 
 def _canonical_sha256(value: object) -> str:
@@ -4504,11 +4519,164 @@ def _recovery_receipt_error_outcome(
     return outcome
 
 
+def _unique_instance_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(
+                f"recovery actor instance record has duplicate JSON member {key!r}"
+            )
+        result[key] = value
+    return result
+
+
+def _reject_instance_constant(value: str) -> None:
+    raise ValueError(
+        f"recovery actor instance record has non-finite JSON number {value!r}"
+    )
+
+
+def _registered_recovery_actor(
+    root: Path,
+    requested_id: object,
+) -> _RecoveryActor:
+    """Resolve an exact, direct registry record before recovery can mutate.
+
+    Owner identity is approval provenance, not runtime execution identity.  A
+    caller therefore supplies an instance id, but cannot supply its role or
+    callsite.  Those fields come only from one stable canonical registry read.
+    The filename and payload identity must match exactly so the registry's
+    sanitizing writer cannot be abused as an aliasing/laundering seam.
+    """
+
+    if not isinstance(requested_id, str):
+        raise ValueError(
+            "recovery actor instance id must name an exact registered instance"
+        )
+    actor_id = requested_id.strip()
+    if (
+        actor_id != requested_id
+        or not actor_id
+        or len(actor_id) > claim_store.CLAIM_IDENTITY_MAX_CHARS
+        or not RECOVERY_ACTOR_INSTANCE_ID.fullmatch(actor_id)
+        or actor_id in {".", ".."}
+    ):
+        raise ValueError(
+            "recovery actor instance id must name an exact registered instance"
+        )
+
+    relative = AGENT_INSTANCES_DIR / f"{actor_id}.json"
+    path = _direct_repo_path(
+        root,
+        relative,
+        "recovery actor instance record",
+        final_kind="file",
+    )
+    if path is None:
+        raise ValueError(
+            f"recovery actor instance is not an exact registered instance: {actor_id}"
+        )
+
+    try:
+        before = path.lstat()
+        if (
+            _is_path_alias(before)
+            or not stat.S_ISREG(before.st_mode)
+            or before.st_size > AGENT_INSTANCE_RECORD_MAX_BYTES
+        ):
+            raise ValueError(
+                "recovery actor instance record must be a bounded direct regular file"
+            )
+        with path.open("rb") as handle:
+            opened_before = os.fstat(handle.fileno())
+            payload_bytes = handle.read(AGENT_INSTANCE_RECORD_MAX_BYTES + 1)
+            opened_after = os.fstat(handle.fileno())
+        after = path.lstat()
+    except ValueError:
+        raise
+    except OSError as exc:
+        raise ValueError("recovery actor instance record is unreadable") from exc
+
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, opened_before, opened_after, after)
+    }
+    if (
+        len(payload_bytes) > AGENT_INSTANCE_RECORD_MAX_BYTES
+        or len(signatures) != 1
+        or any(
+            _is_path_alias(item)
+            or not stat.S_ISREG(item.st_mode)
+            for item in (opened_before, opened_after, after)
+        )
+    ):
+        raise ValueError(
+            "recovery actor instance record changed during direct validation"
+        )
+    try:
+        payload = json.loads(
+            payload_bytes.decode("utf-8"),
+            object_pairs_hook=_unique_instance_object,
+            parse_constant=_reject_instance_constant,
+        )
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("recovery actor instance record is invalid JSON") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("recovery actor instance record must be a JSON object")
+    if payload.get("schema") != AGENT_INSTANCE_SCHEMA:
+        raise ValueError("recovery actor instance record has an invalid schema")
+    if payload.get("agent_instance_id") != actor_id:
+        raise ValueError(
+            "recovery actor instance filename and payload must match exactly"
+        )
+
+    canonical: dict[str, str] = {}
+    for field in ("role", "callsite_id"):
+        value = payload.get(field)
+        if (
+            not isinstance(value, str)
+            or not value.strip()
+            or value != value.strip()
+            or len(value) > claim_store.CLAIM_IDENTITY_MAX_CHARS
+            or any(character in value for character in ("\x00", "\r", "\n"))
+        ):
+            raise ValueError(
+                f"recovery actor instance record has invalid canonical {field}"
+            )
+        canonical[field] = value
+    display_name = payload.get("display_name")
+    if not isinstance(display_name, str):
+        raise ValueError(
+            "recovery actor instance record has invalid canonical display_name"
+        )
+    display_name = display_name.strip()
+    if (
+        len(display_name) > claim_store.CLAIM_IDENTITY_MAX_CHARS
+        or any(character in display_name for character in ("\x00", "\r", "\n"))
+    ):
+        raise ValueError(
+            "recovery actor instance record has invalid canonical display_name"
+        )
+    return _RecoveryActor(
+        agent_instance_id=actor_id,
+        role=canonical["role"],
+        display_name=display_name,
+        callsite_id=canonical["callsite_id"],
+    )
+
+
 def _append_recovery_event(
     *,
     root: Path,
     operation: str,
     owner: str,
+    actor: _RecoveryActor,
     reason: str,
     receipt: dict[str, Any],
     claim: dict[str, Any] | None = None,
@@ -4519,8 +4687,12 @@ def _append_recovery_event(
 
     event = {
         "event": event_name or f"claim_recovery_{operation.replace('-', '_')}",
-        "actor": owner,
-        "actor_role": "owner",
+        "actor": actor.agent_instance_id,
+        "agent_instance_id": actor.agent_instance_id,
+        "actor_role": actor.role,
+        "display_name": actor.display_name,
+        "callsite_id": actor.callsite_id,
+        "owner_id": owner,
         "task_id": str((claim or {}).get("task_id") or ""),
         "task_set_id": str((claim or {}).get("task_set_id") or ""),
         "claim_id": str((claim or {}).get("claim_id") or ""),
@@ -4653,9 +4825,10 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
+        root = args.root.resolve()
+        actor = _registered_recovery_actor(root, args.actor_instance_id)
         now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
-        root = args.root.resolve()
         with claim_store.store_lock(root):
             path, claim, inspection = _recovery_target(root, args.claim_id)
             raw_revision = claim.get("mutation_revision")
@@ -4791,6 +4964,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         root=root,
         operation="adopt",
         owner=owner,
+        actor=actor,
         reason=reason,
         receipt=receipt,
         claim=claim,
@@ -4804,6 +4978,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             "before_sha256": recovery_receipt.raw_digest(before_bytes),
             "after_sha256": recovery_receipt.raw_digest(after_bytes),
             "recovered_by": owner,
+            "actor_instance_id": actor.agent_instance_id,
             "audit": audit,
             "recovery_receipt": receipt,
             "claim": claim,
@@ -4824,9 +4999,10 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
+        root = args.root.resolve()
+        actor = _registered_recovery_actor(root, args.actor_instance_id)
         now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
-        root = args.root.resolve()
         with claim_store.store_lock(root):
             path, claim, inspection = _recovery_target(root, args.claim_id)
             liveness = claim_store.classify_claim_liveness(claim, now=now)
@@ -4931,6 +5107,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
         root=root,
         operation="terminalize",
         owner=owner,
+        actor=actor,
         reason=reason,
         receipt=receipt,
         claim=claim,
@@ -4945,6 +5122,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
             "before_sha256": recovery_receipt.raw_digest(before_bytes),
             "after_sha256": recovery_receipt.raw_digest(after_bytes),
             "recovered_by": owner,
+            "actor_instance_id": actor.agent_instance_id,
             "audit": audit,
             "recovery_receipt": receipt,
             "claim": claim,
@@ -4974,6 +5152,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
         root = args.root.resolve()
+        actor = _registered_recovery_actor(root, args.actor_instance_id)
         initial = claim_store.inspect_store(root)
         before_state = initial.state
 
@@ -4984,6 +5163,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                 {
                     "status": "not_required",
                     "activated_by": owner,
+                    "actor_instance_id": actor.agent_instance_id,
                     "audit": "no-op",
                     "claim_store_state_before": before_state,
                     "claim_store_state": initial.state,
@@ -5116,6 +5296,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         root=root,
         operation="activate-store",
         owner=owner,
+        actor=actor,
         reason=reason,
         receipt=receipt,
         message=(
@@ -5128,6 +5309,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         {
             "status": "activated",
             "activated_by": owner,
+            "actor_instance_id": actor.agent_instance_id,
             "audit": audit,
             "claim_store_state_before": before_state,
             "claim_store_state": inspection.state,
@@ -5296,6 +5478,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     adopt.add_argument("--claim-id", required=True)
     adopt.add_argument("--owner-id", required=True)
+    adopt.add_argument(
+        "--actor-instance-id",
+        required=True,
+        help=(
+            "Exact registered runtime instance executing the Owner-approved "
+            "recovery; role and callsite are resolved from its canonical record"
+        ),
+    )
     adopt.add_argument("--reason", required=True)
     adopt.add_argument(
         "--replan-ref",
@@ -5319,6 +5509,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     terminalize.add_argument("--claim-id", required=True)
     terminalize.add_argument("--owner-id", required=True)
+    terminalize.add_argument(
+        "--actor-instance-id",
+        required=True,
+        help=(
+            "Exact registered runtime instance executing the Owner-approved "
+            "recovery; role and callsite are resolved from its canonical record"
+        ),
+    )
     terminalize.add_argument("--reason", required=True)
     terminalize.add_argument(
         "--allow-indeterminate-lease",
@@ -5338,6 +5536,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Activate this checkout's claim store (a fresh worktree starts migration-required)",
     )
     activate_store.add_argument("--owner-id", required=True)
+    activate_store.add_argument(
+        "--actor-instance-id",
+        required=True,
+        help=(
+            "Exact registered runtime instance executing the Owner-approved "
+            "recovery; role and callsite are resolved from its canonical record"
+        ),
+    )
     activate_store.add_argument("--reason", required=True)
     activate_store.add_argument("--json", action="store_true")
     activate_store.set_defaults(func=cmd_activate_store)

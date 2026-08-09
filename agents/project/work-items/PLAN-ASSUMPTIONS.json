@@ -159,6 +159,11 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md",
+          "value": "7be916ba152984ee3badf1e86746a9a79df03396400f7aed0bf1515d2808df84"
+        },
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan.md",
           "value": "c7eeecafbc19e7c1d5f59c420ecefb9fa91d11a3497049270dfbbcfe9d1a298e"
         },
@@ -175,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "a4cb20b9403105d5c2bb012b29df8aabdaace29a422db70b468cd707de0cf8c5"
+          "value": "40d64491e697a7a66c9e02f81222113a706ddbe15ad0ada025956d79ee086dd7"
         },
         {
           "kind": "sha256",
@@ -214,6 +219,26 @@
         },
         {
           "kind": "sha256",
+          "path": "scripts/claim_reaper.py",
+          "value": "75b2581cc88edbd8dc899f45f0d747945c87930c66efeb1f8f7690f79f94dff3"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/claim_reaper.py",
+          "value": "75b2581cc88edbd8dc899f45f0d747945c87930c66efeb1f8f7690f79f94dff3"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/claim_reaper_hook.py",
+          "value": "d33db86eae09045b4d7521d06652b2c300e33997d19acc273095d0fa72a8f09d"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/claim_reaper_hook.py",
+          "value": "d33db86eae09045b4d7521d06652b2c300e33997d19acc273095d0fa72a8f09d"
+        },
+        {
+          "kind": "sha256",
           "path": "scripts/closure_gate.py",
           "value": "c765949a0ad332cc3d385b16715ba6bbc0ef9db51e62684b300cd2c656351584"
         },
@@ -225,7 +250,7 @@
         {
           "kind": "sha256",
           "path": "scripts/pane_event_log.py",
-          "value": "c85f36c947d3d049fdb2678f024b11fb08ae24c1def0151296f6219da5cdb0d0"
+          "value": "021a961211928b8a1cf7ce339d65a5c4c02a9bc4bad4674d3efc72884ade1837"
         },
         {
           "kind": "sha256",
@@ -260,7 +285,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "0356818da1a2151254abf7c24d7abcebd7fb9f93b6d8e1a7ef34670c6dfd1337"
+          "value": "f77c4cef376c1673e7bc262b97d1ad575dd205ff18bff634aa23d7363b99148c"
         },
         {
           "kind": "sha256",
@@ -278,8 +303,8 @@
           "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan.md",
-      "recorded_at": "2026-08-09T15:17:21+09:00",
+      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md",
+      "recorded_at": "2026-08-09T15:48:04+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1923,5 +1948,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T15:17:21+09:00"
+  "updated_at": "2026-08-09T15:48:04+09:00"
 }

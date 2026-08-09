@@ -948,6 +948,7 @@ def test_owner_recovery_signal_reaches_the_session_start_hook(tmp_path, capsys):
     assert "need owner recovery" in hook_out
     assert "CLAIM-orch-hook" in hook_out
     assert "terminalize" in hook_out
+    assert "--actor-instance-id <registered-agent-instance-id>" in hook_out
 
     report = {
         "apply": False,

@@ -23,6 +23,7 @@ SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
+ATTRIBUTION_GATE = REPO_ROOT / "scripts" / "attribution_gate.py"
 
 
 def _fixture_work_uid(kind: str, display_id: str) -> str:
@@ -176,6 +177,18 @@ def _run_concurrency_gate(root: Path) -> subprocess.CompletedProcess[str]:
 def _run_identity_gate(root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(IDENTITY_GATE), "--root", str(root), "--check"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _run_attribution_gate(root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(ATTRIBUTION_GATE), "--root", str(root), "--check"],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,
@@ -5900,6 +5913,16 @@ def test_overlay_scope_renew_and_standalone_projection_remain_refused(
 _OWNER = "ycpiglet <68498184+ycpiglet@users.noreply.github.com>"
 
 
+def _recovery_actor_id(root: Path) -> str:
+    instance_dir = root / "agents" / "runtime" / "instances"
+    for path in sorted(instance_dir.glob("*.json"), key=lambda item: item.name):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        actor_id = str(payload.get("agent_instance_id") or "")
+        if actor_id and path.stem == actor_id:
+            return actor_id
+    raise AssertionError(f"fixture has no exact registered actor in {instance_dir}")
+
+
 def _legacy_claim(linked: Path, suffix: str) -> tuple[Path, dict]:
     """Create a spec-backed claim, then strip the mutation fields.
 
@@ -5964,6 +5987,8 @@ def _recovery_candidate(
             str(claim["claim_id"]),
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            str(claim["agent_instance_id"]),
             "--reason",
             "receipt-first legacy adoption",
             "--now",
@@ -5990,6 +6015,8 @@ def _recovery_candidate(
         str(claim["claim_id"]),
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        str(claim["agent_instance_id"]),
         "--reason",
         "receipt-first expired claim terminalization",
         "--now",
@@ -6008,6 +6035,192 @@ def _dispatcher_recovery_module(dispatcher, monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(dispatcher, "recovery_receipt", recovery_receipt, raising=False)
     return recovery_receipt
+
+
+def _run_full_dispatcher_args(args: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(SCRIPT), *args],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=_routing_off_env(),
+    )
+
+
+def _registered_instance_record(root: Path, agent_instance_id: str) -> dict:
+    path = (
+        root
+        / "agents"
+        / "runtime"
+        / "instances"
+        / f"{agent_instance_id}.json"
+    )
+    assert path.is_file(), f"missing fixture agent instance: {path}"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _recovery_command_case(
+    linked: Path,
+    operation: str,
+    *,
+    suffix: str,
+) -> tuple[list[str], Path | None, dict]:
+    if operation in {"adopt", "terminalize"}:
+        path, claim, args = _recovery_candidate(
+            linked,
+            operation,
+            suffix=suffix,
+        )
+        return args, path, claim
+
+    assert operation == "activate-store"
+    created = _create_linked_claim(linked, suffix=suffix)
+    assert created.returncode == 0, created.stderr or created.stdout
+    claim = json.loads(created.stdout)["claim"]
+    _claim_store_outer_anchor(linked).unlink()
+    return (
+        [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--actor-instance-id",
+            str(claim["agent_instance_id"]),
+            "--reason",
+            "attributed claim-store recovery",
+            "--json",
+        ],
+        None,
+        claim,
+    )
+
+
+@pytest.mark.parametrize("operation", ("adopt", "terminalize", "activate-store"))
+def test_recovery_event_separates_owner_from_exact_registered_actor(
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    """Owner approves recovery; a registered runtime instance executes it."""
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-recovery-actor-{operation}",
+    )
+    args, path, claim = _recovery_command_case(
+        linked,
+        operation,
+        suffix=f"660-actor-{operation}",
+    )
+    actor_id = str(claim["agent_instance_id"])
+    actor_record = _registered_instance_record(linked, actor_id)
+    assert args[args.index("--actor-instance-id") + 1] == actor_id
+
+    result = _run_full_dispatcher_args(args)
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    response = json.loads(result.stdout)
+    event_lines = _pane_event_bytes(linked)
+    assert event_lines is not None
+    event = json.loads(event_lines.decode("utf-8").splitlines()[-1])
+    assert event["recovery_operation"] == operation
+    assert event["owner_id"] == _OWNER
+    assert event["actor"] == actor_id
+    assert event["agent_instance_id"] == actor_id
+    assert event["actor_role"] == actor_record["role"]
+    assert event["callsite_id"] == actor_record["callsite_id"]
+    assert event["display_name"] == actor_record["display_name"]
+
+    receipt_ref = response["recovery_receipt"]["receipt_ref"]
+    receipt = json.loads((linked / receipt_ref).read_text(encoding="utf-8"))
+    assert receipt["owner_id"] == _OWNER
+    if path is not None:
+        persisted = json.loads(path.read_text(encoding="utf-8"))
+        assert persisted["recovered_by"] == _OWNER
+
+    gate = _run_attribution_gate(linked)
+    assert gate.returncode == 0, gate.stdout + gate.stderr
+    assert "attribution-gate: pass" in gate.stdout
+
+
+@pytest.mark.parametrize("operation", ("adopt", "terminalize", "activate-store"))
+@pytest.mark.parametrize("actor_case", ("missing", "unknown"))
+def test_recovery_refuses_missing_or_unknown_actor_before_any_mutation(
+    tmp_path: Path,
+    operation: str,
+    actor_case: str,
+) -> None:
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-recovery-{actor_case}-{operation}",
+    )
+    args, _path, _claim = _recovery_command_case(
+        linked,
+        operation,
+        suffix=f"660-{actor_case}-{operation}",
+    )
+    actor_index = args.index("--actor-instance-id")
+    if actor_case == "missing":
+        del args[actor_index : actor_index + 2]
+    else:
+        args[actor_index + 1] = "unregistered-recovery-actor"
+
+    checkout_before = _tree_entry_snapshot(linked)
+    admin_root = _claim_store_outer_anchor(linked).parent
+    admin_before = _tree_entry_snapshot(admin_root)
+    events_before = _pane_event_bytes(linked)
+    receipts = _recovery_receipt_dir(linked)
+    receipts_before = _tree_entry_snapshot(receipts)
+
+    result = _run_full_dispatcher_args(args)
+
+    assert result.returncode != 0
+    combined = (result.stdout + result.stderr).lower()
+    assert "actor-instance-id" in combined or "actor instance" in combined
+    if actor_case == "unknown":
+        assert "registered" in combined and "exact" in combined
+    assert _tree_entry_snapshot(linked) == checkout_before
+    assert _tree_entry_snapshot(admin_root) == admin_before
+    assert _pane_event_bytes(linked) == events_before
+    assert _tree_entry_snapshot(receipts) == receipts_before
+
+
+def test_recovery_refuses_instance_filename_payload_identity_mismatch(
+    tmp_path: Path,
+) -> None:
+    """A plausible filename must not launder a different canonical actor."""
+
+    _primary, linked = _init_git_worktree(tmp_path, "ar660-recovery-actor-mismatch")
+    args, path, claim = _recovery_command_case(
+        linked,
+        "terminalize",
+        suffix="660-actor-mismatch",
+    )
+    assert path is not None
+    source = _registered_instance_record(linked, str(claim["agent_instance_id"]))
+    requested_id = "fake-recovery-actor"
+    mismatch = (
+        linked
+        / "agents"
+        / "runtime"
+        / "instances"
+        / f"{requested_id}.json"
+    )
+    mismatch.write_text(json.dumps(source, ensure_ascii=False, indent=2), encoding="utf-8")
+    args[args.index("--actor-instance-id") + 1] = requested_id
+    before = path.read_bytes()
+    events_before = _pane_event_bytes(linked)
+
+    result = _run_full_dispatcher_args(args)
+
+    assert result.returncode != 0
+    assert "exact" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+    assert _pane_event_bytes(linked) == events_before
+    assert not _recovery_receipt_dir(linked).exists()
 
 
 @pytest.mark.parametrize("operation", ("adopt", "terminalize"))
@@ -6224,6 +6437,8 @@ def test_recovery_receipt_terminal_publication_uncertainty_is_never_generic_refu
             "activate-store",
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(linked),
             "--reason",
             "terminal activation receipt durability is uncertain",
             "--json",
@@ -6334,6 +6549,8 @@ def test_red_legacy_claim_is_adoptable_by_owner_bound_command(tmp_path: Path) ->
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "legacy claim predates the mutation fields",
         "--now",
@@ -6361,6 +6578,8 @@ def test_red_adopt_refuses_a_caller_without_owner_identity(tmp_path: Path) -> No
         claim["claim_id"],
         "--owner-id",
         "   ",
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "no identity",
         "--now",
@@ -6398,6 +6617,8 @@ def test_red_expired_claim_is_terminalizable_by_owner_bound_command(
         claim_id,
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "lease expired with no reachable command",
         "--now",
@@ -6432,6 +6653,8 @@ def test_red_terminalize_refuses_a_live_claim(tmp_path: Path) -> None:
         payload["claim"]["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "attempting to kill a live claim",
         "--now",
@@ -6468,6 +6691,8 @@ def test_red_terminalize_reaches_an_orchestrator_claim_the_reaper_skips(
         payload["claim"]["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "orchestrator claim the reaper will never reach",
         "--now",
@@ -6497,7 +6722,13 @@ def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
 
     # Unattributed activation must be refused: this lifts the whole store out
     # of the fail-closed migration-required state.
-    anon = _run_dispatcher(linked, "activate-store", "--json")
+    anon = _run_dispatcher(
+        linked,
+        "activate-store",
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
+        "--json",
+    )
     assert anon.returncode != 0
     assert not outer.is_file()
 
@@ -6506,6 +6737,8 @@ def test_red_new_checkout_can_activate_its_claim_store(tmp_path: Path) -> None:
         "activate-store",
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "fresh checkout needs its claim store",
         "--json",
@@ -6560,6 +6793,8 @@ def test_red_recovery_refuses_when_claim_store_authority_changes(
             payload["claim"]["claim_id"],
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(linked),
             "--reason",
             "authority changed mid-flight",
             "--now",
@@ -6610,6 +6845,8 @@ def test_red_terminalize_cannot_use_a_future_now_to_kill_a_live_claim(
         payload["claim"]["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "future clock must not grant authority",
         "--now",
@@ -6638,6 +6875,8 @@ def test_red_adopt_cannot_use_a_future_now_to_bypass_liveness(tmp_path: Path) ->
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "adoption under a future clock",
         "--now",
@@ -6682,6 +6921,8 @@ def test_deadline_missing_claim_needs_explicit_opt_in_to_terminalize(
         claim_id,
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "claim carries no deadline at all",
     )
@@ -6755,6 +6996,8 @@ def test_adopt_anchors_scope_binding_to_the_unit_spec_not_the_claim(
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "attempting to mint a binding over chosen scope",
         "--json",
@@ -6872,6 +7115,8 @@ def test_adopt_leaves_the_claim_renewable(tmp_path: Path) -> None:
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "legacy claim predates the mutation fields",
         "--replan-ref",
@@ -6931,6 +7176,8 @@ def test_adopt_refuses_a_present_but_invalid_mutation_revision(tmp_path: Path) -
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "string revision must not be silently reset",
         "--json",
@@ -6954,6 +7201,8 @@ def test_owner_identity_is_length_bounded(tmp_path: Path) -> None:
         claim["claim_id"],
         "--owner-id",
         "x" * 5050,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "unbounded owner identity",
         "--json",
@@ -6979,6 +7228,8 @@ def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "y" * 20000,
         "--json",
@@ -7049,6 +7300,8 @@ def test_markerless_activation_receipt_binds_exact_two_subject_transition(
             "activate-store",
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(linked),
             "--reason",
             "bind both marker publications to one recovery receipt",
             "--json",
@@ -7140,6 +7393,8 @@ def test_initialized_activation_is_receipt_and_event_free_noop(
             "activate-store",
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(linked),
             "--reason",
             "verify initialized no-op",
             "--json",
@@ -7188,6 +7443,8 @@ def test_activation_audit_loss_is_reported(
             "activate-store",
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(linked),
             "--reason",
             "audit sink is broken",
             "--json",
@@ -7245,6 +7502,8 @@ def test_indeterminate_flag_cannot_end_a_claim_with_a_future_deadline(
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "flag must not override readable liveness",
         "--allow-indeterminate-lease",
@@ -7290,6 +7549,8 @@ def test_adopt_refuses_a_spec_less_claim_without_a_replan(tmp_path: Path) -> Non
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "spec-less claim must not self-bless its scope",
         "--json",
@@ -7345,6 +7606,8 @@ def test_indeterminate_flag_respects_the_liveness_evidence_boundary(
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         f"boundary case {label}",
         "--allow-indeterminate-lease",
@@ -7777,7 +8040,9 @@ def test_a_claim_created_before_the_stop_condition_fix_is_not_treated_as_drifted
 
     if operation == "adopt":
         args = ["adopt", "--claim-id", claim["claim_id"],
-                "--owner-id", _OWNER, "--reason", "legacy claim repair"]
+                "--owner-id", _OWNER,
+                "--actor-instance-id", _recovery_actor_id(linked),
+                "--reason", "legacy claim repair"]
     else:
         args = ["renew", "--claim-id", claim["claim_id"],
                 "--agent-instance-id", claim["agent_instance_id"],
@@ -8366,6 +8631,8 @@ def test_adopt_adds_only_missing_work_identity_to_an_otherwise_current_claim(
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "claim predates canonical work identity binding",
         "--now",
@@ -8427,6 +8694,8 @@ def test_adopt_fails_closed_when_canonical_work_identity_metadata_is_missing(
         claim["claim_id"],
         "--owner-id",
         _OWNER,
+        "--actor-instance-id",
+        _recovery_actor_id(linked),
         "--reason",
         "legacy claim cannot be rebound without canonical UUID authority",
         "--now",
@@ -8868,6 +9137,8 @@ def test_every_claim_entrypoint_refuses_duplicate_unit_namespace_authority(
             str(claim["claim_id"]),
             "--owner-id",
             _OWNER,
+            "--actor-instance-id",
+            _recovery_actor_id(tmp_path),
             "--reason",
             "duplicate unit authority must not be adopted",
             "--now",

@@ -50,7 +50,8 @@ def main(argv: list[str] | None = None) -> int:
                 f"claim-reaper: {len(outstanding)} claim(s) need owner recovery "
                 f"and will never be reaped: {ids}; run "
                 "task_claim_dispatcher.py terminalize --claim-id <id> "
-                "--owner-id <owner> --reason <why>"
+                "--owner-id <owner> --actor-instance-id "
+                "<registered-agent-instance-id> --reason <why>"
             )
         # Silent when there is nothing to do, to avoid SessionStart noise.
     except Exception as exc:  # noqa: BLE001 - best-effort: never block session start

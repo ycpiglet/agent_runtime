@@ -43,6 +43,10 @@ target_files:
   - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
   - scripts/atomic_io.py
   - src/agent_runtime/templates/project/scripts/atomic_io.py
+  - scripts/claim_reaper.py
+  - src/agent_runtime/templates/project/scripts/claim_reaper.py
+  - scripts/claim_reaper_hook.py
+  - src/agent_runtime/templates/project/scripts/claim_reaper_hook.py
   - new:scripts/recovery_receipt.py
   - new:src/agent_runtime/templates/project/scripts/recovery_receipt.py
   - new:schemas/recovery-receipt.schema.json
@@ -54,6 +58,7 @@ target_files:
   - new:tests/test_recovery_receipt.py
   - tests/test_atomic_io.py
   - tests/test_claim_store.py
+  - tests/test_claim_reaper.py
   - tests/test_task_claim_dispatcher.py
   - tests/test_role_routing.py
   - tests/test_template_mirror_gate.py
@@ -67,7 +72,7 @@ acceptance:
   - A subject failure leaves only a prepared receipt and cannot be reported committed.
   - Already initialized activation creates no false recovery receipt or event.
 verification:
-  - PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_role_routing.py -q
+  - PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_claim_reaper.py tests/test_task_claim_dispatcher.py tests/test_role_routing.py -q
   - PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q
 handoff: Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
 stop_condition: Stop before rotation, claim release/acceptance/completion, external CI, consumer mutation, credential access, push, tag, publish, or deploy.
@@ -99,6 +104,10 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
 - scripts/atomic_io.py
 - src/agent_runtime/templates/project/scripts/atomic_io.py
+- scripts/claim_reaper.py
+- src/agent_runtime/templates/project/scripts/claim_reaper.py
+- scripts/claim_reaper_hook.py
+- src/agent_runtime/templates/project/scripts/claim_reaper_hook.py
 - new:scripts/recovery_receipt.py
 - new:src/agent_runtime/templates/project/scripts/recovery_receipt.py
 - new:schemas/recovery-receipt.schema.json
@@ -110,6 +119,7 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 - new:tests/test_recovery_receipt.py
 - tests/test_atomic_io.py
 - tests/test_claim_store.py
+- tests/test_claim_reaper.py
 - tests/test_task_claim_dispatcher.py
 - tests/test_role_routing.py
 - tests/test_template_mirror_gate.py
@@ -139,7 +149,7 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 
 ## Verification
 
-- `PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_role_routing.py -q`
+- `PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_claim_reaper.py tests/test_task_claim_dispatcher.py tests/test_role_routing.py -q`
 - `PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q`
 
 ## Handoff

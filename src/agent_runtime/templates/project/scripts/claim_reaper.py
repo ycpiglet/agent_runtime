@@ -564,7 +564,8 @@ def _render_human(report: dict[str, Any]) -> str:
             f"  needs-owner-recovery: {entry['claim_id']} task={entry['task_id']}; "
             "lease is dead and this claim is never auto-reaped -- run: "
             "task_claim_dispatcher.py terminalize --claim-id "
-            f"{entry['claim_id']} --owner-id <owner> --reason <why>"
+            f"{entry['claim_id']} --owner-id <owner> --actor-instance-id "
+            "<registered-agent-instance-id> --reason <why>"
         )
     for entry in report.get("torn_lease") or []:
         lines.append(
