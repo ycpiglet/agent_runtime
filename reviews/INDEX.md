@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-09T16:30:03+09:00
-record_count: 1368
+generated_at: 2026-08-09T16:56:08+09:00
+record_count: 1369
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1368` review and evidence records under `reviews/`.
+- Summary: indexed `1369` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1368` files |
+| Reviews covered | pass | `1369` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -1399,6 +1399,7 @@ record_count: 1368
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | blocked | block | TASK-AR-655 type-strict pointer final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md` | `W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final` | md | accepted | pass | TASK-AR-659 owner-bound recovery commands final independent W4b |
 | `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md` | `W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final` | md | accepted | pass | TASK-AR-655 lease truthfulness final independent W4b |
+| `reviews/W4B-2026-08-09-unit-task-ar-660-001-actor-toctou-final.md` | `W4B-2026-08-09-unit-task-ar-660-001-actor-toctou-final` | md | blocked | block | TASK-AR-660 Unit 001 actor TOCTOU final independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
