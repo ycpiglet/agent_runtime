@@ -156,6 +156,7 @@ class _RecoveryActor(NamedTuple):
     role: str
     display_name: str
     callsite_id: str
+    authority_sha256: str
 
 
 def _canonical_sha256(value: object) -> str:
@@ -4668,7 +4669,29 @@ def _registered_recovery_actor(
         role=canonical["role"],
         display_name=display_name,
         callsite_id=canonical["callsite_id"],
+        authority_sha256=hashlib.sha256(payload_bytes).hexdigest(),
     )
+
+
+def _revalidate_recovery_actor(
+    root: Path,
+    requested_id: object,
+    expected: _RecoveryActor,
+) -> _RecoveryActor:
+    """Re-prove actor authority at the receipt precommit boundary.
+
+    Registry writers share the claim-store lock.  Comparing the exact record
+    digest as well as its canonical event fields prevents a lookup made before
+    the transaction from becoming a detached capability after the record is
+    removed or replaced.
+    """
+
+    current = _registered_recovery_actor(root, requested_id)
+    if current != expected:
+        raise ValueError(
+            "recovery actor instance record changed before recovery precommit"
+        )
+    return current
 
 
 def _append_recovery_event(
@@ -4826,10 +4849,10 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
         root = args.root.resolve()
-        actor = _registered_recovery_actor(root, args.actor_instance_id)
         now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
         with claim_store.store_lock(root):
+            actor = _registered_recovery_actor(root, args.actor_instance_id)
             path, claim, inspection = _recovery_target(root, args.claim_id)
             raw_revision = claim.get("mutation_revision")
             has_revision = type(raw_revision) is int and raw_revision >= 0
@@ -4916,6 +4939,11 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 supplied_clock=args.now is not None,
             )
             claim["adopted_at"] = now_text
+            actor = _revalidate_recovery_actor(
+                root,
+                args.actor_instance_id,
+                actor,
+            )
             outcome = _persist_claim_recovery(
                 root=root,
                 path=path,
@@ -5000,10 +5028,10 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
         root = args.root.resolve()
-        actor = _registered_recovery_actor(root, args.actor_instance_id)
         now = _recovery_now(args.now)
         now_text = now.isoformat(timespec="seconds")
         with claim_store.store_lock(root):
+            actor = _registered_recovery_actor(root, args.actor_instance_id)
             path, claim, inspection = _recovery_target(root, args.claim_id)
             liveness = claim_store.classify_claim_liveness(claim, now=now)
             # Every indeterminate shape is exit-less, not just a wholly absent
@@ -5055,6 +5083,11 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 now_text=now_text,
                 operation="terminalize",
                 supplied_clock=args.now is not None,
+            )
+            actor = _revalidate_recovery_actor(
+                root,
+                args.actor_instance_id,
+                actor,
             )
             outcome = _persist_claim_recovery(
                 root=root,
@@ -5152,27 +5185,29 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
         root = args.root.resolve()
-        actor = _registered_recovery_actor(root, args.actor_instance_id)
-        initial = claim_store.inspect_store(root)
-        before_state = initial.state
+        with claim_store.store_lock(root):
+            actor = _registered_recovery_actor(root, args.actor_instance_id)
+            initial = claim_store.inspect_store(root)
+            before_state = initial.state
 
-        # A repeat activation is observational only.  Creating a receipt or a
-        # pane event here would falsely claim that a subject transition ran.
-        if before_state == "initialized":
-            _emit(
-                {
-                    "status": "not_required",
-                    "activated_by": owner,
-                    "actor_instance_id": actor.agent_instance_id,
-                    "audit": "no-op",
-                    "claim_store_state_before": before_state,
-                    "claim_store_state": initial.state,
-                    "witness_claim_id": initial.witness_claim_id,
-                    "marker": _rel(root, claim_store.outer_marker_path(root)),
-                },
-                as_json=args.json,
-            )
-            return 0
+            # A repeat activation is observational only.  Creating a receipt
+            # or a pane event here would falsely claim that a subject
+            # transition ran.
+            if before_state == "initialized":
+                _emit(
+                    {
+                        "status": "not_required",
+                        "activated_by": owner,
+                        "actor_instance_id": actor.agent_instance_id,
+                        "audit": "no-op",
+                        "claim_store_state_before": before_state,
+                        "claim_store_state": initial.state,
+                        "witness_claim_id": initial.witness_claim_id,
+                        "marker": _rel(root, claim_store.outer_marker_path(root)),
+                    },
+                    as_json=args.json,
+                )
+                return 0
 
         activation_plan: claim_store.ClaimStoreActivationPlan | None = None
         recorded_at = datetime.now(timezone.utc).astimezone().isoformat(
@@ -5201,6 +5236,11 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                 _activation_subject_ref(root, subject.path)
                 for subject in plan.subjects
             ]
+            _revalidate_recovery_actor(
+                root,
+                args.actor_instance_id,
+                actor,
+            )
             activation_receipt_id = _new_recovery_receipt_id("activate-store")
             prepared_path = recovery_receipt.prepare_recovery_receipt(
                 receipt_dir=root / recovery_receipt.DEFAULT_RECEIPT_DIR,

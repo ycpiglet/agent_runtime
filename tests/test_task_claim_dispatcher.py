@@ -6231,8 +6231,8 @@ def test_recovery_revalidates_actor_registry_inside_the_commit_transaction(
     resolutions = {"count": 0}
 
     def race_after_first_resolution(root: Path, requested_id: object):
-        actor = real_resolve(root, requested_id)
         resolutions["count"] += 1
+        actor = real_resolve(root, requested_id)
         if resolutions["count"] != 1:
             return actor
         if registry_race == "unlink":

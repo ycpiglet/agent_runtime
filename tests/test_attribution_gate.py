@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
@@ -78,6 +80,8 @@ def _write_instance(root: Path, agent_instance_id: str, **overrides: object) -> 
         "schema": "agent-runtime-agent-instance/v1",
         "agent_instance_id": agent_instance_id,
         "role": "qa",
+        "display_name": "qa@review-01",
+        "callsite_id": "terminal:wt-task-ar-901:tab-01",
         "spawned_at": POST_CUTOFF_TS,
     }
     payload.update(overrides)
@@ -131,6 +135,190 @@ def test_instance_attributed_claim_passes(tmp_path: Path) -> None:
 
 
 # -- pane events ---------------------------------------------------------------
+
+
+def _recovery_event(**overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema": "agent-runtime-pane-event/v1",
+        "seq": 1,
+        "ts": POST_CUTOFF_TS,
+        "event": "claim_recovery_terminalize",
+        "recovery_operation": "terminalize",
+        "actor": "qa-20260613-120000-kst-aa11",
+        "agent_instance_id": "qa-20260613-120000-kst-aa11",
+        "actor_role": "qa",
+        "display_name": "qa@review-01",
+        "callsite_id": "terminal:wt-task-ar-901:tab-01",
+        "owner_id": "owner-recovery-test",
+        "receipt_id": "RECOVERY-TEST-ATTRIBUTION",
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.parametrize(
+    ("timestamp", "expected_rc", "severity"),
+    (
+        (POST_CUTOFF_TS, 1, "block"),
+        (HISTORICAL_TS, 0, "watch"),
+    ),
+)
+def test_recovery_pane_event_refuses_an_unregistered_instance_by_cutoff(
+    tmp_path: Path,
+    timestamp: str,
+    expected_rc: int,
+    severity: str,
+) -> None:
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event(ts=timestamp)],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == expected_rc, result.stdout + result.stderr
+    assert (
+        f"{severity} agents/runtime/pane_events/pane-events.jsonl:1: "
+        "attribution:pane-event-recovery-instance-unregistered:"
+        "qa-20260613-120000-kst-aa11"
+    ) in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("field", "invalid_value", "finding"),
+    (
+        ("actor", "qa-impersonated-instance", "actor-mismatch"),
+        ("actor_role", "lead-engineer", "role-mismatch"),
+        ("display_name", "qa@impersonated-review", "display-name-mismatch"),
+        ("callsite_id", "terminal:other-worktree:tab-09", "callsite-mismatch"),
+    ),
+)
+def test_recovery_pane_event_matches_canonical_instance_identity_role_display_and_callsite(
+    tmp_path: Path,
+    field: str,
+    invalid_value: str,
+    finding: str,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    _write_instance(tmp_path, actor_id)
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event(**{field: invalid_value})],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "block agents/runtime/pane_events/pane-events.jsonl:1: "
+        f"attribution:pane-event-recovery-{finding}:"
+    ) in result.stdout
+
+
+@pytest.mark.parametrize("damage", ("schema", "payload-id"))
+def test_recovery_pane_event_refuses_a_noncanonical_registry_record(
+    tmp_path: Path,
+    damage: str,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    overrides: dict[str, object]
+    if damage == "schema":
+        overrides = {"schema": "agent-runtime-agent-instance/unknown"}
+        _write_instance(tmp_path, actor_id, **overrides)
+    else:
+        overrides = {}
+        _write_json(
+            tmp_path
+            / "agents"
+            / "runtime"
+            / "instances"
+            / f"{actor_id}.json",
+            {
+                "schema": "agent-runtime-agent-instance/v1",
+                "agent_instance_id": "qa-different-payload-instance",
+                "role": "qa",
+                "display_name": "qa@review-01",
+                "callsite_id": "terminal:wt-task-ar-901:tab-01",
+                "spawned_at": POST_CUTOFF_TS,
+            },
+        )
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event()],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "attribution:pane-event-recovery-instance-unregistered:"
+        f"{actor_id}"
+    ) in result.stdout
+
+
+def test_recovery_pane_event_accepts_exact_canonical_instance_attribution(
+    tmp_path: Path,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    _write_instance(tmp_path, actor_id)
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event()],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "attribution-gate: pass" in result.stdout
+    assert "findings=0" in result.stdout
+
+
+def test_recovery_pane_event_rejects_invalid_canonical_display_name(
+    tmp_path: Path,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    _write_instance(tmp_path, actor_id, display_name=None)
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event()],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "block agents/runtime/pane_events/pane-events.jsonl:1: "
+        "attribution:pane-event-recovery-instance-display-name-invalid:"
+        f"{actor_id}"
+    ) in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("registry_display_name", "event_display_name"),
+    (("  qa@review-01  ", "qa@review-01"), ("   ", None)),
+)
+def test_recovery_pane_event_uses_dispatcher_display_name_normalization(
+    tmp_path: Path,
+    registry_display_name: str,
+    event_display_name: str | None,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    _write_instance(tmp_path, actor_id, display_name=registry_display_name)
+    event = _recovery_event()
+    if event_display_name is None:
+        event.pop("display_name")
+    else:
+        event["display_name"] = event_display_name
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [event],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "attribution-gate: pass" in result.stdout
+    assert "findings=0" in result.stdout
 
 
 def test_pane_event_role_only_actor_watch_then_block_by_cutoff(tmp_path: Path) -> None:

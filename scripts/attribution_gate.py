@@ -10,7 +10,9 @@ verifies stored artifacts:
 - Pane events (``agents/runtime/pane_events/*.jsonl``) must carry
   ``agent_instance_id`` (or an actor that resolves to an instance record).
   Events newer than the cutoff without instance attribution block; historical
-  ones are watch-level.
+  ones are watch-level. Receipt-era recovery events additionally bind the
+  instance filename/payload identity, actor, role, and callsite to one exact
+  canonical registry record.
 - A2A messages (``agents/runtime/a2a/*.jsonl`` and
   ``agents/project/a2a/*.jsonl``): ``sender``/``receiver`` checked the same
   way; role-only attribution newer than the cutoff blocks.
@@ -34,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import stat
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -47,6 +50,19 @@ EVIDENCE_DIR = Path("agents/project/evidence")
 REVIEWS_DIR = Path("reviews")
 INSTANCES_DIR = Path("agents/runtime/instances")
 GOVERNANCE_CONFIG = Path("agents/project/COLLABORATION-GOVERNANCE.json")
+AGENT_INSTANCE_SCHEMA = "agent-runtime-agent-instance/v1"
+AGENT_INSTANCE_IDENTITY_MAX_CHARS = 160
+
+RECOVERY_EVENT_PREFIX = "claim_recovery_"
+RECOVERY_ACTIVATION_EVENT = "claim_store_activated"
+RECOVERY_EVENT_MARKERS = (
+    "recovery_operation",
+    "receipt_id",
+    "receipt_ref",
+    "prepared_receipt_ref",
+    "outcome_receipt_ref",
+    "owner_id",
+)
 
 INSTANCE_FIELD_NAMES = (
     "agent_instance_id",
@@ -159,6 +175,45 @@ def _instance_field(record: dict[str, Any]) -> str:
     return ""
 
 
+def _is_current_recovery_event(record: dict[str, Any]) -> bool:
+    """Recognize receipt-era recovery events without reclassifying legacy UI rows."""
+
+    event_name = record.get("event")
+    if isinstance(event_name, str) and event_name.startswith(RECOVERY_EVENT_PREFIX):
+        return True
+    return (
+        event_name == RECOVERY_ACTIVATION_EVENT
+        and any(marker in record for marker in RECOVERY_EVENT_MARKERS)
+    ) or "recovery_operation" in record
+
+
+def _canonical_instance_text(record: dict[str, Any], field: str) -> str | None:
+    value = record.get(field)
+    if (
+        not isinstance(value, str)
+        or not value
+        or value != value.strip()
+        or any(character in value for character in ("\x00", "\r", "\n"))
+    ):
+        return None
+    return value
+
+
+def _canonical_instance_display_name(record: dict[str, Any]) -> str | None:
+    """Apply the dispatcher's canonical display-name normalization."""
+
+    value = record.get("display_name")
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip()
+    if (
+        len(normalized) > AGENT_INSTANCE_IDENTITY_MAX_CHARS
+        or any(character in normalized for character in ("\x00", "\r", "\n"))
+    ):
+        return None
+    return normalized
+
+
 class AttributionChecker:
     def __init__(self, root: Path, *, cutoff: str = CONTRACT_CUTOFF_DATE):
         self.root = root.resolve()
@@ -167,6 +222,7 @@ class AttributionChecker:
         self.claims = self._load_claims()
         self.instances = self._load_instances()
         self.instance_ids = self._collect_instance_ids()
+        self.canonical_instances = self._collect_canonical_instances()
         self.known_roles = self._collect_roles()
         self.resolvable_ids = self._collect_resolvable_ids()
 
@@ -206,6 +262,29 @@ class AttributionChecker:
             if value:
                 ids.add(value)
         return ids
+
+    def _collect_canonical_instances(self) -> dict[str, dict[str, Any]]:
+        """Index only exact direct registry records for strict recovery checks."""
+
+        canonical: dict[str, dict[str, Any]] = {}
+        for path, payload in self.instances:
+            try:
+                metadata = path.lstat()
+            except OSError:
+                continue
+            instance_id = payload.get("agent_instance_id")
+            if (
+                stat.S_ISLNK(metadata.st_mode)
+                or not stat.S_ISREG(metadata.st_mode)
+                or payload.get("schema") != AGENT_INSTANCE_SCHEMA
+                or not isinstance(instance_id, str)
+                or not instance_id
+                or instance_id != instance_id.strip()
+                or path.stem != instance_id
+            ):
+                continue
+            canonical[instance_id] = payload
+        return canonical
 
     def _collect_roles(self) -> set[str]:
         roles = {_normalize_role(role) for role in BUILTIN_ROLES}
@@ -312,18 +391,131 @@ class AttributionChecker:
             for error in errors:
                 self._add("watch", f"{rel}: attribution:pane-event-invalid-json:{error}")
             for line_number, event in rows:
+                date_text = _date_of(event.get("ts"))
+                severity = _severity(date_text, self.cutoff)
+                where = f"{rel}:{line_number}"
+                if _is_current_recovery_event(event):
+                    self._check_recovery_pane_event(
+                        where=where,
+                        event=event,
+                        severity=severity,
+                    )
+                    continue
                 if _instance_field(event):
                     continue
                 actor = str(event.get("actor") or "").strip()
                 if self._is_instance(actor):
                     continue
-                date_text = _date_of(event.get("ts"))
-                severity = _severity(date_text, self.cutoff)
-                where = f"{rel}:{line_number}"
                 if self._is_role(actor):
                     self._add(severity, f"{where}: attribution:pane-event-role-only:{actor}")
                 else:
                     self._add(severity, f"{where}: attribution:pane-event-unattributed:{actor or 'missing-actor'}")
+
+    def _check_recovery_pane_event(
+        self,
+        *,
+        where: str,
+        event: dict[str, Any],
+        severity: str,
+    ) -> None:
+        """Bind one receipt-era recovery event to exact registry authority."""
+
+        raw_instance_id = event.get("agent_instance_id")
+        if (
+            not isinstance(raw_instance_id, str)
+            or not raw_instance_id
+            or raw_instance_id != raw_instance_id.strip()
+        ):
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-instance-unregistered:missing",
+            )
+            return
+        instance_id = raw_instance_id
+        instance = self.canonical_instances.get(instance_id)
+        if instance is None:
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-instance-unregistered:{instance_id}",
+            )
+            return
+
+        actor = event.get("actor")
+        if actor != instance_id:
+            actual = actor if isinstance(actor, str) and actor else "missing"
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-actor-mismatch:"
+                f"{actual}:expected:{instance_id}",
+            )
+
+        canonical_role = _canonical_instance_text(instance, "role")
+        if canonical_role is None:
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-instance-role-invalid:"
+                f"{instance_id}",
+            )
+        elif event.get("actor_role") != canonical_role:
+            actual_role = event.get("actor_role")
+            actual = (
+                actual_role
+                if isinstance(actual_role, str) and actual_role
+                else "missing"
+            )
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-role-mismatch:"
+                f"{actual}:expected:{canonical_role}",
+            )
+
+        canonical_display_name = _canonical_instance_display_name(instance)
+        if canonical_display_name is None:
+            self._add(
+                severity,
+                f"{where}: attribution:"
+                "pane-event-recovery-instance-display-name-invalid:"
+                f"{instance_id}",
+            )
+        else:
+            actual_display_name = event.get("display_name")
+            if canonical_display_name:
+                display_matches = actual_display_name == canonical_display_name
+            else:
+                display_matches = actual_display_name in (None, "")
+            if not display_matches:
+                actual = (
+                    actual_display_name
+                    if isinstance(actual_display_name, str)
+                    and actual_display_name
+                    else "missing"
+                )
+                self._add(
+                    severity,
+                    f"{where}: attribution:"
+                    "pane-event-recovery-display-name-mismatch:"
+                    f"{actual}:expected:{canonical_display_name}",
+                )
+
+        canonical_callsite = _canonical_instance_text(instance, "callsite_id")
+        if canonical_callsite is None:
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-instance-callsite-invalid:"
+                f"{instance_id}",
+            )
+        elif event.get("callsite_id") != canonical_callsite:
+            actual_callsite = event.get("callsite_id")
+            actual = (
+                actual_callsite
+                if isinstance(actual_callsite, str) and actual_callsite
+                else "missing"
+            )
+            self._add(
+                severity,
+                f"{where}: attribution:pane-event-recovery-callsite-mismatch:"
+                f"{actual}:expected:{canonical_callsite}",
+            )
 
     def _check_party(
         self,
