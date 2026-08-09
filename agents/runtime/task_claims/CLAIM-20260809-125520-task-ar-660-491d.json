@@ -51,13 +51,13 @@
   "worktree_path": ".worktrees/TASK-AR-660",
   "branch": "codex/task-ar-660-recovery-receipt",
   "claimed_at": "2026-08-09T12:55:20+09:00",
-  "last_heartbeat": "2026-08-09T15:44:17.357339+09:00",
-  "updated_at": "2026-08-09T15:44:17.357339+09:00",
-  "expires_at": "2026-08-10T03:44:17.357339+09:00",
+  "last_heartbeat": "2026-08-09T16:23:22.156807+09:00",
+  "updated_at": "2026-08-09T16:23:22.156807+09:00",
+  "expires_at": "2026-08-10T04:23:22.156807+09:00",
   "lease": {
     "claimed_at": "2026-08-09T12:55:20+09:00",
-    "heartbeat_at": "2026-08-09T15:44:17.357339+09:00",
-    "expires_at": "2026-08-10T03:44:17.357339+09:00"
+    "heartbeat_at": "2026-08-09T16:23:22.156807+09:00",
+    "expires_at": "2026-08-10T04:23:22.156807+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.log.md",
@@ -97,6 +97,8 @@
     "src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json",
     "scripts/pane_event_log.py",
     "src/agent_runtime/templates/project/scripts/pane_event_log.py",
+    "scripts/attribution_gate.py",
+    "src/agent_runtime/templates/project/scripts/attribution_gate.py",
     "scripts/runtime_asset_usage.py",
     "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
     "tests/test_recovery_receipt.py",
@@ -104,22 +106,23 @@
     "tests/test_claim_store.py",
     "tests/test_claim_reaper.py",
     "tests/test_task_claim_dispatcher.py",
+    "tests/test_attribution_gate.py",
     "tests/test_role_routing.py",
     "tests/test_template_mirror_gate.py",
     "tests/test_template_smoke.py",
     "tests/fixtures/host/agent_runtime.lock.json"
   ],
-  "mutation_revision": 2,
+  "mutation_revision": 3,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
-    "digest": "f775eacdb1324707207d5ebf64edf6560b4cab3eea2a896195f40fc07e37d15b",
+    "digest": "3a5be17969339c2b8ba865308a15cd7526f5e06055e02e9e77c91795739e9176",
     "components": {
       "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
       "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
-      "target_files": "5f51dc725949eb4345d7196d91b2b89e94f25010d22a285047488c44d99e54aa",
+      "target_files": "1ffc0ea1ea303ca06e386d05473eb1e6715ecba0e06a7b2b3dbaad87d84f6d56",
       "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
     },
-    "bound_at": "2026-08-09T15:44:17.357339+09:00"
+    "bound_at": "2026-08-09T16:23:22.156807+09:00"
   },
   "persistence": {
     "mode": "scm_commit",
@@ -142,20 +145,9 @@
   "recovery_scope": "single-claim",
   "adopted_at": "2026-08-09T15:20:04+09:00",
   "last_renewal": {
-    "renewed_at": "2026-08-09T15:44:17.357339+09:00",
-    "replan_ref": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md",
+    "renewed_at": "2026-08-09T16:23:22.156807+09:00",
+    "replan_ref": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
     "old_scope_binding": {
-      "schema": "agent-runtime-claim-scope-binding/v1",
-      "digest": "96859e37d50a9495f5cae5cff8eef1f55f8f7748888613978b1dc69752dadf0a",
-      "components": {
-        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
-        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
-        "target_files": "471293a64d30d90c9a4189588a660c8dfd7ebc1c5f53dd28a92b76566166bb76",
-        "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
-      },
-      "bound_at": "2026-08-09T15:20:45.774970+09:00"
-    },
-    "new_scope_binding": {
       "schema": "agent-runtime-claim-scope-binding/v1",
       "digest": "f775eacdb1324707207d5ebf64edf6560b4cab3eea2a896195f40fc07e37d15b",
       "components": {
@@ -165,6 +157,17 @@
         "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
       },
       "bound_at": "2026-08-09T15:44:17.357339+09:00"
+    },
+    "new_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "3a5be17969339c2b8ba865308a15cd7526f5e06055e02e9e77c91795739e9176",
+      "components": {
+        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+        "target_files": "1ffc0ea1ea303ca06e386d05473eb1e6715ecba0e06a7b2b3dbaad87d84f6d56",
+        "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
+      },
+      "bound_at": "2026-08-09T16:23:22.156807+09:00"
     }
   }
 }
