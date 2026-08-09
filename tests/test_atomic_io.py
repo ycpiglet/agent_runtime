@@ -462,17 +462,18 @@ def test_rejected_exclusive_precommit_restores_owned_fallback_parent_tree(
 
     target = tmp_path / "agents" / "runtime" / "recovery_receipts" / "receipt.json"
     callback_calls = 0
+    rejection = ValueError("stale recovery actor")
 
     def reject_authority() -> None:
         nonlocal callback_calls
         callback_calls += 1
         assert target.parent.is_dir()
         assert len(_tmp_siblings(target)) == 1
-        raise ValueError("stale recovery actor")
+        raise rejection
 
     monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
 
-    with pytest.raises(ValueError, match="stale recovery actor"):
+    with pytest.raises(ValueError, match="stale recovery actor") as rejected:
         atomic_io.publish_json_atomic(
             target,
             {"prepared": True},
@@ -480,6 +481,7 @@ def test_rejected_exclusive_precommit_restores_owned_fallback_parent_tree(
             precommit=reject_authority,
         )
 
+    assert rejected.value is rejection
     assert callback_calls == 1
     assert list(tmp_path.iterdir()) == []
 
@@ -521,27 +523,77 @@ def test_rejected_exclusive_precommit_never_removes_unowned_parent_data(
         )
 
 
-def test_rejected_exclusive_precommit_preserves_replaced_empty_parent(
+def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_aba_identity(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     target = tmp_path / "created-store" / "receipt.json"
-    displaced = tmp_path / "displaced-store"
-    replacement_inode: int | None = None
+    real_lstat = Path.lstat
+    callback_calls = 0
+    replacement_live = False
+    owned_device_inode: tuple[int, int] | None = None
+    owned_generation: int | None = None
+    replacement_generation: int | None = None
+    rejection = ValueError("stale recovery actor")
+
+    class GenerationChangedMetadata:
+        def __init__(self, metadata: object, overrides: dict[str, int | float]) -> None:
+            self._metadata = metadata
+            self._overrides = overrides
+
+        def __getattr__(self, attribute: str) -> object:
+            if attribute in self._overrides:
+                return self._overrides[attribute]
+            return getattr(self._metadata, attribute)
+
+    def report_aba_identity(path: Path) -> object:
+        metadata = real_lstat(path)
+        if not replacement_live or path != target.parent:
+            return metadata
+        assert owned_device_inode is not None
+        assert replacement_generation is not None
+        overrides: dict[str, int | float] = {
+            "st_dev": owned_device_inode[0],
+            "st_ino": owned_device_inode[1],
+            "st_ctime_ns": replacement_generation,
+            "st_ctime": replacement_generation / 1_000_000_000,
+        }
+        if hasattr(metadata, "st_birthtime_ns"):
+            overrides["st_birthtime_ns"] = replacement_generation
+            overrides["st_birthtime"] = replacement_generation / 1_000_000_000
+        return GenerationChangedMetadata(metadata, overrides)
 
     def replace_parent_then_reject() -> None:
-        nonlocal replacement_inode
+        nonlocal callback_calls
+        nonlocal owned_device_inode
+        nonlocal owned_generation
+        nonlocal replacement_generation
+        nonlocal replacement_live
+        callback_calls += 1
         sidecars = _tmp_siblings(target)
         assert len(sidecars) == 1
+        owned_metadata = real_lstat(target.parent)
+        owned_device_inode = (
+            int(owned_metadata.st_dev),
+            int(owned_metadata.st_ino),
+        )
+        owned_generation = int(owned_metadata.st_ctime_ns)
         sidecars[0].unlink()
-        target.parent.rename(displaced)
+        target.parent.rmdir()
         target.parent.mkdir()
-        replacement_inode = target.parent.stat().st_ino
-        raise ValueError("stale recovery actor")
+        replacement_generation = owned_generation + 1_000_000_000
+        replacement_live = True
 
+        reported = target.parent.lstat()
+        assert (int(reported.st_dev), int(reported.st_ino)) == owned_device_inode
+        assert int(reported.st_ctime_ns) == replacement_generation
+        assert int(reported.st_ctime_ns) != owned_generation
+        raise rejection
+
+    monkeypatch.setattr(Path, "lstat", report_aba_identity)
     monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
 
-    with pytest.raises(ValueError, match="stale recovery actor"):
+    with pytest.raises(ValueError, match="stale recovery actor") as rejected:
         atomic_io.publish_text_atomic(
             target,
             "prepared\n",
@@ -549,10 +601,67 @@ def test_rejected_exclusive_precommit_preserves_replaced_empty_parent(
             precommit=replace_parent_then_reject,
         )
 
-    assert replacement_inode is not None
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert owned_device_inode is not None
+    assert owned_generation is not None
+    assert replacement_generation is not None
     assert target.parent.is_dir()
-    assert target.parent.stat().st_ino == replacement_inode
-    assert displaced.is_dir()
+    assert list(target.parent.iterdir()) == []
+
+
+def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    probe = tmp_path / "symlink-probe"
+    try:
+        probe.symlink_to(tmp_path, target_is_directory=True)
+    except (NotImplementedError, OSError) as exc:
+        pytest.skip(f"symlinks are unavailable in this environment: {exc}")
+    else:
+        probe.unlink()
+
+    created_root = tmp_path / "created-root"
+    target = created_root / "nested" / "receipt.json"
+    displaced_root = tmp_path / "displaced-root"
+    callback_calls = 0
+    prepared_sidecar_name: str | None = None
+    prepared_sidecar_bytes: bytes | None = None
+    rejection = ValueError("stale recovery actor")
+
+    def replace_ancestor_with_alias_then_reject() -> None:
+        nonlocal callback_calls
+        nonlocal prepared_sidecar_name
+        nonlocal prepared_sidecar_bytes
+        callback_calls += 1
+        sidecars = _tmp_siblings(target)
+        assert len(sidecars) == 1
+        prepared_sidecar_name = sidecars[0].name
+        prepared_sidecar_bytes = sidecars[0].read_bytes()
+        created_root.rename(displaced_root)
+        created_root.symlink_to(displaced_root, target_is_directory=True)
+        raise rejection
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError, match="stale recovery actor") as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=replace_ancestor_with_alias_then_reject,
+        )
+
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert prepared_sidecar_name is not None
+    assert prepared_sidecar_bytes == b"prepared\n"
+    assert created_root.is_symlink()
+    assert displaced_root.is_dir()
+    displaced_parent = displaced_root / "nested"
+    assert displaced_parent.is_dir()
+    assert (displaced_parent / prepared_sidecar_name).read_bytes() == prepared_sidecar_bytes
 
 
 def test_successful_precommit_is_not_retried_or_rolled_back_after_publish_error(
