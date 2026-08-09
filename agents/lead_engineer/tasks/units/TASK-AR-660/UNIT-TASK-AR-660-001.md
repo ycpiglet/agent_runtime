@@ -13,7 +13,7 @@ status: worker_ready
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T12:00:00+09:00
+updated_at: 2026-08-09T12:55:00+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
 created_by: codex-root-owner-approved-correction
@@ -38,15 +38,15 @@ target_files:
   - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
   - scripts/atomic_io.py
   - src/agent_runtime/templates/project/scripts/atomic_io.py
-  - scripts/recovery_receipt.py
-  - src/agent_runtime/templates/project/scripts/recovery_receipt.py
-  - schemas/recovery-receipt.schema.json
-  - src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json
+  - new:scripts/recovery_receipt.py
+  - new:src/agent_runtime/templates/project/scripts/recovery_receipt.py
+  - new:schemas/recovery-receipt.schema.json
+  - new:src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json
   - scripts/pane_event_log.py
   - src/agent_runtime/templates/project/scripts/pane_event_log.py
   - scripts/runtime_asset_usage.py
   - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
-  - tests/test_recovery_receipt.py
+  - new:tests/test_recovery_receipt.py
   - tests/test_atomic_io.py
   - tests/test_claim_store.py
   - tests/test_task_claim_dispatcher.py
@@ -93,15 +93,15 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 - src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py
 - scripts/atomic_io.py
 - src/agent_runtime/templates/project/scripts/atomic_io.py
-- scripts/recovery_receipt.py
-- src/agent_runtime/templates/project/scripts/recovery_receipt.py
-- schemas/recovery-receipt.schema.json
-- src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json
+- new:scripts/recovery_receipt.py
+- new:src/agent_runtime/templates/project/scripts/recovery_receipt.py
+- new:schemas/recovery-receipt.schema.json
+- new:src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json
 - scripts/pane_event_log.py
 - src/agent_runtime/templates/project/scripts/pane_event_log.py
 - scripts/runtime_asset_usage.py
 - src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json
-- tests/test_recovery_receipt.py
+- new:tests/test_recovery_receipt.py
 - tests/test_atomic_io.py
 - tests/test_claim_store.py
 - tests/test_task_claim_dispatcher.py
