@@ -531,9 +531,12 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
     real_lstat = Path.lstat
     callback_calls = 0
     replacement_live = False
-    owned_device_inode: tuple[int, int] | None = None
+    owned_parent_metadata: object | None = None
+    owned_sidecar_metadata: object | None = None
     owned_generation: int | None = None
     replacement_generation: int | None = None
+    replacement_sidecar: Path | None = None
+    replacement_sidecar_bytes: bytes | None = None
     rejection = ValueError("stale recovery actor")
 
     class GenerationChangedMetadata:
@@ -548,46 +551,62 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
 
     def report_aba_identity(path: Path) -> object:
         metadata = real_lstat(path)
-        if not replacement_live or path != target.parent:
+        if not replacement_live:
             return metadata
-        assert owned_device_inode is not None
+        if path == replacement_sidecar:
+            assert owned_sidecar_metadata is not None
+            # The replacement tree contains the exact original sidecar inode;
+            # hide only link-count timestamp noise from parking that inode
+            # outside the parent while the directory generation is replaced.
+            return owned_sidecar_metadata
+        if path != target.parent:
+            return metadata
+        assert owned_parent_metadata is not None
         assert replacement_generation is not None
-        overrides: dict[str, int | float] = {
-            "st_dev": owned_device_inode[0],
-            "st_ino": owned_device_inode[1],
-            "st_ctime_ns": replacement_generation,
-            "st_ctime": replacement_generation / 1_000_000_000,
-        }
-        if hasattr(metadata, "st_birthtime_ns"):
-            overrides["st_birthtime_ns"] = replacement_generation
-            overrides["st_birthtime"] = replacement_generation / 1_000_000_000
-        return GenerationChangedMetadata(metadata, overrides)
+        return GenerationChangedMetadata(
+            owned_parent_metadata,
+            {
+                "st_ctime_ns": replacement_generation,
+                "st_ctime": replacement_generation / 1_000_000_000,
+            },
+        )
 
     def replace_parent_then_reject() -> None:
         nonlocal callback_calls
-        nonlocal owned_device_inode
+        nonlocal owned_parent_metadata
+        nonlocal owned_sidecar_metadata
         nonlocal owned_generation
         nonlocal replacement_generation
         nonlocal replacement_live
+        nonlocal replacement_sidecar
+        nonlocal replacement_sidecar_bytes
         callback_calls += 1
         sidecars = _tmp_siblings(target)
         assert len(sidecars) == 1
-        owned_metadata = real_lstat(target.parent)
-        owned_device_inode = (
-            int(owned_metadata.st_dev),
-            int(owned_metadata.st_ino),
-        )
-        owned_generation = int(owned_metadata.st_ctime_ns)
+        owned_parent_metadata = real_lstat(target.parent)
+        owned_sidecar_metadata = real_lstat(sidecars[0])
+        owned_generation = int(owned_parent_metadata.st_ctime_ns)
+        replacement_sidecar_bytes = sidecars[0].read_bytes()
+
+        parked_sidecar = tmp_path / "parked-sidecar"
+        os.link(sidecars[0], parked_sidecar)
         sidecars[0].unlink()
         target.parent.rmdir()
         target.parent.mkdir()
+        replacement_sidecar = target.parent / sidecars[0].name
+        os.link(parked_sidecar, replacement_sidecar)
+        parked_sidecar.unlink()
         replacement_generation = owned_generation + 1_000_000_000
         replacement_live = True
 
         reported = target.parent.lstat()
-        assert (int(reported.st_dev), int(reported.st_ino)) == owned_device_inode
+        assert (int(reported.st_dev), int(reported.st_ino)) == (
+            int(owned_parent_metadata.st_dev),
+            int(owned_parent_metadata.st_ino),
+        )
         assert int(reported.st_ctime_ns) == replacement_generation
         assert int(reported.st_ctime_ns) != owned_generation
+        assert replacement_sidecar.lstat() is owned_sidecar_metadata
         raise rejection
 
     monkeypatch.setattr(Path, "lstat", report_aba_identity)
@@ -603,11 +622,14 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
 
     assert rejected.value is rejection
     assert callback_calls == 1
-    assert owned_device_inode is not None
+    assert owned_parent_metadata is not None
+    assert owned_sidecar_metadata is not None
     assert owned_generation is not None
     assert replacement_generation is not None
+    assert replacement_sidecar is not None
+    assert replacement_sidecar_bytes == b"prepared\n"
     assert target.parent.is_dir()
-    assert list(target.parent.iterdir()) == []
+    assert replacement_sidecar.read_bytes() == replacement_sidecar_bytes
 
 
 def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
