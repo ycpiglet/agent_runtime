@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 initiative_id: INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: passed
+verification_status: pending
 owner: lead-engineer
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T18:08:17+09:00
+updated_at: 2026-08-09T18:31:00+09:00
 started_at: 2026-08-09T12:55:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
@@ -29,6 +29,7 @@ context: TASK-AR-659 records recovery digests only on stdout, activate-store can
 inputs:
   - reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
   - reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md
+  - reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md
   - reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
   - scripts/task_claim_dispatcher.py
   - src/agent_runtime/claim_store.py
@@ -78,16 +79,13 @@ acceptance:
   - Recovery actor registry drift refuses inside the commit transaction before receipt or subject publication.
   - Every supported exclusive publication path revalidates recovery authority after durable sidecar preparation and immediately before destination publication.
   - A rejected recovery authority callback restores the exact pre-call receipt-root existence and entries without removing pre-existing or nonempty directories.
+  - Callback-rejection cleanup preserves same-device/inode-reused replacements and never traverses a replaced ancestor alias.
   - Post-cutoff pane events cannot pass with an absent or canonically mismatched runtime instance.
 verification:
   - PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_claim_reaper.py tests/test_task_claim_dispatcher.py tests/test_attribution_gate.py tests/test_role_routing.py -q
   - PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q
 handoff: Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
 stop_condition: Stop before rotation, claim release/acceptance/completion, external CI, consumer mutation, credential access, push, tag, publish, or deploy.
-verified_at: 2026-08-09T18:08:17+09:00
-verified_by: le-20260809-130000-kst-ar660001
-evidence_refs:
-  - reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809180817.json
 ---
 
 # UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL
@@ -100,6 +98,7 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 
 - reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
 - reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md
+- reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md
 - reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
 - scripts/task_claim_dispatcher.py
 - src/agent_runtime/claim_store.py
@@ -155,7 +154,8 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 5. Revalidate the exact registered actor at receipt precommit and independently reject unregistered or canonically mismatched post-cutoff pane events.
 6. Put recovery precommit inside every supported exclusive atomic publisher after durable sidecar preparation and restore operation-created empty parents on callback rejection.
 7. Make pane events derived notifications and preserve receipt bindings through heartbeat and renew.
-8. Mirror, inventory, regenerate the host lock, and prove no grandfather receipt is synthesized for the 2026-08-03 manual recovery.
+8. Bind callback-rejection cleanup to a generation-stable direct parent chain so same-inode replacements and ancestor aliases are preserved.
+9. Mirror, inventory, regenerate the host lock, and prove no grandfather receipt is synthesized for the 2026-08-03 manual recovery.
 
 ## Acceptance Criteria
 
@@ -167,6 +167,7 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 - Recovery actor registry drift refuses inside the commit transaction before receipt or subject publication.
 - Every supported exclusive publication path revalidates recovery authority after durable sidecar preparation and immediately before destination publication.
 - A rejected recovery authority callback restores the exact pre-call receipt-root existence and entries without removing pre-existing or nonempty directories.
+- Callback-rejection cleanup preserves same-device/inode-reused replacements and never traverses a replaced ancestor alias.
 - Post-cutoff pane events cannot pass with an absent or canonically mismatched runtime instance.
 
 ## Verification
@@ -176,7 +177,7 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 
 ## Handoff
 
-Attach RED commits, receipt state matrix, cross-platform 3x3 actor-drift matrix, exact parent-tree rollback proof, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
+Attach RED commits, receipt state matrix, cross-platform 3x3 actor-drift matrix, same-inode ABA and ancestor-alias negatives, exact parent-tree rollback proof, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
 
 ## Stop Boundary
 

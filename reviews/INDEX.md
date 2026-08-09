@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-09T18:11:20+09:00
-record_count: 1373
+generated_at: 2026-08-09T18:32:43+09:00
+record_count: 1375
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1373` review and evidence records under `reviews/`.
+- Summary: indexed `1375` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1373` files |
+| Reviews covered | pass | `1375` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -729,6 +729,7 @@ record_count: 1373
 | `reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md` | `REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan` | md | accepted | pass | Claim Recovery and Work Identity Correction Plan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 recovery actor TOCTOU T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 cross-platform receipt publication T3 replan |
+| `reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 parent identity ABA T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 recovery actor attribution T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-template-contract-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 template contract footprint T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan.md` | `REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan` | md | accepted | pass | TASK-AR-661 Existing Taskset Recovery T3 Replan |
@@ -1404,6 +1405,7 @@ record_count: 1373
 | `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md` | `W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final` | md | accepted | pass | TASK-AR-655 lease truthfulness final independent W4b |
 | `reviews/W4B-2026-08-09-unit-task-ar-660-001-actor-toctou-final.md` | `W4B-2026-08-09-unit-task-ar-660-001-actor-toctou-final` | md | blocked | block | TASK-AR-660 Unit 001 actor TOCTOU final independent W4b |
 | `reviews/W4B-2026-08-09-unit-task-ar-660-001-authority-final-2.md` | `W4B-2026-08-09-unit-task-ar-660-001-authority-final-2` | md | blocked | block | TASK-AR-660 Unit 001 recovery authority final-2 independent W4b |
+| `reviews/W4B-2026-08-09-unit-task-ar-660-001-cross-platform-final-3.md` | `W4B-2026-08-09-unit-task-ar-660-001-cross-platform-final-3` | md | blocked | block | TASK-AR-660 Unit 001 cross-platform final-3 independent W4b |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
