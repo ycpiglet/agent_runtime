@@ -51,13 +51,13 @@
   "worktree_path": ".worktrees/TASK-AR-660",
   "branch": "codex/task-ar-660-recovery-receipt",
   "claimed_at": "2026-08-09T12:55:20+09:00",
-  "last_heartbeat": "2026-08-09T17:52:43.583955+09:00",
-  "updated_at": "2026-08-09T17:52:43.583955+09:00",
-  "expires_at": "2026-08-10T05:52:43.583955+09:00",
+  "last_heartbeat": "2026-08-09T18:33:14.787725+09:00",
+  "updated_at": "2026-08-09T18:33:14.787725+09:00",
+  "expires_at": "2026-08-10T06:33:14.787725+09:00",
   "lease": {
     "claimed_at": "2026-08-09T12:55:20+09:00",
-    "heartbeat_at": "2026-08-09T17:52:43.583955+09:00",
-    "expires_at": "2026-08-10T05:52:43.583955+09:00"
+    "heartbeat_at": "2026-08-09T18:33:14.787725+09:00",
+    "expires_at": "2026-08-10T06:33:14.787725+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.log.md",
@@ -112,7 +112,7 @@
     "tests/test_template_smoke.py",
     "tests/fixtures/host/agent_runtime.lock.json"
   ],
-  "mutation_revision": 4,
+  "mutation_revision": 5,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
     "digest": "3a5be17969339c2b8ba865308a15cd7526f5e06055e02e9e77c91795739e9176",
@@ -145,7 +145,7 @@
   "recovery_scope": "single-claim",
   "adopted_at": "2026-08-09T15:20:04+09:00",
   "last_renewal": {
-    "renewed_at": "2026-08-09T17:52:43.583955+09:00",
+    "renewed_at": "2026-08-09T18:33:14.787725+09:00",
     "replan_ref": null,
     "old_scope_binding": {
       "schema": "agent-runtime-claim-scope-binding/v1",
