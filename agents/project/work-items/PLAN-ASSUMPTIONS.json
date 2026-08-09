@@ -180,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "438b107048d6dd53fca5ea7899fdf1f82c41d22fef0326b23ad64e9fdf255954"
+          "value": "f38c54b877ab07627240dcf3e2bfaccfc58980de896432178a89569b4ed37e9e"
         },
         {
           "kind": "sha256",
@@ -324,7 +324,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
-      "recorded_at": "2026-08-09T17:13:40+09:00",
+      "recorded_at": "2026-08-09T17:20:25+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1968,5 +1968,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T17:13:40+09:00"
+  "updated_at": "2026-08-09T17:20:25+09:00"
 }
