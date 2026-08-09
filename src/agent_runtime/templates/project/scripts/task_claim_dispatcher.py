@@ -28,6 +28,7 @@ contract.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -46,6 +47,7 @@ import claim_guard
 import compound_record
 import model_routing
 import plan_assumption_gate
+import recovery_receipt
 import status_alias
 import task_unit_readiness_gate
 from agent_runtime import claim_store
@@ -3900,6 +3902,261 @@ def _stamp_recovery(
     claim["recovery_scope"] = "single-claim"
 
 
+def _claim_json_bytes(claim: dict[str, Any]) -> bytes:
+    """Return the exact byte image written by ``write_json_atomic`` below."""
+
+    return (
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
+
+
+def _new_recovery_receipt_id(operation: str) -> str:
+    """Mint an unguessable, no-clobber transaction identifier.
+
+    The caller cannot supply or replay this identifier.  The receipt store's
+    exclusive publisher is the final collision authority, while the UUID
+    keeps ordinary concurrent Owner recoveries from colliding in practice.
+    """
+
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    return f"RECOVERY-{stamp}-{_slug(operation)}-{uuid.uuid4().hex}"
+
+
+def _claim_recovery_witness(
+    *,
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+    operation: str,
+) -> dict[str, Any]:
+    scope = claim.get("scope_binding")
+    work = claim.get("work_identity_binding")
+    return {
+        "operation": operation,
+        "claim_id": str(claim.get("claim_id") or ""),
+        "claim_ref": _rel(root, path),
+        "status": str(claim.get("status") or ""),
+        "mutation_revision": claim.get("mutation_revision"),
+        "scope_binding_digest": (
+            scope.get("digest") if isinstance(scope, dict) else None
+        ),
+        "work_identity_binding_digest": (
+            work.get("digest") if isinstance(work, dict) else None
+        ),
+    }
+
+
+def _persist_claim_recovery(
+    *,
+    root: Path,
+    path: Path,
+    claim: dict[str, Any],
+    inspection: Any,
+    operation: str,
+    owner: str,
+    reason: str,
+    before_bytes: bytes,
+) -> dict[str, Any]:
+    """Publish recovery intent, raw-CAS the subject, then witness outcome."""
+
+    # Validate the snapshot before receipt publication.  Creating the receipt
+    # directory legitimately changes the parent runtime-directory metadata, so
+    # that old snapshot cannot be compared byte-for-byte afterward.
+    _assert_recovery_authority(root, inspection, operation)
+    predicted_after = _claim_json_bytes(claim)
+
+    def _mutate_subject() -> None:
+        refreshed = claim_store.inspect_store(root)
+        if (
+            refreshed.state != inspection.state
+            or refreshed.snapshot is None
+            or refreshed.generation_id != inspection.generation_id
+            or refreshed.witness_claim_id != inspection.witness_claim_id
+        ):
+            raise ValueError(
+                f"claim-store authority changed before {operation} persistence"
+            )
+        # This exact-byte comparison is deliberately the final operation before
+        # the strict subject write.  The store lock excludes cooperative peers;
+        # the raw CAS also catches a writer that ignored that authority.
+        if path.read_bytes() != before_bytes:
+            raise ValueError(
+                f"claim bytes changed before {operation} persistence"
+            )
+        atomic_io.write_json_atomic(path, claim, fsync_policy="strict")
+
+    return recovery_receipt.execute_recovery(
+        receipt_dir=root / recovery_receipt.DEFAULT_RECEIPT_DIR,
+        receipt_id=_new_recovery_receipt_id(operation),
+        operation=operation,
+        subject_ref=_rel(root, path),
+        before_bytes=before_bytes,
+        predicted_after_bytes=predicted_after,
+        owner_id=owner,
+        reason=reason,
+        recorded_at=str(claim["recovered_at"]),
+        commit_witness=_claim_recovery_witness(
+            root=root,
+            path=path,
+            claim=claim,
+            operation=operation,
+        ),
+        mutate_subject=_mutate_subject,
+        read_subject=path.read_bytes,
+    )
+
+
+def _recovery_receipt_view(
+    root: Path,
+    outcome: dict[str, Any],
+) -> dict[str, Any]:
+    """Expose receipt authority without leaking checkout-specific abs paths."""
+
+    result = {
+        key: value
+        for key, value in outcome.items()
+        if key not in {"prepared_path", "terminal_path"}
+    }
+    prepared = outcome.get("prepared_path")
+    terminal = outcome.get("terminal_path")
+    if prepared:
+        result["prepared_receipt_ref"] = _rel(root, Path(str(prepared)))
+    if terminal:
+        terminal_ref = _rel(root, Path(str(terminal)))
+        result["outcome_receipt_ref"] = terminal_ref
+        result["receipt_ref"] = terminal_ref
+    return result
+
+
+def _append_recovery_event(
+    *,
+    root: Path,
+    operation: str,
+    owner: str,
+    reason: str,
+    receipt: dict[str, Any],
+    claim: dict[str, Any] | None = None,
+    message: str,
+    event_name: str | None = None,
+) -> str:
+    """Append a derived UI event after receipt authority is committed."""
+
+    event = {
+        "event": event_name or f"claim_recovery_{operation.replace('-', '_')}",
+        "actor": owner,
+        "actor_role": "owner",
+        "task_id": str((claim or {}).get("task_id") or ""),
+        "task_set_id": str((claim or {}).get("task_set_id") or ""),
+        "claim_id": str((claim or {}).get("claim_id") or ""),
+        "worktree_path": str((claim or {}).get("worktree_path") or ""),
+        "message": f"{message}; reason: {reason}",
+        "receipt_id": receipt["receipt_id"],
+        "receipt_ref": receipt.get("receipt_ref"),
+        "prepared_receipt_ref": receipt.get("prepared_receipt_ref"),
+        "outcome_receipt_ref": receipt.get("outcome_receipt_ref"),
+        "recovery_operation": operation,
+    }
+    try:
+        append_event(root, event)
+    except Exception as exc:  # noqa: BLE001 - receipt is already authoritative
+        print(
+            f"{operation} recovery WARNING: durable recovery receipt recorded, "
+            f"but the derived pane event was not recorded ({exc!r})",
+            file=sys.stderr,
+        )
+        return "receipt-recorded:event-lost"
+    return "recorded"
+
+
+def _emit_indeterminate_recovery(
+    *,
+    args: argparse.Namespace,
+    root: Path,
+    path: Path | None,
+    operation: str,
+    outcome: dict[str, Any],
+) -> int:
+    receipt = _recovery_receipt_view(root, outcome)
+    payload: dict[str, Any] = {
+        "status": "indeterminate",
+        "operation": operation,
+        "retry_safe": False,
+        "recovery_receipt": receipt,
+    }
+    if path is not None:
+        payload["path"] = _rel(root, path)
+    finding = str(outcome.get("finding") or "").strip()
+    if finding:
+        payload["finding"] = finding
+    _emit(payload, as_json=args.json)
+    print(
+        f"{operation} recovery outcome is indeterminate and MUST NOT be retried",
+        file=sys.stderr,
+    )
+    return 1
+
+
+def _activation_subject_ref(root: Path, path: Path) -> str:
+    inner = root / "agents" / "runtime" / "task_claims" / ".claim-store"
+    outer = claim_store.outer_marker_path(root)
+    resolved = path.resolve()
+    if resolved == inner.resolve():
+        return "agents/runtime/task_claims/.claim-store"
+    if resolved == outer.resolve():
+        return "git-admin:agent-runtime/task-claim-store"
+    raise ValueError(f"unexpected claim-store activation subject: {path}")
+
+
+def _activation_transition_bytes(
+    root: Path,
+    plan: claim_store.ClaimStoreActivationPlan,
+    *,
+    predicted: bool,
+) -> bytes:
+    subjects: list[dict[str, Any]] = []
+    for subject in plan.subjects:
+        if predicted:
+            exists = True
+            data: bytes | None = subject.after_bytes
+        else:
+            exists = subject.before_bytes is not None
+            data = subject.before_bytes
+        subjects.append(
+            {
+                "path": _activation_subject_ref(root, subject.path),
+                "exists": exists,
+                "base64_bytes": (
+                    base64.b64encode(data).decode("ascii")
+                    if data is not None
+                    else None
+                ),
+            }
+        )
+    return recovery_receipt.canonical_json_bytes({"subjects": subjects})
+
+
+def _observed_activation_bytes(
+    root: Path,
+    plan: claim_store.ClaimStoreActivationPlan,
+) -> bytes:
+    subjects: list[dict[str, Any]] = []
+    for subject in plan.subjects:
+        exists = os.path.lexists(subject.path)
+        data = subject.path.read_bytes() if exists else None
+        subjects.append(
+            {
+                "path": _activation_subject_ref(root, subject.path),
+                "exists": exists,
+                "base64_bytes": (
+                    base64.b64encode(data).decode("ascii")
+                    if data is not None
+                    else None
+                ),
+            }
+        )
+    return recovery_receipt.canonical_json_bytes({"subjects": subjects})
+
+
 def cmd_adopt(args: argparse.Namespace) -> int:
     """Bring a pre-mutation-field claim under the current mutation contract.
 
@@ -3941,7 +4198,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                     "claim already carries mutation_revision, scope_binding, and "
                     "work_identity_binding; adopt is only for legacy claims"
                 )
-            before = _digest(path)
+            before_bytes = path.read_bytes()
             if not has_revision:
                 claim["mutation_revision"] = 0
             if not has_binding:
@@ -4000,9 +4257,16 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 supplied_clock=args.now is not None,
             )
             claim["adopted_at"] = now_text
-            _assert_recovery_authority(root, inspection, "adopt")
-            atomic_io.write_json_atomic(path, claim)
-            after = _digest(path)
+            outcome = _persist_claim_recovery(
+                root=root,
+                path=path,
+                claim=claim,
+                inspection=inspection,
+                operation="adopt",
+                owner=owner,
+                reason=reason,
+                before_bytes=before_bytes,
+            )
     except (
         claim_store.ClaimStoreError,
         OSError,
@@ -4015,14 +4279,35 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         detail = " ".join(str(exc).split())[:256] or "claim adoption unavailable"
         print(f"claim adoption refused: {detail}", file=sys.stderr)
         return 1
+    if outcome.get("status") != "committed":
+        return _emit_indeterminate_recovery(
+            args=args,
+            root=root,
+            path=path,
+            operation="adopt",
+            outcome=outcome,
+        )
+    after_bytes = path.read_bytes()
+    receipt = _recovery_receipt_view(root, outcome)
+    audit = _append_recovery_event(
+        root=root,
+        operation="adopt",
+        owner=owner,
+        reason=reason,
+        receipt=receipt,
+        claim=claim,
+        message=f"legacy claim {claim.get('claim_id')} adopted by owner",
+    )
     _emit(
         {
             "status": "adopted",
-            "path": _rel(args.root.resolve(), path),
+            "path": _rel(root, path),
             "claim_id": claim.get("claim_id"),
-            "before_sha256": before,
-            "after_sha256": after,
+            "before_sha256": recovery_receipt.raw_digest(before_bytes),
+            "after_sha256": recovery_receipt.raw_digest(after_bytes),
             "recovered_by": owner,
+            "audit": audit,
+            "recovery_receipt": receipt,
             "claim": claim,
         },
         as_json=args.json,
@@ -4080,7 +4365,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                     f"claim lease is {liveness.state} ({liveness.reason}); "
                     "terminalize refuses a live claim and only ends an expired one"
                 )
-            before = _digest(path)
+            before_bytes = path.read_bytes()
             prior = str(claim.get("status") or "")
             claim["status"] = "expired"
             claim["recovered_from_status"] = prior
@@ -4095,9 +4380,16 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 operation="terminalize",
                 supplied_clock=args.now is not None,
             )
-            _assert_recovery_authority(root, inspection, "terminalize")
-            atomic_io.write_json_atomic(path, claim)
-            after = _digest(path)
+            outcome = _persist_claim_recovery(
+                root=root,
+                path=path,
+                claim=claim,
+                inspection=inspection,
+                operation="terminalize",
+                owner=owner,
+                reason=reason,
+                before_bytes=before_bytes,
+            )
     except (
         claim_store.ClaimStoreError,
         OSError,
@@ -4110,15 +4402,36 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
         detail = " ".join(str(exc).split())[:256] or "claim terminalization unavailable"
         print(f"claim terminalization refused: {detail}", file=sys.stderr)
         return 1
+    if outcome.get("status") != "committed":
+        return _emit_indeterminate_recovery(
+            args=args,
+            root=root,
+            path=path,
+            operation="terminalize",
+            outcome=outcome,
+        )
+    after_bytes = path.read_bytes()
+    receipt = _recovery_receipt_view(root, outcome)
+    audit = _append_recovery_event(
+        root=root,
+        operation="terminalize",
+        owner=owner,
+        reason=reason,
+        receipt=receipt,
+        claim=claim,
+        message=f"expired claim {claim.get('claim_id')} terminalized by owner",
+    )
     _emit(
         {
             "status": "terminalized",
-            "path": _rel(args.root.resolve(), path),
+            "path": _rel(root, path),
             "claim_id": claim.get("claim_id"),
             "recovered_from_status": claim["recovered_from_status"],
-            "before_sha256": before,
-            "after_sha256": after,
+            "before_sha256": recovery_receipt.raw_digest(before_bytes),
+            "after_sha256": recovery_receipt.raw_digest(after_bytes),
             "recovered_by": owner,
+            "audit": audit,
+            "recovery_receipt": receipt,
             "claim": claim,
         },
         as_json=args.json,
@@ -4143,36 +4456,137 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
         root = args.root.resolve()
-        before_state = claim_store.inspect_store(root).state
-        inspection = claim_store.adopt_legacy_store(root)
-    except (claim_store.ClaimStoreError, OSError, TimeoutError, ValueError) as exc:
+        initial = claim_store.inspect_store(root)
+        before_state = initial.state
+
+        # A repeat activation is observational only.  Creating a receipt or a
+        # pane event here would falsely claim that a subject transition ran.
+        if before_state == "initialized":
+            _emit(
+                {
+                    "status": "not_required",
+                    "activated_by": owner,
+                    "audit": "no-op",
+                    "claim_store_state_before": before_state,
+                    "claim_store_state": initial.state,
+                    "witness_claim_id": initial.witness_claim_id,
+                    "marker": _rel(root, claim_store.outer_marker_path(root)),
+                },
+                as_json=args.json,
+            )
+            return 0
+
+        prepared_path: Path | None = None
+        activation_plan: claim_store.ClaimStoreActivationPlan | None = None
+        recorded_at = datetime.now(timezone.utc).astimezone().isoformat(
+            timespec="seconds"
+        )
+
+        def _prepare_activation(
+            plan: claim_store.ClaimStoreActivationPlan,
+        ) -> None:
+            nonlocal prepared_path, activation_plan
+            if prepared_path is not None or activation_plan is not None:
+                raise RuntimeError(
+                    "claim-store activation precommit ran more than once"
+                )
+            before_bytes = _activation_transition_bytes(
+                root,
+                plan,
+                predicted=False,
+            )
+            predicted_after = _activation_transition_bytes(
+                root,
+                plan,
+                predicted=True,
+            )
+            logical_refs = [
+                _activation_subject_ref(root, subject.path)
+                for subject in plan.subjects
+            ]
+            prepared_path = recovery_receipt.prepare_recovery_receipt(
+                receipt_dir=root / recovery_receipt.DEFAULT_RECEIPT_DIR,
+                receipt_id=_new_recovery_receipt_id("activate-store"),
+                operation="activate-store",
+                subject_ref="claim-store:" + ",".join(logical_refs),
+                before_bytes=before_bytes,
+                predicted_after_bytes=predicted_after,
+                owner_id=owner,
+                reason=reason,
+                recorded_at=recorded_at,
+                commit_witness={
+                    "operation": "activate-store",
+                    "claim_store_operation": plan.operation,
+                    "claim_store_state_before": before_state,
+                    "witness_claim_id": plan.witness_claim_id,
+                    "generation_id": plan.generation_id,
+                    "subjects": logical_refs,
+                },
+            )
+            activation_plan = plan
+
+        inspection = claim_store.adopt_legacy_store(
+            root,
+            precommit=_prepare_activation,
+        )
+        if prepared_path is None or activation_plan is None:
+            raise RuntimeError(
+                "claim-store activation changed state without a prepared receipt"
+            )
+        try:
+            observed_after = _observed_activation_bytes(root, activation_plan)
+        except Exception as exc:  # noqa: BLE001 - marker transaction committed
+            outcome = recovery_receipt.indeterminate_prepared_recovery(
+                prepared_path=prepared_path,
+                finding=(
+                    "post-activation marker readback unavailable: "
+                    f"{exc.__class__.__name__}: {exc}"
+                ),
+                uncertainty={
+                    "error_type": exc.__class__.__name__,
+                    "message": str(exc),
+                },
+            )
+        else:
+            outcome = recovery_receipt.commit_prepared_recovery(
+                prepared_path=prepared_path,
+                observed_after_bytes=observed_after,
+            )
+    except (
+        claim_store.ClaimStoreError,
+        OSError,
+        OverflowError,
+        RuntimeError,
+        TimeoutError,
+        TypeError,
+        ValueError,
+    ) as exc:
         detail = " ".join(str(exc).split())[:256] or "claim-store activation unavailable"
         print(f"claim-store activation refused: {detail}", file=sys.stderr)
         return 1
-    audit = "recorded"
-    try:
-        append_event(
-            root,
-            {
-                "event": "claim_store_activated",
-                "actor": owner,
-                "actor_role": "owner",
-                "message": (
-                    f"claim store activated by owner ({before_state} -> "
-                    f"{inspection.state}); reason: {reason}"
-                ),
-            },
+
+    if outcome.get("status") != "committed":
+        return _emit_indeterminate_recovery(
+            args=args,
+            root=root,
+            path=None,
+            operation="activate-store",
+            outcome=outcome,
         )
-    except Exception as exc:  # noqa: BLE001 - activation already succeeded
-        # Do not roll back a successful activation, but never swallow the loss:
-        # this event is the only durable attribution artifact for the store.
-        audit = "lost"
-        print(
-            "claim-store activation WARNING: activation succeeded but the audit "
-            f"event was not recorded ({exc!r}); attribution for this activation "
-            "is not durable",
-            file=sys.stderr,
-        )
+
+    receipt = _recovery_receipt_view(root, outcome)
+    audit = _append_recovery_event(
+        root=root,
+        operation="activate-store",
+        owner=owner,
+        reason=reason,
+        receipt=receipt,
+        message=(
+            f"claim store activated by owner ({before_state} -> "
+            f"{inspection.state})"
+        ),
+        event_name="claim_store_activated",
+    )
     _emit(
         {
             "status": "activated",
@@ -4182,6 +4596,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
             "claim_store_state": inspection.state,
             "witness_claim_id": inspection.witness_claim_id,
             "marker": _rel(root, claim_store.outer_marker_path(root)),
+            "recovery_receipt": receipt,
         },
         as_json=args.json,
     )
