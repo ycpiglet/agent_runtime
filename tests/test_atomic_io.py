@@ -113,6 +113,27 @@ def test_fsync_disabled_still_writes(tmp_path: Path) -> None:
     assert json.loads(target.read_text(encoding="utf-8")) == {"ok": True}
 
 
+def test_fsync_disabled_keeps_strict_policy_from_syncing_parent_walk(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "new-parent" / "nofsync.json"
+
+    def reject_fsync(_descriptor: int) -> None:
+        raise AssertionError("fsync must remain disabled")
+
+    monkeypatch.setattr(atomic_io.os, "fsync", reject_fsync)
+
+    atomic_io.write_json_atomic(
+        target,
+        {"ok": True},
+        fsync=False,
+        fsync_policy="strict",
+    )
+
+    assert json.loads(target.read_text(encoding="utf-8")) == {"ok": True}
+
+
 def test_precreated_predictable_tmp_symlink_cannot_overwrite_external_file(
     tmp_path: Path,
 ) -> None:
@@ -608,10 +629,14 @@ def test_strict_parent_fsync_failure_reports_committed_non_retry_safe_truth(
     expected: bytes,
 ) -> None:
     target = tmp_path / "strict-parent-fsync-state"
+    target_parent_identity = (tmp_path.stat().st_dev, tmp_path.stat().st_ino)
 
     def fail_directory_fsync(descriptor: int) -> None:
         metadata = os.fstat(descriptor)
-        if stat.S_ISDIR(metadata.st_mode):
+        if (
+            stat.S_ISDIR(metadata.st_mode)
+            and (metadata.st_dev, metadata.st_ino) == target_parent_identity
+        ):
             raise OSError(errno.EIO, "injected parent fsync failure")
 
     monkeypatch.setattr(atomic_io.os, "fsync", fail_directory_fsync)
@@ -657,7 +682,10 @@ def test_strict_first_use_publication_fsyncs_created_directory_entry_and_final_p
 
     receipt_store = target.parent
     receipt_store_identity = (receipt_store.stat().st_dev, receipt_store.stat().st_ino)
-    assert synced_directories == [runtime_identity, receipt_store_identity]
+    # Strict traversal may also sync older ancestors. The newly-created store
+    # entry must be persisted through its existing runtime parent before the
+    # final destination publication syncs the store directory itself.
+    assert synced_directories[-2:] == [runtime_identity, receipt_store_identity]
     assert json.loads(target.read_text(encoding="utf-8")) == {
         "receipt_id": "RECOVERY-first"
     }
@@ -681,24 +709,25 @@ def test_strict_created_parent_fsync_failure_reports_precommit_retry_safe_truth(
 
     monkeypatch.setattr(atomic_io.os, "fsync", fail_created_entry_parent_fsync)
 
-    with pytest.raises(atomic_io.AtomicWriteError) as caught:
-        atomic_io.publish_json_atomic(
-            target,
-            {"receipt_id": "RECOVERY-first"},
-            fsync_policy="strict",
-        )
+    for _attempt in range(2):
+        with pytest.raises(atomic_io.AtomicWriteError) as caught:
+            atomic_io.publish_json_atomic(
+                target,
+                {"receipt_id": "RECOVERY-first"},
+                fsync_policy="strict",
+            )
 
-    # A supporting directory entry exists, but the requested destination has
-    # not crossed its commit point. Retrying the destination publication is
-    # therefore safe; do not conflate parent setup with subject commit.
-    assert caught.value.stage == "parent-create-fsync"
-    assert caught.value.committed is False
-    assert caught.value.retry_safe is True
-    assert isinstance(caught.value.__cause__, OSError)
-    assert caught.value.__cause__.errno == errno.EIO
-    assert target.parent.is_dir()
-    assert not target.exists()
-    assert _tmp_siblings(target) == []
+        # A supporting directory entry exists, but the requested destination
+        # has not crossed its commit point. A retry must re-check the same
+        # ancestor boundary even though that directory now exists.
+        assert caught.value.stage == "parent-create-fsync"
+        assert caught.value.committed is False
+        assert caught.value.retry_safe is True
+        assert isinstance(caught.value.__cause__, OSError)
+        assert caught.value.__cause__.errno == errno.EIO
+        assert target.parent.is_dir()
+        assert not target.exists()
+        assert _tmp_siblings(target) == []
 
 
 @pytest.mark.skipif(os.name != "posix", reason="POSIX exposes both fsync boundaries")

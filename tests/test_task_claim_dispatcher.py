@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime, timedelta
@@ -22,6 +23,62 @@ SCRIPT = REPO_ROOT / "scripts" / "task_claim_dispatcher.py"
 GATE = REPO_ROOT / "scripts" / "parallel_worktree_gate.py"
 CONCURRENCY_GATE = REPO_ROOT / "scripts" / "collaboration_concurrency_gate.py"
 IDENTITY_GATE = REPO_ROOT / "scripts" / "agent_identity_gate.py"
+
+
+def _fixture_work_uid(kind: str, display_id: str) -> str:
+    digest = bytearray(
+        hashlib.sha256(
+            f"agent-runtime-test:{kind}:{display_id}".encode("utf-8")
+        ).digest()[:16]
+    )
+    # Keep fixtures deterministic while honoring the production v4/v7
+    # contract: set the RFC version and variant bits exactly as UUIDv4.
+    digest[6] = (digest[6] & 0x0F) | 0x40
+    digest[8] = (digest[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(digest)))
+
+
+def _fixture_task_set_id(task_id: str) -> str:
+    return "TASKSET-AR-FIXTURE-" + hashlib.sha256(
+        task_id.encode("utf-8")
+    ).hexdigest()[:16].upper()
+
+
+def _write_canonical_task_identity(
+    root: Path,
+    task_id: str,
+    *,
+    task_set_id: str = "",
+) -> Path:
+    """Provision the canonical identity authority legacy fixtures omitted."""
+
+    task_uid = _fixture_work_uid("task", task_id)
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "---",
+        "schema_version: agent-runtime-work-item/v1",
+        f"id: {task_id}",
+        f"display_id: {task_id}",
+        f"task_uid: {task_uid}",
+        f"work_id: {task_id}",
+        f"work_uid: {task_uid}",
+        "kind: task",
+    ]
+    lines.append(f"task_set_id: {task_set_id or _fixture_task_set_id(task_id)}")
+    lines.extend(
+        [
+            "---",
+            "",
+            "# Canonical task identity fixture",
+            "",
+        ]
+    )
+    path.write_text(
+        "\n".join(lines),
+        encoding="utf-8",
+    )
+    return path
 
 
 def _load_dispatcher_module():
@@ -128,7 +185,13 @@ def _run_identity_gate(root: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _write_worktree(root: Path, task_id: str) -> None:
+def _write_worktree(
+    root: Path,
+    task_id: str,
+    *,
+    task_set_id: str = "",
+) -> None:
+    _write_canonical_task_identity(root, task_id, task_set_id=task_set_id)
     worktree = root / ".worktrees" / task_id
     worktree.mkdir(parents=True, exist_ok=True)
     (worktree / ".git").write_text("gitdir: ../../.git/worktrees/test\n", encoding="utf-8")
@@ -186,12 +249,23 @@ def _create_linked_claim(
     suffix: str,
     extra_args: tuple[str, ...] = (),
     env_overrides: dict[str, str] | None = None,
+    provision_identity: bool = True,
 ) -> subprocess.CompletedProcess[str]:
+    task_id = f"TASK-AR-{suffix}"
+    identity_args: tuple[str, ...] = ()
+    if provision_identity:
+        task_set_id = _fixture_task_set_id(task_id)
+        _write_canonical_task_identity(
+            linked,
+            task_id,
+            task_set_id=task_set_id,
+        )
+        identity_args = ("--task-set-id", task_set_id)
     return _run_dispatcher(
         linked,
         "create",
         "--task-id",
-        f"TASK-AR-{suffix}",
+        task_id,
         "--worktree-path",
         ".",
         "--agent-role",
@@ -201,6 +275,7 @@ def _create_linked_claim(
         "--suffix",
         suffix,
         "--json",
+        *identity_args,
         *extra_args,
         env_overrides=env_overrides,
     )
@@ -247,6 +322,7 @@ def test_create_cli_refuses_nonpositive_lease_before_any_mutation(
         linked,
         suffix=f"655-invalid-{lease_minutes.replace('-', 'negative')}",
         extra_args=("--lease-minutes", lease_minutes),
+        provision_identity=False,
     )
 
     assert result.returncode != 0
@@ -264,6 +340,7 @@ def test_create_cli_refuses_overflowing_lease_without_traceback_or_residue(
         linked,
         suffix="655-overflow",
         extra_args=("--lease-minutes", "100000000000000000000"),
+        provision_identity=False,
     )
 
     assert result.returncode != 0
@@ -556,6 +633,8 @@ def test_claim_creation_refuses_existing_artifact_without_mutation(
     assert seeded.returncode == 0, seeded.stderr or seeded.stdout
     artifact = linked / "agents/runtime/task_claims" / artifact_name
     artifact.write_text("retained artifact\n", encoding="utf-8")
+    collision_task_id = f"TASK-AR-654-{artifact_name}-collision"
+    _write_canonical_task_identity(linked, collision_task_id)
     before = {
         path.relative_to(linked).as_posix(): path.read_bytes()
         for path in linked.rglob("*")
@@ -569,6 +648,7 @@ def test_claim_creation_refuses_existing_artifact_without_mutation(
             path_flag,
             f"agents/runtime/task_claims/{artifact_name}",
         ),
+        provision_identity=False,
     )
 
     assert result.returncode == 1
@@ -793,6 +873,10 @@ def test_claim_creation_reports_truthful_success_after_post_commit_failure(
         tmp_path,
         f"claim-post-commit-{failure_stage}",
     )
+    _write_canonical_task_identity(
+        linked,
+        f"TASK-AR-post-commit-{failure_stage}",
+    )
     dispatcher = _load_dispatcher_module()
     lock_depth = {"value": 0}
     original_store_lock = dispatcher.claim_store.store_lock
@@ -866,6 +950,7 @@ def test_claim_creation_has_no_fallible_post_publish_ownership_capture(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "claim-owned-publication")
+    _write_canonical_task_identity(linked, "TASK-AR-owned-publication")
     dispatcher = _load_dispatcher_module()
     capture_calls: list[Path] = []
 
@@ -927,6 +1012,7 @@ def test_first_claim_creation_rolls_back_authority_on_publication_failure(
     )
     dispatcher = _load_dispatcher_module()
     suffix = f"654-rollback-{failure_stage}"
+    _write_canonical_task_identity(linked, f"TASK-AR-{suffix}")
 
     if failure_stage == "second-artifact":
         original = dispatcher._ensure_text_file
@@ -994,7 +1080,10 @@ def test_first_claim_creation_rolls_back_authority_on_publication_failure(
     assert not list(claim_dir.glob("CLAIM-*"))
     assert not (claim_dir / ".claim-store").exists()
     assert not _claim_store_outer_anchor(linked).exists()
-    assert not (linked / "agents").exists()
+    assert not claim_dir.exists()
+    assert (
+        linked / "agents/lead_engineer/tasks" / f"TASK-AR-{suffix}.md"
+    ).is_file()
 
     retried = _create_linked_claim(linked, suffix=suffix)
     assert retried.returncode == 0, retried.stderr or retried.stdout
@@ -1023,6 +1112,7 @@ def test_failed_claim_creation_preserves_initialized_marker_pair(
 
     monkeypatch.setattr(dispatcher, "_ensure_text_file", fail_second_artifact)
     suffix = "654-marker-preserved-retry"
+    _write_canonical_task_identity(linked, f"TASK-AR-{suffix}")
     rc = dispatcher.main(
         [
             "--root",
@@ -1062,6 +1152,10 @@ def test_first_claim_preserves_witness_when_inner_marker_cleanup_is_incomplete(
         "claim-create-incomplete-marker-recovery",
     )
     dispatcher = _load_dispatcher_module()
+    _write_canonical_task_identity(
+        linked,
+        "TASK-AR-incomplete-marker-recovery",
+    )
     outer = _claim_store_outer_anchor(linked)
     original_write = dispatcher.claim_store._write_immutable
     original_remove_marker = dispatcher.claim_store._remove_created_marker
@@ -1144,6 +1238,7 @@ def test_claim_creation_uses_exclusive_publication_for_new_authority_files(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "claim-exclusive-publication")
+    _write_canonical_task_identity(linked, "TASK-AR-exclusive-publication")
     dispatcher = _load_dispatcher_module()
     published_text: list[Path] = []
     published_json: list[Path] = []
@@ -1231,6 +1326,7 @@ def test_claim_create_revalidates_preflight_after_lock_acquisition(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-revalidation")
+    _write_canonical_task_identity(linked, "TASK-AR-preflight-revalidation")
     dispatcher = _load_dispatcher_module()
     original_prepare = dispatcher._prepare_create
     calls: list[bool] = []
@@ -1305,6 +1401,7 @@ def test_claim_create_refuses_preflight_authority_change(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "claim-preflight-authority")
+    _write_canonical_task_identity(linked, "TASK-AR-preflight-authority")
     dispatcher = _load_dispatcher_module()
     original_prepare = dispatcher._prepare_create
     calls = {"count": 0}
@@ -1383,6 +1480,7 @@ def test_opt_in_scm_helper_exception_reports_committed_claim_truth(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "claim-commit-helper-exception")
+    _write_canonical_task_identity(linked, "TASK-AR-scm-helper-exception")
     dispatcher = _load_dispatcher_module()
     before = _git_stdout(linked, "rev-parse", "HEAD")
     calls = {"count": 0}
@@ -1588,6 +1686,7 @@ def test_true_compatibility_setting_retains_authorized_crash_safety(
 
 def test_create_claim_allows_registered_linked_worktree_as_runtime_root(tmp_path: Path) -> None:
     _primary, linked = _init_git_worktree(tmp_path, "runtime")
+    _write_canonical_task_identity(linked, "TASK-AR-648")
     (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 
     result = _run_dispatcher(
@@ -1612,6 +1711,7 @@ def test_create_claim_allows_registered_linked_worktree_as_runtime_root(tmp_path
 
 def test_create_claim_refuses_primary_checkout_even_when_registered(tmp_path: Path) -> None:
     primary, _linked = _init_git_worktree(tmp_path, "runtime")
+    _write_canonical_task_identity(primary, "TASK-AR-648")
     (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 
     result = _run_dispatcher(
@@ -1632,6 +1732,7 @@ def test_create_claim_refuses_primary_checkout_even_when_registered(tmp_path: Pa
 def test_create_claim_refuses_registered_worktree_from_other_repository(tmp_path: Path) -> None:
     primary, _linked = _init_git_worktree(tmp_path, "runtime")
     _other_primary, other_linked = _init_git_worktree(tmp_path, "other")
+    _write_canonical_task_identity(primary, "TASK-AR-648")
     (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 
     result = _run_dispatcher(
@@ -1653,6 +1754,7 @@ def test_create_claim_refuses_primary_root_targeting_same_repo_linked_worktree(
     tmp_path: Path,
 ) -> None:
     primary, linked = _init_git_worktree(tmp_path, "runtime")
+    _write_canonical_task_identity(primary, "TASK-AR-648")
     (primary / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 
     result = _run_dispatcher(
@@ -1674,6 +1776,7 @@ def test_create_claim_refuses_linked_root_targeting_sibling_worktree(tmp_path: P
     primary, linked = _init_git_worktree(tmp_path, "runtime")
     sibling = tmp_path / "runtime-sibling"
     _run_git(primary, "worktree", "add", "-b", "runtime-sibling-worker", str(sibling))
+    _write_canonical_task_identity(linked, "TASK-AR-648")
     (linked / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
 
     result = _run_dispatcher(
@@ -1698,13 +1801,20 @@ def _write_routing_work(
     worker_tier: str = "worker_low",
     triggers: list[str] | None = None,
 ) -> str:
+    task_uid = _fixture_work_uid("task", task_id)
     task_path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
     task_path.parent.mkdir(parents=True, exist_ok=True)
     task_path.write_text(
         "\n".join(
             [
                 "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {task_id}",
+                f"display_id: {task_id}",
+                f"task_uid: {task_uid}",
                 f"work_id: {task_id}",
+                f"work_uid: {task_uid}",
+                "kind: task",
                 f"worker_model_tier: {worker_tier}",
                 "---",
                 "",
@@ -1718,6 +1828,11 @@ def _write_routing_work(
     unit_path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
+        "schema_version: agent-runtime-work-item/v1",
+        f"work_id: {unit_id}",
+        f"work_uid: {_fixture_work_uid('unit', unit_id)}",
+        "kind: unit",
+        f"parent_id: {task_id}",
         f"unit_id: {unit_id}",
         f"task_id: {task_id}",
         f"model_tier: {worker_tier}",
@@ -1812,7 +1927,7 @@ def test_create_claim_separates_system_identity_from_readable_display_name(tmp_p
     assert claim["mode"] == "design"
     assert claim["phase"] == "claim-created"
     assert claim["progress_pct"] == 0
-    assert claim["task_set_id"] == ""
+    assert claim["task_set_id"] == _fixture_task_set_id("TASK-AR-246")
     assert claim["step_index"] == 1
     assert claim["step_total"] == 6
     assert claim["status_text"] == "Claim created"
@@ -1907,7 +2022,12 @@ def test_create_claim_refuses_task_that_is_already_active(tmp_path: Path):
 
 def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
-    _write_worktree(tmp_path, "TASK-AR-246")
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-246",
+        task_set_id="TASKSET-AR-PROJECTION",
+    )
+    unit_rel = _write_heartbeat_unit(tmp_path, task_id="TASK-AR-246")
     created = _run_dispatcher(
         tmp_path,
         "create",
@@ -1917,6 +2037,8 @@ def test_projection_emits_full_pointer_agent_record_not_scalar_claim_id(tmp_path
         "TASKSET-AR-PROJECTION",
         "--unit-id",
         "UNIT-TASK-AR-246-001",
+        "--unit-spec",
+        unit_rel,
         "--agent-role",
         "lead-engineer",
         "--now",
@@ -2054,7 +2176,9 @@ def test_projection_reports_bounded_claim_store_failure_without_traceback(
     assert "Traceback" not in result.stdout + result.stderr
 
 
-def test_projection_rejects_released_or_overlay_claims(tmp_path: Path):
+def test_projection_rejects_released_but_not_self_asserted_overlay_claims(
+    tmp_path: Path,
+):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
     _write_worktree(tmp_path, "TASK-AR-246")
     created = _run_dispatcher(
@@ -2080,9 +2204,17 @@ def test_projection_rejects_released_or_overlay_claims(tmp_path: Path):
     payload["status"] = "claimed"
     payload["overlay"] = True
     path.write_text(json.dumps(payload), encoding="utf-8")
-    overlay = _run_dispatcher(tmp_path, "projection", "--claim-id", claim["claim_id"], "--json")
-    assert overlay.returncode == 1
-    assert "does not apply to overlay claim" in overlay.stderr
+    direct = _run_dispatcher(
+        tmp_path,
+        "projection",
+        "--claim-id",
+        claim["claim_id"],
+        "--now",
+        "2026-06-10T14:31:00+09:00",
+        "--json",
+    )
+    assert direct.returncode == 0, direct.stderr or direct.stdout
+    assert json.loads(direct.stdout)["operation"] == "merge"
 
 
 def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):
@@ -2126,7 +2258,11 @@ def test_release_claim_requires_existing_handoff_and_log_files(tmp_path: Path):
 
 def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
-    _write_worktree(tmp_path, "TASK-AR-248")
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-248",
+        task_set_id="TASKSET-AR-PANE-PROGRESS",
+    )
 
     result = _run_dispatcher(
         tmp_path,
@@ -2169,7 +2305,11 @@ def test_create_claim_accepts_taskset_progress_fields(tmp_path: Path):
 
 def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
-    _write_worktree(tmp_path, "TASK-AR-344")
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-344",
+        task_set_id="TASKSET-AR-PM-OPERATING-SYSTEM",
+    )
     # The spec must exist and declare this claim's ids: create now runs the
     # same resolution heartbeat does, so a claim pointing at a missing or
     # mismatched spec would be born unusable. Written inline rather than via
@@ -2182,6 +2322,11 @@ def test_create_claim_accepts_pm_unit_scope_fields(tmp_path: Path):
     spec.parent.mkdir(parents=True, exist_ok=True)
     spec.write_text(
         "---\n"
+        "schema_version: agent-runtime-work-item/v1\n"
+        "work_id: UNIT-TASK-AR-344-001\n"
+        f"work_uid: {_fixture_work_uid('unit', 'UNIT-TASK-AR-344-001')}\n"
+        "kind: unit\n"
+        "parent_id: TASK-AR-344\n"
         "unit_id: UNIT-TASK-AR-344-001\n"
         "task_id: TASK-AR-344\n"
         "target_files:\n"
@@ -2964,6 +3109,7 @@ def test_create_claim_keeps_unknown_routing_signal_visible(
 
 def test_create_claim_rejects_missing_worktree(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
+    _write_canonical_task_identity(tmp_path, "TASK-AR-246")
 
     result = _run_dispatcher(
         tmp_path,
@@ -2982,8 +3128,16 @@ def test_create_claim_rejects_missing_worktree(tmp_path: Path):
 
 def test_create_claim_refuses_duplicate_active_taskset(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
-    _write_worktree(tmp_path, "TASK-AR-248")
-    _write_worktree(tmp_path, "TASK-AR-249")
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-248",
+        task_set_id="TASKSET-AR-PANE-PROGRESS",
+    )
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-249",
+        task_set_id="TASKSET-AR-PANE-PROGRESS",
+    )
     first = _run_dispatcher(
         tmp_path,
         "create",
@@ -3196,6 +3350,11 @@ def test_create_claim_derives_target_files_from_unit_spec(tmp_path: Path):
         "\n".join(
             [
                 "---",
+                "schema_version: agent-runtime-work-item/v1",
+                "work_id: UNIT-TASK-AR-503-001",
+                f"work_uid: {_fixture_work_uid('unit', 'UNIT-TASK-AR-503-001')}",
+                "kind: unit",
+                "parent_id: TASK-AR-503",
                 "unit_id: UNIT-TASK-AR-503-001",
                 "task_id: TASK-AR-503",
                 "status: worker_ready",
@@ -3318,8 +3477,12 @@ def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(
     _write_worktree(tmp_path, "TASK-AR-645")
     task_path = tmp_path / "agents/lead_engineer/tasks/TASK-AR-645.md"
     task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_uid = _fixture_work_uid("task", "TASK-AR-645")
     task_path.write_text(
-        "---\nwork_id: TASK-AR-645\ndefect_signatures:\n"
+        "---\nid: TASK-AR-645\ndisplay_id: TASK-AR-645\n"
+        f"task_uid: {task_uid}\nwork_id: TASK-AR-645\nwork_uid: {task_uid}\n"
+        f"task_set_id: {_fixture_task_set_id('TASK-AR-645')}\n"
+        "defect_signatures:\n"
         "  - claim lookup omitted\n---\n",
         encoding="utf-8",
     )
@@ -3330,7 +3493,10 @@ def test_create_claim_normalizes_new_targets_and_surfaces_matching_compound(
     unit_path = tmp_path / unit_rel
     unit_path.parent.mkdir(parents=True, exist_ok=True)
     unit_path.write_text(
-        "---\nunit_id: UNIT-TASK-AR-645-001\ntask_id: TASK-AR-645\n"
+        "---\nwork_id: UNIT-TASK-AR-645-001\n"
+        f"work_uid: {_fixture_work_uid('unit', 'UNIT-TASK-AR-645-001')}\n"
+        "parent_id: TASK-AR-645\nunit_id: UNIT-TASK-AR-645-001\n"
+        "task_id: TASK-AR-645\n"
         "status: worker_ready\ntarget_files:\n"
         "  - new:src/agent_runtime/knowledge_records.py\n"
         "  - scripts/task_claim_dispatcher.py\n"
@@ -3957,7 +4123,11 @@ def test_create_claim_rejects_invalid_progress_and_step_state(tmp_path: Path):
 
 def test_create_claim_records_active_scope_boundary(tmp_path: Path):
     (tmp_path / "STATUS.md").write_text("## Handoff Checklist\n- continue here\n", encoding="utf-8")
-    _write_worktree(tmp_path, "TASK-AR-328")
+    _write_worktree(
+        tmp_path,
+        "TASK-AR-328",
+        task_set_id="TASKSET-AR-UI-UX-V2",
+    )
 
     result = _run_dispatcher(
         tmp_path,
@@ -4117,6 +4287,11 @@ def _write_heartbeat_unit(
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
         "---",
+        "schema_version: agent-runtime-work-item/v1",
+        f"work_id: {unit_id}",
+        f"work_uid: {_fixture_work_uid('unit', unit_id)}",
+        "kind: unit",
+        f"parent_id: {task_id}",
         f"unit_id: {unit_id}",
         f"task_id: {task_id}",
         "status: worker_ready",
@@ -4146,6 +4321,11 @@ def _create_heartbeat_candidate(
     )
     if not worktree_path:
         _write_worktree(root, task_id)
+    _write_canonical_task_identity(
+        root,
+        task_id,
+        task_set_id="TASKSET-AR-655-HEARTBEAT",
+    )
     stop_condition = f"stop_after:UNIT-{task_id}-001:verification"
     unit_rel = _write_heartbeat_unit(
         root,
@@ -4766,7 +4946,6 @@ def test_claim_mutation_refuses_indeterminate_deadline_without_mutation(
     ("case", "mutate", "now", "expected_revision"),
     (
         ("inactive", lambda claim: claim.update(status="released"), "2026-08-03T09:10:00+09:00", 0),
-        ("overlay", lambda claim: claim.update(overlay=True), "2026-08-03T09:10:00+09:00", 0),
         (
             "expired",
             lambda claim: (
@@ -5565,6 +5744,11 @@ def _canonical_overlay_heartbeat_fixture(
     monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[object, dict[str, object], Path]:
     monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    _write_canonical_task_identity(
+        tmp_path,
+        "TASK-AR-655-overlay-heartbeat",
+        task_set_id="TASKSET-AR-V080-OPERABILITY-HARDENING",
+    )
     dispatcher = _load_dispatcher_module()
     routed = dispatcher.role_routing.route_review_pass(
         tmp_path,
@@ -5974,6 +6158,166 @@ def test_terminalize_post_commit_atomic_uncertainty_is_indeterminate_nonretry(
     response = json.loads(captured.out)
     assert response["status"] == "indeterminate"
     assert response["retry_safe"] is False
+
+
+@pytest.mark.parametrize(
+    ("operation", "receipt_committed"),
+    (
+        ("adopt", True),
+        ("terminalize", False),
+        ("activate-store", None),
+    ),
+)
+def test_recovery_receipt_terminal_publication_uncertainty_is_never_generic_refusal(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+    receipt_committed: bool | None,
+) -> None:
+    """A crossed subject commit point must survive the broad RuntimeError seam."""
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-receipt-error-{operation}",
+    )
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+    stage = f"{operation}-terminal-receipt-publication"
+
+    if operation in {"adopt", "terminalize"}:
+        path, _claim, args = _recovery_candidate(
+            linked,
+            operation,
+            suffix=f"660-receipt-error-{operation}",
+        )
+
+        def _commit_subject_then_lose_receipt(**kwargs):
+            kwargs["mutate_subject"]()
+            raise recovery_receipt.RecoveryReceiptError(
+                "terminal receipt durability is uncertain",
+                stage=stage,
+                committed=True,
+                retry_safe=False,
+                receipt_committed=receipt_committed,
+            )
+
+        monkeypatch.setattr(
+            recovery_receipt,
+            "execute_recovery",
+            _commit_subject_then_lose_receipt,
+        )
+    else:
+        created = _create_linked_claim(
+            linked,
+            suffix="660-receipt-error-activate",
+        )
+        assert created.returncode == 0, created.stderr or created.stdout
+        inner = linked / "agents/runtime/task_claims/.claim-store"
+        outer = _claim_store_outer_anchor(linked)
+        inner.unlink()
+        outer.unlink()
+        path = None
+        args = [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "terminal activation receipt durability is uncertain",
+            "--json",
+        ]
+
+        def _lose_activation_receipt(**_kwargs):
+            raise recovery_receipt.RecoveryReceiptError(
+                "terminal receipt durability is uncertain",
+                stage=stage,
+                committed=True,
+                retry_safe=False,
+                receipt_committed=receipt_committed,
+            )
+
+        monkeypatch.setattr(
+            recovery_receipt,
+            "commit_prepared_recovery",
+            _lose_activation_receipt,
+        )
+
+    rc = dispatcher.main(args)
+    captured = capsys.readouterr()
+
+    assert rc != 0
+    response = json.loads(captured.out)
+    assert response["status"] == "indeterminate"
+    assert response["retry_safe"] is False
+    assert response["stage"] == stage
+    assert response["receipt_committed"] is receipt_committed
+    assert response["recovery_receipt"]["stage"] == stage
+    assert (
+        response["recovery_receipt"]["receipt_committed"]
+        is receipt_committed
+    )
+    assert "MUST NOT be retried" in captured.err
+    assert "refused" not in captured.err.lower()
+    if path is not None:
+        persisted = json.loads(path.read_text(encoding="utf-8"))
+        expected_status = "expired" if operation == "terminalize" else "claimed"
+        assert persisted["status"] == expected_status
+
+
+@pytest.mark.parametrize("operation", ("adopt", "terminalize"))
+def test_committed_recovery_digest_never_rereads_subject_after_store_unlock(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+) -> None:
+    """Report the receipt-bound image, never a later uncooperative mutation."""
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-after-digest-{operation}",
+    )
+    path, _claim, args = _recovery_candidate(
+        linked,
+        operation,
+        suffix=f"660-after-digest-{operation}",
+    )
+    dispatcher = _load_dispatcher_module()
+    _dispatcher_recovery_module(dispatcher, monkeypatch)
+    real_read_bytes = Path.read_bytes
+    intruder_bytes = b'{"post_lock_intruder":true}\n'
+    subject_reads = {"count": 0}
+
+    def _show_followup_mutation_on_fifth_subject_read(candidate: Path) -> bytes:
+        if candidate.resolve() == path.resolve():
+            subject_reads["count"] += 1
+            # Four reads belong to the locked transaction: caller before-image,
+            # receipt raw CAS, caller raw CAS, and receipt after-image.  The
+            # historical fifth read happened after store authority was released.
+            if subject_reads["count"] > 4:
+                return intruder_bytes
+        return real_read_bytes(candidate)
+
+    monkeypatch.setattr(
+        Path,
+        "read_bytes",
+        _show_followup_mutation_on_fifth_subject_read,
+    )
+
+    rc = dispatcher.main(args)
+    captured = capsys.readouterr()
+
+    assert rc == 0, captured.err or captured.out
+    response = json.loads(captured.out)
+    expected_after = (
+        json.dumps(response["claim"], ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
+    assert response["after_sha256"] == hashlib.sha256(expected_after).hexdigest()
+    assert response["after_sha256"] != hashlib.sha256(intruder_bytes).hexdigest()
+    assert subject_reads["count"] == 4
+    assert real_read_bytes(path) == expected_after
 
 
 def test_red_legacy_claim_is_adoptable_by_owner_bound_command(tmp_path: Path) -> None:
@@ -8208,3 +8552,370 @@ def test_claim_mutations_fail_closed_on_canonical_work_identity_damage(
         for token in ("identity", "canonical", "unit spec", "unit_spec")
     )
     assert path.read_bytes() == before
+
+
+def test_self_asserted_overlay_cannot_adopt_a_direct_claim_with_empty_uuid(
+    tmp_path: Path,
+) -> None:
+    """Only the immutable role-routing shape may receive synthetic identity."""
+
+    task_id = "TASK-AR-660-SELF-ASSERTED-OVERLAY"
+    dispatcher = _load_dispatcher_module()
+    created, _task_path, _unit_path = _create_work_identity_candidate(
+        tmp_path,
+        task_id=task_id,
+        suffix="self-overlay",
+    )
+    claim = created["claim"]
+    claim.pop("work_identity_binding")
+    claim["overlay"] = True
+    claim["parent_task_id"] = ""
+    binding = dispatcher._work_identity_binding_for_claim(
+        tmp_path,
+        claim,
+        bound_at="2026-08-09T09:10:00+09:00",
+    )
+
+    assert binding == _expected_work_identity_binding(
+        task_id=task_id,
+        task_uid=_AR660_TASK_UID,
+        unit_id=f"UNIT-{task_id}-001",
+        work_uid=_AR660_UNIT_WORK_UID,
+        bound_at="2026-08-09T09:10:00+09:00",
+    )
+
+
+@pytest.mark.parametrize("colliding_field", ("id", "display_id", "work_id"))
+def test_claim_mutation_refuses_any_duplicate_task_alias_in_canonical_namespace(
+    tmp_path: Path,
+    colliding_field: str,
+) -> None:
+    task_id = f"TASK-AR-660-NAMESPACE-{colliding_field.upper()}"
+    created, _task_path, _unit_path = _create_work_identity_candidate(
+        tmp_path,
+        task_id=task_id,
+        suffix=f"namespace-{colliding_field}",
+    )
+    claim = created["claim"]
+    alternate_id = f"TASK-AR-660-ALTERNATE-{colliding_field.upper()}"
+    aliases = {
+        "id": alternate_id,
+        "display_id": alternate_id,
+        "work_id": alternate_id,
+    }
+    aliases[colliding_field] = task_id
+    alternate_uid = _fixture_work_uid("task", alternate_id)
+    collision_path = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / f"{alternate_id}.md"
+    )
+    collision_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {aliases['id']}",
+                f"display_id: {aliases['display_id']}",
+                f"task_uid: {alternate_uid}",
+                f"work_id: {aliases['work_id']}",
+                f"work_uid: {alternate_uid}",
+                "kind: task",
+                "status: worker_ready",
+                "---",
+                "",
+                "# Conflicting canonical task alias",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_replace_cli_option(
+            _heartbeat_without_progress_args(claim),
+            "--now",
+            "2026-08-09T09:10:00+09:00",
+        ),
+    )
+
+    assert result.returncode != 0, (
+        f"heartbeat accepted duplicate canonical {colliding_field} authority"
+    )
+    assert "identity" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("identity_kind", ("task", "unit"))
+def test_canonical_work_identity_rejects_uuid_versions_other_than_v4_or_v7(
+    tmp_path: Path,
+    identity_kind: str,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    task_id = f"TASK-AR-660-UUID5-{identity_kind.upper()}"
+    invalid_uuid = str(
+        uuid.uuid5(uuid.NAMESPACE_URL, f"invalid-runtime-{identity_kind}")
+    )
+    task_path, _unit_path, unit_id, unit_rel = _write_work_identity_records(
+        tmp_path,
+        task_id,
+        task_uid=invalid_uuid if identity_kind == "task" else _AR660_TASK_UID,
+        unit_work_uid=(
+            invalid_uuid if identity_kind == "unit" else _AR660_UNIT_WORK_UID
+        ),
+    )
+    assert task_path.is_file()
+
+    with pytest.raises(ValueError, match="UUID|uuid|identity"):
+        if identity_kind == "task":
+            dispatcher._canonical_task_uid(tmp_path, task_id)
+        else:
+            dispatcher._canonical_unit_work_uid(
+                tmp_path,
+                task_id=task_id,
+                unit_id=unit_id,
+                unit_spec=unit_rel,
+            )
+
+
+@pytest.mark.parametrize("identity_kind", ("task", "unit"))
+def test_canonical_work_identity_refuses_symlinked_record_authority(
+    tmp_path: Path,
+    identity_kind: str,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    task_id = f"TASK-AR-660-SYMLINK-{identity_kind.upper()}"
+    task_path, unit_path, unit_id, unit_rel = _write_work_identity_records(
+        tmp_path,
+        task_id,
+    )
+    target = task_path if identity_kind == "task" else unit_path
+    outside = tmp_path.parent / f"{tmp_path.name}-{identity_kind}-authority.md"
+    outside.write_bytes(target.read_bytes())
+    target.unlink()
+    target.symlink_to(outside)
+
+    with pytest.raises(ValueError, match="direct|alias|symlink|reparse|identity"):
+        if identity_kind == "task":
+            dispatcher._canonical_task_uid(tmp_path, task_id)
+        else:
+            dispatcher._canonical_unit_work_uid(
+                tmp_path,
+                task_id=task_id,
+                unit_id=unit_id,
+                unit_spec=unit_rel,
+            )
+
+
+@pytest.mark.parametrize("escape_kind", ("absolute", "parent"))
+def test_unit_meta_refuses_out_of_repo_authority_paths(
+    tmp_path: Path,
+    escape_kind: str,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    root = tmp_path / "repo"
+    root.mkdir()
+    outside = tmp_path / "outside-unit.md"
+    outside.write_text(
+        "---\nunit_id: UNIT-OUTSIDE\nwork_uid: "
+        + _AR660_UNIT_WORK_UID
+        + "\n---\n",
+        encoding="utf-8",
+    )
+    value = str(outside) if escape_kind == "absolute" else "../outside-unit.md"
+
+    with pytest.raises(ValueError, match="repo-relative|outside|direct"):
+        dispatcher._unit_meta(root, value)
+
+
+def _write_duplicate_unit_alias(
+    root: Path,
+    task_id: str,
+    *,
+    colliding_field: str,
+) -> Path:
+    canonical_unit_id = f"UNIT-{task_id}-001"
+    alternate_unit_id = f"UNIT-{task_id}-ALTERNATE-{colliding_field.upper()}"
+    aliases = {
+        "unit_id": alternate_unit_id,
+        "work_id": alternate_unit_id,
+    }
+    aliases[colliding_field] = canonical_unit_id
+    path = (
+        root
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / task_id
+        / f"{alternate_unit_id}.md"
+    )
+    path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"work_id: {aliases['work_id']}",
+                f"work_uid: {_fixture_work_uid('unit', alternate_unit_id)}",
+                "kind: unit",
+                f"parent_id: {task_id}",
+                f"unit_id: {aliases['unit_id']}",
+                f"task_id: {task_id}",
+                "status: worker_ready",
+                "target_files:",
+                "  - scripts/alternate_claim_worker.py",
+                f"stop_condition: stop_after:{alternate_unit_id}:verification",
+                "---",
+                "",
+                "# Conflicting canonical unit alias",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.mark.parametrize(
+    "operation",
+    ("create", "adopt", "heartbeat", "renew", "release"),
+)
+@pytest.mark.parametrize("colliding_field", ("unit_id", "work_id"))
+def test_every_claim_entrypoint_refuses_duplicate_unit_namespace_authority(
+    tmp_path: Path,
+    operation: str,
+    colliding_field: str,
+) -> None:
+    task_id = (
+        f"TASK-AR-660-UNIT-COLLISION-{operation.upper()}-"
+        f"{colliding_field.upper()}"
+    )
+    suffix = f"unit-collision-{operation}-{colliding_field}"
+    if operation == "create":
+        (tmp_path / "STATUS.md").write_text(
+            "## Handoff Checklist\n- continue here\n",
+            encoding="utf-8",
+        )
+        _write_worktree(tmp_path, task_id)
+        _task_path, _unit_path, unit_id, unit_rel = (
+            _write_work_identity_records(tmp_path, task_id)
+        )
+        _write_duplicate_unit_alias(
+            tmp_path,
+            task_id,
+            colliding_field=colliding_field,
+        )
+        result = _run_dispatcher(
+            tmp_path,
+            "create",
+            "--task-id",
+            task_id,
+            "--unit-id",
+            unit_id,
+            "--unit-spec",
+            unit_rel,
+            "--stop-condition",
+            f"stop_after:{unit_id}:verification",
+            "--agent-role",
+            "lead-engineer",
+            "--agent-instance-id",
+            f"le-20260809-110000-kst-{suffix}",
+            "--callsite-id",
+            f"terminal:wt-{task_id.lower()}:tab-01",
+            "--lease-minutes",
+            "30",
+            "--now",
+            "2026-08-09T11:00:00+09:00",
+            "--suffix",
+            suffix,
+            "--json",
+        )
+        assert result.returncode != 0, (
+            f"create accepted duplicate canonical unit {colliding_field}"
+        )
+        diagnostic = (result.stdout + result.stderr).lower()
+        assert any(
+            token in diagnostic
+            for token in ("identity", "canonical", "duplicate", "unit")
+        )
+        assert not list(
+            (tmp_path / "agents/runtime/task_claims").glob("CLAIM-*.json")
+        )
+        return
+
+    created, _task_path, _unit_path = _create_work_identity_candidate(
+        tmp_path,
+        task_id=task_id,
+        suffix=suffix,
+    )
+    claim = created["claim"]
+    path = _claim_path(tmp_path, created)
+    if operation == "adopt":
+        persisted = json.loads(path.read_text(encoding="utf-8"))
+        persisted.pop("work_identity_binding")
+        path.write_text(
+            json.dumps(persisted, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        args = (
+            "adopt",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "duplicate unit authority must not be adopted",
+            "--now",
+            "2026-08-09T09:10:00+09:00",
+            "--json",
+        )
+    else:
+        args = _work_identity_mutation_args(tmp_path, claim, operation)
+    _write_duplicate_unit_alias(
+        tmp_path,
+        task_id,
+        colliding_field=colliding_field,
+    )
+    before = path.read_bytes()
+
+    result = _run_dispatcher(tmp_path, *args)
+
+    assert result.returncode != 0, (
+        f"{operation} accepted duplicate canonical unit {colliding_field}"
+    )
+    diagnostic = (result.stdout + result.stderr).lower()
+    assert any(token in diagnostic for token in ("identity", "canonical", "unit"))
+    assert path.read_bytes() == before
+
+
+def test_unit_namespace_scan_refuses_aliased_sibling_record(
+    tmp_path: Path,
+) -> None:
+    dispatcher = _load_dispatcher_module()
+    task_id = "TASK-AR-660-UNIT-NAMESPACE-ALIAS"
+    _task_path, _unit_path, unit_id, unit_rel = _write_work_identity_records(
+        tmp_path,
+        task_id,
+    )
+    alternate = _write_duplicate_unit_alias(
+        tmp_path,
+        task_id,
+        colliding_field="work_id",
+    )
+    outside = tmp_path.parent / f"{tmp_path.name}-unit-sibling.md"
+    outside.write_bytes(alternate.read_bytes())
+    alternate.unlink()
+    alternate.symlink_to(outside)
+
+    with pytest.raises(ValueError, match="alias|symlink|direct|identity"):
+        dispatcher._canonical_unit_work_uid(
+            tmp_path,
+            task_id=task_id,
+            unit_id=unit_id,
+            unit_spec=unit_rel,
+        )

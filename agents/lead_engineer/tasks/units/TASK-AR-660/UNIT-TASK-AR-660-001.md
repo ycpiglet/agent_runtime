@@ -33,6 +33,7 @@ inputs:
   - src/agent_runtime/claim_store.py
   - scripts/atomic_io.py
 target_files:
+  - agents/project/TEMPLATE-MIRROR-CONTRACT.json
   - scripts/task_claim_dispatcher.py
   - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
   - scripts/role_routing.py
@@ -88,6 +89,7 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 
 ## Target Files
 
+- agents/project/TEMPLATE-MIRROR-CONTRACT.json
 - scripts/task_claim_dispatcher.py
 - src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py
 - scripts/role_routing.py

@@ -1090,10 +1090,7 @@ def _canonical_marker(witness_claim_id: str) -> bytes:
 def _fsync_directory(path: Path) -> None:
     if os.name == "nt":
         return
-    try:
-        descriptor = os.open(path, os.O_RDONLY)
-    except OSError:
-        return
+    descriptor = os.open(path, os.O_RDONLY)
     try:
         os.fsync(descriptor)
     finally:
@@ -1144,10 +1141,7 @@ def _remove_created_file_object(path: Path, opened: PathIdentity) -> bool:
         ):
             return False
         path.unlink()
-        try:
-            _fsync_directory(path.parent)
-        except OSError:
-            pass
+        _fsync_directory(path.parent)
         return True
     except (ClaimStoreError, OSError, RuntimeError):
         return False

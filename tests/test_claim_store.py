@@ -1741,6 +1741,42 @@ def test_immutable_marker_write_cleans_up_its_inode_on_io_failure(
     assert not marker.exists()
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes rollback directory durability")
+def test_immutable_marker_write_reports_incomplete_rollback_when_cleanup_fsync_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _runtime_root(tmp_path)
+    marker = _store(root) / INNER_MARKER_NAME
+    marker.parent.mkdir()
+    payload = _raw_marker_bytes("CLAIM-retained")
+    real_fsync = claim_store.os.fsync
+    marker_parent_identity = (
+        marker.parent.stat().st_dev,
+        marker.parent.stat().st_ino,
+    )
+
+    def fail_marker_and_cleanup_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if stat.S_ISREG(metadata.st_mode):
+            raise OSError(errno.EIO, "injected marker fsync failure")
+        if (
+            stat.S_ISDIR(metadata.st_mode)
+            and (metadata.st_dev, metadata.st_ino) == marker_parent_identity
+        ):
+            raise OSError(errno.EIO, "injected rollback directory fsync failure")
+        real_fsync(descriptor)
+
+    monkeypatch.setattr(claim_store.os, "fsync", fail_marker_and_cleanup_fsync)
+
+    with pytest.raises(claim_store.ClaimStoreError, match="rollback was incomplete"):
+        claim_store._write_immutable(marker, payload)
+
+    # The live namespace no longer contains the marker, but the failed parent
+    # fsync means crash recovery cannot truthfully call that removal durable.
+    assert not marker.exists()
+
+
 @pytest.mark.parametrize("replaced_entry", ("witness", "artifact"))
 def test_checkout_activation_rolls_back_outer_when_store_entries_change(
     tmp_path: Path,

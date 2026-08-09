@@ -20,6 +20,7 @@ import importlib.util
 import json
 import os
 import sys
+import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -48,6 +49,44 @@ def _load():
 
 def _claims_dir(root: Path) -> Path:
     return root / "agents" / "runtime" / "task_claims"
+
+
+def _write_canonical_parent_identity(
+    root: Path,
+    *,
+    task_id: str = "TASK-AR-900",
+    task_uid: str = "33333333-3333-4333-8333-333333333333",
+) -> Path:
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {task_id}",
+                f"display_id: {task_id}",
+                f"task_uid: {task_uid}",
+                f"work_id: {task_id}",
+                f"work_uid: {task_uid}",
+                "kind: task",
+                "status: in_progress",
+                "---",
+                "",
+                "# Canonical overlay parent fixture",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.fixture(autouse=True)
+def _canonical_default_parent_authority(tmp_path: Path) -> None:
+    """Keep legacy TASK-AR-900 overlay fixtures on canonical UUID authority."""
+
+    _write_canonical_parent_identity(tmp_path)
 
 
 def _seed_lead_claim(
@@ -1651,3 +1690,115 @@ def test_explicit_parentless_synthetic_overlay_uses_empty_uuid_by_design(
             bound_at=now,
         )
     )
+
+
+def test_review_overlay_refuses_non_v4_v7_parent_uuid_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    task_id = "TASK-AR-660-OVERLAY-UUID5"
+    _write_canonical_parent_identity(
+        tmp_path,
+        task_id=task_id,
+        task_uid=str(uuid.uuid5(uuid.NAMESPACE_URL, task_id)),
+    )
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id=task_id,
+        task_set_id="TASKSET-AR-660",
+        event="merge",
+        now="2026-08-09T10:30:00+09:00",
+    )
+
+    assert result["created"] == []
+    assert "finding" in result
+    assert "uuid" in str(result["finding"]).lower()
+
+
+@pytest.mark.parametrize("colliding_field", ("id", "display_id", "work_id"))
+def test_review_overlay_refuses_duplicate_parent_alias_in_task_namespace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    colliding_field: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    task_id = f"TASK-AR-660-OVERLAY-COLLISION-{colliding_field.upper()}"
+    _write_canonical_parent_identity(tmp_path, task_id=task_id)
+    alternate_id = f"TASK-AR-660-OVERLAY-OTHER-{colliding_field.upper()}"
+    aliases = {
+        "id": alternate_id,
+        "display_id": alternate_id,
+        "work_id": alternate_id,
+    }
+    aliases[colliding_field] = task_id
+    alternate_uid = "66666666-6666-4666-8666-666666666666"
+    collision = (
+        tmp_path
+        / "agents"
+        / "lead_engineer"
+        / "tasks"
+        / f"{alternate_id}.md"
+    )
+    collision.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {aliases['id']}",
+                f"display_id: {aliases['display_id']}",
+                f"task_uid: {alternate_uid}",
+                f"work_id: {aliases['work_id']}",
+                f"work_uid: {alternate_uid}",
+                "kind: task",
+                "status: in_progress",
+                "---",
+                "",
+                "# Conflicting overlay parent alias",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id=task_id,
+        task_set_id="TASKSET-AR-660",
+        event="merge",
+        now="2026-08-09T10:40:00+09:00",
+    )
+
+    assert result["created"] == []
+    assert "finding" in result
+    assert "identity" in str(result["finding"]).lower()
+
+
+def test_review_overlay_refuses_symlinked_out_of_repo_parent_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    task_id = "TASK-AR-660-OVERLAY-SYMLINK"
+    path = _write_canonical_parent_identity(tmp_path, task_id=task_id)
+    outside = tmp_path.parent / f"{tmp_path.name}-overlay-parent.md"
+    outside.write_bytes(path.read_bytes())
+    path.unlink()
+    path.symlink_to(outside)
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id=task_id,
+        task_set_id="TASKSET-AR-660",
+        event="merge",
+        now="2026-08-09T10:50:00+09:00",
+    )
+
+    assert result["created"] == []
+    assert "finding" in result
+    diagnostic = str(result["finding"]).lower()
+    assert any(token in diagnostic for token in ("direct", "alias", "symlink"))

@@ -280,6 +280,7 @@ def test_clean_installed_core_claim_to_governance_journey_without_status(
         "---\n"
         "schema_version: agent-runtime-work-item/v1\n"
         f"id: {task_id}\n"
+        f"display_id: {task_id}\n"
         f"work_id: {task_id}\n"
         "work_uid: 71e29977-1fd8-4563-bb89-735e03b8ebd1\n"
         f"task_id: {task_id}\n"

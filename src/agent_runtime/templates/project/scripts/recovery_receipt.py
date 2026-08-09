@@ -27,10 +27,12 @@ import hmac
 import json
 import os
 import re
+import secrets
 import stat
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
 from atomic_io import AtomicWriteError, publish_json_atomic
 
@@ -321,38 +323,311 @@ def _validate_record(payload: Any, *, path: Path | None = None) -> dict[str, Any
     return payload
 
 
-def validate_receipt(path: Path) -> dict[str, Any]:
-    """Load and validate one receipt, including its filename and self digest."""
+_WINDOWS_REPARSE_POINT = 0x0400
+_DIRECTORY_FLAGS = (
+    os.O_RDONLY
+    | getattr(os, "O_CLOEXEC", 0)
+    | getattr(os, "O_DIRECTORY", 0)
+    | getattr(os, "O_NOFOLLOW", 0)
+)
+_SECURE_POSIX_DIRFD = (
+    os.name == "posix"
+    and bool(getattr(os, "O_DIRECTORY", 0))
+    and bool(getattr(os, "O_NOFOLLOW", 0))
+    and all(
+        function in os.supports_dir_fd
+        for function in (os.open, os.stat, os.link, os.unlink)
+    )
+    and os.stat in os.supports_follow_symlinks
+    and os.link in os.supports_follow_symlinks
+    and os.listdir in os.supports_fd
+)
 
-    path = Path(path)
-    before = path.lstat()
-    if stat.S_ISLNK(before.st_mode) or bool(
-        getattr(before, "st_file_attributes", 0) & 0x0400
-    ):
+
+def _is_alias(metadata: Any) -> bool:
+    return stat.S_ISLNK(metadata.st_mode) or bool(
+        getattr(metadata, "st_file_attributes", 0) & _WINDOWS_REPARSE_POINT
+    )
+
+
+def _same_inode(left: Any, right: Any) -> bool:
+    return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+
+
+def _absolute_lexical(path: Path) -> Path:
+    return Path(os.path.abspath(os.fspath(path)))
+
+
+def _directory_metadata(path: Path, metadata: Any) -> None:
+    if _is_alias(metadata):
+        raise ValueError(f"unsafe directory alias in recovery receipt path: {path}")
+    if not stat.S_ISDIR(metadata.st_mode):
+        raise NotADirectoryError(
+            errno.ENOTDIR,
+            f"recovery receipt path component is not a directory: {path}",
+            str(path),
+        )
+
+
+def _open_posix_directory(directory: Path) -> tuple[Path, int]:
+    """Open one lexical directory via a root-anchored no-follow fd walk."""
+
+    if not _SECURE_POSIX_DIRFD:
+        raise OSError(
+            errno.ENOTSUP,
+            "platform lacks secure directory-relative recovery receipt operations",
+            str(directory),
+        )
+    absolute = _absolute_lexical(directory)
+    root = Path(absolute.anchor)
+    root_before = root.lstat()
+    _directory_metadata(root, root_before)
+    descriptor = os.open(root, _DIRECTORY_FLAGS)
+    try:
+        root_opened = os.fstat(descriptor)
+        _directory_metadata(root, root_opened)
+        if not _same_inode(root_before, root_opened):
+            raise ValueError("recovery receipt filesystem root changed during open")
+
+        current = root
+        for component in absolute.relative_to(root).parts:
+            current = current / component
+            try:
+                metadata = os.stat(
+                    component,
+                    dir_fd=descriptor,
+                    follow_symlinks=False,
+                )
+            except OSError as exc:
+                if exc.errno in {errno.ELOOP, errno.ENOTDIR}:
+                    raise ValueError(
+                        f"unsafe directory alias in recovery receipt path: {current}"
+                    ) from exc
+                raise
+            _directory_metadata(current, metadata)
+            try:
+                child = os.open(component, _DIRECTORY_FLAGS, dir_fd=descriptor)
+            except OSError as exc:
+                if exc.errno in {errno.ELOOP, errno.ENOTDIR}:
+                    raise ValueError(
+                        f"unsafe directory alias in recovery receipt path: {current}"
+                    ) from exc
+                raise
+            try:
+                opened = os.fstat(child)
+                _directory_metadata(current, opened)
+                if not _same_inode(metadata, opened):
+                    raise ValueError(
+                        f"recovery receipt directory identity changed during open: {current}"
+                    )
+            except BaseException:
+                os.close(child)
+                raise
+            os.close(descriptor)
+            descriptor = child
+        return absolute, descriptor
+    except BaseException:
+        try:
+            os.close(descriptor)
+        except OSError:
+            pass
+        raise
+
+
+def _fallback_directory_snapshot(directory: Path) -> tuple[tuple[str, int, int], ...]:
+    """Capture an alias-free lexical ancestor chain for non-dirfd platforms."""
+
+    absolute = _absolute_lexical(directory)
+    root = Path(absolute.anchor)
+    paths = [root]
+    cursor = root
+    for component in absolute.relative_to(root).parts:
+        cursor = cursor / component
+        paths.append(cursor)
+    snapshot: list[tuple[str, int, int]] = []
+    for candidate in paths:
+        metadata = candidate.lstat()
+        _directory_metadata(candidate, metadata)
+        snapshot.append((os.fspath(candidate), metadata.st_dev, metadata.st_ino))
+    return tuple(snapshot)
+
+
+@contextmanager
+def _verified_parent(path: Path) -> Iterator[tuple[Path, int | None]]:
+    """Pin a receipt's alias-free parent and verify its lexical identity after use."""
+
+    absolute = _absolute_lexical(Path(path))
+    if os.name == "posix":
+        parent_path, parent_fd = _open_posix_directory(absolute.parent)
+        owned_parent_fd: int | None = parent_fd
+        operation_failed = False
+        try:
+            parent_identity = os.fstat(parent_fd)
+            yield absolute, parent_fd
+            reopened_fd: int | None = None
+            reopen_failed = False
+            try:
+                reopened_path, reopened_fd = _open_posix_directory(parent_path)
+                if reopened_path != parent_path or not _same_inode(
+                    parent_identity, os.fstat(reopened_fd)
+                ):
+                    raise ValueError(
+                        "recovery receipt parent identity changed during access"
+                    )
+            except BaseException:
+                reopen_failed = True
+                raise
+            finally:
+                if reopened_fd is not None:
+                    descriptor = reopened_fd
+                    reopened_fd = None
+                    try:
+                        os.close(descriptor)
+                    except OSError:
+                        if not reopen_failed:
+                            raise
+        except BaseException:
+            operation_failed = True
+            raise
+        finally:
+            if owned_parent_fd is not None:
+                descriptor = owned_parent_fd
+                owned_parent_fd = None
+                try:
+                    os.close(descriptor)
+                except OSError:
+                    if not operation_failed:
+                        raise
+        return
+
+    before = _fallback_directory_snapshot(absolute.parent)
+    yield absolute, None
+    after = _fallback_directory_snapshot(absolute.parent)
+    if before != after:
+        raise ValueError("recovery receipt parent identity changed during access")
+
+
+@contextmanager
+def _verified_regular_file(
+    path: Path,
+    *,
+    access: int = os.O_RDONLY,
+) -> Iterator[tuple[Path, int, int | None]]:
+    """Open one regular receipt without following its file or parent aliases."""
+
+    with _verified_parent(path) as (absolute, parent_fd):
+        if parent_fd is not None:
+            metadata = os.stat(
+                absolute.name,
+                dir_fd=parent_fd,
+                follow_symlinks=False,
+            )
+        else:
+            metadata = absolute.lstat()
+        if _is_alias(metadata):
+            raise ValueError("recovery receipt must not be a symlink or reparse point")
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("recovery receipt must be a regular file")
+
+        flags = (
+            access
+            | getattr(os, "O_BINARY", 0)
+            | getattr(os, "O_CLOEXEC", 0)
+            | getattr(os, "O_NOFOLLOW", 0)
+        )
+        if parent_fd is not None:
+            descriptor = os.open(absolute.name, flags, dir_fd=parent_fd)
+        else:
+            descriptor = os.open(absolute, flags)
+        owned_descriptor: int | None = descriptor
+        operation_failed = False
+        try:
+            opened = os.fstat(descriptor)
+            if not stat.S_ISREG(opened.st_mode):
+                raise ValueError("opened recovery receipt is not a regular file")
+            if not _same_inode(metadata, opened):
+                raise ValueError("recovery receipt identity changed during open")
+            yield absolute, descriptor, parent_fd
+            if parent_fd is not None:
+                after = os.stat(
+                    absolute.name,
+                    dir_fd=parent_fd,
+                    follow_symlinks=False,
+                )
+            else:
+                after = absolute.lstat()
+            if _is_alias(after) or not _same_inode(opened, after):
+                raise ValueError("recovery receipt identity changed during access")
+        except BaseException:
+            operation_failed = True
+            raise
+        finally:
+            if owned_descriptor is not None:
+                descriptor_to_close = owned_descriptor
+                owned_descriptor = None
+                try:
+                    os.close(descriptor_to_close)
+                except OSError:
+                    if not operation_failed:
+                        raise
+
+
+def _read_descriptor(descriptor: int) -> bytes:
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    chunks: list[bytes] = []
+    while True:
+        chunk = os.read(descriptor, 1024 * 1024)
+        if not chunk:
+            return b"".join(chunks)
+        chunks.append(chunk)
+
+
+def _validate_receipt_descriptor(path: Path, descriptor: int) -> dict[str, Any]:
+    return _validate_record(
+        _load_json_bytes(_read_descriptor(descriptor)),
+        path=Path(path),
+    )
+
+
+def validate_receipt(path: Path) -> dict[str, Any]:
+    """Load one receipt through an alias-free path and verify its self digest."""
+
+    with _verified_regular_file(path) as (absolute, descriptor, _parent_fd):
+        return _validate_receipt_descriptor(absolute, descriptor)
+
+
+def _validate_receipt_at(
+    directory_fd: int,
+    name: str,
+    display_path: Path,
+) -> dict[str, Any]:
+    """Validate one store entry relative to its already verified directory fd."""
+
+    if not name or Path(name).name != name:
+        raise ValueError("recovery receipt store entry has an unsafe name")
+    metadata = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+    if _is_alias(metadata):
         raise ValueError("recovery receipt must not be a symlink or reparse point")
-    if not stat.S_ISREG(before.st_mode):
+    if not stat.S_ISREG(metadata.st_mode):
         raise ValueError("recovery receipt must be a regular file")
-    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(path, flags)
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_BINARY", 0)
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    descriptor = os.open(name, flags, dir_fd=directory_fd)
     try:
         opened = os.fstat(descriptor)
-        if not stat.S_ISREG(opened.st_mode):
-            raise ValueError("opened recovery receipt is not a regular file")
-        if (before.st_dev, before.st_ino) != (opened.st_dev, opened.st_ino):
-            raise ValueError("recovery receipt identity changed during open")
-        chunks: list[bytes] = []
-        while True:
-            chunk = os.read(descriptor, 1024 * 1024)
-            if not chunk:
-                break
-            chunks.append(chunk)
-        data = b"".join(chunks)
+        if not stat.S_ISREG(opened.st_mode) or not _same_inode(metadata, opened):
+            raise ValueError("recovery receipt identity changed during store open")
+        record = _validate_receipt_descriptor(display_path, descriptor)
+        after = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+        if _is_alias(after) or not _same_inode(opened, after):
+            raise ValueError("recovery receipt identity changed during store read")
+        return record
     finally:
         os.close(descriptor)
-    after = path.lstat()
-    if (opened.st_dev, opened.st_ino) != (after.st_dev, after.st_ino):
-        raise ValueError("recovery receipt identity changed during read")
-    return _validate_record(_load_json_bytes(data), path=path)
 
 
 def _record_path(receipt_dir: Path, receipt_id: str, state: str) -> Path:
@@ -374,25 +649,216 @@ def _require_unused_transaction_id(receipt_dir: Path, receipt_id: str) -> None:
             )
 
 
-def _publish_record(path: Path, payload: Mapping[str, Any]) -> dict[str, Any]:
-    record = _validate_record(_json_copy(payload))
-    publish_json_atomic(
-        path,
-        record,
-        indent=2,
-        sort_keys=True,
-        fsync_policy="strict",
+def _write_all(descriptor: int, data: bytes) -> None:
+    offset = 0
+    while offset < len(data):
+        written = os.write(descriptor, data[offset:])
+        if written <= 0:
+            raise OSError(errno.EIO, "short write while publishing recovery receipt")
+        offset += written
+
+
+def _publish_record_at(
+    parent_fd: int,
+    path: Path,
+    record: Mapping[str, Any],
+) -> None:
+    """Strictly publish one immutable record into a pinned POSIX directory."""
+
+    if os.name != "posix":
+        raise OSError(
+            errno.ENOTSUP,
+            "directory-relative recovery receipt publication requires POSIX",
+            str(path),
+        )
+    if not path.name or Path(path.name).name != path.name:
+        raise ValueError("recovery receipt publication has an unsafe filename")
+    data = (
+        json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
     )
+    descriptor: int | None = None
+    sidecar: str | None = None
+    published = False
+    for _attempt in range(128):
+        candidate = f".{path.name}.tmp-{secrets.token_hex(12)}"
+        try:
+            descriptor = os.open(candidate, flags, 0o600, dir_fd=parent_fd)
+        except FileExistsError:
+            continue
+        sidecar = candidate
+        break
+    if descriptor is None or sidecar is None:
+        raise FileExistsError(
+            errno.EEXIST,
+            "could not reserve an exclusive recovery receipt sidecar",
+            str(path),
+        )
+
+    try:
+        opened: Any | None = None
+        write_failed = False
+        try:
+            _write_all(descriptor, data)
+            try:
+                os.fsync(descriptor)
+            except OSError as exc:
+                raise AtomicWriteError(
+                    "recovery receipt file fsync failed before publication",
+                    stage="file-fsync",
+                    committed=False,
+                    retry_safe=True,
+                ) from exc
+            opened = os.fstat(descriptor)
+            if not stat.S_ISREG(opened.st_mode) or opened.st_size != len(data):
+                raise OSError(
+                    errno.EIO,
+                    "recovery receipt sidecar identity changed before publication",
+                    sidecar,
+                )
+        except BaseException:
+            write_failed = True
+            raise
+        finally:
+            descriptor_to_close = descriptor
+            descriptor = None
+            try:
+                os.close(descriptor_to_close)
+            except OSError as exc:
+                if not write_failed:
+                    raise AtomicWriteError(
+                        "recovery receipt file close failed before publication",
+                        stage="file-close",
+                        committed=False,
+                        retry_safe=True,
+                    ) from exc
+
+        sidecar_metadata = os.stat(
+            sidecar,
+            dir_fd=parent_fd,
+            follow_symlinks=False,
+        )
+        if (
+            opened is None
+            or _is_alias(sidecar_metadata)
+            or not stat.S_ISREG(sidecar_metadata.st_mode)
+            or not _same_inode(opened, sidecar_metadata)
+            or sidecar_metadata.st_size != len(data)
+        ):
+            raise OSError(
+                errno.EIO,
+                "recovery receipt sidecar changed before publication",
+                sidecar,
+            )
+        os.link(
+            sidecar,
+            path.name,
+            src_dir_fd=parent_fd,
+            dst_dir_fd=parent_fd,
+            follow_symlinks=False,
+        )
+        published = True
+        try:
+            os.unlink(sidecar, dir_fd=parent_fd)
+        except OSError:
+            # The link already crossed the commit point.  Persist that fact
+            # before retrying cleanup, then persist a successful retry too.
+            pass
+        else:
+            sidecar = None
+        try:
+            os.fsync(parent_fd)
+        except OSError as exc:
+            raise AtomicWriteError(
+                "recovery receipt committed but parent directory fsync failed",
+                stage="parent-fsync",
+                committed=True,
+                retry_safe=False,
+            ) from exc
+        if sidecar is not None:
+            try:
+                os.unlink(sidecar, dir_fd=parent_fd)
+            except OSError as exc:
+                raise AtomicWriteError(
+                    "recovery receipt committed but sidecar cleanup failed",
+                    stage="sidecar-cleanup",
+                    committed=True,
+                    retry_safe=False,
+                ) from exc
+            sidecar = None
+            try:
+                os.fsync(parent_fd)
+            except OSError as exc:
+                raise AtomicWriteError(
+                    "recovery receipt committed but sidecar cleanup fsync failed",
+                    stage="sidecar-cleanup-fsync",
+                    committed=True,
+                    retry_safe=False,
+                ) from exc
+    finally:
+        if descriptor is not None:
+            descriptor_to_close = descriptor
+            descriptor = None
+            try:
+                os.close(descriptor_to_close)
+            except OSError:
+                pass
+        if sidecar is not None and not published:
+            try:
+                os.unlink(sidecar, dir_fd=parent_fd)
+            except OSError:
+                pass
+
+
+def _publish_record(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    parent_fd: int | None = None,
+) -> dict[str, Any]:
+    record = _validate_record(_json_copy(payload))
+    if parent_fd is not None:
+        _publish_record_at(parent_fd, path, record)
+    else:
+        publish_json_atomic(
+            path,
+            record,
+            indent=2,
+            sort_keys=True,
+            fsync_policy="strict",
+        )
     # The publisher is exclusive, but immediate replay still proves that the
     # visible bytes are the exact valid record we intended to make authority.
-    observed = validate_receipt(path)
+    try:
+        if parent_fd is not None:
+            observed = _validate_receipt_at(parent_fd, path.name, path)
+        else:
+            observed = validate_receipt(path)
+    except (OSError, TypeError, ValueError) as exc:
+        terminal = record["state"] != "prepared"
+        raise RecoveryReceiptError(
+            "published recovery receipt could not be read back and validated",
+            stage="receipt-readback",
+            committed=terminal,
+            retry_safe=False,
+            # Exclusive publication returned successfully.  The receipt path
+            # is therefore visible even though its readback is uncertain.
+            receipt_committed=True,
+        ) from exc
     if not hmac.compare_digest(
         str(observed["receipt_digest"]), str(record["receipt_digest"])
     ):
+        terminal = record["state"] != "prepared"
         raise RecoveryReceiptError(
             "published recovery receipt does not match the intended record",
             stage="receipt-readback",
-            committed=False,
+            committed=terminal,
             retry_safe=False,
             receipt_committed=True,
         )
@@ -482,6 +948,7 @@ def _publish_indeterminate(
     finding: str,
     observed: bytes | None = None,
     uncertainty: Mapping[str, Any] | None = None,
+    parent_fd: int | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     payload = _terminal_base(prepared, "indeterminate")
     payload.update({"finding": finding, "retry_safe": False})
@@ -508,7 +975,7 @@ def _publish_indeterminate(
         Path(receipt_dir), str(prepared["receipt_id"]), "indeterminate"
     )
     try:
-        published = _publish_record(path, record)
+        published = _publish_record(path, record, parent_fd=parent_fd)
     except Exception as exc:
         receipt_committed = getattr(exc, "committed", None)
         raise RecoveryReceiptError(
@@ -532,6 +999,7 @@ def _indeterminate_outcome(
     finding: str,
     observed: bytes | None = None,
     uncertainty: Mapping[str, Any] | None = None,
+    parent_fd: int | None = None,
 ) -> dict[str, Any]:
     terminal_path, terminal = _publish_indeterminate(
         receipt_dir=receipt_dir,
@@ -539,6 +1007,7 @@ def _indeterminate_outcome(
         finding=finding,
         observed=observed,
         uncertainty=uncertainty,
+        parent_fd=parent_fd,
     )
     return {
         "status": "indeterminate",
@@ -558,17 +1027,50 @@ def _prepared_for_finalize(
 
     prepared_path = Path(prepared_path)
     prepared = validate_receipt(prepared_path)
+    return _prepared_for_finalize_record(prepared_path, prepared)
+
+
+def _entry_exists(path: Path, parent_fd: int | None) -> bool:
+    if parent_fd is None:
+        return os.path.lexists(path)
+    try:
+        os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def _prepared_for_finalize_record(
+    prepared_path: Path,
+    prepared: Mapping[str, Any],
+    *,
+    parent_fd: int | None = None,
+    subject_committed: bool = True,
+) -> tuple[Path, dict[str, Any], Path, Path]:
+    """Resolve terminal paths from prepared bytes already verified under lock."""
+
+    prepared_path = Path(prepared_path)
     if prepared.get("state") != "prepared":
         raise ValueError("prepared_path must reference a prepared recovery receipt")
+    prepared_record = dict(prepared)
     receipt_dir = prepared_path.parent
-    receipt_id = str(prepared["receipt_id"])
+    receipt_id = str(prepared_record["receipt_id"])
     committed_path = _record_path(receipt_dir, receipt_id, "committed")
     indeterminate_path = _record_path(receipt_dir, receipt_id, "indeterminate")
-    existing = [
-        path
-        for path in (committed_path, indeterminate_path)
-        if os.path.lexists(path)
-    ]
+    try:
+        existing = [
+            path
+            for path in (committed_path, indeterminate_path)
+            if _entry_exists(path, parent_fd)
+        ]
+    except OSError as exc:
+        raise RecoveryReceiptError(
+            "recovery receipt terminal authority could not be inspected",
+            stage="terminal-authority-stat",
+            committed=subject_committed,
+            retry_safe=not subject_committed,
+            receipt_committed=None,
+        ) from exc
     if len(existing) > 1:
         raise ValueError(
             f"{receipt_id} has conflicting committed and indeterminate witnesses"
@@ -579,7 +1081,232 @@ def _prepared_for_finalize(
             "recovery receipt already has an immutable terminal witness",
             str(existing[0]),
         )
-    return receipt_dir, prepared, committed_path, indeterminate_path
+    return receipt_dir, prepared_record, committed_path, indeterminate_path
+
+
+def _lock_prepared_descriptor(descriptor: int) -> Callable[[], None]:
+    """Acquire the platform process-shared lock and return its unlock action."""
+
+    if os.name == "posix":
+        import fcntl
+
+        fcntl.flock(descriptor, fcntl.LOCK_EX)
+
+        def unlock_posix() -> None:
+            fcntl.flock(descriptor, fcntl.LOCK_UN)
+
+        return unlock_posix
+    if os.name == "nt":
+        import msvcrt
+
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+
+        def unlock_windows() -> None:
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+
+        return unlock_windows
+    raise OSError(
+        errno.ENOTSUP,
+        "platform has no supported process-shared recovery transaction lock",
+    )
+
+
+@contextmanager
+def _terminal_transaction_lock(
+    prepared_path: Path,
+) -> Iterator[tuple[dict[str, Any], int | None]]:
+    """Serialize both terminal namespaces using the immutable WAL inode.
+
+    A persistent ``*.lock`` sentinel can become stale after a crash and would
+    itself pollute the immutable receipt namespace.  The prepared record is
+    already mandatory and immutable, so an advisory exclusive lock on its
+    verified inode is the transaction-scoped arbiter.  POSIX ``flock`` and the
+    Windows CRT byte-range lock both arbitrate separate opens in this process
+    and other processes; the operating system releases either lock if a
+    finalizer exits unexpectedly.
+
+    The same locked descriptor supplies the prepared bytes.  This matters on
+    Windows, where opening a second handle and reading its locked byte can fail
+    even in the locking process.  The shared verified-parent primitive rejects
+    ancestor aliases and stale file identities on every platform.
+    """
+
+    access = os.O_RDWR if os.name == "nt" else os.O_RDONLY
+    with _verified_regular_file(prepared_path, access=access) as (
+        absolute,
+        descriptor,
+        parent_fd,
+    ):
+        unlock: Callable[[], None] | None = None
+        try:
+            # On Windows this is an exclusive byte-0 msvcrt lock; the prepared
+            # bytes below are deliberately read from this same descriptor.
+            unlock = _lock_prepared_descriptor(descriptor)
+
+            prepared = _validate_receipt_descriptor(absolute, descriptor)
+            if prepared.get("state") != "prepared":
+                raise ValueError(
+                    "prepared_path must reference a prepared recovery receipt"
+                )
+            yield prepared, parent_fd
+        finally:
+            if unlock is not None:
+                try:
+                    unlock()
+                except OSError:
+                    pass
+
+
+def _terminal_receipt_visibility(prepared_path: Path) -> bool | None:
+    """Best-effort truth about whether either terminal namespace is occupied."""
+
+    path = Path(prepared_path)
+    suffix = ".prepared.json"
+    if not path.name.endswith(suffix):
+        return None
+    receipt_id = path.name[: -len(suffix)]
+    if not _RECEIPT_ID.fullmatch(receipt_id):
+        return None
+
+    visible = False
+    try:
+        with _verified_parent(path) as (absolute, parent_fd):
+            for state in ("committed", "indeterminate"):
+                terminal_path = _record_path(absolute.parent, receipt_id, state)
+                try:
+                    if parent_fd is not None:
+                        os.stat(
+                            terminal_path.name,
+                            dir_fd=parent_fd,
+                            follow_symlinks=False,
+                        )
+                    else:
+                        terminal_path.lstat()
+                except FileNotFoundError:
+                    continue
+                else:
+                    visible = True
+    except (OSError, ValueError):
+        return None
+    return visible
+
+
+@contextmanager
+def _subject_committed_transaction_lock(
+    prepared_path: Path,
+) -> Iterator[tuple[dict[str, Any], int | None]]:
+    """Type lock-acquisition failures at the split-phase commit boundary.
+
+    Public split-phase finalizers are only called after their subject mutation
+    crossed its commit point.  A missing/unsafe prepared inode or a failed
+    process-shared lock must therefore never look like a retry-safe filesystem
+    error.  Exceptions raised *after* the lock is acquired retain their normal
+    API meaning (for example immutable replay remains ``FileExistsError``).
+    """
+
+    entered = False
+    body_failed = False
+    try:
+        with _terminal_transaction_lock(prepared_path) as authority:
+            entered = True
+            try:
+                yield authority
+            except BaseException:
+                body_failed = True
+                raise
+    except (ImportError, OSError, ValueError) as exc:
+        if entered and body_failed:
+            raise
+        if entered:
+            raise RecoveryReceiptError(
+                "subject committed and its terminal receipt was published, but "
+                "the recovery receipt parent identity changed",
+                stage="terminal-transaction-path",
+                committed=True,
+                retry_safe=False,
+                receipt_committed=True,
+            ) from exc
+        raise RecoveryReceiptError(
+            "subject committed but its recovery transaction lock could not be acquired",
+            stage="terminal-transaction-lock",
+            committed=True,
+            retry_safe=False,
+            receipt_committed=_terminal_receipt_visibility(prepared_path),
+        ) from exc
+
+
+@contextmanager
+def _subject_precommit_transaction_lock(
+    prepared_path: Path,
+) -> Iterator[tuple[dict[str, Any], int | None]]:
+    """Type execute-time lock failures before the subject callback may run."""
+
+    entered = False
+    body_failed = False
+    try:
+        with _terminal_transaction_lock(prepared_path) as authority:
+            entered = True
+            try:
+                yield authority
+            except BaseException:
+                body_failed = True
+                raise
+    except (ImportError, OSError, ValueError) as exc:
+        if entered and body_failed:
+            raise
+        if entered:
+            # The locked execute helper only returns after the subject callback
+            # and a terminal witness both commit.  Pre-callback failures escape
+            # through the body_failed branch with their original truth state.
+            raise RecoveryReceiptError(
+                "subject committed and its terminal receipt was published, but "
+                "the recovery receipt parent identity changed",
+                stage="terminal-transaction-path",
+                committed=True,
+                retry_safe=False,
+                receipt_committed=True,
+            ) from exc
+        raise RecoveryReceiptError(
+            "prepared recovery transaction lock could not be acquired before subject CAS",
+            stage="terminal-transaction-lock",
+            committed=False,
+            retry_safe=True,
+            # prepare_recovery_receipt completed its exclusive publication and
+            # readback before this acquisition was attempted.
+            receipt_committed=True,
+        ) from exc
+
+
+def _indeterminate_prepared_recovery_locked(
+    *,
+    prepared_path: Path,
+    prepared: Mapping[str, Any],
+    parent_fd: int | None,
+    finding: str,
+    observed_after_bytes: bytes | None = None,
+    uncertainty: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    receipt_dir, prepared, _committed_path, _indeterminate_path = (
+        _prepared_for_finalize_record(
+            prepared_path,
+            prepared,
+            parent_fd=parent_fd,
+        )
+    )
+    finding_text = str(finding or "").strip()
+    if not finding_text:
+        raise ValueError("finding must be a non-empty string")
+    return _indeterminate_outcome(
+        receipt_dir=receipt_dir,
+        prepared_path=Path(prepared_path),
+        prepared=prepared,
+        finding=finding_text,
+        observed=observed_after_bytes,
+        uncertainty=uncertainty,
+        parent_fd=parent_fd,
+    )
 
 
 def indeterminate_prepared_recovery(
@@ -597,20 +1324,16 @@ def indeterminate_prepared_recovery(
     refused before publication.
     """
 
-    receipt_dir, prepared, _committed_path, _indeterminate_path = (
-        _prepared_for_finalize(prepared_path)
-    )
-    finding_text = str(finding or "").strip()
-    if not finding_text:
-        raise ValueError("finding must be a non-empty string")
-    return _indeterminate_outcome(
-        receipt_dir=receipt_dir,
-        prepared_path=Path(prepared_path),
-        prepared=prepared,
-        finding=finding_text,
-        observed=observed_after_bytes,
-        uncertainty=uncertainty,
-    )
+    with _subject_committed_transaction_lock(prepared_path) as authority:
+        prepared, parent_fd = authority
+        return _indeterminate_prepared_recovery_locked(
+            prepared_path=prepared_path,
+            prepared=prepared,
+            parent_fd=parent_fd,
+            finding=finding,
+            observed_after_bytes=observed_after_bytes,
+            uncertainty=uncertainty,
+        )
 
 
 def commit_prepared_recovery(
@@ -627,37 +1350,69 @@ def commit_prepared_recovery(
     :class:`AtomicWriteError` and never creates a conflicting second terminal.
     """
 
+    with _subject_committed_transaction_lock(prepared_path) as authority:
+        prepared, parent_fd = authority
+        return _commit_prepared_recovery_locked(
+            prepared_path=prepared_path,
+            prepared=prepared,
+            parent_fd=parent_fd,
+            observed_after_bytes=observed_after_bytes,
+        )
+
+
+def _commit_prepared_recovery_locked(
+    *,
+    prepared_path: Path,
+    prepared: Mapping[str, Any],
+    parent_fd: int | None,
+    observed_after_bytes: bytes,
+) -> dict[str, Any]:
+    """Finalize while the prepared transaction inode is exclusively locked."""
+
     receipt_dir, prepared, committed_path, _indeterminate_path = (
-        _prepared_for_finalize(prepared_path)
+        _prepared_for_finalize_record(
+            prepared_path,
+            prepared,
+            parent_fd=parent_fd,
+        )
     )
     if not isinstance(observed_after_bytes, bytes):
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
+        return _indeterminate_outcome(
+            receipt_dir=receipt_dir,
+            prepared_path=Path(prepared_path),
+            prepared=prepared,
             finding="post-commit readback has an invalid type",
             uncertainty={
                 "error_type": "TypeError",
                 "message": "observed_after_bytes must be bytes",
             },
+            parent_fd=parent_fd,
         )
 
     try:
         observed_identity = _digest_envelope(observed_after_bytes)
     except (TypeError, ValueError) as exc:
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
+        return _indeterminate_outcome(
+            receipt_dir=receipt_dir,
+            prepared_path=Path(prepared_path),
+            prepared=prepared,
             finding=_exception_finding(
                 "post-commit subject is not valid JSON", exc
             ),
-            observed_after_bytes=observed_after_bytes,
+            observed=observed_after_bytes,
             uncertainty=_uncertainty_payload(exc),
+            parent_fd=parent_fd,
         )
     if observed_identity != prepared["after"]:
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
+        return _indeterminate_outcome(
+            receipt_dir=receipt_dir,
+            prepared_path=Path(prepared_path),
+            prepared=prepared,
             finding=(
                 "post-commit readback does not match the exact predicted after bytes"
             ),
-            observed_after_bytes=observed_after_bytes,
+            observed=observed_after_bytes,
+            parent_fd=parent_fd,
         )
 
     committed = _terminal_base(prepared, "committed")
@@ -665,21 +1420,70 @@ def commit_prepared_recovery(
     committed["retry_safe"] = False
     committed_record = _with_self_digest(committed)
     try:
-        published = _publish_record(committed_path, committed_record)
+        published = _publish_record(
+            committed_path,
+            committed_record,
+            parent_fd=parent_fd,
+        )
     except AtomicWriteError as exc:
         if exc.committed:
-            # The immutable terminal entry is visible but its directory fsync
-            # failed.  Preserve the typed, non-retry-safe strict outcome; a
-            # competing terminal record must never be created beside it.
-            raise
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
+            raise RecoveryReceiptError(
+                "subject committed and its committed witness crossed the "
+                "publication point, but durability could not be confirmed",
+                stage="committed-receipt-publication",
+                committed=True,
+                retry_safe=False,
+                receipt_committed=True,
+            ) from exc
+        return _indeterminate_outcome(
+            receipt_dir=receipt_dir,
+            prepared_path=Path(prepared_path),
+            prepared=prepared,
             finding=_exception_finding(
                 "committed witness publication failed before its commit point",
                 exc,
             ),
-            observed_after_bytes=observed_after_bytes,
+            observed=observed_after_bytes,
             uncertainty=_uncertainty_payload(exc),
+            parent_fd=parent_fd,
+        )
+    except RecoveryReceiptError:
+        # A successful exclusive publication followed by uncertain readback
+        # already owns the committed terminal namespace.  Never attempt the
+        # opposing terminal name.
+        raise
+    except OSError as exc:
+        try:
+            committed_visible = _entry_exists(committed_path, parent_fd)
+        except OSError as visibility_exc:
+            raise RecoveryReceiptError(
+                "subject committed; committed witness publication failed and "
+                "terminal visibility could not be determined "
+                f"({exc}; visibility probe: {visibility_exc})",
+                stage="committed-receipt-publication",
+                committed=True,
+                retry_safe=False,
+                receipt_committed=None,
+            ) from visibility_exc
+        if committed_visible:
+            raise RecoveryReceiptError(
+                "subject committed and a committed witness may be visible, "
+                "but publication could not be confirmed",
+                stage="committed-receipt-publication",
+                committed=True,
+                retry_safe=False,
+                receipt_committed=None,
+            ) from exc
+        return _indeterminate_outcome(
+            receipt_dir=receipt_dir,
+            prepared_path=Path(prepared_path),
+            prepared=prepared,
+            finding=_exception_finding(
+                "committed witness publication failed", exc
+            ),
+            observed=observed_after_bytes,
+            uncertainty=_uncertainty_payload(exc),
+            parent_fd=parent_fd,
         )
     return {
         "status": "committed",
@@ -689,6 +1493,114 @@ def commit_prepared_recovery(
         "terminal_path": str(committed_path),
         "receipt_digest": published["receipt_digest"],
     }
+
+
+def _execute_prepared_recovery_locked(
+    *,
+    prepared_path: Path,
+    prepared: Mapping[str, Any],
+    parent_fd: int | None,
+    before_bytes: bytes,
+    mutate_subject: Callable[[], None],
+    read_subject: Callable[[], bytes],
+) -> dict[str, Any]:
+    """Run CAS, subject callback, observation, and terminal under one lock."""
+
+    # Reject a terminal that raced preparation but won before this executor
+    # acquired the transaction lock.  Once this check passes, the same lock is
+    # retained through the subject commit and terminal receipt publication.
+    _prepared_for_finalize_record(
+        prepared_path,
+        prepared,
+        parent_fd=parent_fd,
+        subject_committed=False,
+    )
+
+    # This is the compare-and-swap boundary for the subject's exact byte
+    # identity.  Recovery callers also hold their subject/store lock around the
+    # executor; do not insert fallible work between this read/compare and the
+    # callback.  Semantic equivalence is deliberately insufficient because the
+    # prepared WAL binds raw bytes as the mutation precondition.
+    try:
+        observed_before = read_subject()
+    except Exception as exc:
+        raise RecoveryReceiptError(
+            "prepared recovery could not read the subject before its raw CAS",
+            stage="subject-before-cas",
+            committed=False,
+            retry_safe=True,
+            receipt_committed=True,
+        ) from exc
+    if not isinstance(observed_before, bytes):
+        raise RecoveryReceiptError(
+            "prepared recovery subject raw CAS requires bytes",
+            stage="subject-before-cas",
+            committed=False,
+            retry_safe=True,
+            receipt_committed=True,
+        )
+    if not hmac.compare_digest(observed_before, before_bytes):
+        raise RecoveryReceiptError(
+            "prepared recovery subject drifted from the exact before bytes",
+            stage="subject-before-cas",
+            committed=False,
+            retry_safe=True,
+            receipt_committed=True,
+        )
+
+    try:
+        mutate_subject()
+    except AtomicWriteError as exc:
+        if not exc.committed:
+            raise
+        observed: bytes | None = None
+        try:
+            observed = read_subject()
+        except Exception:
+            pass
+        return _indeterminate_prepared_recovery_locked(
+            prepared_path=prepared_path,
+            prepared=prepared,
+            parent_fd=parent_fd,
+            finding=_exception_finding(
+                "subject publication crossed its commit point but durability "
+                "could not be confirmed",
+                exc,
+            ),
+            observed_after_bytes=observed,
+            uncertainty=_uncertainty_payload(exc),
+        )
+
+    try:
+        observed_after = read_subject()
+    except Exception as exc:
+        return _indeterminate_prepared_recovery_locked(
+            prepared_path=prepared_path,
+            prepared=prepared,
+            parent_fd=parent_fd,
+            finding=_exception_finding(
+                "post-commit readback unavailable after subject callback returned",
+                exc,
+            ),
+            uncertainty=_uncertainty_payload(exc),
+        )
+
+    if not isinstance(observed_after, bytes):
+        exc = TypeError("read_subject must return bytes")
+        return _indeterminate_prepared_recovery_locked(
+            prepared_path=prepared_path,
+            prepared=prepared,
+            parent_fd=parent_fd,
+            finding=_exception_finding("post-commit readback has an invalid type", exc),
+            uncertainty=_uncertainty_payload(exc),
+        )
+
+    return _commit_prepared_recovery_locked(
+        prepared_path=prepared_path,
+        prepared=prepared,
+        parent_fd=parent_fd,
+        observed_after_bytes=observed_after,
+    )
 
 
 def execute_recovery(
@@ -736,83 +1648,168 @@ def execute_recovery(
         recorded_at=recorded_at,
         commit_witness=commit_witness,
     )
-    validate_receipt(prepared_path)
-
-    try:
-        mutate_subject()
-    except AtomicWriteError as exc:
-        if not exc.committed:
-            raise
-        observed: bytes | None = None
-        try:
-            observed = read_subject()
-        except Exception:
-            pass
-        return indeterminate_prepared_recovery(
+    with _subject_precommit_transaction_lock(prepared_path) as authority:
+        prepared, parent_fd = authority
+        return _execute_prepared_recovery_locked(
             prepared_path=prepared_path,
-            finding=_exception_finding(
-                "subject publication crossed its commit point but durability "
-                "could not be confirmed",
-                exc,
-            ),
-            observed_after_bytes=observed,
-            uncertainty=_uncertainty_payload(exc),
+            prepared=prepared,
+            parent_fd=parent_fd,
+            before_bytes=before_bytes,
+            mutate_subject=mutate_subject,
+            read_subject=read_subject,
         )
-
-    try:
-        observed_after = read_subject()
-    except Exception as exc:
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
-            finding=_exception_finding(
-                "post-commit readback unavailable after subject callback returned",
-                exc,
-            ),
-            uncertainty=_uncertainty_payload(exc),
-        )
-
-    if not isinstance(observed_after, bytes):
-        exc = TypeError("read_subject must return bytes")
-        return indeterminate_prepared_recovery(
-            prepared_path=prepared_path,
-            finding=_exception_finding("post-commit readback has an invalid type", exc),
-            uncertainty=_uncertainty_payload(exc),
-        )
-
-    return commit_prepared_recovery(
-        prepared_path=prepared_path,
-        observed_after_bytes=observed_after,
-    )
 
 
 def verify_receipt_store(receipt_dir: Path) -> list[str]:
     """Return integrity findings for an immutable recovery receipt directory."""
 
     receipt_dir = Path(receipt_dir)
-    if not receipt_dir.exists():
-        return []
-    if not receipt_dir.is_dir():
-        return [f"{receipt_dir}: recovery receipt store is not a directory"]
-
     findings: list[str] = []
     records: dict[str, dict[str, tuple[Path, dict[str, Any]]]] = {}
-    entries = sorted(receipt_dir.iterdir(), key=lambda item: item.name)
-    for path in entries:
-        if not path.name.endswith(".json"):
-            findings.append(f"{path}: unexpected entry in recovery receipt store")
-            continue
-        try:
-            record = validate_receipt(path)
-        except (OSError, ValueError, TypeError) as exc:
-            findings.append(f"{path}: invalid recovery receipt: {exc}")
-            continue
+    absolute_store = _absolute_lexical(receipt_dir)
+
+    def add_record(path: Path, record: dict[str, Any]) -> None:
         receipt_id = str(record["receipt_id"])
         state = str(record["state"])
         group = records.setdefault(receipt_id, {})
         if state in group:
             findings.append(f"{path}: duplicate {state} record for {receipt_id}")
-            continue
+            return
         group[state] = (path, record)
+
+    if os.name == "posix":
+        store_fd: int | None = None
+        try:
+            absolute_store, store_fd = _open_posix_directory(absolute_store)
+        except FileNotFoundError:
+            return []
+        except (OSError, ValueError) as exc:
+            return [f"{receipt_dir}: unsafe recovery receipt store path: {exc}"]
+        try:
+            store_identity = os.fstat(store_fd)
+        except OSError as exc:
+            findings.append(
+                f"{receipt_dir}: recovery receipt store identity unavailable: {exc}"
+            )
+            descriptor = store_fd
+            store_fd = None
+            try:
+                os.close(descriptor)
+            except OSError as close_exc:
+                findings.append(
+                    f"{receipt_dir}: cannot close recovery receipt store: "
+                    f"{close_exc}"
+                )
+            return findings
+        try:
+            try:
+                names = sorted(os.listdir(store_fd))
+            except OSError as exc:
+                findings.append(f"{receipt_dir}: cannot enumerate receipt store: {exc}")
+                names = []
+            for name in names:
+                path = absolute_store / name
+                if not name.endswith(".json"):
+                    findings.append(
+                        f"{path}: unexpected entry in recovery receipt store"
+                    )
+                    continue
+                try:
+                    record = _validate_receipt_at(store_fd, name, path)
+                except (OSError, ValueError, TypeError) as exc:
+                    findings.append(f"{path}: invalid recovery receipt: {exc}")
+                    continue
+                add_record(path, record)
+
+            try:
+                names_after = sorted(os.listdir(store_fd))
+            except OSError as exc:
+                findings.append(
+                    f"{receipt_dir}: cannot re-enumerate receipt store: {exc}"
+                )
+            else:
+                if names_after != names:
+                    findings.append(
+                        f"{receipt_dir}: recovery receipt store contents changed "
+                        "during verification"
+                    )
+
+            reopened_fd: int | None = None
+            try:
+                reopened_path, reopened_fd = _open_posix_directory(absolute_store)
+                if reopened_path != absolute_store or not _same_inode(
+                    store_identity, os.fstat(reopened_fd)
+                ):
+                    findings.append(
+                        f"{receipt_dir}: recovery receipt store identity changed "
+                        "during verification"
+                    )
+            except (OSError, ValueError) as exc:
+                findings.append(
+                    f"{receipt_dir}: recovery receipt store path changed or became an alias: {exc}"
+                )
+            finally:
+                if reopened_fd is not None:
+                    os.close(reopened_fd)
+        finally:
+            descriptor = store_fd
+            store_fd = None
+            try:
+                os.close(descriptor)
+            except OSError as exc:
+                findings.append(
+                    f"{receipt_dir}: cannot close recovery receipt store: {exc}"
+                )
+    else:
+        try:
+            before_snapshot = _fallback_directory_snapshot(absolute_store)
+        except FileNotFoundError:
+            return []
+        except (OSError, ValueError) as exc:
+            return [f"{receipt_dir}: unsafe recovery receipt store path: {exc}"]
+        try:
+            entries = sorted(absolute_store.iterdir(), key=lambda item: item.name)
+        except OSError as exc:
+            findings.append(f"{receipt_dir}: cannot enumerate receipt store: {exc}")
+            entries = []
+        for path in entries:
+            if not path.name.endswith(".json"):
+                findings.append(f"{path}: unexpected entry in recovery receipt store")
+                continue
+            try:
+                record = validate_receipt(path)
+            except (OSError, ValueError, TypeError) as exc:
+                findings.append(f"{path}: invalid recovery receipt: {exc}")
+                continue
+            add_record(path, record)
+        try:
+            entries_after = sorted(
+                absolute_store.iterdir(),
+                key=lambda item: item.name,
+            )
+        except OSError as exc:
+            findings.append(
+                f"{receipt_dir}: cannot re-enumerate receipt store: {exc}"
+            )
+        else:
+            if [entry.name for entry in entries_after] != [
+                entry.name for entry in entries
+            ]:
+                findings.append(
+                    f"{receipt_dir}: recovery receipt store contents changed "
+                    "during verification"
+                )
+        try:
+            after_snapshot = _fallback_directory_snapshot(absolute_store)
+        except (OSError, ValueError) as exc:
+            findings.append(
+                f"{receipt_dir}: recovery receipt store path changed or became an alias: {exc}"
+            )
+        else:
+            if before_snapshot != after_snapshot:
+                findings.append(
+                    f"{receipt_dir}: recovery receipt store identity changed during verification"
+                )
 
     common = (
         "operation",
@@ -835,6 +1832,11 @@ def verify_receipt_store(receipt_dir: Path) -> list[str]:
                 f"{receipt_id}: conflicting committed and indeterminate terminal witnesses"
             )
         if prepared_pair is None:
+            continue
+        if not terminals:
+            findings.append(
+                f"{receipt_id}: unresolved prepared recovery has no terminal witness"
+            )
             continue
         _prepared_path, prepared = prepared_pair
         for state in terminals:

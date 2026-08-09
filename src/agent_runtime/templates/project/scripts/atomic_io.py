@@ -139,7 +139,7 @@ def _same_file(left: Any, right: Any) -> bool:
     return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
 
 
-def _posix_parent_fd(parent: Path) -> int:
+def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
     """Open/create ``parent`` through a no-follow walk from the filesystem root."""
     root = Path(parent.anchor)
     flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_DIRECTORY", 0)
@@ -175,6 +175,17 @@ def _posix_parent_fd(parent: Path) -> int:
                 metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
 
             _validate_parent_metadata(current, metadata)
+            if strict_creation_fsync:
+                try:
+                    os.fsync(descriptor)
+                except OSError as exc:
+                    raise AtomicWriteError(
+                        "atomic write failed before destination commit while "
+                        "verifying parent directory-entry durability",
+                        stage="parent-create-fsync",
+                        committed=False,
+                        retry_safe=True,
+                    ) from exc
             try:
                 child = os.open(component, flags | nofollow, dir_fd=descriptor)
             except OSError as exc:
@@ -249,13 +260,20 @@ _SECURE_POSIX_PARENT = _supports_secure_posix_parent()
 
 
 @contextmanager
-def _direct_parent(path: Path) -> Iterator[tuple[Path, int | None]]:
+def _direct_parent(
+    path: Path,
+    *,
+    strict_creation_fsync: bool,
+) -> Iterator[tuple[Path, int | None]]:
     absolute = _absolute_lexical(Path(path))
     parent = absolute.parent
     if os.name == "posix":
         if not _SECURE_POSIX_PARENT:
             raise _unsafe_parent(parent, "platform lacks secure directory-relative operations")
-        descriptor = _posix_parent_fd(parent)
+        descriptor = _posix_parent_fd(
+            parent,
+            strict_creation_fsync=strict_creation_fsync,
+        )
         try:
             yield absolute, descriptor
         finally:
@@ -444,7 +462,10 @@ def _write_text(
     exclusive: bool,
 ) -> PublishedFileIdentity | None:
     policy = _require_fsync_policy(fsync_policy)
-    with _direct_parent(path) as (absolute, parent_fd):
+    with _direct_parent(
+        path,
+        strict_creation_fsync=fsync and policy == "strict",
+    ) as (absolute, parent_fd):
         descriptor: int | None = None
         sidecar: str | None = None
         published_identity: PublishedFileIdentity | None = None

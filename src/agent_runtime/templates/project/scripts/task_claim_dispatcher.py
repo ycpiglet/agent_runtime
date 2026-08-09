@@ -100,6 +100,9 @@ SECURITY_SERVICE_GATE_SHA256 = (
 )
 SECURITY_SERVICE_GATE_MAX_BYTES = 64 * 1024
 SECURITY_SERVICE_PROFILE_STATE_MAX_BYTES = 128 * 1024
+WORK_ITEM_MAX_BYTES = 512 * 1024
+CANONICAL_TASK_NAMESPACE_MAX_ENTRIES = 4096
+CANONICAL_UNIT_NAMESPACE_MAX_ENTRIES = 4096
 SECURITY_SERVICE_PROFILE_MARKERS = (
     ".allimbot.json",
     "agents/project/SECURITY-SERVICE-POLICY.json",
@@ -573,7 +576,102 @@ def _active_task_claim_path(
 
 
 def _is_explicit_overlay(payload: dict[str, Any]) -> bool:
-    return payload.get("overlay") is True
+    """Recognize only the immutable shape emitted by ``role_routing``.
+
+    ``overlay`` is claim-controlled data, so the marker alone is not an
+    authority boundary.  Genuine overlays have a deterministic worker,
+    callsite, pane, artifact, empty-scope, and persistence shape and omit all
+    direct-worker authority fields.  Keep that legacy wire intact while making
+    a direct claim with a self-added boolean take the canonical identity path.
+    """
+
+    if (
+        payload.get("overlay") is not True
+        or payload.get("allow_parallel_task_set") is not True
+        or payload.get("team_id") != "agent-runtime-core"
+        or payload.get("persistence")
+        != {"mode": "working_tree", "scm_commit_authorized": False}
+    ):
+        return False
+    if any(
+        field in payload
+        for field in (
+            "worktree_path",
+            "branch",
+            "project_id",
+            "unit_id",
+            "unit_spec",
+            "target_files",
+            "stop_condition",
+        )
+    ):
+        return False
+
+    scalar_fields = (
+        "claim_id",
+        "task_id",
+        "agent_role",
+        "agent_instance_id",
+        "display_name",
+        "callsite_id",
+        "pane_id",
+        "mode",
+        "claimed_at",
+        "handoff_path",
+        "log_path",
+        "parent_task_id",
+        "parent_task_set_id",
+        "task_set_id",
+        "active_scope",
+    )
+    if any(not isinstance(payload.get(field), str) for field in scalar_fields):
+        return False
+    claim_id = str(payload["claim_id"])
+    task_id = str(payload["task_id"])
+    agent_role = str(payload["agent_role"])
+    mode = str(payload["mode"])
+    claimed_at = str(payload["claimed_at"])
+    if not all((claim_id, task_id, agent_role, mode, claimed_at)):
+        return False
+    if not claim_store.valid_claim_id(claim_id):
+        return False
+    if payload["agent_instance_id"] != f"{agent_role}-{claim_id}":
+        return False
+    if payload["display_name"] != f"{agent_role}@{mode}":
+        return False
+    if payload["pane_id"] != f"overlay:{claim_id}":
+        return False
+    if payload["handoff_path"] != (
+        f"agents/runtime/task_claims/{claim_id}.handoff.md"
+    ):
+        return False
+    if payload["log_path"] != f"agents/runtime/task_claims/{claim_id}.log.md":
+        return False
+    if payload["active_scope"] != payload["task_set_id"]:
+        return False
+
+    anchor = (
+        payload["parent_task_id"]
+        or payload["parent_task_set_id"]
+        or task_id
+    )
+    callsite_parts = str(payload["callsite_id"]).split(":")
+    if (
+        len(callsite_parts) != 4
+        or callsite_parts[0] != "role-routing"
+        or not callsite_parts[1]
+        or callsite_parts[2] != anchor
+        or callsite_parts[3] != agent_role
+    ):
+        return False
+    return payload.get("scope_binding") == claim_store.scope_binding(
+        task_id=task_id,
+        unit_id=None,
+        unit_spec=None,
+        target_files=[],
+        stop_condition=None,
+        bound_at=claimed_at,
+    )
 
 
 def _resolved_worktree(root: Path, value: str) -> Path:
@@ -987,18 +1085,119 @@ def _unit_spec_escalation_triggers(root: Path, unit_spec: str) -> list[str]:
 
 
 def _work_item_meta(path: Path) -> dict[str, Any]:
-    if not path.is_file():
-        return {}
     try:
-        meta, _ = backlog_board.parse_frontmatter(path.read_text(encoding="utf-8"))
-    except OSError:
+        before = path.lstat()
+    except FileNotFoundError:
         return {}
+    except OSError as exc:
+        raise ValueError("canonical work identity record is unavailable") from exc
+    if (
+        _is_path_alias(before)
+        or not stat.S_ISREG(before.st_mode)
+        or before.st_size > WORK_ITEM_MAX_BYTES
+    ):
+        raise ValueError(
+            "canonical work identity record must be a bounded direct regular file"
+        )
+    try:
+        with path.open("rb") as handle:
+            opened_before = os.fstat(handle.fileno())
+            payload = handle.read(WORK_ITEM_MAX_BYTES + 1)
+            opened_after = os.fstat(handle.fileno())
+        after = path.lstat()
+    except OSError as exc:
+        raise ValueError("canonical work identity record is unreadable") from exc
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, opened_before, opened_after, after)
+    }
+    if (
+        len(payload) > WORK_ITEM_MAX_BYTES
+        or len(signatures) != 1
+        or any(_is_path_alias(item) for item in (opened_before, opened_after, after))
+    ):
+        raise ValueError(
+            "canonical work identity record changed during direct validation"
+        )
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeError as exc:
+        raise ValueError("canonical work identity record is not UTF-8") from exc
+    meta, _ = backlog_board.parse_frontmatter(text)
     return dict(meta)
 
 
+def _direct_repo_path(
+    root: Path,
+    value: str | Path,
+    label: str,
+    *,
+    final_kind: str,
+) -> Path | None:
+    """Resolve one lexical repo-relative path without following aliases."""
+
+    relative = Path(value)
+    if (
+        relative.is_absolute()
+        or not relative.parts
+        or ".." in relative.parts
+    ):
+        raise ValueError(f"{label} must be repo-relative and direct")
+    current = Path(os.path.abspath(os.fspath(root)))
+    try:
+        root_meta = current.lstat()
+    except OSError as exc:
+        raise ValueError(f"{label} repository root is unavailable") from exc
+    if _is_path_alias(root_meta) or not stat.S_ISDIR(root_meta.st_mode):
+        raise ValueError(f"{label} repository root must be a direct directory")
+    for index, component in enumerate(relative.parts):
+        current = current / component
+        try:
+            metadata = current.lstat()
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            raise ValueError(f"{label} path is unavailable") from exc
+        if _is_path_alias(metadata):
+            raise ValueError(f"{label} must not use a symlink or reparse alias")
+        is_last = index == len(relative.parts) - 1
+        if not is_last and not stat.S_ISDIR(metadata.st_mode):
+            raise ValueError(f"{label} ancestor must be a direct directory")
+        if is_last:
+            expected_mode = (
+                stat.S_ISREG(metadata.st_mode)
+                if final_kind == "file"
+                else stat.S_ISDIR(metadata.st_mode)
+            )
+            if not expected_mode:
+                raise ValueError(
+                    f"{label} must be a direct regular {final_kind}"
+                )
+    return current
+
+
+def _repo_work_item_meta(
+    root: Path,
+    value: str | Path,
+    label: str,
+) -> dict[str, Any]:
+    path = _direct_repo_path(root, value, label, final_kind="file")
+    return _work_item_meta(path) if path is not None else {}
+
+
 def _task_meta(root: Path, task_id: str) -> dict[str, Any]:
-    return _work_item_meta(
-        root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    if not task_id or Path(task_id).name != task_id:
+        raise ValueError("canonical task identity task_id is invalid")
+    return _repo_work_item_meta(
+        root,
+        Path("agents") / "lead_engineer" / "tasks" / f"{task_id}.md",
+        "canonical task identity record",
     )
 
 
@@ -1006,10 +1205,198 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
     value = str(unit_spec or "").strip()
     if not value:
         return {}
-    path = Path(value)
-    if not path.is_absolute():
-        path = root / path
-    return _work_item_meta(path)
+    return _repo_work_item_meta(
+        root,
+        value,
+        "canonical unit identity record",
+    )
+
+
+def _canonical_task_namespace_records(
+    root: Path,
+) -> list[tuple[Path, dict[str, Any]]]:
+    """Read the complete direct task namespace with an explicit size bound."""
+
+    relative_dir = Path("agents") / "lead_engineer" / "tasks"
+    directory = _direct_repo_path(
+        root,
+        relative_dir,
+        "canonical task identity namespace",
+        final_kind="directory",
+    )
+    if directory is None:
+        return []
+    before = directory.lstat()
+    names: list[str] = []
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if len(names) >= CANONICAL_TASK_NAMESPACE_MAX_ENTRIES:
+                    raise ValueError(
+                        "canonical task identity namespace exceeds its bounded limit"
+                    )
+                names.append(entry.name)
+    except OSError as exc:
+        raise ValueError(
+            "canonical task identity namespace is unreadable"
+        ) from exc
+    records: list[tuple[Path, dict[str, Any]]] = []
+    for name in sorted(names, key=str.casefold):
+        if not name.endswith(".md"):
+            continue
+        relative = relative_dir / name
+        meta = _repo_work_item_meta(
+            root,
+            relative,
+            "canonical task identity namespace record",
+        )
+        if meta:
+            records.append((relative, meta))
+    after = directory.lstat()
+    before_signature = (
+        before.st_dev,
+        before.st_ino,
+        before.st_mode,
+        before.st_size,
+        before.st_mtime_ns,
+    )
+    after_signature = (
+        after.st_dev,
+        after.st_ino,
+        after.st_mode,
+        after.st_size,
+        after.st_mtime_ns,
+    )
+    if (
+        before_signature != after_signature
+        or _is_path_alias(after)
+        or not stat.S_ISDIR(after.st_mode)
+    ):
+        raise ValueError(
+            "canonical task identity namespace changed during validation"
+        )
+    return records
+
+
+def _assert_unique_task_display_authority(root: Path, task_id: str) -> None:
+    expected = (
+        Path("agents") / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    matches = [
+        path
+        for path, meta in _canonical_task_namespace_records(root)
+        if any(
+            isinstance(meta.get(field), str)
+            and meta[field].strip() == task_id
+            for field in ("id", "display_id", "work_id")
+        )
+    ]
+    if matches != [expected]:
+        refs = ", ".join(path.as_posix() for path in matches) or "none"
+        raise ValueError(
+            "canonical task identity display-ID authority is ambiguous: "
+            f"{task_id} declared by {refs}"
+        )
+
+
+def _canonical_unit_namespace_records(
+    root: Path,
+    task_id: str,
+) -> list[tuple[Path, dict[str, Any]]]:
+    """Read one task's complete direct unit namespace with a hard bound."""
+
+    if not task_id or Path(task_id).name != task_id:
+        raise ValueError("canonical unit identity task_id is invalid")
+    relative_dir = (
+        Path("agents")
+        / "lead_engineer"
+        / "tasks"
+        / "units"
+        / task_id
+    )
+    directory = _direct_repo_path(
+        root,
+        relative_dir,
+        "canonical unit identity namespace",
+        final_kind="directory",
+    )
+    if directory is None:
+        return []
+    before = directory.lstat()
+    names: list[str] = []
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if len(names) >= CANONICAL_UNIT_NAMESPACE_MAX_ENTRIES:
+                    raise ValueError(
+                        "canonical unit identity namespace exceeds its bounded limit"
+                    )
+                names.append(entry.name)
+    except OSError as exc:
+        raise ValueError(
+            "canonical unit identity namespace is unreadable"
+        ) from exc
+    records: list[tuple[Path, dict[str, Any]]] = []
+    for name in sorted(names, key=str.casefold):
+        if not name.endswith(".md"):
+            continue
+        relative = relative_dir / name
+        meta = _repo_work_item_meta(
+            root,
+            relative,
+            "canonical unit identity namespace record",
+        )
+        if meta:
+            records.append((relative, meta))
+    after = directory.lstat()
+    before_signature = (
+        before.st_dev,
+        before.st_ino,
+        before.st_mode,
+        before.st_size,
+        before.st_mtime_ns,
+    )
+    after_signature = (
+        after.st_dev,
+        after.st_ino,
+        after.st_mode,
+        after.st_size,
+        after.st_mtime_ns,
+    )
+    if (
+        before_signature != after_signature
+        or _is_path_alias(after)
+        or not stat.S_ISDIR(after.st_mode)
+    ):
+        raise ValueError(
+            "canonical unit identity namespace changed during validation"
+        )
+    return records
+
+
+def _assert_unique_unit_display_authority(
+    root: Path,
+    *,
+    task_id: str,
+    unit_id: str,
+    unit_spec: str,
+) -> None:
+    expected = Path(unit_spec)
+    matches = [
+        path
+        for path, meta in _canonical_unit_namespace_records(root, task_id)
+        if any(
+            isinstance(meta.get(field), str)
+            and meta[field].strip() == unit_id
+            for field in ("unit_id", "work_id")
+        )
+    ]
+    if matches != [expected]:
+        refs = ", ".join(path.as_posix() for path in matches) or "none"
+        raise ValueError(
+            "canonical unit identity display-ID authority is ambiguous: "
+            f"{unit_id} declared by {refs}"
+        )
 
 
 def _identity_scalar(meta: dict[str, Any], field: str, label: str) -> str:
@@ -1023,27 +1410,59 @@ def _identity_scalar(meta: dict[str, Any], field: str, label: str) -> str:
     return value.strip()
 
 
+def _required_identity_scalar(
+    meta: dict[str, Any],
+    field: str,
+    label: str,
+) -> str:
+    value = _identity_scalar(meta, field, label)
+    if not value:
+        raise ValueError(
+            f"canonical {label} identity field {field} is missing"
+        )
+    return value
+
+
+def _canonical_work_uuid(value: str, label: str) -> str:
+    try:
+        parsed = uuid.UUID(value)
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError(f"canonical {label} identity UUID is invalid") from exc
+    if parsed.version not in {4, 7} or str(parsed) != value:
+        raise ValueError(
+            f"canonical {label} identity UUID must be canonical v4 or v7"
+        )
+    return value
+
+
 def _canonical_task_uid(root: Path, task_id: str) -> str:
     """Resolve the durable UUID paired with one canonical task display ID.
 
-    Missing task metadata remains a supported legacy shape and therefore binds
-    an explicit empty UUID. Once a UUID has been bound, removing or replacing
-    it changes the binding and every lifecycle mutation fails closed.
+    Direct work is never allowed to manufacture identity from a reusable
+    display ID.  The canonical task record, all of its display-ID aliases, and
+    both UUID fields must be present and mutually consistent.
     """
 
+    if not task_id:
+        raise ValueError("canonical task identity task_id is missing")
     meta = _task_meta(root, task_id)
     if not meta:
-        return ""
+        raise ValueError(
+            f"canonical task identity record is missing for {task_id}"
+        )
+    _assert_unique_task_display_authority(root, task_id)
     for field in ("id", "display_id", "work_id"):
-        recorded = _identity_scalar(meta, field, "task")
-        if recorded and recorded != task_id:
+        recorded = _required_identity_scalar(meta, field, "task")
+        if recorded != task_id:
             raise ValueError(
                 f"canonical task identity changed: {field}={recorded!r}, "
                 f"expected {task_id!r}"
             )
-    task_uid = _identity_scalar(meta, "task_uid", "task")
-    work_uid = _identity_scalar(meta, "work_uid", "task")
-    if task_uid and work_uid and task_uid != work_uid:
+    task_uid = _required_identity_scalar(meta, "task_uid", "task")
+    work_uid = _required_identity_scalar(meta, "work_uid", "task")
+    _canonical_work_uuid(task_uid, "task")
+    _canonical_work_uuid(work_uid, "task work")
+    if task_uid != work_uid:
         raise ValueError(
             "canonical task identity is inconsistent: task_uid and work_uid differ"
         )
@@ -1061,24 +1480,41 @@ def _canonical_unit_work_uid(
 
     if not unit_id:
         return ""
+    canonical_spec = _canonical_unit_spec(task_id, unit_id)
+    if str(unit_spec or "").strip() != canonical_spec:
+        raise ValueError(
+            "canonical unit identity requires unit_spec "
+            f"{canonical_spec}"
+        )
     meta = _unit_meta(root, unit_spec)
     if not meta:
-        return ""
+        raise ValueError(
+            f"canonical unit identity record is missing for {unit_id}"
+        )
+    _assert_unique_unit_display_authority(
+        root,
+        task_id=task_id,
+        unit_id=unit_id,
+        unit_spec=unit_spec,
+    )
     for field in ("unit_id", "work_id"):
-        recorded = _identity_scalar(meta, field, "unit")
-        if recorded and recorded != unit_id:
+        recorded = _required_identity_scalar(meta, field, "unit")
+        if recorded != unit_id:
             raise ValueError(
                 f"canonical unit identity changed: {field}={recorded!r}, "
                 f"expected {unit_id!r}"
             )
     for field in ("task_id", "parent_id"):
-        recorded = _identity_scalar(meta, field, "unit parent")
-        if recorded and recorded != task_id:
+        recorded = _required_identity_scalar(meta, field, "unit parent")
+        if recorded != task_id:
             raise ValueError(
                 f"canonical unit identity changed: {field}={recorded!r}, "
                 f"expected {task_id!r}"
             )
-    return _identity_scalar(meta, "work_uid", "unit")
+    return _canonical_work_uuid(
+        _required_identity_scalar(meta, "work_uid", "unit"),
+        "unit work",
+    )
 
 
 def _work_identity_binding_for_claim(
@@ -3720,16 +4156,7 @@ def _complete_release(
         triggers = list(claim.get("escalation_triggers") or []) + [
             t for t in (claim.get("tags") or []) if t in model_routing.ESCALATION_TRIGGERS
         ]
-        overlay_marker = claim.get("overlay")
-        if isinstance(overlay_marker, str):
-            is_overlay = overlay_marker.strip().lower() not in {"", "0", "false", "no", "off", "none", "null"}
-        elif overlay_marker is None:
-            is_overlay = False
-        elif isinstance(overlay_marker, (bool, int, float)):
-            is_overlay = bool(overlay_marker)
-        else:
-            is_overlay = True
-        if not is_overlay and role_routing is not None:
+        if not _is_explicit_overlay(claim) and role_routing is not None:
             role_routing.route_review_pass(
                 root,
                 task_id=str(claim.get("task_id") or ""),
@@ -3964,6 +4391,8 @@ def _persist_claim_recovery(
     # that old snapshot cannot be compared byte-for-byte afterward.
     _assert_recovery_authority(root, inspection, operation)
     predicted_after = _claim_json_bytes(claim)
+    receipt_id = _new_recovery_receipt_id(operation)
+    receipt_dir = root / recovery_receipt.DEFAULT_RECEIPT_DIR
 
     def _mutate_subject() -> None:
         refreshed = claim_store.inspect_store(root)
@@ -3985,25 +4414,35 @@ def _persist_claim_recovery(
             )
         atomic_io.write_json_atomic(path, claim, fsync_policy="strict")
 
-    return recovery_receipt.execute_recovery(
-        receipt_dir=root / recovery_receipt.DEFAULT_RECEIPT_DIR,
-        receipt_id=_new_recovery_receipt_id(operation),
-        operation=operation,
-        subject_ref=_rel(root, path),
-        before_bytes=before_bytes,
-        predicted_after_bytes=predicted_after,
-        owner_id=owner,
-        reason=reason,
-        recorded_at=str(claim["recovered_at"]),
-        commit_witness=_claim_recovery_witness(
-            root=root,
-            path=path,
-            claim=claim,
+    try:
+        return recovery_receipt.execute_recovery(
+            receipt_dir=receipt_dir,
+            receipt_id=receipt_id,
             operation=operation,
-        ),
-        mutate_subject=_mutate_subject,
-        read_subject=path.read_bytes,
-    )
+            subject_ref=_rel(root, path),
+            before_bytes=before_bytes,
+            predicted_after_bytes=predicted_after,
+            owner_id=owner,
+            reason=reason,
+            recorded_at=str(claim["recovered_at"]),
+            commit_witness=_claim_recovery_witness(
+                root=root,
+                path=path,
+                claim=claim,
+                operation=operation,
+            ),
+            mutate_subject=_mutate_subject,
+            read_subject=path.read_bytes,
+        )
+    except recovery_receipt.RecoveryReceiptError as exc:
+        # Preserve the transaction identity across the typed exception seam.
+        # The receipt publisher deliberately raises instead of returning an
+        # outcome when its terminal publication cannot be confirmed.
+        exc.receipt_id = receipt_id
+        prepared_path = receipt_dir / f"{receipt_id}.prepared.json"
+        if os.path.lexists(prepared_path):
+            exc.prepared_path = prepared_path
+        raise
 
 
 def _recovery_receipt_view(
@@ -4026,6 +4465,43 @@ def _recovery_receipt_view(
         result["outcome_receipt_ref"] = terminal_ref
         result["receipt_ref"] = terminal_ref
     return result
+
+
+def _recovery_receipt_error_outcome(
+    exc: recovery_receipt.RecoveryReceiptError,
+    *,
+    receipt_id: str | None = None,
+    prepared_path: Path | None = None,
+) -> dict[str, Any]:
+    """Convert a crossed subject commit point into a non-retry-safe outcome."""
+
+    receipt_committed = exc.receipt_committed
+    if receipt_committed is True:
+        publication_state = "committed"
+    elif receipt_committed is False:
+        publication_state = "not_committed"
+    else:
+        publication_state = "unknown"
+    outcome: dict[str, Any] = {
+        "status": "indeterminate",
+        "retry_safe": False,
+        "stage": exc.stage,
+        "committed": exc.committed,
+        "receipt_committed": receipt_committed,
+        "receipt_publication_state": publication_state,
+        "finding": str(exc),
+    }
+    effective_receipt_id = receipt_id or getattr(exc, "receipt_id", None)
+    effective_prepared_path = prepared_path or getattr(
+        exc,
+        "prepared_path",
+        None,
+    )
+    if effective_receipt_id:
+        outcome["receipt_id"] = str(effective_receipt_id)
+    if effective_prepared_path:
+        outcome["prepared_path"] = Path(effective_prepared_path)
+    return outcome
 
 
 def _append_recovery_event(
@@ -4083,6 +4559,14 @@ def _emit_indeterminate_recovery(
         "retry_safe": False,
         "recovery_receipt": receipt,
     }
+    for key in (
+        "stage",
+        "committed",
+        "receipt_committed",
+        "receipt_publication_state",
+    ):
+        if key in outcome:
+            payload[key] = outcome[key]
     if path is not None:
         payload["path"] = _rel(root, path)
     finding = str(outcome.get("finding") or "").strip()
@@ -4164,6 +4648,8 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     exactly as found. It only supplies the missing fields so heartbeat and
     renew can reach the claim again.
     """
+    root = Path(args.root)
+    path: Path | None = None
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
@@ -4267,6 +4753,18 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 reason=reason,
                 before_bytes=before_bytes,
             )
+    except recovery_receipt.RecoveryReceiptError as exc:
+        if exc.committed and not exc.retry_safe:
+            return _emit_indeterminate_recovery(
+                args=args,
+                root=root,
+                path=path,
+                operation="adopt",
+                outcome=_recovery_receipt_error_outcome(exc),
+            )
+        detail = " ".join(str(exc).split())[:256] or "claim adoption unavailable"
+        print(f"claim adoption refused: {detail}", file=sys.stderr)
+        return 1
     except (
         claim_store.ClaimStoreError,
         OSError,
@@ -4287,7 +4785,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             operation="adopt",
             outcome=outcome,
         )
-    after_bytes = path.read_bytes()
+    after_bytes = _claim_json_bytes(claim)
     receipt = _recovery_receipt_view(root, outcome)
     audit = _append_recovery_event(
         root=root,
@@ -4321,6 +4819,8 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
     The claim file is preserved. This is not a release, not a completion, and
     grants no unit acceptance or release authority.
     """
+    root = Path(args.root)
+    path: Path | None = None
     try:
         owner = _owner_identity(args.owner_id)
         reason = _recovery_reason(args.reason)
@@ -4390,6 +4890,21 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 reason=reason,
                 before_bytes=before_bytes,
             )
+    except recovery_receipt.RecoveryReceiptError as exc:
+        if exc.committed and not exc.retry_safe:
+            return _emit_indeterminate_recovery(
+                args=args,
+                root=root,
+                path=path,
+                operation="terminalize",
+                outcome=_recovery_receipt_error_outcome(exc),
+            )
+        detail = (
+            " ".join(str(exc).split())[:256]
+            or "claim terminalization unavailable"
+        )
+        print(f"claim terminalization refused: {detail}", file=sys.stderr)
+        return 1
     except (
         claim_store.ClaimStoreError,
         OSError,
@@ -4410,7 +4925,7 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
             operation="terminalize",
             outcome=outcome,
         )
-    after_bytes = path.read_bytes()
+    after_bytes = _claim_json_bytes(claim)
     receipt = _recovery_receipt_view(root, outcome)
     audit = _append_recovery_event(
         root=root,
@@ -4447,6 +4962,9 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
     adopt_legacy_store() is the consumer sync path, which needs an
     agent_runtime.yml the runtime repository itself does not have.
     """
+    root = Path(args.root)
+    prepared_path: Path | None = None
+    activation_receipt_id: str | None = None
     try:
         # This is the third mutating recovery command, so it is owner-bound
         # like the other two. It lifts the whole store out of the fail-closed
@@ -4476,7 +4994,6 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
             )
             return 0
 
-        prepared_path: Path | None = None
         activation_plan: claim_store.ClaimStoreActivationPlan | None = None
         recorded_at = datetime.now(timezone.utc).astimezone().isoformat(
             timespec="seconds"
@@ -4485,7 +5002,7 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
         def _prepare_activation(
             plan: claim_store.ClaimStoreActivationPlan,
         ) -> None:
-            nonlocal prepared_path, activation_plan
+            nonlocal prepared_path, activation_plan, activation_receipt_id
             if prepared_path is not None or activation_plan is not None:
                 raise RuntimeError(
                     "claim-store activation precommit ran more than once"
@@ -4504,9 +5021,10 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                 _activation_subject_ref(root, subject.path)
                 for subject in plan.subjects
             ]
+            activation_receipt_id = _new_recovery_receipt_id("activate-store")
             prepared_path = recovery_receipt.prepare_recovery_receipt(
                 receipt_dir=root / recovery_receipt.DEFAULT_RECEIPT_DIR,
-                receipt_id=_new_recovery_receipt_id("activate-store"),
+                receipt_id=activation_receipt_id,
                 operation="activate-store",
                 subject_ref="claim-store:" + ",".join(logical_refs),
                 before_bytes=before_bytes,
@@ -4552,6 +5070,25 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                 prepared_path=prepared_path,
                 observed_after_bytes=observed_after,
             )
+    except recovery_receipt.RecoveryReceiptError as exc:
+        if exc.committed and not exc.retry_safe:
+            return _emit_indeterminate_recovery(
+                args=args,
+                root=root,
+                path=None,
+                operation="activate-store",
+                outcome=_recovery_receipt_error_outcome(
+                    exc,
+                    receipt_id=activation_receipt_id,
+                    prepared_path=prepared_path,
+                ),
+            )
+        detail = (
+            " ".join(str(exc).split())[:256]
+            or "claim-store activation unavailable"
+        )
+        print(f"claim-store activation refused: {detail}", file=sys.stderr)
+        return 1
     except (
         claim_store.ClaimStoreError,
         OSError,

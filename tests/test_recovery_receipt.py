@@ -14,6 +14,7 @@ These tests intentionally precede ``scripts/recovery_receipt.py``.
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import sys
@@ -365,7 +366,15 @@ def test_post_commit_read_uncertainty_is_indeterminate_and_not_retry_safe(
     def mutate() -> None:
         subject.write_bytes(after)
 
+    read_calls = 0
+
     def uncertain_read() -> bytes:
+        nonlocal read_calls
+        read_calls += 1
+        if read_calls == 1:
+            # The receipt-first executor must establish an exact raw before-CAS
+            # immediately before invoking the mutation callback.
+            return before
         raise OSError("readback unavailable after subject callback returned")
 
     outcome = _execute(
@@ -375,6 +384,7 @@ def test_post_commit_read_uncertainty_is_indeterminate_and_not_retry_safe(
     )
 
     assert outcome["status"] == "indeterminate"
+    assert read_calls == 2
     assert outcome["retry_safe"] is False
     assert subject.read_bytes() == after
     assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
@@ -565,6 +575,182 @@ def test_concurrent_split_phase_finalizers_publish_exactly_one_terminal(
     assert recovery_receipt.verify_receipt_store(receipt_dir) == []
 
 
+@pytest.mark.parametrize("finalizer", ("commit", "indeterminate"))
+def test_split_phase_lock_acquisition_failure_is_typed_after_subject_commit(
+    tmp_path: Path,
+    finalizer: str,
+) -> None:
+    """Public split-phase APIs begin after the subject commit point.
+
+    Losing the prepared lock authority must therefore never leak a plain
+    retry-looking filesystem exception to a caller.
+    """
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    prepared_path.unlink()
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        if finalizer == "commit":
+            recovery_receipt.commit_prepared_recovery(
+                prepared_path=prepared_path,
+                observed_after_bytes=after,
+            )
+        else:
+            recovery_receipt.indeterminate_prepared_recovery(
+                prepared_path=prepared_path,
+                finding="subject committed but prepared lock authority vanished",
+            )
+
+    assert exc_info.value.stage == "terminal-transaction-lock"
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+    assert exc_info.value.receipt_committed is False
+
+
+def test_windows_style_locked_descriptor_payload_avoids_second_prepared_open(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Locked helpers consume the prepared bytes from the locking handle.
+
+    A Windows byte-range lock can reject a second handle in the locking process,
+    so this fake lock makes any path-based prepared read fail while held.
+    """
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    original_validate = recovery_receipt.validate_receipt
+    lock_held = False
+
+    def fake_msvcrt_lock(descriptor: int) -> Callable[[], None]:
+        nonlocal lock_held
+        assert descriptor >= 0
+        lock_held = True
+
+        def unlock() -> None:
+            nonlocal lock_held
+            lock_held = False
+
+        return unlock
+
+    def reject_second_prepared_handle(path: Path) -> dict[str, object]:
+        if lock_held and Path(path) == prepared_path:
+            raise PermissionError(
+                "Windows byte-range lock rejected a second prepared handle"
+            )
+        return original_validate(path)
+
+    monkeypatch.setattr(
+        recovery_receipt,
+        "_lock_prepared_descriptor",
+        fake_msvcrt_lock,
+    )
+    monkeypatch.setattr(
+        recovery_receipt,
+        "validate_receipt",
+        reject_second_prepared_handle,
+    )
+
+    outcome = recovery_receipt.commit_prepared_recovery(
+        prepared_path=prepared_path,
+        observed_after_bytes=after,
+    )
+
+    assert outcome["status"] == "committed"
+    assert lock_held is False
+    assert (receipt_dir / f"{RECEIPT_ID}.committed.json").is_file()
+
+
+def test_execute_lock_acquisition_failure_is_typed_before_subject_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, _after = _before_after()
+    subject.write_bytes(before)
+    mutation_calls = 0
+
+    @recovery_receipt.contextmanager
+    def fail_lock(_path: Path):
+        raise OSError("process-shared transaction lock unavailable")
+        yield  # pragma: no cover - contextmanager shape only
+
+    def mutate() -> None:
+        nonlocal mutation_calls
+        mutation_calls += 1
+
+    monkeypatch.setattr(recovery_receipt, "_terminal_transaction_lock", fail_lock)
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        _execute(
+            receipt_dir,
+            mutate_subject=mutate,
+            read_subject=subject.read_bytes,
+        )
+
+    assert exc_info.value.stage == "terminal-transaction-lock"
+    assert exc_info.value.committed is False
+    assert exc_info.value.retry_safe is True
+    assert exc_info.value.receipt_committed is True
+    assert mutation_calls == 0
+    assert subject.read_bytes() == before
+
+
+def test_execute_holds_transaction_lock_from_raw_cas_through_terminal(
+    tmp_path: Path,
+) -> None:
+    """An external finalizer cannot seize the prepared record mid-execution."""
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, after = _before_after()
+    subject.write_bytes(before)
+    prepared_path = receipt_dir / f"{RECEIPT_ID}.prepared.json"
+    external_started = threading.Event()
+    external_done = threading.Event()
+    external: dict[str, object] = {}
+
+    def finalize_externally() -> None:
+        external_started.set()
+        try:
+            external["outcome"] = recovery_receipt.indeterminate_prepared_recovery(
+                prepared_path=prepared_path,
+                finding="external observer raced the subject mutation",
+            )
+        except Exception as exc:  # noqa: BLE001 - losing finalizer is expected
+            external["error"] = exc
+        finally:
+            external_done.set()
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        def mutate() -> None:
+            subject.write_bytes(after)
+            executor.submit(finalize_externally)
+            assert external_started.wait(timeout=1.0)
+            # An unlocked executor lets the external finalizer finish here.
+            # A correct executor keeps it blocked until its own terminal is
+            # durable, so this bounded wait intentionally times out.
+            external_done.wait(timeout=0.25)
+
+        outcome = _execute(
+            receipt_dir,
+            mutate_subject=mutate,
+            read_subject=subject.read_bytes,
+        )
+        assert external_done.wait(timeout=2.0)
+
+    assert outcome["status"] == "committed"
+    assert isinstance(external.get("error"), FileExistsError)
+    assert "outcome" not in external
+    assert (receipt_dir / f"{RECEIPT_ID}.committed.json").is_file()
+    assert not (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").exists()
+    assert recovery_receipt.verify_receipt_store(receipt_dir) == []
+
+
 def test_terminal_publication_plain_oserror_is_non_retry_safe_after_subject_commit(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -578,10 +764,14 @@ def test_terminal_publication_plain_oserror_is_non_retry_safe_after_subject_comm
     prepared_path = _prepare(receipt_dir)
     original_publish = recovery_receipt._publish_record
 
-    def fail_committed_publication(path: Path, payload: object):
+    def fail_committed_publication(
+        path: Path,
+        payload: object,
+        **kwargs: object,
+    ):
         if str(path).endswith(".committed.json"):
             raise OSError("plain committed receipt publication failure")
-        return original_publish(path, payload)
+        return original_publish(path, payload, **kwargs)
 
     monkeypatch.setattr(recovery_receipt, "_publish_record", fail_committed_publication)
     outcome: dict[str, object] | None = None
@@ -618,16 +808,20 @@ def test_terminal_readback_plain_oserror_is_typed_after_visible_publication(
     _before, after = _before_after()
     subject.write_bytes(after)
     prepared_path = _prepare(receipt_dir)
-    original_validate = recovery_receipt.validate_receipt
+    original_validate_at = recovery_receipt._validate_receipt_at
 
-    def fail_terminal_readback(path: Path) -> dict[str, object]:
-        if str(path).endswith(".committed.json"):
+    def fail_terminal_readback(
+        directory_fd: int,
+        name: str,
+        display_path: Path,
+    ) -> dict[str, object]:
+        if name.endswith(".committed.json"):
             raise OSError("plain receipt readback failure after publication")
-        return original_validate(path)
+        return original_validate_at(directory_fd, name, display_path)
 
     monkeypatch.setattr(
         recovery_receipt,
-        "validate_receipt",
+        "_validate_receipt_at",
         fail_terminal_readback,
     )
 
@@ -703,3 +897,450 @@ def test_verify_receipt_store_blocks_a_symlinked_directory(tmp_path: Path) -> No
         token in " ".join(str(item).lower() for item in findings)
         for token in ("symlink", "reparse", "alias")
     )
+
+
+def test_validate_receipt_rejects_a_stable_ancestor_alias(tmp_path: Path) -> None:
+    real_parent = tmp_path / "real-parent"
+    receipt_dir = real_parent / "recovery_receipts"
+    prepared_path = _prepare(receipt_dir)
+    alias_parent = tmp_path / "alias-parent"
+    alias_parent.symlink_to(real_parent, target_is_directory=True)
+    alias_path = alias_parent / "recovery_receipts" / prepared_path.name
+
+    with pytest.raises((OSError, ValueError), match="alias|symlink|unsafe"):
+        recovery_receipt.validate_receipt(alias_path)
+
+
+def test_verify_store_rejects_parent_gateway_swap_during_enumeration(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A verified lexical gateway cannot be swapped to a hidden valid store."""
+
+    gateway = tmp_path / "gateway"
+    visible_store = gateway / "recovery_receipts"
+    visible_store.mkdir(parents=True)
+    hidden_gateway = tmp_path / "hidden-gateway"
+    hidden_store = hidden_gateway / "recovery_receipts"
+    hidden_subject = tmp_path / "hidden-claim.json"
+    before, after = _before_after()
+    hidden_subject.write_bytes(before)
+
+    def mutate_hidden() -> None:
+        hidden_subject.write_bytes(after)
+
+    hidden_outcome = _execute(
+        hidden_store,
+        mutate_subject=mutate_hidden,
+        read_subject=hidden_subject.read_bytes,
+    )
+    assert hidden_outcome["status"] == "committed"
+    assert recovery_receipt.verify_receipt_store(hidden_store) == []
+
+    original_listdir = recovery_receipt.os.listdir
+    moved_gateway = tmp_path / "original-gateway"
+    swapped = False
+
+    def swap_before_enumeration(path: object):
+        nonlocal swapped
+        if not swapped:
+            swapped = True
+            gateway.rename(moved_gateway)
+            gateway.symlink_to(hidden_gateway, target_is_directory=True)
+        return original_listdir(path)
+
+    monkeypatch.setattr(
+        recovery_receipt.os,
+        "listdir",
+        swap_before_enumeration,
+    )
+
+    findings = recovery_receipt.verify_receipt_store(visible_store)
+
+    assert swapped is True
+    assert findings
+    finding_text = " ".join(str(item).lower() for item in findings)
+    assert any(token in finding_text for token in ("alias", "identity", "changed"))
+
+
+def test_execute_gateway_swap_after_subject_commit_is_typed_and_pinned(
+    tmp_path: Path,
+) -> None:
+    gateway = tmp_path / "gateway"
+    receipt_dir = gateway / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, after = _before_after()
+    subject.write_bytes(before)
+    moved_gateway = tmp_path / "original-gateway"
+
+    def mutate_and_swap_gateway() -> None:
+        subject.write_bytes(after)
+        gateway.rename(moved_gateway)
+        receipt_dir.mkdir(parents=True)
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        _execute(
+            receipt_dir,
+            mutate_subject=mutate_and_swap_gateway,
+            read_subject=subject.read_bytes,
+        )
+
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+    assert subject.read_bytes() == after
+    original_store = moved_gateway / "recovery_receipts"
+    assert (original_store / f"{RECEIPT_ID}.prepared.json").is_file()
+    assert (original_store / f"{RECEIPT_ID}.committed.json").is_file()
+    assert list(receipt_dir.iterdir()) == []
+
+
+def test_execute_gateway_swap_before_callback_preserves_precommit_truth(
+    tmp_path: Path,
+) -> None:
+    gateway = tmp_path / "gateway"
+    receipt_dir = gateway / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, _after = _before_after()
+    subject.write_bytes(before)
+    moved_gateway = tmp_path / "original-gateway"
+    mutation_calls = 0
+
+    def fail_before_cas() -> bytes:
+        gateway.rename(moved_gateway)
+        receipt_dir.mkdir(parents=True)
+        raise OSError("subject before-CAS read unavailable")
+
+    def mutate() -> None:
+        nonlocal mutation_calls
+        mutation_calls += 1
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        _execute(
+            receipt_dir,
+            mutate_subject=mutate,
+            read_subject=fail_before_cas,
+        )
+
+    assert exc_info.value.committed is False
+    assert exc_info.value.retry_safe is True
+    assert mutation_calls == 0
+    assert subject.read_bytes() == before
+    assert (
+        moved_gateway
+        / "recovery_receipts"
+        / f"{RECEIPT_ID}.prepared.json"
+    ).is_file()
+    assert list(receipt_dir.iterdir()) == []
+
+
+def test_split_finalize_gateway_swap_is_typed_and_pinned(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    gateway = tmp_path / "gateway"
+    receipt_dir = gateway / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    moved_gateway = tmp_path / "original-gateway"
+    original_commit = recovery_receipt._commit_prepared_recovery_locked
+    swapped = False
+
+    def swap_then_commit(**kwargs: object) -> dict[str, object]:
+        nonlocal swapped
+        if not swapped:
+            swapped = True
+            gateway.rename(moved_gateway)
+            receipt_dir.mkdir(parents=True)
+        return original_commit(**kwargs)
+
+    monkeypatch.setattr(
+        recovery_receipt,
+        "_commit_prepared_recovery_locked",
+        swap_then_commit,
+    )
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+
+    assert swapped is True
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+    original_store = moved_gateway / "recovery_receipts"
+    assert (original_store / f"{RECEIPT_ID}.prepared.json").is_file()
+    assert (original_store / f"{RECEIPT_ID}.committed.json").is_file()
+    assert list(receipt_dir.iterdir()) == []
+
+
+def test_split_finalize_terminal_stat_uncertainty_is_typed_post_subject(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    original_stat = recovery_receipt.os.stat
+
+    def fail_terminal_stat(path: object, *args: object, **kwargs: object):
+        if isinstance(path, str) and path.endswith(".committed.json"):
+            raise OSError(errno.EIO, "terminal authority stat unavailable")
+        return original_stat(path, *args, **kwargs)
+
+    monkeypatch.setattr(recovery_receipt.os, "stat", fail_terminal_stat)
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+
+    assert exc_info.value.stage == "terminal-authority-stat"
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+
+
+def test_execute_terminal_stat_uncertainty_before_callback_is_retry_safe(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, _after = _before_after()
+    subject.write_bytes(before)
+    original_stat = recovery_receipt.os.stat
+    mutation_calls = 0
+
+    def fail_terminal_stat(path: object, *args: object, **kwargs: object):
+        if isinstance(path, str) and path.endswith(".committed.json"):
+            raise OSError(errno.EIO, "terminal authority stat unavailable")
+        return original_stat(path, *args, **kwargs)
+
+    def mutate() -> None:
+        nonlocal mutation_calls
+        mutation_calls += 1
+
+    monkeypatch.setattr(recovery_receipt.os, "stat", fail_terminal_stat)
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        _execute(
+            receipt_dir,
+            mutate_subject=mutate,
+            read_subject=subject.read_bytes,
+        )
+
+    assert exc_info.value.stage == "terminal-authority-stat"
+    assert exc_info.value.committed is False
+    assert exc_info.value.retry_safe is True
+    assert mutation_calls == 0
+
+
+def test_terminal_visibility_probe_eio_does_not_mask_publication_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    original_stat = recovery_receipt.os.stat
+    committed_stats = 0
+
+    def fail_second_committed_stat(
+        path: object,
+        *args: object,
+        **kwargs: object,
+    ):
+        nonlocal committed_stats
+        if isinstance(path, str) and path.endswith(".committed.json"):
+            committed_stats += 1
+            if committed_stats >= 2:
+                raise OSError(errno.EIO, "terminal visibility probe unavailable")
+        return original_stat(path, *args, **kwargs)
+
+    def fail_publication(
+        path: Path,
+        _payload: object,
+        **_kwargs: object,
+    ) -> dict[str, object]:
+        if path.name.endswith(".committed.json"):
+            raise OSError(errno.ENOSPC, "committed publication failed")
+        raise AssertionError(f"unexpected publication path: {path}")
+
+    monkeypatch.setattr(recovery_receipt.os, "stat", fail_second_committed_stat)
+    monkeypatch.setattr(recovery_receipt, "_publish_record", fail_publication)
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+
+    assert committed_stats >= 2
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+    assert "publication" in str(exc_info.value).lower()
+
+
+def test_prepared_descriptor_close_failure_does_not_mask_typed_body_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    prepared_inode = prepared_path.stat().st_ino
+    original_close = recovery_receipt.os.close
+    marker = recovery_receipt.RecoveryReceiptError(
+        "typed subject outcome",
+        stage="typed-body",
+        committed=True,
+        retry_safe=False,
+    )
+
+    def fail_prepared_close(descriptor: int) -> None:
+        metadata = recovery_receipt.os.fstat(descriptor)
+        if metadata.st_ino == prepared_inode and recovery_receipt.stat.S_ISREG(
+            metadata.st_mode
+        ):
+            original_close(descriptor)
+            raise OSError(errno.EIO, "prepared descriptor close uncertain")
+        original_close(descriptor)
+
+    def fail_body(**_kwargs: object) -> dict[str, object]:
+        raise marker
+
+    monkeypatch.setattr(recovery_receipt.os, "close", fail_prepared_close)
+    monkeypatch.setattr(
+        recovery_receipt,
+        "_commit_prepared_recovery_locked",
+        fail_body,
+    )
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+
+    assert exc_info.value is marker
+
+
+def test_pinned_publish_refsyncs_parent_after_retry_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    original_unlink = recovery_receipt.os.unlink
+    original_fsync = recovery_receipt.os.fsync
+    cleanup_calls = 0
+    parent_fsyncs = 0
+
+    def flaky_sidecar_unlink(
+        path: object,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        nonlocal cleanup_calls
+        if isinstance(path, str) and ".tmp-" in path:
+            cleanup_calls += 1
+            if cleanup_calls == 1:
+                raise OSError(errno.EIO, "first sidecar cleanup failed")
+        original_unlink(path, *args, **kwargs)
+
+    def count_parent_fsync(descriptor: int) -> None:
+        nonlocal parent_fsyncs
+        metadata = recovery_receipt.os.fstat(descriptor)
+        if recovery_receipt.stat.S_ISDIR(metadata.st_mode):
+            parent_fsyncs += 1
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(recovery_receipt.os, "unlink", flaky_sidecar_unlink)
+    monkeypatch.setattr(recovery_receipt.os, "fsync", count_parent_fsync)
+
+    outcome = recovery_receipt.commit_prepared_recovery(
+        prepared_path=prepared_path,
+        observed_after_bytes=after,
+    )
+
+    assert outcome["status"] == "committed"
+    assert cleanup_calls >= 2
+    assert parent_fsyncs >= 2
+    assert not any(".tmp-" in path.name for path in receipt_dir.iterdir())
+
+
+def test_verified_parent_closes_fd_when_initial_fstat_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    path = parent / "receipt.json"
+    flags = recovery_receipt.os.O_RDONLY | getattr(
+        recovery_receipt.os,
+        "O_DIRECTORY",
+        0,
+    )
+    descriptor = recovery_receipt.os.open(parent, flags)
+    original_fstat = recovery_receipt.os.fstat
+    failed = False
+
+    def fixed_parent(_directory: Path) -> tuple[Path, int]:
+        return parent, descriptor
+
+    def fail_first_fstat(candidate: int):
+        nonlocal failed
+        if candidate == descriptor and not failed:
+            failed = True
+            raise OSError(errno.EIO, "parent identity unavailable")
+        return original_fstat(candidate)
+
+    monkeypatch.setattr(recovery_receipt, "_open_posix_directory", fixed_parent)
+    monkeypatch.setattr(recovery_receipt.os, "fstat", fail_first_fstat)
+
+    with pytest.raises(OSError, match="parent identity unavailable"):
+        with recovery_receipt._verified_parent(path):
+            raise AssertionError("verified parent yielded after fstat failure")
+
+    with pytest.raises(OSError) as closed:
+        original_fstat(descriptor)
+    assert closed.value.errno == errno.EBADF
+
+
+def test_verify_store_closes_fd_when_initial_fstat_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    receipt_dir.mkdir()
+    flags = recovery_receipt.os.O_RDONLY | getattr(
+        recovery_receipt.os,
+        "O_DIRECTORY",
+        0,
+    )
+    descriptor = recovery_receipt.os.open(receipt_dir, flags)
+    original_fstat = recovery_receipt.os.fstat
+    failed = False
+
+    def fixed_store(_directory: Path) -> tuple[Path, int]:
+        return receipt_dir, descriptor
+
+    def fail_first_fstat(candidate: int):
+        nonlocal failed
+        if candidate == descriptor and not failed:
+            failed = True
+            raise OSError(errno.EIO, "store identity unavailable")
+        return original_fstat(candidate)
+
+    monkeypatch.setattr(recovery_receipt, "_open_posix_directory", fixed_store)
+    monkeypatch.setattr(recovery_receipt.os, "fstat", fail_first_fstat)
+
+    findings = recovery_receipt.verify_receipt_store(receipt_dir)
+
+    assert findings
+    assert "identity" in " ".join(findings).lower()
+    with pytest.raises(OSError) as closed:
+        original_fstat(descriptor)
+    assert closed.value.errno == errno.EBADF

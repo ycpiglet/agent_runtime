@@ -39,6 +39,7 @@ import json
 import os
 import stat
 import threading
+import uuid
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
@@ -69,6 +70,8 @@ BETA_ROLE = "beta-tester"
 
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400)
 _BTC_DIRECTORY_COMPONENTS = ("agents", "beta_tester", "test_cases")
+WORK_ITEM_MAX_BYTES = 512 * 1024
+CANONICAL_TASK_NAMESPACE_MAX_ENTRIES = 4096
 
 # These fields describe execution progress or terminal provenance and may
 # legitimately change after the deterministic overlay is first published.
@@ -208,46 +211,238 @@ def _rel(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
 
 
-def _canonical_parent_task_uid(root: Path, task_id: str) -> str:
-    """Resolve a parent task UUID; missing metadata binds an explicit null."""
-
-    if not task_id:
-        return ""
-    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
-    if not path.is_file():
-        return ""
-    try:
-        meta, _ = backlog_board.parse_frontmatter(
-            path.read_text(encoding="utf-8")
+def _direct_repo_path(
+    root: Path,
+    value: str | Path,
+    label: str,
+    *,
+    final_kind: str,
+) -> Path | None:
+    relative = Path(value)
+    if relative.is_absolute() or not relative.parts or ".." in relative.parts:
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {label} must be repo-relative and direct"
         )
+    current = Path(os.path.abspath(os.fspath(root)))
+    try:
+        root_meta = current.lstat()
     except OSError as exc:
         raise claim_store.ClaimStoreError(
-            "claim-store overlay parent work identity is unreadable"
+            f"claim-store overlay {label} repository root is unavailable"
         ) from exc
+    if _is_path_alias(root_meta) or not stat.S_ISDIR(root_meta.st_mode):
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {label} repository root is not direct"
+        )
+    for index, component in enumerate(relative.parts):
+        current = current / component
+        try:
+            metadata = current.lstat()
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            raise claim_store.ClaimStoreError(
+                f"claim-store overlay {label} path is unavailable"
+            ) from exc
+        if _is_path_alias(metadata):
+            raise claim_store.ClaimStoreError(
+                f"claim-store overlay {label} must not use an alias or symlink"
+            )
+        is_last = index == len(relative.parts) - 1
+        if not is_last and not stat.S_ISDIR(metadata.st_mode):
+            raise claim_store.ClaimStoreError(
+                f"claim-store overlay {label} ancestor is not a direct directory"
+            )
+        if is_last:
+            expected_mode = (
+                stat.S_ISREG(metadata.st_mode)
+                if final_kind == "file"
+                else stat.S_ISDIR(metadata.st_mode)
+            )
+            if not expected_mode:
+                raise claim_store.ClaimStoreError(
+                    f"claim-store overlay {label} is not a direct {final_kind}"
+                )
+    return current
+
+
+def _direct_work_item_meta(
+    root: Path,
+    relative: str | Path,
+    label: str,
+) -> dict[str, Any]:
+    path = _direct_repo_path(root, relative, label, final_kind="file")
+    if path is None:
+        return {}
+    try:
+        before = path.lstat()
+        with path.open("rb") as handle:
+            opened_before = os.fstat(handle.fileno())
+            payload = handle.read(WORK_ITEM_MAX_BYTES + 1)
+            opened_after = os.fstat(handle.fileno())
+        after = path.lstat()
+    except OSError as exc:
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {label} is unreadable"
+        ) from exc
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, opened_before, opened_after, after)
+    }
+    if (
+        len(payload) > WORK_ITEM_MAX_BYTES
+        or len(signatures) != 1
+        or any(
+            _is_path_alias(item)
+            or not stat.S_ISREG(item.st_mode)
+            for item in (before, opened_before, opened_after, after)
+        )
+    ):
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {label} changed or is not a bounded direct file"
+        )
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeError as exc:
+        raise claim_store.ClaimStoreError(
+            f"claim-store overlay {label} is not UTF-8"
+        ) from exc
+    meta, _ = backlog_board.parse_frontmatter(text)
+    return dict(meta)
+
+
+def _canonical_task_namespace_records(
+    root: Path,
+) -> list[tuple[Path, dict[str, Any]]]:
+    relative_dir = Path("agents") / "lead_engineer" / "tasks"
+    directory = _direct_repo_path(
+        root,
+        relative_dir,
+        "parent work identity namespace",
+        final_kind="directory",
+    )
+    if directory is None:
+        return []
+    before = directory.lstat()
+    names: list[str] = []
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if len(names) >= CANONICAL_TASK_NAMESPACE_MAX_ENTRIES:
+                    raise claim_store.ClaimStoreError(
+                        "claim-store overlay parent work identity namespace "
+                        "exceeds its bounded limit"
+                    )
+                names.append(entry.name)
+    except OSError as exc:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity namespace is unreadable"
+        ) from exc
+    records: list[tuple[Path, dict[str, Any]]] = []
+    for name in sorted(names, key=str.casefold):
+        if not name.endswith(".md"):
+            continue
+        relative = relative_dir / name
+        meta = _direct_work_item_meta(
+            root,
+            relative,
+            "parent work identity namespace record",
+        )
+        if meta:
+            records.append((relative, meta))
+    after = directory.lstat()
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, after)
+    }
+    if (
+        len(signatures) != 1
+        or _is_path_alias(after)
+        or not stat.S_ISDIR(after.st_mode)
+    ):
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity namespace changed"
+        )
+    return records
+
+
+def _canonical_parent_task_uid(root: Path, task_id: str) -> str:
+    """Resolve a unique direct parent task UUID from canonical authority."""
+
+    if not task_id or Path(task_id).name != task_id:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity task_id is missing or invalid"
+        )
+    relative = (
+        Path("agents") / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    meta = _direct_work_item_meta(
+        root,
+        relative,
+        "parent work identity record",
+    )
+    if not meta:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity record is missing"
+        )
+    matches = [
+        path
+        for path, candidate in _canonical_task_namespace_records(root)
+        if any(
+            isinstance(candidate.get(field), str)
+            and candidate[field].strip() == task_id
+            for field in ("id", "display_id", "work_id")
+        )
+    ]
+    if matches != [relative]:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity display-ID authority "
+            "is ambiguous"
+        )
     for field in ("id", "display_id", "work_id"):
         value = meta.get(field)
-        if value is None:
-            continue
-        if not isinstance(value, str) or (value.strip() and value.strip() != task_id):
+        if not isinstance(value, str) or value.strip() != task_id:
             raise claim_store.ClaimStoreError(
                 "claim-store overlay parent work identity is inconsistent"
             )
     task_uid = meta.get("task_uid")
-    if task_uid is None:
-        return ""
-    if not isinstance(task_uid, str):
+    if not isinstance(task_uid, str) or not task_uid.strip():
         raise claim_store.ClaimStoreError(
-            "claim-store overlay parent task_uid is invalid"
+            "claim-store overlay parent work identity task_uid is missing or invalid"
         )
     work_uid = meta.get("work_uid")
-    if work_uid is not None and (
+    if (
         not isinstance(work_uid, str)
-        or (task_uid.strip() and work_uid.strip() and task_uid.strip() != work_uid.strip())
+        or not work_uid.strip()
+        or task_uid.strip() != work_uid.strip()
     ):
         raise claim_store.ClaimStoreError(
             "claim-store overlay parent work identity is inconsistent"
         )
-    return task_uid.strip()
+    canonical_uid = task_uid.strip()
+    try:
+        parsed_uid = uuid.UUID(canonical_uid)
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity UUID is invalid"
+        ) from exc
+    if parsed_uid.version not in {4, 7} or str(parsed_uid) != canonical_uid:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity UUID must be canonical v4 or v7"
+        )
+    return canonical_uid
 
 
 def _overlay_work_identity_binding(
