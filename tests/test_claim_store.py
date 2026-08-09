@@ -17,6 +17,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import threading
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -124,6 +125,41 @@ def _raw_marker_bytes(witness_claim_id: str) -> bytes:
         )
         + "\n"
     ).encode("utf-8")
+
+
+def _activation_authority_state(root: Path) -> dict[str, tuple[object, ...]]:
+    """Capture bytes and mutation-sensitive metadata around marker activation."""
+
+    outer, inner = _marker_paths(root)
+    paths = (
+        root / "agents",
+        root / "agents" / "runtime",
+        _store(root),
+        _store(root) / "CLAIM-retained.json",
+        outer.parent,
+        outer.with_name(outer.name + ".lock"),
+        outer,
+        inner,
+    )
+    state: dict[str, tuple[object, ...]] = {}
+    for path in paths:
+        try:
+            metadata = path.lstat()
+        except FileNotFoundError:
+            state[str(path)] = (False,)
+            continue
+        content = path.read_bytes() if stat.S_ISREG(metadata.st_mode) else None
+        state[str(path)] = (
+            True,
+            int(metadata.st_dev),
+            int(metadata.st_ino),
+            int(metadata.st_mode),
+            int(metadata.st_size),
+            int(metadata.st_mtime_ns),
+            int(metadata.st_ctime_ns),
+            content,
+        )
+    return state
 
 
 @pytest.mark.parametrize("value", (True, False, 1.0, "1", None))
@@ -493,6 +529,138 @@ def test_explicit_legacy_adoption_creates_one_canonical_marker_pair(
     assert result.generation_id == payload["generation_id"]
     assert result.witness_claim_id == "CLAIM-retained"
     assert result.snapshot is not None
+
+
+def test_legacy_adoption_precommit_runs_once_under_lock_before_marker_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _runtime_root(tmp_path)
+    _write_claim(root, "CLAIM-retained")
+    events: list[str] = []
+    contention: list[str] = []
+    real_write_immutable = claim_store._write_immutable
+
+    def observe_marker_write(path: Path, payload: bytes) -> object:
+        events.append(f"marker:{path.name}")
+        return real_write_immutable(path, payload)
+
+    def precommit(plan: object) -> None:
+        events.append("precommit")
+        assert isinstance(plan, claim_store.ClaimStoreActivationPlan)
+        assert type(plan).__dataclass_params__.frozen is True
+
+        def contend_for_store_lock() -> None:
+            try:
+                with claim_store.store_lock(root, timeout_seconds=0.02):
+                    contention.append("acquired")
+            except claim_store.ClaimStoreLockTimeout:
+                contention.append("timed-out")
+
+        contender = threading.Thread(target=contend_for_store_lock)
+        contender.start()
+        contender.join(timeout=1.0)
+        assert contender.is_alive() is False
+        assert contention == ["timed-out"]
+
+    monkeypatch.setattr(claim_store, "_write_immutable", observe_marker_write)
+
+    result = claim_store.adopt_legacy_store(
+        root,
+        witness_claim_id="CLAIM-retained",
+        precommit=precommit,
+    )
+
+    assert result.state == "initialized"
+    assert events == ["precommit", "marker:.claim-store", "marker:task-claim-store"]
+
+
+def test_legacy_adoption_precommit_failure_leaves_authority_byte_identical(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    claim = _write_claim(root, "CLAIM-retained")
+    with claim_store.store_lock(root):
+        pass
+    before = _activation_authority_state(root)
+    callbacks: list[object] = []
+
+    class ReceiptSinkFailure(RuntimeError):
+        pass
+
+    def reject_receipt(plan: object) -> None:
+        callbacks.append(plan)
+        raise ReceiptSinkFailure("receipt sink refused activation")
+
+    with pytest.raises(ReceiptSinkFailure, match="receipt sink refused"):
+        claim_store.adopt_legacy_store(
+            root,
+            witness_claim_id="CLAIM-retained",
+            precommit=reject_receipt,
+        )
+
+    assert len(callbacks) == 1
+    assert isinstance(callbacks[0], claim_store.ClaimStoreActivationPlan)
+    assert _activation_authority_state(root) == before
+    assert claim.read_bytes() == before[str(claim)][-1]
+    outer, inner = _marker_paths(root)
+    assert not outer.exists()
+    assert not inner.exists()
+    assert claim_store.inspect_store(root).state == "migration-required"
+
+
+def test_checkout_activation_precommit_failure_preserves_existing_inner_marker(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    _write_claim(root, "CLAIM-retained")
+    claim_store.initialize_store(root, witness_claim_id="CLAIM-retained")
+    outer, inner = _marker_paths(root)
+    outer.unlink()
+    assert claim_store.inspect_store(root).state == "migration-required"
+    before = _activation_authority_state(root)
+    callbacks: list[object] = []
+
+    class ReceiptSinkFailure(RuntimeError):
+        pass
+
+    def reject_receipt(plan: object) -> None:
+        callbacks.append(plan)
+        raise ReceiptSinkFailure("receipt sink refused checkout activation")
+
+    with pytest.raises(ReceiptSinkFailure, match="checkout activation"):
+        claim_store.adopt_legacy_store(
+            root,
+            witness_claim_id="CLAIM-retained",
+            precommit=reject_receipt,
+        )
+
+    assert len(callbacks) == 1
+    assert isinstance(callbacks[0], claim_store.ClaimStoreActivationPlan)
+    assert _activation_authority_state(root) == before
+    assert inner.exists()
+    assert not outer.exists()
+    assert claim_store.inspect_store(root).state == "migration-required"
+
+
+def test_initialized_adoption_is_noop_and_never_calls_precommit(
+    tmp_path: Path,
+) -> None:
+    root = _runtime_root(tmp_path)
+    _write_claim(root, "CLAIM-retained")
+    claim_store.initialize_store(root, witness_claim_id="CLAIM-retained")
+    before = _activation_authority_state(root)
+    callbacks: list[object] = []
+
+    result = claim_store.adopt_legacy_store(
+        root,
+        witness_claim_id="CLAIM-retained",
+        precommit=callbacks.append,
+    )
+
+    assert result.state == "initialized"
+    assert callbacks == []
+    assert _activation_authority_state(root) == before
 
 
 def test_adoption_candidate_enumeration_is_bounded_by_store_entry_limit(

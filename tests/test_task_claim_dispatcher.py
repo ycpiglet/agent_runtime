@@ -7324,3 +7324,299 @@ def test_renew_still_reconciles_ordinary_scope_drift(tmp_path: Path) -> None:
     assert "scripts/routing_third.py" in json.loads(
         path.read_text(encoding="utf-8")
     )["target_files"]
+
+
+# TASK-AR-660: durable work identity ---------------------------------------
+
+WORK_IDENTITY_BINDING_SCHEMA = "agent-runtime-claim-work-identity-binding/v1"
+_AR660_TASK_UID = "11111111-1111-4111-8111-111111111111"
+_AR660_UNIT_WORK_UID = "22222222-2222-4222-8222-222222222222"
+_AR660_REPLACEMENT_UID = "33333333-3333-4333-8333-333333333333"
+
+
+def _expected_work_identity_binding(
+    *,
+    task_id: str,
+    task_uid: str,
+    unit_id: str,
+    work_uid: str,
+    bound_at: str,
+) -> dict[str, object]:
+    """Independent oracle for the immutable display-ID/UUID pairing."""
+
+    components = {
+        "task": _canonical_sha256(
+            {"task_id": task_id, "task_uid": task_uid}
+        ),
+        "unit": _canonical_sha256(
+            {"unit_id": unit_id, "work_uid": work_uid}
+        ),
+    }
+    return {
+        "schema": WORK_IDENTITY_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def _write_work_identity_records(
+    root: Path,
+    task_id: str,
+    *,
+    task_uid: str = _AR660_TASK_UID,
+    unit_work_uid: str = _AR660_UNIT_WORK_UID,
+) -> tuple[Path, Path, str, str]:
+    unit_id = f"UNIT-{task_id}-001"
+    unit_rel = f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    task_path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    unit_path = root / unit_rel
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    unit_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {task_id}",
+                f"display_id: {task_id}",
+                f"task_uid: {task_uid}",
+                f"work_id: {task_id}",
+                f"work_uid: {task_uid}",
+                "kind: task",
+                f"unit_spec: {unit_rel}",
+                "status: worker_ready",
+                "---",
+                "",
+                "# Work identity fixture task",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    unit_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"work_id: {unit_id}",
+                f"work_uid: {unit_work_uid}",
+                "kind: unit",
+                f"parent_id: {task_id}",
+                f"unit_id: {unit_id}",
+                f"task_id: {task_id}",
+                "status: worker_ready",
+                "target_files:",
+                "  - scripts/claim_worker.py",
+                f"stop_condition: stop_after:{unit_id}:verification",
+                "---",
+                "",
+                "# Work identity fixture unit",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return task_path, unit_path, unit_id, unit_rel
+
+
+def _create_work_identity_candidate(
+    root: Path,
+    *,
+    task_id: str,
+    suffix: str,
+    worktree_path: str = "",
+) -> tuple[dict[str, object], Path, Path]:
+    (root / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n",
+        encoding="utf-8",
+    )
+    if not worktree_path:
+        _write_worktree(root, task_id)
+    task_path, unit_path, unit_id, unit_rel = _write_work_identity_records(
+        root, task_id
+    )
+    args = [
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        unit_id,
+        "--unit-spec",
+        unit_rel,
+        "--stop-condition",
+        f"stop_after:{unit_id}:verification",
+        "--agent-role",
+        "lead-engineer",
+        "--agent-instance-id",
+        f"le-20260809-090000-kst-{suffix}",
+        "--callsite-id",
+        f"terminal:wt-{task_id.lower()}:tab-01",
+        "--lease-minutes",
+        "30",
+        "--now",
+        "2026-08-09T09:00:00+09:00",
+        "--suffix",
+        suffix,
+        "--json",
+    ]
+    if worktree_path:
+        args.extend(("--worktree-path", worktree_path))
+    created = _run_dispatcher(root, *args)
+    assert created.returncode == 0, created.stderr or created.stdout
+    return json.loads(created.stdout), task_path, unit_path
+
+
+def test_create_binds_canonical_task_and_unit_uuids_without_changing_scope_wire(
+    tmp_path: Path,
+) -> None:
+    task_id = "TASK-AR-660-IDENTITY-CREATE"
+    created, _task_path, _unit_path = _create_work_identity_candidate(
+        tmp_path,
+        task_id=task_id,
+        suffix="identity-create",
+    )
+    claim = created["claim"]
+    unit_id = f"UNIT-{task_id}-001"
+
+    assert claim["work_identity_binding"] == _expected_work_identity_binding(
+        task_id=task_id,
+        task_uid=_AR660_TASK_UID,
+        unit_id=unit_id,
+        work_uid=_AR660_UNIT_WORK_UID,
+        bound_at="2026-08-09T09:00:00+09:00",
+    )
+    # Work identity is an additional contract. It must not silently revise the
+    # already-persisted scope-binding schema or component digest layout.
+    assert claim["scope_binding"] == _expected_scope_binding(
+        claim,
+        bound_at="2026-08-09T09:00:00+09:00",
+    )
+
+
+def test_adopt_adds_only_missing_work_identity_to_an_otherwise_current_claim(
+    tmp_path: Path,
+) -> None:
+    task_id = "TASK-AR-660-IDENTITY-ADOPT"
+    _primary, linked = _init_git_worktree(tmp_path, "ar660-identity-adopt")
+    created, _task_path, _unit_path = _create_work_identity_candidate(
+        linked,
+        task_id=task_id,
+        suffix="identity-adopt",
+        worktree_path=".",
+    )
+    path = _claim_path(linked, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("work_identity_binding", None)
+    path.write_text(json.dumps(claim, ensure_ascii=False, indent=2), encoding="utf-8")
+    scope_before = json.loads(json.dumps(claim["scope_binding"]))
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "claim predates canonical work identity binding",
+        "--now",
+        "2026-08-09T09:10:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    adopted = json.loads(path.read_text(encoding="utf-8"))
+    assert adopted["mutation_revision"] == 0
+    assert adopted["scope_binding"] == scope_before
+    assert adopted["work_identity_binding"] == _expected_work_identity_binding(
+        task_id=task_id,
+        task_uid=_AR660_TASK_UID,
+        unit_id=f"UNIT-{task_id}-001",
+        work_uid=_AR660_UNIT_WORK_UID,
+        bound_at="2026-08-09T09:10:00+09:00",
+    )
+
+
+def _damage_work_identity_record(
+    task_path: Path,
+    unit_path: Path,
+    damage: str,
+) -> None:
+    if damage == "task-display-id-collision":
+        text = task_path.read_text(encoding="utf-8")
+        text = text.replace(_AR660_TASK_UID, _AR660_REPLACEMENT_UID)
+        task_path.write_text(text, encoding="utf-8")
+        return
+    text = unit_path.read_text(encoding="utf-8")
+    if damage == "unit-uuid-drift":
+        text = text.replace(_AR660_UNIT_WORK_UID, _AR660_REPLACEMENT_UID)
+    elif damage == "unit-uuid-missing":
+        text = text.replace(f"work_uid: {_AR660_UNIT_WORK_UID}\n", "")
+    else:  # pragma: no cover - the parametrization is the complete call surface
+        raise AssertionError(f"unknown damage mode: {damage}")
+    unit_path.write_text(text, encoding="utf-8")
+
+
+def _work_identity_mutation_args(
+    root: Path,
+    claim: dict[str, object],
+    operation: str,
+) -> tuple[str, ...]:
+    if operation == "heartbeat":
+        return _replace_cli_option(
+            _heartbeat_without_progress_args(claim),
+            "--now",
+            "2026-08-09T09:10:00+09:00",
+        )
+    if operation == "renew":
+        return _renew_args(claim, now="2026-08-09T09:10:00+09:00")
+    evidence = _write_evidence(
+        root,
+        "agents/runtime/task_claims/evidence/W4B-AR660-WORK-IDENTITY.md",
+    )
+    return (
+        "release",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--verified-by",
+        "qa-20260809-091000-kst-ar660",
+        "--verifier-role",
+        "qa-reviewer",
+        "--verification-evidence",
+        evidence,
+        "--now",
+        "2026-08-09T09:10:00+09:00",
+        "--json",
+    )
+
+
+@pytest.mark.parametrize("operation", ("heartbeat", "renew", "release"))
+@pytest.mark.parametrize(
+    "damage",
+    ("task-display-id-collision", "unit-uuid-drift", "unit-uuid-missing"),
+)
+def test_claim_mutations_fail_closed_on_canonical_work_identity_damage(
+    tmp_path: Path,
+    operation: str,
+    damage: str,
+) -> None:
+    task_id = f"TASK-AR-660-{operation.upper()}-{damage.upper()}"
+    created, task_path, unit_path = _create_work_identity_candidate(
+        tmp_path,
+        task_id=task_id,
+        suffix=f"{operation}-{damage}",
+    )
+    claim = created["claim"]
+    _damage_work_identity_record(task_path, unit_path, damage)
+    path = _claim_path(tmp_path, created)
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        tmp_path,
+        *_work_identity_mutation_args(tmp_path, claim, operation),
+    )
+
+    assert result.returncode != 0, f"{operation} accepted {damage}"
+    assert "identity" in (result.stdout + result.stderr).lower()
+    assert path.read_bytes() == before

@@ -522,6 +522,143 @@ def test_successful_write_fsyncs_file_and_parent_directory(
     assert fsync_kinds == ["file", "directory"]
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes the directory fsync boundary")
+@pytest.mark.parametrize(
+    ("writer_name", "payload", "existing", "expected"),
+    (
+        ("write_text_atomic", "replacement\n", b"original\n", b"original\n"),
+        ("publish_text_atomic", "published\n", None, None),
+        ("publish_text_owned_atomic", "published\n", None, None),
+        (
+            "write_json_atomic",
+            {"replacement": True},
+            b'{"original":true}\n',
+            b'{"original":true}\n',
+        ),
+        ("publish_json_atomic", {"published": True}, None, None),
+        ("publish_json_owned_atomic", {"published": True}, None, None),
+    ),
+)
+def test_strict_file_fsync_failure_is_retry_safe_and_never_commits(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    writer_name: str,
+    payload: object,
+    existing: bytes | None,
+    expected: bytes | None,
+) -> None:
+    target = tmp_path / "strict-file-fsync-state"
+    if existing is not None:
+        target.write_bytes(existing)
+
+    def fail_regular_file_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if stat.S_ISREG(metadata.st_mode):
+            raise OSError(errno.EIO, "injected file fsync failure")
+
+    monkeypatch.setattr(atomic_io.os, "fsync", fail_regular_file_fsync)
+
+    with pytest.raises(atomic_io.AtomicWriteError) as caught:
+        getattr(atomic_io, writer_name)(
+            target,
+            payload,
+            fsync_policy="strict",
+        )
+
+    assert caught.value.stage == "file-fsync"
+    assert caught.value.committed is False
+    assert caught.value.retry_safe is True
+    assert isinstance(caught.value.__cause__, OSError)
+    if expected is None:
+        assert not target.exists()
+    else:
+        assert target.read_bytes() == expected
+    assert _tmp_siblings(target) == []
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes the directory fsync boundary")
+@pytest.mark.parametrize(
+    ("writer_name", "payload", "expected"),
+    (
+        ("write_text_atomic", "replacement\n", b"replacement\n"),
+        ("publish_text_atomic", "published\n", b"published\n"),
+        ("publish_text_owned_atomic", "published\n", b"published\n"),
+        (
+            "write_json_atomic",
+            {"replacement": True},
+            b'{\n  "replacement": true\n}\n',
+        ),
+        (
+            "publish_json_atomic",
+            {"published": True},
+            b'{\n  "published": true\n}\n',
+        ),
+        (
+            "publish_json_owned_atomic",
+            {"published": True},
+            b'{\n  "published": true\n}\n',
+        ),
+    ),
+)
+def test_strict_parent_fsync_failure_reports_committed_non_retry_safe_truth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    writer_name: str,
+    payload: object,
+    expected: bytes,
+) -> None:
+    target = tmp_path / "strict-parent-fsync-state"
+
+    def fail_directory_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if stat.S_ISDIR(metadata.st_mode):
+            raise OSError(errno.EIO, "injected parent fsync failure")
+
+    monkeypatch.setattr(atomic_io.os, "fsync", fail_directory_fsync)
+
+    with pytest.raises(atomic_io.AtomicWriteError) as caught:
+        getattr(atomic_io, writer_name)(
+            target,
+            payload,
+            fsync_policy="strict",
+        )
+
+    assert caught.value.stage == "parent-fsync"
+    assert caught.value.committed is True
+    assert caught.value.retry_safe is False
+    assert isinstance(caught.value.__cause__, OSError)
+    assert target.read_bytes() == expected
+    assert _tmp_siblings(target) == []
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes both fsync boundaries")
+@pytest.mark.parametrize("failure_kind", ("file", "directory"))
+def test_explicit_best_effort_fsync_policy_preserves_legacy_success_contract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure_kind: str,
+) -> None:
+    target = tmp_path / f"best-effort-{failure_kind}.txt"
+
+    def fail_selected_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        kind = "directory" if stat.S_ISDIR(metadata.st_mode) else "file"
+        if kind == failure_kind:
+            raise OSError(errno.EIO, f"injected {kind} fsync failure")
+
+    monkeypatch.setattr(atomic_io.os, "fsync", fail_selected_fsync)
+
+    result = atomic_io.write_text_atomic(
+        target,
+        "legacy success\n",
+        fsync_policy="best_effort",
+    )
+
+    assert result is None
+    assert target.read_bytes() == b"legacy success\n"
+    assert _tmp_siblings(target) == []
+
+
 def test_concurrent_overwrite_writers_publish_only_complete_payloads(tmp_path: Path) -> None:
     target = tmp_path / "shared.txt"
     payloads = {f"writer-{index}:" + (str(index) * 2048) for index in range(12)}

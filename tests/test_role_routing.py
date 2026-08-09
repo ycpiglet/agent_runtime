@@ -15,6 +15,7 @@ All state is synthetic and lives under tmp_path; nothing touches the real repo.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
@@ -1468,3 +1469,101 @@ def test_beta_scaffold_failure_preserves_created_claim_in_result(tmp_path, monke
     inspection = claim_store.inspect_store(tmp_path)
     assert inspection.state == "initialized"
     assert inspection.witness_claim_id == "CLAIM-BETA-CYCLE-010"
+
+
+# TASK-AR-660: overlays bind their canonical parent work identity. Synthetic
+# review IDs are routing labels, not durable task identities.
+
+
+def _ar660_canonical_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _ar660_expected_parent_identity_binding(
+    *,
+    task_id: str,
+    task_uid: str,
+    bound_at: str,
+) -> dict[str, object]:
+    components = {
+        "task": _ar660_canonical_sha256(
+            {"task_id": task_id, "task_uid": task_uid}
+        ),
+        # The current route API has no unit authority to inherit. Empty values
+        # are explicit here; inventing a UUID for a synthetic overlay would be
+        # indistinguishable from a real canonical unit.
+        "unit": _ar660_canonical_sha256({"unit_id": "", "work_uid": ""}),
+    }
+    return {
+        "schema": "agent-runtime-claim-work-identity-binding/v1",
+        "digest": _ar660_canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def test_review_overlay_binds_canonical_parent_uuid_separately_from_scope(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    task_id = "TASK-AR-900"
+    task_uid = "44444444-4444-4444-8444-444444444444"
+    task_path = (
+        tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    )
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_path.write_text(
+        "\n".join(
+            [
+                "---",
+                "schema_version: agent-runtime-work-item/v1",
+                f"id: {task_id}",
+                f"display_id: {task_id}",
+                f"task_uid: {task_uid}",
+                f"work_id: {task_id}",
+                f"work_uid: {task_uid}",
+                "kind: task",
+                "status: in_progress",
+                "---",
+                "",
+                "# Canonical parent fixture",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id=task_id,
+        task_set_id="TASKSET-AR-900",
+        event="merge",
+        now="2026-08-09T10:00:00+09:00",
+    )
+
+    assert len(result["created"]) == 1
+    overlay = result["created"][0]
+    assert overlay["parent_task_id"] == task_id
+    assert overlay["work_identity_binding"] == (
+        _ar660_expected_parent_identity_binding(
+            task_id=task_id,
+            task_uid=task_uid,
+            bound_at="2026-08-09T10:00:00+09:00",
+        )
+    )
+    assert overlay["scope_binding"] == claim_store.scope_binding(
+        task_id=overlay["task_id"],
+        unit_id=None,
+        unit_spec=None,
+        target_files=[],
+        stop_condition=None,
+        bound_at="2026-08-09T10:00:00+09:00",
+    )
