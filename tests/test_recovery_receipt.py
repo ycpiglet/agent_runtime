@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import recovery_receipt  # noqa: E402
+import atomic_io  # noqa: E402
 
 
 RECEIPT_ID = "RECOVERY-20260809-130000-claim-ar-660-test"
@@ -403,3 +404,81 @@ def test_existing_store_activation_emits_no_false_recovery_receipt(
     assert outcome["retry_safe"] is True
     assert mutation_calls == 0
     assert not receipt_dir.exists() or list(receipt_dir.iterdir()) == []
+
+
+def test_split_phase_commit_matches_prepared_after_and_refuses_replay(
+    tmp_path: Path,
+) -> None:
+    """Claim-store activation can prepare under lock and finalize afterward."""
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+
+    outcome = recovery_receipt.commit_prepared_recovery(
+        prepared_path=prepared_path,
+        observed_after_bytes=after,
+    )
+
+    assert outcome["status"] == "committed"
+    assert outcome["retry_safe"] is False
+    committed_path = receipt_dir / f"{RECEIPT_ID}.committed.json"
+    assert committed_path.is_file()
+    assert recovery_receipt.verify_receipt_store(receipt_dir) == []
+    with pytest.raises((FileExistsError, ValueError)):
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+    assert not (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").exists()
+
+
+def test_split_phase_mismatch_is_indeterminate_not_a_false_commit(
+    tmp_path: Path,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    prepared_path = _prepare(receipt_dir)
+    unexpected = _json_bytes({"claim_id": "CLAIM-test", "status": "other"})
+
+    outcome = recovery_receipt.commit_prepared_recovery(
+        prepared_path=prepared_path,
+        observed_after_bytes=unexpected,
+    )
+
+    assert outcome["status"] == "indeterminate"
+    assert outcome["retry_safe"] is False
+    assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
+    indeterminate_path = receipt_dir / f"{RECEIPT_ID}.indeterminate.json"
+    assert indeterminate_path.is_file()
+    assert recovery_receipt.verify_receipt_store(receipt_dir) == []
+
+
+def test_committed_subject_atomic_error_gets_indeterminate_witness(
+    tmp_path: Path,
+) -> None:
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, after = _before_after()
+    subject.write_bytes(before)
+
+    def mutate_then_report_uncertainty() -> None:
+        subject.write_bytes(after)
+        raise atomic_io.AtomicWriteError(
+            "parent fsync failed after rename",
+            stage="parent-fsync",
+            committed=True,
+            retry_safe=False,
+        )
+
+    outcome = _execute(
+        receipt_dir,
+        mutate_subject=mutate_then_report_uncertainty,
+        read_subject=subject.read_bytes,
+    )
+
+    assert outcome["status"] == "indeterminate"
+    assert outcome["retry_safe"] is False
+    assert subject.read_bytes() == after
+    assert (receipt_dir / f"{RECEIPT_ID}.prepared.json").is_file()
+    assert (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").is_file()
+    assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
+    assert recovery_receipt.verify_receipt_store(receipt_dir) == []
