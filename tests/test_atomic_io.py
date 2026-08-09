@@ -28,6 +28,19 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import atomic_io  # noqa: E402
 
 
+class _NamedOSProxy:
+    """Delegate to the host os module while selecting an atomic_io branch."""
+
+    def __init__(self, name: str, **overrides: object) -> None:
+        self.name = name
+        self._overrides = overrides
+
+    def __getattr__(self, attribute: str) -> object:
+        if attribute in self._overrides:
+            return self._overrides[attribute]
+        return getattr(os, attribute)
+
+
 def _tmp_siblings(path: Path) -> list[Path]:
     return list(path.parent.glob(f"{path.name}.*.tmp"))
 
@@ -392,6 +405,116 @@ def test_publish_json_atomic_preserves_json_options(tmp_path: Path) -> None:
     assert text.index('"a"') < text.index('"z"')
     assert text.startswith("{\n    ")
     assert text.endswith("\n")
+
+
+def test_exclusive_precommit_is_the_final_fallback_publication_boundary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Fallback validation and durable sidecar preparation precede authority."""
+
+    target = tmp_path / "created" / "receipt.json"
+    events: list[str] = []
+    real_prepare_parent = atomic_io._fallback_prepare_parent
+
+    def observe_parent_validation(parent: Path) -> None:
+        events.append("parent-validation")
+        real_prepare_parent(parent)
+
+    def observe_destination(source: object, destination: object) -> None:
+        events.append("destination")
+        os.rename(source, destination)
+
+    def prove_authority() -> None:
+        events.append("precommit")
+        assert target.parent.is_dir()
+        assert not target.exists()
+        assert len(_tmp_siblings(target)) == 1
+
+    monkeypatch.setattr(atomic_io, "_fallback_prepare_parent", observe_parent_validation)
+    monkeypatch.setattr(
+        atomic_io,
+        "os",
+        _NamedOSProxy("nt", rename=observe_destination),
+    )
+
+    atomic_io.publish_json_atomic(
+        target,
+        {"prepared": True},
+        fsync_policy="strict",
+        precommit=prove_authority,
+    )
+
+    assert events[-3:] == ["parent-validation", "precommit", "destination"]
+    assert json.loads(target.read_text(encoding="utf-8")) == {"prepared": True}
+    assert _tmp_siblings(target) == []
+
+
+def test_rejected_exclusive_precommit_restores_owned_fallback_parent_tree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A callback rejection removes only directories this operation created."""
+
+    target = tmp_path / "agents" / "runtime" / "recovery_receipts" / "receipt.json"
+    callback_calls = 0
+
+    def reject_authority() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+        assert target.parent.is_dir()
+        assert len(_tmp_siblings(target)) == 1
+        raise ValueError("stale recovery actor")
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError, match="stale recovery actor"):
+        atomic_io.publish_json_atomic(
+            target,
+            {"prepared": True},
+            fsync_policy="strict",
+            precommit=reject_authority,
+        )
+
+    assert callback_calls == 1
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("parent_case", ("pre-existing", "concurrently-populated"))
+def test_rejected_exclusive_precommit_never_removes_unowned_parent_data(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    parent_case: str,
+) -> None:
+    target = tmp_path / "receipt-store" / "receipt.json"
+    if parent_case == "pre-existing":
+        target.parent.mkdir()
+
+    def reject_authority() -> None:
+        if parent_case == "concurrently-populated":
+            (target.parent / "concurrent.txt").write_text(
+                "belongs to another writer\n",
+                encoding="utf-8",
+            )
+        raise ValueError("stale recovery actor")
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError, match="stale recovery actor"):
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=reject_authority,
+        )
+
+    assert target.parent.is_dir()
+    assert not target.exists()
+    assert _tmp_siblings(target) == []
+    if parent_case == "concurrently-populated":
+        assert (target.parent / "concurrent.txt").read_text(encoding="utf-8") == (
+            "belongs to another writer\n"
+        )
 
 
 def test_publish_refuses_existing_destination_without_mutation(tmp_path: Path) -> None:

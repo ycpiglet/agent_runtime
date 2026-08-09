@@ -6364,6 +6364,106 @@ def test_recovery_binds_actor_authority_to_prepared_receipt_publication(
     assert _tree_entry_snapshot(receipt_dir) == receipts_before
 
 
+@pytest.mark.parametrize("operation", ("adopt", "terminalize", "activate-store"))
+@pytest.mark.parametrize(
+    "registry_race",
+    ("disappearance", "replacement", "field-drift"),
+)
+def test_recovery_fallback_revalidates_actor_at_destination_publication(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+    registry_race: str,
+) -> None:
+    """The supported non-POSIX branch has the same final authority boundary."""
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-fallback-publish-{operation}-{registry_race}",
+    )
+    args, _claim_path, claim = _recovery_command_case(
+        linked,
+        operation,
+        suffix=f"660-fallback-publish-{operation}-{registry_race}",
+    )
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+    actor_id = str(claim["agent_instance_id"])
+    actor_path = (
+        linked
+        / "agents"
+        / "runtime"
+        / "instances"
+        / f"{actor_id}.json"
+    )
+    actor_bytes = actor_path.read_bytes()
+    actor_inode = actor_path.stat().st_ino
+    real_publish_sidecar = dispatcher.atomic_io._publish_sidecar
+    injections = 0
+
+    class _FallbackRecoveryOS:
+        name = "fallback"
+
+        def __getattr__(self, attribute: str) -> object:
+            return getattr(os, attribute)
+
+    def damage_actor_at_destination(*publish_args, **publish_kwargs):
+        nonlocal injections
+        destination = Path(publish_args[0])
+        if (
+            injections == 0
+            and destination.parent.name == "recovery_receipts"
+            and destination.name.endswith(".prepared.json")
+        ):
+            injections += 1
+            if registry_race == "disappearance":
+                actor_path.unlink()
+            elif registry_race == "replacement":
+                replacement = actor_path.with_name(f".{actor_path.name}.replacement")
+                replacement.write_bytes(actor_bytes)
+                os.replace(replacement, actor_path)
+                assert actor_path.stat().st_ino != actor_inode
+            else:
+                changed = json.loads(actor_bytes.decode("utf-8"))
+                changed["callsite_id"] = f"{changed['callsite_id']}:drifted"
+                actor_path.write_text(
+                    json.dumps(changed, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8",
+                )
+        return real_publish_sidecar(*publish_args, **publish_kwargs)
+
+    # Select only recovery_receipt's supported fallback branch. atomic_io keeps
+    # the host POSIX primitives so this test isolates ordering without claiming
+    # to be a native Windows execution.
+    monkeypatch.setattr(recovery_receipt, "os", _FallbackRecoveryOS())
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "_publish_sidecar",
+        damage_actor_at_destination,
+    )
+    claims_root = linked / "agents" / "runtime" / "task_claims"
+    claims_before = _tree_entry_snapshot(claims_root)
+    admin_root = _claim_store_outer_anchor(linked).parent
+    admin_before = _tree_entry_snapshot(admin_root)
+    events_before = _pane_event_bytes(linked)
+    receipt_dir = _recovery_receipt_dir(linked)
+    receipt_root_before = receipt_dir.exists()
+    receipts_before = _tree_entry_snapshot(receipt_dir)
+
+    rc = dispatcher.main(args)
+    output = capsys.readouterr()
+
+    assert rc == 1, output.out + output.err
+    assert injections == 1
+    assert "actor instance" in (output.out + output.err).lower()
+    assert _tree_entry_snapshot(claims_root) == claims_before
+    assert _tree_entry_snapshot(admin_root) == admin_before
+    assert _pane_event_bytes(linked) == events_before
+    assert receipt_dir.exists() == receipt_root_before
+    assert _tree_entry_snapshot(receipt_dir) == receipts_before
+
+
 def test_recovery_refuses_instance_filename_payload_identity_mismatch(
     tmp_path: Path,
 ) -> None:

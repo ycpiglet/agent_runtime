@@ -229,7 +229,8 @@ def test_prepare_precommit_failure_leaves_no_receipt_authority(
     assert calls == 1
     if recovery_receipt.os.name == "posix":
         assert sidecar_observed
-    assert not receipt_dir.exists() or list(receipt_dir.iterdir()) == []
+    assert not receipt_dir.exists()
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_validate_rejects_missing_and_self_digest_tampered_receipts(
