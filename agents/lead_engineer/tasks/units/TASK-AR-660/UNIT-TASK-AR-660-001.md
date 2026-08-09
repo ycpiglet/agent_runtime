@@ -10,10 +10,10 @@ task_set_id: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 initiative_id: INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 project_id: PROJECT-AGENT-RUNTIME
 status: in_progress
-verification_status: pending
+verification_status: passed
 owner: lead-engineer
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T19:23:45+09:00
+updated_at: 2026-08-09T19:41:49+09:00
 started_at: 2026-08-09T12:55:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
@@ -89,6 +89,10 @@ verification:
   - PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q
 handoff: Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, explicit quiescent/cooperative-lock cleanup boundary and noncooperating-writer exclusion, native handle-backed compare-delete deferral, W4a, and independent W4b. No external release authority is granted.
 stop_condition: Stop before rotation, claim release/acceptance/completion, external CI, consumer mutation, credential access, push, tag, publish, or deploy.
+verified_at: 2026-08-09T19:41:49+09:00
+verified_by: le-20260809-130000-kst-ar660001
+evidence_refs:
+  - reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809194149.json
 ---
 
 # UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL

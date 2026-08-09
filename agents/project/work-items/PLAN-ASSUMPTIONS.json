@@ -180,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "ca7a868604ec96ff47f74c2c9e046e628de8b0422be119810bca492166d51c4d"
+          "value": "202a9912ac15558010688c45080293d0548e50482bbaa7b96dbcbd9fdf58990e"
         },
         {
           "kind": "sha256",
@@ -364,7 +364,7 @@
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md",
-      "recorded_at": "2026-08-09T19:40:11+09:00",
+      "recorded_at": "2026-08-09T19:44:45+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -2008,5 +2008,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T19:40:11+09:00"
+  "updated_at": "2026-08-09T19:44:45+09:00"
 }

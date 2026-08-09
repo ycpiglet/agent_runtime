@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-09T19:23:45+09:00
-record_count: 1376
+generated_at: 2026-08-09T19:44:28+09:00
+record_count: 1377
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1376` review and evidence records under `reviews/`.
+- Summary: indexed `1377` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1376` files |
+| Reviews covered | pass | `1377` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -728,7 +728,7 @@ record_count: 1376
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md` | `REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan` | md | accepted | pass | Claim Recovery and Work Identity Correction Plan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 recovery actor TOCTOU T3 replan |
-| `reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 Cleanup Concurrency Boundary T3 Replan |
+| `reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 cleanup concurrency boundary T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 cross-platform receipt publication T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 parent identity ABA T3 replan |
 | `reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md` | `REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan` | md | accepted | pass | TASK-AR-660 Unit 001 recovery actor attribution T3 replan |
@@ -1123,6 +1123,7 @@ record_count: 1376
 | `reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809162712.json` | `VERIFY-2026-08-09-unit-task-ar-660-001-20260809162712` | json | record | n/a | VERIFY-2026-08-09-unit-task-ar-660-001-20260809162712 |
 | `reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809171715.json` | `VERIFY-2026-08-09-unit-task-ar-660-001-20260809171715` | json | record | n/a | VERIFY-2026-08-09-unit-task-ar-660-001-20260809171715 |
 | `reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809180817.json` | `VERIFY-2026-08-09-unit-task-ar-660-001-20260809180817` | json | record | n/a | VERIFY-2026-08-09-unit-task-ar-660-001-20260809180817 |
+| `reviews/VERIFY-2026-08-09-unit-task-ar-660-001-20260809194149.json` | `VERIFY-2026-08-09-unit-task-ar-660-001-20260809194149` | json | record | n/a | VERIFY-2026-08-09-unit-task-ar-660-001-20260809194149 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
