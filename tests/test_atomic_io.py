@@ -629,7 +629,7 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
     assert replacement_sidecar is not None
     assert replacement_sidecar_bytes == b"prepared\n"
     assert target.parent.is_dir()
-    assert replacement_sidecar.read_bytes() == replacement_sidecar_bytes
+    assert not replacement_sidecar.exists()
 
 
 def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
