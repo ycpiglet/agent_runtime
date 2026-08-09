@@ -51,13 +51,13 @@
   "worktree_path": ".worktrees/TASK-AR-660",
   "branch": "codex/task-ar-660-recovery-receipt",
   "claimed_at": "2026-08-09T12:55:20+09:00",
-  "last_heartbeat": "2026-08-09T12:55:20+09:00",
-  "updated_at": "2026-08-09T12:55:20+09:00",
-  "expires_at": "2026-08-10T00:55:20+09:00",
+  "last_heartbeat": "2026-08-09T15:44:17.357339+09:00",
+  "updated_at": "2026-08-09T15:44:17.357339+09:00",
+  "expires_at": "2026-08-10T03:44:17.357339+09:00",
   "lease": {
     "claimed_at": "2026-08-09T12:55:20+09:00",
-    "heartbeat_at": "2026-08-09T12:55:20+09:00",
-    "expires_at": "2026-08-10T00:55:20+09:00"
+    "heartbeat_at": "2026-08-09T15:44:17.357339+09:00",
+    "expires_at": "2026-08-10T03:44:17.357339+09:00"
   },
   "handoff_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.handoff.md",
   "log_path": "agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.log.md",
@@ -77,6 +77,7 @@
   },
   "knowledge_matches": [],
   "target_files": [
+    "agents/project/TEMPLATE-MIRROR-CONTRACT.json",
     "scripts/task_claim_dispatcher.py",
     "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
     "scripts/role_routing.py",
@@ -86,6 +87,10 @@
     "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
     "scripts/atomic_io.py",
     "src/agent_runtime/templates/project/scripts/atomic_io.py",
+    "scripts/claim_reaper.py",
+    "src/agent_runtime/templates/project/scripts/claim_reaper.py",
+    "scripts/claim_reaper_hook.py",
+    "src/agent_runtime/templates/project/scripts/claim_reaper_hook.py",
     "scripts/recovery_receipt.py",
     "src/agent_runtime/templates/project/scripts/recovery_receipt.py",
     "schemas/recovery-receipt.schema.json",
@@ -97,26 +102,69 @@
     "tests/test_recovery_receipt.py",
     "tests/test_atomic_io.py",
     "tests/test_claim_store.py",
+    "tests/test_claim_reaper.py",
     "tests/test_task_claim_dispatcher.py",
     "tests/test_role_routing.py",
     "tests/test_template_mirror_gate.py",
     "tests/test_template_smoke.py",
     "tests/fixtures/host/agent_runtime.lock.json"
   ],
-  "mutation_revision": 0,
+  "mutation_revision": 2,
   "scope_binding": {
     "schema": "agent-runtime-claim-scope-binding/v1",
-    "digest": "68cb29bfea1ac3bdd165a1c0c07d3dbe9eb7ac9ddd2ae428d66b447293f251fb",
+    "digest": "f775eacdb1324707207d5ebf64edf6560b4cab3eea2a896195f40fc07e37d15b",
     "components": {
       "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
       "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
-      "target_files": "086ff91cf590bc0c84795bceec0d6b6202239d21a62b8f731c7fa301f1787b25",
+      "target_files": "5f51dc725949eb4345d7196d91b2b89e94f25010d22a285047488c44d99e54aa",
       "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
     },
-    "bound_at": "2026-08-09T12:55:20+09:00"
+    "bound_at": "2026-08-09T15:44:17.357339+09:00"
   },
   "persistence": {
     "mode": "scm_commit",
     "scm_commit_authorized": true
+  },
+  "work_identity_binding": {
+    "schema": "agent-runtime-claim-work-identity-binding/v1",
+    "digest": "8dd1d23efa72b195e6bd36c0cf4ead0c6e8f179543da484abc2f8f4958ddd2ad",
+    "components": {
+      "task": "96740ab993028195baf41877c30114672f5508e8f5824df0c74cd85f2f121c1e",
+      "unit": "c5184c06c2efca5cecc8cae155f317d5c48de02a5f5a264b171e70b674852245"
+    },
+    "bound_at": "2026-08-09T15:20:04+09:00"
+  },
+  "recovered_at": "2026-08-09T15:20:04+09:00",
+  "recovered_by": "ycpiglet <68498184+ycpiglet@users.noreply.github.com>",
+  "recovery_authority": "owner-explicit-approval",
+  "recovery_operation": "adopt",
+  "recovery_reason": "bind active TASK-AR-660 claim to canonical task and unit UUID authority and the accepted Unit 001 template-contract footprint before verification",
+  "recovery_scope": "single-claim",
+  "adopted_at": "2026-08-09T15:20:04+09:00",
+  "last_renewal": {
+    "renewed_at": "2026-08-09T15:44:17.357339+09:00",
+    "replan_ref": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md",
+    "old_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "96859e37d50a9495f5cae5cff8eef1f55f8f7748888613978b1dc69752dadf0a",
+      "components": {
+        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+        "target_files": "471293a64d30d90c9a4189588a660c8dfd7ebc1c5f53dd28a92b76566166bb76",
+        "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
+      },
+      "bound_at": "2026-08-09T15:20:45.774970+09:00"
+    },
+    "new_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "f775eacdb1324707207d5ebf64edf6560b4cab3eea2a896195f40fc07e37d15b",
+      "components": {
+        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+        "target_files": "5f51dc725949eb4345d7196d91b2b89e94f25010d22a285047488c44d99e54aa",
+        "stop_condition": "cb0af026ed4b49b6ba7b7f562a6f84923f105a8c6d9bd3779345f470873f906e"
+      },
+      "bound_at": "2026-08-09T15:44:17.357339+09:00"
+    }
   }
 }
