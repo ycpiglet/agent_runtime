@@ -13,7 +13,7 @@ status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T18:31:00+09:00
+updated_at: 2026-08-09T19:23:45+09:00
 started_at: 2026-08-09T12:55:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
@@ -29,6 +29,7 @@ context: TASK-AR-659 records recovery digests only on stdout, activate-store can
 inputs:
   - reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
   - reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md
+  - reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md
   - reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md
   - reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
   - scripts/task_claim_dispatcher.py
@@ -80,11 +81,13 @@ acceptance:
   - Every supported exclusive publication path revalidates recovery authority after durable sidecar preparation and immediately before destination publication.
   - A rejected recovery authority callback restores the exact pre-call receipt-root existence and entries without removing pre-existing or nonempty directories.
   - Callback-rejection cleanup preserves same-device/inode-reused replacements and never traverses a replaced ancestor alias.
+  - The callback may adversarially mutate relevant paths before returning or raising; subsequent cleanup is guaranteed only while the namespace is quiescent or all participants hold the cooperative process-shared claim-store lock used by production recovery operations.
+  - No atomic cleanup guarantee is claimed against arbitrary noncooperating writers racing after final validation; native handle-backed compare-delete is separate future work.
   - Post-cutoff pane events cannot pass with an absent or canonically mismatched runtime instance.
 verification:
   - PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_claim_reaper.py tests/test_task_claim_dispatcher.py tests/test_attribution_gate.py tests/test_role_routing.py -q
   - PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q
-handoff: Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
+handoff: Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, explicit quiescent/cooperative-lock cleanup boundary and noncooperating-writer exclusion, native handle-backed compare-delete deferral, W4a, and independent W4b. No external release authority is granted.
 stop_condition: Stop before rotation, claim release/acceptance/completion, external CI, consumer mutation, credential access, push, tag, publish, or deploy.
 ---
 
@@ -98,6 +101,7 @@ TASK-AR-659 records recovery digests only on stdout, activate-store can succeed 
 
 - reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
 - reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md
+- reviews/REVIEW-2026-08-09-task-ar-660-unit001-cleanup-concurrency-boundary-t3-replan.md
 - reviews/REVIEW-2026-08-09-task-ar-660-unit001-parent-identity-aba-t3-replan.md
 - reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md
 - scripts/task_claim_dispatcher.py
@@ -168,6 +172,8 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 - Every supported exclusive publication path revalidates recovery authority after durable sidecar preparation and immediately before destination publication.
 - A rejected recovery authority callback restores the exact pre-call receipt-root existence and entries without removing pre-existing or nonempty directories.
 - Callback-rejection cleanup preserves same-device/inode-reused replacements and never traverses a replaced ancestor alias.
+- The callback may adversarially mutate relevant paths before returning or raising; subsequent cleanup is guaranteed only while the namespace is quiescent or all participants hold the cooperative process-shared claim-store lock used by production recovery operations.
+- No atomic cleanup guarantee is claimed against arbitrary noncooperating writers racing after final validation; native handle-backed compare-delete is separate future work.
 - Post-cutoff pane events cannot pass with an absent or canonically mismatched runtime instance.
 
 ## Verification
@@ -177,7 +183,7 @@ Local filesystem claim authority only. Recovery receipts are machine authority; 
 
 ## Handoff
 
-Attach RED commits, receipt state matrix, cross-platform 3x3 actor-drift matrix, same-inode ABA and ancestor-alias negatives, exact parent-tree rollback proof, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.
+Attach RED commits, receipt state matrix, cross-platform 3x3 actor-drift matrix, same-inode ABA and ancestor-alias negatives, exact parent-tree rollback proof, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, explicit quiescent/cooperative-lock cleanup boundary and noncooperating-writer exclusion, native handle-backed compare-delete deferral, W4a, and independent W4b. This handoff grants no external release authority.
 
 ## Stop Boundary
 
