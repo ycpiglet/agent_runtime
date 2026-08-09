@@ -417,9 +417,13 @@ def test_exclusive_precommit_is_the_final_fallback_publication_boundary(
     events: list[str] = []
     real_prepare_parent = atomic_io._fallback_prepare_parent
 
-    def observe_parent_validation(parent: Path) -> None:
+    def observe_parent_validation(
+        parent: Path,
+        *,
+        created_parents: list[atomic_io.CreatedDirectoryIdentity] | None = None,
+    ) -> None:
         events.append("parent-validation")
-        real_prepare_parent(parent)
+        real_prepare_parent(parent, created_parents=created_parents)
 
     def observe_destination(source: object, destination: object) -> None:
         events.append("destination")

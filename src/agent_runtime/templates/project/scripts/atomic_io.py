@@ -31,7 +31,7 @@ import stat
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple
+from typing import Any, Callable, Iterator, NamedTuple
 
 
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x0400)
@@ -91,6 +91,14 @@ class PublishedFileIdentity(NamedTuple):
     reparse_tag: int
 
 
+class CreatedDirectoryIdentity(NamedTuple):
+    """Identity of a parent directory created by the active atomic operation."""
+
+    path: Path
+    device: int
+    inode: int
+
+
 def _stat_is_path_alias(metadata: Any) -> bool:
     """Return whether an lstat result is a symlink or Windows reparse point."""
     return stat.S_ISLNK(metadata.st_mode) or bool(
@@ -139,7 +147,12 @@ def _same_file(left: Any, right: Any) -> bool:
     return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
 
 
-def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
+def _posix_parent_fd(
+    parent: Path,
+    *,
+    strict_creation_fsync: bool,
+    created_parents: list[CreatedDirectoryIdentity] | None = None,
+) -> int:
     """Open/create ``parent`` through a no-follow walk from the filesystem root."""
     root = Path(parent.anchor)
     flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_DIRECTORY", 0)
@@ -165,6 +178,7 @@ def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
         current = root
         for component in parent.relative_to(root).parts:
             current = current / component
+            created = False
             try:
                 metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
             except FileNotFoundError:
@@ -172,6 +186,8 @@ def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
                     os.mkdir(component, mode=0o777, dir_fd=descriptor)
                 except FileExistsError:
                     pass
+                else:
+                    created = True
                 metadata = os.stat(component, dir_fd=descriptor, follow_symlinks=False)
 
             _validate_parent_metadata(current, metadata)
@@ -200,6 +216,14 @@ def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
                 _validate_parent_metadata(current, opened)
                 if not _same_file(metadata, opened):
                     raise _unsafe_parent(current, "directory identity changed during open")
+                if created and created_parents is not None:
+                    created_parents.append(
+                        CreatedDirectoryIdentity(
+                            current,
+                            int(opened.st_dev),
+                            int(opened.st_ino),
+                        )
+                    )
             except BaseException:
                 os.close(child)
                 raise
@@ -220,7 +244,11 @@ def _posix_parent_fd(parent: Path, *, strict_creation_fsync: bool) -> int:
         raise
 
 
-def _fallback_prepare_parent(parent: Path) -> None:
+def _fallback_prepare_parent(
+    parent: Path,
+    *,
+    created_parents: list[CreatedDirectoryIdentity] | None = None,
+) -> None:
     """Best available direct-parent validation where dir_fd is unavailable."""
     for candidate in (parent, *parent.parents):
         try:
@@ -233,11 +261,23 @@ def _fallback_prepare_parent(parent: Path) -> None:
     current = anchor
     for component in reversed(missing):
         current = current / component
+        created = False
         try:
             current.mkdir()
         except FileExistsError:
             pass
-        _validate_parent_metadata(current, current.lstat())
+        else:
+            created = True
+        metadata = current.lstat()
+        _validate_parent_metadata(current, metadata)
+        if created and created_parents is not None:
+            created_parents.append(
+                CreatedDirectoryIdentity(
+                    current,
+                    int(metadata.st_dev),
+                    int(metadata.st_ino),
+                )
+            )
 
     # Repeat immediately before use so a stable alias is never accepted merely
     # because it appeared after the create walk. Windows reparse points are
@@ -264,6 +304,7 @@ def _direct_parent(
     path: Path,
     *,
     strict_creation_fsync: bool,
+    created_parents: list[CreatedDirectoryIdentity] | None = None,
 ) -> Iterator[tuple[Path, int | None]]:
     absolute = _absolute_lexical(Path(path))
     parent = absolute.parent
@@ -273,6 +314,7 @@ def _direct_parent(
         descriptor = _posix_parent_fd(
             parent,
             strict_creation_fsync=strict_creation_fsync,
+            created_parents=created_parents,
         )
         try:
             yield absolute, descriptor
@@ -287,8 +329,40 @@ def _direct_parent(
                 pass
         return
 
-    _fallback_prepare_parent(parent)
+    _fallback_prepare_parent(parent, created_parents=created_parents)
     yield absolute, None
+
+
+def _rollback_created_parents(
+    created_parents: list[CreatedDirectoryIdentity],
+) -> None:
+    """Best-effort removal of empty directories provably created by this call.
+
+    Cleanup walks leaf-first and refuses any path whose direct, non-alias
+    device/inode identity changed. ``rmdir`` then preserves concurrent data by
+    failing on a nonempty directory. This helper is intentionally used only
+    when an external precommit callback rejects; other atomic-write failure
+    contracts retain their historical parent-creation semantics.
+    """
+
+    for created in reversed(created_parents):
+        try:
+            metadata = created.path.lstat()
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        if (
+            _stat_is_path_alias(metadata)
+            or not stat.S_ISDIR(metadata.st_mode)
+            or (int(metadata.st_dev), int(metadata.st_ino))
+            != (created.device, created.inode)
+        ):
+            continue
+        try:
+            created.path.rmdir()
+        except OSError:
+            # Missing, replaced, or nonempty directories are never cleanup
+            # authority. Preserve them and the original callback exception.
+            continue
 
 
 def _open_exclusive_tmp(path: Path, parent_fd: int | None) -> tuple[int, str]:
@@ -379,7 +453,14 @@ def _replace_sidecar(path: Path, name: str, parent_fd: int | None) -> None:
             os.replace(source, path)
 
 
-def _publish_sidecar(path: Path, name: str, parent_fd: int | None) -> bool:
+def _publish_sidecar(
+    path: Path,
+    name: str,
+    parent_fd: int | None,
+    *,
+    precommit: Callable[[], None] | None = None,
+    created_parents: list[CreatedDirectoryIdentity] | None = None,
+) -> bool:
     """Publish without replacement and report whether cleanup completed.
 
     Once the destination link/rename succeeds, publication is committed. A
@@ -389,6 +470,8 @@ def _publish_sidecar(path: Path, name: str, parent_fd: int | None) -> bool:
     caller should make one best-effort cleanup retry.
     """
     if parent_fd is not None:
+        if precommit is not None:
+            precommit()
         os.link(
             name,
             path.name,
@@ -402,17 +485,19 @@ def _publish_sidecar(path: Path, name: str, parent_fd: int | None) -> bool:
             return False
         return True
 
-    _fallback_prepare_parent(path.parent)
+    _fallback_prepare_parent(path.parent, created_parents=created_parents)
     source = path.parent / name
     if os.name == "nt":
         # Windows rename fails with FileExistsError when destination exists.
         try:
+            if precommit is not None:
+                precommit()
             os.rename(source, path)
         except OSError as exc:
             try:
                 path.lstat()
             except FileNotFoundError:
-                raise
+                raise exc
             raise FileExistsError(
                 errno.EEXIST,
                 "atomic publication destination already exists",
@@ -420,6 +505,8 @@ def _publish_sidecar(path: Path, name: str, parent_fd: int | None) -> bool:
             ) from exc
         return True
     else:
+        if precommit is not None:
+            precommit()
         os.link(source, path, follow_symlinks=False)
         try:
             source.unlink()
@@ -460,11 +547,25 @@ def _write_text(
     fsync: bool,
     fsync_policy: str,
     exclusive: bool,
+    precommit: Callable[[], None] | None = None,
 ) -> PublishedFileIdentity | None:
     policy = _require_fsync_policy(fsync_policy)
+    created_parents: list[CreatedDirectoryIdentity] = []
+    precommit_rejected = False
+
+    def run_precommit() -> None:
+        nonlocal precommit_rejected
+        assert precommit is not None
+        try:
+            precommit()
+        except BaseException:
+            precommit_rejected = True
+            raise
+
     with _direct_parent(
         path,
         strict_creation_fsync=fsync and policy == "strict",
+        created_parents=created_parents,
     ) as (absolute, parent_fd):
         descriptor: int | None = None
         sidecar: str | None = None
@@ -506,7 +607,13 @@ def _write_text(
                 )
 
             if exclusive:
-                if _publish_sidecar(absolute, sidecar, parent_fd):
+                if _publish_sidecar(
+                    absolute,
+                    sidecar,
+                    parent_fd,
+                    precommit=run_precommit if precommit is not None else None,
+                    created_parents=created_parents,
+                ):
                     sidecar = None
             else:
                 _replace_sidecar(absolute, sidecar, parent_fd)
@@ -533,6 +640,8 @@ def _write_text(
                     _unlink_sidecar(absolute, sidecar, parent_fd)
                 except OSError:
                     pass
+            if precommit_rejected:
+                _rollback_created_parents(created_parents)
         if exclusive:
             assert published_identity is not None
             return published_identity
@@ -571,6 +680,7 @@ def publish_text_atomic(
     encoding: str = "utf-8",
     fsync: bool = True,
     fsync_policy: str = "best_effort",
+    precommit: Callable[[], None] | None = None,
 ) -> None:
     """Atomically publish a new text file without clobbering any destination.
 
@@ -583,6 +693,7 @@ def publish_text_atomic(
         encoding=encoding,
         fsync=fsync,
         fsync_policy=fsync_policy,
+        precommit=precommit,
     )
 
 
@@ -593,6 +704,7 @@ def publish_text_owned_atomic(
     encoding: str = "utf-8",
     fsync: bool = True,
     fsync_policy: str = "best_effort",
+    precommit: Callable[[], None] | None = None,
 ) -> PublishedFileIdentity:
     """Publish new text and return its pre-commit opened-file identity."""
 
@@ -603,6 +715,7 @@ def publish_text_owned_atomic(
         fsync=fsync,
         fsync_policy=fsync_policy,
         exclusive=True,
+        precommit=precommit,
     )
     assert identity is not None
     return identity
@@ -635,6 +748,7 @@ def publish_json_atomic(
     sort_keys: bool = False,
     fsync: bool = True,
     fsync_policy: str = "best_effort",
+    precommit: Callable[[], None] | None = None,
 ) -> None:
     """Atomically publish new JSON without replacing an existing destination."""
     publish_json_owned_atomic(
@@ -644,6 +758,7 @@ def publish_json_atomic(
         sort_keys=sort_keys,
         fsync=fsync,
         fsync_policy=fsync_policy,
+        precommit=precommit,
     )
 
 
@@ -655,6 +770,7 @@ def publish_json_owned_atomic(
     sort_keys: bool = False,
     fsync: bool = True,
     fsync_policy: str = "best_effort",
+    precommit: Callable[[], None] | None = None,
 ) -> PublishedFileIdentity:
     """Publish new JSON and return its pre-commit opened-file identity."""
 
@@ -664,4 +780,5 @@ def publish_json_owned_atomic(
         text,
         fsync=fsync,
         fsync_policy=fsync_policy,
+        precommit=precommit,
     )

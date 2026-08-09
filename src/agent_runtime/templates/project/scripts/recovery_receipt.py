@@ -36,7 +36,9 @@ from typing import Any, Callable, Iterator, Mapping
 
 from atomic_io import (
     AtomicWriteError,
+    CreatedDirectoryIdentity,
     _direct_parent as _atomic_direct_parent,
+    _rollback_created_parents,
     publish_json_atomic,
 )
 
@@ -893,38 +895,59 @@ def _publish_record(
         # Reuse atomic_io's secure create/no-alias parent walk, then keep that
         # directory descriptor pinned through sidecar preparation, the actor
         # proof, destination link, durability fsync, and exact readback.
-        with _atomic_direct_parent(
-            path,
-            strict_creation_fsync=True,
-        ) as (absolute, pinned_parent_fd):
-            if pinned_parent_fd is None:
-                raise OSError(
-                    errno.ENOTSUP,
-                    "POSIX receipt publication requires a pinned parent",
-                    str(path),
-                )
-            _publish_record_at(
-                pinned_parent_fd,
-                absolute,
-                record,
-                precommit=precommit,
-            )
-            return _readback_published_record(
-                absolute,
-                record,
-                parent_fd=pinned_parent_fd,
-            )
+        created_parents: list[CreatedDirectoryIdentity] = []
+        precommit_rejected = False
 
-    if precommit is not None:
-        # Non-POSIX atomic_io performs the platform's direct-parent checks.
-        # Callback failure still precedes every receipt filesystem mutation.
-        precommit()
+        def run_precommit() -> None:
+            nonlocal precommit_rejected
+            assert precommit is not None
+            try:
+                precommit()
+            except BaseException:
+                precommit_rejected = True
+                raise
+
+        try:
+            with _atomic_direct_parent(
+                path,
+                strict_creation_fsync=True,
+                created_parents=created_parents,
+            ) as (absolute, pinned_parent_fd):
+                if pinned_parent_fd is None:
+                    raise OSError(
+                        errno.ENOTSUP,
+                        "POSIX receipt publication requires a pinned parent",
+                        str(path),
+                    )
+                _publish_record_at(
+                    pinned_parent_fd,
+                    absolute,
+                    record,
+                    precommit=(
+                        run_precommit if precommit is not None else None
+                    ),
+                )
+                return _readback_published_record(
+                    absolute,
+                    record,
+                    parent_fd=pinned_parent_fd,
+                )
+        except BaseException:
+            if precommit_rejected:
+                _rollback_created_parents(created_parents)
+            raise
+
+    # Non-POSIX atomic_io performs the platform's direct-parent checks, durable
+    # sidecar preparation, and final callback immediately before destination
+    # publication. A rejected callback also rolls back only parents that this
+    # exclusive publication provably created.
     publish_json_atomic(
         path,
         record,
         indent=2,
         sort_keys=True,
         fsync_policy="strict",
+        precommit=precommit,
     )
     return _readback_published_record(
         path,
