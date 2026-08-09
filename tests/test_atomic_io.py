@@ -937,6 +937,59 @@ def test_cleanup_identity_uses_real_windows_legacy_ctime_as_birth_generation(
     assert not atomic_io._same_cleanup_identity(identity, changed)
 
 
+def test_windows_precommit_normalizes_last_write_generation_after_handle_close(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A close-finalized mtime cannot suppress or replace callback authority."""
+
+    target = tmp_path / "created-store" / "receipt.json"
+    rejection = ValueError("stale recovery actor")
+    callback_calls = 0
+    real_sidecar_metadata = atomic_io._sidecar_metadata
+
+    class CloseFinalizedMetadata:
+        def __init__(self, metadata: object) -> None:
+            self._metadata = metadata
+
+        def __getattr__(self, attribute: str) -> object:
+            if attribute == "st_mtime_ns":
+                return int(getattr(self._metadata, attribute)) + 1_000_000
+            return getattr(self._metadata, attribute)
+
+    def observe_close_finalized_mtime(
+        path: Path,
+        name: str,
+        parent_fd: int | None,
+    ) -> object:
+        return CloseFinalizedMetadata(real_sidecar_metadata(path, name, parent_fd))
+
+    def reject_authority() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+        raise rejection
+
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+    monkeypatch.setattr(atomic_io.sys, "platform", "win32")
+    monkeypatch.setattr(
+        atomic_io,
+        "_sidecar_metadata",
+        observe_close_finalized_mtime,
+    )
+
+    with pytest.raises(ValueError) as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=reject_authority,
+        )
+
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_rejected_precommit_cleanup_failure_never_masks_callback_exception(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
