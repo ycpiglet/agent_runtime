@@ -180,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "ba286214992d52e08937b353c080e09faf95f224f54d1393ac5db273239df0ce"
+          "value": "c5f61e47be7cbecd43e443a2ff5904e986081e8f6b946ecb8015da19171039c7"
         },
         {
           "kind": "sha256",
@@ -285,7 +285,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "f77c4cef376c1673e7bc262b97d1ad575dd205ff18bff634aa23d7363b99148c"
+          "value": "757c63ccf212ccf6d6ff497fd00781e55c7a4a7eda7b26a5c1c2ea443bb27e0d"
         },
         {
           "kind": "sha256",
@@ -301,10 +301,30 @@
           "kind": "sha256",
           "path": "scripts/work.py",
           "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
+          "value": "95399be22428a3127908347f011c8629ca32b864976aa2ef207b7cc84e4ffb8a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/attribution_gate.py",
+          "value": "3c1c78378c73d48309cfd286c37e5aa1da146186e82e467caf449a494d4751c7"
+        },
+        {
+          "kind": "sha256",
+          "path": "src/agent_runtime/templates/project/scripts/attribution_gate.py",
+          "value": "3c1c78378c73d48309cfd286c37e5aa1da146186e82e467caf449a494d4751c7"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_attribution_gate.py",
+          "value": "93a995b02276e3b3fe2cce8ceb03113361563753a87b8b6a952a34d69927282b"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-recovery-actor-t3-replan.md",
-      "recorded_at": "2026-08-09T15:55:52+09:00",
+      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
+      "recorded_at": "2026-08-09T16:22:35+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1948,5 +1968,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T15:55:52+09:00"
+  "updated_at": "2026-08-09T16:22:35+09:00"
 }
