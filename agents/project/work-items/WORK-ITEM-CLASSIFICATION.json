@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-08-04T14:28:19+09:00",
-  "record_count": 556,
+  "generated_at": "2026-08-09T12:50:02+09:00",
+  "record_count": 567,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -6120,6 +6120,127 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
       "parent_id": "TASK-AR-659",
       "status": "done"
+    },
+    {
+      "key": "initiative:INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "level": "initiative",
+      "number": "45",
+      "label": "Initiative 45",
+      "id": "INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "title": "Claim Recovery and Work Identity Correction",
+      "path": "agents/project/initiatives/INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "level": "taskset",
+      "number": "45.1",
+      "label": "Taskset 45.1",
+      "id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "title": "Claim Recovery and Work Identity Correction",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-660",
+      "level": "task",
+      "number": "45.1.1",
+      "label": "Task 45.1.1",
+      "id": "TASK-AR-660",
+      "title": "Finish the missing TASK-AR-659 rotation path and make every recovery mutation indepen…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-660.md",
+      "parent_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-660-001",
+      "level": "unit",
+      "number": "45.1.1.1",
+      "label": "Unit 45.1.1.1",
+      "id": "UNIT-TASK-AR-660-001",
+      "title": "UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
+      "parent_id": "TASK-AR-660",
+      "status": "worker_ready"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-660-002",
+      "level": "unit",
+      "number": "45.1.1.2",
+      "label": "Unit 45.1.1.2",
+      "id": "UNIT-TASK-AR-660-002",
+      "title": "UNIT-TASK-AR-660-002 - Implement owner-attributed in-place expired-claim rotation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-002.md",
+      "parent_id": "TASK-AR-660",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-661",
+      "level": "task",
+      "number": "45.1.2",
+      "label": "Task 45.1.2",
+      "id": "TASK-AR-661",
+      "title": "Repair the first-parent merge loss without overwriting canonical 653/654, and make th…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-661.md",
+      "parent_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-661-001",
+      "level": "unit",
+      "number": "45.1.2.1",
+      "label": "Unit 45.1.2.1",
+      "id": "UNIT-TASK-AR-661-001",
+      "title": "UNIT-TASK-AR-661-001 - Repair work identity authority and prevent first-parent ledger loss",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md",
+      "parent_id": "TASK-AR-661",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-662",
+      "level": "task",
+      "number": "45.1.3",
+      "label": "Task 45.1.3",
+      "id": "TASK-AR-662",
+      "title": "Restore canonical task/unit authority for the already integrated Scribe source-debt i…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-662.md",
+      "parent_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-662-001",
+      "level": "unit",
+      "number": "45.1.3.1",
+      "label": "Unit 45.1.3.1",
+      "id": "UNIT-TASK-AR-662-001",
+      "title": "UNIT-TASK-AR-662-001 - Re-attest integrated Scribe behavior under collision-free authority",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-662/UNIT-TASK-AR-662-001.md",
+      "parent_id": "TASK-AR-662",
+      "status": "worker_ready"
+    },
+    {
+      "key": "task:TASK-AR-663",
+      "level": "task",
+      "number": "45.1.4",
+      "label": "Task 45.1.4",
+      "id": "TASK-AR-663",
+      "title": "Restore collision-free authority for the integrated repeated-failure Compound work an…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-663.md",
+      "parent_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+      "status": "planned"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-663-001",
+      "level": "unit",
+      "number": "45.1.4.1",
+      "label": "Unit 45.1.4.1",
+      "id": "UNIT-TASK-AR-663-001",
+      "title": "UNIT-TASK-AR-663-001 - Re-attest and finish repeated-failure Compound enforcement",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-663/UNIT-TASK-AR-663-001.md",
+      "parent_id": "TASK-AR-663",
+      "status": "worker_ready"
     }
   ]
 }

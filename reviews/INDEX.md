@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-04T14:28:19+09:00
-record_count: 1359
+generated_at: 2026-08-09T12:50:02+09:00
+record_count: 1362
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1359` review and evidence records under `reviews/`.
+- Summary: indexed `1362` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1359` files |
+| Reviews covered | pass | `1362` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -726,6 +726,9 @@ record_count: 1359
 | `reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md` | `REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan` | md | accepted | pass | TASK-AR-659 legacy claim bootstrap dispatch T3 replan |
 | `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
+| `reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md` | `REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan` | md | accepted | pass | Claim Recovery and Work Identity Correction Plan |
+| `reviews/REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan.md` | `REVIEW-2026-08-09-task-ar-661-existing-taskset-recovery-t3-replan` | md | accepted | pass | TASK-AR-661 Existing Taskset Recovery T3 Replan |
+| `reviews/REVIEW-2026-08-09-taskset-ar-claim-recovery-work-identity-correction-registration.md` | `REVIEW-2026-08-09-taskset-ar-claim-recovery-work-identity-correction-registration` | md | record | pass | Claim Recovery and Work Identity Correction Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |

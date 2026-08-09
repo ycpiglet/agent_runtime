@@ -1,0 +1,406 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "origin_type": "owner_request",
+  "origin_ref": "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+  "created_by": "codex-root-owner-approved-correction",
+  "now": "2026-08-09T12:00:00+09:00",
+  "initiative": {
+    "id": "INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+    "title": "Claim Recovery and Work Identity Correction",
+    "summary": "Complete owner-bound claim recovery transactions and repair merge-damaged work identity authority before the next Runtime release.",
+    "owner": "lead-engineer"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION",
+    "display_name": "Claim Recovery and Work Identity Correction",
+    "summary": "Make recovery durable and collision-safe, restore exact ledger and taskset authority, and re-key the lost V080 Scribe and Compound work without rewriting history.",
+    "order": 7240,
+    "plan_slug": "2026-08-09-claim-recovery-work-identity-correction",
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "display_id": "TASK-AR-660",
+      "title": "Complete durable owner-bound claim recovery transactions",
+      "goal": "Finish the missing TASK-AR-659 rotation path and make every recovery mutation independently auditable after stdout, pane events, or process state are gone.",
+      "scope": "Add canonical work-identity binding, immutable receipt-first recovery WAL semantics, strict durability outcomes, and in-place expired-claim owner rotation with worker lineage and verifier exclusion.",
+      "priority": "P1",
+      "difficulty": "XL",
+      "est_hours": 24,
+      "est_tokens": 48000,
+      "owner": "lead-engineer",
+      "team": "agent-runtime-core",
+      "tags": ["claim-recovery", "data-integrity", "repeated-failure", "red-first"],
+      "acceptance": [
+        "New and adopted claims bind the canonical task task_uid and unit work_uid; heartbeat, renew, release, and rotate reject identity drift.",
+        "Adopt, terminalize, activate-store, and rotate publish an immutable receipt before subject mutation and retain exact semantic and raw before/after digests plus Owner attribution.",
+        "Receipt failure leaves the subject byte-identical, post-write uncertainty is non-retry-safe, and pane-event loss cannot erase recovery authority.",
+        "Rotate changes one provably expired active claim in place, preserves task/unit/scope/branch authority, advances one revision, and never creates, deletes, completes, or releases a claim.",
+        "Old workers immediately lose mutation authority and current plus prior worker lineage is barred from independent release verification.",
+        "Old/new agent-instance truth, projections, handoff/log continuity, template parity, and host lock remain consistent."
+      ],
+      "verification": [
+        "PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_agent_instance_registry.py tests/test_agent_identity_gate.py tests/test_role_routing.py -q",
+        "PYTHONPATH=src python -m pytest tests/test_parallel_worktree_gate.py tests/test_rbac_write_gate.py tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q",
+        "PYTHONPATH=src python scripts/recovery_receipt.py --check",
+        "PYTHONPATH=src python scripts/template_mirror_gate.py --check",
+        "PYTHONPATH=src python scripts/rbac_write_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-660-001",
+          "title": "Bind claim work identity and add receipt-first recovery WAL",
+          "context": "TASK-AR-659 records recovery digests only on stdout, activate-store can succeed after losing its only audit event, strict fsync outcomes are hidden, and claim files are bound only to reusable display IDs.",
+          "inputs": [
+            "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+            "reviews/RECOVERY-2026-08-03-task-ar-655-owner-claim-terminalize.md",
+            "scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/claim_store.py",
+            "scripts/atomic_io.py"
+          ],
+          "target_files": [
+            "scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "scripts/role_routing.py",
+            "src/agent_runtime/templates/project/scripts/role_routing.py",
+            "src/agent_runtime/claim_store.py",
+            "scripts/agent_runtime/claim_store.py",
+            "src/agent_runtime/templates/project/scripts/agent_runtime/claim_store.py",
+            "scripts/atomic_io.py",
+            "src/agent_runtime/templates/project/scripts/atomic_io.py",
+            "scripts/recovery_receipt.py",
+            "src/agent_runtime/templates/project/scripts/recovery_receipt.py",
+            "schemas/recovery-receipt.schema.json",
+            "src/agent_runtime/templates/project/schemas/recovery-receipt.schema.json",
+            "scripts/pane_event_log.py",
+            "src/agent_runtime/templates/project/scripts/pane_event_log.py",
+            "scripts/runtime_asset_usage.py",
+            "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "tests/test_recovery_receipt.py",
+            "tests/test_atomic_io.py",
+            "tests/test_claim_store.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_role_routing.py",
+            "tests/test_template_mirror_gate.py",
+            "tests/test_template_smoke.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Local filesystem claim authority only. Recovery receipts are machine authority; Markdown reviews remain explanation. Preserve the existing scope_binding wire format.",
+          "steps": [
+            "RED identity-drift, missing/tampered receipt, receipt-sink, strict-fsync, activation crash-gap, pane-event-loss, and post-commit-indeterminate cases.",
+            "Resolve canonical task_uid and unit work_uid into a separate immutable work-identity binding and validate it on every claim mutation.",
+            "Add one canonical JSON encoder, strict receipt publication outcomes, schema, immutable receipt builder, validator, and check command.",
+            "Publish receipt-first for adopt, terminalize, and activate-store using a claim-store under-lock precommit transition callback.",
+            "Make pane events derived notifications and preserve receipt bindings through heartbeat and renew.",
+            "Mirror, inventory, regenerate the host lock, and prove no grandfather receipt is synthesized for the 2026-08-03 manual recovery."
+          ],
+          "acceptance": [
+            "A display-ID collision or changed task/unit UUID blocks claim use.",
+            "Exact persisted receipt and predicted subject bytes reproduce their recorded hashes.",
+            "Receipt publication failure occurs before subject mutation.",
+            "A subject failure leaves only a prepared receipt and cannot be reported committed.",
+            "Already initialized activation creates no false recovery receipt or event."
+          ],
+          "verification": [
+            "PYTHONPATH=src python -m pytest tests/test_recovery_receipt.py tests/test_atomic_io.py tests/test_claim_store.py tests/test_task_claim_dispatcher.py tests/test_role_routing.py -q",
+            "PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q"
+          ],
+          "handoff": "Attach RED commits, receipt state matrix, exact digest proof, crash/failure matrix, work-identity drift negatives, template parity, managed-lock proof, W4a, and independent W4b.",
+          "stop_condition": "Stop before rotation, claim release/acceptance/completion, external CI, consumer mutation, credential access, push, tag, publish, or deploy."
+        },
+        {
+          "unit_id": "UNIT-TASK-AR-660-002",
+          "title": "Implement owner-attributed in-place expired-claim rotation",
+          "depends_on": ["UNIT-TASK-AR-660-001"],
+          "context": "TASK-AR-659 promised rotation but shipped only adopt, terminalize, and activate-store. Autofolio demonstrates the recovery need, but its manual rotation omitted prior-owner lineage, old-instance termination, and prior-worker verifier exclusion.",
+          "inputs": [
+            "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+            "scripts/task_claim_dispatcher.py",
+            "scripts/agent_instance_registry.py",
+            "scripts/agent_identity_gate.py",
+            "reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md"
+          ],
+          "target_files": [
+            "scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "scripts/agent_instance_registry.py",
+            "src/agent_runtime/templates/project/scripts/agent_instance_registry.py",
+            "scripts/agent_identity_gate.py",
+            "src/agent_runtime/templates/project/scripts/agent_identity_gate.py",
+            "scripts/pane_event_log.py",
+            "src/agent_runtime/templates/project/scripts/pane_event_log.py",
+            "scripts/parallel_worktree_gate.py",
+            "src/agent_runtime/templates/project/scripts/parallel_worktree_gate.py",
+            "scripts/rbac_write_gate.py",
+            "src/agent_runtime/templates/project/scripts/rbac_write_gate.py",
+            "docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md",
+            "src/agent_runtime/templates/project/docs/PARALLEL_AGENT_WORKTREE_PROTOCOL.md",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_agent_instance_registry.py",
+            "tests/test_agent_identity_gate.py",
+            "tests/test_parallel_worktree_gate.py",
+            "tests/test_rbac_write_gate.py",
+            "tests/test_template_mirror_gate.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "In-place recovery of one adopted, provably expired active worker/orchestrator claim. Owner identity is durable attribution, not cryptographic authentication.",
+          "steps": [
+            "RED expired success, legacy-adopt sequence, live/terminal/overlay/indeterminate refusals, every CAS dimension, task UID replacement, races, receipt failure, and history-cap behavior.",
+            "Require expected raw digest, revision, old agent/callsite, scope digest, work-identity digest, initialized store snapshot, Owner identity, and reason.",
+            "Atomically rotate identity and complete lease tuple while preserving task, unit, taskset, scope, branch, role, team, model, progress, and claimed_at.",
+            "Append bounded worker lineage, terminate the old instance, spawn the new instance, refresh projection/handoff/log, and emit a receipt-bound rotation notification.",
+            "Reject current or prior worker identities as the release verifier and prove old heartbeat fails while new heartbeat succeeds.",
+            "Mirror documentation and implementation, regenerate the host lock, then obtain independent W4b."
+          ],
+          "acceptance": [
+            "Exactly one concurrent beat/rotate or rotate/rotate mutation commits.",
+            "No successful rotation changes claim path or claim_id or creates/deletes a claim.",
+            "Legacy claims must be adopted before rotation and ambiguous canonical work identity always refuses.",
+            "Old instance termination and new instance spawn are durable and projections match the new revision.",
+            "Every prior worker is excluded from independent release verification."
+          ],
+          "verification": [
+            "PYTHONPATH=src python -m pytest tests/test_task_claim_dispatcher.py tests/test_claim_store.py tests/test_recovery_receipt.py tests/test_agent_instance_registry.py tests/test_agent_identity_gate.py tests/test_parallel_worktree_gate.py tests/test_rbac_write_gate.py -q",
+            "PYTHONPATH=src python -m pytest tests/test_template_mirror_gate.py tests/test_regen_host_lock_if_needed.py tests/test_template_smoke.py -q"
+          ],
+          "handoff": "Attach Autofolio-shaped regression, exact before/after receipt, race evidence, lineage/verifier negative, old/new instance evidence, no-new-claim proof, W4a, and independent W4b.",
+          "stop_condition": "Stop before changing task/unit/scope/branch authority, accepting indeterminate liveness by default, release/accept/complete/delete, external CI, push, tag, publish, or deploy."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-661",
+      "title": "Restore collision-safe work ledger and taskset authority",
+      "goal": "Repair the first-parent merge loss without overwriting canonical 653/654, and make the same ledger, taskset, or claim-identity corruption fail closed in owner governance.",
+      "scope": "Add inverse exact reservation validation, explicit taskset membership validation, immutable collision mapping, exact six-row ledger restoration, V080 membership correction, and stale Host Required Merge Gates closeout reconciliation.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 16,
+      "est_tokens": 32000,
+      "owner": "lead-engineer",
+      "team": "planning-office",
+      "depends_on": ["TASK-AR-660"],
+      "tags": ["work-identity", "ledger", "merge-loss", "data-integrity", "red-first"],
+      "acceptance": [
+        "Every canonical task has one exact fulfilled reservation row and every fulfilled row resolves to the same task path and task_uid.",
+        "The ledger restores exactly 652 and 655-659 while the colliding old 653/654 reservations are never reintroduced as canonical rows.",
+        "Every taskset with explicit membership is exact in both directions and V080 no longer aliases the unrelated canonical 653/654 tasks.",
+        "An immutable recovery map binds lost task/unit UUIDs and historical claim digests to successor Tasks 662/663 without rewriting terminal artifacts.",
+        "New claims carry canonical work UUID binding and a reused display ID cannot appropriate historical claim authority.",
+        "The current Host Required Merge Gates task metadata is reconciled only from its own released claim and approved W4b evidence."
+      ],
+      "verification": [
+        "PYTHONPATH=src python -m pytest tests/test_task_identity.py tests/test_task_identity_uuid7.py tests/test_taskset_work_gate.py tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_work_registration.py tests/test_backlog_board_tasksets.py -q",
+        "PYTHONPATH=src python -m pytest tests/test_owner_governance_gate.py tests/test_state_sync_gate.py tests/test_template_mirror_gate.py -q",
+        "PYTHONPATH=src python scripts/task_identity.py check --check",
+        "PYTHONPATH=src python scripts/taskset_work_gate.py --check",
+        "PYTHONPATH=src python scripts/owner_governance_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-661-001",
+          "title": "Repair work identity authority and prevent first-parent ledger loss",
+          "context": "Merge 2db74f8f kept first-parent TASK-AR-653/654 and ledger bytes while losing six non-conflicting rows and the V080 Scribe/Compound task records. Existing gates validate ledger-to-task only and do not enforce registry membership in owner governance.",
+          "inputs": [
+            "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+            "agents/project/work-items/TASK-ID-RESERVATIONS.json",
+            "agents/project/work-items/TASKSET-DEFINITIONS.json",
+            "scripts/task_identity.py",
+            "scripts/taskset_work_gate.py"
+          ],
+          "target_files": [
+            "scripts/task_identity.py",
+            "src/agent_runtime/templates/project/scripts/task_identity.py",
+            "scripts/taskset_work_gate.py",
+            "src/agent_runtime/templates/project/scripts/taskset_work_gate.py",
+            "scripts/task_claim_dispatcher.py",
+            "src/agent_runtime/templates/project/scripts/task_claim_dispatcher.py",
+            "schemas/work-identity-recovery.schema.json",
+            "src/agent_runtime/templates/project/schemas/work-identity-recovery.schema.json",
+            "agents/project/work-items/WORK-IDENTITY-RECOVERIES.json",
+            "tests/test_task_identity.py",
+            "tests/test_taskset_work_gate.py",
+            "tests/test_taskset_dispatcher.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_work_registration.py",
+            "tests/test_backlog_board_tasksets.py",
+            "tests/test_owner_governance_gate.py",
+            "tests/test_template_mirror_gate.py"
+          ],
+          "scope": "Implement gates and immutable recovery mapping in the worker. Shared task, unit, reservation-ledger, registry, pointer, and generated-view reconciliation remains orchestrator-owned W5 work.",
+          "steps": [
+            "RED missing/dangling/mismatched task reservation, wrong V080 membership, omitted 659, claim display-ID reuse, and tampered collision map.",
+            "Add task-to-ledger inverse exact linkage and taskset registry bidirectional membership validation.",
+            "Validate a bounded immutable work-identity recovery registry with old/new UUID, claim path/digest, evidence, and commit ancestry bindings.",
+            "Make claim create/adopt and later mutations consume exact canonical work identity and refuse unresolved collision history.",
+            "Under orchestrator authority restore exactly six reservation rows, correct V080 membership, and reconcile Host Gates metadata from non-colliding evidence.",
+            "Refresh generated views, run owner governance, and obtain independent W4b."
+          ],
+          "acceptance": [
+            "The pre-fix repository reproduces both wrong-membership and missing-reservation REDs.",
+            "No invalid JSON merge strategy or display-ID overwrite is used.",
+            "Historical claim files remain byte-identical.",
+            "Owner governance transitively blocks every new identity finding.",
+            "Template gates remain usable with an absent or empty recovery registry."
+          ],
+          "verification": [
+            "PYTHONPATH=src python -m pytest tests/test_task_identity.py tests/test_taskset_work_gate.py tests/test_taskset_dispatcher.py tests/test_task_claim_dispatcher.py tests/test_owner_governance_gate.py tests/test_template_mirror_gate.py -q",
+            "PYTHONPATH=src python scripts/task_identity.py check --check",
+            "PYTHONPATH=src python scripts/taskset_work_gate.py --check",
+            "PYTHONPATH=src python scripts/owner_governance_gate.py --check"
+          ],
+          "handoff": "Attach RED output, exact restored-row diff, collision map and claim digests, V080 membership before/after, Host Gates evidence binding, historical artifact byte check, W4a, and independent W4b.",
+          "stop_condition": "Stop before rewriting old 653/654 task or claim artifacts, union-merging JSON, granting recovery mappings claim-release authority, external CI, push, tag, publish, or deploy."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-662",
+      "title": "Re-key and re-attest the lost V080 Scribe work",
+      "goal": "Restore canonical task/unit authority for the already integrated Scribe source-debt implementation under a new collision-free identity.",
+      "scope": "Claim normally, verify the inherited implementation and historical approval against current main, record exact old-to-new evidence mapping, and close only with fresh W4a/W4b under the new identity.",
+      "priority": "P1",
+      "difficulty": "M",
+      "est_hours": 8,
+      "est_tokens": 16000,
+      "owner": "lead-engineer",
+      "team": "quality",
+      "depends_on": ["TASK-AR-661"],
+      "tags": ["scribe", "identity-recovery", "re-attestation"],
+      "acceptance": [
+        "The new task is linked to lost task_uid d7d6d63a-5059-4a2f-8399-d7ca683ba6ef and all four historical worker claims by immutable digest.",
+        "Current Scribe debt, active coverage, cleanup receipt, no-touch, configuration, Git-view, and template behavior pass the complete registered suite.",
+        "No historical task, unit, claim, review, receipt, or Compound record is rewritten.",
+        "Fresh evidence and independent W4b cite the new task/unit identity and distinguish historical evidence from current approval."
+      ],
+      "verification": [
+        "PYTHONPATH=src python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q",
+        "PYTHONPATH=src python scripts/scribe_due.py --root . --json",
+        "PYTHONPATH=src python scripts/template_mirror_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-662-001",
+          "title": "Re-attest integrated Scribe behavior under collision-free authority",
+          "context": "The V080 Scribe task completed with final independent approval, but its task/unit files were overwritten by an earlier canonical TASK-AR-653 during merge. Its implementation, reviews, claims, and commit history remain on main.",
+          "inputs": [
+            "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+            "reviews/W4B-2026-07-31-unit-task-ar-653-001-invalid-runtime-config-final.md",
+            "agents/project/work-items/WORK-IDENTITY-RECOVERIES.json",
+            "src/agent_runtime/state_projection.py",
+            "scripts/scribe_due.py"
+          ],
+          "target_files": [
+            "tests/test_scribe_due.py",
+            "tests/test_closure_gate.py",
+            "tests/test_session_continuity_hooks.py",
+            "tests/test_doctor.py",
+            "tests/test_template_smoke.py"
+          ],
+          "scope": "Re-attestation first. Change implementation only when a current reproducible failure is found and record any expansion through T3 before editing.",
+          "steps": [
+            "Claim the new task/unit normally and prove its recovery mapping resolves every old claim digest without resolving through the current TASK-AR-653 unit.",
+            "Run the full registered Scribe suite and command-level state projection checks on current main.",
+            "If red, register a T3 scope amendment and repair RED-first; otherwise keep the implementation tree unchanged.",
+            "Create fresh verification evidence, W4a, and independent W4b bound to TASK-AR-662."
+          ],
+          "acceptance": [
+            "Historical approval is context, never substituted for fresh W4b.",
+            "Active work cannot disappear from the bounded continuity view.",
+            "Projection freshness alone cannot clear overdue source debt.",
+            "No consumer project is mutated."
+          ],
+          "verification": [
+            "PYTHONPATH=src python -m pytest tests/test_scribe_due.py tests/test_closure_gate.py tests/test_session_continuity_hooks.py tests/test_doctor.py tests/test_template_smoke.py -q",
+            "PYTHONPATH=src python scripts/scribe_due.py --root . --json"
+          ],
+          "handoff": "Attach collision-map proof, historical blob immutability, complete current suite evidence, any T3 repair, W4a, and fresh independent W4b.",
+          "stop_condition": "Stop before rewriting historical artifacts, performing archive mutations without an explicit bounded Scribe decision, mutating consumers, external CI, push, tag, publish, or deploy."
+        }
+      ]
+    },
+    {
+      "display_id": "TASK-AR-663",
+      "title": "Re-key and finish the lost V080 Compound work",
+      "goal": "Restore collision-free authority for the integrated repeated-failure Compound work and truthfully close or expose every remaining verification blocker.",
+      "scope": "Claim normally, bind all historical claims/reviews/Compound records to the new identity, re-run current closure and failure-to-regression behavior, repair current reds, and obtain fresh skeptic plus independent W4b.",
+      "priority": "P1",
+      "difficulty": "L",
+      "est_hours": 16,
+      "est_tokens": 32000,
+      "owner": "lead-engineer",
+      "team": "quality",
+      "depends_on": ["TASK-AR-662"],
+      "tags": ["compound", "identity-recovery", "repeated-failure", "red-first"],
+      "acceptance": [
+        "The new task is linked to lost task_uid ef3cb8e5-d5b9-443e-ad93-5948ade62659, its worker claims, role overlays, review chain, and append-only Compound records by immutable digest.",
+        "Repeated-failure closure requires complete canonical Compound coverage and a prevention destination while ordinary substantial work retains review/retro compatibility.",
+        "The consumer failure-to-regression skill remains registered and template parity holds.",
+        "Fresh skeptic and independent W4b have zero P0/P1 for locally testable scope; unavailable native-Windows evidence remains an explicit release blocker rather than a false pass.",
+        "No historical task, unit, claim, review, receipt, or Compound record is rewritten."
+      ],
+      "verification": [
+        "PYTHONPATH=src python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_claim_store.py tests/test_atomic_io.py -q",
+        "PYTHONPATH=src python scripts/compound_record.py --check",
+        "PYTHONPATH=src python scripts/runtime_asset_usage.py --check",
+        "PYTHONPATH=src python scripts/template_mirror_gate.py --check"
+      ],
+      "units": [
+        {
+          "unit_id": "UNIT-TASK-AR-663-001",
+          "title": "Re-attest and finish repeated-failure Compound enforcement",
+          "context": "The V080 Compound task reached a bounded conditional approval after extensive fail-closed repairs, but remained open for Scribe, skeptic, adjacent-task, and native-Windows evidence. Its task/unit authority was then overwritten by an earlier canonical TASK-AR-654 although its code and evidence were merged.",
+          "inputs": [
+            "reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md",
+            "reviews/W4B-2026-08-02-unit-task-ar-654-001-adverse-w4b-repair-final.md",
+            "reviews/AUDIT-2026-08-02-task-ar-654-windows-native-evidence-final.md",
+            "agents/project/work-items/WORK-IDENTITY-RECOVERIES.json",
+            "scripts/closure_gate.py",
+            "scripts/compound_record.py"
+          ],
+          "target_files": [
+            "scripts/closure_gate.py",
+            "src/agent_runtime/templates/project/scripts/closure_gate.py",
+            "scripts/compound_record.py",
+            "src/agent_runtime/templates/project/scripts/compound_record.py",
+            "skills/failure-to-regression/SKILL.md",
+            "src/agent_runtime/templates/project/skills/failure-to-regression/SKILL.md",
+            "src/agent_runtime/templates/project/agents/project/RUNTIME-ASSET-REGISTRY.json",
+            "tests/test_compound_records.py",
+            "tests/test_closure_gate.py",
+            "tests/test_task_claim_dispatcher.py",
+            "tests/test_runtime_asset_usage.py",
+            "tests/test_claim_store.py",
+            "tests/test_atomic_io.py",
+            "tests/fixtures/host/agent_runtime.lock.json"
+          ],
+          "scope": "Re-attest all current behavior and repair locally reproducible gaps. Native Windows execution must be real or remain explicitly blocked; POSIX modeling cannot satisfy it.",
+          "steps": [
+            "Claim the new task/unit and prove all old worker/overlay claim digests map to the lost UUID, not the current Host Gates task.",
+            "Run the complete Compound, closure, claim-authority, atomic publication, asset, and template suites on current main.",
+            "Reproduce any remaining current failure RED-first and record a T3 amendment before source changes.",
+            "Verify Scribe and adjacent dependencies are now satisfied, preserve every prior Compound record append-only, and classify native-Windows evidence separately.",
+            "Create fresh machine evidence, W4a, skeptic review, and independent W4b bound to TASK-AR-663."
+          ],
+          "acceptance": [
+            "Review-only closure cannot satisfy a declared repeated failure.",
+            "All defect signatures have exact canonical Compound coverage or closure blocks.",
+            "No old Compound record changes bytes.",
+            "External platform absence cannot be reported as verified."
+          ],
+          "verification": [
+            "PYTHONPATH=src python -m pytest tests/test_compound_records.py tests/test_closure_gate.py tests/test_task_claim_dispatcher.py tests/test_runtime_asset_usage.py tests/test_claim_store.py tests/test_atomic_io.py -q",
+            "PYTHONPATH=src python scripts/compound_record.py --check",
+            "PYTHONPATH=src python scripts/runtime_asset_usage.py --check",
+            "PYTHONPATH=src python scripts/template_mirror_gate.py --check"
+          ],
+          "handoff": "Attach collision-map proof, append-only hash matrix, RED/fix evidence, complete current suite, native-Windows disposition, fresh skeptic, W4a, and independent W4b.",
+          "stop_condition": "Stop before rewriting legacy Compound history, claiming unexecuted native-Windows coverage, external CI, consumer mutation, claim release without W4b, push, tag, publish, or deploy."
+        }
+      ]
+    }
+  ]
+}

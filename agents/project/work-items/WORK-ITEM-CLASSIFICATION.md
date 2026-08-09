@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-08-04T14:28:19+09:00
-record_count: 556
+generated_at: 2026-08-09T12:50:02+09:00
+record_count: 567
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `556` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `567` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `45` records |
-| Tasksets | pass | `69` records |
-| Tasks | pass | `323` records |
-| Units | pass | `119` records |
+| Initiatives | pass | `46` records |
+| Tasksets | pass | `70` records |
+| Tasks | pass | `327` records |
+| Units | pass | `124` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -595,6 +595,17 @@ record_count: 556
 | 44.1.5.1 | Unit 44.1.5.1 | unit | `UNIT-TASK-AR-658-001` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md` | UNIT-TASK-AR-658-001 - Build the secret-free Runtime health resource and console surface |
 | 44.1.6 | Task 44.1.6 | task | `TASK-AR-659` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | done | `agents/lead_engineer/tasks/TASK-AR-659.md` | Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom… |
 | 44.1.6.1 | Unit 44.1.6.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | done | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
+| 45 | Initiative 45 | initiative | `INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | - | active | `agents/project/initiatives/INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION.md` | Claim Recovery and Work Identity Correction |
+| 45.1 | Taskset 45.1 | taskset | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | `INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | active | `BACKLOG-BOARD.md` | Claim Recovery and Work Identity Correction |
+| 45.1.1 | Task 45.1.1 | task | `TASK-AR-660` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-660.md` | Finish the missing TASK-AR-659 rotation path and make every recovery mutation indepen… |
+| 45.1.1.1 | Unit 45.1.1.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL |
+| 45.1.1.2 | Unit 45.1.1.2 | unit | `UNIT-TASK-AR-660-002` | `TASK-AR-660` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-002.md` | UNIT-TASK-AR-660-002 - Implement owner-attributed in-place expired-claim rotation |
+| 45.1.2 | Task 45.1.2 | task | `TASK-AR-661` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-661.md` | Repair the first-parent merge loss without overwriting canonical 653/654, and make th… |
+| 45.1.2.1 | Unit 45.1.2.1 | unit | `UNIT-TASK-AR-661-001` | `TASK-AR-661` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md` | UNIT-TASK-AR-661-001 - Repair work identity authority and prevent first-parent ledger loss |
+| 45.1.3 | Task 45.1.3 | task | `TASK-AR-662` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-662.md` | Restore canonical task/unit authority for the already integrated Scribe source-debt i… |
+| 45.1.3.1 | Unit 45.1.3.1 | unit | `UNIT-TASK-AR-662-001` | `TASK-AR-662` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-662/UNIT-TASK-AR-662-001.md` | UNIT-TASK-AR-662-001 - Re-attest integrated Scribe behavior under collision-free authority |
+| 45.1.4 | Task 45.1.4 | task | `TASK-AR-663` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-663.md` | Restore collision-free authority for the integrated repeated-failure Compound work an… |
+| 45.1.4.1 | Unit 45.1.4.1 | unit | `UNIT-TASK-AR-663-001` | `TASK-AR-663` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-663/UNIT-TASK-AR-663-001.md` | UNIT-TASK-AR-663-001 - Re-attest and finish repeated-failure Compound enforcement |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

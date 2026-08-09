@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-08-04T14:28:19+09:00
-task_count: 323
-open_count: 20
+generated_at: 2026-08-09T12:50:02+09:00
+task_count: 327
+open_count: 24
 completed_count: 303
-task_set_count: 5
+task_set_count: 6
 completed_task_set_count: 64
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `303` completed tasks are archived from this live board.
+- Summary: `24` open or active tasks; `303` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `303`.
-- Task Sets: `5` active workflows; `64` completed workflows are hidden from the live action board.
+- Status: Action `16` / Ask `5` / Review `0` / Later `3` / Done `303`.
+- Task Sets: `6` active workflows; `64` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -102,6 +102,18 @@ completed_task_set_count: 64
 |---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
 | `TASK-AR-654` | INIT-AR-PROJECT-MERGE-GOVERNANCE | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-654/UNIT-TASK-AR-654-001.md | planned | Ask | P1 | High | Medium | 3h/9000tok | Low | 6 | agent-runtime-core | lead-engineer | Owner/agent decision | Prevent worker branches from bypassing project contract, ownership, and visual gates… |
 
+### Claim Recovery and Work Identity Correction (`TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION`)
+
+- Flow: Make recovery durable and collision-safe, restore exact ledger and taskset authority, and re-key the lost V080 Scribe and Compound work without rewriting history.
+- Progress: `0/4` done; `4` open or active.
+- WIP: active `0/3`; oldest `0.0h`; stale `0`.
+| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
+|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
+| `TASK-AR-662` | INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-662/UNIT-TASK-AR-662-001.md | planned | Action | P1 | High | Medium | 8h/16000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Restore canonical task/unit authority for the already integrated Scribe source-debt i… |
+| `TASK-AR-661` | INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md | planned | Later | P1 | High | High | 16h/32000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Repair the first-parent merge loss without overwriting canonical 653/654, and make th… |
+| `TASK-AR-663` | INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-663/UNIT-TASK-AR-663-001.md | planned | Later | P1 | High | High | 16h/32000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Restore collision-free authority for the integrated repeated-failure Compound work an… |
+| `TASK-AR-660` | INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md | planned | Later | P1 | High | Critical | 24h/48000tok | Low | 6 | agent-runtime-core | lead-engineer | Wait for dependency | Finish the missing TASK-AR-659 rotation path and make every recovery mutation indepen… |
+
 ## Archived Task Sets
 
 - Archive rule: completed task sets stay out of the live Action Board but remain visible as workflow-level completion evidence.
@@ -177,8 +189,8 @@ completed_task_set_count: 64
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `20` open across `5` task sets (see Action Board above).
-- Throughput (7d): `17` tasks completed in the last 7 days (TASK-AR-627).
+- Active: `24` open across `6` task sets (see Action Board above).
+- Throughput (7d): `2` tasks completed in the last 7 days (TASK-AR-627).
 - Archived task sets: `64` (see Archived Task Sets above).
 - Archived task files: `303` — see `ARCHIVE-INDEX.md`.
 
