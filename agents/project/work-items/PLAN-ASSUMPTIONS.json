@@ -180,7 +180,7 @@
         {
           "kind": "sha256",
           "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
-          "value": "f38c54b877ab07627240dcf3e2bfaccfc58980de896432178a89569b4ed37e9e"
+          "value": "ee7e940fddaa32fee4f963f50241ada271c66d979dfe0607959c63428dc4b103"
         },
         {
           "kind": "sha256",
@@ -321,10 +321,15 @@
           "kind": "sha256",
           "path": "tests/test_attribution_gate.py",
           "value": "52b833e2b980fd60278e194a4aee78bc9edf09a3bba7af1f8769094324e7af5c"
+        },
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md",
+          "value": "da742733c4473b59ea8cb2cb2b8247c1ff583d2af64d56c653371e0bb6778526"
         }
       ],
-      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
-      "recorded_at": "2026-08-09T17:20:25+09:00",
+      "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-cross-platform-publication-t3-replan.md",
+      "recorded_at": "2026-08-09T17:51:23+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1968,5 +1973,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T17:20:25+09:00"
+  "updated_at": "2026-08-09T17:51:23+09:00"
 }
