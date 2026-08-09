@@ -9,9 +9,10 @@ kind: task
 parent_id: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 registered_at: 2026-08-09T12:00:00+09:00
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T12:00:00+09:00
+updated_at: 2026-08-09T12:55:20+09:00
+started_at: 2026-08-09T12:55:20+09:00
 title: Complete durable owner-bound claim recovery transactions
-status: planned
+status: in_progress
 priority: P1
 difficulty: XL
 est_hours: 24
@@ -35,6 +36,9 @@ tags:
   - data-integrity
   - repeated-failure
   - red-first
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json
+last_actor_instance: le-20260809-130000-kst-ar660001
 acceptance:
   - New and adopted claims bind the canonical task task_uid and unit work_uid; heartbeat, renew, release, and rotate reject identity drift.
   - Adopt, terminalize, activate-store, and rotate publish an immutable receipt before subject mutation and retain exact semantic and raw before/after digests plus Owner attribution.

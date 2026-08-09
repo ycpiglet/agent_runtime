@@ -1,5 +1,12 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-08-09 Claim Recovery and Work Identity Correction active (`TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION`)
+
+- Active: `TASK-AR-660` Unit 001 adds claim work-identity binding and receipt-first recovery WAL; Unit 002 adds owner-attributed in-place rotation.
+- Next: `TASK-AR-661` restores exact reservation/taskset authority and provides an audited existing-taskset recovery transaction.
+- Re-keyed product work: staged Tasks `662` (Scribe) and `663` (Compound) move into V080 only through that verified transaction; the current unrelated canonical Tasks 653/654 are preserved.
+- Release boundary: local W4a/W4b, identity recovery, Scribe/Compound re-attestation, and explicit external-platform blockers precede any version, tag, push, package, publish, deploy, consumer pilot, or release action.
+
 ## 2026-07-30 v0.8 Operability Hardening active (`TASKSET-AR-V080-OPERABILITY-HARDENING`)
 
 - Migration gate: `TASK-AR-650` is independently closed; its task-scope P0/P1/P2 count is 0/0/0 while the next-RC backlog remains P1 6 and P2 1.

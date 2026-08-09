@@ -9,11 +9,12 @@ task_id: TASK-AR-660
 task_set_id: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 initiative_id: INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
 project_id: PROJECT-AGENT-RUNTIME
-status: worker_ready
+status: in_progress
 verification_status: pending
 owner: lead-engineer
 created_at: 2026-08-09T12:00:00+09:00
-updated_at: 2026-08-09T12:55:00+09:00
+updated_at: 2026-08-09T12:55:20+09:00
+started_at: 2026-08-09T12:55:20+09:00
 origin_type: owner_request
 origin_ref: reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md
 created_by: codex-root-owner-approved-correction
@@ -21,6 +22,9 @@ summary: Bind claim work identity and add receipt-first recovery WAL
 horizon: unit
 model_tier: worker_standard
 escalation_triggers:
+claim_refs:
+  - agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json
+last_actor_instance: le-20260809-130000-kst-ar660001
 context: TASK-AR-659 records recovery digests only on stdout, activate-store can succeed after losing its only audit event, strict fsync outcomes are hidden, and claim files are bound only to reusable display IDs.
 inputs:
   - reviews/REVIEW-2026-08-09-claim-recovery-work-identity-correction-plan.md

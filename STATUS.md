@@ -1,5 +1,12 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-08-09 - Claim recovery and work identity correction active
+
+- Active: `TASK-AR-660` / `UNIT-TASK-AR-660-001` in `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION`; claim `CLAIM-20260809-125520-task-ar-660-491d`, worktree `.worktrees/TASK-AR-660`, branch `codex/task-ar-660-recovery-receipt`.
+- Scope: RED-first canonical task/unit UUID binding and immutable receipt-first WAL for adopt, terminalize, and activate-store. Owner-bound rotation remains the next separate unit.
+- Recovery queue: Task 661 repairs reservation/taskset authority and atomically moves re-keyed Scribe/Compound Tasks 662/663 into V080; historical 653/654 task and claim artifacts remain immutable.
+- Boundary: no external CI, consumer mutation, version, tag, package, push, publication, deployment, or release action is authorized.
+
 ## 2026-08-04 - TASK-AR-655 and TASK-AR-659 closed
 
 - Completed: `TASK-AR-655` (long-running claims stay truthful; one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor) accepted by an 11-round independent context-isolated W4b, and `TASK-AR-659` (owner-bound recovery for claims no automated path can reach) accepted by a 4-round one. All five claims released or terminalized.

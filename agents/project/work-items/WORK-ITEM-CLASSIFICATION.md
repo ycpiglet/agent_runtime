@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-08-09T12:53:03+09:00
+generated_at: 2026-08-09T13:01:47+09:00
 record_count: 567
 ---
 
@@ -597,8 +597,8 @@ record_count: 567
 | 44.1.6.1 | Unit 44.1.6.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | done | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
 | 45 | Initiative 45 | initiative | `INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | - | active | `agents/project/initiatives/INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION.md` | Claim Recovery and Work Identity Correction |
 | 45.1 | Taskset 45.1 | taskset | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | `INIT-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | active | `BACKLOG-BOARD.md` | Claim Recovery and Work Identity Correction |
-| 45.1.1 | Task 45.1.1 | task | `TASK-AR-660` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-660.md` | Finish the missing TASK-AR-659 rotation path and make every recovery mutation indepen… |
-| 45.1.1.1 | Unit 45.1.1.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL |
+| 45.1.1 | Task 45.1.1 | task | `TASK-AR-660` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | in_progress | `agents/lead_engineer/tasks/TASK-AR-660.md` | Finish the missing TASK-AR-659 rotation path and make every recovery mutation indepen… |
+| 45.1.1.1 | Unit 45.1.1.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | in_progress | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Bind claim work identity and add receipt-first recovery WAL |
 | 45.1.1.2 | Unit 45.1.1.2 | unit | `UNIT-TASK-AR-660-002` | `TASK-AR-660` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-002.md` | UNIT-TASK-AR-660-002 - Implement owner-attributed in-place expired-claim rotation |
 | 45.1.2 | Task 45.1.2 | task | `TASK-AR-661` | `TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION` | planned | `agents/lead_engineer/tasks/TASK-AR-661.md` | Repair the first-parent merge loss without overwriting canonical 653/654, and make th… |
 | 45.1.2.1 | Unit 45.1.2.1 | unit | `UNIT-TASK-AR-661-001` | `TASK-AR-661` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md` | UNIT-TASK-AR-661-001 - Repair work identity authority and prevent first-parent ledger loss |

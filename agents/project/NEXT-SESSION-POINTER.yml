@@ -1,35 +1,64 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-04T14:18:00+09:00
-updated_by: le-20260804-121045-kst-0427
+updated_at: 2026-08-09T12:55:20+09:00
+updated_by: le-20260809-130000-kst-ar660001
 current_state:
-  summary: "TASK-AR-655 and TASK-AR-659 are both done and released. Long-running claims are now truthful across every consumer, and a claim no automated path can reach has registered owner-bound exits."
-  status: unclaimed
+  summary: "TASK-AR-660 is implementing canonical work-identity binding and receipt-first recovery WAL semantics before owner-bound rotation."
+  status: active
   task_set_status: active
-  task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 12
-  step_total: 12
-  progress_pct: 100
-  status_text: "AR-655 closed after an 11-round independent W4b. TASK-AR-656 and TASK-AR-657 remain planned in this task set."
+  task_set_id: "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
+  step_index: 1
+  step_total: 6
+  progress_pct: 0
+  status_text: "Claim-first bootstrap complete; RED-first receipt and identity implementation is next."
 active_work:
-  current_agents: []
+  current_agents:
+    - claim_id: CLAIM-20260809-125520-task-ar-660-491d
+      agent_role: lead-engineer
+      team_id: agent-runtime-core
+      agent_instance_id: le-20260809-130000-kst-ar660001
+      display_name: lead-engineer@task-ar-660-001
+      callsite_id: codex-root:task-ar-660-unit-001
+      pane_id: codex-root
+      task_id: TASK-AR-660
+      unit_id: UNIT-TASK-AR-660-001
+      task_set_id: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
+      status: claimed
+      phase: claim-created
+      progress_pct: 0
+      step_index: 1
+      step_total: 6
+      status_text: "TASK-AR-660 claim-first bootstrap; receipt-first recovery WAL implementation"
+      worktree_path: .worktrees/TASK-AR-660
+      branch: codex/task-ar-660-recovery-receipt
+      requested_model_tier: worker_standard
+      selected_model_tier: planner_high
+      routing_policy_id: task-unit-tier-policy
+      routing_escalation_reason: "trigger:data_integrity,repeated_failure"
+      task_token_budget: 48000
+      claim_token_budget: 30000
+      claim_path: agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json
+      handoff_path: agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.handoff.md
+      log_path: agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.log.md
+      last_heartbeat: 2026-08-09T12:55:20+09:00
+      mutation_revision: 0
   current_teams:
     - agent-runtime-core
 resume:
-  active_task: TASK-AR-656
-  active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
-  branch_policy: "AR-655 and AR-659 are closed. Claim the next task in its own worktree; keep consumer primaries and release surfaces read-only."
+  active_task: TASK-AR-660
+  active_task_set: TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION
+  branch_policy: "Work only in .worktrees/TASK-AR-660 on codex/task-ar-660-recovery-receipt; shared SSoT remains orchestrator-owned."
   next_actions:
-    - "Claim TASK-AR-656 (composable lifecycle hooks) or TASK-AR-657; the task set is free."
-    - "Create every claim mode=worker. An orchestrator-mode claim is skipped by claim_reaper unconditionally and needs owner-bound terminalize to clear."
-    - "TASK-AR-648 owns the umask defect in claim_guard.py: chmod 0600 precedes a git add that rewrites the index as 0666 & ~umask, so parallel_worktree_gate never recognises the claim-commit transaction. tests/test_claim_guard.py 21-red is that defect, not a permanent baseline."
-    - "Keep TASK-AR-654, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
+    - "Write RED tests for work-identity drift and receipt-first failure semantics."
+    - "Implement immutable recovery receipts for adopt, terminalize, and activate-store."
+    - "Keep rotation, ledger recovery, consumer mutation, version, tag, push, publish, deploy, and release actions blocked."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."
   qa: "Quality Loop is closed; use the named task-set completion gate before reopening completion claims."
   progress_scout: "Pane Progress is closed; use the named task-set completion gate before reopening completion claims."
 pointers:
-  active_claims: []
+  active_claims:
+    - agents/runtime/task_claims/CLAIM-20260809-125520-task-ar-660-491d.json
   registered_followups:
     - task_id: TASK-AR-639
       task_set_id: TASKSET-AR-V080-ADOPTION-ENFORCEMENT
