@@ -636,6 +636,132 @@ def test_rejected_exclusive_precommit_preserves_generation_changed_parent_with_a
     assert replacement_sidecar.read_bytes() == replacement_sidecar_bytes
 
 
+def test_rejected_exclusive_precommit_preserves_created_parent_replaced_before_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Creation ownership must survive a pre-snapshot directory replacement."""
+
+    target = tmp_path / "created-store" / "receipt.json"
+    real_capture = atomic_io._capture_precommit_cleanup
+    real_lstat = Path.lstat
+    callback_calls = 0
+    capture_calls = 0
+    replacement_live = False
+    created_parent_metadata: object | None = None
+    opened_sidecar_metadata: object | None = None
+    replacement_generation: int | None = None
+    replacement_sidecar: Path | None = None
+    rejection = ValueError("stale recovery actor")
+
+    class ReplacementMetadata:
+        def __init__(self, metadata: object, overrides: dict[str, int | float]) -> None:
+            self._metadata = metadata
+            self._overrides = overrides
+
+        def __getattr__(self, attribute: str) -> object:
+            if attribute in self._overrides:
+                return self._overrides[attribute]
+            return getattr(self._metadata, attribute)
+
+    def report_replacement_generation(path: Path) -> object:
+        metadata = real_lstat(path)
+        if not replacement_live:
+            return metadata
+        if path == replacement_sidecar:
+            assert opened_sidecar_metadata is not None
+            # Moving the exact prepared sidecar through a hard link changes
+            # link-count timestamps on the host. Keep its opened generation
+            # stable so this regression isolates created-parent ownership.
+            return opened_sidecar_metadata
+        if path != target.parent:
+            return metadata
+        assert created_parent_metadata is not None
+        assert replacement_generation is not None
+        return ReplacementMetadata(
+            created_parent_metadata,
+            {
+                "st_birthtime_ns": replacement_generation,
+                "st_ctime_ns": replacement_generation,
+                "st_ctime": replacement_generation / 1_000_000_000,
+            },
+        )
+
+    def replace_parent_before_snapshot(
+        path: Path,
+        name: str,
+        parent_fd: int | None,
+        opened_identity: atomic_io.PublishedFileIdentity,
+        opened_cleanup_identity: atomic_io._CleanupPathIdentity,
+    ) -> atomic_io._RejectedCleanupProof:
+        nonlocal capture_calls
+        nonlocal created_parent_metadata
+        nonlocal opened_sidecar_metadata
+        nonlocal replacement_generation
+        nonlocal replacement_live
+        nonlocal replacement_sidecar
+        capture_calls += 1
+        assert capture_calls == 1
+        assert parent_fd is None
+
+        sidecar = path.parent / name
+        created_parent_metadata = real_lstat(path.parent)
+        opened_sidecar_metadata = real_lstat(sidecar)
+        replacement_generation = int(created_parent_metadata.st_ctime_ns) + 1_000_000_000
+        parked_sidecar = tmp_path / "parked-sidecar-before-snapshot"
+        os.link(sidecar, parked_sidecar)
+        sidecar.unlink()
+        path.parent.rmdir()
+        path.parent.mkdir()
+        replacement_sidecar = path.parent / name
+        os.link(parked_sidecar, replacement_sidecar)
+        parked_sidecar.unlink()
+        replacement_live = True
+
+        reported = path.parent.lstat()
+        assert (int(reported.st_dev), int(reported.st_ino)) == (
+            int(created_parent_metadata.st_dev),
+            int(created_parent_metadata.st_ino),
+        )
+        assert int(reported.st_birthtime_ns) == replacement_generation
+        return real_capture(
+            path,
+            name,
+            parent_fd,
+            opened_identity,
+            opened_cleanup_identity,
+        )
+
+    def reject_authority() -> None:
+        nonlocal callback_calls
+        callback_calls += 1
+        raise rejection
+
+    monkeypatch.setattr(Path, "lstat", report_replacement_generation)
+    monkeypatch.setattr(
+        atomic_io,
+        "_capture_precommit_cleanup",
+        replace_parent_before_snapshot,
+    )
+    monkeypatch.setattr(atomic_io, "os", _NamedOSProxy("nt"))
+
+    with pytest.raises(ValueError, match="stale recovery actor") as rejected:
+        atomic_io.publish_text_atomic(
+            target,
+            "prepared\n",
+            fsync_policy="strict",
+            precommit=reject_authority,
+        )
+
+    assert rejected.value is rejection
+    assert callback_calls == 1
+    assert capture_calls == 1
+    assert not target.exists()
+    assert replacement_sidecar is not None
+    assert target.parent.is_dir()
+    assert replacement_sidecar.read_bytes() == b"prepared\n"
+
+
 def test_rejected_exclusive_precommit_does_not_follow_replaced_ancestor_alias(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
