@@ -45,6 +45,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 import atomic_io
+import backlog_board
 from agent_runtime import claim_store
 from pane_event_log import append_event
 
@@ -205,6 +206,73 @@ def _artifact_path(root: Path, claim_id: str, suffix: str) -> Path:
 
 def _rel(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
+
+
+def _canonical_parent_task_uid(root: Path, task_id: str) -> str:
+    """Resolve a parent task UUID; missing metadata binds an explicit null."""
+
+    if not task_id:
+        return ""
+    path = root / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+    if not path.is_file():
+        return ""
+    try:
+        meta, _ = backlog_board.parse_frontmatter(
+            path.read_text(encoding="utf-8")
+        )
+    except OSError as exc:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity is unreadable"
+        ) from exc
+    for field in ("id", "display_id", "work_id"):
+        value = meta.get(field)
+        if value is None:
+            continue
+        if not isinstance(value, str) or (value.strip() and value.strip() != task_id):
+            raise claim_store.ClaimStoreError(
+                "claim-store overlay parent work identity is inconsistent"
+            )
+    task_uid = meta.get("task_uid")
+    if task_uid is None:
+        return ""
+    if not isinstance(task_uid, str):
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent task_uid is invalid"
+        )
+    work_uid = meta.get("work_uid")
+    if work_uid is not None and (
+        not isinstance(work_uid, str)
+        or (task_uid.strip() and work_uid.strip() and task_uid.strip() != work_uid.strip())
+    ):
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay parent work identity is inconsistent"
+        )
+    return task_uid.strip()
+
+
+def _overlay_work_identity_binding(
+    root: Path,
+    *,
+    task_id: str,
+    parent_task_id: str,
+    bound_at: str,
+) -> dict[str, Any]:
+    """Bind an overlay to its real parent, never to an invented UUID."""
+
+    canonical_parent = str(parent_task_id or "").strip()
+    identity_task_id = canonical_parent or str(task_id or "").strip()
+    task_uid = (
+        _canonical_parent_task_uid(root, canonical_parent)
+        if canonical_parent
+        else ""
+    )
+    return claim_store.work_identity_binding(
+        task_id=identity_task_id,
+        task_uid=task_uid,
+        unit_id="",
+        work_uid="",
+        bound_at=bound_at,
+    )
 
 
 def _is_path_alias(metadata: os.stat_result) -> bool:
@@ -378,7 +446,13 @@ def _existing_overlay_claim(
         # bound_at is the creation instant, like claimed_at. Its integrity is
         # enforced where it matters - every mutation revalidates it against the
         # claim's own fields, so a widened footprint is refused.
-        | {"schema", "claimed_at", "persistence", "scope_binding"}
+        | {
+            "schema",
+            "claimed_at",
+            "persistence",
+            "scope_binding",
+            "work_identity_binding",
+        }
         | OVERLAY_MUTABLE_LIFECYCLE_FIELDS
     )
     if unexpected_fields:
@@ -440,6 +514,16 @@ def _existing_overlay_claim(
     ):
         raise claim_store.ClaimStoreError(
             "claim-store overlay claimed_at contract is invalid"
+        )
+    expected_work_identity = _overlay_work_identity_binding(
+        root,
+        task_id=task_id,
+        parent_task_id=parent_task_id,
+        bound_at=claimed_at,
+    )
+    if payload.get("work_identity_binding") != expected_work_identity:
+        raise claim_store.ClaimStoreError(
+            "claim-store overlay work identity binding is invalid"
         )
     lease = payload.get("lease")
     revision = payload.get("mutation_revision")
@@ -705,6 +789,12 @@ def _write_overlay_claim_unlocked(
             unit_spec=None,
             target_files=[],
             stop_condition=None,
+            bound_at=now,
+        ),
+        "work_identity_binding": _overlay_work_identity_binding(
+            root,
+            task_id=task_id,
+            parent_task_id=parent_task_id,
             bound_at=now,
         ),
         "tags": list(tags or []),

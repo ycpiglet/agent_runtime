@@ -16,10 +16,11 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
 
 SCOPE_BINDING_SCHEMA = "agent-runtime-claim-scope-binding/v1"
+WORK_IDENTITY_BINDING_SCHEMA = "agent-runtime-claim-work-identity-binding/v1"
 
 
 def _canonical_sha256(value: object) -> str:
@@ -71,6 +72,38 @@ def scope_binding(
     }
     return {
         "schema": SCOPE_BINDING_SCHEMA,
+        "digest": _canonical_sha256(components),
+        "components": components,
+        "bound_at": bound_at,
+    }
+
+
+def work_identity_binding(
+    *,
+    task_id: object,
+    task_uid: object,
+    unit_id: object,
+    work_uid: object,
+    bound_at: str,
+) -> dict[str, Any]:
+    """Bind reusable display identifiers to their canonical work UUIDs."""
+
+    components = {
+        "task": _canonical_sha256(
+            {
+                "task_id": str(task_id or ""),
+                "task_uid": str(task_uid or ""),
+            }
+        ),
+        "unit": _canonical_sha256(
+            {
+                "unit_id": str(unit_id or ""),
+                "work_uid": str(work_uid or ""),
+            }
+        ),
+    }
+    return {
+        "schema": WORK_IDENTITY_BINDING_SCHEMA,
         "digest": _canonical_sha256(components),
         "components": components,
         "bound_at": bound_at,
@@ -391,6 +424,26 @@ class ClaimStoreInspection:
     generation_id: str | None
     witness_claim_id: str | None
     snapshot: ClaimStoreSnapshot | None
+
+
+@dataclass(frozen=True)
+class ClaimStoreActivationSubject:
+    """One exact marker transition planned by checkout activation."""
+
+    path: Path
+    before_bytes: bytes | None
+    after_bytes: bytes
+
+
+@dataclass(frozen=True)
+class ClaimStoreActivationPlan:
+    """Immutable transition plan delivered before the first marker commit."""
+
+    operation: str
+    root: Path
+    witness_claim_id: str
+    generation_id: str
+    subjects: tuple[ClaimStoreActivationSubject, ...]
 
 
 def _root_path(root: Path | str) -> Path:
@@ -1238,7 +1291,12 @@ def _require_transaction_continuity(
         raise ClaimStoreError("claim-store authority continuity changed during marker transaction")
 
 
-def _establish(root: Path, witness_claim_id: str) -> ClaimStoreInspection:
+def _establish(
+    root: Path,
+    witness_claim_id: str,
+    *,
+    precommit: Callable[[ClaimStoreActivationPlan], None] | None = None,
+) -> ClaimStoreInspection:
     inspection = inspect_store(root)
     if inspection.state == "initialized":
         if inspection.witness_claim_id == witness_claim_id:
@@ -1269,6 +1327,9 @@ def _establish(root: Path, witness_claim_id: str) -> ClaimStoreInspection:
     ):
         raise ClaimStoreError("claim-store changed before marker transaction")
     payload = _canonical_marker(witness_claim_id)
+    generation_id, retained_witness = _parse_marker(payload)
+    if retained_witness != witness_claim_id:
+        raise ClaimStoreError("claim-store marker witness changed during construction")
     missing = PathIdentity(False)
     created: list[tuple[Path, PathIdentity, bytes]] = []
     try:
@@ -1279,6 +1340,19 @@ def _establish(root: Path, witness_claim_id: str) -> ClaimStoreInspection:
             inner_marker=missing,
             outer_marker=missing,
         )
+        if precommit is not None:
+            precommit(
+                ClaimStoreActivationPlan(
+                    operation="legacy-store-adoption",
+                    root=root,
+                    witness_claim_id=witness_claim_id,
+                    generation_id=generation_id,
+                    subjects=(
+                        ClaimStoreActivationSubject(inner, None, payload),
+                        ClaimStoreActivationSubject(outer, None, payload),
+                    ),
+                )
+            )
         inner_identity = _write_immutable(inner, payload)
         created.append((inner, inner_identity, payload))
         after_inner = _transaction_snapshot(root, witness_claim_id)
@@ -1357,6 +1431,8 @@ def _activate_checkout(
     root: Path,
     inspection: ClaimStoreInspection,
     witness_claim_id: str | None,
+    *,
+    precommit: Callable[[ClaimStoreActivationPlan], None] | None = None,
 ) -> ClaimStoreInspection:
     expected_witness = inspection.witness_claim_id
     expected_generation = inspection.generation_id
@@ -1399,6 +1475,18 @@ def _activate_checkout(
             inner_marker=baseline.inner_marker,
             outer_marker=PathIdentity(False),
         )
+        if precommit is not None:
+            precommit(
+                ClaimStoreActivationPlan(
+                    operation="checkout-activation",
+                    root=root,
+                    witness_claim_id=retained_witness,
+                    generation_id=generation,
+                    subjects=(
+                        ClaimStoreActivationSubject(outer, None, payload),
+                    ),
+                )
+            )
         outer_identity = _write_immutable(outer, payload)
         created.append((outer, outer_identity, payload))
         after_outer = _transaction_snapshot(root, retained_witness)
@@ -1430,6 +1518,8 @@ def _activate_checkout(
 def adopt_legacy_store(
     root: Path | str,
     witness_claim_id: str | None = None,
+    *,
+    precommit: Callable[[ClaimStoreActivationPlan], None] | None = None,
 ) -> ClaimStoreInspection:
     root_path = _root_path(root)
     with store_lock(root_path):
@@ -1441,7 +1531,12 @@ def adopt_legacy_store(
         if current.state != "migration-required":
             raise ClaimStoreError(current.finding or "claim-store adoption is unsafe")
         if current.generation_id is not None:
-            return _activate_checkout(root_path, current, witness_claim_id)
+            return _activate_checkout(
+                root_path,
+                current,
+                witness_claim_id,
+                precommit=precommit,
+            )
         selected = witness_claim_id
         if selected is None:
             for candidate in _adoption_candidates(root_path):
@@ -1453,7 +1548,7 @@ def adopt_legacy_store(
                 break
         if selected is None:
             raise ClaimStoreError("claim-store adoption has no safe witness")
-        return _establish(root_path, selected)
+        return _establish(root_path, selected, precommit=precommit)
 
 
 _THREAD_LOCKS: dict[str, threading.RLock] = {}

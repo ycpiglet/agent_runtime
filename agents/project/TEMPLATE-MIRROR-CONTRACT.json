@@ -50,6 +50,7 @@
     "plan_assumption_gate.py",
     "promote_retro_forward.py",
     "rbac_write_gate.py",
+    "recovery_receipt.py",
     "release_cadence_trigger.py",
     "requirements_lint_gate.py",
     "response_contract_gate.py",

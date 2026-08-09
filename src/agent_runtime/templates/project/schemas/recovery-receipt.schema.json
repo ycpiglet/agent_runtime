@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-runtime.local/schemas/recovery-receipt.schema.json",
+  "title": "Agent Runtime immutable recovery receipt",
+  "description": "Receipt-first WAL records for Owner-attributed claim recovery mutations.",
+  "oneOf": [
+    { "$ref": "#/$defs/prepared" },
+    { "$ref": "#/$defs/committed" },
+    { "$ref": "#/$defs/indeterminate" }
+  ],
+  "$defs": {
+    "receiptId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,191}$"
+    },
+    "operation": {
+      "type": "string",
+      "enum": ["adopt", "terminalize", "activate-store", "rotate"]
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "digestEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_sha256", "semantic_sha256", "byte_length"],
+      "properties": {
+        "raw_sha256": { "$ref": "#/$defs/sha256" },
+        "semantic_sha256": { "$ref": "#/$defs/sha256" },
+        "byte_length": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "receipt_id",
+        "state",
+        "operation",
+        "subject_ref",
+        "owner_id",
+        "reason",
+        "recorded_at",
+        "before",
+        "after",
+        "commit_witness",
+        "receipt_digest"
+      ],
+      "properties": {
+        "schema": { "const": "agent-runtime-recovery-receipt/v1" },
+        "receipt_id": { "$ref": "#/$defs/receiptId" },
+        "state": { "const": "prepared" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "subject_ref": { "type": "string", "minLength": 1 },
+        "owner_id": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "before": { "$ref": "#/$defs/digestEnvelope" },
+        "after": { "$ref": "#/$defs/digestEnvelope" },
+        "commit_witness": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "receipt_digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "committed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "receipt_id",
+        "state",
+        "operation",
+        "subject_ref",
+        "owner_id",
+        "reason",
+        "recorded_at",
+        "prepared_receipt_digest",
+        "observed_after_raw_sha256",
+        "observed_after_semantic_sha256",
+        "observed_after_byte_length",
+        "commit_witness",
+        "retry_safe",
+        "receipt_digest"
+      ],
+      "properties": {
+        "schema": { "const": "agent-runtime-recovery-receipt/v1" },
+        "receipt_id": { "$ref": "#/$defs/receiptId" },
+        "state": { "const": "committed" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "subject_ref": { "type": "string", "minLength": 1 },
+        "owner_id": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "prepared_receipt_digest": { "$ref": "#/$defs/sha256" },
+        "observed_after_raw_sha256": { "$ref": "#/$defs/sha256" },
+        "observed_after_semantic_sha256": { "$ref": "#/$defs/sha256" },
+        "observed_after_byte_length": { "type": "integer", "minimum": 0 },
+        "commit_witness": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "retry_safe": { "const": false },
+        "receipt_digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "indeterminate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "receipt_id",
+        "state",
+        "operation",
+        "subject_ref",
+        "owner_id",
+        "reason",
+        "recorded_at",
+        "prepared_receipt_digest",
+        "finding",
+        "commit_witness",
+        "retry_safe",
+        "receipt_digest"
+      ],
+      "dependentRequired": {
+        "observed_after_raw_sha256": [
+          "observed_after_semantic_sha256",
+          "observed_after_byte_length"
+        ],
+        "observed_after_semantic_sha256": [
+          "observed_after_raw_sha256",
+          "observed_after_byte_length"
+        ],
+        "observed_after_byte_length": [
+          "observed_after_raw_sha256",
+          "observed_after_semantic_sha256"
+        ]
+      },
+      "properties": {
+        "schema": { "const": "agent-runtime-recovery-receipt/v1" },
+        "receipt_id": { "$ref": "#/$defs/receiptId" },
+        "state": { "const": "indeterminate" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "subject_ref": { "type": "string", "minLength": 1 },
+        "owner_id": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "prepared_receipt_digest": { "$ref": "#/$defs/sha256" },
+        "finding": { "type": "string", "minLength": 1 },
+        "observed_after_raw_sha256": { "$ref": "#/$defs/sha256" },
+        "observed_after_semantic_sha256": { "$ref": "#/$defs/sha256" },
+        "observed_after_byte_length": { "type": "integer", "minimum": 0 },
+        "commit_witness": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "uncertainty": { "type": "object" },
+        "retry_safe": { "const": false },
+        "receipt_digest": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

@@ -1010,6 +1010,108 @@ def _unit_meta(root: Path, unit_spec: str) -> dict[str, Any]:
     return _work_item_meta(path)
 
 
+def _identity_scalar(meta: dict[str, Any], field: str, label: str) -> str:
+    """Return one canonical identity scalar without coercing structured data."""
+
+    value = meta.get(field)
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ValueError(f"canonical {label} identity field {field} is invalid")
+    return value.strip()
+
+
+def _canonical_task_uid(root: Path, task_id: str) -> str:
+    """Resolve the durable UUID paired with one canonical task display ID.
+
+    Missing task metadata remains a supported legacy shape and therefore binds
+    an explicit empty UUID. Once a UUID has been bound, removing or replacing
+    it changes the binding and every lifecycle mutation fails closed.
+    """
+
+    meta = _task_meta(root, task_id)
+    if not meta:
+        return ""
+    for field in ("id", "display_id", "work_id"):
+        recorded = _identity_scalar(meta, field, "task")
+        if recorded and recorded != task_id:
+            raise ValueError(
+                f"canonical task identity changed: {field}={recorded!r}, "
+                f"expected {task_id!r}"
+            )
+    task_uid = _identity_scalar(meta, "task_uid", "task")
+    work_uid = _identity_scalar(meta, "work_uid", "task")
+    if task_uid and work_uid and task_uid != work_uid:
+        raise ValueError(
+            "canonical task identity is inconsistent: task_uid and work_uid differ"
+        )
+    return task_uid
+
+
+def _canonical_unit_work_uid(
+    root: Path,
+    *,
+    task_id: str,
+    unit_id: str,
+    unit_spec: str,
+) -> str:
+    """Resolve the durable UUID paired with one canonical unit display ID."""
+
+    if not unit_id:
+        return ""
+    meta = _unit_meta(root, unit_spec)
+    if not meta:
+        return ""
+    for field in ("unit_id", "work_id"):
+        recorded = _identity_scalar(meta, field, "unit")
+        if recorded and recorded != unit_id:
+            raise ValueError(
+                f"canonical unit identity changed: {field}={recorded!r}, "
+                f"expected {unit_id!r}"
+            )
+    for field in ("task_id", "parent_id"):
+        recorded = _identity_scalar(meta, field, "unit parent")
+        if recorded and recorded != task_id:
+            raise ValueError(
+                f"canonical unit identity changed: {field}={recorded!r}, "
+                f"expected {task_id!r}"
+            )
+    return _identity_scalar(meta, "work_uid", "unit")
+
+
+def _work_identity_binding_for_claim(
+    root: Path,
+    claim: dict[str, Any],
+    *,
+    bound_at: str,
+) -> dict[str, Any]:
+    """Bind display IDs to canonical UUIDs without changing scope_binding."""
+
+    if _is_explicit_overlay(claim):
+        parent_task_id = str(claim.get("parent_task_id") or "").strip()
+        task_id = parent_task_id or str(claim.get("task_id") or "").strip()
+        task_uid = _canonical_task_uid(root, parent_task_id) if parent_task_id else ""
+        unit_id = ""
+        work_uid = ""
+    else:
+        task_id = str(claim.get("task_id") or "").strip()
+        unit_id = str(claim.get("unit_id") or "").strip()
+        task_uid = _canonical_task_uid(root, task_id)
+        work_uid = _canonical_unit_work_uid(
+            root,
+            task_id=task_id,
+            unit_id=unit_id,
+            unit_spec=str(claim.get("unit_spec") or "").strip(),
+        )
+    return claim_store.work_identity_binding(
+        task_id=task_id,
+        task_uid=task_uid,
+        unit_id=unit_id,
+        work_uid=work_uid,
+        bound_at=bound_at,
+    )
+
+
 def _resolve_target_files(root: Path, args: argparse.Namespace) -> list[str]:
     explicit = _normalize_target_files(tuple(args.target_file or ()))
     registered = _unit_spec_target_files(root, args.unit_spec)
@@ -2287,6 +2389,11 @@ def _cmd_create_locked(
         claim,
         bound_at=str(claim["claimed_at"]),
     )
+    claim["work_identity_binding"] = _work_identity_binding_for_claim(
+        root,
+        claim,
+        bound_at=str(claim["claimed_at"]),
+    )
     claim["persistence"] = {
         "mode": "scm_commit" if claim_commit_authorized else "working_tree",
         "scm_commit_authorized": claim_commit_authorized,
@@ -2739,6 +2846,7 @@ def _validate_mutation_authority(
     # Unconditional. There is no exemption and therefore no predicate to
     # attack: every such field lives in the same file whose integrity is in
     # question. Overlays are bound at birth in role_routing.
+    _persisted_work_identity_binding(root, claim)
     persisted = _persisted_scope_binding(claim)
     # Internal consistency is not authority. The binding is an unkeyed digest
     # over the claim's own fields, so widening target_files and recomputing the
@@ -2782,6 +2890,33 @@ def _persisted_scope_binding(claim: dict[str, Any]) -> dict[str, Any]:
     expected = _binding_for_claim(claim, bound_at=bound_at)
     if binding != expected:
         raise ValueError("claim scope binding is invalid")
+    return json.loads(json.dumps(binding, ensure_ascii=False))
+
+
+def _persisted_work_identity_binding(
+    root: Path,
+    claim: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate the immutable display-ID/UUID pairing against canonical work."""
+
+    binding = claim.get("work_identity_binding")
+    if not isinstance(binding, dict):
+        raise ValueError(
+            "claim work identity binding is missing; owner adoption is required"
+        )
+    bound_at = binding.get("bound_at")
+    if not isinstance(bound_at, str) or not bound_at.strip():
+        raise ValueError("claim work identity binding bound_at is invalid")
+    expected = _work_identity_binding_for_claim(
+        root,
+        claim,
+        bound_at=bound_at,
+    )
+    if binding != expected:
+        raise ValueError(
+            "claim work identity binding is invalid: canonical work identity "
+            "is missing or changed"
+        )
     return json.loads(json.dumps(binding, ensure_ascii=False))
 
 
@@ -3437,6 +3572,7 @@ def _cmd_release_locked(
             file=sys.stderr,
         )
         return 1
+    _persisted_work_identity_binding(root, claim)
     errors: list[str] = []
     pointer_errors: list[str] = []
     for field in ("handoff_path", "log_path"):
@@ -3782,6 +3918,8 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             raw_revision = claim.get("mutation_revision")
             has_revision = type(raw_revision) is int and raw_revision >= 0
             has_binding = isinstance(claim.get("scope_binding"), dict)
+            raw_work_binding = claim.get("work_identity_binding")
+            has_work_binding = isinstance(raw_work_binding, dict)
             if "mutation_revision" in claim and not has_revision:
                 # Present but unusable (e.g. "7", -1, True, null). Rewriting it
                 # to 0 would destroy CAS history rather than adopt a legacy
@@ -3791,10 +3929,17 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                     f"claim mutation_revision is present but invalid ({raw_revision!r}); "
                     "adopt will not overwrite it"
                 )
-            if has_revision and has_binding:
+            if "work_identity_binding" in claim and not has_work_binding:
                 raise ValueError(
-                    "claim already carries mutation_revision and scope_binding; "
-                    "adopt is only for legacy claims and must not reset scope"
+                    "claim work identity binding is present but invalid; "
+                    "adopt will not overwrite it"
+                )
+            if has_work_binding:
+                _persisted_work_identity_binding(root, claim)
+            if has_revision and has_binding and has_work_binding:
+                raise ValueError(
+                    "claim already carries mutation_revision, scope_binding, and "
+                    "work_identity_binding; adopt is only for legacy claims"
                 )
             before = _digest(path)
             if not has_revision:
@@ -3839,6 +3984,12 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                     bound_at=now_text,
                     target_files=target_files,
                     stop_condition=stop_condition,
+                )
+            if not has_work_binding:
+                claim["work_identity_binding"] = _work_identity_binding_for_claim(
+                    root,
+                    claim,
+                    bound_at=now_text,
                 )
             _stamp_recovery(
                 claim,

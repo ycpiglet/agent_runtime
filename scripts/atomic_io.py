@@ -53,6 +53,28 @@ class UnsafePathError(OSError):
     """Raised when a target parent is an alias or is not a directory."""
 
 
+class AtomicWriteError(RuntimeError):
+    """Report the exact durability boundary at which an atomic write failed.
+
+    ``committed`` says whether the destination mutation already happened;
+    ``retry_safe`` says whether repeating the complete operation is safe.  The
+    originating ``OSError`` is retained as ``__cause__`` by the raising site.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        stage: str,
+        committed: bool,
+        retry_safe: bool,
+    ) -> None:
+        super().__init__(message)
+        self.stage = stage
+        self.committed = committed
+        self.retry_safe = retry_safe
+
+
 class PublishedFileIdentity(NamedTuple):
     """Identity of the opened regular file used for exclusive publication.
 
@@ -401,13 +423,15 @@ def _fsync_parent(path: Path, parent_fd: int | None) -> None:
             )
             close_after = True
         os.fsync(descriptor)
-    except OSError:
-        # Some filesystems reject directory fsync. The publication remains
-        # atomic, while durability is best-effort as with the file fsync below.
-        pass
     finally:
         if close_after and descriptor is not None:
             os.close(descriptor)
+
+
+def _require_fsync_policy(value: str) -> str:
+    if value not in {"best_effort", "strict"}:
+        raise ValueError("fsync_policy must be 'best_effort' or 'strict'")
+    return value
 
 
 def _write_text(
@@ -416,8 +440,10 @@ def _write_text(
     *,
     encoding: str,
     fsync: bool,
+    fsync_policy: str,
     exclusive: bool,
 ) -> PublishedFileIdentity | None:
+    policy = _require_fsync_policy(fsync_policy)
     with _direct_parent(path) as (absolute, parent_fd):
         descriptor: int | None = None
         sidecar: str | None = None
@@ -434,9 +460,14 @@ def _write_text(
                 if fsync:
                     try:
                         os.fsync(handle.fileno())
-                    except OSError:
-                        # Atomicity does not depend on filesystem durability.
-                        pass
+                    except OSError as exc:
+                        if policy == "strict":
+                            raise AtomicWriteError(
+                                "atomic write failed before destination commit during file fsync",
+                                stage="file-fsync",
+                                committed=False,
+                                retry_safe=True,
+                            ) from exc
                 opened = os.fstat(handle.fileno())
                 if not stat.S_ISREG(opened.st_mode):
                     raise OSError(
@@ -460,7 +491,16 @@ def _write_text(
                 _replace_sidecar(absolute, sidecar, parent_fd)
                 sidecar = None
             if fsync:
-                _fsync_parent(absolute, parent_fd)
+                try:
+                    _fsync_parent(absolute, parent_fd)
+                except OSError as exc:
+                    if policy == "strict":
+                        raise AtomicWriteError(
+                            "atomic write committed but parent directory fsync failed",
+                            stage="parent-fsync",
+                            committed=True,
+                            retry_safe=False,
+                        ) from exc
         finally:
             if descriptor is not None:
                 try:
@@ -484,14 +524,23 @@ def write_text_atomic(
     *,
     encoding: str = "utf-8",
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> None:
     """Atomically write ``text`` to ``path``.
 
-    Creates parent dirs as needed. On success no ``.tmp`` sidecar remains; on any
-    failure the partial temp file is cleaned up and the original target is left
-    untouched (the write never corrupts an existing file).
+    Creates parent dirs as needed. On success no ``.tmp`` sidecar remains. A
+    strict file-fsync failure occurs before publication and leaves the original
+    target untouched; a strict parent-fsync failure is reported as already
+    committed and non-retry-safe.
     """
-    _write_text(Path(path), text, encoding=encoding, fsync=fsync, exclusive=False)
+    _write_text(
+        Path(path),
+        text,
+        encoding=encoding,
+        fsync=fsync,
+        fsync_policy=fsync_policy,
+        exclusive=False,
+    )
 
 
 def publish_text_atomic(
@@ -500,13 +549,20 @@ def publish_text_atomic(
     *,
     encoding: str = "utf-8",
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> None:
     """Atomically publish a new text file without clobbering any destination.
 
     Raises ``FileExistsError`` if a file, directory, symlink, or reparse point is
     present at the destination when publication occurs.
     """
-    publish_text_owned_atomic(Path(path), text, encoding=encoding, fsync=fsync)
+    publish_text_owned_atomic(
+        Path(path),
+        text,
+        encoding=encoding,
+        fsync=fsync,
+        fsync_policy=fsync_policy,
+    )
 
 
 def publish_text_owned_atomic(
@@ -515,6 +571,7 @@ def publish_text_owned_atomic(
     *,
     encoding: str = "utf-8",
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> PublishedFileIdentity:
     """Publish new text and return its pre-commit opened-file identity."""
 
@@ -523,6 +580,7 @@ def publish_text_owned_atomic(
         text,
         encoding=encoding,
         fsync=fsync,
+        fsync_policy=fsync_policy,
         exclusive=True,
     )
     assert identity is not None
@@ -536,10 +594,16 @@ def write_json_atomic(
     indent: int = 2,
     sort_keys: bool = False,
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> None:
     """Atomically write ``payload`` as JSON (trailing newline included)."""
     text = json.dumps(payload, ensure_ascii=False, indent=indent, sort_keys=sort_keys) + "\n"
-    write_text_atomic(Path(path), text, fsync=fsync)
+    write_text_atomic(
+        Path(path),
+        text,
+        fsync=fsync,
+        fsync_policy=fsync_policy,
+    )
 
 
 def publish_json_atomic(
@@ -549,6 +613,7 @@ def publish_json_atomic(
     indent: int = 2,
     sort_keys: bool = False,
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> None:
     """Atomically publish new JSON without replacing an existing destination."""
     publish_json_owned_atomic(
@@ -557,6 +622,7 @@ def publish_json_atomic(
         indent=indent,
         sort_keys=sort_keys,
         fsync=fsync,
+        fsync_policy=fsync_policy,
     )
 
 
@@ -567,8 +633,14 @@ def publish_json_owned_atomic(
     indent: int = 2,
     sort_keys: bool = False,
     fsync: bool = True,
+    fsync_policy: str = "best_effort",
 ) -> PublishedFileIdentity:
     """Publish new JSON and return its pre-commit opened-file identity."""
 
     text = json.dumps(payload, ensure_ascii=False, indent=indent, sort_keys=sort_keys) + "\n"
-    return publish_text_owned_atomic(Path(path), text, fsync=fsync)
+    return publish_text_owned_atomic(
+        Path(path),
+        text,
+        fsync=fsync,
+        fsync_policy=fsync_policy,
+    )

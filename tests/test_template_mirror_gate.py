@@ -124,7 +124,7 @@ def test_product_common_script_census_has_only_three_pinned_variants() -> None:
         if root_files[path].read_bytes() != template_files[path].read_bytes()
     }
 
-    assert len(common) == 86
+    assert len(common) == 87
     assert divergent == INTENTIONAL
     assert PORTABLE_REPAIRS.isdisjoint(divergent)
     assert CONTRACT.is_file()
@@ -141,10 +141,10 @@ def test_product_common_script_census_has_only_three_pinned_variants() -> None:
     result = _run(REPO_ROOT)
     assert result.returncode == 0, result.stdout or result.stderr
     payload = json.loads(result.stdout)
-    assert payload["expected_common"] == 86
-    assert payload["current_common"] == 86
-    assert payload["eligible_common"] == 86
-    assert payload["identical"] == 83
+    assert payload["expected_common"] == 87
+    assert payload["current_common"] == 87
+    assert payload["eligible_common"] == 87
+    assert payload["identical"] == 84
     assert payload["intentional"] == 3
     assert payload["package_sources"] == 1
     assert payload["findings"] == []
