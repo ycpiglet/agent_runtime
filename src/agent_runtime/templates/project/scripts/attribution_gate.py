@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import stat
 from pathlib import Path
@@ -52,6 +53,9 @@ INSTANCES_DIR = Path("agents/runtime/instances")
 GOVERNANCE_CONFIG = Path("agents/project/COLLABORATION-GOVERNANCE.json")
 AGENT_INSTANCE_SCHEMA = "agent-runtime-agent-instance/v1"
 AGENT_INSTANCE_IDENTITY_MAX_CHARS = 160
+AGENT_INSTANCE_RECORD_MAX_BYTES = 256 * 1024
+RECOVERY_ACTOR_INSTANCE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.@-]*$")
+_WINDOWS_REPARSE_POINT = 0x400
 
 RECOVERY_EVENT_PREFIX = "claim_recovery_"
 RECOVERY_ACTIVATION_EVENT = "claim_store_activated"
@@ -145,6 +149,26 @@ def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     return payload, None
 
 
+def _load_bounded_json(
+    path: Path,
+    *,
+    max_bytes: int,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Keep legacy instance discovery bounded without changing its JSON policy."""
+
+    try:
+        with path.open("rb") as handle:
+            payload_bytes = handle.read(max_bytes + 1)
+        if len(payload_bytes) > max_bytes:
+            return None, "record-too-large"
+        payload = json.loads(payload_bytes.decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return None, str(exc)
+    if not isinstance(payload, dict):
+        return None, "invalid-record"
+    return payload, None
+
+
 def _load_jsonl(path: Path) -> tuple[list[tuple[int, dict[str, Any]]], list[str]]:
     rows: list[tuple[int, dict[str, Any]]] = []
     errors: list[str] = []
@@ -193,6 +217,7 @@ def _canonical_instance_text(record: dict[str, Any], field: str) -> str | None:
         not isinstance(value, str)
         or not value
         or value != value.strip()
+        or len(value) > AGENT_INSTANCE_IDENTITY_MAX_CHARS
         or any(character in value for character in ("\x00", "\r", "\n"))
     ):
         return None
@@ -214,6 +239,126 @@ def _canonical_instance_display_name(record: dict[str, Any]) -> str | None:
     return normalized
 
 
+def _is_path_alias(metadata: os.stat_result) -> bool:
+    attributes = int(getattr(metadata, "st_file_attributes", 0) or 0)
+    reparse_tag = int(getattr(metadata, "st_reparse_tag", 0) or 0)
+    return (
+        stat.S_ISLNK(metadata.st_mode)
+        or bool(attributes & _WINDOWS_REPARSE_POINT)
+        or bool(reparse_tag)
+    )
+
+
+def _direct_instance_registry_path(root: Path, instance_id: str) -> Path | None:
+    """Resolve the dispatcher-equivalent lexical registry path without aliases."""
+
+    relative = INSTANCES_DIR / f"{instance_id}.json"
+    current = Path(os.path.abspath(os.fspath(root)))
+    try:
+        root_metadata = current.lstat()
+    except OSError:
+        return None
+    if _is_path_alias(root_metadata) or not stat.S_ISDIR(root_metadata.st_mode):
+        return None
+    for index, component in enumerate(relative.parts):
+        current = current / component
+        try:
+            metadata = current.lstat()
+        except OSError:
+            return None
+        if _is_path_alias(metadata):
+            return None
+        is_last = index == len(relative.parts) - 1
+        if not is_last and not stat.S_ISDIR(metadata.st_mode):
+            return None
+        if is_last and not stat.S_ISREG(metadata.st_mode):
+            return None
+    return current
+
+
+def _unique_instance_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON member {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_instance_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r}")
+
+
+def _load_canonical_instance(
+    root: Path,
+    instance_id: object,
+) -> dict[str, Any] | None:
+    """Read one registry record with the dispatcher's recovery-actor contract."""
+
+    if not isinstance(instance_id, str):
+        return None
+    if (
+        not instance_id
+        or len(instance_id) > AGENT_INSTANCE_IDENTITY_MAX_CHARS
+        or not RECOVERY_ACTOR_INSTANCE_ID.fullmatch(instance_id)
+        or instance_id in {".", ".."}
+    ):
+        return None
+    path = _direct_instance_registry_path(root, instance_id)
+    if path is None:
+        return None
+    try:
+        before = path.lstat()
+        if (
+            _is_path_alias(before)
+            or not stat.S_ISREG(before.st_mode)
+            or before.st_size > AGENT_INSTANCE_RECORD_MAX_BYTES
+        ):
+            return None
+        with path.open("rb") as handle:
+            opened_before = os.fstat(handle.fileno())
+            payload_bytes = handle.read(AGENT_INSTANCE_RECORD_MAX_BYTES + 1)
+            opened_after = os.fstat(handle.fileno())
+        after = path.lstat()
+    except OSError:
+        return None
+
+    signatures = {
+        (
+            item.st_dev,
+            item.st_ino,
+            item.st_mode,
+            item.st_size,
+            item.st_mtime_ns,
+        )
+        for item in (before, opened_before, opened_after, after)
+    }
+    if (
+        len(payload_bytes) > AGENT_INSTANCE_RECORD_MAX_BYTES
+        or len(signatures) != 1
+        or any(
+            _is_path_alias(item) or not stat.S_ISREG(item.st_mode)
+            for item in (opened_before, opened_after, after)
+        )
+    ):
+        return None
+    try:
+        payload = json.loads(
+            payload_bytes.decode("utf-8"),
+            object_pairs_hook=_unique_instance_object,
+            parse_constant=_reject_instance_constant,
+        )
+    except (UnicodeError, json.JSONDecodeError, ValueError, RecursionError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema") != AGENT_INSTANCE_SCHEMA:
+        return None
+    if payload.get("agent_instance_id") != instance_id:
+        return None
+    return payload
+
+
 class AttributionChecker:
     def __init__(self, root: Path, *, cutoff: str = CONTRACT_CUTOFF_DATE):
         self.root = root.resolve()
@@ -222,7 +367,10 @@ class AttributionChecker:
         self.claims = self._load_claims()
         self.instances = self._load_instances()
         self.instance_ids = self._collect_instance_ids()
-        self.canonical_instances = self._collect_canonical_instances()
+        (
+            self.canonical_instances,
+            self.canonical_instance_errors,
+        ) = self._collect_canonical_instances()
         self.known_roles = self._collect_roles()
         self.resolvable_ids = self._collect_resolvable_ids()
 
@@ -247,7 +395,10 @@ class AttributionChecker:
         if not instances_dir.is_dir():
             return instances
         for path in sorted(instances_dir.glob("*.json"), key=lambda item: item.name.lower()):
-            payload, error = _load_json(path)
+            payload, error = _load_bounded_json(
+                path,
+                max_bytes=AGENT_INSTANCE_RECORD_MAX_BYTES,
+            )
             if error:
                 self._add("watch", f"{_rel(self.root, path)}: attribution:instance-invalid-json:{error}")
                 continue
@@ -263,28 +414,37 @@ class AttributionChecker:
                 ids.add(value)
         return ids
 
-    def _collect_canonical_instances(self) -> dict[str, dict[str, Any]]:
+    def _collect_canonical_instances(
+        self,
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         """Index only exact direct registry records for strict recovery checks."""
 
         canonical: dict[str, dict[str, Any]] = {}
-        for path, payload in self.instances:
-            try:
-                metadata = path.lstat()
-            except OSError:
+        errors: dict[str, str] = {}
+        for path, _ in self.instances:
+            instance_id = path.stem
+            payload = _load_canonical_instance(self.root, instance_id)
+            if payload is None:
                 continue
-            instance_id = payload.get("agent_instance_id")
-            if (
-                stat.S_ISLNK(metadata.st_mode)
-                or not stat.S_ISREG(metadata.st_mode)
-                or payload.get("schema") != AGENT_INSTANCE_SCHEMA
-                or not isinstance(instance_id, str)
-                or not instance_id
-                or instance_id != instance_id.strip()
-                or path.stem != instance_id
-            ):
+            invalid_field = next(
+                (
+                    field
+                    for field in ("role", "callsite_id")
+                    if _canonical_instance_text(payload, field) is None
+                ),
+                None,
+            )
+            if invalid_field is not None:
+                errors[instance_id] = {
+                    "role": "role-invalid",
+                    "callsite_id": "callsite-invalid",
+                }[invalid_field]
+                continue
+            if _canonical_instance_display_name(payload) is None:
+                errors[instance_id] = "display-name-invalid"
                 continue
             canonical[instance_id] = payload
-        return canonical
+        return canonical, errors
 
     def _collect_roles(self) -> set[str]:
         roles = {_normalize_role(role) for role in BUILTIN_ROLES}
@@ -434,6 +594,14 @@ class AttributionChecker:
         instance_id = raw_instance_id
         instance = self.canonical_instances.get(instance_id)
         if instance is None:
+            canonical_error = self.canonical_instance_errors.get(instance_id)
+            if canonical_error is not None:
+                self._add(
+                    severity,
+                    f"{where}: attribution:pane-event-recovery-instance-"
+                    f"{canonical_error}:{instance_id}",
+                )
+                return
             self._add(
                 severity,
                 f"{where}: attribution:pane-event-recovery-instance-unregistered:{instance_id}",

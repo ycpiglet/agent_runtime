@@ -34,7 +34,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
-from atomic_io import AtomicWriteError, publish_json_atomic
+from atomic_io import (
+    AtomicWriteError,
+    _direct_parent as _atomic_direct_parent,
+    publish_json_atomic,
+)
 
 
 SCHEMA = "agent-runtime-recovery-receipt/v1"
@@ -662,6 +666,8 @@ def _publish_record_at(
     parent_fd: int,
     path: Path,
     record: Mapping[str, Any],
+    *,
+    precommit: Callable[[], None] | None = None,
 ) -> None:
     """Strictly publish one immutable record into a pinned POSIX directory."""
 
@@ -756,6 +762,12 @@ def _publish_record_at(
                 "recovery receipt sidecar changed before publication",
                 sidecar,
             )
+        if precommit is not None:
+            # External authority must be proved inside the publisher, after
+            # all fallible sidecar preparation and immediately before the
+            # immutable destination link becomes visible.  A rejected proof
+            # leaves only the owned sidecar for the finally block to remove.
+            precommit()
         os.link(
             sidecar,
             path.name,
@@ -816,23 +828,14 @@ def _publish_record_at(
                 pass
 
 
-def _publish_record(
+def _readback_published_record(
     path: Path,
-    payload: Mapping[str, Any],
+    record: Mapping[str, Any],
     *,
-    parent_fd: int | None = None,
+    parent_fd: int | None,
 ) -> dict[str, Any]:
-    record = _validate_record(_json_copy(payload))
-    if parent_fd is not None:
-        _publish_record_at(parent_fd, path, record)
-    else:
-        publish_json_atomic(
-            path,
-            record,
-            indent=2,
-            sort_keys=True,
-            fsync_policy="strict",
-        )
+    """Validate the just-published authority through its pinned parent."""
+
     # The publisher is exclusive, but immediate replay still proves that the
     # visible bytes are the exact valid record we intended to make authority.
     try:
@@ -865,6 +868,71 @@ def _publish_record(
     return observed
 
 
+def _publish_record(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    parent_fd: int | None = None,
+    precommit: Callable[[], None] | None = None,
+) -> dict[str, Any]:
+    record = _validate_record(_json_copy(payload))
+    if parent_fd is not None:
+        _publish_record_at(
+            parent_fd,
+            path,
+            record,
+            precommit=precommit,
+        )
+        return _readback_published_record(
+            path,
+            record,
+            parent_fd=parent_fd,
+        )
+
+    if os.name == "posix":
+        # Reuse atomic_io's secure create/no-alias parent walk, then keep that
+        # directory descriptor pinned through sidecar preparation, the actor
+        # proof, destination link, durability fsync, and exact readback.
+        with _atomic_direct_parent(
+            path,
+            strict_creation_fsync=True,
+        ) as (absolute, pinned_parent_fd):
+            if pinned_parent_fd is None:
+                raise OSError(
+                    errno.ENOTSUP,
+                    "POSIX receipt publication requires a pinned parent",
+                    str(path),
+                )
+            _publish_record_at(
+                pinned_parent_fd,
+                absolute,
+                record,
+                precommit=precommit,
+            )
+            return _readback_published_record(
+                absolute,
+                record,
+                parent_fd=pinned_parent_fd,
+            )
+
+    if precommit is not None:
+        # Non-POSIX atomic_io performs the platform's direct-parent checks.
+        # Callback failure still precedes every receipt filesystem mutation.
+        precommit()
+    publish_json_atomic(
+        path,
+        record,
+        indent=2,
+        sort_keys=True,
+        fsync_policy="strict",
+    )
+    return _readback_published_record(
+        path,
+        record,
+        parent_fd=None,
+    )
+
+
 def prepare_recovery_receipt(
     *,
     receipt_dir: Path,
@@ -877,6 +945,7 @@ def prepare_recovery_receipt(
     reason: str,
     recorded_at: str,
     commit_witness: Mapping[str, Any],
+    precommit: Callable[[], None] | None = None,
 ) -> Path:
     """Publish the immutable WAL intent before any subject mutation."""
 
@@ -897,7 +966,7 @@ def prepare_recovery_receipt(
     )
     _require_unused_transaction_id(Path(receipt_dir), receipt_id)
     path = _record_path(Path(receipt_dir), receipt_id, "prepared")
-    _publish_record(path, prepared)
+    _publish_record(path, prepared, precommit=precommit)
     return path
 
 
@@ -1618,6 +1687,7 @@ def execute_recovery(
     mutate_subject: Callable[[], None],
     read_subject: Callable[[], bytes],
     transition_required: bool = True,
+    precommit: Callable[[], None] | None = None,
 ) -> dict[str, Any]:
     """Execute one receipt-first recovery transition.
 
@@ -1647,6 +1717,7 @@ def execute_recovery(
         reason=reason,
         recorded_at=recorded_at,
         commit_witness=commit_witness,
+        precommit=precommit,
     )
     with _subject_precommit_transaction_lock(prepared_path) as authority:
         prepared, parent_fd = authority

@@ -270,7 +270,7 @@
         {
           "kind": "sha256",
           "path": "scripts/recovery_receipt.py",
-          "value": "4cc808308c6e8ba421145e4088425e676a69bc63ac4f80b89a584f57a6d3d529"
+          "value": "5090ee949677ad1c013509f7a6eccff11bf083a001992e2d47b5cf26426b0551"
         },
         {
           "kind": "sha256",
@@ -285,7 +285,7 @@
         {
           "kind": "sha256",
           "path": "scripts/task_claim_dispatcher.py",
-          "value": "757c63ccf212ccf6d6ff497fd00781e55c7a4a7eda7b26a5c1c2ea443bb27e0d"
+          "value": "64c43d245f72d3e5b8fcbba0634d38ef354e753e8bd78f9d0af90da123d13a60"
         },
         {
           "kind": "sha256",
@@ -310,21 +310,21 @@
         {
           "kind": "sha256",
           "path": "scripts/attribution_gate.py",
-          "value": "3c1c78378c73d48309cfd286c37e5aa1da146186e82e467caf449a494d4751c7"
+          "value": "3b69da0cac563aaa1ead3465370cc043a44db11d0c5ab06013864174f7276b13"
         },
         {
           "kind": "sha256",
           "path": "src/agent_runtime/templates/project/scripts/attribution_gate.py",
-          "value": "3c1c78378c73d48309cfd286c37e5aa1da146186e82e467caf449a494d4751c7"
+          "value": "3b69da0cac563aaa1ead3465370cc043a44db11d0c5ab06013864174f7276b13"
         },
         {
           "kind": "sha256",
           "path": "tests/test_attribution_gate.py",
-          "value": "93a995b02276e3b3fe2cce8ceb03113361563753a87b8b6a952a34d69927282b"
+          "value": "52b833e2b980fd60278e194a4aee78bc9edf09a3bba7af1f8769094324e7af5c"
         }
       ],
       "design_record": "reviews/REVIEW-2026-08-09-task-ar-660-unit001-actor-toctou-t3-replan.md",
-      "recorded_at": "2026-08-09T16:56:56+09:00",
+      "recorded_at": "2026-08-09T17:13:40+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-CLAIM-RECOVERY-WORK-IDENTITY-CORRECTION"
     },
@@ -1968,5 +1968,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-09T16:56:56+09:00"
+  "updated_at": "2026-08-09T17:13:40+09:00"
 }

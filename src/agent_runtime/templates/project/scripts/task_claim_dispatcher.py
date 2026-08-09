@@ -157,6 +157,8 @@ class _RecoveryActor(NamedTuple):
     display_name: str
     callsite_id: str
     authority_sha256: str
+    authority_device: int
+    authority_inode: int
 
 
 def _canonical_sha256(value: object) -> str:
@@ -4399,6 +4401,8 @@ def _persist_claim_recovery(
     owner: str,
     reason: str,
     before_bytes: bytes,
+    actor_instance_id: object,
+    actor_authority: _RecoveryActor,
 ) -> dict[str, Any]:
     """Publish recovery intent, raw-CAS the subject, then witness outcome."""
 
@@ -4409,6 +4413,13 @@ def _persist_claim_recovery(
     predicted_after = _claim_json_bytes(claim)
     receipt_id = _new_recovery_receipt_id(operation)
     receipt_dir = root / recovery_receipt.DEFAULT_RECEIPT_DIR
+
+    def _prove_actor_at_receipt_publication() -> None:
+        _revalidate_recovery_actor(
+            root,
+            actor_instance_id,
+            actor_authority,
+        )
 
     def _mutate_subject() -> None:
         refreshed = claim_store.inspect_store(root)
@@ -4449,6 +4460,7 @@ def _persist_claim_recovery(
             ),
             mutate_subject=_mutate_subject,
             read_subject=path.read_bytes,
+            precommit=_prove_actor_at_receipt_publication,
         )
     except recovery_receipt.RecoveryReceiptError as exc:
         # Preserve the transaction identity across the typed exception seam.
@@ -4670,6 +4682,8 @@ def _registered_recovery_actor(
         display_name=display_name,
         callsite_id=canonical["callsite_id"],
         authority_sha256=hashlib.sha256(payload_bytes).hexdigest(),
+        authority_device=int(after.st_dev),
+        authority_inode=int(after.st_ino),
     )
 
 
@@ -4953,6 +4967,8 @@ def cmd_adopt(args: argparse.Namespace) -> int:
                 owner=owner,
                 reason=reason,
                 before_bytes=before_bytes,
+                actor_instance_id=args.actor_instance_id,
+                actor_authority=actor,
             )
     except recovery_receipt.RecoveryReceiptError as exc:
         if exc.committed and not exc.retry_safe:
@@ -5098,6 +5114,8 @@ def cmd_terminalize(args: argparse.Namespace) -> int:
                 owner=owner,
                 reason=reason,
                 before_bytes=before_bytes,
+                actor_instance_id=args.actor_instance_id,
+                actor_authority=actor,
             )
     except recovery_receipt.RecoveryReceiptError as exc:
         if exc.committed and not exc.retry_safe:
@@ -5260,6 +5278,11 @@ def cmd_activate_store(args: argparse.Namespace) -> int:
                     "generation_id": plan.generation_id,
                     "subjects": logical_refs,
                 },
+                precommit=lambda: _revalidate_recovery_actor(
+                    root,
+                    args.actor_instance_id,
+                    actor,
+                ),
             )
             activation_plan = plan
 
