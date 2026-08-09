@@ -6188,6 +6188,95 @@ def test_recovery_refuses_missing_or_unknown_actor_before_any_mutation(
     assert _tree_entry_snapshot(receipts) == receipts_before
 
 
+@pytest.mark.parametrize("operation", ("adopt", "terminalize", "activate-store"))
+@pytest.mark.parametrize(
+    "registry_race",
+    ("unlink", "atomic-replace", "field-change"),
+)
+def test_recovery_revalidates_actor_registry_inside_the_commit_transaction(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+    registry_race: str,
+) -> None:
+    """An actor that disappears or changes after lookup has no authority.
+
+    The Owner approval and the first registry read are not a capability token.
+    Recovery must prove that the exact canonical actor record still exists at
+    the mutation boundary, before either the prepared receipt or its subject is
+    published.  This pins the TOCTOU seam for all three recovery commands.
+    """
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-actor-race-{operation}-{registry_race}",
+    )
+    args, claim_path, claim = _recovery_command_case(
+        linked,
+        operation,
+        suffix=f"660-race-{operation}-{registry_race}",
+    )
+    dispatcher = _load_dispatcher_module()
+    real_resolve = dispatcher._registered_recovery_actor
+    actor_id = str(claim["agent_instance_id"])
+    actor_path = (
+        linked
+        / "agents"
+        / "runtime"
+        / "instances"
+        / f"{actor_id}.json"
+    )
+    assert actor_path.is_file()
+    resolutions = {"count": 0}
+
+    def race_after_first_resolution(root: Path, requested_id: object):
+        actor = real_resolve(root, requested_id)
+        resolutions["count"] += 1
+        if resolutions["count"] != 1:
+            return actor
+        if registry_race == "unlink":
+            actor_path.unlink()
+        else:
+            changed = json.loads(actor_path.read_text(encoding="utf-8"))
+            changed["callsite_id"] = f"{changed['callsite_id']}:changed"
+            encoded = json.dumps(changed, ensure_ascii=False, indent=2) + "\n"
+            if registry_race == "atomic-replace":
+                replacement = actor_path.with_suffix(".replacement")
+                replacement.write_text(encoded, encoding="utf-8")
+                os.replace(replacement, actor_path)
+            else:
+                actor_path.write_text(encoded, encoding="utf-8")
+        return actor
+
+    monkeypatch.setattr(
+        dispatcher,
+        "_registered_recovery_actor",
+        race_after_first_resolution,
+    )
+    claim_before = claim_path.read_bytes() if claim_path is not None else None
+    admin_root = _claim_store_outer_anchor(linked).parent
+    admin_before = _tree_entry_snapshot(admin_root)
+    events_before = _pane_event_bytes(linked)
+    receipt_dir = _recovery_receipt_dir(linked)
+    receipts_before = _tree_entry_snapshot(receipt_dir)
+
+    rc = dispatcher.main(args)
+    output = capsys.readouterr()
+
+    assert rc == 1, output.out + output.err
+    assert resolutions["count"] >= 2, (
+        "recovery trusted a stale actor snapshot instead of revalidating it "
+        "at the commit boundary"
+    )
+    assert "actor instance" in (output.out + output.err).lower()
+    if claim_path is not None:
+        assert claim_path.read_bytes() == claim_before
+    assert _tree_entry_snapshot(admin_root) == admin_before
+    assert _pane_event_bytes(linked) == events_before
+    assert _tree_entry_snapshot(receipt_dir) == receipts_before
+
+
 def test_recovery_refuses_instance_filename_payload_identity_mismatch(
     tmp_path: Path,
 ) -> None:
