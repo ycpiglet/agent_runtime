@@ -7874,6 +7874,103 @@ def _create_work_identity_candidate(
     return json.loads(created.stdout), task_path, unit_path
 
 
+def _remove_work_identity_metadata(
+    task_path: Path,
+    unit_path: Path,
+    damage: str,
+) -> None:
+    if damage == "task-record-missing":
+        task_path.unlink()
+        return
+    if damage == "unit-record-missing":
+        unit_path.unlink()
+        return
+    targets = {
+        "task-id-missing": (task_path, "id:"),
+        "task-uuid-missing": (task_path, "task_uid:"),
+        "task-work-uuid-missing": (task_path, "work_uid:"),
+        "unit-id-missing": (unit_path, "unit_id:"),
+        "unit-uuid-missing": (unit_path, "work_uid:"),
+    }
+    try:
+        path, prefix = targets[damage]
+    except KeyError as exc:  # pragma: no cover - parametrizations own the set
+        raise AssertionError(f"unknown missing identity metadata: {damage}") from exc
+    lines = path.read_text(encoding="utf-8").splitlines()
+    filtered = [line for line in lines if not line.startswith(prefix)]
+    assert len(filtered) == len(lines) - 1, (path, prefix)
+    path.write_text("\n".join(filtered) + "\n", encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "damage",
+    (
+        "task-record-missing",
+        "task-id-missing",
+        "task-uuid-missing",
+        "task-work-uuid-missing",
+        "unit-record-missing",
+        "unit-id-missing",
+        "unit-uuid-missing",
+    ),
+)
+def test_create_fails_closed_when_canonical_work_identity_metadata_is_missing(
+    tmp_path: Path,
+    damage: str,
+) -> None:
+    task_id = f"TASK-AR-660-CREATE-{damage.upper()}"
+    unit_id = f"UNIT-{task_id}-001"
+    unit_rel = f"agents/lead_engineer/tasks/units/{task_id}/{unit_id}.md"
+    (tmp_path / "STATUS.md").write_text(
+        "## Handoff Checklist\n- continue here\n",
+        encoding="utf-8",
+    )
+    _write_worktree(tmp_path, task_id)
+    task_path, unit_path, _unit_id, _unit_rel = _write_work_identity_records(
+        tmp_path,
+        task_id,
+    )
+    _remove_work_identity_metadata(task_path, unit_path, damage)
+
+    result = _run_dispatcher(
+        tmp_path,
+        "create",
+        "--task-id",
+        task_id,
+        "--unit-id",
+        unit_id,
+        "--unit-spec",
+        unit_rel,
+        "--stop-condition",
+        f"stop_after:{unit_id}:verification",
+        "--agent-role",
+        "lead-engineer",
+        "--agent-instance-id",
+        f"le-20260809-090000-kst-create-{damage}",
+        "--callsite-id",
+        f"terminal:wt-{task_id.lower()}:tab-01",
+        "--lease-minutes",
+        "30",
+        "--now",
+        "2026-08-09T09:00:00+09:00",
+        "--suffix",
+        f"create-{damage}",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        f"create accepted missing canonical identity metadata ({damage}): "
+        + (result.stderr or result.stdout)
+    )
+    diagnostic = (result.stdout + result.stderr).lower()
+    assert any(
+        token in diagnostic
+        for token in ("identity", "canonical", "unit spec", "unit_spec")
+    )
+    claim_dir = tmp_path / "agents" / "runtime" / "task_claims"
+    assert not list(claim_dir.glob("CLAIM-*.json"))
+
+
 def test_create_binds_canonical_task_and_unit_uuids_without_changing_scope_wire(
     tmp_path: Path,
 ) -> None:
@@ -7945,11 +8042,81 @@ def test_adopt_adds_only_missing_work_identity_to_an_otherwise_current_claim(
     )
 
 
+@pytest.mark.parametrize(
+    "damage",
+    (
+        "task-record-missing",
+        "task-id-missing",
+        "task-uuid-missing",
+        "task-work-uuid-missing",
+        "unit-record-missing",
+        "unit-id-missing",
+        "unit-uuid-missing",
+    ),
+)
+def test_adopt_fails_closed_when_canonical_work_identity_metadata_is_missing(
+    tmp_path: Path,
+    damage: str,
+) -> None:
+    task_id = f"TASK-AR-660-ADOPT-{damage.upper()}"
+    _primary, linked = _init_git_worktree(tmp_path, f"ar660-adopt-{damage}")
+    created, task_path, unit_path = _create_work_identity_candidate(
+        linked,
+        task_id=task_id,
+        suffix=f"adopt-missing-{damage}",
+        worktree_path=".",
+    )
+    path = _claim_path(linked, created)
+    claim = json.loads(path.read_text(encoding="utf-8"))
+    claim.pop("work_identity_binding")
+    path.write_text(
+        json.dumps(claim, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    _remove_work_identity_metadata(task_path, unit_path, damage)
+    before = path.read_bytes()
+
+    result = _run_dispatcher(
+        linked,
+        "adopt",
+        "--claim-id",
+        claim["claim_id"],
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "legacy claim cannot be rebound without canonical UUID authority",
+        "--now",
+        "2026-08-09T09:10:00+09:00",
+        "--json",
+    )
+
+    assert result.returncode != 0, (
+        f"adopt accepted missing canonical identity metadata ({damage}): "
+        + (result.stderr or result.stdout)
+    )
+    diagnostic = (result.stdout + result.stderr).lower()
+    assert any(
+        token in diagnostic
+        for token in ("identity", "canonical", "unit spec", "unit_spec")
+    )
+    assert path.read_bytes() == before
+
+
 def _damage_work_identity_record(
     task_path: Path,
     unit_path: Path,
     damage: str,
 ) -> None:
+    if damage in {
+        "task-record-missing",
+        "task-id-missing",
+        "task-uuid-missing",
+        "task-work-uuid-missing",
+        "unit-record-missing",
+        "unit-id-missing",
+    }:
+        _remove_work_identity_metadata(task_path, unit_path, damage)
+        return
     if damage == "task-display-id-collision":
         text = task_path.read_text(encoding="utf-8")
         text = text.replace(_AR660_TASK_UID, _AR660_REPLACEMENT_UID)
@@ -8001,7 +8168,17 @@ def _work_identity_mutation_args(
 @pytest.mark.parametrize("operation", ("heartbeat", "renew", "release"))
 @pytest.mark.parametrize(
     "damage",
-    ("task-display-id-collision", "unit-uuid-drift", "unit-uuid-missing"),
+    (
+        "task-display-id-collision",
+        "task-record-missing",
+        "task-id-missing",
+        "task-uuid-missing",
+        "task-work-uuid-missing",
+        "unit-record-missing",
+        "unit-id-missing",
+        "unit-uuid-drift",
+        "unit-uuid-missing",
+    ),
 )
 def test_claim_mutations_fail_closed_on_canonical_work_identity_damage(
     tmp_path: Path,
@@ -8025,5 +8202,9 @@ def test_claim_mutations_fail_closed_on_canonical_work_identity_damage(
     )
 
     assert result.returncode != 0, f"{operation} accepted {damage}"
-    assert "identity" in (result.stdout + result.stderr).lower()
+    diagnostic = (result.stdout + result.stderr).lower()
+    assert any(
+        token in diagnostic
+        for token in ("identity", "canonical", "unit spec", "unit_spec")
+    )
     assert path.read_bytes() == before

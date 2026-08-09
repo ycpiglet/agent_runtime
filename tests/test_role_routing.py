@@ -1567,3 +1567,87 @@ def test_review_overlay_binds_canonical_parent_uuid_separately_from_scope(
         stop_condition=None,
         bound_at="2026-08-09T10:00:00+09:00",
     )
+
+
+@pytest.mark.parametrize("missing", ("record", "task_uid", "work_uid"))
+def test_review_overlay_fails_closed_without_canonical_parent_uuid_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    missing: str,
+) -> None:
+    monkeypatch.setenv("AR_ROLE_ROUTING", "1")
+    mod = _load()
+    task_id = f"TASK-AR-660-PARENT-{missing.upper()}"
+    if missing != "record":
+        task_uid = "55555555-5555-4555-8555-555555555555"
+        lines = [
+            "---",
+            "schema_version: agent-runtime-work-item/v1",
+            f"id: {task_id}",
+            f"display_id: {task_id}",
+            f"task_uid: {task_uid}",
+            f"work_id: {task_id}",
+            f"work_uid: {task_uid}",
+            "kind: task",
+            "status: in_progress",
+            "---",
+            "",
+            "# Incomplete canonical parent fixture",
+            "",
+        ]
+        prefix = f"{missing}:"
+        lines = [line for line in lines if not line.startswith(prefix)]
+        task_path = (
+            tmp_path / "agents" / "lead_engineer" / "tasks" / f"{task_id}.md"
+        )
+        task_path.parent.mkdir(parents=True, exist_ok=True)
+        task_path.write_text("\n".join(lines), encoding="utf-8")
+
+    result = mod.route_review_pass(
+        tmp_path,
+        task_id=task_id,
+        task_set_id="TASKSET-AR-660",
+        event="merge",
+        now="2026-08-09T10:10:00+09:00",
+    )
+
+    assert result["created"] == [], (
+        f"overlay accepted a parent without canonical UUID authority ({missing})"
+    )
+    assert "finding" in result
+    assert "identity" in str(result["finding"]).lower()
+    assert not list(_claims_dir(tmp_path).glob("CLAIM-REVIEW-*.json"))
+
+
+def test_explicit_parentless_synthetic_overlay_uses_empty_uuid_by_design(
+    tmp_path: Path,
+) -> None:
+    """Only a declared parentless overlay may bind the explicit empty UUID."""
+
+    mod = _load()
+    task_id = "SYNTHETIC-AR-660-PARENTLESS"
+    now = "2026-08-09T10:20:00+09:00"
+
+    claim, finding = mod._try_write_overlay_claim(
+        tmp_path,
+        operation="synthetic parentless overlay",
+        claim_id="CLAIM-SYNTHETIC-AR-660-PARENTLESS",
+        task_id=task_id,
+        agent_role="progress-scout",
+        mode="observe",
+        status_text="explicit parentless synthetic overlay",
+        now=now,
+        parent_task_id="",
+        event_name="synthetic_overlay_dispatched",
+    )
+
+    assert finding is None
+    assert claim is not None
+    assert claim["parent_task_id"] == ""
+    assert claim["work_identity_binding"] == (
+        _ar660_expected_parent_identity_binding(
+            task_id=task_id,
+            task_uid="",
+            bound_at=now,
+        )
+    )

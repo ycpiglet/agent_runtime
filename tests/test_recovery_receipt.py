@@ -17,6 +17,8 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import threading
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from typing import Callable
 
@@ -341,6 +343,14 @@ def test_subject_failure_leaves_prepared_receipt_only(tmp_path: Path) -> None:
     assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
     assert not (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").exists()
     assert _load(receipt_dir / f"{RECEIPT_ID}.prepared.json")["state"] == "prepared"
+    findings = recovery_receipt.verify_receipt_store(receipt_dir)
+    assert findings, "a legitimate pre-commit failure still needs operator resolution"
+    finding_text = " ".join(str(finding).lower() for finding in findings)
+    assert "prepared" in finding_text
+    assert any(
+        token in finding_text
+        for token in ("unresolved", "incomplete", "missing terminal", "no terminal")
+    )
 
 
 def test_post_commit_read_uncertainty_is_indeterminate_and_not_retry_safe(
@@ -482,3 +492,214 @@ def test_committed_subject_atomic_error_gets_indeterminate_witness(
     assert (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").is_file()
     assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
     assert recovery_receipt.verify_receipt_store(receipt_dir) == []
+
+
+def test_concurrent_split_phase_finalizers_publish_exactly_one_terminal(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Committed and indeterminate outcomes share one transaction namespace.
+
+    Checking both terminal names and then publishing one of them is a TOCTOU:
+    the paths differ, so per-file exclusive creation cannot arbitrate the
+    transaction.  The bounded barrier widens that exact window without making
+    the test incompatible with an implementation that serializes the whole
+    finalize operation (the first waiter simply times out while holding the
+    transaction lock).
+    """
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    _before, after = _before_after()
+    prepared_path = _prepare(receipt_dir)
+    original_prepare_finalize = recovery_receipt._prepared_for_finalize
+    ready = threading.Barrier(2)
+
+    def synchronized_prepare_finalize(path: Path):
+        result = original_prepare_finalize(path)
+        try:
+            ready.wait(timeout=1.0)
+        except threading.BrokenBarrierError:
+            pass
+        return result
+
+    monkeypatch.setattr(
+        recovery_receipt,
+        "_prepared_for_finalize",
+        synchronized_prepare_finalize,
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures: tuple[Future[dict[str, object]], ...] = (
+            executor.submit(
+                recovery_receipt.commit_prepared_recovery,
+                prepared_path=prepared_path,
+                observed_after_bytes=after,
+            ),
+            executor.submit(
+                recovery_receipt.indeterminate_prepared_recovery,
+                prepared_path=prepared_path,
+                finding="concurrent observer cannot confirm the subject",
+            ),
+        )
+        successes: list[dict[str, object]] = []
+        failures: list[Exception] = []
+        for future in futures:
+            try:
+                successes.append(future.result(timeout=5))
+            except Exception as exc:  # noqa: BLE001 - the losing API may vary
+                failures.append(exc)
+
+    terminals = sorted(
+        [
+            *receipt_dir.glob(f"{RECEIPT_ID}.committed.json"),
+            *receipt_dir.glob(f"{RECEIPT_ID}.indeterminate.json"),
+        ]
+    )
+    assert len(successes) == 1, (
+        "exactly one concurrent finalizer may report success; "
+        f"successes={successes!r} failures={failures!r}"
+    )
+    assert len(failures) == 1
+    assert len(terminals) == 1, [path.name for path in terminals]
+    assert successes[0]["status"] in terminals[0].name
+    assert recovery_receipt.verify_receipt_store(receipt_dir) == []
+
+
+def test_terminal_publication_plain_oserror_is_non_retry_safe_after_subject_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A plain sidecar error must not disguise an already-committed subject."""
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    _before, after = _before_after()
+    subject.write_bytes(after)  # split-phase caller already crossed commit
+    prepared_path = _prepare(receipt_dir)
+    original_publish = recovery_receipt._publish_record
+
+    def fail_committed_publication(path: Path, payload: object):
+        if str(path).endswith(".committed.json"):
+            raise OSError("plain committed receipt publication failure")
+        return original_publish(path, payload)
+
+    monkeypatch.setattr(recovery_receipt, "_publish_record", fail_committed_publication)
+    outcome: dict[str, object] | None = None
+    caught: Exception | None = None
+    try:
+        outcome = recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+    except Exception as exc:  # noqa: BLE001 - assert the public error below
+        caught = exc
+
+    assert subject.read_bytes() == after
+    if caught is not None:
+        assert isinstance(caught, recovery_receipt.RecoveryReceiptError)
+        assert caught.committed is True
+        assert caught.retry_safe is False
+    else:
+        assert outcome is not None
+        assert outcome["status"] == "indeterminate"
+        assert outcome["retry_safe"] is False
+        assert (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").is_file()
+    assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
+
+
+def test_terminal_readback_plain_oserror_is_typed_after_visible_publication(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Readback uncertainty after terminal publication is also a commit point."""
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    _before, after = _before_after()
+    subject.write_bytes(after)
+    prepared_path = _prepare(receipt_dir)
+    original_validate = recovery_receipt.validate_receipt
+
+    def fail_terminal_readback(path: Path) -> dict[str, object]:
+        if str(path).endswith(".committed.json"):
+            raise OSError("plain receipt readback failure after publication")
+        return original_validate(path)
+
+    monkeypatch.setattr(
+        recovery_receipt,
+        "validate_receipt",
+        fail_terminal_readback,
+    )
+
+    with pytest.raises(recovery_receipt.RecoveryReceiptError) as exc_info:
+        recovery_receipt.commit_prepared_recovery(
+            prepared_path=prepared_path,
+            observed_after_bytes=after,
+        )
+
+    assert exc_info.value.committed is True
+    assert exc_info.value.retry_safe is False
+    assert subject.read_bytes() == after
+    assert (receipt_dir / f"{RECEIPT_ID}.committed.json").is_file()
+    assert not (receipt_dir / f"{RECEIPT_ID}.indeterminate.json").exists()
+
+
+def test_execute_recovery_raw_cas_blocks_subject_drift_before_callback(
+    tmp_path: Path,
+) -> None:
+    """Prepared.before is an exact-byte CAS input, not descriptive metadata."""
+
+    receipt_dir = tmp_path / "recovery_receipts"
+    subject = tmp_path / "claim.json"
+    before, after = _before_after()
+    drifted = recovery_receipt.canonical_json_bytes(json.loads(before))
+    assert drifted != before
+    assert recovery_receipt.semantic_digest(drifted) == (
+        recovery_receipt.semantic_digest(before)
+    )
+    subject.write_bytes(drifted)
+    mutation_calls = 0
+    outcome: dict[str, object] | None = None
+    caught: Exception | None = None
+
+    def mutate() -> None:
+        nonlocal mutation_calls
+        mutation_calls += 1
+        subject.write_bytes(after)
+
+    try:
+        outcome = _execute(
+            receipt_dir,
+            mutate_subject=mutate,
+            read_subject=subject.read_bytes,
+        )
+    except Exception as exc:  # noqa: BLE001 - prepared-only may raise
+        caught = exc
+
+    assert mutation_calls == 0, "subject callback ran despite before-image drift"
+    assert subject.read_bytes() == drifted
+    assert (receipt_dir / f"{RECEIPT_ID}.prepared.json").is_file()
+    assert not (receipt_dir / f"{RECEIPT_ID}.committed.json").exists()
+    if outcome is not None:
+        assert outcome["status"] != "committed"
+        assert outcome.get("finding") or outcome["status"] in {
+            "conflict",
+            "not_applied",
+        }
+    else:
+        assert caught is not None
+
+
+def test_verify_receipt_store_blocks_a_symlinked_directory(tmp_path: Path) -> None:
+    real_store = tmp_path / "real-recovery-receipts"
+    real_store.mkdir()
+    linked_store = tmp_path / "linked-recovery-receipts"
+    linked_store.symlink_to(real_store, target_is_directory=True)
+
+    findings = recovery_receipt.verify_receipt_store(linked_store)
+
+    assert findings
+    assert any(
+        token in " ".join(str(item).lower() for item in findings)
+        for token in ("symlink", "reparse", "alias")
+    )

@@ -11,6 +11,7 @@ checkout-activation migration, while an outer-only marker remains invalid.
 
 from __future__ import annotations
 
+import errno
 import json
 import os
 import shutil
@@ -160,6 +161,16 @@ def _activation_authority_state(root: Path) -> dict[str, tuple[object, ...]]:
             content,
         )
     return state
+
+
+def _activation_subject_bytes(root: Path, claim: Path) -> dict[str, bytes | None]:
+    """Capture only the claim and marker subjects governed by activation."""
+
+    outer, inner = _marker_paths(root)
+    return {
+        str(path): path.read_bytes() if path.exists() else None
+        for path in (claim, outer, inner)
+    }
 
 
 @pytest.mark.parametrize("value", (True, False, 1.0, "1", None))
@@ -661,6 +672,77 @@ def test_initialized_adoption_is_noop_and_never_calls_precommit(
     assert result.state == "initialized"
     assert callbacks == []
     assert _activation_authority_state(root) == before
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes marker directory durability")
+@pytest.mark.parametrize("failure_site", ("open", "fsync"))
+def test_activation_marker_parent_directory_eio_fails_and_restores_subject_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure_site: str,
+) -> None:
+    root = _runtime_root(tmp_path)
+    claim = _write_claim(root, "CLAIM-retained")
+    # Establish the lock directory before the snapshot so only activation marker
+    # subjects are in play once the injected durability failure occurs.
+    with claim_store.store_lock(root):
+        pass
+    outer, inner = _marker_paths(root)
+    marker_parent = inner.parent
+    marker_parent_identity = (marker_parent.stat().st_dev, marker_parent.stat().st_ino)
+    before = _activation_subject_bytes(root, claim)
+    injected = False
+
+    if failure_site == "open":
+        real_open = claim_store.os.open
+
+        def fail_first_marker_parent_open(
+            path: object,
+            flags: int,
+            mode: int = 0o777,
+            *,
+            dir_fd: int | None = None,
+        ) -> int:
+            nonlocal injected
+            if (
+                not injected
+                and dir_fd is None
+                and Path(path) == marker_parent
+                and flags & os.O_ACCMODE == os.O_RDONLY
+            ):
+                injected = True
+                raise OSError(errno.EIO, "injected marker parent open failure")
+            return real_open(path, flags, mode, dir_fd=dir_fd)
+
+        monkeypatch.setattr(claim_store.os, "open", fail_first_marker_parent_open)
+    else:
+        real_fsync = claim_store.os.fsync
+
+        def fail_first_marker_parent_fsync(descriptor: int) -> None:
+            nonlocal injected
+            metadata = os.fstat(descriptor)
+            if (
+                not injected
+                and stat.S_ISDIR(metadata.st_mode)
+                and (metadata.st_dev, metadata.st_ino) == marker_parent_identity
+            ):
+                injected = True
+                raise OSError(errno.EIO, "injected marker parent fsync failure")
+            real_fsync(descriptor)
+
+        monkeypatch.setattr(claim_store.os, "fsync", fail_first_marker_parent_fsync)
+
+    with pytest.raises(claim_store.ClaimStoreError):
+        claim_store.adopt_legacy_store(
+            root,
+            witness_claim_id="CLAIM-retained",
+        )
+
+    assert injected is True
+    assert _activation_subject_bytes(root, claim) == before
+    assert not outer.exists()
+    assert not inner.exists()
+    assert claim_store.inspect_store(root).state == "migration-required"
 
 
 def test_adoption_candidate_enumeration_is_bounded_by_store_entry_limit(

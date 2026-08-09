@@ -631,6 +631,76 @@ def test_strict_parent_fsync_failure_reports_committed_non_retry_safe_truth(
     assert _tmp_siblings(target) == []
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes directory entry durability")
+def test_strict_first_use_publication_fsyncs_created_directory_entry_and_final_parent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = tmp_path / "agents" / "runtime"
+    runtime.mkdir(parents=True)
+    target = runtime / "recovery_receipts" / "RECOVERY-first.prepared.json"
+    runtime_identity = (runtime.stat().st_dev, runtime.stat().st_ino)
+    synced_directories: list[tuple[int, int]] = []
+
+    def observe_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if stat.S_ISDIR(metadata.st_mode):
+            synced_directories.append((metadata.st_dev, metadata.st_ino))
+
+    monkeypatch.setattr(atomic_io.os, "fsync", observe_fsync)
+
+    atomic_io.publish_json_atomic(
+        target,
+        {"receipt_id": "RECOVERY-first"},
+        fsync_policy="strict",
+    )
+
+    receipt_store = target.parent
+    receipt_store_identity = (receipt_store.stat().st_dev, receipt_store.stat().st_ino)
+    assert synced_directories == [runtime_identity, receipt_store_identity]
+    assert json.loads(target.read_text(encoding="utf-8")) == {
+        "receipt_id": "RECOVERY-first"
+    }
+    assert _tmp_siblings(target) == []
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exposes directory entry durability")
+def test_strict_created_parent_fsync_failure_reports_precommit_retry_safe_truth(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = tmp_path / "agents" / "runtime"
+    runtime.mkdir(parents=True)
+    runtime_identity = (runtime.stat().st_dev, runtime.stat().st_ino)
+    target = runtime / "recovery_receipts" / "RECOVERY-first.prepared.json"
+
+    def fail_created_entry_parent_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if (metadata.st_dev, metadata.st_ino) == runtime_identity:
+            raise OSError(errno.EIO, "injected created-parent fsync failure")
+
+    monkeypatch.setattr(atomic_io.os, "fsync", fail_created_entry_parent_fsync)
+
+    with pytest.raises(atomic_io.AtomicWriteError) as caught:
+        atomic_io.publish_json_atomic(
+            target,
+            {"receipt_id": "RECOVERY-first"},
+            fsync_policy="strict",
+        )
+
+    # A supporting directory entry exists, but the requested destination has
+    # not crossed its commit point. Retrying the destination publication is
+    # therefore safe; do not conflate parent setup with subject commit.
+    assert caught.value.stage == "parent-create-fsync"
+    assert caught.value.committed is False
+    assert caught.value.retry_safe is True
+    assert isinstance(caught.value.__cause__, OSError)
+    assert caught.value.__cause__.errno == errno.EIO
+    assert target.parent.is_dir()
+    assert not target.exists()
+    assert _tmp_siblings(target) == []
+
+
 @pytest.mark.skipif(os.name != "posix", reason="POSIX exposes both fsync boundaries")
 @pytest.mark.parametrize("failure_kind", ("file", "directory"))
 def test_explicit_best_effort_fsync_policy_preserves_legacy_success_contract(
