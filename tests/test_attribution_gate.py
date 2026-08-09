@@ -88,6 +88,13 @@ def _write_instance(root: Path, agent_instance_id: str, **overrides: object) -> 
     return _write_json(root / "agents" / "runtime" / "instances" / f"{agent_instance_id}.json", payload)
 
 
+def _write_raw_instance(root: Path, agent_instance_id: str, text: str) -> Path:
+    path = root / "agents" / "runtime" / "instances" / f"{agent_instance_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
 # -- claims ------------------------------------------------------------------
 
 
@@ -252,6 +259,81 @@ def test_recovery_pane_event_refuses_a_noncanonical_registry_record(
     assert result.returncode == 1, result.stdout + result.stderr
     assert (
         "attribution:pane-event-recovery-instance-unregistered:"
+        f"{actor_id}"
+    ) in result.stdout
+
+
+def test_recovery_pane_event_refuses_duplicate_registry_json_member(
+    tmp_path: Path,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    _write_raw_instance(
+        tmp_path,
+        actor_id,
+        (
+            '{"schema":"agent-runtime-agent-instance/v1",'
+            f'"agent_instance_id":"{actor_id}",'
+            '"role":"lead-engineer","role":"qa",'
+            '"display_name":"qa@review-01",'
+            '"callsite_id":"terminal:wt-task-ar-901:tab-01",'
+            f'"spawned_at":"{POST_CUTOFF_TS}"}}\n'
+        ),
+    )
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event()],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "block agents/runtime/pane_events/pane-events.jsonl:1: "
+        "attribution:pane-event-recovery-instance-unregistered:"
+        f"{actor_id}"
+    ) in result.stdout
+
+
+def test_recovery_pane_event_refuses_symlinked_registry_ancestor(
+    tmp_path: Path,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    registry_target = _write_instance(tmp_path / "registry-fixture", actor_id).parent
+    instances_parent = tmp_path / "agents" / "runtime"
+    instances_parent.mkdir(parents=True, exist_ok=True)
+    (instances_parent / "instances").symlink_to(registry_target, target_is_directory=True)
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event()],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "block agents/runtime/pane_events/pane-events.jsonl:1: "
+        "attribution:pane-event-recovery-instance-unregistered:"
+        f"{actor_id}"
+    ) in result.stdout
+
+
+def test_recovery_pane_event_refuses_oversized_canonical_role(
+    tmp_path: Path,
+) -> None:
+    actor_id = "qa-20260613-120000-kst-aa11"
+    oversized_role = "r" * 161
+    _write_instance(tmp_path, actor_id, role=oversized_role)
+    _write_jsonl(
+        tmp_path / "agents" / "runtime" / "pane_events" / "pane-events.jsonl",
+        [_recovery_event(actor_role=oversized_role)],
+    )
+
+    result = _run(GATE, tmp_path, "--check")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert (
+        "block agents/runtime/pane_events/pane-events.jsonl:1: "
+        "attribution:pane-event-recovery-instance-role-invalid:"
         f"{actor_id}"
     ) in result.stdout
 

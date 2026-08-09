@@ -6277,6 +6277,93 @@ def test_recovery_revalidates_actor_registry_inside_the_commit_transaction(
     assert _tree_entry_snapshot(receipt_dir) == receipts_before
 
 
+@pytest.mark.parametrize("operation", ("adopt", "terminalize", "activate-store"))
+@pytest.mark.parametrize(
+    "registry_race",
+    ("disappearance", "replacement", "field-drift"),
+)
+def test_recovery_binds_actor_authority_to_prepared_receipt_publication(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+    registry_race: str,
+) -> None:
+    """The receipt publisher, not its caller, owns the final actor proof."""
+
+    _primary, linked = _init_git_worktree(
+        tmp_path,
+        f"ar660-publish-race-{operation}-{registry_race}",
+    )
+    args, _claim_path, claim = _recovery_command_case(
+        linked,
+        operation,
+        suffix=f"660-publish-{operation}-{registry_race}",
+    )
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+    real_prepare = recovery_receipt.prepare_recovery_receipt
+    actor_id = str(claim["agent_instance_id"])
+    actor_path = (
+        linked
+        / "agents"
+        / "runtime"
+        / "instances"
+        / f"{actor_id}.json"
+    )
+    actor_bytes = actor_path.read_bytes()
+    actor_inode = actor_path.stat().st_ino
+    prepare_calls = 0
+    publisher_precommit_seen = False
+
+    def race_after_caller_revalidation(**kwargs):
+        nonlocal prepare_calls, publisher_precommit_seen
+        prepare_calls += 1
+        publisher_precommit_seen = callable(kwargs.get("precommit"))
+        if registry_race == "disappearance":
+            actor_path.unlink()
+        elif registry_race == "replacement":
+            replacement = actor_path.with_name(f".{actor_path.name}.replacement")
+            replacement.write_bytes(actor_bytes)
+            os.replace(replacement, actor_path)
+            assert actor_path.stat().st_ino != actor_inode
+        else:
+            changed = json.loads(actor_bytes.decode("utf-8"))
+            changed["callsite_id"] = f"{changed['callsite_id']}:drifted"
+            actor_path.write_text(
+                json.dumps(changed, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        return real_prepare(**kwargs)
+
+    monkeypatch.setattr(
+        recovery_receipt,
+        "prepare_recovery_receipt",
+        race_after_caller_revalidation,
+    )
+    claims_root = linked / "agents" / "runtime" / "task_claims"
+    claims_before = _tree_entry_snapshot(claims_root)
+    admin_root = _claim_store_outer_anchor(linked).parent
+    admin_before = _tree_entry_snapshot(admin_root)
+    events_before = _pane_event_bytes(linked)
+    receipt_dir = _recovery_receipt_dir(linked)
+    receipts_before = _tree_entry_snapshot(receipt_dir)
+
+    rc = dispatcher.main(args)
+    output = capsys.readouterr()
+
+    assert rc == 1, output.out + output.err
+    assert prepare_calls == 1
+    assert publisher_precommit_seen, (
+        "dispatcher did not bind actor authority to the receipt publisher"
+    )
+    assert "actor instance" in (output.out + output.err).lower()
+    assert _tree_entry_snapshot(claims_root) == claims_before
+    assert _tree_entry_snapshot(admin_root) == admin_before
+    assert _pane_event_bytes(linked) == events_before
+    assert _tree_entry_snapshot(receipt_dir) == receipts_before
+
+
 def test_recovery_refuses_instance_filename_payload_identity_mismatch(
     tmp_path: Path,
 ) -> None:

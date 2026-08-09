@@ -189,6 +189,49 @@ def test_prepare_publishes_immutable_receipt_with_exact_transition_digests(
     assert prepared_path.read_bytes() == prepared_bytes
 
 
+def test_prepare_precommit_failure_leaves_no_receipt_authority(
+    tmp_path: Path,
+) -> None:
+    """A failed external authority proof must run before immutable publish."""
+
+    receipt_dir = tmp_path / "agents" / "runtime" / "recovery_receipts"
+    before, after = _before_after()
+    calls = 0
+    sidecar_observed = False
+
+    def reject_stale_authority() -> None:
+        nonlocal calls, sidecar_observed
+        calls += 1
+        assert not list(receipt_dir.glob("*.json"))
+        if recovery_receipt.os.name == "posix":
+            sidecars = list(
+                receipt_dir.glob(f".{RECEIPT_ID}.prepared.json.tmp-*")
+            )
+            assert len(sidecars) == 1
+            sidecar_observed = True
+        raise ValueError("actor authority disappeared before receipt publication")
+
+    with pytest.raises(ValueError, match="actor authority disappeared"):
+        recovery_receipt.prepare_recovery_receipt(
+            receipt_dir=receipt_dir,
+            receipt_id=RECEIPT_ID,
+            operation="terminalize",
+            subject_ref=SUBJECT_REF,
+            before_bytes=before,
+            predicted_after_bytes=after,
+            owner_id=OWNER_ID,
+            reason=REASON,
+            recorded_at=RECORDED_AT,
+            commit_witness=COMMIT_WITNESS,
+            precommit=reject_stale_authority,
+        )
+
+    assert calls == 1
+    if recovery_receipt.os.name == "posix":
+        assert sidecar_observed
+    assert not receipt_dir.exists() or list(receipt_dir.iterdir()) == []
+
+
 def test_validate_rejects_missing_and_self_digest_tampered_receipts(
     tmp_path: Path,
 ) -> None:
