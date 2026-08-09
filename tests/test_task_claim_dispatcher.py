@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import importlib.util
 import hashlib
 import json
@@ -5754,6 +5755,227 @@ def _legacy_claim(linked: Path, suffix: str) -> tuple[Path, dict]:
     return path, claim
 
 
+def _recovery_receipt_dir(root: Path) -> Path:
+    return root / "agents" / "runtime" / "recovery_receipts"
+
+
+def _pane_event_bytes(root: Path) -> bytes | None:
+    path = root / "agents" / "runtime" / "pane_events" / "pane-events.jsonl"
+    return path.read_bytes() if path.exists() else None
+
+
+def _recovery_candidate(
+    linked: Path,
+    operation: str,
+    *,
+    suffix: str,
+) -> tuple[Path, dict, list[str]]:
+    if operation == "adopt":
+        path, claim = _legacy_claim(linked, suffix)
+        args = [
+            "--root",
+            str(linked),
+            "adopt",
+            "--claim-id",
+            str(claim["claim_id"]),
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "receipt-first legacy adoption",
+            "--now",
+            "2026-07-29T08:30:00+09:00",
+            "--json",
+        ]
+        return path, claim, args
+
+    assert operation == "terminalize"
+    created = _create_linked_claim(
+        linked,
+        suffix=suffix,
+        extra_args=("--lease-minutes", "1"),
+    )
+    assert created.returncode == 0, created.stderr or created.stdout
+    payload = json.loads(created.stdout)
+    path = linked / payload["path"]
+    claim = payload["claim"]
+    args = [
+        "--root",
+        str(linked),
+        "terminalize",
+        "--claim-id",
+        str(claim["claim_id"]),
+        "--owner-id",
+        _OWNER,
+        "--reason",
+        "receipt-first expired claim terminalization",
+        "--now",
+        "2026-07-29T18:00:00+09:00",
+        "--json",
+    ]
+    return path, claim, args
+
+
+def _dispatcher_recovery_module(dispatcher, monkeypatch: pytest.MonkeyPatch):
+    # The import is deliberately late: _load_dispatcher_module() installs the
+    # repository scripts directory on sys.path. `raising=False` keeps this a
+    # behavioral RED when dispatcher wiring is still absent instead of failing
+    # at test setup merely because no module attribute exists yet.
+    import recovery_receipt
+
+    monkeypatch.setattr(dispatcher, "recovery_receipt", recovery_receipt, raising=False)
+    return recovery_receipt
+
+
+@pytest.mark.parametrize("operation", ("adopt", "terminalize"))
+def test_recovery_prepares_before_strict_claim_write_and_events_after_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+) -> None:
+    """The pane event is derived from a committed receipt, never its authority."""
+    _primary, linked = _init_git_worktree(tmp_path, f"ar660-wal-order-{operation}")
+    path, _claim, args = _recovery_candidate(
+        linked,
+        operation,
+        suffix=f"660-wal-{operation}",
+    )
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+    receipt_dir = _recovery_receipt_dir(linked)
+    real_write = dispatcher.atomic_io.write_json_atomic
+    real_append = dispatcher.append_event
+    observed: list[str] = []
+
+    def _strict_subject_write(candidate, payload, *write_args, **write_kwargs):
+        if Path(candidate).resolve() == path.resolve():
+            prepared = list(receipt_dir.glob("*.prepared.json"))
+            assert len(prepared) == 1, "claim write ran before the prepared WAL record"
+            assert not list(receipt_dir.glob("*.committed.json"))
+            assert not list(receipt_dir.glob("*.indeterminate.json"))
+            assert write_kwargs.get("fsync_policy") == "strict"
+            observed.append("subject")
+        return real_write(candidate, payload, *write_args, **write_kwargs)
+
+    def _event_after_commit(event_root: Path, event: dict):
+        committed_paths = list(receipt_dir.glob("*.committed.json"))
+        assert len(committed_paths) == 1, "pane event ran before committed receipt"
+        committed = recovery_receipt.validate_receipt(committed_paths[0])
+        assert event["recovery_operation"] == operation
+        assert event["receipt_id"] == committed["receipt_id"]
+        assert str(event["prepared_receipt_ref"]).endswith(
+            f"{committed['receipt_id']}.prepared.json"
+        )
+        assert str(event["outcome_receipt_ref"]).endswith(committed_paths[0].name)
+        observed.append("event")
+        return real_append(event_root, event)
+
+    monkeypatch.setattr(dispatcher.atomic_io, "write_json_atomic", _strict_subject_write)
+    monkeypatch.setattr(dispatcher, "append_event", _event_after_commit)
+
+    rc = dispatcher.main(args)
+    captured = capsys.readouterr()
+
+    assert rc == 0, captured.err or captured.out
+    assert observed == ["subject", "event"]
+    response = json.loads(captured.out)
+    assert response["recovery_receipt"]["status"] == "committed"
+    assert response["recovery_receipt"]["retry_safe"] is False
+    assert len(list(receipt_dir.glob("*.prepared.json"))) == 1
+    assert len(list(receipt_dir.glob("*.committed.json"))) == 1
+
+
+@pytest.mark.parametrize("operation", ("adopt", "terminalize"))
+def test_recovery_prepare_failure_preserves_subject_and_event_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    operation: str,
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, f"ar660-wal-prepare-{operation}")
+    path, _claim, args = _recovery_candidate(
+        linked,
+        operation,
+        suffix=f"660-prep-{operation}",
+    )
+    subject_before = path.read_bytes()
+    events_before = _pane_event_bytes(linked)
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+
+    def _fail_prepare(**_kwargs):
+        raise OSError("prepared receipt sink is unavailable")
+
+    monkeypatch.setattr(recovery_receipt, "prepare_recovery_receipt", _fail_prepare)
+
+    rc = dispatcher.main(args)
+    captured = capsys.readouterr()
+
+    assert rc != 0
+    assert "Traceback" not in captured.out + captured.err
+    assert path.read_bytes() == subject_before
+    assert _pane_event_bytes(linked) == events_before
+    receipt_dir = _recovery_receipt_dir(linked)
+    assert not receipt_dir.exists() or list(receipt_dir.iterdir()) == []
+
+
+def test_terminalize_post_commit_atomic_uncertainty_is_indeterminate_nonretry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "ar660-wal-indeterminate")
+    path, _claim, args = _recovery_candidate(
+        linked,
+        "terminalize",
+        suffix="660-indet",
+    )
+    events_before = _pane_event_bytes(linked)
+    dispatcher = _load_dispatcher_module()
+    _dispatcher_recovery_module(dispatcher, monkeypatch)
+    real_write = dispatcher.atomic_io.write_json_atomic
+
+    def _commit_then_lose_durability(candidate, payload, *write_args, **write_kwargs):
+        if Path(candidate).resolve() != path.resolve():
+            return real_write(candidate, payload, *write_args, **write_kwargs)
+        assert write_kwargs.get("fsync_policy") == "strict"
+        real_write(
+            candidate,
+            payload,
+            *write_args,
+            **{**write_kwargs, "fsync_policy": "best_effort"},
+        )
+        raise dispatcher.atomic_io.AtomicWriteError(
+            "parent fsync failed after subject rename",
+            stage="parent-fsync",
+            committed=True,
+            retry_safe=False,
+        )
+
+    monkeypatch.setattr(
+        dispatcher.atomic_io,
+        "write_json_atomic",
+        _commit_then_lose_durability,
+    )
+
+    rc = dispatcher.main(args)
+    captured = capsys.readouterr()
+
+    assert rc != 0
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "expired"
+    assert _pane_event_bytes(linked) == events_before
+    receipt_dir = _recovery_receipt_dir(linked)
+    assert len(list(receipt_dir.glob("*.prepared.json"))) == 1
+    assert not list(receipt_dir.glob("*.committed.json"))
+    indeterminate_paths = list(receipt_dir.glob("*.indeterminate.json"))
+    assert len(indeterminate_paths) == 1
+    indeterminate = json.loads(indeterminate_paths[0].read_text(encoding="utf-8"))
+    assert indeterminate["retry_safe"] is False
+    response = json.loads(captured.out)
+    assert response["status"] == "indeterminate"
+    assert response["retry_safe"] is False
+
+
 def test_red_legacy_claim_is_adoptable_by_owner_bound_command(tmp_path: Path) -> None:
     """A pre-mutation-field claim must be adoptable instead of unrecoverable."""
     _primary, linked = _init_git_worktree(tmp_path, "ar659-adopt")
@@ -6423,18 +6645,192 @@ def test_recovery_reason_is_length_bounded(tmp_path: Path) -> None:
     assert "recovery reason exceeds" in (result.stdout + result.stderr)
 
 
+def test_markerless_activation_receipt_binds_exact_two_subject_transition(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Both marker images belong to one prepared WAL record before either exists."""
+    _primary, linked = _init_git_worktree(tmp_path, "ar660-activation-two-subject")
+    result = _create_linked_claim(linked, suffix="660-act-two")
+    assert result.returncode == 0, result.stderr or result.stdout
+    inner = linked / "agents" / "runtime" / "task_claims" / ".claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    assert inner.is_file() and outer.is_file()
+    inner.unlink()
+    outer.unlink()
+
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+    real_prepare = recovery_receipt.prepare_recovery_receipt
+    real_adopt = dispatcher.claim_store.adopt_legacy_store
+    captured: dict[str, object] = {}
+
+    def _capture_prepare(**kwargs):
+        assert not inner.exists() and not outer.exists()
+        captured["prepare"] = kwargs
+        prepared_path = real_prepare(**kwargs)
+        captured["prepared_path"] = prepared_path
+        return prepared_path
+
+    def _observe_precommit(root, *adopt_args, **adopt_kwargs):
+        precommit = adopt_kwargs.get("precommit")
+        captured["precommit"] = precommit
+        if precommit is None:
+            return real_adopt(root, *adopt_args, **adopt_kwargs)
+
+        def _wrapped(plan):
+            captured["plan"] = plan
+            assert not inner.exists() and not outer.exists()
+            result = precommit(plan)
+            prepared_path = captured.get("prepared_path")
+            assert isinstance(prepared_path, Path) and prepared_path.is_file()
+            assert not inner.exists() and not outer.exists()
+            return result
+
+        adopt_kwargs["precommit"] = _wrapped
+        return real_adopt(root, *adopt_args, **adopt_kwargs)
+
+    monkeypatch.setattr(recovery_receipt, "prepare_recovery_receipt", _capture_prepare)
+    monkeypatch.setattr(
+        dispatcher.claim_store,
+        "adopt_legacy_store",
+        _observe_precommit,
+    )
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "bind both marker publications to one recovery receipt",
+            "--json",
+        ]
+    )
+    output = capsys.readouterr()
+
+    assert rc == 0, output.err or output.out
+    assert callable(captured.get("precommit"))
+    plan = captured["plan"]
+    assert plan.operation == "legacy-store-adoption"
+    assert [subject.path for subject in plan.subjects] == [inner, outer]
+    assert all(subject.before_bytes is None for subject in plan.subjects)
+    assert len({subject.after_bytes for subject in plan.subjects}) == 1
+
+    def _logical_ref(path: Path) -> str:
+        if path.resolve() == inner.resolve():
+            return "agents/runtime/task_claims/.claim-store"
+        if path.resolve() == outer.resolve():
+            return "git-admin:agent-runtime/task-claim-store"
+        raise AssertionError(f"unexpected activation subject: {path}")
+
+    expected_before = {
+        "subjects": [
+            {"path": _logical_ref(subject.path), "exists": False, "base64_bytes": None}
+            for subject in plan.subjects
+        ]
+    }
+    expected_after = {
+        "subjects": [
+            {
+                "path": _logical_ref(subject.path),
+                "exists": True,
+                "base64_bytes": base64.b64encode(subject.after_bytes).decode("ascii"),
+            }
+            for subject in plan.subjects
+        ]
+    }
+    prepare = captured["prepare"]
+    assert prepare["operation"] == "activate-store"
+    assert prepare["before_bytes"] == recovery_receipt.canonical_json_bytes(
+        expected_before
+    )
+    assert prepare["predicted_after_bytes"] == recovery_receipt.canonical_json_bytes(
+        expected_after
+    )
+    assert inner.read_bytes() == plan.subjects[0].after_bytes
+    assert outer.read_bytes() == plan.subjects[1].after_bytes
+    receipt_dir = _recovery_receipt_dir(linked)
+    assert len(list(receipt_dir.glob("*.prepared.json"))) == 1
+    assert len(list(receipt_dir.glob("*.committed.json"))) == 1
+
+
+def test_initialized_activation_is_receipt_and_event_free_noop(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _primary, linked = _init_git_worktree(tmp_path, "ar660-activation-noop")
+    result = _create_linked_claim(linked, suffix="660-act-noop")
+    assert result.returncode == 0, result.stderr or result.stdout
+    inner = linked / "agents" / "runtime" / "task_claims" / ".claim-store"
+    outer = _claim_store_outer_anchor(linked)
+    marker_before = (inner.read_bytes(), outer.read_bytes())
+    event_before = _pane_event_bytes(linked)
+    receipt_dir = _recovery_receipt_dir(linked)
+    receipts_before = (
+        sorted(path.name for path in receipt_dir.iterdir())
+        if receipt_dir.exists()
+        else []
+    )
+
+    dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
+
+    def _must_not_prepare(**_kwargs):
+        raise AssertionError("initialized activation prepared a false recovery receipt")
+
+    def _must_not_event(*_args, **_kwargs):
+        raise AssertionError("initialized activation emitted a false recovery event")
+
+    monkeypatch.setattr(recovery_receipt, "prepare_recovery_receipt", _must_not_prepare)
+    monkeypatch.setattr(dispatcher, "append_event", _must_not_event)
+
+    rc = dispatcher.main(
+        [
+            "--root",
+            str(linked),
+            "activate-store",
+            "--owner-id",
+            _OWNER,
+            "--reason",
+            "verify initialized no-op",
+            "--json",
+        ]
+    )
+    output = capsys.readouterr()
+
+    assert rc == 0, output.err or output.out
+    response = json.loads(output.out)
+    assert response["status"] == "not_required"
+    assert response["audit"] == "no-op"
+    assert (inner.read_bytes(), outer.read_bytes()) == marker_before
+    assert _pane_event_bytes(linked) == event_before
+    receipts_after = (
+        sorted(path.name for path in receipt_dir.iterdir())
+        if receipt_dir.exists()
+        else []
+    )
+    assert receipts_after == receipts_before
+
+
 def test_activation_audit_loss_is_reported(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """The pane event is the only durable attribution for a store activation."""
+    """A derived pane-event failure cannot erase durable receipt authority."""
     _primary, linked = _init_git_worktree(tmp_path, "ar659-audit-loss")
     result = _create_linked_claim(linked, suffix="659-auditloss")
     assert result.returncode == 0, result.stderr or result.stdout
     _claim_store_outer_anchor(linked).unlink()
+    events_before = _pane_event_bytes(linked)
 
     dispatcher = _load_dispatcher_module()
+    recovery_receipt = _dispatcher_recovery_module(dispatcher, monkeypatch)
 
     def _broken_sink(*_a, **_k):
         raise OSError("pane event sink is unavailable")
@@ -6457,8 +6853,19 @@ def test_activation_audit_loss_is_reported(
 
     assert rc == 0  # activation must not roll back
     assert _claim_store_outer_anchor(linked).is_file()
-    assert json.loads(captured.out)["audit"] == "lost"
-    assert "not durable" in captured.err
+    assert _pane_event_bytes(linked) == events_before
+    response = json.loads(captured.out)
+    assert response["audit"] == "receipt-recorded:event-lost"
+    assert response["recovery_receipt"]["status"] == "committed"
+    receipt_dir = _recovery_receipt_dir(linked)
+    prepared = list(receipt_dir.glob("*.prepared.json"))
+    committed = list(receipt_dir.glob("*.committed.json"))
+    assert len(prepared) == len(committed) == 1
+    assert recovery_receipt.validate_receipt(prepared[0])["state"] == "prepared"
+    assert recovery_receipt.validate_receipt(committed[0])["state"] == "committed"
+    assert "event" in captured.err.lower()
+    assert "not recorded" in captured.err.lower()
+    assert "attribution" not in captured.err.lower() or "not durable" not in captured.err.lower()
 
 
 def test_indeterminate_flag_cannot_end_a_claim_with_a_future_deadline(
