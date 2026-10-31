@@ -127,7 +127,7 @@ Stop before consumer installation, permission expansion, production mutations or
 - 2026-11-01 owner request: resolve remaining work-ledger mismatch; publish, independently review and conditionally merge. Prior registration and review history retained.
 - Catalog repair: add only the registered TASKSET-AR-SECURITY-RESILIENCE-20261101 expectation; preserve exact equality.
 
-- Verification history: 02:10 receipt covers the product implementation before catalog integration. New integration receipt pending; original evidence retained.
+- Verification history: 02:10 receipt covers the original product implementation. Subsequent integration receipt024414 passed271 focused tests, host lock and governance; official unit close completed03:05:02. Original evidence retained.
 - Board Team is derived generator routing; canonical assignment and actual claim team are risk-and-safety. Generator/policy unchanged.
 - Execution: Codex agent instance codex-security-20261101. Model-routing labels are policy metadata; actual model/provider fields remain unverified, not proof of another provider execution.
 ## Failed verification history
