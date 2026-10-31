@@ -1,27 +1,26 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-11-01T02:36:00.938686+09:00
+updated_at: 2026-11-01T03:05:03+09:00
 updated_by: codex-security-20261101
 current_state:
-  summary: "TASK-AR-660 integration authorized on 2026-11-01; exact catalog expectation aligned; full regression and independent PR review in progress."
-  status: review
-  task_set_status: active
+  summary: "TASK-AR-660 merged in PR393 at7e8e63f0; official unit/task closeout and generated ledger aligned. Consumer installation and release are not performed."
+  status: completed
+  task_set_status: completed
   task_set_id: "TASKSET-AR-SECURITY-RESILIENCE-20261101"
-  step_index: 5
+  step_index: 6
   step_total: 6
-  progress_pct: 90
-  status_text: "Integration claim independently released; exact PR CI/merge and postmerge work-close pending."
+  progress_pct: 100
+  status_text: "All current claims released; independent review and six remote checks passed; product merged and work-close recorded."
 active_work:
   current_agents: []
-  current_teams:
-    - risk-and-safety
+  current_teams: []
 resume:
-  active_task: TASK-AR-660
-  active_task_set: TASKSET-AR-SECURITY-RESILIENCE-20261101
+  active_task: ""
+  active_task_set: ""
   branch_policy: "AR-655 and AR-659 are closed. Claim the next task in its own worktree; keep consumer primaries and release surfaces read-only."
   next_actions:
-    - "Finish TASK-AR-660 complete-suite verification, public-data audit, independent PR review, conditional merge and closeout under the 2026-11-01 owner authorization."
+    - "TASK-AR-660 first package complete. Preserve passed acceptance receipts and separate failed-history records; register and authorize any new implementation scope before dispatch."
     - "Claim TASK-AR-656 (composable lifecycle hooks) or TASK-AR-657; the task set is free."
-    - "Default implementation claims use worker mode. TASK-AR-660 integration uses the existing orchestrator claim for work-ledger/merge coordination; it is not reaped automatically and must be explicitly independently released before cleanup."
+    - "Default implementation claims use worker mode. TASK-AR-660 historical integration orchestrator claim was explicitly independently released before merged-worktree cleanup; no active integration claim remains."
     - "Historical TASK-AR-648 note reported 21 claim-guard failures. Current source e5cd5142 verification on 2026-11-01: tests/test_claim_guard.py 36/36 pass; do not treat the historical red count as a current baseline."
     - "Keep TASK-AR-654, TASK-AR-651 and Scribe restrictions; version/tag/package/deploy/release remain outside TASK-AR-660. Only TASK-AR-660 branch push, PR publication and merge after checks plus independent approval are owner-authorized on 2026-11-01."
 roles:

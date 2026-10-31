@@ -9,9 +9,9 @@ kind: task
 parent_id: TASKSET-AR-SECURITY-RESILIENCE-20261101
 registered_at: 2026-11-01T01:40:41+09:00
 created_at: 2026-11-01T01:40:41+09:00
-updated_at: 2026-11-01T02:44:44+09:00
+updated_at: 2026-11-01T03:05:03+09:00
 title: Add independent security and resilience reviewer with evidence closure
-status: active
+status: completed
 started_at: 2026-11-01T01:41:58+09:00
 priority: P1
 difficulty: L
@@ -46,8 +46,18 @@ verification_status: passed
 verified_at: 2026-11-01T02:44:44+09:00
 verified_by: codex-security-20261101
 evidence_refs:
-  - reviews/VERIFY-2026-11-01-task-ar-660-20261101024237.json
   - reviews/VERIFY-2026-11-01-task-ar-660-20261101024444.json
+escalation_triggers:
+  - security
+  - cross_cutting
+defect_signatures:
+compound_refs:
+review_refs:
+  - reviews/REVIEW-2026-11-01-task-ar-660-merged-closeout.md
+resolution: done
+completed_at: 2026-11-01T03:05:03+09:00
+closed_by: codex-security-20261101
+measurement_unavailable_reason: Complete cumulative host time/token/cost meter unavailable; original checkpoints and measured verification timings retained
 ---
 
 # TASK-AR-660 - Add independent security and resilience reviewer with evidence closure
@@ -74,3 +84,21 @@ evidence_refs:
 
 - 2026-11-01 owner request: resolve remaining work-ledger mismatch; publish, independently review and conditionally merge. Prior registration and review history retained.
 - Catalog repair: add only the registered TASKSET-AR-SECURITY-RESILIENCE-20261101 expectation; preserve exact equality.
+## Failed verification history
+
+- Preserved failed attempt: reviews/VERIFY-2026-11-01-task-ar-660-20261101024237.json. Pointer identity projection was corrected; subsequent passed integration receipt remains the acceptance evidence. Failed file and prior Git revisions retained; no result rewritten.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-11-01T03:05:03+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Complete cumulative host time/token/cost meter unavailable; original checkpoints and measured verification timings retained
+- Closed by: `codex-security-20261101`
+- Verification evidence:
+  - `reviews/VERIFY-2026-11-01-task-ar-660-20261101024444.json`
+- Reviews:
+  - `reviews/REVIEW-2026-11-01-task-ar-660-merged-closeout.md`
+<!-- work-close:end -->

@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-11-01T02:49:37+09:00
-record_count: 1370
+generated_at: 2026-11-01T03:07:00+09:00
+record_count: 1372
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1370` review and evidence records under `reviews/`.
+- Summary: indexed `1372` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1370` files |
+| Reviews covered | pass | `1372` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -258,6 +258,7 @@ record_count: 1370
 | `reviews/RETRO-2026-07-29-task-ar-647-native-events-security-boundary.md` | `RETRO-2026-07-29-task-ar-647-native-events-security-boundary` | md | completed | pass-with-compound | TASK-AR-647 Native-Events and Security-Boundary Retrospective |
 | `reviews/RETRO-2026-07-30-task-ar-652-economic-routing-integrity.md` | `RETRO-2026-07-30-task-ar-652-economic-routing-integrity` | md | completed | pass-with-compound | TASK-AR-652 Economic Routing and Receipt-Integrity Retrospective |
 | `reviews/RETRO-2026-07-30-task-ar-653-merge-queue-safety.md` | `RETRO-2026-07-30-task-ar-653-merge-queue-safety` | md | completed | pass-with-followup | TASK-AR-653 Merge-Queue Safety Retrospective |
+| `reviews/RETRO-2026-11-01-task-ar-660.md` | `RETRO-2026-11-01-task-ar-660` | md | record | n/a | Reviewer integration retrospective |
 | `reviews/REVIEW-2026-06-08-agent-runtime-after-pass-1.md` | `REVIEW-2026-06-08-agent-runtime-after-pass-1` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-after-pass-1 |
 | `reviews/REVIEW-2026-06-08-agent-runtime-baseline.md` | `REVIEW-2026-06-08-agent-runtime-baseline` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-baseline |
 | `reviews/REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25.md` | `REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25` | md | record | n/a | REVIEW-2026-06-08-agent-runtime-claim-backup-validity-comparison-pass-25 |
@@ -727,6 +728,7 @@ record_count: 1370
 | `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
 | `reviews/REVIEW-2026-11-01-task-ar-660-integration.md` | `REVIEW-2026-11-01-task-ar-660-integration` | md | review | pass | Security reviewer catalog integration verification |
+| `reviews/REVIEW-2026-11-01-task-ar-660-merged-closeout.md` | `REVIEW-2026-11-01-task-ar-660-merged-closeout` | md | accepted | pass | Registered reviewer integration and merge |
 | `reviews/REVIEW-2026-11-01-task-ar-660-t3-integration.md` | `REVIEW-2026-11-01-task-ar-660-t3-integration` | md | accepted | pass | Security reviewer integration replan |
 | `reviews/REVIEW-2026-11-01-task-ar-660-t3-security-wiring.md` | `REVIEW-2026-11-01-task-ar-660-t3-security-wiring` | md | accepted | pass | Security reviewer wiring and evidence replan |
 | `reviews/REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration.md` | `REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration` | md | record | pass | Security and resilience reviewer Registration |

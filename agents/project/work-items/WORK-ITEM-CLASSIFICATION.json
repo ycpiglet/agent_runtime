@@ -1,6 +1,6 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-11-01T02:49:37+09:00",
+  "generated_at": "2026-11-01T03:08:01+09:00",
   "record_count": 560,
   "finding_count": 0,
   "findings": [],
@@ -6130,7 +6130,7 @@
       "title": "Independent security and resilience verification",
       "path": "agents/project/initiatives/INIT-AR-SECURITY-RESILIENCE-20261101.md",
       "parent_id": "",
-      "status": "active"
+      "status": "completed"
     },
     {
       "key": "taskset:TASKSET-AR-SECURITY-RESILIENCE-20261101",
@@ -6141,7 +6141,7 @@
       "title": "Security and resilience reviewer",
       "path": "BACKLOG-BOARD.md",
       "parent_id": "INIT-AR-SECURITY-RESILIENCE-20261101",
-      "status": "active"
+      "status": "complete"
     },
     {
       "key": "task:TASK-AR-660",
@@ -6152,7 +6152,7 @@
       "title": "Make independent security and stability verification dispatchable and prevent unverif…",
       "path": "agents/lead_engineer/tasks/TASK-AR-660.md",
       "parent_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
-      "status": "active"
+      "status": "completed"
     },
     {
       "key": "unit:UNIT-TASK-AR-660-001",
@@ -6163,7 +6163,7 @@
       "title": "UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
       "parent_id": "TASK-AR-660",
-      "status": "active"
+      "status": "completed"
     }
   ]
 }

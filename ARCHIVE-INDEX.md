@@ -3,12 +3,12 @@ type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
 generated_at: 2026-11-01
-archived_count: 303
+archived_count: 304
 ---
 
 # Archived Task Files
 
-- `303` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
+- `304` completed task files, extracted from `BACKLOG-BOARD.md` (TASK-AR-533) so the live board stays an attention surface.
 - Restore rule: completed tasks stay hidden from the live Action Board; full identity + lifecycle metadata is preserved here and remains queryable.
 
 | Task | UID | Task Set | Status | registered_at | started_at | completed_at | updated_at | Summary |
@@ -192,6 +192,7 @@ archived_count: 303
 | `TASK-AR-372` | `42f1d67e-cc3…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-12T11:58:44+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Provide one structured registration command path so planners stop hand-editing board… |
 | `TASK-AR-373` | `d30bf31f-641…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Make it visible which planned tasks are worker-ready and which still require planner… |
 | `TASK-AR-374` | `e08dd19a-399…` | `TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE` | completed | 2026-06-12T08:17:54+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | 2026-06-15T12:01:39+09:00 | Prove that the work hierarchy and registration conflict surfaces are actually closed… |
+| `TASK-AR-660` | `a728fc61-c3f…` | `TASKSET-AR-SECURITY-RESILIENCE-20261101` | completed | 2026-11-01T01:40:41+09:00 | 2026-11-01T01:41:58+09:00 | 2026-11-01T03:05:03+09:00 | 2026-11-01T03:05:03+09:00 | Make independent security and stability verification dispatchable and prevent unverif… |
 | `TASK-AR-375` | `fe4cf218-9eb…` | `TASKSET-AR-AGENT-IDENTITY-CONTRACT` | completed | 2026-06-12T14:50:00+09:00 | 2026-06-12T15:05:12+09:00 | 2026-06-12T15:25:40+09:00 | 2026-06-12T15:25:40+09:00 | Create durable instance-level identity records and a deterministic gate that rejects… |
 | `TASK-AR-514` | `5b5f167a-3a1…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:30:00+09:00 | 2026-06-13T01:33:45+09:00 | 2026-06-13T04:30:00+09:00 | 2026-06-13T04:30:00+09:00 | Owner/Claude/Codex planning discussions must map to review records, task records, boa… |
 | `TASK-AR-517` | `da2e7699-1f7…` | `TASKSET-AR-WORK-METADATA-ANALYTICS` | completed | 2026-06-12T23:33:00+09:00 | 2026-06-13T02:45:16+09:00 | 2026-06-13T11:50:00+09:00 | 2026-06-13T11:50:00+09:00 | Turn Work Item metadata into queryable statistics, JSON/CSV export, and reusable save… |
