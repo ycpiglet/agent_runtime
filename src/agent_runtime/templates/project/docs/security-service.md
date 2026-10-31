@@ -1,5 +1,13 @@
 # Security-service profile
 
+The core role registry also exposes `security-reviewer` (`security` or
+`resilience`). Its [managed skill](../agents/security_reviewer/SKILL.md)
+defines authorization-bypass, replay and failure-recovery verification with an
+independent reproduce/fix/retest/regression loop. It does not enable scans or
+replace this profile's claim-time controls. An optional read-only report check
+is available as `python -m agent_runtime.security_review --help`; host findings
+and evidence remain host-owned and are never copied into Runtime automatically.
+
 This profile adds claim-time metadata enforcement for paths that can affect
 secrets, authentication, data migrations, or production systems. The gate
 classifies path names only; it never opens target files or records their

@@ -70,6 +70,7 @@ def emit_allimbot_event(event_type: str, data: dict[str, object]) -> None:
 PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 # Owner field aliases used in TASK frontmatter -> orchestrator role slug.
 OWNER_TO_ROLE = {
+    "Security Reviewer": "security-reviewer",
     "Lead Engineer": "lead-engineer",
     "Backend Engineer": "backend",
     "Backend": "backend",
@@ -90,6 +91,9 @@ OWNER_TO_ROLE = {
 }
 
 ROLE_ALIASES = {
+    "security": "security-reviewer",
+    "security-reviewer": "security-reviewer",
+    "resilience": "security-reviewer",
     "qa": "qa",
     "lead-engineer": "lead-engineer",
     "lead": "lead-engineer",

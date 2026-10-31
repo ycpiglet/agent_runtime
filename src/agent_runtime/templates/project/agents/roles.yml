@@ -30,6 +30,24 @@ schema: agent-role-registry/v1
 updated_at: 2026-05-27T17:20:40+09:00
 
 roles:
+  - id: security-reviewer
+    aliases: [security, security-reviewer, resilience]
+    skill_file: agents/security_reviewer/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/security_reviewer/SKILL.md
+      - "Active task/unit, exact source revision, host security rules and prior findings"
+    forbidden_inputs:
+      - "Contributor self-approval or unverified completion claims"
+    output_contract:
+      - "Authorization bypass, request replay and failure recovery evidence with explicit unknowns"
+      - "Reproduction -> fix handoff -> independent retest -> regression links"
+    audit_gate: false
+    default_subagents: []
+    notes: |
+      Independent adversarial verification; no production authority or scheduled execution.
+      Contributors cannot verify their own artifact. Existing host approval gates remain.
+
   - id: lead-engineer
     aliases: [lead, lead-engineer]
     skill_file: agents/lead_engineer/SKILL.md
