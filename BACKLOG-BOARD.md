@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-11-01T02:49:37+09:00
+generated_at: 2026-11-01T03:08:01+09:00
 task_count: 324
-open_count: 21
-completed_count: 303
-task_set_count: 6
-completed_task_set_count: 64
+open_count: 20
+completed_count: 304
+task_set_count: 5
+completed_task_set_count: 65
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `21` open or active tasks; `303` completed tasks are archived from this live board.
+- Summary: `20` open or active tasks; `304` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `16` / Ask `5` / Review `0` / Later `0` / Done `303`.
-- Task Sets: `6` active workflows; `64` completed workflows are hidden from the live action board.
+- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `304`.
+- Task Sets: `5` active workflows; `65` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -41,15 +41,6 @@ completed_task_set_count: 64
 ## Action Board
 
 - Board rule: task sets are the primary panes of work. Completed tasks and fully completed task sets are archived automatically.
-
-### Security and resilience reviewer (`TASKSET-AR-SECURITY-RESILIENCE-20261101`)
-
-- Flow: A reusable role and bounded verification evidence contract; consumer findings remain host-owned.
-- Progress: `0/1` done; `1` open or active.
-- WIP: active `0/3`; oldest `0.0h`; stale `0`.
-| Task | Initiative | Project | Unit | Status | Lane | P | Imp | Diff | Cost | Value | Score | Team | Agent | Decision | Summary |
-|---|---|---|---|---|---|---:|---|---|---|---|---:|---|---|---|---|
-| `TASK-AR-660` | INIT-AR-SECURITY-RESILIENCE-20261101 | PROJECT-AGENT-RUNTIME | agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md | active | Action | P1 | High | High | 1h/1000tok | Low | 6 | agent-runtime-core | lead-engineer | Execute next | Make independent security and stability verification dispatchable and prevent unverif… |
 
 ### Console Overhaul P0 — Trust & Hygiene (`TASKSET-AR-CONSOLE-OVERHAUL-P0`)
 
@@ -143,6 +134,7 @@ completed_task_set_count: 64
 | Project Workbreaker (`TASKSET-AR-PM-OPERATING-SYSTEM`) | Project-to-unit hierarchy, worker-ready specs, model-tier routing, WIP controls, dispatcher scope stops, and PM verification gates. | `9/9` done | `9` completed task files archived |
 | Pitch Alchemist (`TASKSET-AR-DOC-TO-PLAN`) | Document-to-plan intake pipeline, Paperclip gap adoption, actuals capture, and multi-factor evaluation/sorting. | `3/3` done | `3` completed task files archived |
 | Work Taxonomist (`TASKSET-AR-WORK-HIERARCHY-CONFLICT-CLOSURE`) | Initiative vocabulary, collision-free task registration, shared backlog deconfliction, and unit-readiness migration. | `6/6` done | `6` completed task files archived |
+| Security and resilience reviewer (`TASKSET-AR-SECURITY-RESILIENCE-20261101`) | A reusable role and bounded verification evidence contract; consumer findings remain host-owned. | `1/1` done | `1` completed task files archived |
 | Agent Identity Contract (`TASKSET-AR-AGENT-IDENTITY-CONTRACT`) | Add role/instance/display identity records, spawn provenance, and attribution gates for multi-agent work. | `1/1` done | `1` completed task files archived |
 | Work Metadata Analyst (`TASKSET-AR-WORK-METADATA-ANALYTICS`) | Conversation-to-work traceability, Work Item metadata, Explorer roll-ups, query/export, agent attribution, and stale verification evidence. | `6/6` done | `6` completed task files archived |
 | Wave Conductor (`TASKSET-AR-PARALLEL-WAVE-EXECUTION`) | Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement. | `10/10` done | `10` completed task files archived |
@@ -186,10 +178,10 @@ completed_task_set_count: 64
 - Needs attention: `36` — cost_anomalies `36` (single source: scripts/attention_inbox.py = console cockpit, TASK-AR-630).
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
-- Active: `21` open across `6` task sets (see Action Board above).
-- Throughput (7d): `0` tasks completed in the last 7 days (TASK-AR-627).
-- Archived task sets: `64` (see Archived Task Sets above).
-- Archived task files: `303` — see `ARCHIVE-INDEX.md`.
+- Active: `20` open across `5` task sets (see Action Board above).
+- Throughput (7d): `1` tasks completed in the last 7 days (TASK-AR-627).
+- Archived task sets: `65` (see Archived Task Sets above).
+- Archived task files: `304` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

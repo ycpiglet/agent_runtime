@@ -9,11 +9,11 @@ task_id: TASK-AR-660
 task_set_id: TASKSET-AR-SECURITY-RESILIENCE-20261101
 initiative_id: INIT-AR-SECURITY-RESILIENCE-20261101
 project_id: PROJECT-AGENT-RUNTIME
-status: active
+status: completed
 verification_status: passed
 owner: lead-engineer
 created_at: 2026-11-01T01:40:41+09:00
-updated_at: 2026-11-01T02:44:14+09:00
+updated_at: 2026-11-01T03:05:02+09:00
 origin_type: owner_request
 origin_ref: owner-request:2026-11-01-independent-security-resilience
 created_by: codex-security-20261101
@@ -57,8 +57,15 @@ verified_at: 2026-11-01T02:44:14+09:00
 verified_by: codex-security-20261101
 evidence_refs:
   - reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056.json
-  - reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208.json
   - reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414.json
+defect_signatures:
+compound_refs:
+review_refs:
+  - reviews/REVIEW-2026-11-01-task-ar-660-merged-closeout.md
+resolution: done
+completed_at: 2026-11-01T03:05:02+09:00
+closed_by: codex-security-20261101
+measurement_unavailable_reason: Complete cumulative host time/token/cost meter unavailable; original checkpoints and measured verification timings retained
 ---
 
 # UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure
@@ -120,6 +127,25 @@ Stop before consumer installation, permission expansion, production mutations or
 - 2026-11-01 owner request: resolve remaining work-ledger mismatch; publish, independently review and conditionally merge. Prior registration and review history retained.
 - Catalog repair: add only the registered TASKSET-AR-SECURITY-RESILIENCE-20261101 expectation; preserve exact equality.
 
-- Verification history: 02:10 receipt covers the product implementation before catalog integration. New integration receipt pending; original evidence retained.
+- Verification history: 02:10 receipt covers the original product implementation. Subsequent integration receipt024414 passed271 focused tests, host lock and governance; official unit close completed03:05:02. Original evidence retained.
 - Board Team is derived generator routing; canonical assignment and actual claim team are risk-and-safety. Generator/policy unchanged.
 - Execution: Codex agent instance codex-security-20261101. Model-routing labels are policy metadata; actual model/provider fields remain unverified, not proof of another provider execution.
+## Failed verification history
+
+- Preserved failed attempt: reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208.json. Pointer identity projection was corrected; subsequent passed integration receipt remains the acceptance evidence. Failed file and prior Git revisions retained; no result rewritten.
+
+<!-- work-close:start -->
+## Closeout
+
+- Completed at: `2026-11-01T03:05:02+09:00`
+- Resolution: `done`
+- Actual hours: `unavailable`
+- Actual tokens: `unavailable`
+- Measurement unavailable reason: Complete cumulative host time/token/cost meter unavailable; original checkpoints and measured verification timings retained
+- Closed by: `codex-security-20261101`
+- Verification evidence:
+  - `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056.json`
+  - `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414.json`
+- Reviews:
+  - `reviews/REVIEW-2026-11-01-task-ar-660-merged-closeout.md`
+<!-- work-close:end -->
