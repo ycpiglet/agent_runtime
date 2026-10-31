@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-08-04T14:28:19+09:00
-record_count: 556
+generated_at: 2026-11-01T02:49:37+09:00
+record_count: 560
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `556` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `560` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `45` records |
-| Tasksets | pass | `69` records |
-| Tasks | pass | `323` records |
-| Units | pass | `119` records |
+| Initiatives | pass | `46` records |
+| Tasksets | pass | `70` records |
+| Tasks | pass | `324` records |
+| Units | pass | `120` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -595,6 +595,10 @@ record_count: 556
 | 44.1.5.1 | Unit 44.1.5.1 | unit | `UNIT-TASK-AR-658-001` | `TASK-AR-658` | worker_ready | `agents/lead_engineer/tasks/units/TASK-AR-658/UNIT-TASK-AR-658-001.md` | UNIT-TASK-AR-658-001 - Build the secret-free Runtime health resource and console surface |
 | 44.1.6 | Task 44.1.6 | task | `TASK-AR-659` | `TASKSET-AR-V080-OPERABILITY-HARDENING` | done | `agents/lead_engineer/tasks/TASK-AR-659.md` | Let an owner-identified actor bootstrap, rotate, or terminalize a claim that no autom… |
 | 44.1.6.1 | Unit 44.1.6.1 | unit | `UNIT-TASK-AR-659-001` | `TASK-AR-659` | done | `agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md` | UNIT-TASK-AR-659-001 - Implement owner-bound legacy claim bootstrap, rotation, and terminalization RED-first |
+| 45 | Initiative 45 | initiative | `INIT-AR-SECURITY-RESILIENCE-20261101` | - | active | `agents/project/initiatives/INIT-AR-SECURITY-RESILIENCE-20261101.md` | Independent security and resilience verification |
+| 45.1 | Taskset 45.1 | taskset | `TASKSET-AR-SECURITY-RESILIENCE-20261101` | `INIT-AR-SECURITY-RESILIENCE-20261101` | active | `BACKLOG-BOARD.md` | Security and resilience reviewer |
+| 45.1.1 | Task 45.1.1 | task | `TASK-AR-660` | `TASKSET-AR-SECURITY-RESILIENCE-20261101` | active | `agents/lead_engineer/tasks/TASK-AR-660.md` | Make independent security and stability verification dispatchable and prevent unverif… |
+| 45.1.1.1 | Unit 45.1.1.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | active | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

@@ -1728,8 +1728,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-HOST-REQUIRED-MERGE-GATES",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-660",
+      "expires_at": "2026-11-02T01:40:41+09:00",
+      "fulfilled_at": "2026-11-01T01:40:41+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-660.md",
+      "fulfilled_task_id": "TASK-AR-660",
+      "fulfilled_task_uid": "a728fc61-c3f2-4ef0-afa2-792fdc984b5d",
+      "initiative_id": "INIT-AR-SECURITY-RESILIENCE-20261101",
+      "kind": "task",
+      "owner_id": "codex-security-20261101",
+      "reason": "work registration TASKSET-AR-SECURITY-RESILIENCE-20261101",
+      "reservation_group_id": "RES-20261101-014041-1766d58d",
+      "reservation_id": "RES-20261101-014041-1766d58d-01",
+      "reserved_at": "2026-11-01T01:40:41+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-07-30T09:20:00+09:00"
+  "updated_at": "2026-11-01T01:40:41+09:00"
 }

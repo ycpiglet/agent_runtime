@@ -1,0 +1,132 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20261101-014158-task-ar-660-2030",
+  "task_id": "TASK-AR-660",
+  "agent_role": "lead-engineer",
+  "team_id": "risk-and-safety",
+  "agent_instance_id": "codex-security-20261101",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-desktop",
+  "pane_id": "codex-desktop",
+  "mode": "orchestrator",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+  "active_scope": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+  "scope_transition_approved": true,
+  "project_id": "",
+  "unit_id": "UNIT-TASK-AR-660-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
+  "requested_model_tier": "worker_standard",
+  "selected_model_tier": "planner_high",
+  "model_tier": "planner_high",
+  "provider_tier": "opus",
+  "routing_status": "escalated",
+  "routing_reason": "escalated to planner_high by task/unit trigger",
+  "routing_policy_id": "task-unit-tier-policy",
+  "routing_policy_reason": "unit tier overrides task tier; registered high-risk triggers gate worker escalation",
+  "routing_high_tier_authorized": true,
+  "routing_escalation_reason": "trigger:cross_cutting,security",
+  "routing_registered_triggers": [
+    "cross_cutting",
+    "security"
+  ],
+  "routing_signals": [
+    "cross_cutting",
+    "security"
+  ],
+  "routing_unknown_triggers": [],
+  "task_token_budget": null,
+  "claim_token_budget": null,
+  "actual_model": null,
+  "actual_model_status": "unverified",
+  "wip_slot": 0,
+  "stop_condition": "Stop before consumer installation, scans against live targets, permission changes, publishing a release or merging.",
+  "phase": "handoff-ready",
+  "progress_pct": 100,
+  "step_index": 6,
+  "step_total": 6,
+  "status_text": "Local product implementation independently verified; remote integration and task-catalog alignment remain separate",
+  "worktree_path": "/Users/leo/Developer/agent_runtime-security-resilience-20261101",
+  "branch": "codex/security-resilience-20261101",
+  "claimed_at": "2026-11-01T01:41:58+09:00",
+  "last_heartbeat": "2026-11-01T02:20:29+09:00",
+  "updated_at": "2026-11-01T02:20:29+09:00",
+  "expires_at": "2026-11-01T06:20:29.446155+09:00",
+  "lease": {
+    "claimed_at": "2026-11-01T01:41:58+09:00",
+    "heartbeat_at": "2026-11-01T02:20:29+09:00",
+    "expires_at": "2026-11-01T06:20:29.446155+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20261101-014158-task-ar-660-2030.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20261101-014158-task-ar-660-2030.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [],
+  "escalation_triggers": [
+    "security",
+    "cross_cutting"
+  ],
+  "defect_signatures": [],
+  "knowledge_lookup": {
+    "status": "clear",
+    "match_count": 0
+  },
+  "knowledge_matches": [],
+  "target_files": [
+    "src/agent_runtime/security_review.py",
+    "src/agent_runtime/templates/project/agents/security_reviewer/SKILL.md",
+    "src/agent_runtime/templates/project/agents/roles.yml",
+    "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+    "src/agent_runtime/templates/project/docs/security-service.md",
+    "src/agent_runtime/templates/project/scripts/agent_worker.py",
+    "src/agent_runtime/templates/project/scripts/agent_terminal.py",
+    "tests/test_security_review.py",
+    "tests/fixtures/host/agent_runtime.lock.json"
+  ],
+  "mutation_revision": 3,
+  "scope_binding": {
+    "schema": "agent-runtime-claim-scope-binding/v1",
+    "digest": "a548b30f32588f96b773e305f3e8e4858c7bf9f74880ea526ec3e13b7c698e5e",
+    "components": {
+      "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+      "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+      "target_files": "e6d6d5223e879c690c583ac1cd3be5287fd03fe5bdf3fdaf8cb4e5c04de9e17a",
+      "stop_condition": "56c8cf6d8687c72eeec2b1f2b7d43d21ea57025a80e8aa9bd8defb6b81eac250"
+    },
+    "bound_at": "2026-11-01T01:51:16.353033+09:00"
+  },
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "last_renewal": {
+    "renewed_at": "2026-11-01T01:51:16.353033+09:00",
+    "replan_ref": "reviews/REVIEW-2026-11-01-task-ar-660-t3-security-wiring.md",
+    "old_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "a1d50086e562111648d02c18cea143b509a9063b532370d2ebd999ed066f8be5",
+      "components": {
+        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+        "target_files": "98e926825cf28bf54603c2c1f461347da1804309709a78bb735913ce70d8523f",
+        "stop_condition": "56c8cf6d8687c72eeec2b1f2b7d43d21ea57025a80e8aa9bd8defb6b81eac250"
+      },
+      "bound_at": "2026-11-01T01:41:58+09:00"
+    },
+    "new_scope_binding": {
+      "schema": "agent-runtime-claim-scope-binding/v1",
+      "digest": "a548b30f32588f96b773e305f3e8e4858c7bf9f74880ea526ec3e13b7c698e5e",
+      "components": {
+        "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+        "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+        "target_files": "e6d6d5223e879c690c583ac1cd3be5287fd03fe5bdf3fdaf8cb4e5c04de9e17a",
+        "stop_condition": "56c8cf6d8687c72eeec2b1f2b7d43d21ea57025a80e8aa9bd8defb6b81eac250"
+      },
+      "bound_at": "2026-11-01T01:51:16.353033+09:00"
+    }
+  },
+  "scope_transition_approval_ref": "owner-request:2026-11-01-independent-security-resilience",
+  "released_at": "2026-11-01T02:20:29+09:00",
+  "verified_by": "/root/runtime_independent_review",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-11-01-task-ar-660-security-reviewer.md"
+}

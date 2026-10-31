@@ -1194,3 +1194,11 @@
 - For future 5+ pane work, start panes through task-set dispatcher worktrees.
 - Record pane lifecycle events before and after shared-state-affecting work.
 - Keep `scripts/collaboration_concurrency_gate.py --check` in Owner governance gates.
+
+
+## Independent security reviewer work
+
+- Taskset: TASKSET-AR-SECURITY-RESILIENCE-20261101.
+- Task: TASK-AR-660. Current Owner request on 2026-11-01 authorizes this new scope; older tasksets and their approval boundaries remain unchanged.
+- State: in_progress; reusable role, local evidence checks and independent verification.
+- Remote publication, consumer installation and merge: not performed.

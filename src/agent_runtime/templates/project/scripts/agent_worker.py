@@ -69,6 +69,9 @@ except Exception:
     pass
 
 ROLE_ALIASES = {
+    "security": "security-reviewer",
+    "security-reviewer": "security-reviewer",
+    "resilience": "security-reviewer",
     "qa": "qa",
     "lead": "lead-engineer",
     "lead-engineer": "lead-engineer",

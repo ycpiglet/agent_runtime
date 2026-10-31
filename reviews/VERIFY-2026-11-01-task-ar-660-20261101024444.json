@@ -1,0 +1,43 @@
+{
+  "schema": "agent-runtime-work-verification/v1",
+  "id": "VERIFY-2026-11-01-task-ar-660-20261101024444",
+  "work_id": "TASK-AR-660",
+  "work_path": "agents/lead_engineer/tasks/TASK-AR-660.md",
+  "kind": "task",
+  "task_id": "TASK-AR-660",
+  "unit_id": "",
+  "status": "passed",
+  "signal": "pass",
+  "verified_at": "2026-11-01T02:44:44+09:00",
+  "verified_by": "codex-security-20261101",
+  "command_count": 3,
+  "commands": [
+    {
+      "command": "python -m pytest tests/test_security_review.py tests/test_security_service.py tests/test_inventory_sync_sanitize.py tests/test_backlog_board_tasksets.py -q",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-11-01T02:44:44+09:00",
+      "finished_at": "2026-11-01T02:45:02+09:00",
+      "stdout": "........................................................................ [ 26%]\n........................................................................ [ 53%]\n........................................................................ [ 79%]\n.......................................................                  [100%]\n271 passed in 17.81s\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/regen_host_lock_if_needed.py --check",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-11-01T02:45:02+09:00",
+      "finished_at": "2026-11-01T02:45:02+09:00",
+      "stdout": "OK: /Users/leo/Developer/agent_runtime-security-resilience-20261101/tests/fixtures/host/agent_runtime.lock.json is up to date.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/owner_governance_gate.py",
+      "status": "passed",
+      "returncode": 0,
+      "started_at": "2026-11-01T02:45:02+09:00",
+      "finished_at": "2026-11-01T02:45:10+09:00",
+      "stdout": "status=active lifecycle=keep paths=2 evidence=2 usage=25 reuse=2\n- metric capability.update_notify kind=script status=active lifecycle=keep paths=1 evidence=2 usage=4 reuse=2\n- metric capability.session_dashboard kind=script status=active lifecycle=keep paths=1 evidence=2 usage=3 reuse=1\n- metric hook.session_continuity kind=hook status=active lifecycle=keep paths=4 evidence=2 usage=27 reuse=2\n- metric skill.failure_to_regression kind=skill status=active lifecycle=keep paths=2 evidence=4 usage=45 reuse=3\n- metric skill.wave_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=7 reuse=2\n- metric skill.merge_integrator kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=16 reuse=2\n- metric skill.independent_verification kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=11 reuse=2\n- metric skill.work_analytics kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=14 reuse=2\n- metric skill.release_conductor kind=skill status=active lifecycle=keep paths=2 evidence=3 usage=5 reuse=2\n- metric skill.scm_steward kind=skill status=active lifecycle=keep paths=2 evidence=2 usage=19 reuse=2\nowner-governance: result: scripts/runtime_asset_usage.py --check -> 0\nowner-governance: start: scripts/state_sync_gate.py --check\nstate-sync-gate: pass\nroot=/Users/leo/Developer/agent_runtime-security-resilience-20261101\nfindings=0\nblock=0\nwatch=0\nowner-governance: result: scripts/state_sync_gate.py --check -> 0\nowner-governance: start: scripts/automation_rules_gate.py --check\nautomation-rules-gate: pass\nroot=/Users/leo/Developer/agent_runtime-security-resilience-20261101\nrules_total=0\nrules_active=0\nrules_executed=0\nrules_invalid=0\nactions=0\nfindings=0\nowner-governance: result: scripts/automation_rules_gate.py --check -> 0\nowner-governance: start: scripts/scheduled_dispatch_gate.py --check\nscheduled-dispatch-gate: pass\nroot=/Users/leo/Developer/agent_runtime-security-resilience-20261101\nschedules_total=0\nschedules_active=0\nschedules_invalid=0\ndue=0\ndispatches=0\nreminders=0\nfindings=0\nowner-governance: result: scripts/scheduled_dispatch_gate.py --check -> 0\nowner-governance: start: scripts/release_cadence_trigger.py --check\nrelease-cadence: watch finding=release-cadence:proposal recommended_bump=minor recommended_version=0.8.0\nrelease-cadence: baseline tag=v0.7.0 commits=628 feat=21 fix=126 breaking=0 days=100 (thresholds commits>=40 feat>=5 days>=14)\nrelease-cadence: trigger reasons: commits>=40 (actual 628); feat>=5 (actual 21); days>=14 (actual 100)\nrelease-cadence: minor bump reasons: template-deleted-or-renamed:src/agent_runtime/templates/project/scripts/allimbot_stop_hook.cmd; schema-changed:schemas/task-unit.schema.json\nrelease-cadence: current version=0.7.0 source=pyproject.toml\nrelease-cadence: bump targets: pyproject.toml\nrelease-cadence: non-blocking watch; no version bump, tag, push, publish, or release execution\nowner-governance: result: scripts/release_cadence_trigger.py --check -> 0\nowner-governance: start: scripts/conversation_work_audit.py --check\nconversation-work-audit: pass\nroot=/Users/leo/Developer/agent_runtime-security-resilience-20261101\nplanning_records=39\nfindings=0 block=0 watch=0\nowner-governance: result: scripts/conversation_work_audit.py --check -> 0\nowner-governance: start: scripts/knowledge_lint_gate.py --check\nknowledge-lint-gate: pass (enforced; changed=18>=10; no block findings)\nowner-governance: result: scripts/knowledge_lint_gate.py --check -> 0\nowner-governance: start: scripts/planning_loop.py gate --trigger hook --action scan\nstatus=pass\nowner-governance: result: scripts/planning_loop.py gate --trigger hook --action scan -> 0\nowner-governance: start: scripts/compound_cadence_gate.py --obligation\ncompound-cadence-gate: pass\nroot=/Users/leo/Developer/agent_runtime-security-resilience-20261101\nreviews=471\ncompounds=37\nretros=14\ncompound_retro_total=51\nratio=9.2\nthreshold=20\nwatch=0\nowner-governance: result: scripts/compound_cadence_gate.py --obligation -> 0\n",
+      "stderr": ""
+    }
+  ]
+}

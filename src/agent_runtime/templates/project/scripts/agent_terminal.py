@@ -38,6 +38,9 @@ AGENT_OBSERVER = REPO_ROOT / "scripts" / "agent_observer.py"
 CONTEXTS_DIR = REPO_ROOT / "agents" / "runtime" / "contexts"
 
 ROLE_ALIASES = {
+    "security": "security-reviewer",
+    "security-reviewer": "security-reviewer",
+    "resilience": "security-reviewer",
     "qa": "qa",
     "lead": "lead-engineer",
     "lead-engineer": "lead-engineer",

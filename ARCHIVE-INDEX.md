@@ -2,7 +2,7 @@
 type: archive_index
 id: ARCHIVE-INDEX-agent-runtime
 audience: owner
-generated_at: 2026-08-04
+generated_at: 2026-11-01
 archived_count: 303
 ---
 
