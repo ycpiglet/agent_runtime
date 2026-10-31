@@ -1735,3 +1735,11 @@ Decision
 
 - The v0.7.0 release and intake taskset are complete. W5 closeout branch integration and local worktree/branch removal remain the final mechanical cleanup before the next W0 session.
 - Do not move or delete the published tag. If a release defect is discovered, publish a warning and forward-fix as v0.7.1; immutable v0.6.0 remains the prior known release.
+
+
+## Independent security reviewer work
+
+- Taskset: TASKSET-AR-SECURITY-RESILIENCE-20261101.
+- Task: TASK-AR-660. Current Owner request on 2026-11-01 authorizes this new scope; older tasksets and their approval boundaries remain unchanged.
+- State: in_progress; reusable role, local evidence checks and independent verification.
+- Remote publication, consumer installation and merge: not performed.

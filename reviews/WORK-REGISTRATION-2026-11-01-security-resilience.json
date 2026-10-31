@@ -1,0 +1,90 @@
+{
+  "schema_version": "agent-runtime-work-registration/v1",
+  "origin_type": "owner_request",
+  "origin_ref": "owner-request:2026-11-01-independent-security-resilience",
+  "created_by": "codex-security-20261101",
+  "project_id": "PROJECT-AGENT-RUNTIME",
+  "initiative": {
+    "id": "INIT-AR-SECURITY-RESILIENCE-20261101",
+    "title": "Independent security and resilience verification",
+    "summary": "Adversarial verification with evidence-backed fixes, independent retests and durable regressions.",
+    "owner": "lead-engineer",
+    "status": "active"
+  },
+  "taskset": {
+    "id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+    "display_name": "Security and resilience reviewer",
+    "summary": "A reusable role and bounded verification evidence contract; consumer findings remain host-owned.",
+    "owner": "lead-engineer",
+    "status": "active",
+    "order": 501,
+    "planner_model_tier": "planner_high",
+    "worker_model_tier": "worker_standard",
+    "reviewer_model_tier": "reviewer_standard"
+  },
+  "tasks": [
+    {
+      "title": "Add independent security and resilience reviewer with evidence closure",
+      "goal": "Make independent security and stability verification dispatchable and prevent unverified closure.",
+      "summary": "Owner requests a reusable independent adversarial role covering authorization bypass, request replay and failure recovery; retain existing lifecycle and security-service boundaries.",
+      "scope": "Add a dispatchable security-reviewer role and a read-only evidence validator. Require exact source revision, independent reviewer, all three test families, and reproduction/fix/retest/regression links. Do not run scans, change host policies, install into consumers, send notifications or merge.",
+      "priority": "P1",
+      "difficulty": "L",
+      "owner": "lead-engineer",
+      "team": "risk-and-safety",
+      "verification": [
+        "python -m pytest tests/test_security_review.py tests/test_security_service.py tests/test_inventory_sync_sanitize.py -q",
+        "python scripts/regen_host_lock_if_needed.py --check",
+        "python scripts/owner_governance_gate.py"
+      ],
+      "units": [
+        {
+          "title": "Add independent security and resilience reviewer with evidence closure",
+          "context": "Owner requests a reusable independent adversarial role covering authorization bypass, request replay and failure recovery; retain existing lifecycle and security-service boundaries.",
+          "inputs": [
+            "AGENTS.md",
+            "src/agent_runtime/templates/project/agents/roles.yml",
+            "src/agent_runtime/templates/project/docs/security-service.md"
+          ],
+          "target_files": [
+            "new:src/agent_runtime/security_review.py",
+            "new:src/agent_runtime/templates/project/agents/security_reviewer/SKILL.md",
+            "src/agent_runtime/templates/project/agents/roles.yml",
+            "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+            "src/agent_runtime/templates/project/docs/security-service.md",
+            "new:tests/test_security_review.py",
+            "tests/fixtures/host/agent_runtime.lock.json",
+            "src/agent_runtime/templates/project/scripts/agent_worker.py",
+            "src/agent_runtime/templates/project/scripts/agent_terminal.py"
+          ],
+          "scope": "Add a dispatchable security-reviewer role and a read-only evidence validator. Require exact source revision, independent reviewer, all three test families, and reproduction/fix/retest/regression links. Do not run scans, change host policies, install into consumers, send notifications or merge.",
+          "steps": [
+            "Add the managed role skill and orchestrator alias.",
+            "Implement bounded read-only report validation with unknown and failure states.",
+            "Test evidence independence, missing coverage, fixed-finding closure, source binding and unsafe paths; verify generated-host inclusion."
+          ],
+          "acceptance": [
+            "The generated host resolves security-reviewer and security/resilience aliases to the managed skill.",
+            "The validator blocks self-review and incomplete finding closure; absent coverage remains unknown.",
+            "The validator never executes a command or accesses a network target; evidence references remain within the declared evidence directory."
+          ],
+          "verification": [
+            "python -m pytest tests/test_security_review.py tests/test_security_service.py tests/test_inventory_sync_sanitize.py -q",
+            "python scripts/regen_host_lock_if_needed.py --check",
+            "python scripts/owner_governance_gate.py"
+          ],
+          "handoff": "Return changed files, exact source version, test evidence, limitations, independent review and recovery instructions.",
+          "stop_condition": "Stop before consumer installation, scans against live targets, permission changes, publishing a release or merging.",
+          "escalation_triggers": [
+            "security",
+            "cross_cutting"
+          ],
+          "model_tier": "worker_standard",
+          "risk_tier": "high",
+          "security_sensitive": true,
+          "approval_required": false
+        }
+      ]
+    }
+  ]
+}

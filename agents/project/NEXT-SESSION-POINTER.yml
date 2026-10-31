@@ -1,28 +1,29 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-08-04T14:18:00+09:00
-updated_by: le-20260804-121045-kst-0427
+updated_at: 2026-11-01T02:36:00.938686+09:00
+updated_by: codex-security-20261101
 current_state:
-  summary: "TASK-AR-655 and TASK-AR-659 are both done and released. Long-running claims are now truthful across every consumer, and a claim no automated path can reach has registered owner-bound exits."
-  status: unclaimed
+  summary: "TASK-AR-660 integration authorized on 2026-11-01; exact catalog expectation aligned; full regression and independent PR review in progress."
+  status: review
   task_set_status: active
-  task_set_id: "TASKSET-AR-V080-OPERABILITY-HARDENING"
-  step_index: 12
-  step_total: 12
-  progress_pct: 100
-  status_text: "AR-655 closed after an 11-round independent W4b. TASK-AR-656 and TASK-AR-657 remain planned in this task set."
+  task_set_id: "TASKSET-AR-SECURITY-RESILIENCE-20261101"
+  step_index: 5
+  step_total: 6
+  progress_pct: 90
+  status_text: "Integration claim independently released; exact PR CI/merge and postmerge work-close pending."
 active_work:
   current_agents: []
   current_teams:
-    - agent-runtime-core
+    - risk-and-safety
 resume:
-  active_task: TASK-AR-656
-  active_task_set: TASKSET-AR-V080-OPERABILITY-HARDENING
+  active_task: TASK-AR-660
+  active_task_set: TASKSET-AR-SECURITY-RESILIENCE-20261101
   branch_policy: "AR-655 and AR-659 are closed. Claim the next task in its own worktree; keep consumer primaries and release surfaces read-only."
   next_actions:
+    - "Finish TASK-AR-660 complete-suite verification, public-data audit, independent PR review, conditional merge and closeout under the 2026-11-01 owner authorization."
     - "Claim TASK-AR-656 (composable lifecycle hooks) or TASK-AR-657; the task set is free."
-    - "Create every claim mode=worker. An orchestrator-mode claim is skipped by claim_reaper unconditionally and needs owner-bound terminalize to clear."
-    - "TASK-AR-648 owns the umask defect in claim_guard.py: chmod 0600 precedes a git add that rewrites the index as 0666 & ~umask, so parallel_worktree_gate never recognises the claim-commit transaction. tests/test_claim_guard.py 21-red is that defect, not a permanent baseline."
-    - "Keep TASK-AR-654, TASK-AR-651, Scribe, version, tag, package, push, publish, deploy, and release actions blocked."
+    - "Default implementation claims use worker mode. TASK-AR-660 integration uses the existing orchestrator claim for work-ledger/merge coordination; it is not reaped automatically and must be explicitly independently released before cleanup."
+    - "Historical TASK-AR-648 note reported 21 claim-guard failures. Current source e5cd5142 verification on 2026-11-01: tests/test_claim_guard.py 36/36 pass; do not treat the historical red count as a current baseline."
+    - "Keep TASK-AR-654, TASK-AR-651 and Scribe restrictions; version/tag/package/deploy/release remain outside TASK-AR-660. Only TASK-AR-660 branch push, PR publication and merge after checks plus independent approval are owner-authorized on 2026-11-01."
 roles:
   owner: "Human owner approves irreversible external actions, remote publish, PR/tag pushes, and provider-live evidence claims."
   lead_engineer: "Select the next taskset from BACKLOG-BOARD.md; keep PM, Vision, Ops, and RSI closed unless a new canonical task is added."

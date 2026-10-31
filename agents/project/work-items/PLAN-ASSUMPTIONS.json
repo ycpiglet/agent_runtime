@@ -859,6 +859,29 @@
       "anchors": [
         {
           "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "28c99d820d6f1426c0ff2b8d07dc3cb1f0d3d0dc544999f57e0bb7f4c8a64699"
+        },
+        {
+          "kind": "sha256",
+          "path": "tests/test_backlog_board_tasksets.py",
+          "value": "66b1371b125b95e39f670075ab9eb2d098341d040cf1fd46e8da1f4b5eb64050"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-11-01-task-ar-660-t3-integration.md",
+      "recorded_at": "2026-11-01T02:32:12+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
           "path": "reviews/REVIEW-2026-07-23-self-eval-query-integrity-plan.md",
           "value": "2168da6b9d696492871e2847cfd4b832952b375bbac6490372731f30c0581c2c"
         },
@@ -1795,5 +1818,5 @@
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-08-04T14:28:45+09:00"
+  "updated_at": "2026-11-01T02:32:12+09:00"
 }

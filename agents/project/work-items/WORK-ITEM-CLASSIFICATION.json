@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-08-04T14:28:19+09:00",
-  "record_count": 556,
+  "generated_at": "2026-11-01T02:49:37+09:00",
+  "record_count": 560,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -6120,6 +6120,50 @@
       "path": "agents/lead_engineer/tasks/units/TASK-AR-659/UNIT-TASK-AR-659-001.md",
       "parent_id": "TASK-AR-659",
       "status": "done"
+    },
+    {
+      "key": "initiative:INIT-AR-SECURITY-RESILIENCE-20261101",
+      "level": "initiative",
+      "number": "45",
+      "label": "Initiative 45",
+      "id": "INIT-AR-SECURITY-RESILIENCE-20261101",
+      "title": "Independent security and resilience verification",
+      "path": "agents/project/initiatives/INIT-AR-SECURITY-RESILIENCE-20261101.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-AR-SECURITY-RESILIENCE-20261101",
+      "level": "taskset",
+      "number": "45.1",
+      "label": "Taskset 45.1",
+      "id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+      "title": "Security and resilience reviewer",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-AR-SECURITY-RESILIENCE-20261101",
+      "status": "active"
+    },
+    {
+      "key": "task:TASK-AR-660",
+      "level": "task",
+      "number": "45.1.1",
+      "label": "Task 45.1.1",
+      "id": "TASK-AR-660",
+      "title": "Make independent security and stability verification dispatchable and prevent unverif…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-660.md",
+      "parent_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+      "status": "active"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-660-001",
+      "level": "unit",
+      "number": "45.1.1.1",
+      "label": "Unit 45.1.1.1",
+      "id": "UNIT-TASK-AR-660-001",
+      "title": "UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
+      "parent_id": "TASK-AR-660",
+      "status": "active"
     }
   ]
 }

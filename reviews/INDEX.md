@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-08-04T14:28:19+09:00
-record_count: 1359
+generated_at: 2026-11-01T02:49:37+09:00
+record_count: 1370
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1359` review and evidence records under `reviews/`.
+- Summary: indexed `1370` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1359` files |
+| Reviews covered | pass | `1370` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -726,6 +726,10 @@ record_count: 1359
 | `reviews/REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan.md` | `REVIEW-2026-08-03-task-ar-659-legacy-claim-bootstrap-t3-replan` | md | accepted | pass | TASK-AR-659 legacy claim bootstrap dispatch T3 replan |
 | `reviews/REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment.md` | `REVIEW-2026-08-03-task-ar-659-w4b-consumer-wiring-scope-amendment` | md | accepted | pass | TASK-AR-659 W4b consumer wiring scope amendment |
 | `reviews/REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation.md` | `REVIEW-2026-08-03-taskset-ar-v080-post-ar654-plan-revalidation` | md | accepted | pass | v0.8 operability hardening post-AR-654 plan revalidation |
+| `reviews/REVIEW-2026-11-01-task-ar-660-integration.md` | `REVIEW-2026-11-01-task-ar-660-integration` | md | review | pass | Security reviewer catalog integration verification |
+| `reviews/REVIEW-2026-11-01-task-ar-660-t3-integration.md` | `REVIEW-2026-11-01-task-ar-660-t3-integration` | md | accepted | pass | Security reviewer integration replan |
+| `reviews/REVIEW-2026-11-01-task-ar-660-t3-security-wiring.md` | `REVIEW-2026-11-01-task-ar-660-t3-security-wiring` | md | accepted | pass | Security reviewer wiring and evidence replan |
+| `reviews/REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration.md` | `REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration` | md | record | pass | Security and resilience reviewer Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -1109,6 +1113,11 @@ record_count: 1359
 | `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803153038 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803155106 |
 | `reviews/VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906.json` | `VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906` | json | record | n/a | VERIFY-2026-08-03-unit-task-ar-659-001-20260803160906 |
+| `reviews/VERIFY-2026-11-01-task-ar-660-20261101024237.json` | `VERIFY-2026-11-01-task-ar-660-20261101024237` | json | record | n/a | VERIFY-2026-11-01-task-ar-660-20261101024237 |
+| `reviews/VERIFY-2026-11-01-task-ar-660-20261101024444.json` | `VERIFY-2026-11-01-task-ar-660-20261101024444` | json | record | n/a | VERIFY-2026-11-01-task-ar-660-20261101024444 |
+| `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056 |
+| `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208 |
+| `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |
@@ -1390,9 +1399,11 @@ record_count: 1359
 | `reviews/W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final.md` | `W4B-2026-08-03-unit-task-ar-655-001-type-strict-pointer-final` | md | blocked | block | TASK-AR-655 type-strict pointer final independent W4b |
 | `reviews/W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final.md` | `W4B-2026-08-03-unit-task-ar-659-001-recovery-commands-final` | md | accepted | pass | TASK-AR-659 owner-bound recovery commands final independent W4b |
 | `reviews/W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final.md` | `W4B-2026-08-04-unit-task-ar-655-001-lease-truthfulness-final` | md | accepted | pass | TASK-AR-655 lease truthfulness final independent W4b |
+| `reviews/W4B-2026-11-01-task-ar-660-security-reviewer.md` | `W4B-2026-11-01-task-ar-660-security-reviewer` | md | approved | n/a | Independent security reviewer verification |
 | `reviews/WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability.json` | `WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability` | json | record | n/a | WORK-REGISTRATION-2026-07-19-role-routing-closeout-reliability |
 | `reviews/WORK-REGISTRATION-2026-07-19-upstream-intake.json` | `WORK-REGISTRATION-2026-07-19-upstream-intake` | json | record | n/a | WORK-REGISTRATION-2026-07-19-upstream-intake |
 | `reviews/WORK-REGISTRATION-2026-07-23-work-cli-integrity.json` | `WORK-REGISTRATION-2026-07-23-work-cli-integrity` | json | record | n/a | WORK-REGISTRATION-2026-07-23-work-cli-integrity |
+| `reviews/WORK-REGISTRATION-2026-11-01-security-resilience.json` | `WORK-REGISTRATION-2026-11-01-security-resilience` | json | record | n/a | WORK-REGISTRATION-2026-11-01-security-resilience |
 
 ## Risks / Blockers
 - Risk: this index proves coverage, not semantic correctness of each evidence file.

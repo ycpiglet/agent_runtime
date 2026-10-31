@@ -453,6 +453,7 @@ def test_real_backlog_tasks_are_classified_into_registered_task_sets() -> None:
         "TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY",
         "TASKSET-AR-CONSOLE-OVERHAUL-P0",
         "TASKSET-AR-CONSOLE-OVERHAUL-P1",
+        "TASKSET-AR-SECURITY-RESILIENCE-20261101",
     }
 
 

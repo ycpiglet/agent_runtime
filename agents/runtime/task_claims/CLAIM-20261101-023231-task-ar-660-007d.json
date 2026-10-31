@@ -1,0 +1,106 @@
+{
+  "schema": "agent-runtime-task-claim/v1",
+  "claim_id": "CLAIM-20261101-023231-task-ar-660-007d",
+  "task_id": "TASK-AR-660",
+  "agent_role": "lead-engineer",
+  "team_id": "risk-and-safety",
+  "agent_instance_id": "codex-security-20261101",
+  "display_name": "lead_engineer@orchestrator-01",
+  "callsite_id": "codex-desktop",
+  "pane_id": "codex-desktop",
+  "mode": "orchestrator",
+  "status": "released",
+  "task_set_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+  "active_scope": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
+  "scope_transition_approved": true,
+  "project_id": "",
+  "unit_id": "UNIT-TASK-AR-660-001",
+  "unit_spec": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
+  "requested_model_tier": "worker_standard",
+  "selected_model_tier": "planner_high",
+  "model_tier": "planner_high",
+  "provider_tier": "opus",
+  "routing_status": "escalated",
+  "routing_reason": "escalated to planner_high by task/unit trigger",
+  "routing_policy_id": "task-unit-tier-policy",
+  "routing_policy_reason": "unit tier overrides task tier; registered high-risk triggers gate worker escalation",
+  "routing_high_tier_authorized": true,
+  "routing_escalation_reason": "trigger:cross_cutting,security",
+  "routing_registered_triggers": [
+    "cross_cutting",
+    "security"
+  ],
+  "routing_signals": [
+    "cross_cutting",
+    "security"
+  ],
+  "routing_unknown_triggers": [],
+  "task_token_budget": null,
+  "claim_token_budget": null,
+  "actual_model": null,
+  "actual_model_status": "unverified",
+  "wip_slot": 0,
+  "stop_condition": "Stop before consumer installation, permission expansion, production mutations or release publication. Pull-request publication and conditional merge are owner-authorized on 2026-11-01.",
+  "phase": "verification",
+  "progress_pct": 80,
+  "step_index": 4,
+  "step_total": 6,
+  "status_text": "Exact catalog repaired; complete regression and independent integration review running",
+  "worktree_path": "/Users/leo/Developer/agent_runtime-security-resilience-20261101",
+  "branch": "codex/security-resilience-20261101",
+  "claimed_at": "2026-11-01T02:32:31+09:00",
+  "last_heartbeat": "2026-11-01T02:49:36+09:00",
+  "updated_at": "2026-11-01T02:49:36+09:00",
+  "expires_at": "2026-11-01T06:36:00.938686+09:00",
+  "lease": {
+    "claimed_at": "2026-11-01T02:32:31+09:00",
+    "heartbeat_at": "2026-11-01T02:49:36+09:00",
+    "expires_at": "2026-11-01T06:36:00.938686+09:00"
+  },
+  "handoff_path": "agents/runtime/task_claims/CLAIM-20261101-023231-task-ar-660-007d.handoff.md",
+  "log_path": "agents/runtime/task_claims/CLAIM-20261101-023231-task-ar-660-007d.log.md",
+  "allow_parallel_task_set": false,
+  "tags": [],
+  "escalation_triggers": [
+    "security",
+    "cross_cutting"
+  ],
+  "defect_signatures": [],
+  "knowledge_lookup": {
+    "status": "clear",
+    "match_count": 0
+  },
+  "knowledge_matches": [],
+  "target_files": [
+    "src/agent_runtime/security_review.py",
+    "src/agent_runtime/templates/project/agents/security_reviewer/SKILL.md",
+    "src/agent_runtime/templates/project/agents/roles.yml",
+    "src/agent_runtime/templates/project/scripts/agent_orchestrator.py",
+    "src/agent_runtime/templates/project/docs/security-service.md",
+    "src/agent_runtime/templates/project/scripts/agent_worker.py",
+    "src/agent_runtime/templates/project/scripts/agent_terminal.py",
+    "tests/test_security_review.py",
+    "tests/fixtures/host/agent_runtime.lock.json",
+    "tests/test_backlog_board_tasksets.py"
+  ],
+  "mutation_revision": 1,
+  "scope_binding": {
+    "schema": "agent-runtime-claim-scope-binding/v1",
+    "digest": "c9415339095cd43a03d7a3af39d83eaeeaeb793be850ea452a862a957dd415d6",
+    "components": {
+      "task": "66623fc8563fcbc6e71b00f4b71f52ff1dcda2ba8dbba7fa2e851f1d05fd9449",
+      "unit": "215cd5e6f9a394e7e403a2207530d1657a935d3fd531555d43b3e7be6781ff21",
+      "target_files": "1c63035560abbb50a7d50fb36571f2eec88a28a812a44f9f83a5197c6f40f435",
+      "stop_condition": "ce70f212bee917fc49b1bc962fb0b51e6b82a50e1966755d0ee564d131f237b9"
+    },
+    "bound_at": "2026-11-01T02:32:31+09:00"
+  },
+  "persistence": {
+    "mode": "working_tree",
+    "scm_commit_authorized": false
+  },
+  "released_at": "2026-11-01T02:49:36+09:00",
+  "verified_by": "/root/runtime_independent_review",
+  "verifier_role": "independent-auditor",
+  "verification_evidence": "reviews/W4B-2026-11-01-task-ar-660-security-reviewer.md"
+}
