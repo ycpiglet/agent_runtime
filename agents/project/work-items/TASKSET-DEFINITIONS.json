@@ -143,6 +143,15 @@
       "order": 605
     },
     {
+      "task_set_id": "TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "display_name": "Owner report clarity",
+      "summary": "Compact report layout, validation and reusable host guidance.",
+      "order": 610,
+      "tasks": [
+        "TASK-AR-661"
+      ]
+    },
+    {
       "task_set_id": "TASKSET-AR-SELF-IMPROVEMENT-CADENCE",
       "display_name": "Self Improvement Cadence",
       "summary": "Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals.",

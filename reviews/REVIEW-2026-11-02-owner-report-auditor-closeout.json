@@ -1,0 +1,88 @@
+{
+  "schema": "independent-closeout-review/v1",
+  "task_id": "TASK-AR-661",
+  "unit_id": "UNIT-TASK-AR-661-001",
+  "claim_id": "CLAIM-REVIEW-TASK-AR-661-independent-auditor-closeout",
+  "reviewed_at": "2026-11-02T02:44:23.957471+00:00",
+  "reviewer": "/root/hub_adversarial_review",
+  "reviewer_role": "independent-auditor",
+  "result": "APPROVE",
+  "product_source_contributions": 0,
+  "implementation_contributors": [
+    "/root/compact_report_implementation",
+    "/root"
+  ],
+  "preserved_aliases": {
+    "codex-owner-report-planner": "/root",
+    "codex-owner-report-worker-20261102": "/root/compact_report_implementation"
+  },
+  "prior_independent_reviewer": "/root/runtime_independent_review",
+  "base_head": "cef790f3b1b71e4e1803565667aef2fa820515c9",
+  "reviewed_state": "Frozen working/staged product11 plus pre-auditor-release closeout metadata; final commit/CI pending.",
+  "checks": [
+    "Frozen product11 matches prior W4b receipt and staged/working bytes; manifest exact.",
+    "Registered-taskset fixture adds one expected taskset string only; existing equality/classification assertions retained.",
+    "Task/unit verification and closure keep original actors; explicit provenance resolves actual implementation/planning/review instances without inventing independent agents.",
+    "Original worker claim released by distinct actual W4b reviewer with public evidence ref.",
+    "Pointer shows review95 and exactly the active additive auditor claim/identity; implementation taskset completion remains separate from review/integration.",
+    "Generated ledger/archive/classification retain completed task identity; original committed A2A/pane event prefixes preserved.",
+    "Existing independent190 runtime/9 preview/20 backlog evidence reused; no large suite rerun or product edits.",
+    "Public generic scope only; no private company records, provider credentials or new external authority added."
+  ],
+  "resolved_metadata_findings": [
+    "Actor provenance ambiguity clarified with original aliases preserved.",
+    "Active-auditor claim and pointer visibility reconciled."
+  ],
+  "unresolved_findings": 0,
+  "product_file_sha256": {
+    "AGENTS.md": "e10792043bdcc487c8f35b8b29f7d72282426c3f95af37c1ff40e5317a237dbc",
+    "scripts/owner_doc_format_gate.py": "5dfafab7af006ac27820b3bfb47ae9b4e40d45d1d8b7d2b8b43f312b81507d79",
+    "src/agent_runtime/owner_brief.py": "df6659ffbbda2ea287895ee966b8b77938a54778d25c50b018ce74fc3094c6b3",
+    "src/agent_runtime/templates/project/AGENTS.md": "2a553bbf6f7be5e9b3454d7752a6a549570414592a9522c32db81f0a9a686d97",
+    "src/agent_runtime/templates/project/agents/lead_engineer/REPORTING-FORMAT.md": "835b80facfd661c6bf7ae9d521cc6d41f80536d409ed070549a96bd4f27ca15a",
+    "src/agent_runtime/templates/project/agents/lead_engineer/reports/README.md": "867cb195c050483ab132c7d74c29340123afe572cd4afeb0c54ff23984ece56a",
+    "src/agent_runtime/templates/project/scripts/check_agent_docs.py": "df2a93e0fc903274a9a9a78e75bc0b5268ab75532638a49020fda9b1e782f219",
+    "src/agent_runtime/templates/project/scripts/owner_doc_format_gate.py": "5dfafab7af006ac27820b3bfb47ae9b4e40d45d1d8b7d2b8b43f312b81507d79",
+    "src/agent_runtime/templates/project/scripts/save_report.py": "4b2bb2d248cf5b5a2bdf78c4a6c6d5d5110072f7e7a840affaec7d48690fd813",
+    "tests/test_owner_brief.py": "fd39a33c0b22d1029f49bad958701c85ab2cd85c60fabbaeb81e31a093b5a7d0",
+    "tests/test_owner_doc_format_gate.py": "ff54f5192cfe1ec04172ab6b1684cbc1e18547533fff15675e9e27edff5cc305"
+  },
+  "product_manifest_sha256": "87781a84a8c8eb01507c7f324de4246bf8b2c297c8f58be25613eb897e5d605c",
+  "manifest_algorithm": "sha256 of sorted path + space + hex sha256 + LF rows",
+  "fixture_file_sha256": {
+    "tests/test_backlog_board_tasksets.py": "0cc9c6ee334ad0dd0335810061030c6e31e90a0ae9267bd6bfc39fdbfe6f45f5"
+  },
+  "metadata_file_sha256": {
+    "reviews/EXECUTION-PROVENANCE-TASK-AR-661.json": "28f3490f9470d6c2273666dcc35e615288f91d3e77371d36424e901350bdca22",
+    "reviews/REVIEW-2026-11-02-owner-report-clarity.json": "e69d2881867762a2b6f84f72334ce5bf567fd25eb69b6e271939ec706e8d8259",
+    "agents/project/NEXT-SESSION-POINTER.yml": "56d5aa6066e733aef7d9f7be5ca807e7078f5ba8a8732478d68da517ab117080",
+    "agents/runtime/task_claims/CLAIM-20261102-103438-task-ar-661-f587.json": "da7c64e8ce340aa6912b0492c4d40bfb77feffbc4bc7e4093d0e938acb0a3567",
+    "agents/runtime/task_claims/CLAIM-REVIEW-TASK-AR-661-independent-auditor-closeout.json": "f4d9c25285360117b6983a3257d521d68ef1897b60489d34e7913e45b1ff1b4d",
+    "agents/lead_engineer/tasks/TASK-AR-661.md": "981bc2fa43cef63d005f4dbb9bf11c2a06de820825bf2180517aa709c9c0a064",
+    "agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md": "6ebfef19ed16d685dd1ff91a51a85fa54961f463a542432e3ad311b193416fee",
+    "reviews/VERIFY-2026-11-02-task-ar-661-20261102113307.json": "388407dac28f985cd95c1553105b91c951a0dd92fafc6f93d224189d4a220bfe",
+    "reviews/VERIFY-2026-11-02-unit-task-ar-661-001-20261102113112.json": "8899cec130278babfeb797eb649bc89758e455acf01e67ae6dadd523e1f96db7",
+    "agents/project/work-items/TASKSET-DEFINITIONS.json": "4d72839932127205f738cd755afef1e10aa44cfa2ba89d7abd4865bfae722d35",
+    "agents/project/work-items/WORK-ITEM-CLASSIFICATION.json": "be51fd850c02872156a05a403f7ec9695ecbce59bb3ea896c33ae63a98757f86",
+    "BACKLOG.md": "f998f3201aeaef069f5cea0e0e2d56c2172e72816658f71a7513cb422d15c6f9",
+    "STATUS.md": "33a0d68e26e75c42689e3410e767fcd576b1de8ab899138484693a4062228e0a",
+    "BACKLOG-BOARD.md": "fdb833ca34a3ca612ad78b41e42112da5bdef327970e2bbacb2c0712a476db3a",
+    "ARCHIVE-INDEX.md": "d43939cc4af404611dc595ed4282002e3d73555532042bfbe49389e5c24c212e",
+    "agents/runtime/a2a/messages.jsonl": "6e6ebf8b1a118f1c3f7a2a9af5d8446b435e8335613cd014d9582b95202ceba5",
+    "agents/runtime/pane_events/pane-events.jsonl": "8fd591ec0d459fdbcfda2fe24575bd7700114ea7c3cea1190c7df90e1d3fcc4f"
+  },
+  "limits": [
+    "Formatting does not authenticate caller facts, approvals or score sources.",
+    "Interrupted broad suite is partial491pass/4skip per execution provenance, not full-suite PASS.",
+    "Preview visual browser acceptance, consumer installation, package release, external delivery and final integration/CI are not verified by this receipt.",
+    "Metadata hashes describe the frozen pre-release snapshot; supported auditor release and serial generated-ledger updates require final validation."
+  ],
+  "next_step": "A distinct actual reviewer verifies this receipt and releases the auditor claim through the supported workflow; this auditor does not release its own review claim.",
+  "guardrails": {
+    "product_edits": 0,
+    "claim_releases": 0,
+    "new_network_calls": 0,
+    "new_model_calls": 0,
+    "external_sends": 0
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-11-01T03:08:01+09:00",
-  "record_count": 560,
+  "generated_at": "2026-11-02T11:47:50+09:00",
+  "record_count": 564,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -6163,6 +6163,50 @@
       "title": "UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure",
       "path": "agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md",
       "parent_id": "TASK-AR-660",
+      "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-OWNER-REPORT-CLARITY-20261102",
+      "level": "initiative",
+      "number": "46",
+      "label": "Initiative 46",
+      "id": "INIT-OWNER-REPORT-CLARITY-20261102",
+      "title": "Owner report clarity",
+      "path": "agents/project/initiatives/INIT-OWNER-REPORT-CLARITY-20261102.md",
+      "parent_id": "",
+      "status": "active"
+    },
+    {
+      "key": "taskset:TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "level": "taskset",
+      "number": "46.1",
+      "label": "Taskset 46.1",
+      "id": "TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "title": "Owner report clarity",
+      "path": "BACKLOG-BOARD.md",
+      "parent_id": "INIT-OWNER-REPORT-CLARITY-20261102",
+      "status": "complete"
+    },
+    {
+      "key": "task:TASK-AR-661",
+      "level": "task",
+      "number": "46.1.1",
+      "label": "Task 46.1.1",
+      "id": "TASK-AR-661",
+      "title": "Owners need concise reports with a one-line outcome, at most three state highlights,…",
+      "path": "agents/lead_engineer/tasks/TASK-AR-661.md",
+      "parent_id": "TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "status": "completed"
+    },
+    {
+      "key": "unit:UNIT-TASK-AR-661-001",
+      "level": "unit",
+      "number": "46.1.1.1",
+      "label": "Unit 46.1.1.1",
+      "id": "UNIT-TASK-AR-661-001",
+      "title": "UNIT-TASK-AR-661-001 - Compact owner report generation and validation",
+      "path": "agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md",
+      "parent_id": "TASK-AR-661",
       "status": "completed"
     }
   ]

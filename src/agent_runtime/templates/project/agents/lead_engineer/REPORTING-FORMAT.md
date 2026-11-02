@@ -7,6 +7,32 @@ Owner: Lead Engineer
 
 ---
 
+## 새 Owner 작업 보고 기본값: compact-v1
+
+새 독립 Owner/CEO 작업 보고는 `report_layout: compact-v1`을 기본으로 쓴다.
+이 프로필에서는 아래 과거 형식의 `Bottom Line:`, 6개 필수 절, 표,
+Insight/Decision, 항목별 평가 4요소와 필수 점수 규칙을 적용하지 않는다.
+기존 보고·백로그·기획 원본과 보관·식별자·색인 규칙은 유지한다.
+
+- 제목: H1, 최대 70자. 결론: `> **한 줄 결론**`, 최대 140자.
+- 순서: `## 현재 상태` 1–3개, `## 다음 행동` 최대 2개,
+  `## 한도와 미확인` 1–3개, `## 검증 근거`.
+- 첫 층: 근거 절 전까지 Markdown 최대 1200자. 긴 입력은 잘라내지 않고
+  재작성을 요구한다. 근거는 뒤에 보존한다.
+- 상태: `완료`, `진행 중`, `차단`, `미확인`, `미실행`. 불확실성·미실행·승인
+  대기·중요 한도는 첫 층에 명시한다. 근거 절이나 접힌 영역으로 숨기지 않는다.
+- frontmatter: `report_layout: compact-v1`, `signal: pass|watch|block`.
+  미확인·미실행·진행 중은 최소 `watch`, 차단은 `block`이다.
+  `score`는 실제 원본 수치가 있을 때만 넣고 `score_source`를 함께 기록한다.
+  임의 확신·품질 점수는 만들지 않는다.
+- 생성: `python -m agent_runtime.owner_brief input.json`.
+  검증: `python scripts/owner_doc_format_gate.py report.md`.
+  생성기는 오프라인이며 송신·hook·권한을 활성화하지 않는다.
+
+이하 BRIEF/PLAN 예시와 필수 구조는 compact-v1 이외의 기존 형식에 적용한다.
+
+---
+
 ## 목적
 
 Owner 또는 CEO가 적은 토큰으로 빠르게 판단하되, 단순 작업 보고를 넘어 다음 판단에 필요한 인사이트를 얻도록 in-conversation 보고·기획 응답을 표준화한다.

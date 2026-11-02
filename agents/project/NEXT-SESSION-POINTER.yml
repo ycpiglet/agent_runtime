@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-11-01T03:05:03+09:00
-updated_by: codex-security-20261101
+updated_at: 2026-11-02T11:56:05+09:00
+updated_by: /root
 current_state:
-  summary: "TASK-AR-660 merged in PR393 at7e8e63f0; official unit/task closeout and generated ledger aligned. Consumer installation and release are not performed."
+  summary: "TASK-AR-661 implementation and independent closeout accepted; all claims released; integration status is recorded in PR395."
   status: completed
   task_set_status: completed
-  task_set_id: "TASKSET-AR-SECURITY-RESILIENCE-20261101"
+  task_set_id: "TASKSET-OWNER-REPORT-CLARITY-20261102"
   step_index: 6
   step_total: 6
   progress_pct: 100
-  status_text: "All current claims released; independent review and six remote checks passed; product merged and work-close recorded."
+  status_text: "Both independent reviews complete; no active claim; exact-head CI/merge: https://github.com/ycpiglet/agent_runtime/pull/395. Consumer installation and delivery remain separate."
 active_work:
   current_agents: []
   current_teams: []

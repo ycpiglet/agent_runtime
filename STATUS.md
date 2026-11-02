@@ -1,5 +1,11 @@
 # 현재 상태 보고 (agent_runtime)
 
+## 2026-11-02 - Compact owner reporting
+
+- Task: TASK-AR-661 / TASKSET-OWNER-REPORT-CLARITY-20261102.
+- Result: compact-v1 offline generator and format gates; one-line summary, up to three statuses, visible limits and two next actions. Original evidence and legacy reports preserved.
+- Verification: focused190 tests and independent W4b/closeout pass. [PR395](https://github.com/ycpiglet/agent_runtime/pull/395) records exact-head CI and integration state; conditional merge is authorized. Consumer install, tag/package release and delivery remain separate.
+
 ## 2026-08-04 - TASK-AR-655 and TASK-AR-659 closed
 
 - Completed: `TASK-AR-655` (long-running claims stay truthful; one shared liveness classifier across reaper, gates, lifecycle, UI, console, and Doctor) accepted by an 11-round independent context-isolated W4b, and `TASK-AR-659` (owner-bound recovery for claims no automated path can reach) accepted by a 4-round one. All five claims released or terminalized.

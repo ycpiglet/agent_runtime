@@ -1747,8 +1747,27 @@
       "status": "fulfilled",
       "task_set_id": "TASKSET-AR-SECURITY-RESILIENCE-20261101",
       "ttl_seconds": 86400
+    },
+    {
+      "display_id": "TASK-AR-661",
+      "expires_at": "2026-11-03T10:29:43+09:00",
+      "fulfilled_at": "2026-11-02T10:29:43+09:00",
+      "fulfilled_by": "agents/lead_engineer/tasks/TASK-AR-661.md",
+      "fulfilled_task_id": "TASK-AR-661",
+      "fulfilled_task_uid": "a9ead343-b9f5-478a-a8a6-fea6096c346a",
+      "initiative_id": "INIT-OWNER-REPORT-CLARITY-20261102",
+      "kind": "task",
+      "owner_id": "codex-owner-report-planner",
+      "reason": "work registration TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "reservation_group_id": "RES-20261102-102943-b03919b6",
+      "reservation_id": "RES-20261102-102943-b03919b6-01",
+      "reserved_at": "2026-11-02T10:29:43+09:00",
+      "schema": "agent-runtime-task-id-reservation/v1",
+      "status": "fulfilled",
+      "task_set_id": "TASKSET-OWNER-REPORT-CLARITY-20261102",
+      "ttl_seconds": 86400
     }
   ],
   "schema": "agent-runtime-task-id-reservations/v1",
-  "updated_at": "2026-11-01T01:40:41+09:00"
+  "updated_at": "2026-11-02T10:29:43+09:00"
 }

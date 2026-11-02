@@ -425,8 +425,27 @@ an executable gate can fail when it is violated.
 
 ## 9. Reporting
 
-Final task reports use the human-centered, machine-readable Executive BRIEF
-format. Keep it concise, visually scannable, and action-oriented.
+New standalone Owner/CEO task reports default to `report_layout: compact-v1`.
+This profile takes priority over the legacy six-section executive outline,
+`Bottom Line:` prefix, mandatory tables, Insight/Decision sections and score.
+Historical reports, backlog boards and planning records keep their formats.
+
+### Compact Owner Reports
+
+- First layer: H1 title (at most 70 characters), one bold blockquote outcome
+  (at most 140), `## 현재 상태` (1–3 bullets), `## 다음 행동` (at most 2),
+  `## 한도와 미확인` (1–3 explicit limits). At most 1200 Markdown characters
+  before the exact `## 검증 근거` heading; evidence follows in that section.
+- Visible states: `완료`, `진행 중`, `차단`, `미확인`, `미실행`. Unknowns, unrun
+  checks, approval boundaries and material constraints stay in the first layer.
+  Do not hide them in evidence or turn them into stronger completion claims.
+- Required metadata: `report_layout: compact-v1`, `signal: pass|watch|block`.
+  Signal must reflect the most cautious state. Score is optional and requires
+  a real source recorded in `score_source`; never invent a certainty score.
+- `python -m agent_runtime.owner_brief input.json` renders explicit facts
+  offline. Oversized input fails rather than losing facts. Validate with
+  `python scripts/owner_doc_format_gate.py report.md`. No sending or activation
+  is implied; archive identity, provenance and indexing rules still apply.
 
 ### Owner-Facing Language Contract
 
@@ -436,6 +455,8 @@ format. Keep it concise, visually scannable, and action-oriented.
   evidence record는 필요하면 영어를 사용할 수 있다.
 - 사용자가 영어로 말해도 "영어로 답해줘"처럼 명시 요청하지 않으면 한국어로 답한다.
 - 이 규칙은 짧은 진행 업데이트와 최종 보고 모두에 적용한다.
+
+The following Executive BRIEF examples apply to the legacy format only.
 
 ```yaml
 ---

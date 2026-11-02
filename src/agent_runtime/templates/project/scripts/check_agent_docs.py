@@ -5,6 +5,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote
+from owner_doc_format_gate import FRONTMATTER_PATTERN, PROFILE_KEY_PATTERN, check_path as check_owner_doc
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1500,12 +1501,21 @@ def check_reports(errors: list[str], warnings: list[str]) -> None:
         if scale not in REPORT_SCALE_VALUES:
             errors.append(f"{rel}: report 'scale' '{scale}' must be in {sorted(REPORT_SCALE_VALUES)}.")
 
+        # Compact reports keep archive identity/index checks, with their own
+        # visible outline. An unknown/malformed profile is never a bypass.
+        header = FRONTMATTER_PATTERN.match(text)
+        profiled = PROFILE_KEY_PATTERN.search(header.group(0) if header else text.split("\n---", 1)[0])
+        if profiled:
+            for finding in check_owner_doc(path):
+                errors.append(f"{rel}: {finding}")
+
         # TASK-124 후속(CYCLE-063): CEO/Owner-facing 보고는 Executive Layer 마커(`Bottom Line:`)
         # 로 시작해야 한다(CLAUDE.md §5.3). cutoff 이후 + audience CEO/Owner/mixed 에만 강제(소급 안 함).
         if (
             DATE_ONLY_RE.match(date_value)
             and date_value >= REPORT_EXECUTIVE_LAYER_FROM
             and audience in REPORT_EXECUTIVE_AUDIENCES
+            and not profiled
             and not REPORT_BOTTOM_LINE_RE.search(text)
         ):
             errors.append(
