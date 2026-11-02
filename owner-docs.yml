@@ -1,5 +1,6 @@
 schema: agent-runtime-owner-docs/v1
 owner_docs:
+  - reviews/REVIEW-2026-11-02-taskset-owner-report-clarity-20261102-registration.md
   - reviews/REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration.md
   - reviews/REVIEW-2026-07-30-taskset-ar-host-required-merge-gates-registration.md
   - reviews/REVIEW-2026-07-30-taskset-ar-merge-queue-safety-registration.md

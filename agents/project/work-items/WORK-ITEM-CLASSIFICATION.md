@@ -7,23 +7,23 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-11-01T03:08:01+09:00
-record_count: 560
+generated_at: 2026-11-02T11:47:50+09:00
+record_count: 564
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `560` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `564` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `46` records |
-| Tasksets | pass | `70` records |
-| Tasks | pass | `324` records |
-| Units | pass | `120` records |
+| Initiatives | pass | `47` records |
+| Tasksets | pass | `71` records |
+| Tasks | pass | `325` records |
+| Units | pass | `121` records |
 | Findings | pass | `0` findings |
 
 ## Insight
@@ -599,6 +599,10 @@ record_count: 560
 | 45.1 | Taskset 45.1 | taskset | `TASKSET-AR-SECURITY-RESILIENCE-20261101` | `INIT-AR-SECURITY-RESILIENCE-20261101` | complete | `BACKLOG-BOARD.md` | Security and resilience reviewer |
 | 45.1.1 | Task 45.1.1 | task | `TASK-AR-660` | `TASKSET-AR-SECURITY-RESILIENCE-20261101` | completed | `agents/lead_engineer/tasks/TASK-AR-660.md` | Make independent security and stability verification dispatchable and prevent unverif… |
 | 45.1.1.1 | Unit 45.1.1.1 | unit | `UNIT-TASK-AR-660-001` | `TASK-AR-660` | completed | `agents/lead_engineer/tasks/units/TASK-AR-660/UNIT-TASK-AR-660-001.md` | UNIT-TASK-AR-660-001 - Add independent security and resilience reviewer with evidence closure |
+| 46 | Initiative 46 | initiative | `INIT-OWNER-REPORT-CLARITY-20261102` | - | active | `agents/project/initiatives/INIT-OWNER-REPORT-CLARITY-20261102.md` | Owner report clarity |
+| 46.1 | Taskset 46.1 | taskset | `TASKSET-OWNER-REPORT-CLARITY-20261102` | `INIT-OWNER-REPORT-CLARITY-20261102` | complete | `BACKLOG-BOARD.md` | Owner report clarity |
+| 46.1.1 | Task 46.1.1 | task | `TASK-AR-661` | `TASKSET-OWNER-REPORT-CLARITY-20261102` | completed | `agents/lead_engineer/tasks/TASK-AR-661.md` | Owners need concise reports with a one-line outcome, at most three state highlights,… |
+| 46.1.1.1 | Unit 46.1.1.1 | unit | `UNIT-TASK-AR-661-001` | `TASK-AR-661` | completed | `agents/lead_engineer/tasks/units/TASK-AR-661/UNIT-TASK-AR-661-001.md` | UNIT-TASK-AR-661-001 - Compact owner report generation and validation |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

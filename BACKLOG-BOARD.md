@@ -7,23 +7,23 @@ signal: pass
 score: 100
 priority: High
 tags: [backlog, decision-board, owner-brief, action-board]
-generated_at: 2026-11-01T03:08:01+09:00
-task_count: 324
+generated_at: 2026-11-02T11:48:46+09:00
+task_count: 325
 open_count: 20
-completed_count: 304
+completed_count: 305
 task_set_count: 5
-completed_task_set_count: 65
+completed_task_set_count: 66
 ---
 
 # Backlog Decision Board
 
 ## Bottom Line
-- Summary: `20` open or active tasks; `304` completed tasks are archived from this live board.
+- Summary: `20` open or active tasks; `305` completed tasks are archived from this live board.
 - Routing rule: choose a task set first, then sort priority, cost, and difficulty inside that task set.
 
 ## Signal
-- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `304`.
-- Task Sets: `5` active workflows; `65` completed workflows are hidden from the live action board.
+- Status: Action `15` / Ask `5` / Review `0` / Later `0` / Done `305`.
+- Task Sets: `5` active workflows; `66` completed workflows are hidden from the live action board.
 - Key Point: Restored prior `ACT / REVIEW / ASK / DEFER` backlog as clearer `Action / Review / Ask / Later` lanes.
 - Key Point: Every task includes difficulty, cost, value, importance, team, and agent.
 
@@ -152,6 +152,7 @@ completed_task_set_count: 65
 | Terminal Status Start Guard (`TASKSET-AR-TERMINAL-STATUS-START-GUARD`) | Align taskset terminal-status selection and start transitions with the established closed/released status vocabulary. | `1/1` done | `1` completed task files archived |
 | Work Verify Windows Shell Integrity (`TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY`) | Define and enforce a cross-platform execution contract for work.py verify. | `1/1` done | `1` completed task files archived |
 | Work Frontmatter Scalar Integrity (`TASKSET-AR-WORK-FRONTMATTER-SCALAR-INTEGRITY`) | Define and enforce lossless work-item frontmatter scalar serialization. | `1/1` done | `1` completed task files archived |
+| Owner report clarity (`TASKSET-OWNER-REPORT-CLARITY-20261102`) | Compact report layout, validation and reusable host guidance. | `1/1` done | `1` completed task files archived |
 | Self Improvement Cadence (`TASKSET-AR-SELF-IMPROVEMENT-CADENCE`) | Detect low-frequency roles and runtime assets, run review/retro/meeting/seminar/compound/doc-steward/scribe cycles from evidence, and publish measurable maturity signals. | `3/3` done | `3` completed task files archived |
 | Self Improvement Remediation (`TASKSET-AR-SELF-IMPROVEMENT-REMEDIATION-CYCLE`) | Burn down the first-cycle maturity blockers: scribe waiver debt, dormant monitored-role evidence, low-reuse runtime assets, and a follow-up measurable report. | `4/4` done | `4` completed task files archived |
 | Business Operations Teams (`TASKSET-AR-BUSINESS-OPERATIONS-TEAMS`) | Extend the live org overlay and host scaffold with business-side teams for monetization, asset management, marketing, and compliant sales automation. | `1/1` done | `1` completed task files archived |
@@ -179,9 +180,9 @@ completed_task_set_count: 65
 - Owner lanes: triage awaiting `0`, owner-decision (Ask) `5` (TASK-AR-538).
 - Triage: `0` awaiting accept/defer.
 - Active: `20` open across `5` task sets (see Action Board above).
-- Throughput (7d): `1` tasks completed in the last 7 days (TASK-AR-627).
-- Archived task sets: `65` (see Archived Task Sets above).
-- Archived task files: `304` — see `ARCHIVE-INDEX.md`.
+- Throughput (7d): `2` tasks completed in the last 7 days (TASK-AR-627).
+- Archived task sets: `66` (see Archived Task Sets above).
+- Archived task files: `305` — see `ARCHIVE-INDEX.md`.
 
 ## Risks / Blockers
 - Format drift risk: backlog output must not collapse into a plain task list.

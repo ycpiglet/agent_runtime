@@ -20,6 +20,27 @@ continues to live at `src/agent_runtime/templates/project/AGENTS.md`.
   `src/agent_runtime/templates/project/AGENTS.md` when the rule should apply to
   generated host projects.
 
+## New Owner Report Default
+
+- New standalone Owner/CEO task reports default to `report_layout: compact-v1`.
+  This profile takes priority over the legacy six-section executive outline,
+  `Bottom Line:` prefix, mandatory tables, Insight/Decision sections and score.
+  Historical reports, backlog boards and planning records keep their formats.
+- First layer: H1 title (at most 70 characters), one bold blockquote outcome
+  (at most 140), `## 현재 상태` (1–3 bullets), `## 다음 행동` (at most 2),
+  `## 한도와 미확인` (1–3 explicit limits). At most 1200 Markdown characters
+  before `## 검증 근거`; evidence belongs after that exact heading.
+- Use visible states `완료`, `진행 중`, `차단`, `미확인`, `미실행`. Keep unknowns,
+  unrun checks, approval boundaries and material constraints in the first layer.
+  Never hide them in evidence or shorten them into stronger completion claims.
+- `signal: pass|watch|block` must reflect the most cautious visible state.
+  Omit score unless supplied by a real source; retain that source in
+  `score_source`. Do not invent a certainty or quality percentage.
+- `python -m agent_runtime.owner_brief input.json` renders offline from explicit
+  facts. It rejects oversized input rather than dropping facts. Validate with
+  `python scripts/owner_doc_format_gate.py report.md`; no sending or activation
+  is implied. Archive identity, provenance and indexing rules still apply.
+
 ## Live Checkout Layout vs Host Scaffold (Two-Layer Structure)
 
 - This checkout intentionally keeps `agents/` flat with four lanes:

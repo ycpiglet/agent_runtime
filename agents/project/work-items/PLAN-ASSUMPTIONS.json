@@ -1815,8 +1815,36 @@
       "recorded_at": "2026-07-23T15:38:29+09:00",
       "revalidation_policy": "block_dispatch_on_drift",
       "taskset_id": "TASKSET-AR-WORK-VERIFY-WINDOWS-SHELL-INTEGRITY"
+    },
+    {
+      "anchors": [
+        {
+          "kind": "sha256",
+          "path": "reviews/REVIEW-2026-11-02-taskset-owner-report-clarity-20261102-registration.md",
+          "value": "8394a397902ea47af1651fd7436457bd360156bc749cb371dea15ec264b80a69"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/owner_doc_format_gate.py",
+          "value": "0ad323c0b4344d3071fa08f79e2f8720498b8d83e43fd03fc721dc1472b61815"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/task_claim_dispatcher.py",
+          "value": "28c99d820d6f1426c0ff2b8d07dc3cb1f0d3d0dc544999f57e0bb7f4c8a64699"
+        },
+        {
+          "kind": "sha256",
+          "path": "scripts/work.py",
+          "value": "1aa01cf2305af059e6999134c968350b4209f3562d842394d57743c30261fa9a"
+        }
+      ],
+      "design_record": "reviews/REVIEW-2026-11-02-taskset-owner-report-clarity-20261102-registration.md",
+      "recorded_at": "2026-11-02T10:29:44+09:00",
+      "revalidation_policy": "block_dispatch_on_drift",
+      "taskset_id": "TASKSET-OWNER-REPORT-CLARITY-20261102"
     }
   ],
   "schema": "agent-runtime-plan-assumptions/v1",
-  "updated_at": "2026-11-01T02:32:12+09:00"
+  "updated_at": "2026-11-02T10:29:44+09:00"
 }

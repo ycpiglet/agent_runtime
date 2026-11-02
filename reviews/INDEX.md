@@ -7,20 +7,20 @@ signal: pass
 score: 100
 priority: High
 tags: [evidence, traceability, generated-index]
-generated_at: 2026-11-01T03:07:00+09:00
-record_count: 1372
+generated_at: 2026-11-02T11:48:46+09:00
+record_count: 1379
 ---
 
 # Evidence Index
 
 ## Bottom Line
-- Summary: indexed `1372` review and evidence records under `reviews/`.
+- Summary: indexed `1379` review and evidence records under `reviews/`.
 - Result: task closeout evidence is searchable by path, id, status, signal, and title.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Reviews covered | pass | `1372` files |
+| Reviews covered | pass | `1379` files |
 | Source | pass | `reviews/` |
 
 ## Insight
@@ -95,6 +95,7 @@ record_count: 1372
 | `reviews/COUNCIL-2026-06-14-host-feedback-first-deliberation.md` | `COUNCIL-2026-06-14-host-feedback-first-deliberation` | council | watch | watch | Council — Host Feedback First Deliberation (TASK-AR-527) |
 | `reviews/DIAGNOSTIC-2026-06-18-ui-design-system-maturity.md` | `DIAGNOSTIC-2026-06-18-ui-design-system-maturity` | md | accepted | n/a | UI Design System Maturity Diagnostic |
 | `reviews/DOC-STEWARD-2026-06-21-business-operating-system.md` | `DOC-STEWARD-2026-06-21-business-operating-system` | doc-steward-review | recorded | pass | Business Operating System Doc Steward Review |
+| `reviews/EXECUTION-PROVENANCE-TASK-AR-661.json` | `EXECUTION-PROVENANCE-TASK-AR-661` | json | record | n/a | EXECUTION-PROVENANCE-TASK-AR-661 |
 | `reviews/GOVERNANCE-OPS-REPORT-2026-06-10.md` | `GOVERNANCE-OPS-REPORT-2026-06-10` | governance_ops_report | watch | watch | Governance Operations Report |
 | `reviews/HANDOFF-2026-06-15-ui-redesign-and-product-structure.md` | `HANDOFF-2026-06-15-ui-redesign-and-product-structure` | md | record | n/a | HANDOFF — UI Redesign & Product-Structure Change (for next session) |
 | `reviews/INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout.md` | `INDEPENDENT-AUDIT-2026-07-30-task-ar-650-closeout` | md | passed | pass | Independent Auditor Closeout - TASK-AR-650 |
@@ -732,6 +733,10 @@ record_count: 1372
 | `reviews/REVIEW-2026-11-01-task-ar-660-t3-integration.md` | `REVIEW-2026-11-01-task-ar-660-t3-integration` | md | accepted | pass | Security reviewer integration replan |
 | `reviews/REVIEW-2026-11-01-task-ar-660-t3-security-wiring.md` | `REVIEW-2026-11-01-task-ar-660-t3-security-wiring` | md | accepted | pass | Security reviewer wiring and evidence replan |
 | `reviews/REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration.md` | `REVIEW-2026-11-01-taskset-ar-security-resilience-20261101-registration` | md | record | pass | Security and resilience reviewer Registration |
+| `reviews/REVIEW-2026-11-02-owner-report-auditor-closeout.json` | `REVIEW-2026-11-02-owner-report-auditor-closeout` | json | record | n/a | REVIEW-2026-11-02-owner-report-auditor-closeout |
+| `reviews/REVIEW-2026-11-02-owner-report-auditor-crosscheck.json` | `REVIEW-2026-11-02-owner-report-auditor-crosscheck` | json | record | n/a | REVIEW-2026-11-02-owner-report-auditor-crosscheck |
+| `reviews/REVIEW-2026-11-02-owner-report-clarity.json` | `REVIEW-2026-11-02-owner-report-clarity` | json | record | n/a | REVIEW-2026-11-02-owner-report-clarity |
+| `reviews/REVIEW-2026-11-02-taskset-owner-report-clarity-20261102-registration.md` | `REVIEW-2026-11-02-taskset-owner-report-clarity-20261102-registration` | md | record | pass | Owner report clarity Registration |
 | `reviews/RFC-2026-06-23-character-design-exploration.md` | `RFC-2026-06-23-character-design-exploration` | rfc | proposal | decide | RFC — Character Design Exploration (P1 decision gate) |
 | `reviews/RFC-2026-06-23-decision-first-console-IA.md` | `RFC-2026-06-23-decision-first-console-IA` | rfc | proposal | decide | RFC — Decision-First Console IA |
 | `reviews/RFC-2026-06-23-i18n-en-schema-ko-ui.md` | `RFC-2026-06-23-i18n-en-schema-ko-ui` | rfc | proposal | decide | RFC — i18n: EN Canonical Schema + KO UI Localization |
@@ -1120,6 +1125,8 @@ record_count: 1372
 | `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101021056 |
 | `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101024208 |
 | `reviews/VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414.json` | `VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414` | json | record | n/a | VERIFY-2026-11-01-unit-task-ar-660-001-20261101024414 |
+| `reviews/VERIFY-2026-11-02-task-ar-661-20261102113307.json` | `VERIFY-2026-11-02-task-ar-661-20261102113307` | json | record | n/a | VERIFY-2026-11-02-task-ar-661-20261102113307 |
+| `reviews/VERIFY-2026-11-02-unit-task-ar-661-001-20261102113112.json` | `VERIFY-2026-11-02-unit-task-ar-661-001-20261102113112` | json | record | n/a | VERIFY-2026-11-02-unit-task-ar-661-001-20261102113112 |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001-ci-followup.md` | `W4A-2026-07-29-unit-task-ar-644-001-ci-followup` | md | passed | pass | TASK-AR-644 UNIT-001 CI Sanitization Follow-up W4a |
 | `reviews/W4A-2026-07-29-unit-task-ar-644-001.md` | `W4A-2026-07-29-unit-task-ar-644-001` | md | passed | pass | TASK-AR-644 UNIT-001 W4a Self-Review |
 | `reviews/W4A-2026-07-29-unit-task-ar-645-001.md` | `W4A-2026-07-29-unit-task-ar-645-001` | md | passed | pass | TASK-AR-645 UNIT-001 W4a Self-Review |

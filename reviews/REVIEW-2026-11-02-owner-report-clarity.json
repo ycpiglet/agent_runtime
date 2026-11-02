@@ -1,0 +1,54 @@
+{
+  "task_id": "TASK-AR-661",
+  "unit_id": "UNIT-TASK-AR-661-001",
+  "result": "APPROVE",
+  "reviewed_at": "2026-11-02T02:29:26.956174+00:00",
+  "reviewer": "/root/runtime_independent_review",
+  "reviewer_role": "independent-reviewer",
+  "implementation_instance": "codex-owner-report-worker-20261102",
+  "product_source_contributions": 0,
+  "base_head": "cef790f3b1b71e4e1803565667aef2fa820515c9",
+  "reviewed_state": "staged and working product bytes; product commit pending",
+  "file_sha256": {
+    "AGENTS.md": "e10792043bdcc487c8f35b8b29f7d72282426c3f95af37c1ff40e5317a237dbc",
+    "scripts/owner_doc_format_gate.py": "5dfafab7af006ac27820b3bfb47ae9b4e40d45d1d8b7d2b8b43f312b81507d79",
+    "src/agent_runtime/owner_brief.py": "df6659ffbbda2ea287895ee966b8b77938a54778d25c50b018ce74fc3094c6b3",
+    "src/agent_runtime/templates/project/AGENTS.md": "2a553bbf6f7be5e9b3454d7752a6a549570414592a9522c32db81f0a9a686d97",
+    "src/agent_runtime/templates/project/agents/lead_engineer/REPORTING-FORMAT.md": "835b80facfd661c6bf7ae9d521cc6d41f80536d409ed070549a96bd4f27ca15a",
+    "src/agent_runtime/templates/project/agents/lead_engineer/reports/README.md": "867cb195c050483ab132c7d74c29340123afe572cd4afeb0c54ff23984ece56a",
+    "src/agent_runtime/templates/project/scripts/check_agent_docs.py": "df2a93e0fc903274a9a9a78e75bc0b5268ab75532638a49020fda9b1e782f219",
+    "src/agent_runtime/templates/project/scripts/owner_doc_format_gate.py": "5dfafab7af006ac27820b3bfb47ae9b4e40d45d1d8b7d2b8b43f312b81507d79",
+    "src/agent_runtime/templates/project/scripts/save_report.py": "4b2bb2d248cf5b5a2bdf78c4a6c6d5d5110072f7e7a840affaec7d48690fd813",
+    "tests/test_owner_brief.py": "fd39a33c0b22d1029f49bad958701c85ab2cd85c60fabbaeb81e31a093b5a7d0",
+    "tests/test_owner_doc_format_gate.py": "ff54f5192cfe1ec04172ab6b1684cbc1e18547533fff15675e9e27edff5cc305"
+  },
+  "file_set_sha256": "87781a84a8c8eb01507c7f324de4246bf8b2c297c8f58be25613eb897e5d605c",
+  "manifest_algorithm": "sha256 of sorted path + space + hex sha256 + LF rows",
+  "resolved_findings": [
+    "numeric/named control entities rejected after one-pass decode; escaped literals remain literal",
+    "generator boundary whitespace rejected before rendering",
+    "noncanonical or duplicate compact metadata rejected consistently"
+  ],
+  "checks": [
+    {
+      "command": "PYTHONPATH=src python -m pytest tests/test_owner_doc_format_gate.py tests/test_owner_brief.py -q -p no:cacheprovider",
+      "result": "190 passed",
+      "exit_code": 0
+    },
+    {
+      "check": "original counterexamples plus normal/escaped-literal controls",
+      "result": "pass"
+    },
+    {
+      "check": "working and staged individual hashes match worker receipt",
+      "result": "11 of 11"
+    }
+  ],
+  "unresolved_product_findings": 0,
+  "limits": [
+    "Approval binds the listed product bytes, not a future commit with different contents.",
+    "Integration metadata, host lock, complete governance and final commit/CI binding remain separate checks.",
+    "No operational service, HTTP scan, external send, deployment or merge performed.",
+    "Source facts, approvals and score-source authority remain caller-declared; formatting does not authenticate them."
+  ]
+}

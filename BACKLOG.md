@@ -1,5 +1,11 @@
 # Backlog (agent_runtime, 진행 우선순위 기준)
 
+## 2026-11-02 Compact owner reports
+
+- Taskset: TASKSET-OWNER-REPORT-CLARITY-20261102; task: TASK-AR-661.
+- Scope: offline compact reporting, visible limitations, retained evidence, legacy compatibility. Independent review and conditional PR integration are authorized by the current Owner request.
+- State: focused190 checks pass; independent W4b and integration records remain separate. No consumer installation, package release, delivery or hook activation.
+
 ## 2026-07-30 v0.8 Operability Hardening active (`TASKSET-AR-V080-OPERABILITY-HARDENING`)
 
 - Migration gate: `TASK-AR-650` is independently closed; its task-scope P0/P1/P2 count is 0/0/0 while the next-RC backlog remains P1 6 and P2 1.

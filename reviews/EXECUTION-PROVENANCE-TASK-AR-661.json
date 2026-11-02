@@ -1,0 +1,27 @@
+{
+  "schema": "execution-provenance/v1",
+  "task_id": "TASK-AR-661",
+  "recorded_at": "2026-11-02T02:40:51.980486+00:00",
+  "source": "actual current host agent tree and task delegation",
+  "aliases": {
+    "codex-owner-report-planner": "/root",
+    "codex-owner-report-worker-20261102": "/root/compact_report_implementation"
+  },
+  "independent_reviewers": [
+    "/root/runtime_independent_review",
+    "/root/hub_adversarial_review"
+  ],
+  "review_claim_executor": {
+    "CLAIM-REVIEW-TASK-AR-661-independent-auditor-closeout": "/root/hub_adversarial_review"
+  },
+  "preservation": "Original created_by/verified_by/closed_by aliases and original pane actor retained; this map clarifies actual executors. These aliases are not separate independent agents.",
+  "public_scope": "Generic offline reporting only; no company originals, provider credentials or account expansion.",
+  "authority": "Current direct owner request and existing repository W4b/closeout workflow; not inferred human acceptance of a model report.",
+  "measurement": "Actual model/provider/account costs and per-task tokens unknown; routing policy labels are not runtime model proof.",
+  "full_suite_attempt": "Interrupted after491pass/4skip on a reviewer report of missing files, later retracted as path error; full result not claimed. Focused190/preview9/backlog20 and exact-head CI are separate.",
+  "canonical_started_at_correction": {
+    "value": "2026-11-02T10:34:38+09:00",
+    "source": "actual worker claim claimed_at; first scoped entry, not inferred effort duration",
+    "reason": "manual active projection retained status but omitted required canonical started_at; preserved actual close/evidence/approvals"
+  }
+}
