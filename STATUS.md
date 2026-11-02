@@ -4,7 +4,7 @@
 
 - Task: TASK-AR-661 / TASKSET-OWNER-REPORT-CLARITY-20261102.
 - Result: compact-v1 offline generator and format gates; one-line summary, up to three statuses, visible limits and two next actions. Original evidence and legacy reports preserved.
-- Verification: focused190 tests pass; independent W4b/integration tracked in this task. Conditional PR merge authorized; remote CI/merge pending. Consumer install, tag/package release and delivery remain unperformed.
+- Verification: focused190 tests and independent W4b/closeout pass. [PR395](https://github.com/ycpiglet/agent_runtime/pull/395) records exact-head CI and integration state; conditional merge is authorized. Consumer install, tag/package release and delivery remain separate.
 
 ## 2026-08-04 - TASK-AR-655 and TASK-AR-659 closed
 

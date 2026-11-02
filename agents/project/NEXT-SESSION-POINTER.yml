@@ -1,15 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-11-02T11:32:03.229475+09:00
+updated_at: 2026-11-02T11:56:05+09:00
 updated_by: /root
 current_state:
-  summary: "TASK-AR-661 implementation and independent closeout accepted; all claims released; PR/CI integration pending separately."
+  summary: "TASK-AR-661 implementation and independent closeout accepted; all claims released; integration status is recorded in PR395."
   status: completed
   task_set_status: completed
   task_set_id: "TASKSET-OWNER-REPORT-CLARITY-20261102"
   step_index: 6
   step_total: 6
   progress_pct: 100
-  status_text: "Both independent reviews complete; no active claim; remote CI/merge pending; no consumer installation or delivery."
+  status_text: "Both independent reviews complete; no active claim; exact-head CI/merge: https://github.com/ycpiglet/agent_runtime/pull/395. Consumer installation and delivery remain separate."
 active_work:
   current_agents: []
   current_teams: []
